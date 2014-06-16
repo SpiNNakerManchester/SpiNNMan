@@ -162,9 +162,9 @@ def _pack(sv, data, dataoffset, sizelimit):
                                                       " %s" % pack)
                 struct.pack_into(pack, data, dataoffset + offset, value)
 
-def boot_pkt(socket, host, op, a1, a2, a3, data = None, offset = 0,
+def _boot_pkt(socket, host, op, a1, a2, a3, data = None, offset = 0,
              datasize = 0):
-    """sends the boot command down to the spinnaker machine
+    """private method that sends the boot command down to the spinnaker machine
     :param socket: stream to write the command to
     :param host: hostname of the target SpiNNaker
     :param op: boot ROM command
@@ -237,3 +237,96 @@ def _rom_boot(hostname, data):
         offset += block_size
     _boot_pkt(sock, host, scamp_constants.BOOT_CMD_DONE, 1, 0, 0)
 
+def boot(hostname, bootfile, configfile, structfile):
+    """ entrance function to the boot system
+    :param hostname: the name of the machine in ip format or equivalent
+    :param bootfile: the filepath to the boot file used during this boot seq
+    :param configfile: the filpath of the config file used during this boot seq
+    :param structfile: the filepath of the struct file used during this boot seq
+    :type hostname: str
+    :type bootfile: str
+    :type configfile: str
+    :type structfile: str
+    :return: None
+    :rtype: None
+    :raises:spinnMan.spinnman_exceptions.BootException
+    """
+    sv = _readstruct("sv", structfile)
+    _readconf(sv, configfile)
+    buf = numpy.fromfile(file=bootfile, dtype=numpy.uint8)
+    current_time = time.time()
+    sv["unix_time"][0] = current_time
+    sv["boot_sig"][0] = current_time
+
+    if bootfile.endswith(".boot"):
+        sv["root_chip"][0] = 1
+        _pack(sv, buf, 384, 128)
+        _rom_boot(hostname, buf)
+
+    elif bootfile.endswith(".aplx"):
+        sv["boot_delay"][0] = 0
+        _pack(sv, buf, 384, 128)
+
+    else:
+        raise spinnman_exceptions.BootError("Unknown file extension of boot "
+                                            "file %s" % bootfile)
+
+def reset(hostname):
+    """ Establishes a SCP connection to the board-management processor specified
+    by ``hostname`` and sends a reset command.
+    .. warning::
+
+        This function is only applicable to SpiNN-4 (or greater) boards that
+        have board-management processors on the PCB. yet does not check that the
+        board commincating with the given hostname is a spinn-4 or spinn-5 board
+
+    :param hostname: hostname of the board-management processor of the target
+                     SpiNNaker
+    :type hostname: str
+    :return: None
+    :rtype: None
+    :raises: None: does not raise any known exceptions
+    """
+    conn = SCPConnection(hostname)
+    msg        = SCPMessage()
+    msg.cmd_rc = scamp_constants.CMD_RESET
+    msg.arg1   = 2
+    conn.send_scp_msg (msg)
+
+def _printargs():
+    """helper method which prints out the order and explination of the boot args
+    :return: None
+    :rtype: None
+    :raises: None: does not raise any known exceptions
+    """
+    print sys.argv[0], " ", "-h <hostname> -b <bootfile> -c <configfile> -s " \
+                            "<structfile>"
+    sys.exit(2)
+
+"""entrance method when called directly"""
+if __name__ == "__main__":
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "?h:b:c:s:", \
+            ["hostname=", "bootfile=", "configfile=", "structfile="])
+    except getopt.GetoptError:
+        _printargs()
+    hostname = None
+    bootfile = None
+    configfile = None
+    structfile = None
+    for opt, arg in opts:
+        if opt == "-?":
+            _printargs()
+        elif opt in ("-h", "--hostname"):
+            hostname = arg
+        elif opt in ("-b", "--bootfile"):
+            bootfile = arg
+        elif opt in ("-c", "--configfile"):
+            configfile = arg
+        elif opt in ("-s", "--structfile"):
+            structfile = arg
+    if (hostname == None) or (bootfile == None) or (configfile == None) or\
+       (structfile == None):
+        print "Missing arguments:"
+        _printargs()
+    boot(hostname, bootfile, configfile, structfile)

@@ -60,6 +60,7 @@ class SDPMessage (object):
         :param packed: encoded packet data
         :type packed:  string or None
         :param kwargs: keyword arguments providing initial values
+        :type: kwargs: dict
         :return: a new SDP_message object
         :rtype: spinnman.sdp.sdp_message.SdpMessage object
         :raises None: does not raise any known exceptions
@@ -128,7 +129,7 @@ class SDPMessage (object):
            assumed to be payload.
         :param packed: packed data to decode
         :type packed: str
-        :returns: dictionary of header fields, payload
+        :returns: dictionary of header fields, payload array
         :rtype: dict
         :raises None: does not raise any known exceptions
         """

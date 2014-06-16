@@ -1,4 +1,6 @@
 __author__ = 'stokesa6'
+import socket, select
+from SpiNNMan.spinnman.sdp.sdp_message import SDPMessage
 
 class SDPConnection(object):
     """Represents an SDP connection to a target SpiNNaker machine or an incoming
@@ -65,7 +67,31 @@ class SDPConnection(object):
         :rtype: spinnman.sdp.sdp_connection.SDPConnection
         :raises: spinnman.spinnman_exceptions.InvalidHostNameException
         """
-        pass
+        self._sock = None
+
+        # resolve the hostname to make things easier
+        try:
+            # resolving 'locahost' will find the correct hostname but will
+            # *always* return an IP of 127.0.0.1 which seems to prevent external
+            # connections under some conditions.
+            if host.lower () in ('localhost', '127.0.0.1'):
+                host = socket.gethostname ()
+
+            hostname, _, addresses = socket.gethostbyname_ex (host)
+        except:
+            raise ValueError ('cannot resolve hostname %s' % host)
+        # store the hostname and the host IP for messages
+        self._hostname  = hostname
+        self._host      = addresses[0]
+        self._port      = port
+        self._addr      = (self._host, port)
+        self._interrupt = True
+        self._iter_to   = None
+
+        # create a socket and enforce a small timeout
+        self._sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
+        self._sock.connect((addresses[0], port))
+        self._sock.settimeout (1.0) # 1 second
 
     def __del__ (self):
         """Class destructor -- closes any open network connections.
@@ -100,5 +126,183 @@ class SDPConnection(object):
         desired use case, but all other exceptions are probably genuine errors
         that the user should care about.
         """
-        pass
+        # close down the socket
+        self.close ()
 
+        # context managers may return True to suppress an exception or anything
+        # that will evaluate to False to allow it to propagate.  They must
+        # *never* raise exceptions unless they themselves have failed.
+        return type is StopIteration
+
+    def __repr__ (self):
+        """Custom representation for interactive programming.
+        :return: a represnetation of the sdp connection
+        :rtype: str
+        :raises: None: does not raise any known exceptions
+        """
+        return 'SDPConnection: {:s}[{:s}]:{:d}'.format (self.remote_hostname,
+                                                        self.remote_host_ip,
+                                                        self.remote_host_port)
+
+    def send (self, message):
+        """Sends an :py:class:`SDPMessage` to the remote host.
+
+        :param message: message packet to send
+        :type message: spinnman.sdp.sdp_message.SDPMessage
+        :return None
+        :rtype: None
+        :raises: socket.error, socket.timeout, struct.error
+        """
+        raw_data = str (message)
+        self._sock.send(raw_data)
+
+    def receive(self, msg_type=SDPMessage):
+        """Recives data from the remote host and processes it into the required
+           object type (default is :py:class:`SDPMessage`).
+
+        :param msg_type: :py:class:`SDPMessage`-derived class to unpack response
+        :type msg_type: a object pointer, default set to a SDPMessage
+        :return: a message of a given message type
+        :rtype: the input msg_type
+        :raises: socket.error, socket.timeout, struct.error
+        """
+        raw_data, addr = self._sock.recvfrom(512)
+        return msg_type (raw_data)
+
+    def has_message (self, timeout=0):
+        """Returns ``True`` if there is a message in the buffer that should be
+           handled.
+        :param timeout: maximum time (in seconds) to wait before returning
+        :type timeout:  float or None
+        :return a socket with a message
+        :rtype: socket
+        :raises: None: does not raise any known exceptions
+        """
+
+        rlist, wlist, xlist = select.select ([self._sock], [], [], timeout)
+        return self._sock in rlist
+
+    def __nonzero__ (self):
+        """a helper method that Returns ``True`` if there is a message in the
+        buffer.
+        :return: true or false
+        :rtype: boolean
+        :raises: None: does not raise any known exceptions
+        """
+        return self.has_message ()
+
+    def wait_for_message (self):
+        """Spins indefinitely waiting for an :py:class:`SDPMessage` to arrive.
+        :return: None
+        :rtype: None
+        :raises: None: does not raise any known exceptions
+        """
+        while True:
+            if self.has_message (0.2):
+                return
+
+    def listen (self, timeout=None):
+        """
+        Binds the current socket to the hostname and port number given in the
+        constructor so that messages may be delivered to this object.  This
+        process can be stopped by calling either :py:meth:`interrupt` or
+        :py:meth:`stop`.
+
+        Usage::
+
+            with SDPConnection ('localhost') as conn:
+                conn.listen ()
+                for msg in conn:
+                    print msg.data
+
+        An optional timeout may be specified which is the maximum number of
+        seconds the iterator will wait for a packet.  If no packet arrives in
+        this interval then the iterator will return ``None`` which allows the
+        loop to do useful work between packet arrivals.  If ``timeout`` is
+        ``None`` (the default value) then each wait will block indefinitely.
+
+        .. seealso::
+
+            :py:meth:`interrupt`
+        :param timeout: seconds to wait for a packet or ``None``
+        :type timeout: float
+        :return: None
+        :rtype: None
+        :raises: socket.error
+        """
+        # allow the iterator to run
+        self._interrupt = False
+        self._iter_to   = timeout
+
+        # bind the socket to the given port
+        self._sock.bind ((self._host, self._port))
+
+    def close (self):
+        """Closes the internal socket.
+        :return: None
+        :rtype: None
+        :raises: socket.error
+        """
+        if self._sock:
+            self._sock.close ()
+            self._sock = None
+
+    def interrupt (self):
+        """Stops the current iteration over the connection.
+        :return: None
+        :rtype: None
+        :raises: None: does not raise any known exceptions
+        """
+        self._interrupt = True
+
+    def _next (self):
+        """
+        Private function that actually performs the iterator behaviour for
+        :py:class:`_SDPConnectionIterator`.
+         :return: a message of a given type recieved from a given socket
+        :rtype: a msg_type or None
+        :raises: None: does not raise any known exceptions
+        """
+
+        if self._interrupt is True:
+            raise StopIteration
+
+        if self.has_message (self._iter_to):
+            return self.receive ()
+        else:
+            return None
+
+    def __iter__ (self):
+        """Returns an instance of an interator object for this class.
+        :return a SDPConnectionIterator object
+        :rtype: SDPConnectionIterator
+        :raises: None: does not raise any known exceptions
+        """
+        return _SDPConnectionIterator (self)
+
+
+# private classes (used by the __iter__ function in SDP_connection class)
+#TODO ABS WHO USES THIS OBJECT AFTER THE SDP_CONNECTION???? is this a dead object
+class _SDPConnectionIterator (object):
+    """Iterator object that waits for messages on a :py:class:`SDPConnection`.
+    """
+
+    def __init__ (self, conn):
+        """Construct an _SDPConnectionIterator object for the given
+           SDPConnection.
+        :param conn: :py:class:`SDPConnection` to iterate over
+        :type: spinnman.sdp.sdp_connection.SDPConnection object
+        :return: None
+        :rtype: None
+        :raises: None: does not raise any known exceptions
+        """
+
+        self._conn = conn
+
+    def next (self):
+        """Returns the next packet in the SDP stream.
+        :returns: next :py:class:`SDPMessage` in the stream or ``None``
+        :rtype: None or a spinnman.sdp.sdp_message.SDPMessage
+        :raises: None: does not raise any known exceptions
+        """
+        return self._conn._next ()
