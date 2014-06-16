@@ -1,5 +1,5 @@
 __author__ = 'stokesa6'
-from spinnman import spinnman_exceptions
+from SpiNNMan.spinnman import spinnman_exceptions as exceptions
 #
 # DESCRIPTION
 #   Defines the various constants that are used by SC&MP 1.02.
@@ -184,6 +184,18 @@ cc_map = {0: 'CMD_VER',
           64: 'CMD_TUBE',
           }
 
+# boot constants
+BOOT_PORT       = 54321
+BOOT_DELAY      = 0.01
+BOOT_PROT_VER   = 1
+BOOT_BLOCK_SIZE = 256 # words (i.e. 1024 bytes)
+BOOT_MAX_BLOCKS = 32
+BOOT_CMD_START  = 1
+BOOT_CMD_BLOCK  = 3
+BOOT_CMD_DONE   = 5
+
+
+
 # functions
 def rc_to_string(rc):
     """Returns the string equivalent of ``rc`` along with a very brief
@@ -209,6 +221,5 @@ def cmd_to_string(cc):
     if cc not in cc_map.keys():
         raise exceptions.InvalidCommandCodeException("do not recognise the "
                                                      "command code")
-
     return cc_map[cc]
 
