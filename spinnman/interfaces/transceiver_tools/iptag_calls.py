@@ -1,20 +1,27 @@
 __author__ = 'stokesa6'
 from spinnman.scp.scp_message import SCPMessage
-from spinnaker_tools_tools import scamp_constants
+from spinnman.scp.spinnaker_tools_tools import scamp_constants
 from spinnman.interfaces.iptag import IPTag
 import socket
 import struct
 import math
 
+
 class IPTagCalls(object):
 
     def __init__(self, transceiver):
+        """constructor for a IPTAG call object
+        :param transceiver: the parent object which contains other calls
+        :type transceiver: spinnman.interfaces.transceiver.Transciever
+        :return: a new  IPTAG call object
+        :rtype: spinnman.interfaces.transceiver_tools.iptag_calls.IPTAGCalls
+        :raise: None: does not raise any known exceptions
+        """
         self._x = 0
         self._y = 0
         self._cpu = 0
         self._node = (self._x << 8) | self._y
         self.transceiver = transceiver
-
 
     def get_iptag_table_info(self):
         """Retrieve the number of fixed and transient tags available as well as\
@@ -199,14 +206,14 @@ class IPTagCalls(object):
         iptags = []
 
         # get the total number of possible IP tag records
-        fixed, trans, timeout = self.get_iptag_table_info ()
+        fixed, trans, timeout = self.get_iptag_table_info()
 
         # iterate over the possibilities
         for i in xrange(fixed + trans):
             iptag = self.get_iptag(i)
 
             # add valid records to the list
-            if iptag.flags & scamp_constants.IPTAG_VALID:
+            if iptag.__dict__['flags'] & scamp_constants.IPTAG_VALID:
                 iptags.append(iptag)
 
         # return whatever we found (possibly an empty list)

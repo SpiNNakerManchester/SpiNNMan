@@ -1,4 +1,6 @@
 __author__ = 'stokesa6'
+from spinnman.scp.scp_message import SCPMessage
+
 class PacketCalls(object):
     """packet specific commands are stored here for clarity"""
 
@@ -15,6 +17,8 @@ class PacketCalls(object):
            :rtype: spinnman.interfaces.transceiver_tools.memory_calls.MemoryCalls
            :raise: None: does not raise any known exceptions
         """
+
+        self.transceiver = transceiver
         self.nn_id = 0
 
 
@@ -78,3 +82,11 @@ class PacketCalls(object):
         :raise: None: does not raise any known exceptions
         """
         pass
+
+    def send_scp_msg(self, command_code, arg1, arg2, arg3):
+        msg = SCPMessage()
+        msg.cmd_rc = command_code
+        msg.arg1 = arg1
+        msg.arg2 = arg2
+        msg.arg3 = arg3
+        self.transceiver.conn.send_scp_msg(msg)

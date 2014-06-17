@@ -5,6 +5,7 @@ import math
 import os
 import subprocess
 from spinnman import spinnman_exceptions
+from pacman103 import conf
 logger = logging.getLogger(__name__)
 
 
@@ -245,3 +246,59 @@ class TranscieverUtilities(object):
         level_3 += math.floor(x_offset / 1)
         return "{}.{}.{}.{}".format(int(level_0), int(level_1),
                                     int(level_2), int(level_3))
+
+    @staticmethod
+    def organise_targets(targets):
+        """method that takes the targets and converts them into a list of chip \
+           scoped targets where each entry contains the chip
+
+           :param targets: the targets which need to be organised
+           :type targets: iterable object
+           :return a dict with the targets organised
+           :rtype: dict
+           :raise: None: does not raise any known exceptions
+        """
+
+        organised_targets = dict()
+        for target in targets:
+            key = "{},{}".format(target.targets[0]['x'], target.targets[0]['y'])
+            proc = target.targets[0]['p']
+            if target.filename in organised_targets:
+                chip_collection = organised_targets.get(target.filename)
+                if key in chip_collection:
+                    chip_collection[key].append(proc)
+                else:
+                    chip_collection[key] = [proc]
+            else:
+                #add with the chip definition
+                chip_collection = dict()
+                chip_collection[key] = [proc]
+                organised_targets[target.filename] = chip_collection
+        return organised_targets
+
+    @staticmethod
+    def checkfile(test_file):
+        """helper method that checks if a file exists or locates its real \
+           address from a relative address
+
+           :param test_file:  the file to locate
+           :type test_file: str
+           :return the real file path
+           :rtype: str
+           :raise: None: does not raise any known exceptions
+        """
+        real_file = test_file
+        if not os.path.isfile(real_file):
+            components = os.path.abspath(conf.__file__).split(os.sep)
+            directory = \
+                os.path.abspath(
+                    os.path.join(os.sep,
+                                 *components[1:components.index("pacman103")]))
+            real_file = os.path.join(directory,
+                                     "spinnaker_tools",
+                                     "boot", real_file)
+            print real_file
+        if not os.path.isfile(real_file):
+            print "File %s not found" % test_file
+            raise spinnman_exceptions.SpinnmanException("file not found")
+        return real_file

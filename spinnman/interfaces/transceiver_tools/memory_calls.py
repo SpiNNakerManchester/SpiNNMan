@@ -16,6 +16,7 @@ class MemoryCalls(object):
             :rtype: spinnman.interfaces.transceiver_tools.memory_calls.MemoryCalls
             :raise: None: does not raise any known exceptions
         """
+        self.transceiver = transceiver
 
     def set_view(self, new_x, new_y, new_cpu, new_node):
         """ updates the chip and processor that is currently under focus
