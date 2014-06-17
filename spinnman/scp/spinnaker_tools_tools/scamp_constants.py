@@ -1,5 +1,5 @@
 __author__ = 'stokesa6'
-from SpiNNMan.spinnman import spinnman_exceptions as exceptions
+from spinnman import spinnman_exceptions as exceptions
 #
 # DESCRIPTION
 #   Defines the various constants that are used by SC&MP 1.02.
@@ -195,10 +195,9 @@ BOOT_CMD_BLOCK  = 3
 BOOT_CMD_DONE   = 5
 
 
-
 # functions
 def rc_to_string(rc):
-    """Returns the string equivalent of ``rc`` along with a very brief
+    """Returns the string equivalent of ``rc`` along with a very brief \
        description of what probably caused the error.
 
     :param rc: response code
@@ -211,8 +210,10 @@ def rc_to_string(rc):
                                                       "response code")
     return rc_map[rc]
 
+
 def cmd_to_string(cc):
     """Returns the string equivalent of the given command code.
+
     :param int cc: command code
     :returns:      string name of ``cc``
     :raises:       KeyError

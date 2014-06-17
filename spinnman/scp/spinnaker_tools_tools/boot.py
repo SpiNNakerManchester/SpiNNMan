@@ -16,47 +16,55 @@ __author__ = 'stokesa6'
 #
 
 # imports
-import socket, struct, time, re, numpy, sys, getopt
-from SpiNNMan.spinnman.scp.spinnaker_tools_tools import scamp_constants
-from SpiNNMan.spinnman.scp.scp_connection import SCPConnection
-from SpiNNMan.spinnman.scp.scp_message import SCPMessage
-from SpiNNMan.spinnman import spinnman_exceptions
+import socket
+import struct
+import time
+import re
+import numpy
+import sys
+import getopt
+from spinnman.scp.spinnaker_tools_tools import scamp_constants
+from spinnman.scp.scp_connection import SCPConnection
+from spinnman.scp.scp_message import SCPMessage
+from spinnman import spinnman_exceptions
 
 
-__all__ = ['boot', 'readstruct' ]
+__all__ = ['boot', 'readstruct']
+
 
 # functions
-def _readstruct(section_name, structfile):
+def _readstruct(section_name, struct_file):
     """ reads a specific section of a structfile
+
     :param section_name: a section to read from a fiven structfile
-    :param structfile: a structfile to read from
+    :param struct_file: a structfile to read from
     :type section_name: str
-    :type structfile: str or file
+    :type struct_file: str or file
     :return: a dictonary which contains elements of the structfile
     :rtype: dict
     :raises: spinnman.spinnman_exceptions.BootError when given a malformed
              struct file
     """
     sv = dict()
-    sv['=size='] = 0;
+    sv['=size='] = 0
     match = False
-    matchFound = False
-    for line in open(structfile):
+    match_found = False
+    for line in open(struct_file):
         line = line.strip()
         comment_idx = line.find("#")
         if comment_idx != -1:
             line = line[:comment_idx].strip()
         if line != "":
             equal_match = re.match("(^[^\s]+) = ([^\s]+)$", line)
-            if equal_match != None:
+            if equal_match is not None:
                 if equal_match.group(1) == "name":
                     if equal_match.group(2) == section_name:
                         match = True
-                        matchFound = True
+                        match_found = True
                     else:
                         match = False
-            if match == True:
-                if equal_match != None:
+            if match:
+                if equal_match is not None:
                     if equal_match.group(1) == "size":
                         sv['=size='] = int(equal_match.group(2), 0)
                     elif equal_match.group(1) == "base":
@@ -65,7 +73,7 @@ def _readstruct(section_name, structfile):
                         raise spinnman_exceptions.\
                             BootError("Unrecognised line in %s - "
                                       "unrecognised item %s from line: "
-                                      "%s" % (structfile,
+                                      "%s" % (struct_file,
                                               equal_match.group(1), line))
 
                 else:
@@ -74,12 +82,12 @@ def _readstruct(section_name, structfile):
                                           "?\s+(V|v|C|A16)"
                                           "\s+(\S+)"
                                           "\s+(%\d*[dx]|%s)\s+(\S+)$", line)
-                    if line_match != None:
+                    if line_match is not None:
                         (name, index, pack,
                          offset, fmt, value) = line_match.groups()
                         offset = int(offset, 0)
                         value = int(value, 0)
-                        if index != None and index != "":
+                        if index is not None and index != "":
                             index = int(("%s" % index)[1:-1])
                             sv[name] = [value, pack, offset, fmt, index]
                         else:
@@ -88,23 +96,25 @@ def _readstruct(section_name, structfile):
                         raise spinnman_exceptions.\
                             BootError("Unrecognised line in %s - format does"
                                       " not match expected format: %s"
-                                      % (structfile, line))
-    if matchFound == False:
+                                      % (struct_file, line))
+    if not match_found:
         raise spinnman_exceptions.BootError("Missing section %s in %s"
-                                            % (section_name, structfile))
+                                            % (section_name, struct_file))
 
-def _readconf(sv, configfile):
+
+def _readconf(sv, config_file):
     """ reads a config file
+
     :param sv: a dictonary object to store elements from the config file in
-    :param configfile: the config file to read
+    :param config_file: the config file to read
     :type sv: dict
-    :type configfile: str or file
+    :type config_file: str or file
     :return: the inputted dict with added elements from the configfile
     :rtype: dict
     :raises: spinnman.spinnman_exceptions.BootError when given a malformed
              config file
     """
-    for line in open(configfile):
+    for line in open(config_file):
         line = line.strip()
         comment_idx = line.find("#")
         if comment_idx != -1:
@@ -112,7 +122,7 @@ def _readconf(sv, configfile):
         if line != "":
             config_match = re.match("^([\w\.]+)"
                                     "\s+(0x[0-9a-fA-F]+|\d+|time)$", line)
-            if config_match != None:
+            if config_match is not None:
                 (name, value) = config_match.groups()
                 if name in sv:
                     if value == "time":
@@ -122,16 +132,17 @@ def _readconf(sv, configfile):
                 raise spinnman_exceptions.BootError("Unrecognised line in %s - "
                                                     "format does not match "
                                                     "expected format: %s"
-                                                    % (configfile, line))
+                                                    % (config_file, line))
 
 
 def _pack(sv, data, dataoffset, sizelimit):
     """ packs data into a form usable in packets
-    :param sv: the dictonary that contains elements from the config and struct
+
+    :param sv: the dictonary that contains elements from the config and struct\
                files
     :param data: data which should be packed
-    :param dataoffset: how far into the packing that the data should start being
-                       written
+    :param dataoffset: how far into the packing that the data should start \
+                       being written
     :param sizelimit: the size limit of the packed data
     :type sv: dict
     :type data: numpy array
@@ -139,6 +150,7 @@ def _pack(sv, data, dataoffset, sizelimit):
     :type sizelimit: int
     :return: None
     :rtype: None
+
     ABS(Is this correct? as you pack somethign but dont
         get the packed version back?)
     :raises: spinnman.spinnman_exceptions.StructInterpertationException if the
@@ -162,10 +174,12 @@ def _pack(sv, data, dataoffset, sizelimit):
                                                       " %s" % pack)
                 struct.pack_into(pack, data, dataoffset + offset, value)
 
-def _boot_pkt(socket, host, op, a1, a2, a3, data = None, offset = 0,
-             datasize = 0):
+
+def _boot_pkt(connection_socket, host, op, a1, a2, a3, data=None,
+              offset=0, datasize=0):
     """private method that sends the boot command down to the spinnaker machine
-    :param socket: stream to write the command to
+
+    :param connection_socket: stream to write the command to
     :param host: hostname of the target SpiNNaker
     :param op: boot ROM command
     :param a1: argument 1 -- varies with ``op``
@@ -174,7 +188,7 @@ def _boot_pkt(socket, host, op, a1, a2, a3, data = None, offset = 0,
     :param data: optional data
     :param offset: the offset into the data to start from
     :param datasize: the maximum amount of data to write from the data
-    :type socket: socket.socket
+    :type connection_socket: socket.socket
     :type host: str
     :type op: boot constant from scamp_constants
     :type a1: int
@@ -187,7 +201,7 @@ def _boot_pkt(socket, host, op, a1, a2, a3, data = None, offset = 0,
     :rtype: None
     :raises: None: does not raise any known exceptions
     """
-    if data != None:
+    if data is not None:
         pkt_data = numpy.zeros(datasize + 18, dtype=numpy.uint8)
         struct.pack_into(">HLLLL", pkt_data, 0, scamp_constants.BOOT_PROT_VER,
                          op, a1, a2, a3)
@@ -199,26 +213,29 @@ def _boot_pkt(socket, host, op, a1, a2, a3, data = None, offset = 0,
             the_word = struct.unpack_from("<I", data, offset + off)[0]
             struct.pack_into(">I", pkt_data, 18 + off, the_word)
             off += 4
-        socket.sendto(pkt_data, (host, scamp_constants.BOOT_PORT))
+        connection_socket.sendto(pkt_data, (host, scamp_constants.BOOT_PORT))
     else:
         hdr = struct.pack(">HLLLL", scamp_constants.BOOT_PROT_VER, op, a1,
                           a2, a3)
-        socket.sendto(hdr, (host, scamp_constants.BOOT_PORT))
+        connection_socket.sendto(hdr, (host, scamp_constants.BOOT_PORT))
     time.sleep(scamp_constants.BOOT_DELAY)
 
-def _rom_boot(hostname, data):
+
+def _rom_boot(the_hostname, data):
     """sends the boot rom to the spinnaker machine listening on the hostname
-    :param hostname:
-    :param data:
-    :type hostname: str
+
+    :param the_hostname: the hostname of the machine to boot
+    :param data: the rom to boot with
+    :type the_hostname: str
     :type data: numpy array or None
     :return: None
     :rtype: None
     :raises: spinnMan.spinnman_exceptions.BootException
     """
     # determine the number of blocks required to send the boot file
-    block_size  = scamp_constants.BOOT_BLOCK_SIZE * 4 # convert into bytes from words
-    block_count = (data.size + block_size - 1) / block_size # implicit modulo
+    block_size = scamp_constants.BOOT_BLOCK_SIZE * 4  # convert into bytes
+                                                      # from words
+    block_count = (data.size + block_size - 1) / block_size  # implicit modulo
 
     # make sure the boot file is not larger than the TCRAM
     if block_count > scamp_constants.BOOT_MAX_BLOCKS:
@@ -226,8 +243,8 @@ def _rom_boot(hostname, data):
                                             "and will not fit in DTCM.")
 
     # attempt to open a socket to the remote host
-    host = socket.gethostbyname (hostname)
-    sock = socket.socket (socket.AF_INET, socket.SOCK_DGRAM)
+    host = socket.gethostbyname(the_hostname)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     _boot_pkt(sock, host, scamp_constants.BOOT_CMD_START, 0, 0, block_count - 1)
     offset = 0
     for cur_block in range(0, block_count):
@@ -237,61 +254,68 @@ def _rom_boot(hostname, data):
         offset += block_size
     _boot_pkt(sock, host, scamp_constants.BOOT_CMD_DONE, 1, 0, 0)
 
-def boot(hostname, bootfile, configfile, structfile):
+
+def boot(the_hostname, the_bootfile, config_file, struct_file):
     """ entrance function to the boot system
-    :param hostname: the name of the machine in ip format or equivalent
-    :param bootfile: the filepath to the boot file used during this boot seq
-    :param configfile: the filpath of the config file used during this boot seq
-    :param structfile: the filepath of the struct file used during this boot seq
-    :type hostname: str
-    :type bootfile: str
-    :type configfile: str
-    :type structfile: str
+
+    :param the_hostname: the name of the machine in ip format or equivalent
+    :param the_bootfile: the filepath to the boot file used during this boot seq
+    :param config_file: the filpath of the config file used during this boot seq
+    :param struct_file: the filepath of the struct file used during this boot\
+                        seq
+    :type the_hostname: str
+    :type the_bootfile: str
+    :type config_file: str
+    :type struct_file: str
     :return: None
     :rtype: None
     :raises:spinnMan.spinnman_exceptions.BootException
     """
-    sv = _readstruct("sv", structfile)
-    _readconf(sv, configfile)
-    buf = numpy.fromfile(file=bootfile, dtype=numpy.uint8)
+    sv = _readstruct("sv", struct_file)
+    _readconf(sv, config_file)
+    # ABS it does indeed return something
+    buf = numpy.fromfile(file=the_bootfile, dtype=numpy.uint8)
     current_time = time.time()
     sv["unix_time"][0] = current_time
     sv["boot_sig"][0] = current_time
 
-    if bootfile.endswith(".boot"):
+    if the_bootfile.endswith(".boot"):
         sv["root_chip"][0] = 1
         _pack(sv, buf, 384, 128)
-        _rom_boot(hostname, buf)
+        _rom_boot(the_hostname, buf)
 
-    elif bootfile.endswith(".aplx"):
+    elif the_bootfile.endswith(".aplx"):
         sv["boot_delay"][0] = 0
         _pack(sv, buf, 384, 128)
 
     else:
         raise spinnman_exceptions.BootError("Unknown file extension of boot "
-                                            "file %s" % bootfile)
+                                            "file %s" % the_bootfile)
 
-def reset(hostname):
-    """ Establishes a SCP connection to the board-management processor specified
-    by ``hostname`` and sends a reset command.
-    .. warning::
 
-        This function is only applicable to SpiNN-4 (or greater) boards that
-        have board-management processors on the PCB. yet does not check that the
-        board commincating with the given hostname is a spinn-4 or spinn-5 board
+def reset(the_hostname):
+    """ Establishes a SCP connection to the board-management processor\
+    specified by ``hostname`` and sends a reset command.\
+    .. warning::\
+    \
+        This function is only applicable to SpiNN-4 (or greater) boards that\
+        have board-management processors on the PCB. yet does not check that \
+        the board commincating with the given hostname is a spinn-4 or spinn-5 \
+        board
 
-    :param hostname: hostname of the board-management processor of the target
-                     SpiNNaker
-    :type hostname: str
+    :param the_hostname: hostname of the board-management processor of the \
+                         target SpiNNaker machine
+    :type the_hostname: str
     :return: None
     :rtype: None
     :raises: None: does not raise any known exceptions
     """
-    conn = SCPConnection(hostname)
-    msg        = SCPMessage()
+    conn = SCPConnection(the_hostname)
+    msg = SCPMessage()
     msg.cmd_rc = scamp_constants.CMD_RESET
-    msg.arg1   = 2
-    conn.send_scp_msg (msg)
+    msg.arg1 = 2
+    conn.send_scp_msg(msg)
+
 
 def _printargs():
     """helper method which prints out the order and explination of the boot args
@@ -303,11 +327,14 @@ def _printargs():
                             "<structfile>"
     sys.exit(2)
 
-"""entrance method when called directly"""
+
 if __name__ == "__main__":
+    #entrance method when called directly
+    opts = None
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "?h:b:c:s:", \
-            ["hostname=", "bootfile=", "configfile=", "structfile="])
+        opts, args = getopt.getopt(sys.argv[1:], "?h:b:c:s:",
+                                   ["hostname=", "bootfile=",
+                                    "configfile=", "structfile="])
     except getopt.GetoptError:
         _printargs()
     hostname = None
@@ -325,8 +352,8 @@ if __name__ == "__main__":
             configfile = arg
         elif opt in ("-s", "--structfile"):
             structfile = arg
-    if (hostname == None) or (bootfile == None) or (configfile == None) or\
-       (structfile == None):
+    if (hostname is None) or (bootfile is None) or (configfile is None) or\
+       (structfile is None):
         print "Missing arguments:"
         _printargs()
     boot(hostname, bootfile, configfile, structfile)
