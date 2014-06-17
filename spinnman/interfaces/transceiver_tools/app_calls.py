@@ -22,7 +22,18 @@ class AppCalls(object):
             :rtype: spinnman.interfaces.transceiver_tools.app_calls.AppCalls
             :raise: None: does not raise any known exceptions
         """
-        pass
+        self._signal_states = {0: 'init', 1: 'pwrdn', 2: 'stop', 3: 'start',
+                              4: 'sync0', 5: 'sync1', 6: 'pause', 7: 'cont',
+                              8: 'exit', 9: 'timer', 10: 'usr0', 11: 'usr1',
+                              12: 'usr2', 13: 'usr3', 16: 'or', 17: 'and',
+                              18: 'count'}
+        self._states = {0: 'dead', 1: 'pwrdn', 2: 'rte', 3: 'wdog', 4: 'init',
+                       5: 'ready', 6: 'c_main', 7: 'run', 8: 'sync0',
+                       9: 'sync1', 10: 'pause', 11: 'exit', 15: 'idle'}
+        self._sig_type = {'init': 2, 'pwrdn': 2, 'stop': 2, 'start': 2,
+                         'sync0': 0, 'sync1': 0, 'pause': 0, 'cont': 0,
+                         'exit': 2, 'timer': 0, 'usr0': 0, 'usr1': 0,
+                         'usr2': 0, 'usr3': 0, 'or': 1, 'and': 1, 'count': 1}
 
     def set_view(self, new_x, new_y, new_cpu, new_node):
         """ updates the chip and processor that is currently under focus
