@@ -68,6 +68,22 @@ class InvalidIPTagConfigurationException(SpinnmanException):
     pass
 
 
+class InvalidSignalException(SpinnmanException):
+    """ thrown when a app signal is given which does not exist in the code base
+
+    :raise None: does not raise any known exceptions
+    """
+    pass
+
+
+class InvalidStateException(SpinnmanException):
+    """ thrown when a app state is given which does not exist in the code base
+
+    :raise None: does not raise any known exceptions
+    """
+    pass
+
+
 class SCPError (RuntimeError):
     """Error response from target SpiNNaker.
 
