@@ -1,5 +1,5 @@
 __author__ = 'stokesa6'
-from spinnman import spinnman_exceptions
+from spinnman import exceptions
 
 
 class IPTag(object):
@@ -13,7 +13,7 @@ class IPTag(object):
         :type kwargs: dict
         :return: a IPTag object
         :rtype: spinnman.interfaces.iptag.IPTag object
-        :raise: spinnman.spinnman_exceptions.InvalidIPTagConfigurationException
+        :raise: spinnman.exceptions.InvalidIPTagConfigurationException
         """
 
         members = ('ip', 'mac', 'port', 'timeout', 'flags',
@@ -25,19 +25,20 @@ class IPTag(object):
             for member in members:
                 self.__dict__[member] = kwargs.setdefault(member, None)
         except Exception:
-            raise spinnman_exceptions.\
+            raise exceptions.\
                 InvalidIPTagConfigurationException(" the member {} is not a "
                                                    "recognised element of a "
                                                    "IPTAG".format(member))
 
     def __str__(self):
-        """
-        Pretty print method to help in interactive mode.
+        """Pretty print method to help in interactive mode.\
+           Print format:\
+           \
+           index: ip:port [mac]; flags, timeout
 
-        Print format:
-
-            index: ip:port [mac]; flags, timeout
-
+           :return: a string representation of a iptag
+           :rtype: str
+           :raise: keyError
         """
         return '{:d}: {:s}:{:d} [{:s}]; {:x}, {:.02f}'\
                .format(self.__dict__['index'], self.__dict__['ip'],

@@ -1,10 +1,10 @@
 __author__ = 'stokesa6'
 import socket
 import select
-from spinnman.sdp.sdp_message import SDPMessage
+from spinnman.sdp.sdp_message import _SDPMessage
 
 
-class SDPConnection(object):
+class _SDPConnection(object):
     """Represents an SDP connection to a target SpiNNaker machine or an
     incoming SDP connection to the local machine.\
     \
@@ -65,8 +65,8 @@ class SDPConnection(object):
         :type host: str
         :type port: int
         :return: a new spinnman.sdp.sdp_connection.SDPConnection object
-        :rtype: spinnman.sdp.sdp_connection.SDPConnection
-        :raise: spinnman.spinnman_exceptions.InvalidHostNameException
+        :rtype: spinnman.sdp._sdp_connection.SDPConnection
+        :raise: spinnman.exceptions.InvalidHostNameException
         """
         self._sock = None
 
@@ -167,7 +167,7 @@ class SDPConnection(object):
         raw_data = str(message)
         self._sock.send(raw_data)
 
-    def receive(self, msg_type=SDPMessage):
+    def receive(self, msg_type=_SDPMessage):
         """Recives data from the remote host and processes it into the required\
            object type (default is :py:class:`SDPMessage`).
 

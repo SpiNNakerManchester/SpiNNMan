@@ -4,8 +4,7 @@ import logging
 import math
 import os
 import subprocess
-from spinnman import spinnman_exceptions
-from pacman103 import conf
+from spinnman import exceptions
 logger = logging.getLogger(__name__)
 
 
@@ -15,7 +14,8 @@ class TranscieverUtilities(object):
     """
     
     def __init__(self):
-        """
+        """builds a new transceiverUtilities object
+
         :return: a TranscieverUtilities object
         :rtype: Spinnman.interfaces.transceiver_tools.TranscieverUtilities\
                 object
@@ -27,13 +27,14 @@ class TranscieverUtilities(object):
     def send_ybug_command(hostname, command_string):
         """Create an instance of `ybug` and use it to execute the given command\
            string.
+
            :param hostname: the name of a spinnaker machine
            :param command_string: the command and its args in a string format
            :type hostname: str
            :type command_string: str
            :return: None
            :rtype: None
-           :raise: Spinnman.spinnman_exceptions.ybug_exception
+           :raise: Spinnman.exceptions.ybug_exception
         """
         logger.warn("USING YBUG DIRECTLY IS NOT RECOMMENDED. PLEASE USE THE "
                     "TRANSCIEVER INTERFACE INSTEAD")
@@ -47,6 +48,7 @@ class TranscieverUtilities(object):
     def parse_region(self, region, chip_x, chip_y):
         """takes a region and checks its in the correct format and converts if \
            needed
+
            :param region: a region definition
            :param chip_x: a id for a chip in the x dimension
            :param chip_y: a id for a chip in the y dimenison
@@ -55,17 +57,17 @@ class TranscieverUtilities(object):
            :type chip_y: int
            :return a region in a format recogonised by the sark
            :rtype: int
-           :raise: Spinnman.spinnman_exceptions.SpinnmanException
+           :raise: Spinnman.exceptions.SpinnmanException
         """
         # if no region defined, return 0
         if region is None:
-            raise spinnman_exceptions.SpinnmanException("no region was defined")
+            raise exceptions.SpinnmanException("no region was defined")
 
         # if current region
         if region == "." or str(region).partition(",")[1] == ",":
             # if no x and y corrds defined, return 0
             if chip_x is None and chip_y is None:
-                raise spinnman_exceptions.\
+                raise exceptions.\
                     SpinnmanException("no chip coords were "
                                       "supplied for parsing region")
             else:
@@ -90,14 +92,14 @@ class TranscieverUtilities(object):
         region_bits = region.split(".")
         number_of_levels = len(region_bits) - 1
         if number_of_levels < 0 or number_of_levels > 3:
-            raise spinnman_exceptions.\
+            raise exceptions.\
                 SpinnmanException("the region given did not have enough levels")
 
         x, y = 0, 0
         for level in range(number_of_levels):
             d = int(region_bits[level])
             if d > 15 or d < 0:
-                raise spinnman_exceptions.\
+                raise exceptions.\
                     SpinnmanException("the region requested does not exist. "
                                       "out of bounds")
 
@@ -109,8 +111,8 @@ class TranscieverUtilities(object):
         mask = self.parse_bits(region_bits[-1], 0, 15)
 
         if mask is None:
-            raise spinnman_exceptions.SpinnmanException("no mask was supplied "
-                                                        "for parsing a region")
+            raise exceptions.SpinnmanException("no mask was supplied "
+                                               "for parsing a region")
 
         return (x << 24) + (y << 16) + (number_of_levels << 16) + mask
 
@@ -124,20 +126,19 @@ class TranscieverUtilities(object):
         :type app_range: int
         :return merged app_id range
         :rtype: int
-        :raise: Spinnman.spinnman_exceptions.SpinnmanException
+        :raise: Spinnman.exceptions.SpinnmanException
         """
         if app_range is None:
             return 255
         elif app_range < 1:
-            raise spinnman_exceptions.SpinnmanException("range is less than 1, "
-                                                        "a app region must be "
-                                                        "positive")
+            raise exceptions.SpinnmanException("range is less than 1, "
+                                               "a app region must be positive")
         elif app_id % app_range != 0:
-            raise spinnman_exceptions.SpinnmanException("range % app_id "
-                                                        "must equal 0")
+            raise exceptions.SpinnmanException("range % app_id "
+                                               "must equal 0")
         elif app_id + app_range > 255:
-            raise spinnman_exceptions.SpinnmanException("range + app_id must "
-                                                        "not go above 255")
+            raise exceptions.SpinnmanException("range + app_id must "
+                                               "not go above 255")
         return 255 & ~(app_range - 1)
 
     @staticmethod
@@ -152,11 +153,11 @@ class TranscieverUtilities(object):
         :type max_core_id: int
         :return a parsed core
         :rtype: int
-        :raise: Spinnman.spinnman_exceptions.SpinnmanException
+        :raise: Spinnman.exceptions.SpinnmanException
         """
         if mask is None:
-            raise spinnman_exceptions.SpinnmanException("no mask was supplied "
-                                                        "for parsing a region")
+            raise exceptions.SpinnmanException("no mask was supplied "
+                                               "for parsing a region")
         if mask.lower() == "all":
             mask = "{}-{}".format(min_core_id, max_core_id)
 
@@ -189,7 +190,7 @@ class TranscieverUtilities(object):
         :type cores: str
         :return: parsed cores
         :rtype: str
-        :raise Spinnman.spinnman_exceptions.SpinnmanException
+        :raise Spinnman.exceptions.SpinnmanException
         """
         return self.parse_bits(cores, 1, 17)
 
@@ -204,12 +205,12 @@ class TranscieverUtilities(object):
         :type max_length: int
         :return string array containing the contents of the file
         :rtype: str array
-        :raise: Spinnman.spinnman_exceptions.SpinnmanException
+        :raise: Spinnman.exceptions.SpinnmanException
         """
         statinfo = os.stat(file_name)
         if statinfo.st_size >= max_length:
-            raise spinnman_exceptions.SpinnmanException("file too big to "
-                                                        "be written to a core")
+            raise exceptions.SpinnmanException("file too big to "
+                                               "be written to a core")
         try:
             opened_file = open(file_name, 'rb')
             buf = opened_file.read(statinfo.st_size)
@@ -289,7 +290,7 @@ class TranscieverUtilities(object):
         """
         real_file = test_file
         if not os.path.isfile(real_file):
-            components = os.path.abspath(conf.__file__).split(os.sep)
+            components = os.path.abspath(exceptions.__file__).split(os.sep)
             directory = \
                 os.path.abspath(
                     os.path.join(os.sep,
@@ -300,5 +301,5 @@ class TranscieverUtilities(object):
             print real_file
         if not os.path.isfile(real_file):
             print "File %s not found" % test_file
-            raise spinnman_exceptions.SpinnmanException("file not found")
+            raise exceptions.SpinnmanException("file not found")
         return real_file

@@ -77,7 +77,16 @@ class InvalidSignalException(SpinnmanException):
 
 
 class InvalidStateException(SpinnmanException):
-    """ thrown when a app state is given which does not exist in the code base
+    """ thrown when a app state is given which does not exist in the code base \
+        or that a core has gone into a unexpected state
+
+    :raise None: does not raise any known exceptions
+    """
+    pass
+
+
+class ExploreException(SpinnmanException):
+    """ thrown when an attempt to explore the machine results in an error
 
     :raise None: does not raise any known exceptions
     """
@@ -98,7 +107,7 @@ class SCPError (RuntimeError):
         :param rc: response code from target SpiNNaker.
         :param msg: the SCPMessage that caused the error
         :type rc: int
-        :type msg: spinnman.scp.scp_message.SCPMessage or None
+        :type msg: spinnman.scp._scp_message.SCPMessage or None
         :raise None: does not raise any known exceptions
         """
         # get a nice custom error message

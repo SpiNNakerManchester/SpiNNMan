@@ -1,9 +1,9 @@
 __author__ = 'stokesa6'
 import struct
-from spinnman import spinnman_exceptions
+from spinnman import exceptions
 
 
-class SDPMessage(object):
+class _SDPMessage(object):
     """Wraps up an SDP message that may be sent or received to/from a SpiNNaker\
        using a :py:class:`SDPConnection`.\
     \
@@ -130,7 +130,8 @@ class SDPMessage(object):
         """
         return self._sizeof_hdr + len(self.data)
 
-    def _unpack_hdr(self, packed):
+    @staticmethod
+    def _unpack_hdr(packed):
         """Reconstructs only an SDP header from ``packed`` and return what is
            assumed to be payload.
 
@@ -159,17 +160,18 @@ class SDPMessage(object):
     def from_string(self, packed):
         """Deconstructs the given string and sets the member
            variables accordingly.
+           
         :param packed: packed data to decode
         :type packed: str
         :return: None
         :rtype: None
-        :raise: Spinnman.spinnman_exceptions.StructInterpertationException
+        :raise: spinnman.exceptions.StructInterpertationException
         """
         try:
             # unpack the header and the payload
             hdr, payload = self._unpack_hdr(packed)
-        except struct.error as e:
-            raise spinnman_exceptions.\
+        except struct.error:
+            raise exceptions.\
                 StructInterpertationException("could not interperate the data "
                                               "contained within {} when "
                                               "generating a sdp message"
@@ -181,18 +183,19 @@ class SDPMessage(object):
     def from_dict(self, sdp_fields):
         """Updates the SDPMessage object from the given key-value map of valid
            fields.
+
         :param sdp_fields: valid SDP fields
         :type sdp_fields: dict
         :return: None
         :rtype: None
-        :raise: Spinnman.spinnman_exceptions.unrecogonisedAttributeException
+        :raise: Spinnman.exceptions.unrecogonisedAttributeException
         """
         k, v = None
         try:
             for k, v in sdp_fields.iteritems():
                 setattr(self, k, v)
         except AttributeError:
-            raise spinnman_exceptions.\
+            raise exceptions.\
                 UnrecogonisedAttributeException("The attribute {} was not "
                                                 "recognised as a attribute of "
                                                 "a SDP message".format(k))

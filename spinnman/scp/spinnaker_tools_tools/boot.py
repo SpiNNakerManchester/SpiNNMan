@@ -24,9 +24,9 @@ import numpy
 import sys
 import getopt
 from spinnman.scp.spinnaker_tools_tools import scamp_constants
-from spinnman.scp.scp_connection import SCPConnection
-from spinnman.scp.scp_message import SCPMessage
-from spinnman import spinnman_exceptions
+from spinnman.scp.scp_connection import _SCPConnection
+from spinnman.scp.scp_message import _SCPMessage
+from spinnman import exceptions
 
 
 __all__ = ['boot', 'readstruct']
@@ -42,7 +42,7 @@ def _readstruct(section_name, struct_file):
     :type struct_file: str or file
     :return: a dictonary which contains elements of the structfile
     :rtype: dict
-    :raises: spinnman.spinnman_exceptions.BootError when given a malformed
+    :raise: spinnman.exceptions.BootError when given a malformed
              struct file
     """
     sv = dict()
@@ -70,7 +70,7 @@ def _readstruct(section_name, struct_file):
                     elif equal_match.group(1) == "base":
                         sv['=base='] = int(equal_match.group(2), 0)
                     elif equal_match.group(1) != "name":
-                        raise spinnman_exceptions.\
+                        raise exceptions.\
                             BootError("Unrecognised line in %s - "
                                       "unrecognised item %s from line: "
                                       "%s" % (struct_file,
@@ -93,12 +93,12 @@ def _readstruct(section_name, struct_file):
                         else:
                             sv[name] = [value, pack, offset, fmt, 1]
                     else:
-                        raise spinnman_exceptions.\
+                        raise exceptions.\
                             BootError("Unrecognised line in %s - format does"
                                       " not match expected format: %s"
                                       % (struct_file, line))
     if not match_found:
-        raise spinnman_exceptions.BootError("Missing section %s in %s"
+        raise exceptions.BootError("Missing section %s in %s"
                                             % (section_name, struct_file))
 
 
@@ -111,7 +111,7 @@ def _readconf(sv, config_file):
     :type config_file: str or file
     :return: the inputted dict with added elements from the configfile
     :rtype: dict
-    :raises: spinnman.spinnman_exceptions.BootError when given a malformed
+    :raise: spinnman.exceptions.BootError when given a malformed
              config file
     """
     for line in open(config_file):
@@ -129,14 +129,14 @@ def _readconf(sv, config_file):
                         value = time.time()
                     sv[name][0] = int(value, 0)
             else:
-                raise spinnman_exceptions.BootError("Unrecognised line in %s - "
+                raise exceptions.BootError("Unrecognised line in %s - "
                                                     "format does not match "
                                                     "expected format: %s"
                                                     % (config_file, line))
 
 
 def _pack(sv, data, dataoffset, sizelimit):
-    """ packs data into a form usable in packets
+    """ packs stuff into data into a form usable in packets
 
     :param sv: the dictonary that contains elements from the config and struct\
                files
@@ -150,10 +150,7 @@ def _pack(sv, data, dataoffset, sizelimit):
     :type sizelimit: int
     :return: None
     :rtype: None
-
-    ABS(Is this correct? as you pack somethign but dont
-        get the packed version back?)
-    :raises: spinnman.spinnman_exceptions.StructInterpertationException if the
+    :raise: spinnman.exceptions.StructInterpertationException if the
              method cannot decide on how to pack the data
     """
     for field in sv:
@@ -169,7 +166,7 @@ def _pack(sv, data, dataoffset, sizelimit):
                 elif pack == "A16":
                     pack = "16s"
                 else:
-                    raise spinnman_exceptions.\
+                    raise exceptions.\
                         StructInterpertationException("Unrecognised pack format"
                                                       " %s" % pack)
                 struct.pack_into(pack, data, dataoffset + offset, value)
@@ -199,7 +196,7 @@ def _boot_pkt(connection_socket, host, op, a1, a2, a3, data=None,
     :type datasize: int
     :return: None
     :rtype: None
-    :raises: None: does not raise any known exceptions
+    :raise: None: does not raise any known exceptions
     """
     if data is not None:
         pkt_data = numpy.zeros(datasize + 18, dtype=numpy.uint8)
@@ -230,7 +227,7 @@ def _rom_boot(the_hostname, data):
     :type data: numpy array or None
     :return: None
     :rtype: None
-    :raises: spinnMan.spinnman_exceptions.BootException
+    :raise: spinnMan.exceptions.BootException
     """
     # determine the number of blocks required to send the boot file
     block_size = scamp_constants.BOOT_BLOCK_SIZE * 4  # convert into bytes
@@ -239,7 +236,7 @@ def _rom_boot(the_hostname, data):
 
     # make sure the boot file is not larger than the TCRAM
     if block_count > scamp_constants.BOOT_MAX_BLOCKS:
-        raise spinnman_exceptions.BootError("Boot file is too large "
+        raise exceptions.BootError("Boot file is too large "
                                             "and will not fit in DTCM.")
 
     # attempt to open a socket to the remote host
@@ -269,7 +266,7 @@ def boot(the_hostname, the_bootfile, config_file, struct_file):
     :type struct_file: str
     :return: None
     :rtype: None
-    :raises:spinnMan.spinnman_exceptions.BootException
+    :raise:spinnMan.exceptions.BootException
     """
     sv = _readstruct("sv", struct_file)
     _readconf(sv, config_file)
@@ -289,7 +286,7 @@ def boot(the_hostname, the_bootfile, config_file, struct_file):
         _pack(sv, buf, 384, 128)
 
     else:
-        raise spinnman_exceptions.BootError("Unknown file extension of boot "
+        raise exceptions.BootError("Unknown file extension of boot "
                                             "file %s" % the_bootfile)
 
 
@@ -308,10 +305,10 @@ def reset(the_hostname):
     :type the_hostname: str
     :return: None
     :rtype: None
-    :raises: None: does not raise any known exceptions
+    :raise: None: does not raise any known exceptions
     """
-    conn = SCPConnection(the_hostname)
-    msg = SCPMessage()
+    conn = _SCPConnection(the_hostname)
+    msg = _SCPMessage()
     msg.cmd_rc = scamp_constants.CMD_RESET
     msg.arg1 = 2
     conn.send_scp_msg(msg)
@@ -321,7 +318,7 @@ def _printargs():
     """helper method which prints out the order and explination of the boot args
     :return: None
     :rtype: None
-    :raises: None: does not raise any known exceptions
+    :raise: None: does not raise any known exceptions
     """
     print sys.argv[0], " ", "-h <hostname> -b <bootfile> -c <configfile> -s " \
                             "<structfile>"

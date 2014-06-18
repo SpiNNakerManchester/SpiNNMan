@@ -1,11 +1,11 @@
 __author__ = 'stokesa6'
-from spinnman.interfaces.transceiver_tools.app_calls import AppCalls
-from spinnman.interfaces.transceiver_tools.iptag_calls import IPTagCalls
-from spinnman.interfaces.transceiver_tools.memory_calls import MemoryCalls
-from spinnman.interfaces.transceiver_tools.packet_calls import PacketCalls
-from spinnman.scp.scp_connection import SCPConnection
+from spinnman.interfaces.transceiver_tools.app_calls import _AppCalls
+from spinnman.interfaces.transceiver_tools.iptag_calls import _IPTagCalls
+from spinnman.interfaces.transceiver_tools.memory_calls import _MemoryCalls
+from spinnman.interfaces.transceiver_tools.packet_calls import _PacketCalls
+from spinnman.scp.scp_connection import _SCPConnection
 
-class Transceiver(AppCalls, IPTagCalls, MemoryCalls, PacketCalls, object):
+class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
     """main transciever object, inherrits from multiple transciever tools to
        reduce the size of the transciever.
     """
@@ -22,44 +22,99 @@ class Transceiver(AppCalls, IPTagCalls, MemoryCalls, PacketCalls, object):
         :raise None: does not raise any known exceptions
         """
 
-        AppCalls.__init__(self, self)
-        IPTagCalls.__init__(self, self)
-        MemoryCalls.__init__(self, self)
-        PacketCalls.__init__(self, self)
+        _AppCalls.__init__(self, self)
+        _IPTagCalls.__init__(self, self)
+        _MemoryCalls.__init__(self, self)
+        _PacketCalls.__init__(self, self)
 
         self._x = 0
         self._y = 0
         self._cpu = 0
         self._node = (self._x << 8) | self._y
         self.utility = None
-        self.conn = SCPConnection(hostname, port)
+        self.conn = _SCPConnection(hostname, port)
 
-    def load_targets(self, load_data):
+    def load_targets(self, load_data_interface):
+        """ public method for loading data targets to cores on a spinnaker\
+            machine
+
+        :param load_data_interface: an interface for retrieving data to load \
+                                    for a core
+        :type load_data_interface: diriritive of spinnman.interfaces.\
+                                   load_interfaces.abstract_load_data_interface
+        :return None
+        :rtype: None
+        :raise spinnman.exceptions.SCPError
+        """
         pass
 
-    def load_targets_raw(self, targets):
+    def load_write_mem(self, load_data_interface):
+        """ public method for loading memory writes to cores on a spinnaker\
+            machine
+
+        :param load_data_interface: an interface for retrieving data to load \
+                                    for a core
+        :type load_data_interface: diriritive of spinnman.interfaces.\
+                                   load_interfaces.abstract_load_data_interface
+        :return None
+        :rtype: None
+        :raise spinnman.exceptions.SCPError
+        """
         pass
 
-    def load_targets_load(self, file_name):
+    def load_executables(self, load_executable_interface):
+        """ public method for loading executable images to cores on a spinnaker\
+            machine
+
+        :param load_executable_interface: an interface for retrieving data \
+                                          to load for a core
+        :type load_executable_interface: diriritive of spinnman.interfaces.\
+                                         load_interfaces.\
+                                         abstract_load_executables_interface
+        :return None
+        :rtype: None
+        :raise spinnman.exceptions.SCPError
+        """
         pass
 
-    def load_write_mem(self, load_data):
-        pass
+    def check_synco(self, total_processors, app_id):
+        """ public method that allows the end user to see if all the cores\
+            associated with the given app_id are in sync0
 
-    def load_write_mem_raw(self, targets):
-        pass
-
-    def load_write_mem_load(self, file_name):
+        :param total_processors: The number of processors used in this \
+                                 application
+        :param app_id: the unique identifier for this application
+        :type total_processors: int
+        :type app_id: int
+        :return true or false given if all cores are in sync 0
+        :rtype: boolean
+        :raise None: does not raise any known exceptions
+        """
         pass
 
     def run(self, app_id):
+        """ public method that allows the end user set cores that are in sync0 \
+            into the run state (executing)
+
+        :param app_id: the unique identifier for this application
+        :type app_id: int
+        :return None
+        :rtype: None
+        :raise spinnman.exceptions.SCPError
+        """
         pass
 
-    def run_raw(self, targets, run_time, app_id, iptags):
-        pass
+    def has_exited(self, app_id, total_processors):
+        """ public method that allows the end user to see if all the cores\
+            associated with the given app_id have exited
 
-    def _check_synco_and_run(self, total_processors, app_id, run_time):
-        pass
-
-    def select(self, *args):
+        :param total_processors: The number of processors used in this \
+                                 application
+        :param app_id: the unique identifier for this application
+        :type total_processors: int
+        :type app_id: int
+        :return true or false given if all cores are in sync 0
+        :rtype: boolean
+        :raise spinnman.exceptions.InvalidStateException
+        """
         pass
