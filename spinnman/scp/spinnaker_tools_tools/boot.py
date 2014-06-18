@@ -29,7 +29,7 @@ from spinnman.scp.scp_message import _SCPMessage
 from spinnman import exceptions
 
 
-__all__ = ['boot', 'readstruct']
+#__all__ = ['boot', 'readstruct']
 
 
 # functions
@@ -266,7 +266,9 @@ def boot(the_hostname, the_bootfile, config_file, struct_file):
     :type struct_file: str
     :return: None
     :rtype: None
-    :raise:spinnMan.exceptions.BootException
+    :raise spinnman.exceptions.BootError: when the boot/config/struct file \
+                                              is not a recongised boot/config/\
+                                              struct file.
     """
     sv = _readstruct("sv", struct_file)
     _readconf(sv, config_file)

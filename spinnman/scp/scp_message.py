@@ -1,9 +1,9 @@
 __author__ = 'stokesa6'
 import struct
-from spinnman.sdp.sdp_message import SDPMessage
+from spinnman.sdp.sdp_message import _SDPMessage
 
 
-class SCPMessage (SDPMessage):
+class _SCPMessage (_SDPMessage):
     """Builds on :py:class:`SDPMessage` by adding the following fields to \
        support SCP messages:\
     \
@@ -14,13 +14,7 @@ class SCPMessage (SDPMessage):
         ``seq`` (16 bits)\
             sequence code -- not used for every command type\
     \
-        ``arg1``, ``arg2``, ``arg3`` (all 32 bits)\
-            optional word data at the start of the payload that may be ignored\
-            if ``raw_data`` is used directly\
-    \
-        ``payload`` (variable length)\
-            optional data field that appears *after* the optional arguments in\
-            the SCP payload\
+        ``arg1``, ``arg2``, ``arg3`` (all 32 bits) args of the scp packet\
     \
         ``data`` (variable length)\
             SCP packet payload *including* the optional word data fieelds.\
@@ -53,25 +47,23 @@ class SCPMessage (SDPMessage):
         :type kwargs: dict
         :return a new spinnMan.scp.scp_message.SCP_Message object
         :rtype: spinnMan.scp.scp_message.SCP_Message
-        :raise: spinnman.spinnman_exceptions.StructInterpertationException
+        :raise: spinnman.exceptions.StructInterpertationException
         """
         # (sizeof(sdp_hdr_t) + 2*sizeof(uint16_t) == 12 in SC&MP/SARK -- used
         # for the size calculation
         self._sizeof_hdr = 12
 
         # call base class
-        super(SCPMessage, self).__init__()
+        super(_SCPMessage, self).__init__()
 
         # default initialise new members before calling the base constructor
         self.dst_port = 0  # override from base class for command port
-        self.cmd_rc = 0
-        self.seq = 0
+        self._cmd_rc = 0
+        self._seq = 0
         self._arg1 = 0
         self._arg2 = 0
         self._arg3 = 0
-        self.payload = ''
-        self._data = ''
-        self.has_args = True
+        self._payload = ''
 
         # handle the packed data and keyword arguments after default init
         if packed is not None:
@@ -88,11 +80,12 @@ class SCPMessage (SDPMessage):
         """
 
         # pack the two compulsory SCP fields and append them to the SDP header
-        scp_packed = struct.pack('<2H', self.cmd_rc, self.seq)
+        scp_packed = struct.pack('<2H', self._cmd_rc, self._seq)
 
-        return super(SCPMessage, self)._pack_hdr() + scp_packed
+        return super(_SCPMessage, self)._pack_hdr() + scp_packed
 
-    def _unpack_hdr(self, packed):
+    @staticmethod
+    def _unpack_hdr(packed):
         """Overloaded from base class to unpack the extra header fields.
 
         :param packed: encoded string
@@ -103,7 +96,7 @@ class SCPMessage (SDPMessage):
         """
 
         # get the SDP header from the base class
-        pkt, payload = super(SCPMessage, self)._unpack_hdr(packed)
+        pkt, payload = _SDPMessage._unpack_hdr(packed)
 
         # strip 4 bytes from the payload to decode the SCP compulsory fields
         scp_hdr, payload = payload[:4], payload[4:]
@@ -129,7 +122,6 @@ class SCPMessage (SDPMessage):
         :raise: None: does not raise any known exceptions
         """
         self._arg1 = value
-        self.has_args = True
 
     @property
     def arg2(self):
@@ -150,7 +142,6 @@ class SCPMessage (SDPMessage):
         :raise: None: does not raise any known exceptions
         """
         self._arg2 = value
-        self.has_args = True
 
     @property
     def arg3(self):
@@ -172,10 +163,9 @@ class SCPMessage (SDPMessage):
         :raise: None: does not raise any known exceptions
         """
         self._arg3 = value
-        self.has_args = True
 
     @property
-    def data(self):
+    def payload(self):
         """Optional payload for the :py:class:`SCPMessage` object --\
            automatically packs the word arguments and variable-length data into\
            a single value.
@@ -185,15 +175,11 @@ class SCPMessage (SDPMessage):
            :raise: None: does not raise any known exceptions
         """
 
-        if self.has_args:
-            _data = struct.pack('<3I', self.arg1, self.arg2, self.arg3)
-            _data += self.payload
-        else:
-            _data = self._data
-        return _data
+        _payload = struct.pack('<3I', self.arg1, self.arg2, self.arg3)
+        return _payload
 
-    @data.setter
-    def data(self, value):
+    @payload.setter
+    def payload(self, value):
         """Optional payload for the message -- automatically unpacks the word\
            arguments if there is sufficient space to do so.
 
@@ -204,12 +190,4 @@ class SCPMessage (SDPMessage):
         :raise: None: does not raise any known exceptions
 
         """
-
-        if len(value) >= 12:
-            self.has_args = True
-            (self.arg1, self.arg2, self.arg3) = struct.unpack('<3I',
-                                                              value[:12])
-            self.payload = value[12:]
-        else:
-            self.has_args = False
-            self._data = value
+        self._payload = value

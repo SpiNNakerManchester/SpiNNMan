@@ -8,12 +8,14 @@ class IPTag(object):
     def __init__(self, **kwargs):
         """Constructs an IPTag object.
 
-        :param **kwargs: a list of elements such as 'ip', 'mac', 'port', \
+        :param kwargs: a list of elements such as 'ip', 'mac', 'port', \
                         'timeout', 'flags', 'index', 'tag', 'hostname'
         :type kwargs: dict
         :return: a IPTag object
-        :rtype: spinnman.interfaces.iptag.IPTag object
-        :raise: spinnman.exceptions.InvalidIPTagConfigurationException
+        :rtype: spinnman.interfaces.iptag.IPTag
+        :raise spinnman.exceptions.InvalidIPTagConfigurationException: when a \
+                                   element of kwargs is not a valid member of \
+                                   the iptag
         """
 
         members = ('ip', 'mac', 'port', 'timeout', 'flags',

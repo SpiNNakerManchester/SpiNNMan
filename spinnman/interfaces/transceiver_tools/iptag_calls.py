@@ -1,5 +1,5 @@
 __author__ = 'stokesa6'
-from spinnman.scp.scp_message import SCPMessage
+from spinnman.scp.scp_message import _SCPMessage
 from spinnman.scp.spinnaker_tools_tools import scamp_constants
 from spinnman.interfaces.iptag import IPTag
 import socket
@@ -7,10 +7,11 @@ import struct
 import math
 
 
-class IPTagCalls(object):
+class _IPTagCalls(object):
 
     def __init__(self, transceiver):
         """constructor for a IPTAG call object
+        
         :param transceiver: the parent object which contains other calls
         :type transceiver: spinnman.interfaces.transceiver.Transciever
         :return: a new  IPTAG call object
@@ -30,14 +31,15 @@ class IPTagCalls(object):
         :return: fixed record count, transient record count, default timeout in\
                  a tuple
         :rtype: tuple
-        :raise: spinnman.spinnman_exceptions.SCPError
+        :raise spinnman.exceptions.SCPError: when something fails in the \
+                                             connection level
         """
 
         # build up the request according to the following formula:
         #   arg1 = 0 : command : 0 :    0
         #   arg2 = 0 :    0    : 0 : timeout
         #   arg3 = 0 :    0    : 0 :    0
-        msg = SCPMessage()
+        msg = _SCPMessage()
         msg.cmd_rc = scamp_constants.CMD_IPTAG
         msg.arg1 = scamp_constants.IPTAG_TTO << 16
         msg.arg2 = 255                  # must be 16 or greater to be ignored
@@ -71,12 +73,14 @@ class IPTagCalls(object):
                 timeout = 10ms * 2^(tto - 1)\
         \
             Hence timeout values passed into this function will be decomposed\
-            into ``tto`` in the above equation.\
+            into ``tto`` in the above equation.
+            
         :param timeout: timeout in *seconds*
         :return: None
         :rtype: None
         :type timeout: float
-        :raise: SCPError
+        :raise spinnman.exceptions.SCPError: when something fails at the \
+                                             connection level
 
         """
 
@@ -89,7 +93,7 @@ class IPTagCalls(object):
         #   arg1 = 0 : command : 0 :    0
         #   arg2 = 0 :    0    : 0 : timeout
         #   arg3 = 0 :    0    : 0 :    0
-        msg = SCPMessage()
+        msg = _SCPMessage()
         msg.cmd_rc = scamp_constants.CMD_IPTAG
         msg.arg1 = scamp_constants.IPTAG_TTO << 16
         msg.arg2 = tto
@@ -103,14 +107,15 @@ class IPTagCalls(object):
         :type index: int
         :return: IP tag data in a :py:class:`IPTag`
         :rtype: spinnman.interfaces.iptag.IPTag object
-        :raise: spinnman.spinnman_exceptions.SCPError
+        :raise: spinnman.exceptions.SCPError: something fails at the connection\
+                                              level
         """
 
         # build up the request as follows:
         #   arg1 = 0 : command : 0 :  tag
         #   arg2 = 0 :    0    : 0 : count
         #   arg3 = 0 :    0    : 0 :   0
-        msg = SCPMessage()
+        msg = _SCPMessage()
         msg.cmd_rc = scamp_constants.CMD_IPTAG
         msg.arg1 = scamp_constants.IPTAG_GET << 16 | index
         msg.arg2 = 1
@@ -143,7 +148,8 @@ class IPTagCalls(object):
         :type port: int
         :return: record index in the IP-tag table
         :rtype: int
-        :raise: spinnman.spinnman_exceptions.SCPError
+        :raise spinnman.exceptions.SCPError: something fails at the connection \
+                                             level
         """
 
         # clamp the port and timeout to their appropriate ranges
@@ -162,7 +168,7 @@ class IPTagCalls(object):
         for n, seg in enumerate(segs):
             ip |= (int(seg) << (8*n))
 
-        msg = SCPMessage(cmd_rc=scamp_constants.CMD_IPTAG)
+        msg = _SCPMessage(cmd_rc=scamp_constants.CMD_IPTAG)
         msg.arg1 = scamp_constants.IPTAG_SET << 16 | (index & 0xFF)
 
         # the rest of the arguments follow the order:
@@ -181,14 +187,15 @@ class IPTagCalls(object):
         :type index: int
         :return: None
         :rtype: None
-        :raise: spinnman.spinnman_exceptions.SCPError
+        :raise spinnman.exceptions.SCPError: Something fails at the connection\
+                                             level
         """
 
         # build up the request as follows:
         #   arg1 = 0 : command : 0 : tag
         #   arg2 = 0 :    0    : 0 :  0
         #   arg3 = 0 :    0    : 0 :  0
-        msg = SCPMessage()
+        msg = _SCPMessage()
         msg.cmd_rc = scamp_constants.CMD_IPTAG
         msg.arg1 = (scamp_constants.IPTAG_CLR << 16) | index
 
@@ -200,7 +207,8 @@ class IPTagCalls(object):
 
         :return: list of :py:class:`Struct`\ s containing IP-tag information
         :rtype: list
-        :raise: spinnman.spinnman_exceptions.SCPError
+        :raise spinnman.exceptions.SCPError: Something fails at the connection\
+                                             level
         """
 
         iptags = []

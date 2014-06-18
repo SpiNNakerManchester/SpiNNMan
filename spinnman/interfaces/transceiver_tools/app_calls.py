@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class AppCalls(object):
+class _AppCalls(object):
     """application specific commands are stored here for clarity"""
 
     def __init__(self, transceiver):
@@ -19,8 +19,8 @@ class AppCalls(object):
             :param transceiver: the parent object which contains other calls
             :type transceiver: spinnman.interfaces.transceiver.Transciever
             :return: a new AppCalls object
-            :rtype: spinnman.interfaces.transceiver_tools.app_calls.AppCalls
-            :raise: None: does not raise any known exceptions
+            :rtype: spinnman.interfaces.transceiver_tools.app_calls._AppCalls
+            :raise None: does not raise any known exceptions
         """
         self._signal_states = {0: 'init', 1: 'pwrdn', 2: 'stop', 3: 'start',
                               4: 'sync0', 5: 'sync1', 6: 'pause', 7: 'cont',
@@ -34,23 +34,6 @@ class AppCalls(object):
                          'sync0': 0, 'sync1': 0, 'pause': 0, 'cont': 0,
                          'exit': 2, 'timer': 0, 'usr0': 0, 'usr1': 0,
                          'usr2': 0, 'usr3': 0, 'or': 1, 'and': 1, 'count': 1}
-
-    def set_view(self, new_x, new_y, new_cpu, new_node):
-        """ updates the chip and processor that is currently under focus
-
-            :param new_x: the new x value of the chip to move focus to
-            :param new_y: the new y value of the chip to move focus to
-            :param new_cpu: the new p value of the chip to move focus to
-            :param new_node: the new x|y|p value to move focus to
-            :type new_x: int
-            :type new_y: int
-            :type new_cpu:int
-            :type new_node:int
-            :return: None
-            :rtype: None
-            :raise: None: does not raise any known exceptions
-        """
-        pass
 
     def app_load(self, filename, region, cores, app_id, flags=None):
         '''loads a .aplx file onto a collection of cores based off the region\
@@ -71,13 +54,15 @@ class AppCalls(object):
            :type flags: int or None
            :return: None
            :rtype: None
-           :raise:spinnman.spinnman_exceptions.SpinnManException
+           :raise spinnman.exceptions.SCPError: whens an error occurs \
+                                                  at the connection level
         '''
         pass
 
     def app_signal(self, app_id, signal_id, state_id=None, x=None,y=None,
                    range=None):
-        """
+        """sends a signal to the board 
+        
         :param app_id: the application id that idtnefities which applciation\
                        this signal targets on the machien
         :param signal_id: the type of signal being transmitted to the machine
@@ -95,8 +80,11 @@ class AppCalls(object):
         :type range: str
         :return: None
         :rtype: None
-        :raise:spinnman.spinnman_exceptions.SpinnManException, \
-               spinnman.spinnman_exceptions.InvalidSignal, \
-               spinnman.spinnman_exceptions.InvalidState
+        :raise spinnman.exceptions.SCPError: whens an error occurs at\
+                                                      the connection level
+        :raise spinnman.exceptions.InvalidSignalException: when the signal sent\
+                                           is not a valid signal id
+        :raise spinnman.exceptions.InvalidStateException: when the state sent \
+                                          is not a valid state id
         """
         pass

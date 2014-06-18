@@ -1,5 +1,5 @@
 __author__ = 'stokesa6'
-from spinnman import spinnman_exceptions as exceptions
+"""constants file for all scamp based message codes etc"""
 #
 # DESCRIPTION
 # Defines the various constants that are used by SC&MP 1.02.
@@ -194,34 +194,3 @@ BOOT_MAX_BLOCKS = 32
 BOOT_CMD_START = 1
 BOOT_CMD_BLOCK = 3
 BOOT_CMD_DONE = 5
-
-
-# functions
-def rc_to_string(rc):
-    """Returns the string equivalent of ``rc`` along with a very brief \
-    description of what probably caused the error.
-
-    :param rc: response code
-    :type rc: int
-    :returns: tuple of (string equivalent, description)
-    :raises: KeyError
-    """
-
-    if rc not in rc_map.keys():
-        raise exceptions.InvalidResponseCodeException("do not recognise the "
-                                                      "response code")
-    return rc_map[rc]
-
-
-def cmd_to_string(cc):
-    """Returns the string equivalent of the given command code.
-
-    :param int cc: command code
-    :returns: string name of ``cc``
-    :raises: KeyError
-    """
-
-    if cc not in cc_map.keys():
-        raise exceptions.InvalidCommandCodeException("do not recognise the "
-                                                     "command code")
-    return cc_map[cc]

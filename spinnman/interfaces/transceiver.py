@@ -8,7 +8,10 @@ from spinnman.scp.scp_connection import _SCPConnection
 class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
     """main transciever object, inherrits from multiple transciever tools to
        reduce the size of the transciever.
+       :inherited-members:
     """
+
+    __all__ = ['_AppCalls', '_IPTagCalls', '_MemoryCalls', '_PacketCalls']
 
     def __init__(self, hostname, port=17893):
         """ constructor for a transciever object
@@ -17,8 +20,8 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
         :param port: the port to which to listen for this machine
         :type hostname: str
         :type port: int
-        :return a new transceiver object
-        :rtype: spinnman.interfaces.transceiver.Transciever
+        :return: a new transceiver object
+        :rtype: spinnman.interfaces.transceiver.Transceiver
         :raise None: does not raise any known exceptions
         """
 
@@ -42,9 +45,10 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
                                     for a core
         :type load_data_interface: diriritive of spinnman.interfaces.\
                                    load_interfaces.abstract_load_data_interface
-        :return None
+        :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError
+        :raise spinnman.exceptions.SCPError: when there is error with the\
+                                             connection
         """
         pass
 
@@ -56,9 +60,10 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
                                     for a core
         :type load_data_interface: diriritive of spinnman.interfaces.\
                                    load_interfaces.abstract_load_data_interface
-        :return None
+        :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError
+        :raise spinnman.exceptions.SCPError: when there is error with the\
+                                             connection
         """
         pass
 
@@ -71,9 +76,10 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
         :type load_executable_interface: diriritive of spinnman.interfaces.\
                                          load_interfaces.\
                                          abstract_load_executables_interface
-        :return None
+        :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError
+        :raise spinnman.exceptions.SCPError: when there is error with the\
+                                             connection
         """
         pass
 
@@ -86,7 +92,7 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
         :param app_id: the unique identifier for this application
         :type total_processors: int
         :type app_id: int
-        :return true or false given if all cores are in sync 0
+        :return: true or false given if all cores are in sync 0
         :rtype: boolean
         :raise None: does not raise any known exceptions
         """
@@ -98,9 +104,10 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
 
         :param app_id: the unique identifier for this application
         :type app_id: int
-        :return None
+        :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError
+        :raise spinnman.exceptions.SCPError: when there is error with the\
+                                             connection
         """
         pass
 
@@ -113,8 +120,10 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
         :param app_id: the unique identifier for this application
         :type total_processors: int
         :type app_id: int
-        :return true or false given if all cores are in sync 0
+        :return: true or false given if all cores are in sync 0
         :rtype: boolean
-        :raise spinnman.exceptions.InvalidStateException
+        :raise spinnman.exceptions.InvalidStateException: when some cores have\
+                                                          resulted in crashed \
+                                                          states (RTE, WDOG etc)
         """
         pass

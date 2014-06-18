@@ -1,6 +1,6 @@
 __author__ = 'stokesa6'
 
-from spinnman.scp.spinnaker_tools_tools import scamp_constants
+from spinnman.scp.spinnaker_tools_tools.scamp_constants import rc_map, cc_map
 
 
 class SpinnmanException(Exception):
@@ -111,9 +111,39 @@ class SCPError (RuntimeError):
         :raise None: does not raise any known exceptions
         """
         # get a nice custom error message
-        super(SCPError, self).__init__("command failed with error %s: '%s'"
-                                       % scamp_constants.rc_to_string(rc))
+        super(SCPError, self).__init__("command failed with error {%s}: {%s}"
+                                       .format(SCPError.rc_to_string(rc), rc))
         # save the response code
         self.rc = rc
-        self.rc_text = scamp_constants.rc_to_string(rc)
+        self.rc_text = self.rc_to_string(rc)
         self.message = msg
+
+    @staticmethod
+    def rc_to_string(rc):
+        """Returns the string equivalent of ``rc`` along with a very brief \
+        description of what probably caused the error.
+
+        :param rc: response code
+        :type rc: int
+        :returns: tuple of (string equivalent, description)
+        :raises: KeyError
+        """
+
+        if rc not in rc_map.keys():
+            raise InvalidResponseCodeException("do not recognise the "
+                                               "response code")
+        return rc_map[rc]
+
+    @staticmethod
+    def cmd_to_string(cc):
+        """Returns the string equivalent of the given command code.
+
+        :param int cc: command code
+        :returns: string name of ``cc``
+        :raises: KeyError
+        """
+
+        if cc not in cc_map.keys():
+            raise InvalidCommandCodeException("do not recognise the "
+                                              "command code")
+        return cc_map[cc]

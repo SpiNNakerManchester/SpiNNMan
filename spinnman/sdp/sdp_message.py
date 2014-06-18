@@ -99,7 +99,6 @@ class _SDPMessage(object):
         :return: header encoded as a string
         :rtype: str
         :raise None: does not raise any known exceptions
-
         """
         # generate source and destination addresses
         src_proc = ((self.src_port & 7) << 5) | (self.src_cpu & 31)
@@ -165,7 +164,9 @@ class _SDPMessage(object):
         :type packed: str
         :return: None
         :rtype: None
-        :raise: spinnman.exceptions.StructInterpertationException
+        :raise spinnman.exceptions.StructInterpertationException: when the \
+                                        struct module cannot unpack the packed\
+                                        data
         """
         try:
             # unpack the header and the payload
@@ -188,7 +189,9 @@ class _SDPMessage(object):
         :type sdp_fields: dict
         :return: None
         :rtype: None
-        :raise: Spinnman.exceptions.unrecogonisedAttributeException
+        :raise Spinnman.exceptions.unrecogonisedAttributeException: when an \
+                                  parameter in sdp_fields is not a recogonised \
+                                  parameter of a sdp_message
         """
         k, v = None
         try:

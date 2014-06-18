@@ -18,10 +18,10 @@ __author__ = 'stokesa6'
 #   Electronics and Electrical Engingeering Group,
 #   School of Electronics and Computer Science (ECS)
 #
-from spinnman.sdp.sdp_connection import SDPConnection
-from spinnman.scp.scp_message import SCPMessage
+from spinnman.sdp.sdp_connection import _SDPConnection
+from spinnman.scp.scp_message import _SCPMessage
 from spinnaker_tools_tools import scamp_constants
-from spinnman import spinnman_exceptions
+from spinnman import exceptions
 from spinnaker_tools_tools.version_info import VersionInfo
 import socket
 import logging
@@ -29,7 +29,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class SCPConnection (SDPConnection):
+class _SCPConnection(_SDPConnection):
     """
     Builds on an :py:class:`SDPConnection` to support the SpiNNaker Command\
     Protocol (SCP) which can interact with SC&MP and SARK.\
@@ -75,7 +75,7 @@ class SCPConnection (SDPConnection):
         :rtype:spinnman.scp.scp_connection.SCPConnection
         :raise:  None: does not raise any known exceptions
         """
-        super(SCPConnection, self).__init__(host, port)
+        super(_SCPConnection, self).__init__(host, port)
 
         # intialise SCP members
         self._x = 0
@@ -248,7 +248,7 @@ class SCPConnection (SDPConnection):
         (self._x, self._y, self._cpu) = new_coords
         self._node = ((self._x & 0xFF) << 8) | (self._y & 0xFF)
 
-    def receive(self, msg_type=SCPMessage):
+    def receive(self, msg_type=_SCPMessage):
         """Override from :py:class:`SDPConnection` to convert the socket data\
            into an :py:class:`SCPMessage` object (or whichever is required).
 
@@ -258,7 +258,7 @@ class SCPConnection (SDPConnection):
         :rtype: msg_type
         :raise: socket.error, socket.timeout, struct.error
         """
-        return super(SCPConnection, self).receive(msg_type)
+        return super(_SCPConnection, self).receive(msg_type)
 
     def send_scp_msg(self, msg, retries=10):
         """ Dispatches the given packet and expects a response from the target\
@@ -269,10 +269,10 @@ class SCPConnection (SDPConnection):
         :param msg: command packet to send to remote host
         :param retries: the number of times to try to transmit the message
                         before failing
-        :type msg: SCPMessage
+        :type msg: _SCPMessage
         :type retries: int
         :return: :py:class:`SCPMessage` returned from the remote host
-        :raise: spinnman.spinnman_exceptions.SCPError
+        :raise: spinnman.exceptions.SCPError
         """
 
         # update the message before sending
@@ -307,12 +307,12 @@ class SCPConnection (SDPConnection):
                 logger.debug("Warning - timeout waiting for response")
                 retries -= 1
         if not sent_message:
-            raise spinnman_exceptions.SCPError(0, "Failed to receive response "
-                                                  "after sending message")
+            raise exceptions.SCPError(0, "Failed to receive response "
+                                         "after sending message")
 
         # deal with errors by making it someone else's problem!
         if resp.cmd_rc != scamp_constants.RC_OK:
-            raise spinnman_exceptions.SCPError(resp.cmd_rc, resp)
+            raise exceptions.SCPError(resp.cmd_rc, resp)
         else:
             return resp
 
@@ -324,9 +324,9 @@ class SCPConnection (SDPConnection):
         :type retries: int
         :return: version of OS in a class
         :rtype: spinnman.spinnaker_tools_tools.version_info.VersionInfo object
-        :raise: spinnman.spinnman_exceptions.SCPError
+        :raise: spinnman.exceptions.SCPError
         """
-        cmd_msg = SCPMessage(cmd_rc=scamp_constants.CMD_VER)
+        cmd_msg = _SCPMessage(cmd_rc=scamp_constants.CMD_VER)
         ver_msg = self.send_scp_msg(cmd_msg, retries=retries)
         # decode the payload into a usable struct
         return VersionInfo(ver_msg)
@@ -353,10 +353,10 @@ class SCPConnection (SDPConnection):
         :type cy: int
         :return: None
         :rtype: None
-        :raise: spinnman.spinnman_exceptions.SCPError
+        :raise: spinnman.exceptions.SCPError
         """
 
-        msg = SCPMessage(cmd_rc=scamp_constants.CMD_P2PC)
+        msg = _SCPMessage(cmd_rc=scamp_constants.CMD_P2PC)
 
         # generate a new sequence number
         seq = self.next_seq_num()
@@ -393,7 +393,7 @@ class SCPConnection (SDPConnection):
         """
 
         # LED control signals exist only in the lowest byte of arg1
-        msg = SCPMessage()
+        msg = _SCPMessage()
         msg.cmd_rc = scamp_constants.CMD_LED
         msg.arg1 = (led4 << 6) | (led3 << 4) | (led2 << 2) | led1
         self.send_scp_msg(msg)

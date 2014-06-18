@@ -34,7 +34,8 @@ class TranscieverUtilities(object):
            :type command_string: str
            :return: None
            :rtype: None
-           :raise: Spinnman.exceptions.ybug_exception
+           :raise spinnman.exceptions.SpinnmanException: when something failed \
+                             when executing the ybug command
         """
         logger.warn("USING YBUG DIRECTLY IS NOT RECOMMENDED. PLEASE USE THE "
                     "TRANSCIEVER INTERFACE INSTEAD")
@@ -55,9 +56,11 @@ class TranscieverUtilities(object):
            :type region: str
            :type chip_x: int
            :type chip_y: int
-           :return a region in a format recogonised by the sark
+           :return: a region in a format recogonised by the sark
            :rtype: int
-           :raise: Spinnman.exceptions.SpinnmanException
+           :raise spinnman.exceptions.SpinnmanException: when no region is \
+                           defined or no chip coords were defined, or the \
+                           region was malformed in size or out of bounds
         """
         # if no region defined, return 0
         if region is None:
@@ -124,9 +127,11 @@ class TranscieverUtilities(object):
         :param app_range: the rnage from the app_id to which to parse
         :type app_id: int
         :type app_range: int
-        :return merged app_id range
+        :return: merged app_id range
         :rtype: int
-        :raise: Spinnman.exceptions.SpinnmanException
+        :raise spinnman.exceptions.SpinnmanException: when the range is not a \
+                                 valid entry (<1 or range % app_id == 0 or \
+                                  above 255)
         """
         if app_range is None:
             return 255
@@ -151,9 +156,9 @@ class TranscieverUtilities(object):
         :type mask: str
         :type min_core_id: int
         :type max_core_id: int
-        :return a parsed core
+        :return: a parsed core
         :rtype: int
-        :raise: Spinnman.exceptions.SpinnmanException
+        :raise spinnman.exceptions.SpinnmanException: when no mask is supplied
         """
         if mask is None:
             raise exceptions.SpinnmanException("no mask was supplied "
@@ -190,7 +195,7 @@ class TranscieverUtilities(object):
         :type cores: str
         :return: parsed cores
         :rtype: str
-        :raise Spinnman.exceptions.SpinnmanException
+        :raise spinnman.exceptions.SpinnmanException: when no mask is supplied
         """
         return self.parse_bits(cores, 1, 17)
 
@@ -203,9 +208,11 @@ class TranscieverUtilities(object):
                            loaded on a chip
         :type file_name: str
         :type max_length: int
-        :return string array containing the contents of the file
+        :return: string array containing the contents of the file
         :rtype: str array
-        :raise: Spinnman.exceptions.SpinnmanException
+        :raise spinnman.exceptions.SpinnmanException: when the file to be \
+                         is too big to be written to a core or when the file is \
+                         unreadable
         """
         statinfo = os.stat(file_name)
         if statinfo.st_size >= max_length:
@@ -217,7 +224,8 @@ class TranscieverUtilities(object):
             opened_file.close()
             return buf
         except IOError:
-            print "failed to read the file at {}".format(file_name)
+            raise exceptions.SpinnmanException("failed to read the file at {}"
+                                               .format(file_name))
 
     @staticmethod
     def calculate_region_id(x, y):
@@ -227,7 +235,7 @@ class TranscieverUtilities(object):
         :param y: id of a chip in y dimension
         :type x: int
         :type y: int
-        :return a region id in string format
+        :return: a region id in string format
         :rtype: str
         :raise: None: does not raise any known exceptions
         """
@@ -255,7 +263,7 @@ class TranscieverUtilities(object):
 
            :param targets: the targets which need to be organised
            :type targets: iterable object
-           :return a dict with the targets organised
+           :return: a dict with the targets organised
            :rtype: dict
            :raise: None: does not raise any known exceptions
         """
@@ -284,7 +292,7 @@ class TranscieverUtilities(object):
 
            :param test_file:  the file to locate
            :type test_file: str
-           :return the real file path
+           :return: the real file path
            :rtype: str
            :raise: None: does not raise any known exceptions
         """
