@@ -54,8 +54,8 @@ class _AppCalls(object):
            :type flags: int or None
            :return: None
            :rtype: None
-           :raise spinnman.exceptions.SCPError: whens an error occurs \
-                                                  at the connection level
+           :raise spinnman.exceptions.SpinnmanSCPError: \
+                        whens an error occurs at the connection level
         '''
         pass
 
@@ -80,11 +80,11 @@ class _AppCalls(object):
         :type range: str
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError: whens an error occurs at\
+        :raise spinnman.exceptions.SpinnmanSCPError: whens an error occurs at\
                                                       the connection level
-        :raise spinnman.exceptions.InvalidSignalException: when the signal sent\
-                                           is not a valid signal id
-        :raise spinnman.exceptions.InvalidStateException: when the state sent \
-                                          is not a valid state id
+        :raise spinnman.exceptions.SpinnmanInvalidSignalException:\
+                      when the signal sent is not a valid signal id
+        :raise spinnman.exceptions.SpinnmanInvalidStateException:\
+                      when the state sent is not a valid state id
         """
         pass

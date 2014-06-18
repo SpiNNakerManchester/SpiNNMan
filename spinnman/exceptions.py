@@ -10,7 +10,7 @@ class SpinnmanException(Exception):
     pass
 
 
-class InvalidResponseCodeException(SpinnmanException):
+class SpinnmanInvalidResponseCodeException(SpinnmanException):
     """thrown when a response code from the spinnaker board\
        is not recongised by spinnman
 
@@ -18,7 +18,7 @@ class InvalidResponseCodeException(SpinnmanException):
     pass
 
 
-class InvalidCommandCodeException(SpinnmanException):
+class SpinnmanInvalidCommandCodeException(SpinnmanException):
     """thrown when a command code is not recongised by spinnman\
 
     :raise None: does not raise any known exceptions
@@ -26,7 +26,7 @@ class InvalidCommandCodeException(SpinnmanException):
     pass
 
 
-class StructInterpertationException(SpinnmanException):
+class SpinnmanStructInterpertationException(SpinnmanException):
     """thrown when a struct unpack cannot recongise aspects of the string \
     inside SpinnMan
 
@@ -35,7 +35,7 @@ class StructInterpertationException(SpinnmanException):
     pass
 
 
-class UnrecogonisedAttributeException(SpinnmanException):
+class SpinnmanUnrecogonisedAttributeException(SpinnmanException):
     """thrown when a attribute is set that does not exist inside SpinnMan\
 
     :raise None: does not raise any known exceptions
@@ -43,7 +43,7 @@ class UnrecogonisedAttributeException(SpinnmanException):
     pass
 
 
-class UnrecogonisedHostNameException(SpinnmanException):
+class SpinnmanUnrecogonisedHostNameException(SpinnmanException):
     """thrown when trying to make a sdp or scp connection with a invalid\
        hostname
 
@@ -52,7 +52,7 @@ class UnrecogonisedHostNameException(SpinnmanException):
     pass
 
 
-class BootError (SpinnmanException):
+class SpinnmanBootException(SpinnmanException):
     """thrown when trying to boot a spiNNaker machine fails
 
     :raise None: does not raise any known exceptions
@@ -60,7 +60,7 @@ class BootError (SpinnmanException):
     pass
 
 
-class InvalidIPTagConfigurationException(SpinnmanException):
+class SpinnmanInvalidIPTagConfigurationException(SpinnmanException):
     """thrown when a IPTAG is unable to be created due to incorrect parameters
 
     :raise None: does not raise any known exceptions
@@ -68,7 +68,7 @@ class InvalidIPTagConfigurationException(SpinnmanException):
     pass
 
 
-class InvalidSignalException(SpinnmanException):
+class SpinnmanInvalidSignalException(SpinnmanException):
     """ thrown when a app signal is given which does not exist in the code base
 
     :raise None: does not raise any known exceptions
@@ -76,7 +76,7 @@ class InvalidSignalException(SpinnmanException):
     pass
 
 
-class InvalidStateException(SpinnmanException):
+class SpinnmanInvalidStateException(SpinnmanException):
     """ thrown when a app state is given which does not exist in the code base \
         or that a core has gone into a unexpected state
 
@@ -85,7 +85,7 @@ class InvalidStateException(SpinnmanException):
     pass
 
 
-class ExploreException(SpinnmanException):
+class SpinnmanExploreException(SpinnmanException):
     """ thrown when an attempt to explore the machine results in an error
 
     :raise None: does not raise any known exceptions
@@ -93,7 +93,7 @@ class ExploreException(SpinnmanException):
     pass
 
 
-class SCPError (RuntimeError):
+class SpinnmanSCPError (RuntimeError):
     """Error response from target SpiNNaker.
 
     :param int rc: response code from target SpiNNaker.
@@ -111,8 +111,10 @@ class SCPError (RuntimeError):
         :raise None: does not raise any known exceptions
         """
         # get a nice custom error message
-        super(SCPError, self).__init__("command failed with error {%s}: {%s}"
-                                       .format(SCPError.rc_to_string(rc), rc))
+        super(SpinnmanSCPError, self).__init__("command failed with error "
+                                               "{%s}: {%s}"
+                                               .format(SpinnmanSCPError.
+                                                       rc_to_string(rc), rc))
         # save the response code
         self.rc = rc
         self.rc_text = self.rc_to_string(rc)
@@ -130,8 +132,8 @@ class SCPError (RuntimeError):
         """
 
         if rc not in rc_map.keys():
-            raise InvalidResponseCodeException("do not recognise the "
-                                               "response code")
+            raise SpinnmanInvalidResponseCodeException("do not recognise the "
+                                                       "response code")
         return rc_map[rc]
 
     @staticmethod
@@ -144,6 +146,6 @@ class SCPError (RuntimeError):
         """
 
         if cc not in cc_map.keys():
-            raise InvalidCommandCodeException("do not recognise the "
-                                              "command code")
+            raise SpinnmanInvalidCommandCodeException("do not recognise the "
+                                                      "command code")
         return cc_map[cc]

@@ -44,7 +44,8 @@ class _MachineCalls(object):
         :return: xdims,ydims, list of chips with spec that were detected in \
                   the machine
         :rtype: tuple
-        :raise spinnman.exceptions.ExploreException: when an error occurs \
+        :raise spinnman.exceptions.SpinnmanExploreException: \
+                                                       when an error occurs \
                                                        during the exploration \
                                                        of the machine
 
@@ -65,7 +66,8 @@ class _MachineCalls(object):
         :return: list of chips with spec that were detected in \
                   the machine
         :rtype: iterable object of tuple
-        :raise spinnman.exceptions.ExploreException: when an error occurs \
+        :raise spinnman.exceptions.SpinnmanExploreException:\
+                                                       when an error occurs \
                                                        during the exploration \
                                                        of the machine
         """

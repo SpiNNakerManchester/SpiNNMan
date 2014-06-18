@@ -71,7 +71,7 @@ def _readstruct(section_name, struct_file):
                         sv['=base='] = int(equal_match.group(2), 0)
                     elif equal_match.group(1) != "name":
                         raise exceptions.\
-                            BootError("Unrecognised line in %s - "
+                            SpinnmanBootException("Unrecognised line in %s - "
                                       "unrecognised item %s from line: "
                                       "%s" % (struct_file,
                                               equal_match.group(1), line))
@@ -94,11 +94,11 @@ def _readstruct(section_name, struct_file):
                             sv[name] = [value, pack, offset, fmt, 1]
                     else:
                         raise exceptions.\
-                            BootError("Unrecognised line in %s - format does"
+                            SpinnmanBootException("Unrecognised line in %s - format does"
                                       " not match expected format: %s"
                                       % (struct_file, line))
     if not match_found:
-        raise exceptions.BootError("Missing section %s in %s"
+        raise exceptions.SpinnmanBootException("Missing section %s in %s"
                                             % (section_name, struct_file))
 
 
@@ -129,7 +129,7 @@ def _readconf(sv, config_file):
                         value = time.time()
                     sv[name][0] = int(value, 0)
             else:
-                raise exceptions.BootError("Unrecognised line in %s - "
+                raise exceptions.SpinnmanBootException("Unrecognised line in %s - "
                                                     "format does not match "
                                                     "expected format: %s"
                                                     % (config_file, line))
@@ -167,7 +167,7 @@ def _pack(sv, data, dataoffset, sizelimit):
                     pack = "16s"
                 else:
                     raise exceptions.\
-                        StructInterpertationException("Unrecognised pack format"
+                        SpinnmanStructInterpertationException("Unrecognised pack format"
                                                       " %s" % pack)
                 struct.pack_into(pack, data, dataoffset + offset, value)
 
@@ -236,7 +236,7 @@ def _rom_boot(the_hostname, data):
 
     # make sure the boot file is not larger than the TCRAM
     if block_count > scamp_constants.BOOT_MAX_BLOCKS:
-        raise exceptions.BootError("Boot file is too large "
+        raise exceptions.SpinnmanBootException("Boot file is too large "
                                             "and will not fit in DTCM.")
 
     # attempt to open a socket to the remote host
@@ -288,7 +288,7 @@ def boot(the_hostname, the_bootfile, config_file, struct_file):
         _pack(sv, buf, 384, 128)
 
     else:
-        raise exceptions.BootError("Unknown file extension of boot "
+        raise exceptions.SpinnmanBootException("Unknown file extension of boot "
                                             "file %s" % the_bootfile)
 
 

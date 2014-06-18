@@ -294,7 +294,7 @@ class _SCPConnection(_SDPConnection):
                     sent_message = True
                 else:
                     logger.debug("Warning - response was {}, retrying"
-                                 .format(scamp_constants.
+                                 .format(exceptions.SpinnmanSCPError.
                                          rc_to_string(resp.cmd_rc)))
                     if resp.cmd_rc == scamp_constants.RC_TIMEOUT:
                         self.no_timeout_retries += 1
@@ -307,12 +307,12 @@ class _SCPConnection(_SDPConnection):
                 logger.debug("Warning - timeout waiting for response")
                 retries -= 1
         if not sent_message:
-            raise exceptions.SCPError(0, "Failed to receive response "
+            raise exceptions.SpinnmanSCPError(0, "Failed to receive response "
                                          "after sending message")
 
         # deal with errors by making it someone else's problem!
         if resp.cmd_rc != scamp_constants.RC_OK:
-            raise exceptions.SCPError(resp.cmd_rc, resp)
+            raise exceptions.SpinnmanSCPError(resp.cmd_rc, resp)
         else:
             return resp
 

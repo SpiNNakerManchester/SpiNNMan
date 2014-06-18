@@ -13,9 +13,8 @@ class IPTag(object):
         :type kwargs: dict
         :return: a IPTag object
         :rtype: spinnman.interfaces.iptag.IPTag
-        :raise spinnman.exceptions.InvalidIPTagConfigurationException: when a \
-                                   element of kwargs is not a valid member of \
-                                   the iptag
+        :raise spinnman.exceptions.SpinnmanInvalidIPTagConfigurationException:\
+                 when a element of kwargs is not a valid member of  the iptag
         """
 
         members = ('ip', 'mac', 'port', 'timeout', 'flags',
@@ -28,7 +27,7 @@ class IPTag(object):
                 self.__dict__[member] = kwargs.setdefault(member, None)
         except Exception:
             raise exceptions.\
-                InvalidIPTagConfigurationException(" the member {} is not a "
+                SpinnmanInvalidIPTagConfigurationException(" the member {} is not a "
                                                    "recognised element of a "
                                                    "IPTAG".format(member))
 

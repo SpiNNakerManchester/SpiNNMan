@@ -47,8 +47,8 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
                                    load_interfaces.abstract_load_data_interface
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError: when there is error with the\
-                                             connection
+        :raise spinnman.exceptions.SpinnmanSCPError: when there is error with\
+                                                     the connection
         """
         pass
 
@@ -62,8 +62,8 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
                                    load_interfaces.abstract_load_data_interface
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError: when there is error with the\
-                                             connection
+        :raise spinnman.exceptions.SpinnmanSCPError: when there is error with \
+                                                     the connection
         """
         pass
 
@@ -78,8 +78,8 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
                                          abstract_load_executables_interface
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError: when there is error with the\
-                                             connection
+        :raise spinnman.exceptions.SpinnmanSCPError: when there is error with
+                                                     the connection
         """
         pass
 
@@ -106,8 +106,8 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
         :type app_id: int
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError: when there is error with the\
-                                             connection
+        :raise spinnman.exceptions.SpinnmanSCPError: when there is error with \
+                                                     the connection
         """
         pass
 
@@ -122,8 +122,8 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
         :type app_id: int
         :return: true or false given if all cores are in sync 0
         :rtype: boolean
-        :raise spinnman.exceptions.InvalidStateException: when some cores have\
-                                                          resulted in crashed \
-                                                          states (RTE, WDOG etc)
+        :raise spinnman.exceptions.SpinnmanInvalidStateException:\
+                    when some cores have resulted in crashed states \
+                    (RTE, WDOG etc)
         """
         pass

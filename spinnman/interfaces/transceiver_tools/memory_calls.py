@@ -15,7 +15,8 @@ class _MemoryCalls(object):
             :param transceiver: the parent object which contains other calls
             :type transceiver: spinnman.interfaces.transceiver.Transciever
             :return: a new memoryCalls object
-            :rtype: spinnman.interfaces.transceiver_tools.memory_calls._MemoryCalls
+            :rtype: spinnman.interfaces.transceiver_tools.memory_calls\
+                    ._MemoryCalls
             :raise: None: does not raise any known exceptions
         """
         self.transceiver = transceiver
@@ -40,8 +41,8 @@ class _MemoryCalls(object):
         :type chip_cpu: int
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError:  whens an error occurs at the \
-                                             connection level
+        :raise spinnman.exceptions.SpinnmanSCPError:\
+               whens an error occurs at the connection level
         """
 
     def gen_slice(self, seq, length):
@@ -96,8 +97,8 @@ class _MemoryCalls(object):
         :return: the current file position
         :rtype: int
         :raise IOError: when something goes wrong with reading a file
-        :raise spinnman.exceptions.SCPError: whens an error occurs at the \
-                                             connection level
+        :raise spinnman.exceptions.SpinnmanSCPError: \
+               whens an error occurs at the connection level
         """
         pass
 
@@ -121,8 +122,8 @@ class _MemoryCalls(object):
         :type chip_cpu: int
         :return: the data read
         :rtype: str
-        :raise spinnman.exceptions.SCPError: whens an error occurs at the \
-                                             connection level
+        :raise spinnman.exceptions.SpinnmanSCPError: \
+                      whens an error occurs at the connection level
         """
         pass
 
@@ -150,8 +151,8 @@ class _MemoryCalls(object):
         :return: None
         :rtype: None
         :raise IOError: something goes wrong with writing to a file
-        :raise spinnman.exceptions.SCPError:  whens an error occurs at the \
-                                              connection level
+        :raise spinnman.exceptions.SpinnmanSCPError:\
+                      whens an error occurs at the connection level
         """
         pass
 

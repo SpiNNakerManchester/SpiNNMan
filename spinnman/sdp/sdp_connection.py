@@ -66,7 +66,8 @@ class _SDPConnection(object):
         :type port: int
         :return: a new spinnman.sdp.sdp_connection.SDPConnection object
         :rtype: spinnman.sdp._sdp_connection.SDPConnection
-        :raise: spinnman.exceptions.InvalidHostNameException
+        :raise spinnman.exceptions.SpinnmanInvalidHostNameException: \
+                   when the hostname results in a unreachable machine
         """
         self._sock = None
 
@@ -162,7 +163,9 @@ class _SDPConnection(object):
         :type message: spinnman.sdp.sdp_message.SDPMessage
         :return None
         :rtype: None
-        :raise: socket.error, socket.timeout, struct.error
+        :raise socket.error: when something fails in the socket
+        :raise socket.timeout: when something fails in the socket
+        :raise struct.error: when something fails in the socket
         """
         raw_data = str(message)
         self._sock.send(raw_data)
@@ -175,7 +178,9 @@ class _SDPConnection(object):
         :type msg_type: a object pointer, default set to a SDPMessage
         :return: a message of a given message type
         :rtype: the input msg_type
-        :raise: socket.error, socket.timeout, struct.error
+        :raise socket.error: when something fails in the socket
+        :raise socket.timeout: when something fails in the socket
+        :raise struct.error: when something fails in the socket
         """
         raw_data, addr = self._sock.recvfrom(512)
         return msg_type(raw_data)
@@ -242,7 +247,7 @@ class _SDPConnection(object):
         :type timeout: float
         :return: None
         :rtype: None
-        :raise: socket.error
+        :raise socket.error: when something fails in the socket
         """
         # allow the iterator to run
         self._interrupt = False
@@ -256,7 +261,7 @@ class _SDPConnection(object):
 
         :return: None
         :rtype: None
-        :raise: socket.error
+        :raise socket.error: when something fails in the socket
         """
         if self._sock:
             self._sock.close()
@@ -271,23 +276,6 @@ class _SDPConnection(object):
         """
         self._interrupt = True
 
-    def _next(self):
-        """Private function that actually performs the iterator behaviour for \
-           :py:class:`_SDPConnectionIterator`.
-
-        :return: a message of a given type recieved from a given socket
-        :rtype: a msg_type or None
-        :raise: None: does not raise any known exceptions
-        """
-
-        if self._interrupt is True:
-            raise StopIteration
-
-        if self.has_message(self._iter_to):
-            return self.receive()
-        else:
-            return None
-
     def __iter__(self):
         """return an instance of an interator object for this class.
 
@@ -296,6 +284,26 @@ class _SDPConnection(object):
         :raise: None: does not raise any known exceptions
         """
         return _SDPConnectionIterator(self)
+
+    @property
+    def interrupt(self):
+        """returns the interrupt param used in the _SDPConnectionIterator
+
+        :return _interrupt
+        :rtype: ???
+        :raise None: does not raise any known exceptions
+        """
+        return self._interrupt
+
+    @property
+    def iter_to(self):
+        """returns the iter_to param used in the _SDPConnectionIterator
+
+        :return _iter_to
+        :rtype: ???
+        :raise None: does not raise any known exceptions
+        """
+        return self._iter_to
 
 
 # private classes (used by the __iter__ function in SDP_connection class)
@@ -325,4 +333,20 @@ class _SDPConnectionIterator (object):
         :rtype: None or a spinnman.sdp.sdp_message.SDPMessage
         :raise: None: does not raise any known exceptions
         """
-        return self._conn._next()
+        return self._next()
+
+    def _next(self):
+        """Private function that actually performs the iterator behaviour for \
+           :py:class:`_SDPConnectionIterator`.
+
+        :return: a message of a given type recieved from a given socket
+        :rtype: a msg_type or None
+        :raise: None: does not raise any known exceptions
+        """
+        if self._conn.interrupt is True:
+            raise StopIteration
+
+        if self._conn.has_message(self._conn.iter_to):
+            return self._conn.receive()
+        else:
+            return None

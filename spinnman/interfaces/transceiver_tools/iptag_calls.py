@@ -31,8 +31,8 @@ class _IPTagCalls(object):
         :return: fixed record count, transient record count, default timeout in\
                  a tuple
         :rtype: tuple
-        :raise spinnman.exceptions.SCPError: when something fails in the \
-                                             connection level
+        :raise spinnman.exceptions.SpinnmanSCPError:\
+                            when something fails in the connection level
         """
 
         # build up the request according to the following formula:
@@ -79,8 +79,8 @@ class _IPTagCalls(object):
         :return: None
         :rtype: None
         :type timeout: float
-        :raise spinnman.exceptions.SCPError: when something fails at the \
-                                             connection level
+        :raise spinnman.exceptions.SpinnmanSCPError: \
+                        when something fails at the connection level
 
         """
 
@@ -107,8 +107,8 @@ class _IPTagCalls(object):
         :type index: int
         :return: IP tag data in a :py:class:`IPTag`
         :rtype: spinnman.interfaces.iptag.IPTag object
-        :raise: spinnman.exceptions.SCPError: something fails at the connection\
-                                              level
+        :raise: spinnman.exceptions.SpinnmanSCPError: \
+                 something fails at the connection level
         """
 
         # build up the request as follows:
@@ -148,8 +148,8 @@ class _IPTagCalls(object):
         :type port: int
         :return: record index in the IP-tag table
         :rtype: int
-        :raise spinnman.exceptions.SCPError: something fails at the connection \
-                                             level
+        :raise spinnman.exceptions.SpinnmanSCPError: \
+                   something fails at the connection level
         """
 
         # clamp the port and timeout to their appropriate ranges
@@ -187,8 +187,8 @@ class _IPTagCalls(object):
         :type index: int
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError: Something fails at the connection\
-                                             level
+        :raise spinnman.exceptions.SpinnmanSCPError:\
+                    Something fails at the connection level
         """
 
         # build up the request as follows:
@@ -207,8 +207,8 @@ class _IPTagCalls(object):
 
         :return: list of :py:class:`Struct`\ s containing IP-tag information
         :rtype: list
-        :raise spinnman.exceptions.SCPError: Something fails at the connection\
-                                             level
+        :raise spinnman.exceptions.SpinnmanSCPError: \
+                Something fails at the connection level
         """
 
         iptags = []

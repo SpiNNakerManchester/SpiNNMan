@@ -16,7 +16,8 @@ class _PacketCalls(object):
            :param transceiver: the parent object which contains other calls
            :type transceiver: spinnman.interfaces.transceiver.Transciever
            :return: a new packetCalls object
-           :rtype: spinnman.interfaces.transceiver_tools.packet_calls._PacketCalls
+           :rtype: spinnman.interfaces.transceiver_tools.\
+                   packet_calls._PacketCalls
            :raise: None: does not raise any known exceptions
         """
 
@@ -41,8 +42,8 @@ class _PacketCalls(object):
            :type base: hex value
            :return: None
            :rtype: None
-           :raise spinnman.exceptions.SCPError: whens an error occurs at the \
-                                                connection level
+           :raise spinnman.exceptions.SpinnmanSCPError: \
+                    whens an error occurs at the connection level
         """
         pass
 
@@ -57,8 +58,8 @@ class _PacketCalls(object):
         :type sfr: int
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError: whens an error occurs at the \
-                                             connection level
+        :raise spinnman.exceptions.SpinnmanSCPError: \
+                        whens an error occurs at the connection level
         """
         pass
 
@@ -85,8 +86,8 @@ class _PacketCalls(object):
         :type payload: int
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.SCPError: whens an error occurs at the \
-                                             connection level
+        :raise spinnman.exceptions.SpinnmanSCPError:\
+                   whens an error occurs at the connection level
         """
         msg = _SCPMessage()
         msg.cmd_rc = command_code

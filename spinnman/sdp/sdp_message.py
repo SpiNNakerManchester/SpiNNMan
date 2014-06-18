@@ -164,19 +164,20 @@ class _SDPMessage(object):
         :type packed: str
         :return: None
         :rtype: None
-        :raise spinnman.exceptions.StructInterpertationException: when the \
-                                        struct module cannot unpack the packed\
-                                        data
+        :raise spinnman.exceptions.SpinnmanStructInterpertationException: \
+                            when the struct module cannot unpack the packed\
+                            data
         """
         try:
             # unpack the header and the payload
             hdr, payload = self._unpack_hdr(packed)
         except struct.error:
             raise exceptions.\
-                StructInterpertationException("could not interperate the data "
-                                              "contained within {} when "
-                                              "generating a sdp message"
-                                              .format(packed))
+                SpinnmanStructInterpertationException("could not interperate "
+                                                      "the data contained "
+                                                      "within {} when "
+                                                      "generating a sdp message"
+                                                      .format(packed))
         # merge the fields and store the payload
         self.from_dict(hdr)
         self.data = payload
@@ -189,9 +190,9 @@ class _SDPMessage(object):
         :type sdp_fields: dict
         :return: None
         :rtype: None
-        :raise Spinnman.exceptions.unrecogonisedAttributeException: when an \
-                                  parameter in sdp_fields is not a recogonised \
-                                  parameter of a sdp_message
+        :raise Spinnman.exceptions.SpinnmanunrecogonisedAttributeException: \
+                         when an parameter in sdp_fields is not a recogonised \
+                         parameter of a sdp_message
         """
         k, v = None
         try:
@@ -199,6 +200,7 @@ class _SDPMessage(object):
                 setattr(self, k, v)
         except AttributeError:
             raise exceptions.\
-                UnrecogonisedAttributeException("The attribute {} was not "
-                                                "recognised as a attribute of "
-                                                "a SDP message".format(k))
+                SpinnmanUnrecogonisedAttributeException("The attribute {} was"
+                                                        " not recognised as a "
+                                                        "attribute of a SDP "
+                                                        "message".format(k))
