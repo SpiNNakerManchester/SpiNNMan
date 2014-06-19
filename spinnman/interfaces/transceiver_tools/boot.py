@@ -1,3 +1,5 @@
+from spinnman.interfaces.transceiver_tools import scamp_constants
+
 __author__ = 'stokesa6'
 #
 # DESCRIPTION
@@ -23,7 +25,6 @@ import re
 import numpy
 import sys
 import getopt
-from spinnman.scp.spinnaker_tools_tools import scamp_constants
 from spinnman.scp.scp_connection import _SCPConnection
 from spinnman.scp.scp_message import _SCPMessage
 from spinnman import exceptions

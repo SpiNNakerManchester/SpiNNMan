@@ -1,6 +1,7 @@
+from spinnman.interfaces.transceiver_tools import scamp_constants
+
 __author__ = 'stokesa6'
 from spinnman.scp.scp_message import _SCPMessage
-from spinnman.scp.spinnaker_tools_tools import scamp_constants
 from spinnman.interfaces.iptag import IPTag
 import socket
 import struct

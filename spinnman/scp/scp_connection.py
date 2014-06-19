@@ -1,3 +1,5 @@
+from spinnman.interfaces.transceiver_tools import scamp_constants
+
 __author__ = 'stokesa6'
 #
 # DESCRIPTION
@@ -18,13 +20,14 @@ __author__ = 'stokesa6'
 #   Electronics and Electrical Engingeering Group,
 #   School of Electronics and Computer Science (ECS)
 #
-from spinnman.sdp.sdp_connection import _SDPConnection
-from spinnman.scp.scp_message import _SCPMessage
-from spinnaker_tools_tools import scamp_constants
-from spinnman import exceptions
-from spinnaker_tools_tools.version_info import VersionInfo
 import socket
 import logging
+
+from spinnman.sdp.sdp_connection import _SDPConnection
+from spinnman.scp.scp_message import _SCPMessage
+from spinnman import exceptions
+from spinnman.interfaces.version_info import VersionInfo
+
 
 logger = logging.getLogger(__name__)
 

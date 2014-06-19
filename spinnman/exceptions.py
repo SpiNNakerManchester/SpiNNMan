@@ -1,6 +1,6 @@
 __author__ = 'stokesa6'
 
-from spinnman.scp.spinnaker_tools_tools.scamp_constants import rc_map, cc_map
+from spinnman.interfaces.transceiver_tools.scamp_constants import rc_map, cc_map
 
 
 class SpinnmanException(Exception):
