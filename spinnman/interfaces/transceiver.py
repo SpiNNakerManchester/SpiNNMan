@@ -8,9 +8,7 @@ from spinnman.scp.scp_connection import _SCPConnection
 class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
     """main transciever object, inherrits from multiple transciever tools to
        reduce the size of the transciever.
-       :inherited-members:
     """
-
     __all__ = ['_AppCalls', '_IPTagCalls', '_MemoryCalls', '_PacketCalls']
 
     def __init__(self, hostname, port=17893):
