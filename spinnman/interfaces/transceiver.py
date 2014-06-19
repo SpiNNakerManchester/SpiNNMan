@@ -125,3 +125,18 @@ class Transceiver(_AppCalls, _IPTagCalls, _MemoryCalls, _PacketCalls, object):
                     (RTE, WDOG etc)
         """
         pass
+
+    def get_iobuf(self, processor_coords):
+        """ public method that allows the end user to read a collection of \
+            memory that was reserved for iobuf prints.
+
+        :param processor_coords: a tuple containing a processors x,y,p coords
+        :type processor_coords: tuple containing x,y,p
+        :return: a array of lines printed to iobuf
+        :rtype: an iterable object containing strings
+        :raise spinnman.exceptions.SpinnmanSCPError: when somethign fails at\
+                            the connection level, such as timeouts etc.
+
+
+        """
+        pass
