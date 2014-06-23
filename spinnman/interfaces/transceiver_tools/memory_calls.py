@@ -45,7 +45,7 @@ class _MemoryCalls(object):
                whens an error occurs at the connection level
         """
 
-    def gen_slice(self, seq, length):
+    def _gen_slice(self, seq, length):
         """Generator function to slice a container into smaller chunks.
 
         :param seq: a container to store chunks

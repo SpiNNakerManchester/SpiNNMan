@@ -51,7 +51,7 @@ class _MachineCalls(object):
 
         """
 
-    def _list_avilable_machine_spec(self, hostname, x, y):
+    def list_avilable_machine_spec(self, hostname, x, y):
         """explores the board and returns a list of tuples for each chip in the\
            machine
 

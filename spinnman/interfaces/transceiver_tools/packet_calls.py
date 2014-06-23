@@ -63,7 +63,7 @@ class _PacketCalls(object):
         """
         pass
 
-    def next_id(self):
+    def _next_id(self):
         """ returns the next id used for packet sending
 
         :return: new id

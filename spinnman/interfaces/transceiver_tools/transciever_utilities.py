@@ -8,7 +8,7 @@ from spinnman import exceptions
 logger = logging.getLogger(__name__)
 
 
-class TranscieverUtilities(object):
+class _TranscieverUtilities(object):
     """ class object that contains a collection of utility functions used by \
         the transciever during its execution
     """
