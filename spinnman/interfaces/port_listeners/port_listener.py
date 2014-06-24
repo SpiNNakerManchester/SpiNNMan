@@ -24,13 +24,13 @@ class PortListener(threading.Thread):
     """used to listen to a given port"""
 
     def __init__(self, machine_time_step, time_scale_factor):
-        """constructor for initlising a port listener
-
+        """
         :param machine_time_step: the machine time step (how quickly tics hapen)
         :param time_scale_factor: how much real time is each time tic slowed \
                                   down by
         :type machine_time_step: int
         :type time_scale_factor: int
+        
         :return a new PortListener object
         :rtype: spinnman.interfaces.port_listener.PortListener object
         :raise socket errors: when something fails in creating a socket
