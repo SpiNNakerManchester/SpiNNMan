@@ -2,3 +2,4 @@
 /.pydevproject
 /.idea
 /doc/build
+*.pyc
