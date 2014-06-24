@@ -2,6 +2,9 @@ spinnman.interfaces.iptag module
 ================================
 
 .. automodule:: spinnman.interfaces.iptag
-    :members:
-    :undoc-members:
-    :show-inheritance:
+
+.. currentmodule:: spinnman.interfaces.iptag
+
+.. autoclass:: IPTag
+
+

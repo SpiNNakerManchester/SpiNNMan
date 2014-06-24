@@ -17,10 +17,3 @@ Submodules
 
    spinnman.exceptions
 
-Module contents
----------------
-
-.. automodule:: spinnman
-    :members:
-    :undoc-members:
-    :show-inheritance:

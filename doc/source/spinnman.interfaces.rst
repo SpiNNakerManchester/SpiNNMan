@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     spinnman.interfaces.load_interfaces
+    spinnman.interfaces.port_listeners
     spinnman.interfaces.transceiver_tools
 
 Submodules
@@ -16,11 +17,5 @@ Submodules
 
    spinnman.interfaces.iptag
    spinnman.interfaces.transceiver
+   spinnman.interfaces.version_info
 
-Module contents
----------------
-
-.. automodule:: spinnman.interfaces
-    :members:
-    :undoc-members:
-    :show-inheritance:

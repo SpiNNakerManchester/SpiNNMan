@@ -1,4 +1,4 @@
-SpiNNMan
+spinnman
 ========
 
 .. toctree::
