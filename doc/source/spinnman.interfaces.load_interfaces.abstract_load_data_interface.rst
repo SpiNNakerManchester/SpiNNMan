@@ -10,9 +10,11 @@ spinnman.interfaces.load_interfaces.abstract_load_data_interface module
     .. rubric:: Methods
 
     .. autosummary::
-        ~AbstractLoadDataInterface.contains_cores
-        ~AbstractLoadDataInterface.get_data_for_core
-        ~AbstractLoadDataInterface.get_no_blocks
+        contains_cores
+        get_data_for_core
+        get_no_blocks
+
+    .. rubric:: Detailed Methods
 
     .. automethod:: contains_cores
     .. automethod:: get_data_for_core

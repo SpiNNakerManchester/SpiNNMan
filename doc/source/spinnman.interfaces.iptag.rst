@@ -7,4 +7,3 @@ spinnman.interfaces.iptag module
 
 .. autoclass:: IPTag
 
-

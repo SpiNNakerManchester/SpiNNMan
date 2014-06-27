@@ -21,6 +21,22 @@ spinnman.exceptions module
     SpinnmanUnrecogonisedAttributeException
     SpinnmanUnrecogonisedHostNameException
 
+.. rubric:: Classes
+
+.. autosummary::
+    SpinnmanBootException
+    SpinnmanException
+    SpinnmanExploreException
+    SpinnmanInvalidCommandCodeException
+    SpinnmanInvalidIPTagConfigurationException
+    SpinnmanInvalidResponseCodeException
+    SpinnmanInvalidSignalException
+    SpinnmanInvalidStateException
+    SpinnmanSCPError
+    SpinnmanStructInterpertationException
+    SpinnmanUnrecogonisedAttributeException
+    SpinnmanUnrecogonisedHostNameException
+
 .. autoexception:: SpinnmanBootException
 .. autoexception:: SpinnmanException
 .. autoexception:: SpinnmanExploreException

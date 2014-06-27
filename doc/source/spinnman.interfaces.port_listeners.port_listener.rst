@@ -10,12 +10,14 @@ spinnman.interfaces.port_listeners.port_listener module
     .. rubric:: Methods
 
     .. autosummary::
-        ~PortListener.add_page_listener
-        ~PortListener.run
-        ~PortListener.set_bufsize
-        ~PortListener.set_port
-        ~PortListener.set_timeout
-        ~PortListener.stop
+        add_page_listener
+        run
+        set_bufsize
+        set_port
+        set_timeout
+        stop
+
+    .. rubric:: Detailed Methods
 
     .. automethod:: add_page_listener
     .. automethod:: run

@@ -10,28 +10,30 @@ spinnman.interfaces.transceiver module
     .. rubric:: Methods
 
     .. autosummary::
-        ~Transceiver.check_synco
-        ~Transceiver.get_iobuf
-        ~Transceiver.has_exited
-        ~Transceiver.load_executables
-        ~Transceiver.load_targets
-        ~Transceiver.load_write_mem
-        ~Transceiver.run
-        ~Transceiver.app_load
-        ~Transceiver.app_signal
-        ~Transceiver.clear_iptag
-        ~Transceiver.get_all_iptags
-        ~Transceiver.get_iptag
-        ~Transceiver.get_iptag_table_info
-        ~Transceiver.set_iptag
-        ~Transceiver.set_transient_iptag_timeout
-        ~Transceiver.read_mem
-        ~Transceiver.read_mem_to_file
-        ~Transceiver.write_mem
-        ~Transceiver.write_mem_from_file
-        ~Transceiver.flood_fill
-        ~Transceiver.nnp
-        ~Transceiver.send_scp_msg
+        check_synco
+        get_iobuf
+        has_exited
+        load_executables
+        load_targets
+        load_write_mem
+        run
+        app_load
+        app_signal
+        clear_iptag
+        get_all_iptags
+        get_iptag
+        get_iptag_table_info
+        set_iptag
+        set_transient_iptag_timeout
+        read_mem
+        read_mem_to_file
+        write_mem
+        write_mem_from_file
+        flood_fill
+        nnp
+        send_scp_msg
+
+    .. rubric:: Detailed Methods
 
     .. automethod:: check_synco
     .. automethod:: get_iobuf

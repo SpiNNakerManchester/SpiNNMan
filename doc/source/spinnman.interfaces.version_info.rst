@@ -7,4 +7,3 @@ spinnman.interfaces.version_info module
 
 .. autoclass:: VersionInfo
 
-
