@@ -8,44 +8,18 @@ spinnman.exceptions module
 .. rubric:: Exceptions
 
 .. autosummary::
-    SpinnmanBootException
     SpinnmanException
-    SpinnmanExploreException
-    SpinnmanInvalidCommandCodeException
-    SpinnmanInvalidIPTagConfigurationException
-    SpinnmanInvalidResponseCodeException
-    SpinnmanInvalidSignalException
-    SpinnmanInvalidStateException
-    SpinnmanSCPError
-    SpinnmanStructInterpertationException
-    SpinnmanUnrecogonisedAttributeException
-    SpinnmanUnrecogonisedHostNameException
+    SpinnmanIOException
+    SpinnmanInvalidPacketException
+    SpinnmanInvalidParameterException
+    SpinnmanTimeoutException
+    SpinnmanUnexpectedResponseCodeException
+    SpinnmanUnsupportedOperationException
 
-.. rubric:: Classes
-
-.. autosummary::
-    SpinnmanBootException
-    SpinnmanException
-    SpinnmanExploreException
-    SpinnmanInvalidCommandCodeException
-    SpinnmanInvalidIPTagConfigurationException
-    SpinnmanInvalidResponseCodeException
-    SpinnmanInvalidSignalException
-    SpinnmanInvalidStateException
-    SpinnmanSCPError
-    SpinnmanStructInterpertationException
-    SpinnmanUnrecogonisedAttributeException
-    SpinnmanUnrecogonisedHostNameException
-
-.. autoexception:: SpinnmanBootException
 .. autoexception:: SpinnmanException
-.. autoexception:: SpinnmanExploreException
-.. autoexception:: SpinnmanInvalidCommandCodeException
-.. autoexception:: SpinnmanInvalidIPTagConfigurationException
-.. autoexception:: SpinnmanInvalidResponseCodeException
-.. autoexception:: SpinnmanInvalidSignalException
-.. autoexception:: SpinnmanInvalidStateException
-.. autoexception:: SpinnmanSCPError
-.. autoexception:: SpinnmanStructInterpertationException
-.. autoexception:: SpinnmanUnrecogonisedAttributeException
-.. autoexception:: SpinnmanUnrecogonisedHostNameException
+.. autoexception:: SpinnmanIOException
+.. autoexception:: SpinnmanInvalidPacketException
+.. autoexception:: SpinnmanInvalidParameterException
+.. autoexception:: SpinnmanTimeoutException
+.. autoexception:: SpinnmanUnexpectedResponseCodeException
+.. autoexception:: SpinnmanUnsupportedOperationException

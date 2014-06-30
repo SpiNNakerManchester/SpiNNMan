@@ -14,7 +14,7 @@ class AbstractExecutableDataItem(object):
             is to be loaded
         
         :return: The chips and cores
-        :rtype: spinnman.model.chips_and_cores.ChipsAndCores
+        :rtype: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
         :raise spinnman.exceptions.SpinnmanIOException: If there is a problem\
                     reading the data
         """

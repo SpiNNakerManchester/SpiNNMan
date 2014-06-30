@@ -13,7 +13,7 @@ class AbstractSpinnakerBootSender(AbstractConnection):
     def send_boot_message(self, boot_message):
         """ Sends a SpiNNaker boot message using this connection
         
-        :param boot: The message to be sent
+        :param boot_message: The message to be sent
         :type boot_message: spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage
         :return: Nothing is returned
         :rtype: None

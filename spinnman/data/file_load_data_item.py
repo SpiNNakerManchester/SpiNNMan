@@ -12,7 +12,7 @@ class FileLoadDataItem(AbstractLoadDataItem, FileExecutableDataItem):
         :param load_locations: An iterable of chips and cores\
                     indicating where the data is to be loaded
         :type load_locations: iterable of\
-                    spinnman.model.chips_and_cores.ChipsAndCores
+                    :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
         :param base_address: The base address at which to load the data
         :type base_address: int
         :raise spinnman.exceptions.SpinnmanIOException: If the file\
@@ -21,7 +21,7 @@ class FileLoadDataItem(AbstractLoadDataItem, FileExecutableDataItem):
         pass
     
     def get_base_address(self):
-        """ See :py:meth:`spinnman.abstract_load_data_item.AbstractLoadDataItem.get_base_address`
+        """ See :py:meth:`spinnman.data.abstract_load_data_item.AbstractLoadDataItem.get_base_address`
         """
         # TODO
         return 0

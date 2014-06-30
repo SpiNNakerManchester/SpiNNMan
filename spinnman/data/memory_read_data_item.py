@@ -9,7 +9,7 @@ class MemoryReadDataItem(AbstractReadDataItem):
         :param read_locations: An iterable of chips and cores\
                     indicating where the data is to be read from
         :type read_locations: iterable of\
-                    spinnman.model.chips_and_cores.ChipsAndCores
+                    :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
         :param base_address: The base address from which to read the data
         :type base_address: int
         :param length: The amount of data to read

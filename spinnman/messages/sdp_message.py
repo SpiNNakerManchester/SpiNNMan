@@ -1,28 +1,25 @@
 from enum import Enum
 
+class Flag(Enum):
+    """ Flag for the message
+    """
+    REPLY_NOT_EXPECTED = (0x07, "Indicates that a reply is not expected")
+    REPLY_EXPECTED = (0x87, "Indicates that a reply is expected")
+    
+    def __init__(self, value, doc=""):
+        self._value_ = value
+        self.__doc__ = doc
+
 class SDPMessage(object):
     """ Wraps up an SDP message.
     """
     
-    class Flag(Enum):
-        """ Flag for the message:
-            
-            ================== ===========================================
-            Flag               Description
-            ================== ===========================================
-            REPLY_NOT_EXPECTED Indicates that a reply is not expected
-            REPLY_EXCPECTED    Indicates that a reply is expected
-            ================== ===========================================
-        """
-        REPLY_NOT_EXPECTED = 0x07
-        REPLY_EXPECTED = 0x87
-
     def __init__(self, flags, tag, destination_port, destination_chip_x, 
             destination_chip_y, destination_cpu, source_port,
             source_chip_x, source_chip_y, source_cpu, data):
         """
         :param flags: Any flags for the packet
-        :type flags: Flag
+        :type flags: :py:class:`Flag`
         :param tag: The ip tag of the packet between 0 and 255
         :type tag: int
         :param destination_port: The destination port of the packet between 1\

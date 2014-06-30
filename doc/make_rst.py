@@ -90,7 +90,9 @@ def get_public_members(obj, typ, include_public=[]):
         except AttributeError:
             continue
         
-        if ((documenter.objtype == typ) and (get_file(attr) == get_file(obj)) 
+        attr_file = get_file(attr)
+        if ((documenter.objtype == typ) 
+                and ((attr_file == get_file(obj)) or (attr_file is None)) 
                 and ((name in include_public) or not name.startswith('_'))):
             items.append(name)
     return items
@@ -143,7 +145,7 @@ def format_directive(module, package=None):
     
     directive += get_summary(exceptions, "Exceptions", "", min_items=1)
     
-    directive += get_summary(exceptions, "Classes", "", min_items=1)
+    directive += get_summary(classes, "Classes", "", min_items=1)
             
     for function in functions:
         directive += '.. autofunction:: %s\n' % function
@@ -152,7 +154,8 @@ def format_directive(module, package=None):
         directive += '.. autoexception:: %s\n' % exception
     
     for cls in classes:
-        directive += '.. autoclass:: %s\n\n' % cls
+        directive += '.. autoclass:: %s\n' % cls
+        directive += '    :show-inheritance:\n\n'
         
         cls_name, cls_obj, cls_parent = import_by_name(makename(package, 
                 "%s.%s" % (module, cls)))

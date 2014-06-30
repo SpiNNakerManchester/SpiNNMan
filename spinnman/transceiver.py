@@ -5,8 +5,8 @@ class Transceiver(object):
     def __init__(self, connections):
         """
 
-        :param connections: A list of connections to the board
-        :type connections: A list of (spinnman.connections.abstract_connection.AbstractConnection)
+        :param connections: An iterable of connections to the board
+        :type connections: An iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: Does not raise any known exceptions
         """
         pass
@@ -17,12 +17,12 @@ class Transceiver(object):
             and the board, given an SCP sender and receiver
         
         :param scp_sender: A connection that can send SCP packets
-        :type scp_sender: spinnman.connections.abstract_scp_sender.AbstractSCPSender
+        :type scp_sender: :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :param scp_receiver: A connection that can receive SCP packets
-        :type scp_receiver: spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver
-        :return: A list of discovered connections, not including the given\
+        :type scp_receiver: :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
+        :return: An iterable of discovered connections, not including the given\
                     connections
-        :rtype: list of (spinnman.connections.abstract_connection.AbstractConnection)
+        :rtype: iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -45,7 +45,7 @@ class Transceiver(object):
         :param hostname: The hostname or IP address of the board
         :type hostname: str
         :return: The created transceiver
-        :rtype: spinnman.transceiver.Transceiver
+        :rtype: :py:class:`spinnman.transceiver.Transceiver`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -62,7 +62,7 @@ class Transceiver(object):
             the chips in the machine
         
         :return: The dimensions of the machine
-        :rtype: spinnman.model.machine_dimensions.MachineDimensions
+        :rtype: :py:class:`spinnman.model.machine_dimensions.MachineDimensions`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -79,7 +79,7 @@ class Transceiver(object):
             connected to each other.
             
         :return: An iterable of chip information
-        :rtype: iterable of spinnman.model.chip_info.ChipInfo
+        :rtype: iterable of :py:class:`spinnman.model.chip_info.ChipInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -99,7 +99,7 @@ class Transceiver(object):
             protocol has been developed.
         
         :return: An iterable of links
-        :rtype: An iterable of spinnman.model.link_info.LinkInfo
+        :rtype: An iterable of :py:class:`spinnman.model.link_info.LinkInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -117,7 +117,7 @@ class Transceiver(object):
         :param connection: The connection which is to be tested.  If none,\
                     all connections will be tested, and the board will be\
                     considered to be connected if any one connection works.
-        :type connection: spinnman.connections.abstract_connection.AbstractConnection
+        :type connection: :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :return: True if the board can be contacted, False otherwise
         :rtype: bool
         :raise None: No known exceptions are raised
@@ -132,7 +132,7 @@ class Transceiver(object):
         :param timeout: The timeout for each retry in seconds
         :type timeout: int
         :return: The version identifier
-        :rtype: spinnman.model.version_info.VersionInfo
+        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
@@ -161,10 +161,10 @@ class Transceiver(object):
                     the information.  If not specified, the information from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type chips and cores: spinnman.models.chips_and_cores.ChipsAndCores
+        :type chips_and_cores: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
         :return: An iterable of the cpu information for the selected cores, or\
                     all cores if chips_and_cores are not specified
-        :rtype: iterable of spinnman.model.cpu_info.CPUInfo
+        :rtype: iterable of :py:class:`spinnman.model.cpu_info.CPUInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -184,10 +184,10 @@ class Transceiver(object):
                     the buffers.  If not specified, the buffers from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type chips and cores: spinnman.models.chips_and_cores.ChipsAndCores
+        :type chips_and_cores: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
         :return: An iterable of the buffers, which may not be in the order\
                     of chips_and_cores
-        :rtype: iterable of spinnman.models.io_buffer.IOBuffer
+        :rtype: iterable of :py:class:`spinnman.model.io_buffer.IOBuffer`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -204,7 +204,7 @@ class Transceiver(object):
         """ Get a count of the number of cores which have a given status
         
         :param status: The status count to get
-        :type status: spinnman.model.cpu_info.CPUInfo.State
+        :type status: :py:class:`spinnman.model.cpu_info.State`
         :param app_id: The id of the application from which to get the count.\
                     If not specified, gets the count from all applications.
         :type app_id: int
@@ -229,7 +229,7 @@ class Transceiver(object):
         :param executable_data_items: An iterable of executable data items\
                      detailing what should be executed where
         :type executable_data_items: iterable of\
-                    spinnman.data.abstract_executable_data_item.AbstractExecutableDataItem
+                    :py:class:`spinnman.data.abstract_executable_data_item.AbstractExecutableDataItem`
         :param app_id: The id of the application with which to associate the\
                     executables
         :type app_id: int
@@ -254,7 +254,7 @@ class Transceiver(object):
         :param load_data_items: An iterable of load data items detailing\
                     what should be written where
         :type load_data_items: iterable of\
-                    spinnman.data.abstract_load_data_item.AbstractLoadDataItem
+                    :py:class:`spinnman.data.abstract_load_data_item.AbstractLoadDataItem`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -276,7 +276,7 @@ class Transceiver(object):
         :param read_data_items: An iterable of read data items detailing what\
                     should be read from where and where to write it
         :type read_data_items: iterable of\
-                    spinnman.data.abstract_read_data_item.AbstractReadDataItem
+                    :py:class:`spinnman.data.abstract_read_data_item.AbstractReadDataItem`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -297,7 +297,7 @@ class Transceiver(object):
         """ Send a signal to an application
         
         :param signal: The signal to send
-        :type signal: spinnman.messages.scp_message.SCPMessage.Signal
+        :type signal: :py:class:`spinnman.messages.scp_message.Signal`
         :param app_id: The id of the application to send to.  If not specified,\
                     the signal is sent to all applications
         :type app_id: int
@@ -320,12 +320,12 @@ class Transceiver(object):
         """ Set up an ip tag
         
         :param iptag: The iptag to set up
-        :type iptag: spinnman.model.iptag.IPTag
+        :type iptag: :py:class:`spinnman.model.iptag.IPTag`
         :param connection: Connection where the tag should be set up.  If not\
                     specified, all SCPSender connections will send the message\
                     to set up the tag
         :type connection:\
-                    spinnman.connections.abstract_scp_sender.AbstractSDPSender
+                    :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -350,7 +350,7 @@ class Transceiver(object):
                     specified, all SCPSender connections will send the message\
                     to clear the tag
         :type connection:\
-                    spinnman.connections.abstract_scp_sender.AbstractSDPSender
+                    :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -373,9 +373,9 @@ class Transceiver(object):
                     If not specified, all SCPSender connections will be queried\
                     and the response will be combined.
         :type connection:\
-                    spinnman.connections.abstract_scp_sender.AbstractSDPSender
+                    :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :return: An iterable of ip tags
-        :rtype: iterable of spinnman.model.iptag.IPTag
+        :rtype: iterable of :py:class:`spinnman.model.iptag.IPTag`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -397,7 +397,7 @@ class Transceiver(object):
         :type y: int
         :param route_data_item: An iterable of multicast routes to load
         :type route_data_item: iterable of\
-                    spinnman.model.multicast_route.MulticastRoute
+                    :py:class:`spinnman.model.multicast_route.MulticastRoute`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -420,7 +420,7 @@ class Transceiver(object):
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
         :return: An iterable of multicast routes
-        :rtype: iterable of spinnman.model.multicast_route.MulticastRoute
+        :rtype: iterable of :py:class:`spinnman.model.multicast_route.MulticastRoute`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -459,7 +459,7 @@ class Transceiver(object):
         :param y: The y-coordinate of the chip from which to get the information
         :type y: int
         :return: The router diagnostic information
-        :rtype: spinnman.model.router_diagnostics.RouterDiagnostics
+        :rtype: :py:class:`spinnman.model.router_diagnostics.RouterDiagnostics`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -482,12 +482,12 @@ class Transceiver(object):
         :type y: int
         :param multicast_message: A multicast message to send
         :type multicast_message:\
-                    spinnman.messages.multicast_message.MulticastMessage
+                    :py:class:`spinnman.messages.multicast_message.MulticastMessage`
         :param connection: A specific connection over which to send the\
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
         :type connection:\
-                    spinnman.connections.abstract_multicast_sender.AbstractMulticastSender
+                    :py:class:`spinnman.connections.abstract_multicast_sender.AbstractMulticastSender`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -517,9 +517,9 @@ class Transceiver(object):
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
         :type connection:\
-                    spinnman.connections.abstract_multicast_receiver.AbstractMulticastReceiver
+                    :py:class:`spinnman.connections.abstract_multicast_receiver.AbstractMulticastReceiver`
         :return: The received message
-        :rtype: spinnman.messages.multicast_message.MulticastMessage
+        :rtype: :py:class:`spinnman.messages.multicast_message.MulticastMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: 
@@ -539,12 +539,12 @@ class Transceiver(object):
         """ Sends an SDP message to the board
         
         :param sdp_message: The SDP message to send
-        :type sdp_message: spinnman.messages.sdp_message.SDPMessage
+        :type sdp_message: :py:class:`spinnman.messages.sdp_message.SDPMessage`
         :param connection: A specific connection over which to send the\
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
         :type connection:\
-                    spinnman.connections.abstract_sdp_sender.AbstractSDPSender
+                    :py:class:`spinnman.connections.abstract_sdp_sender.AbstractSDPSender`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -566,9 +566,9 @@ class Transceiver(object):
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
         :type connection:\
-                    spinnman.connections.abstract_sdp_receiver.AbstractSDPReceiver
+                    :py:class:`spinnman.connections.abstract_sdp_receiver.AbstractSDPReceiver`
         :return: The received message
-        :rtype: spinnman.messages.sdp_message.SDPMessage
+        :rtype: :py:class:`spinnman.messages.sdp_message.SDPMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
@@ -586,12 +586,12 @@ class Transceiver(object):
         """ Sends an SCP message to the board
         
         :param scp_message: The SDP message to send
-        :type scp_message: spinnman.messages.scp_message.SCPMessage
+        :type scp_message: :py:class:`spinnman.messages.scp_message.SCPMessage`
         :param connection: A specific connection over which to send the\
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
         :type connection:\
-                    spinnman.connections.abstract_scp_sender.AbstractSCPSender
+                    :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -613,9 +613,9 @@ class Transceiver(object):
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
         :type connection:\
-                    spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver
+                    :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
         :return: The received message
-        :rtype: spinnman.messages.scp_message.SCPMessage
+        :rtype: :py:class:`spinnman.messages.scp_message.SCPMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\

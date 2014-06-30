@@ -19,7 +19,7 @@ class AbstractMulticastReceiver(AbstractConnection):
                     connection is closed
         :type timeout: int
         :return: a multicast message
-        :rtype: spinnman.messages.multicast_message.MulticastMessage
+        :rtype: :py:class:`spinnman.messages.multicast_message.MulticastMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     receiving the message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\

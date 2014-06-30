@@ -6,9 +6,10 @@ Subpackages
 
 .. toctree::
 
-    spinnman.interfaces
-    spinnman.scp
-    spinnman.sdp
+    spinnman.connections
+    spinnman.data
+    spinnman.messages
+    spinnman.model
 
 Submodules
 ----------
@@ -16,4 +17,5 @@ Submodules
 .. toctree::
 
    spinnman.exceptions
+   spinnman.transceiver
 

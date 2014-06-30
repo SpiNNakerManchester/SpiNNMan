@@ -5,7 +5,7 @@ class VersionInfo(object):
     def __init__(self, scp_message):
         """
         :param scp_message: SCPMessage containing the information
-        :type scp_message: spinnman.scp.scp_message.SCPMessage
+        :type scp_message: :py:class:`spinnman.messages.scp_message.SCPMessage`
         :raise spinnman.exceptions.SCPInvalidParameterException: If the message\
                     does not contain valid version information
         """

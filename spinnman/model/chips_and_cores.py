@@ -7,6 +7,7 @@ class ChipsAndCores(object):
         """ 
         :param chips_and_cores: A list of dicts indicating which chips and\
                     cores to get the state of, each with the following keys:
+                    
                     * "x": The x-coordinate of a chip
                     * "y": The y-coordinate of a chip
                     * "cores": A list of cores on the chip
@@ -38,6 +39,7 @@ class ChipsAndCores(object):
         """ Gets a list of the chips and the cores on the chips
         
         :return: The list of chips as a dict, with the following keys:
+        
                     * "x": The x-coordinate of a chip
                     * "y": The y-coordinate of a chip
                     * "cores": A list of cores on the chip

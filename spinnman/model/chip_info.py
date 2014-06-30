@@ -12,7 +12,7 @@ class ChipInfo(object):
         :param cores: iterable of available core ids on the chip
         :type cores: iterable of int
         :param links: iterable of available links outgoing from the chip
-        :type links: iterable of spinnman.model.link_info.LinkInfo
+        :type links: iterable of :py:class:`spinnman.model.link_info.LinkInfo`
         :param sdram: The size of the shared sdram on the chip in bytes
         :type sdram: int
         :param ip_address: The ip address of the ethernet adapter of the chip\
@@ -75,5 +75,3 @@ class ChipInfo(object):
         :rtype: str
         """
         pass
-
-        """

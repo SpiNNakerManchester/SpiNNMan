@@ -19,7 +19,7 @@ class AbstractSpinnakerBootReceiver(AbstractConnection):
                     connection is closed
         :type timeout: int
         :return: a boot message
-        :rtype: spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage
+        :rtype: :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     receiving the message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\

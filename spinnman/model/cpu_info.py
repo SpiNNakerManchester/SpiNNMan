@@ -1,61 +1,66 @@
 from enum import Enum
 
+class State(Enum):
+    """ SARK CPU States
+    """
+    DEAD = 0
+    POWERED_DOWN = 1
+    RUN_TIME_EXCEPTION = 2
+    WATCHDOG = 3
+    INITIALISING = 4
+    READY = 5
+    C_MAIN = 6
+    RUNNING = 7
+    SYNC0 = 8
+    SYNC1 = 9
+    PAUSED = 10
+    FINSHED = 11
+    IDLE = 15
+    
+    def __init__(self, value, doc=""):
+        self._value_ = value
+        self.__doc__ = doc
+    
+class RunTimeError(Enum):
+    """ SARK Run time errors
+    """
+    NONE = 0
+    RESET = 1
+    UNDEF = 2
+    SVC = 3 
+    PABT = 4 
+    DABT = 5 
+    IRQ = 6
+    FIQ = 7 
+    VIC = 8 
+    ABORT = 9
+    MALLOC = 10
+    DIVBY0 = 11
+    EVENT = 12
+    SWERR = 13
+    IOBUF = 14
+    
+    def __init__(self, value, doc=""):
+        self._value_ = value
+        self.__doc__ = doc
+    
+class MailboxCommands(Enum):
+    """ Commands sent between an application and the monitor processor
+    """
+    
+    SHM_IDLE = (0, "The mailbox is idle")
+    SHM_MSG = (1, "The mailbox contains an SDP message")
+    SHM_NOP = (2, "The mailbox contains a non-operation")
+    SHM_SIGNAL = (3, "The mailbox contains a signal")
+    SHM_CMD = (4, "The mailbox contains a command")
+    
+    def __init__(self, value, doc=""):
+        self._value_ = value
+        self.__doc__ = doc
+
 class CPUInfo(object):
     """ Represents information about the state of a CPU
     """
-    
-    class State(Enum):
-        """ SARK CPU States
-        """
-        DEAD = 0
-        POWERED_DOWN = 1
-        RUN_TIME_EXCEPTION = 2
-        WATCHDOG = 3
-        INITIALISING = 4
-        READY = 5
-        C_MAIN = 6
-        RUNNING = 7
-        SYNC0 = 8
-        SYNC1 = 9
-        PAUSED = 10
-        FINSHED = 11
-        IDLE = 15
-        
-    class RunTimeError(Enum):
-        NONE = 0
-        RESET = 1
-        UNDEF = 2
-        SVC = 3 
-        PABT = 4 
-        DABT = 5 
-        IRQ = 6
-        FIQ = 7 
-        VIC = 8 
-        ABORT = 9
-        MALLOC = 10
-        DIVBY0 = 11
-        EVENT = 12
-        SWERR = 13
-        IOBUF = 14
-        
-    class MailboxCommands(Enum):
-        """ Commands sent between an application and the monitor processor
-        
-        ============ =====================================================
-        Command      Description
-        ============ =====================================================
-        SHM_IDLE     The mailbox is idle
-        SHM_MSG      The mailbox contains an SDP message
-        SHM_NOP      The mailbox contains a non-operation
-        SHM_SIGNAL   The mailbox contains a signal (see Signal)
-        SHM_CMD      The mailbox contains a command
-        ============ =====================================================
-        """
-        SHM_IDLE = 0       #!< Idle state of mailbox
-        SHM_MSG = 1        #!< Passing SDP message
-        SHM_NOP = 2        #!< Does nothing...
-        SHM_SIGNAL = 3     #!< Signal application
-        SHM_CMD = 4        #!< Command to MP
     
     def __init__(self, x, y, p, cpu_data):
         """

@@ -18,19 +18,19 @@ class FileExecutableDataItem(AbstractExecutableDataItem):
         """
         
     def get_chips_and_cores(self):
-        """ See :py:meth:`spinnman.abstract_executable_data_item.AbstractExecutableDataItem.get_chips`
+        """ See :py:meth:`spinnman.data.abstract_executable_data_item.AbstractExecutableDataItem.get_chips_and_cores`
         """
         # TODO
         return None
     
     def get_n_chunks(self, chunk_size):
-        """ See :py:meth:`spinnman.abstract_executable_data_item.AbstractExecutableDataItem.get_n_chunks`
+        """ See :py:meth:`spinnman.data.abstract_executable_data_item.AbstractExecutableDataItem.get_n_chunks`
         """
         # TODO
         return 0
     
     def get_chunks(self, chunk_size):
-        """ See :py:meth:`spinnman.abstract_executable_data_item.AbstractExecutableDataItem.get_chunks`
+        """ See :py:meth:`spinnman.data.abstract_executable_data_item.AbstractExecutableDataItem.get_chunks`
         """
         # TODO
         return None

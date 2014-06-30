@@ -12,7 +12,7 @@ class SCPListener(threading.Thread):
         :param callback: The callback function to call on reception of each\
                     packet; the function should take one parameter, which is\
                     the SCP packet received
-        :type callback: function(spinnman.messages.scp_message.SCPMessage)
+        :type callback: function(:py:class:`spinnman.messages.scp_message.SCPMessage`)
         :param error_callback: The callback function to call if there is an\
                     error receiving a packet; the function should take two\
                     parameters:

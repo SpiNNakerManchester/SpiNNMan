@@ -19,7 +19,7 @@ class AbstractSDPReceiver(AbstractConnection):
                     connection is closed
         :type timeout: int
         :return: The received SDP message
-        :rtype: spinnman.messages.sdp_message.SDPMessage
+        :rtype: :py:class:`spinnman.messages.sdp_message.SDPMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     receiving the message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\

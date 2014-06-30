@@ -13,7 +13,7 @@ class AbstractConnection(object):
         
         :return: True if the medium is connected, False otherwise
         :rtype: bool
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error/
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     when determining the connectivity of the medium
         """
         pass

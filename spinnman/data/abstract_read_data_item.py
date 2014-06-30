@@ -14,7 +14,7 @@ class AbstractReadDataItem(object):
             is to be loaded
         
         :return: The chips and cores
-        :rtype: spinnman.model.chips_and_cores.ChipsAndCores
+        :rtype: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
         :raise None: No known exceptions are raised
         """
         pass
@@ -50,7 +50,7 @@ class AbstractReadDataItem(object):
         :param p: The core on the chip
         :type p: int
         :return: A writer for the core
-        :rtype: spinnman.data.abstract_read_data_writer.AbstractReadDataWriter
+        :rtype: :py:class:`spinnman.data.abstract_read_data_writer.AbstractReadDataWriter`
         :raise: spinnman.execptions.SpinnmanIOException: If there is a problem\
                     obtaining the writer
         """

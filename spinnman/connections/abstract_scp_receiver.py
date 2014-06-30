@@ -19,7 +19,7 @@ class AbstractSCPReceiver(AbstractConnection):
                     connection is closed
         :type timeout: int
         :return: an SCP message
-        :rtype: spinnman.messages.sdp_message.SCPMessage
+        :rtype: :py:class:`spinnman.messages.scp_message.SCPMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     receiving the message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
