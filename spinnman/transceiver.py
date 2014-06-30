@@ -388,16 +388,16 @@ class Transceiver(object):
         """
         pass
     
-    def load_routes(self, x, y, route_data_item):
-        """ Load a set of routes on to the board
+    def load_multicast_routes(self, x, y, routes):
+        """ Load a set of multicast routes on to a chip
         
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
         :type y: int
-        :param route_data_item: The routes to load
-        :type route_data_item:\
-                    spinnman.data.abstract_route_data_item.AbstractRouteDataItem
+        :param route_data_item: An iterable of multicast routes to load
+        :type route_data_item: iterable of\
+                    spinnman.model.multicast_route.MulticastRoute
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -405,37 +405,69 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the routes are invalid
+                    * If any of the routes are invalid
                     * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
         pass
     
-    def get_routes(self, x, y):
-        """ Get the current routes set up on the board
+    def get_multicast_routes(self, x, y):
+        """ Get the current multicast routes set up on a chip
         
         :param x: The x-coordinate of the chip from which to get the routes
         :type x: int
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
-        :return: An iterable of routes
-        :rtype: iterable of spinnman.data.route.Route
+        :return: An iterable of multicast routes
+        :rtype: iterable of spinnman.model.multicast_route.MulticastRoute
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                    packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        pass
+    
+    def clear_multicast_routes(self, x, y):
+        """ Remove all the multicast routes on a chip
+        :param x: The x-coordinate of the chip on which to clear the routes
+        :type x: int
+        :param y: The y-coordinate of the chip on which to clear the routes
+        :type y: int
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                    packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
         """
         pass
     
     def get_router_diagnostics(self, x, y):
-        """ Get router diagnostic information
+        """ Get router diagnostic information from a chip
         
-        :param x: The x-coordinate of the chip from which to get the routes
+        :param x: The x-coordinate of the chip from which to get the information
         :type x: int
-        :param y: The y-coordinate of the chip from which to get the routes
+        :param y: The y-coordinate of the chip from which to get the information
         :type y: int
-        """
-        pass
-    
-    def clear_routes(self, x, y):
-        """
+        :return: The router diagnostic information
+        :rtype: spinnman.model.router_diagnostics.RouterDiagnostics
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                    packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
         """
         pass
     
@@ -449,49 +481,150 @@ class Transceiver(object):
                     arrive on the board
         :type y: int
         :param multicast_message: A multicast message to send
-        :type multicast_message: iterable of\
+        :type multicast_message:\
                     spinnman.messages.multicast_message.MulticastMessage
         :param connection: A specific connection over which to send the\
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
+        :type connection:\
+                    spinnman.connections.abstract_multicast_sender.AbstractMulticastSender
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: 
                     * If there is no connection that supports sending over\
-                      multicast
+                      multicast (or the given connection does not)
                     * If there is no connection that can make the packet\
                       arrive at the selected chip (ignoring routing tables)
         """
         pass
     
-    def receive_multicast(self, x, y, connection=None):
-        """
+    def receive_multicast(self, x, y, timeout=None, connection=None):
+        """ Receives a multicast message from the board
+        
+        :param x: The x-coordinate of the chip where the message should come\
+                    from on the board
+        :type x: int
+        :param y: The y-coordinate of the chip where the message should come\
+                    from on the board
+        :type y: int
+        :param timeout: Amount of time to wait for the message to arrive in\
+                    seconds before a timeout.  If not specified, will wait\
+                    indefinitely, or until the selected connection is closed
+        :type timeout: int
+        :param connection: A specific connection from which to receive the\
+                    message.  If not specified, an appropriate connection is\
+                    chosen automatically
+        :type connection:\
+                    spinnman.connections.abstract_multicast_receiver.AbstractMulticastReceiver
+        :return: The received message
+        :rtype: spinnman.messages.multicast_message.MulticastMessage
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: 
+                    * If there is no connection that supports reception over\
+                      multicast (or the given connection does not)
+                    * If there is no connection that can receive a packet\
+                      from the selected chip (ignoring routing tables)
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
+                    message received is not a valid multicast message
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If the timeout value is not valid
+                    * If the received packet has an invalid parameter
         """
         pass
     
     def send_sdp_message(self, sdp_message, connection=None):
-        """
+        """ Sends an SDP message to the board
+        
+        :param sdp_message: The SDP message to send
+        :type sdp_message: spinnman.messages.sdp_message.SDPMessage
+        :param connection: A specific connection over which to send the\
+                    message.  If not specified, an appropriate connection is\
+                    chosen automatically
+        :type connection:\
+                    spinnman.connections.abstract_sdp_sender.AbstractSDPSender
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
+                    there is no connection that supports sending SDP\
+                    messages (or the given connection does not)
         """
         pass
     
-    def receive_sdp_message(self, connection=None):
-        """
+    def receive_sdp_message(self, timeout=None, connection=None):
+        """ Receives an SDP message from the board
+        
+        :param timeout: Amount of time to wait for the message to arrive in\
+                    seconds before a timeout.  If not specified, will wait\
+                    indefinitely, or until the selected connection is closed
+        :type timeout: int
+        :param connection: A specific connection from which to receive the\
+                    message.  If not specified, an appropriate connection is\
+                    chosen automatically
+        :type connection:\
+                    spinnman.connections.abstract_sdp_receiver.AbstractSDPReceiver
+        :return: The received message
+        :rtype: spinnman.messages.sdp_message.SDPMessage
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
+                    there is no connection that supports reception of\
+                    SDP (or the given connection does not)
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
+                    message received is not a valid SDP message
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If the timeout value is not valid
+                    * If the received packet has an invalid parameter
         """
         pass
     
     def send_scp_message(self, scp_message, connection=None):
-        """
+        """ Sends an SCP message to the board
+        
+        :param scp_message: The SDP message to send
+        :type scp_message: spinnman.messages.scp_message.SCPMessage
+        :param connection: A specific connection over which to send the\
+                    message.  If not specified, an appropriate connection is\
+                    chosen automatically
+        :type connection:\
+                    spinnman.connections.abstract_scp_sender.AbstractSCPSender
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
+                    there is no connection that supports sending SCP\
+                    messages (or the given connection does not)
         """
         pass
     
-    def send_scp_message_and_get_response(self, scp_message, connection=None):
-        """
-        """
-        pass
-    
-    def receive_scp_message(self, connection=None):
-        """
+    def receive_scp_message(self, timeout=None, connection=None):
+        """ Receives an SCP message from the board
+        
+        :param timeout: Amount of time to wait for the message to arrive in\
+                    seconds before a timeout.  If not specified, will wait\
+                    indefinitely, or until the selected connection is closed
+        :type timeout: int
+        :param connection: A specific connection from which to receive the\
+                    message.  If not specified, an appropriate connection is\
+                    chosen automatically
+        :type connection:\
+                    spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver
+        :return: The received message
+        :rtype: spinnman.messages.scp_message.SCPMessage
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
+                    there is no connection that supports reception of\
+                    SCP (or the given connection does not)
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
+                    message received is not a valid SCP message
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If the timeout value is not valid
+                    * If the received packet has an invalid parameter
         """
         pass
