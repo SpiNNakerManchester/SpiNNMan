@@ -1,3 +1,5 @@
+DEFAULT_SDRAM_BYTES = 128 * 1024 * 1024
+
 class ChipInfo(object):
     """ Information about a chip
     """
