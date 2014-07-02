@@ -180,7 +180,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'data_allocationdoc'
+htmlhelp_basename = 'SpiNNMandoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -200,8 +200,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'data_allocation.tex', u'data\\_allocation Documentation',
-   u'Author', 'manual'),
+  ('index', 'SpiNNMan.tex', u'SpiNNMan Documentation',
+   u'', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -230,8 +230,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'data_allocation', u'data_allocation Documentation',
-     [u'Author'], 1)
+    ('index', 'SpiNNMan', u'SpiNNMan Documentation',
+     [u''], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -244,8 +244,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'data_allocation', u'data_allocation Documentation',
-   u'Author', 'data_allocation', 'One line description of project.',
+  ('index', 'SpiNNMan', u'SpiNNMan Documentation',
+   u'', 'SpiNNMan', '',
    'Miscellaneous'),
 ]
 
@@ -265,10 +265,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'data_allocation'
-epub_author = u'Author'
-epub_publisher = u'Author'
-epub_copyright = u'2014, Author'
+epub_title = u'SpiNNMan'
+epub_author = u''
+epub_publisher = u''
+epub_copyright = u'2014'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'data_allocation'

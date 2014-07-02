@@ -13,5 +13,6 @@ spinnman.model.multicast_route module
     .. autosummary::
         key
         mask
-        route
+        processor_ids
+		link_ids
 
