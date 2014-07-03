@@ -22,7 +22,7 @@ spinnman.transceiver module
         get_detected_external_peripheral_links
         get_iobuf
         get_ip_tags
-        get_machine_chip_details
+        get_machine_details
         get_machine_dimensions
         get_multicast_routes
         get_router_diagnostics
@@ -53,7 +53,7 @@ spinnman.transceiver module
     .. automethod:: get_detected_external_peripheral_links
     .. automethod:: get_iobuf
     .. automethod:: get_ip_tags
-    .. automethod:: get_machine_chip_details
+    .. automethod:: get_machine_details
     .. automethod:: get_machine_dimensions
     .. automethod:: get_multicast_routes
     .. automethod:: get_router_diagnostics

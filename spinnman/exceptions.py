@@ -71,7 +71,7 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         :param command: The command being executed
         :type command: str
         :param response: The response received in error
-        :type response str
+        :type response: str
         """
         pass
 

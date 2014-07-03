@@ -74,12 +74,12 @@ class Transceiver(object):
         """
         pass
     
-    def get_machine_chip_details(self):
-        """ Get the details of the chips on a board and how they are\
-            connected to each other.
+    def get_machine_details(self):
+        """ Get the details of the machine made up of chips on a board and how\
+            they are connected to each other.
             
-        :return: An iterable of chip information
-        :rtype: iterable of :py:class:`spinnman.model.chip_info.ChipInfo`
+        :return: A machine description
+        :rtype: :py:class:`spinn_machine.machine.Machine`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -99,7 +99,7 @@ class Transceiver(object):
             protocol has been developed.
         
         :return: An iterable of links
-        :rtype: An iterable of :py:class:`spinnman.model.link_info.LinkInfo`
+        :rtype: An iterable of :py:class:`spinn_machine.link.Link`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -397,7 +397,7 @@ class Transceiver(object):
         :type y: int
         :param route_data_item: An iterable of multicast routes to load
         :type route_data_item: iterable of\
-                    :py:class:`spinnman.model.multicast_route.MulticastRoute`
+                    :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -420,7 +420,7 @@ class Transceiver(object):
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
         :return: An iterable of multicast routes
-        :rtype: iterable of :py:class:`spinnman.model.multicast_route.MulticastRoute`
+        :rtype: iterable of :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
