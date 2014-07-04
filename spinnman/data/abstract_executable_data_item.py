@@ -9,12 +9,12 @@ class AbstractExecutableDataItem(object):
     """
     
     @abstractmethod
-    def get_chips_and_cores(self):
+    def get_core_subsets(self):
         """ Return the chips and the cores on the chips where the executable\
             is to be loaded
         
         :return: The chips and cores
-        :rtype: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
+        :rtype: :py:class:`spinnman.model.core_subsets.CoreSubsets`
         :raise spinnman.exceptions.SpinnmanIOException: If there is a problem\
                     reading the data
         """

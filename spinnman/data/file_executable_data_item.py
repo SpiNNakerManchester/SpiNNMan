@@ -12,7 +12,7 @@ class FileExecutableDataItem(AbstractExecutableDataItem):
         :param load_locations: An iterable of chips and cores\
                     indicating where the executable is to be loaded
         :type load_locations: iterable of\
-                    spinnman.model.chips_and_cores.ChipsAndCores
+                    spinnman.model.core_subsets.CoreSubsets
         :raise spinnman.exceptions.SpinnmanIOException: If the file is\
                     cannot be read
         """

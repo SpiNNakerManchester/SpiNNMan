@@ -166,16 +166,16 @@ class Transceiver(object):
         """
         pass
     
-    def get_cpu_information(self, chips_and_cores=None):
+    def get_cpu_information(self, core_subsets=None):
         """ Get information about the processors on the board
         
-        :param chips_and_cores: A set of chips and cores from which to get\
+        :param core_subsets: A set of chips and cores from which to get\
                     the information.  If not specified, the information from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type chips_and_cores: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
+        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
         :return: An iterable of the cpu information for the selected cores, or\
-                    all cores if chips_and_cores are not specified
+                    all cores if core_subsets is not specified
         :rtype: iterable of :py:class:`spinnman.model.cpu_info.CPUInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
@@ -189,16 +189,16 @@ class Transceiver(object):
         """
         pass
     
-    def get_iobuf(self, chips_and_cores=None):
+    def get_iobuf(self, core_subsets=None):
         """ Get the contents of the IOBUF buffer for a number of processors
         
-        :param chips_and_cores: A set of chips and cores from which to get\
+        :param core_subsets: A set of chips and cores from which to get\
                     the buffers.  If not specified, the buffers from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type chips_and_cores: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
+        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
         :return: An iterable of the buffers, which may not be in the order\
-                    of chips_and_cores
+                    of core_subsets
         :rtype: iterable of :py:class:`spinnman.model.io_buffer.IOBuffer`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
