@@ -1,3 +1,47 @@
+def discover_connections(cls, scp_sender, scp_receiver):
+    """ Get a list of connections that are discovered between this host\
+        and the board, given an SCP sender and receiver
+    
+    :param scp_sender: A connection that can send SCP packets
+    :type scp_sender: :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
+    :param scp_receiver: A connection that can receive SCP packets
+    :type scp_receiver: :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
+    :return: An iterable of discovered connections, not including the given\
+                connections
+    :rtype: iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+    :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                communicating with the board
+    :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                is received that is not in the valid format
+    :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                packet is received that has invalid parameters
+    :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                a response indicates an error during the exchange
+    """
+    pass
+
+def create_transceiver_from_hostname(cls, hostname):
+    """ Create a Transceiver by creating a UDPConnection to the given\
+        hostname on port 17893 (the default SCAMP port), discovering any\
+        additional links using this connection, and then returning the\
+        transceiver created with the conjunction of the created\
+        UDPConnection and the discovered connections
+    
+    :param hostname: The hostname or IP address of the board
+    :type hostname: str
+    :return: The created transceiver
+    :rtype: :py:class:`spinnman.transceiver.Transceiver`
+    :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                communicating with the board
+    :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                is received that is not in the valid format
+    :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                packet is received that has invalid parameters
+    :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                a response indicates an error during the exchange
+    """
+    pass
+
 class Transceiver(object):
     """ An encapsulation of various communications with the spinnaker board
     """ 
@@ -8,52 +52,6 @@ class Transceiver(object):
         :param connections: An iterable of connections to the board
         :type connections: An iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: Does not raise any known exceptions
-        """
-        pass
-    
-    @classmethod
-    def discover_connections(cls, scp_sender, scp_receiver):
-        """ Get a list of connections that are discovered between this host\
-            and the board, given an SCP sender and receiver
-        
-        :param scp_sender: A connection that can send SCP packets
-        :type scp_sender: :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
-        :param scp_receiver: A connection that can receive SCP packets
-        :type scp_receiver: :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
-        :return: An iterable of discovered connections, not including the given\
-                    connections
-        :rtype: iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-                    packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
-        """
-        pass
-    
-    @classmethod
-    def create_transceiver_from_hostname(cls, hostname):
-        """ Create a Transceiver by creating a UDPConnection to the given\
-            hostname on port 17893 (the default SCAMP port), discovering any\
-            additional links using this connection, and then returning the\
-            transceiver created with the conjunction of the created\
-            UDPConnection and the discovered connections
-        
-        :param hostname: The hostname or IP address of the board
-        :type hostname: str
-        :return: The created transceiver
-        :rtype: :py:class:`spinnman.transceiver.Transceiver`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-                    packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
         """
         pass
     
@@ -143,10 +141,13 @@ class Transceiver(object):
         """
         pass
     
-    def boot_board(self):
+    def boot_board(self, board_version):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
-            
+        
+        :param board_version: The version of the board e.g. 3 for a SpiNN-3\
+                    board or 5 for a SpiNN-5 board.
+        :type board_version: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -388,9 +389,11 @@ class Transceiver(object):
         """
         pass
     
-    def load_multicast_routes(self, x, y, routes):
+    def load_multicast_routes(self, app_id, x, y, routes):
         """ Load a set of multicast routes on to a chip
         
+        :param app_id: The id of the application to associate routes with
+        :type app_id: int
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
@@ -412,13 +415,18 @@ class Transceiver(object):
         """
         pass
     
-    def get_multicast_routes(self, x, y):
+    def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
         
         :param x: The x-coordinate of the chip from which to get the routes
         :type x: int
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
+        :param app_id: Optional application id of the routes.  If not specified\
+                    all the routes will be returned.  If specified, the routes\
+                    will be filtered so that only those for the given\
+                    application are returned.
+        :type app_id: int
         :return: An iterable of multicast routes
         :rtype: iterable of :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -432,12 +440,15 @@ class Transceiver(object):
         """
         pass
     
-    def clear_multicast_routes(self, x, y):
+    def clear_multicast_routes(self, x, y, app_id=None):
         """ Remove all the multicast routes on a chip
         :param x: The x-coordinate of the chip on which to clear the routes
         :type x: int
         :param y: The y-coordinate of the chip on which to clear the routes
         :type y: int
+        :param app_id: Optional application id of the routes.  If not specified\
+                    all the routes will be cleared.  If specified, only the\
+                    routes with the given application id will be removed.
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
