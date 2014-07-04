@@ -1,25 +1,3 @@
-def discover_connections(cls, scp_sender, scp_receiver):
-    """ Get a list of connections that are discovered between this host\
-        and the board, given an SCP sender and receiver
-    
-    :param scp_sender: A connection that can send SCP packets
-    :type scp_sender: :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
-    :param scp_receiver: A connection that can receive SCP packets
-    :type scp_receiver: :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
-    :return: An iterable of discovered connections, not including the given\
-                connections
-    :rtype: iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-    :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                communicating with the board
-    :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                is received that is not in the valid format
-    :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-                packet is received that has invalid parameters
-    :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                a response indicates an error during the exchange
-    """
-    pass
-
 def create_transceiver_from_hostname(cls, hostname):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), discovering any\
@@ -54,6 +32,39 @@ class Transceiver(object):
         :raise None: Does not raise any known exceptions
         """
         pass
+    
+    def discover_connections(self):
+        """ Find connections to the board and store these for future use.\
+            Note that connections can be empty, in which case another local\
+            discovery mechanism will be used.  Note that an exception will be\
+            thrown if no initial connections can be found to the board.
+        
+        :param scp_sender: A connection that can send SCP packets
+        :type scp_sender: :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
+        :param scp_receiver: A connection that can receive SCP packets
+        :type scp_receiver: :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
+        :return: An iterable of discovered connections, not including the\
+                    initially given connections in the constructor
+        :rtype: iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                    packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        pass
+    
+    def get_connections(self):
+        """ Get the currently known connections to the board, made up of those\
+            passed in to the transceiver and those that are discovered during\
+            calls to discover_connections.  No further discovery is done here.
+        
+        :return: An iterable of connections known to the transciever
+        :rtype: iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        """
     
     def get_machine_dimensions(self):
         """ Get the maximum chip x-coordinate and maximum chip y-coordinate of\
