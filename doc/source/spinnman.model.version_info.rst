@@ -11,5 +11,13 @@ spinnman.model.version_info module
     .. rubric:: Attributes
 
     .. autosummary::
-        version_information
+        build_date
+        hardware
+        hardware_version
+        name
+        p
+        version_number
+        version_string
+        x
+        y
 

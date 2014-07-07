@@ -1,28 +1,49 @@
+def create_transceiver_from_hostname(hostname):
+    """ Create a Transceiver by creating a UDPConnection to the given\
+        hostname on port 17893 (the default SCAMP port), discovering any\
+        additional links using this connection, and then returning the\
+        transceiver created with the conjunction of the created\
+        UDPConnection and the discovered connections
+    
+    :param hostname: The hostname or IP address of the board
+    :type hostname: str
+    :return: The created transceiver
+    :rtype: :py:class:`spinnman.transceiver.Transceiver`
+    :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                communicating with the board
+    :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                is received that is not in the valid format
+    :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                packet is received that has invalid parameters
+    :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                a response indicates an error during the exchange
+    """
+    pass
+
 class Transceiver(object):
-    """ An encapsulation of various communications with the spinnaker board
+    """ An encapsulation of various communications with the spinnaker board.\
+        Note that the methods of this class are designed to be thread-safe;\
+        thus you can make multiple calls to the same (or different) methods\
+        from multiple threads and expect each call to work as if it had been\
+        called sequentially, although the order of returns is not guaranteed.\
+        Note also that with multiple connections to the board, using multiple\
+        threads in this way may result in an increase in the overall speed of\
+        operation, since the multiple calls may be made separately over the\
+        set of given connections. 
     """ 
 
-    def __init__(self, connections):
+    def __init__(self, connections=None, discover=True):
         """
 
-        :param connections: An iterable of connections to the board
-        :type connections: An iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :raise None: Does not raise any known exceptions
-        """
-        pass
-    
-    @classmethod
-    def discover_connections(cls, scp_sender, scp_receiver):
-        """ Get a list of connections that are discovered between this host\
-            and the board, given an SCP sender and receiver
-        
-        :param scp_sender: A connection that can send SCP packets
-        :type scp_sender: :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
-        :param scp_receiver: A connection that can receive SCP packets
-        :type scp_receiver: :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
-        :return: An iterable of discovered connections, not including the given\
-                    connections
-        :rtype: iterable of :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :param connections: An iterable of connections to the board.  If not\
+                    specified, no communication will be possible until\
+                    connections are specified.
+        :type connections: iterable of\
+                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :param discover: Determines if discovery should take place.  If not\
+                    specified, an attempt will be made to discover connections\
+                    to the board.
+        :type discover: bool
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -34,18 +55,16 @@ class Transceiver(object):
         """
         pass
     
-    @classmethod
-    def create_transceiver_from_hostname(cls, hostname):
-        """ Create a Transceiver by creating a UDPConnection to the given\
-            hostname on port 17893 (the default SCAMP port), discovering any\
-            additional links using this connection, and then returning the\
-            transceiver created with the conjunction of the created\
-            UDPConnection and the discovered connections
+    def discover_connections(self):
+        """ Find connections to the board and store these for future use.\
+            Note that connections can be empty, in which case another local\
+            discovery mechanism will be used.  Note that an exception will be\
+            thrown if no initial connections can be found to the board.
         
-        :param hostname: The hostname or IP address of the board
-        :type hostname: str
-        :return: The created transceiver
-        :rtype: :py:class:`spinnman.transceiver.Transceiver`
+        :return: An iterable of discovered connections, not including the\
+                    initially given connections in the constructor
+        :rtype: iterable of\
+                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -56,6 +75,17 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         pass
+    
+    def get_connections(self):
+        """ Get the currently known connections to the board, made up of those\
+            passed in to the transceiver and those that are discovered during\
+            calls to discover_connections.  No further discovery is done here.
+        
+        :return: An iterable of connections known to the transciever
+        :rtype: iterable of\
+                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :raise None: No known exceptions are raised
+        """
     
     def get_machine_dimensions(self):
         """ Get the maximum chip x-coordinate and maximum chip y-coordinate of\
@@ -80,26 +110,6 @@ class Transceiver(object):
             
         :return: A machine description
         :rtype: :py:class:`spinn_machine.machine.Machine`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-                    packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
-        """
-    
-    def get_detected_external_peripheral_links(self):
-        """ Gets a list of links on which external peripherals are\
-            detected to be connected to.  Note that if the external peripheral\
-            does not communicate this information with the board, the\
-            peripheral will not be listed here.\
-            NOTE: This is EXPERIMENTAL and as such may change once a proper\
-            protocol has been developed.
-        
-        :return: An iterable of links
-        :rtype: An iterable of :py:class:`spinn_machine.link.Link`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -143,10 +153,13 @@ class Transceiver(object):
         """
         pass
     
-    def boot_board(self):
+    def boot_board(self, board_version):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
-            
+        
+        :param board_version: The version of the board e.g. 3 for a SpiNN-3\
+                    board or 5 for a SpiNN-5 board.
+        :type board_version: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -154,16 +167,16 @@ class Transceiver(object):
         """
         pass
     
-    def get_cpu_information(self, chips_and_cores=None):
+    def get_cpu_information(self, core_subsets=None):
         """ Get information about the processors on the board
         
-        :param chips_and_cores: A set of chips and cores from which to get\
+        :param core_subsets: A set of chips and cores from which to get\
                     the information.  If not specified, the information from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type chips_and_cores: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
+        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
         :return: An iterable of the cpu information for the selected cores, or\
-                    all cores if chips_and_cores are not specified
+                    all cores if core_subsets is not specified
         :rtype: iterable of :py:class:`spinnman.model.cpu_info.CPUInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
@@ -177,16 +190,16 @@ class Transceiver(object):
         """
         pass
     
-    def get_iobuf(self, chips_and_cores=None):
+    def get_iobuf(self, core_subsets=None):
         """ Get the contents of the IOBUF buffer for a number of processors
         
-        :param chips_and_cores: A set of chips and cores from which to get\
+        :param core_subsets: A set of chips and cores from which to get\
                     the buffers.  If not specified, the buffers from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type chips_and_cores: :py:class:`spinnman.model.chips_and_cores.ChipsAndCores`
+        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
         :return: An iterable of the buffers, which may not be in the order\
-                    of chips_and_cores
+                    of core_subsets
         :rtype: iterable of :py:class:`spinnman.model.io_buffer.IOBuffer`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
@@ -223,38 +236,90 @@ class Transceiver(object):
         """
         pass
     
-    def execute(self, executable_data_items, app_id):
-        """ Start a number of executables running on the board
+    def execute(self, x, y, p, executable, app_id):
+        """ Start an executable running on a single core
         
-        :param executable_data_items: An iterable of executable data items\
-                     detailing what should be executed where
-        :type executable_data_items: iterable of\
-                    :py:class:`spinnman.data.abstract_executable_data_item.AbstractExecutableDataItem`
+        :param x: The x-coordinate of the chip on which to run the executable
+        :type x: int
+        :param y: The y-coordinate of the chip on which to run the executable
+        :type y: int
+        :param p: The core on the chip on which to run the application
+        :type p: int
+        :param executable: The data that is to be executed.  Should be one of\
+                    the following:
+                    * An instance of AbstractDataReader
+                    * A bytearray
+        :type executable: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+                    or bytearray
         :param app_id: The id of the application with which to associate the\
-                    executables
+                    executable
         :type app_id: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
                     * If there is an error communicating with the board
-                    * If there is an error reading one of the executables
+                    * If there is an error reading the executable
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If one of the items targets an invalid chip or core
+                    * If x, y, p does not lead to a valid core
+                    * If app_id is an invalid application id
                     * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
         pass
     
-    def write_memory(self, load_data_items):
+    def execute_flood(self, core_subsets, executable, app_id):
+        """ Start an executable running on multiple places on the board.  This\
+            will be optimized based on the selected cores, but it may still\
+            require a number of communications with the board to execute.
+        
+        :param core_subsets: Which cores on which chips to start the executable
+        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :param executable: The data that is to be executed.  Should be one of\
+                    the following:
+                    * An instance of AbstractDataReader
+                    * A bytearray
+        :type executable: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+                    or bytearray
+        :param app_id: The id of the application with which to associate the\
+                    executable
+        :type app_id: int
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException:
+                    * If there is an error communicating with the board
+                    * If there is an error reading the executable
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If one of the specified cores is not valid
+                    * If app_id is an invalid application id
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        pass
+    
+    def write_memory(self, x, y, base_address, data):
         """ Write to the SDRAM on the board
         
-        :param load_data_items: An iterable of load data items detailing\
-                    what should be written where
-        :type load_data_items: iterable of\
-                    :py:class:`spinnman.data.abstract_load_data_item.AbstractLoadDataItem`
+        :param x: The x-coordinate of the chip where the memory is to be\
+                    written to
+        :type x: int
+        :param y: The y-coordinate of the chip where the memory is to be\
+                    written to
+        :type y: int
+        :param base_address: The address in SDRAM where the region of memory\
+                    is to be written
+        :type base_address: int
+        :param data: The data to write.  Should be one of the following:
+                    * An instance of AbstractDataReader
+                    * A bytearray
+                    * A single integer
+        :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+                    or bytearray or int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -263,30 +328,69 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If one of the items targets an invalid chip, core or\
-                      base address
+                    * If x, y does not lead to a valid chip
                     * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        
-    def read_memory(self, read_data_items):
-        """ Read some areas of SDRAM from the board
-        
-        :param read_data_items: An iterable of read data items detailing what\
-                    should be read from where and where to write it
-        :type read_data_items: iterable of\
-                    :py:class:`spinnman.data.abstract_read_data_item.AbstractReadDataItem`
+        pass
+    
+    def write_memory_flood(self, core_subsets, base_address, data):
+        """ Write to the SDRAM of a number of chips.  This will be optimized\
+            based on the selected cores, but it may still require a number\
+            of communications with the board.
+            
+        :param core_subsets: Which chips to write the data to (the cores are\
+                    ignored)
+        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :param base_address: The address in SDRAM where the region of memory\
+                    is to be written
+        :type base_address: int
+        :param data: The data that is to be written.  Should be one of\
+                    the following:
+                    * An instance of AbstractDataReader
+                    * A bytearray
+                    * A single integer
+        :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+                    or bytearray or int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
                     * If there is an error communicating with the board
-                    * If there is an error writing the data
+                    * If there is an error reading the executable
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If one of the items is to read from an invalid chip, core\
-                      or base address
+                    * If one of the specified chips is not valid
+                    * If app_id is an invalid application id
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        pass
+        
+    def read_memory(self, x, y, base_address, length):
+        """ Read some areas of SDRAM from the board
+        
+        :param x: The x-coordinate of the chip where the memory is to be\
+                    read from
+        :type x: int
+        :param y: The y-coordinate of the chip where the memory is to be\
+                    read from
+        :type y: int
+        :param base_address: The address in SDRAM where the region of memory\
+                    to be read starts
+        :type base_address: int
+        :param length: The length of the data to be read in bytes
+        :type length: int
+        :return: An iterable of chunks of data read in order
+        :rtype: iterable of bytearray
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If one of x, y, p, base_address or length is invalid
                     * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
@@ -388,9 +492,11 @@ class Transceiver(object):
         """
         pass
     
-    def load_multicast_routes(self, x, y, routes):
+    def load_multicast_routes(self, app_id, x, y, routes):
         """ Load a set of multicast routes on to a chip
         
+        :param app_id: The id of the application to associate routes with
+        :type app_id: int
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
@@ -412,13 +518,18 @@ class Transceiver(object):
         """
         pass
     
-    def get_multicast_routes(self, x, y):
+    def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
         
         :param x: The x-coordinate of the chip from which to get the routes
         :type x: int
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
+        :param app_id: Optional application id of the routes.  If not specified\
+                    all the routes will be returned.  If specified, the routes\
+                    will be filtered so that only those for the given\
+                    application are returned.
+        :type app_id: int
         :return: An iterable of multicast routes
         :rtype: iterable of :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -432,12 +543,15 @@ class Transceiver(object):
         """
         pass
     
-    def clear_multicast_routes(self, x, y):
+    def clear_multicast_routes(self, x, y, app_id=None):
         """ Remove all the multicast routes on a chip
         :param x: The x-coordinate of the chip on which to clear the routes
         :type x: int
         :param y: The y-coordinate of the chip on which to clear the routes
         :type y: int
+        :param app_id: Optional application id of the routes.  If not specified\
+                    all the routes will be cleared.  If specified, only the\
+                    routes with the given application id will be removed.
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\

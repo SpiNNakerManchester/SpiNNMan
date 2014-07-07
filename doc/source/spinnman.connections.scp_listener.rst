@@ -18,11 +18,13 @@ spinnman.connections.scp_listener module
     .. rubric:: Methods
 
     .. autosummary::
+        run
         start
         stop
 
     .. rubric:: Detailed Methods
 
+    .. automethod:: run
     .. automethod:: start
     .. automethod:: stop
 

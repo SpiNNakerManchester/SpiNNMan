@@ -5,6 +5,12 @@ spinnman.transceiver module
 
 .. currentmodule:: spinnman.transceiver
 
+.. rubric:: Functions
+
+.. autosummary::
+    create_transceiver_from_hostname
+
+.. autofunction:: create_transceiver_from_hostname
 .. autoclass:: Transceiver
     :show-inheritance:
 
@@ -14,12 +20,12 @@ spinnman.transceiver module
         boot_board
         clear_ip_tag
         clear_multicast_routes
-        create_transceiver_from_hostname
         discover_connections
         execute
+        execute_flood
+        get_connections
         get_core_status_count
         get_cpu_information
-        get_detected_external_peripheral_links
         get_iobuf
         get_ip_tags
         get_machine_details
@@ -39,18 +45,19 @@ spinnman.transceiver module
         send_signal
         set_ip_tag
         write_memory
+        write_memory_flood
 
     .. rubric:: Detailed Methods
 
     .. automethod:: boot_board
     .. automethod:: clear_ip_tag
     .. automethod:: clear_multicast_routes
-    .. automethod:: create_transceiver_from_hostname
     .. automethod:: discover_connections
     .. automethod:: execute
+    .. automethod:: execute_flood
+    .. automethod:: get_connections
     .. automethod:: get_core_status_count
     .. automethod:: get_cpu_information
-    .. automethod:: get_detected_external_peripheral_links
     .. automethod:: get_iobuf
     .. automethod:: get_ip_tags
     .. automethod:: get_machine_details
@@ -70,4 +77,5 @@ spinnman.transceiver module
     .. automethod:: send_signal
     .. automethod:: set_ip_tag
     .. automethod:: write_memory
+    .. automethod:: write_memory_flood
 

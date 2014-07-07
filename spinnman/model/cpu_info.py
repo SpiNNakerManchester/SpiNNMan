@@ -64,6 +64,12 @@ class CPUInfo(object):
     
     def __init__(self, x, y, p, cpu_data):
         """
+        :param x: The x-coordinate of a chip
+        :type x: int
+        :param y: The y-coordinate of a chip
+        :type y: int
+        :param p: The id of a core on the chip
+        :type p: int
         :param cpu_data: An array of bytes received from SDRAM on the board
         :type cpu_data: bytearray
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\

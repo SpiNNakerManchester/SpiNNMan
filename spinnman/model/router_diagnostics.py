@@ -167,3 +167,14 @@ class RouterDiagnostics(object):
         :rtype: array of int
         """
         pass
+    
+    @property
+    def registers(self):
+        """ The values in all of the registers.  Can be used to directly\
+            access the registers if they have been programmed to give\
+            different values
+        
+        :return: An array of 16 values
+        :rtype: array of int
+        """
+        pass

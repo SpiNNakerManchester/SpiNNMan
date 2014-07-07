@@ -25,6 +25,7 @@ spinnman.model.router_diagnostics module
         n_local_multicast_packets
         n_local_nearest_neighbour_packets
         n_local_peer_to_peer_packets
+        registers
         user_registers
         wait_1
         wait_2
