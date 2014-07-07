@@ -6,7 +6,8 @@ Submodules
 
 .. toctree::
 
-   spinnman.model.chips_and_cores
+   spinnman.model.core_subset
+   spinnman.model.core_subsets
    spinnman.model.cpu_info
    spinnman.model.io_buffer
    spinnman.model.iptag

@@ -12,6 +12,7 @@ spinnman.connections.udp_connection module
 
     .. autosummary::
         local_ip_address
+        local_port
 
     .. rubric:: Methods
 

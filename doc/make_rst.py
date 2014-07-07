@@ -76,8 +76,11 @@ def get_file(obj):
     if hasattr(obj, "__file__"):
         return obj.__file__
     if hasattr(obj, "__module__") and obj.__module__ is not None:
-        name, module, parent = import_by_name(obj.__module__)
-        return get_file(module)
+        try:
+            name, module, parent = import_by_name(obj.__module__)
+            return get_file(module)
+        except:
+            return None
     return None
 
 def get_public_members(obj, typ, include_public=[]):
