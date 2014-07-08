@@ -7,7 +7,7 @@ import sys  #for exit
 
 # create dgram udp socket
 
-"""
+
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 except socket.error:
@@ -33,4 +33,4 @@ while(1) :
 
     except socket.error, msg:
         print 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
-        sys.exit()"""
+        sys.exit()
