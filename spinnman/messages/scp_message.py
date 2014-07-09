@@ -152,13 +152,12 @@ class SCPMessage(SDPMessage):
         
         super(SCPMessage, self).__init__(flags, tag, destination_port, 
                 destination_chip_x, destination_chip_y, destination_cpu, 
-                source_port, source_chip_x, source_chip_y, source_cpu)
+                source_port, source_chip_x, source_chip_y, source_cpu, data)
         self._command = command
         self._sequence = sequence
         self._argument_1 = argument_1
         self._argument_2 = argument_2
         self._argument_3 = argument_3
-        self._data = data
     
     @property
     def command(self):
@@ -212,4 +211,4 @@ class SCPMessage(SDPMessage):
         :return: The data
         :rtype: bytearray
         """
-        return self._data
+        return super(SCPMessage, self).data()
