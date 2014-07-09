@@ -1,3 +1,18 @@
+from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinnman._utils import _get_int_from_little_endian_bytearray
+from spinnman._utils import _get_short_from_little_endian_bytearray
+
+def _get_int_from_bytearray(array, offset):
+    """ Wrapper function in case the endianness changes
+    """
+    return _get_int_from_little_endian_bytearray(array, offset)
+
+def _get_short_from_bytearray(array, offset):
+    """ Wrapper function in case the endianness changes
+    """
+    return _get_short_from_little_endian_bytearray(array, offset)
+
+
 class VersionInfo(object):
     """ Decodes SC&MP/SARK version information as returned by the SVER command
     """
@@ -10,7 +25,20 @@ class VersionInfo(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     message does not contain valid version information
         """
-        pass
+        if len(version_data) < 13:
+            raise SpinnmanInvalidParameterException(
+                    "len(version_data)", len(version_data), 
+                    "The length of the version data is too short")
+        
+        self._p = version_data[0]
+        self._y = version_data[2]
+        self._x = version_data[3]
+        self._version_number = (_get_short_from_bytearray(version_data, 4) 
+                / 100.0)
+        self._build_date = _get_int_from_bytearray(version_data, 6)
+        
+        self._version_string = version_data[12:-1].decode("ascii")
+        self._name, self._hardware = self._version_string.split("\\")
     
     @property
     def name(self):
@@ -19,7 +47,7 @@ class VersionInfo(object):
         :return: The name
         :rtype: str
         """
-        pass
+        return self._name
     
     @property
     def version_number(self):
@@ -28,7 +56,7 @@ class VersionInfo(object):
         :return: The version
         :rtype: float
         """
-        pass
+        return self._version_number
     
     @property
     def hardware(self):
@@ -37,7 +65,7 @@ class VersionInfo(object):
         :return: The hardware
         :rtype: str
         """
-        pass
+        return self._hardware
     
     @property
     def x(self):
@@ -46,7 +74,7 @@ class VersionInfo(object):
         :return: the x-coordinate
         :rtype: int
         """
-        pass
+        return self._x
     
     @property
     def y(self):
@@ -55,7 +83,7 @@ class VersionInfo(object):
         :return: The y-coordinate
         :rtype: int
         """
-        pass
+        return self._y
     
     @property
     def p(self):
@@ -64,7 +92,7 @@ class VersionInfo(object):
         :return: the processor id
         :rtype: int
         """
-        pass
+        return self._p
     
     @property
     def build_date(self):
@@ -73,16 +101,7 @@ class VersionInfo(object):
         :return: The number of seconds since 1st January 1970
         :rtype: long
         """
-        pass
-    
-    @property
-    def hardware_version(self):
-        """ The version of the hardware being run on
-        
-        :return: The version
-        :rtype: int
-        """
-        pass
+        return self._build_date
     
     @property
     def version_string(self):
@@ -91,4 +110,4 @@ class VersionInfo(object):
         :return: The version information
         :rtype: str
         """
-        pass
+        return self._version_string

@@ -1,89 +1,20 @@
-from enum import Enum
+from spinnman.model.cpu_state import CPUState
+from spinnman.model.run_time_error import RunTimeError
+from spinnman.model.mailbox_command import MailboxCommand
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from array import array
+from spinnman._utils import _get_int_from_big_endian_bytearray
+from spinnman._utils import _get_short_from_big_endian_bytearray
 
-class State(Enum):
-    """ SARK CPU States
-    """
-    DEAD = 0
-    POWERED_DOWN = 1
-    RUN_TIME_EXCEPTION = 2
-    WATCHDOG = 3
-    INITIALISING = 4
-    READY = 5
-    C_MAIN = 6
-    RUNNING = 7
-    SYNC0 = 8
-    SYNC1 = 9
-    PAUSED = 10
-    FINSHED = 11
-    IDLE = 15
-    
-    def __init__(self, value, doc=""):
-        self._value_ = value
-        self.__doc__ = doc
-    
-class RunTimeError(Enum):
-    """ SARK Run time errors
-    """
-    NONE = 0
-    RESET = 1
-    UNDEF = 2
-    SVC = 3 
-    PABT = 4 
-    DABT = 5 
-    IRQ = 6
-    FIQ = 7 
-    VIC = 8 
-    ABORT = 9
-    MALLOC = 10
-    DIVBY0 = 11
-    EVENT = 12
-    SWERR = 13
-    IOBUF = 14
-    
-    def __init__(self, value, doc=""):
-        self._value_ = value
-        self.__doc__ = doc
-    
-class MailboxCommands(Enum):
-    """ Commands sent between an application and the monitor processor
-    """
-    
-    SHM_IDLE = (0, "The mailbox is idle")
-    SHM_MSG = (1, "The mailbox contains an SDP message")
-    SHM_NOP = (2, "The mailbox contains a non-operation")
-    SHM_SIGNAL = (3, "The mailbox contains a signal")
-    SHM_CMD = (4, "The mailbox contains a command")
-    
-    def __init__(self, value, doc=""):
-        self._value_ = value
-        self.__doc__ = doc
-        
 def _get_int_from_bytearray(array, offset):
-    """ Get an int from a byte array, starting at the given offset
-    
-    :param array: The byte array to get the int from
-    :type array: bytearray
-    :param offset: The offset at which to start looking
-    :type offset: int
-    :return: The decoded integer
-    :rtype: int
+    """ Wrapper function in case the endianness changes
     """
-    return ((array[offset] << 24) | (array[offset + 1] << 16) |
-            (array[offset + 2] << 8) | array[offset + 3])
+    return _get_int_from_big_endian_bytearray(array, offset)
 
 def _get_short_from_bytearray(array, offset):
-    """ Get a short from a byte array, starting at the given offset
-    
-    :param array: The byte array to get the short from
-    :type array: bytearray
-    :param offset: The offset at which to start looking
-    :type offset: int
-    :return: The decoded short
-    :rtype: int
+    """ Wrapper function in case the endianness changes
     """
-    return (array[offset] << 8) | array[offset + 1]
+    return _get_short_from_big_endian_bytearray(array, offset)
+
 
 class CPUInfo(object):
     """ Represents information about the state of a CPU
@@ -116,15 +47,15 @@ class CPUInfo(object):
         self._processor_state_register = _get_int_from_bytearray(cpu_data, 32)
         self._stack_pointer = _get_int_from_bytearray(cpu_data, 36)
         self._link_register = _get_int_from_bytearray(cpu_data, 40)
-        self._run_time_error = RuntimeError(cpu_data[44])
-        self._state = State(cpu_data[46])
+        self._run_time_error = RunTimeError(cpu_data[44])
+        self._state = CPUState(cpu_data[46])
         self._application_id = cpu_data[47]
         self._application_mailbox_data_address =\
                     _get_int_from_bytearray(cpu_data, 48)
         self._monitor_mailbox_data_address =\
                     _get_int_from_bytearray(cpu_data, 52)
-        self._application_mailbox_command = cpu_data[56]
-        self._monitor_mailbox_command = cpu_data[57]
+        self._application_mailbox_command = MailboxCommand(cpu_data[56])
+        self._monitor_mailbox_command = MailboxCommand(cpu_data[57])
         self._software_error_count = _get_short_from_bytearray(cpu_data, 58)
         self._software_source_filename_address =\
                     _get_int_from_bytearray(cpu_data, 60)
@@ -168,7 +99,7 @@ class CPUInfo(object):
         """ The current state of the core
         
         :return: The state of the core
-        :rtype: State
+        :rtype: :py:class:`spinnman.model.cpu_state.CPUState`
         """
         return self._state
         
@@ -204,7 +135,7 @@ class CPUInfo(object):
         """ The reason for a run time error
         
         :return: The run time error
-        :rtype: RunTimeError
+        :rtype: :py:class:`spinnman.model.run_time_error.RunTimeError`
         """
         return self._run_time_error
     
@@ -214,7 +145,7 @@ class CPUInfo(object):
             processor to the application
         
         :return: The command
-        :rtype: MailboxCommand
+        :rtype: :py:class:`spinnman.model.mailbox_command.MailboxCommand`
         """
         return self._application_mailbox_command
     
@@ -233,7 +164,7 @@ class CPUInfo(object):
             application to the monitor processor
             
         :return: The command
-        :rtype: MailboxCommand
+        :rtype: :py:class:`spinnman.model.mailbox_command.MailboxCommand`
         """
         return self._monitor_mailbox_command
     

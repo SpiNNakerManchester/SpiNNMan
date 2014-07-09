@@ -1,15 +1,5 @@
-from enum import Enum
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
-class Flag(Enum):
-    """ Flag for the message
-    """
-    REPLY_NOT_EXPECTED = (0x07, "Indicates that a reply is not expected")
-    REPLY_EXPECTED = (0x87, "Indicates that a reply is expected")
-    
-    def __init__(self, value, doc=""):
-        self._value_ = value
-        self.__doc__ = doc
 
 class SDPMessage(object):
     """ Wraps up an SDP message.
@@ -20,7 +10,7 @@ class SDPMessage(object):
             source_chip_x, source_chip_y, source_cpu, data):
         """
         :param flags: Any flags for the packet
-        :type flags: :py:class:`Flag`
+        :type flags: :py:class:`spinnman.messages.sdp_flag.SDPFlag`
         :param tag: The ip tag of the packet between 0 and 255
         :type tag: int
         :param destination_port: The destination port of the packet between 0\
@@ -103,7 +93,7 @@ class SDPMessage(object):
         """ The flags of the packet
         
         :return: The flags of the packet
-        :rtype: Flag
+        :rtype: :py:class:`spinnman.messages.sdp_flag.SDPFlag`
         """
         return self._flags
     
