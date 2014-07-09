@@ -13,21 +13,25 @@ class IPTag(object):
         :type tag: int
         :raise None: No known exceptions are raised
         """
-        pass
+        self._address = address
+        self._port = port
+        self._tag = tag
     
     @property
     def address(self):
         """ Return the IP address of the tag
         """
-        pass
+        return self._address
     
     @property
     def port(self):
         """ Return the port of the tag
         """
-        pass
+        return self._port
     
     @property
     def tag(self):
         """ Return the tag of the packet
         """
+        return self._tag
+

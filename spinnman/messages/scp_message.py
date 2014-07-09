@@ -1,6 +1,7 @@
 from enum import Enum
 
 from spinnman.messages.sdp_message import SDPMessage
+from spinnman.exceptions import SpinnmanInvalidParameterException
 
 class Command(Enum):
     """ The SCP Commands and Response codes
@@ -133,12 +134,31 @@ class SCPMessage(SDPMessage):
         :type argument_2: int
         :param argument_3: Third argument of the SCP command
         :type argument_3: int
-        :param data: The data of the SCP packet
+        :param data: The data of the SCP packet, up to 256 bytes
         :type data: bytearray
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one of\
                     the parameters is incorrect
         """
-        pass
+        
+        if sequence < 0 or sequence > 65535:
+            raise SpinnmanInvalidParameterException(
+                    "sequence", str(sequence),
+                    "The sequence must be between 0 and 65535")
+        
+        if len(data) > 256:
+            raise SpinnmanInvalidParameterException(
+                    "len(data)", str(len(data)), 
+                    "The length of the data cannot exceed 256 bytes")
+        
+        super(SCPMessage, self).__init__(flags, tag, destination_port, 
+                destination_chip_x, destination_chip_y, destination_cpu, 
+                source_port, source_chip_x, source_chip_y, source_cpu)
+        self._command = command
+        self._sequence = sequence
+        self._argument_1 = argument_1
+        self._argument_2 = argument_2
+        self._argument_3 = argument_3
+        self._data = data
     
     @property
     def command(self):
@@ -147,7 +167,7 @@ class SCPMessage(SDPMessage):
         :return: The command
         :rtype: Command
         """
-        pass
+        return self._command
     
     @property
     def sequence(self):
@@ -156,7 +176,7 @@ class SCPMessage(SDPMessage):
         :return: The sequence number of the packet, between 0 and 65535
         :rtype: int
         """
-        pass
+        return self._sequence
     
     @property
     def argument_1(self):
@@ -165,7 +185,7 @@ class SCPMessage(SDPMessage):
         :return: The first argument of the packet
         :rtype: int
         """
-        pass
+        return self._argument_1
     
     @property
     def argument_2(self):
@@ -174,7 +194,7 @@ class SCPMessage(SDPMessage):
         :return: The second argument of the packet
         :rtype: int
         """
-        pass
+        return self._argument_2
     
     @property
     def argument_3(self):
@@ -183,4 +203,13 @@ class SCPMessage(SDPMessage):
         :return: The third argument of the packet
         :rtype: int
         """
-        pass
+        return self._argument_3
+    
+    @property
+    def data(self):
+        """ The data of the SCP packet
+        
+        :return: The data
+        :rtype: bytearray
+        """
+        return self._data

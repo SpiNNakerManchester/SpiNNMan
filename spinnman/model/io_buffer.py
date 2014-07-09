@@ -14,6 +14,10 @@ class IOBuffer(object):
         :type iobuf: str
         :raise None: No known exceptions are raised
         """
+        self._x = x
+        self._y = y
+        self._p = p
+        self._iobuf = iobuf
     
     @property
     def x(self):
@@ -22,7 +26,7 @@ class IOBuffer(object):
         :return: The x-coordinate of the chip
         :rtype: int
         """
-        pass
+        return self._x
     
     @property
     def y(self):
@@ -31,7 +35,7 @@ class IOBuffer(object):
         :return: The y-coordinate of the chip
         :rtype: int
         """
-        pass
+        return self._y
     
     @property
     def p(self):
@@ -40,7 +44,7 @@ class IOBuffer(object):
         :return: The id of the core
         :rtype: int
         """
-        pass
+        return self._p
     
     @property
     def iobuf(self):
@@ -49,4 +53,4 @@ class IOBuffer(object):
         :return: The contents of the buffer
         :rtype: str
         """
-        pass
+        return self._iobuf

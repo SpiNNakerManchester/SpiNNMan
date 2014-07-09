@@ -13,8 +13,8 @@ class AbstractSCPSender(AbstractConnection):
     def send_scp_message(self, scp_message):
         """ Sends an SCP message down this connection
         
-        :param message: message packet to send
-        :type message: spinnman.messages.scp_message.SCPMessage
+        :param scp_message: message packet to send
+        :type scp_message: spinnman.messages.scp_message.SCPMessage
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\

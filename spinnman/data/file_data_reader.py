@@ -1,4 +1,6 @@
 from spinnman.data.abstract_data_reader import AbstractDataReader
+from io import FileIO
+from spinnman.exceptions import SpinnmanIOException
 
 class FileDataReader(AbstractDataReader):
     """ A reader that can read data from a file
@@ -11,19 +13,20 @@ class FileDataReader(AbstractDataReader):
         :raise spinnman.exceptions.SpinnmanIOException: If the file\
                     cannot found or opened for reading
         """
-        pass
+        try:
+            self._fileio = FileIO(filename, "r")
+        except IOError as e:
+            raise SpinnmanIOException(str(e))
     
     def read(self, n_bytes):
         """ See :py:meth:`spinnman.data.abstract_data_reader.AbstractDataReader.read`
         """
-        # TODO
-        return None
+        return bytearray(self._fileio.read(n_bytes))
     
-    def readinto(self, data, offset=0, length=None):
+    def readinto(self, data):
         """ See :py:meth:`spinnman.data.abstract_data_reader.AbstractDataReader.readinto`
         """
-        # TODO
-        return 0
+        return self._fileio.readinto(data)
     
     def close(self):
         """ Closes the file
@@ -33,5 +36,7 @@ class FileDataReader(AbstractDataReader):
         :raise spinnman.exceptions.SpinnmanIOException: If the file\
                     cannot be closed
         """
-        # TODO
-        pass
+        try:
+            self._fileop.close()
+        except IOError as e:
+            raise SpinnmanIOException(str(e))

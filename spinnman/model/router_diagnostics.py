@@ -1,3 +1,6 @@
+from spinnman.exceptions import SpinnmanInvalidParameterException
+
+
 class RouterDiagnostics(object):
     """ Represents a set of diagnostic information available from a chip router
     """
@@ -13,7 +16,12 @@ class RouterDiagnostics(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     number of register values is not 16
         """
-        pass
+        if len(register_values) != 16:
+            raise SpinnmanInvalidParameterException(
+                    "len(register_values)", len(register_values),
+                    "There must be exactly 16 register values")
+            
+        self._mon = (control_register >> 8) & 0x1F
     
     @property
     def mon(self):

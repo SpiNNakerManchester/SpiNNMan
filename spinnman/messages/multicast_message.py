@@ -10,7 +10,8 @@ class MulticastMessage(object):
         :type payload: int
         :raise None: No known exceptions are raised
         """
-        pass
+        self._key = key
+        self._payload = payload
     
     @property
     def key(self):
@@ -19,7 +20,7 @@ class MulticastMessage(object):
         :return: The key
         :rtype: int
         """
-        pass
+        return self._key
     
     @property
     def payload(self):
@@ -28,4 +29,4 @@ class MulticastMessage(object):
         :return: The payload, or None if there is no payload
         :rtype: int
         """
-        pass
+        return self._payload

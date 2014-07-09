@@ -1,14 +1,48 @@
-import threading
+import inspect
 
-class SCPListener(threading.Thread):
+from threading import Thread
+from _callback_queue import _CallbackQueue
+
+from spinnman.exceptions import SpinnmanInvalidParameterException
+
+def _function_has_free_argument_count(func, count):
+    """ Determines if a function has a given free argument count (such that the
+        function can be called with the given number of arguments)
+    
+    :param func: The function to determine the free argument count of
+    :type func: callable
+    :param count: The amount of free arguments to check for
+    :type count: int
+    :return: True if func has count free arguments, false otherwise
+    :rtype: bool 
+    """
+    (args, varargs, keywords, defaults) = inspect.getargspec(func)
+    
+    # If the function has count args, it is fine
+    if len(args) == count:
+        return True
+    
+    # If the function has count args once the defaults are assigned, it is fine
+    if len(args) - len(defaults) == count:
+        return True
+    
+    # Otherwise, if the function has a "varargs" or "keywords", it is fine
+    if varargs is not None or keywords is not None:
+        return True
+    
+    # Otherwise it must not match
+    return False
+
+class SCPListener(Thread):
     """ Listens for SCP packets received from a connection,\
         calling a callback function with received packets
     """
 
-    def __init__(self, sdp_receiver, callback, error_callback=None):
+    def __init__(self, scp_receiver, callback, error_callback=None):
         """
-        :param connection: The SDP Receiver to receive packets from
-        :type connection: spinnman.connections.abstract_sdp_receiver.AbstractSDPReceiver
+        :param scp_receiver: The SCP Receiver to receive packets from
+        :type scp_receiver: 
+                    :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
         :param callback: The callback function to call on reception of each\
                     packet; the function should take one parameter, which is\
                     the SCP packet received
@@ -23,7 +57,21 @@ class SCPListener(threading.Thread):
                     the callback or the error_callback do not take the\
                     expected number of arguments
         """
-        pass
+        if not _function_has_free_argument_count(callback, 1):
+            raise SpinnmanInvalidParameterException(
+                    "callback", repr(callback),
+                    "Incorrect number of parameters")
+        
+        if (error_callback is not None 
+                and not _function_has_free_argument_count(error_callback, 2)):
+            raise SpinnmanInvalidParameterException(
+                    "error_callback", repr(error_callback),
+                    "Incorrect number of parameters")
+        
+        self._scp_receiver = scp_receiver
+        self._error_callback = error_callback
+        self._queue_consumer = _CallbackQueue(callback)
+        self._running = False
 
     def start(self):
         """ Starts listening and sending callbacks
@@ -32,7 +80,20 @@ class SCPListener(threading.Thread):
         :rtype: None
         :raise None: No known exceptions are raised
         """
-        pass
+        self._queue_consumer.start()
+        super(SCPListener, self).start()
+    
+    def run(self):
+        """ Overridden method of Thread that runs this listener
+        """
+        self._running = True
+        while self._running and self._sdp_receiver.is_connected():
+            try:
+                sdp_message = self._sdp_receiver.receive_sdp_message()
+                self._queue_consumer.add_item(sdp_message)
+            except Exception as exception:
+                self._running = False
+                self._error_callback(exception, "Error receiving packet")
     
     def stop(self):
         """ Stops the reception of packets
@@ -41,4 +102,5 @@ class SCPListener(threading.Thread):
         :rtype: None
         :raise None: No known exceptions are raised
         """
-        pass
+        self._running = False
+        self._queue_consumer.stop()

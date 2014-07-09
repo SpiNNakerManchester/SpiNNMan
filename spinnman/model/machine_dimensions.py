@@ -10,7 +10,8 @@ class MachineDimensions(object):
         :type y_max: int
         :raise None: No known exceptions are raised
         """
-        pass
+        self._x_max = x_max
+        self._y_max = y_max
     
     @property
     def x_max(self):
@@ -19,7 +20,7 @@ class MachineDimensions(object):
         :return: The x-coordinate
         :rtype: int
         """
-        pass
+        return self._x_max
     
     @property
     def y_max(self):
@@ -28,4 +29,4 @@ class MachineDimensions(object):
         :return: The y-coordinate
         :rtype: int
         """
-        pass
+        return self._y_max

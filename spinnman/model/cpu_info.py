@@ -1,4 +1,6 @@
 from enum import Enum
+from spinnman.exceptions import SpinnmanInvalidParameterException
+from array import array
 
 class State(Enum):
     """ SARK CPU States
@@ -57,6 +59,31 @@ class MailboxCommands(Enum):
     def __init__(self, value, doc=""):
         self._value_ = value
         self.__doc__ = doc
+        
+def _get_int_from_bytearray(array, offset):
+    """ Get an int from a byte array, starting at the given offset
+    
+    :param array: The byte array to get the int from
+    :type array: bytearray
+    :param offset: The offset at which to start looking
+    :type offset: int
+    :return: The decoded integer
+    :rtype: int
+    """
+    return ((array[offset] << 24) | (array[offset + 1] << 16) |
+            (array[offset + 2] << 8) | array[offset + 3])
+
+def _get_short_from_bytearray(array, offset):
+    """ Get a short from a byte array, starting at the given offset
+    
+    :param array: The byte array to get the short from
+    :type array: bytearray
+    :param offset: The offset at which to start looking
+    :type offset: int
+    :return: The decoded short
+    :rtype: int
+    """
+    return (array[offset] << 8) | array[offset + 1]
 
 class CPUInfo(object):
     """ Represents information about the state of a CPU
@@ -75,7 +102,39 @@ class CPUInfo(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     array does not contain a cpu data structure
         """
-        pass
+        if len(cpu_data) != 128:
+            raise SpinnmanInvalidParameterException(
+                    "len(cpu_data)", str(len(cpu_data)),
+                    "Must be 128 bytes of data")
+            
+        self._x = x
+        self._y = y
+        self._p = p
+            
+        self._registers = [_get_int_from_bytearray(cpu_data, i)
+                           for i in range(0, 32, 4)]
+        self._processor_state_register = _get_int_from_bytearray(cpu_data, 32)
+        self._stack_pointer = _get_int_from_bytearray(cpu_data, 36)
+        self._link_register = _get_int_from_bytearray(cpu_data, 40)
+        self._run_time_error = RuntimeError(cpu_data[44])
+        self._state = State(cpu_data[46])
+        self._application_id = cpu_data[47]
+        self._application_mailbox_data_address =\
+                    _get_int_from_bytearray(cpu_data, 48)
+        self._monitor_mailbox_data_address =\
+                    _get_int_from_bytearray(cpu_data, 52)
+        self._application_mailbox_command = cpu_data[56]
+        self._monitor_mailbox_command = cpu_data[57]
+        self._software_error_count = _get_short_from_bytearray(cpu_data, 58)
+        self._software_source_filename_address =\
+                    _get_int_from_bytearray(cpu_data, 60)
+        self._software_source_line_number =\
+                    _get_int_from_bytearray(cpu_data, 64)
+        self._time = _get_int_from_bytearray(cpu_data, 68)
+        self._application_name = cpu_data[72:88].decode("ascii")
+        self._iobuf_address = _get_int_from_bytearray(cpu_data, 88)
+        self._user = [_get_int_from_bytearray(cpu_data, i)
+                      for i in range(112, 128, 4)]
     
     @property
     def x(self):
@@ -84,7 +143,7 @@ class CPUInfo(object):
         :return: The x-coordinate of the chip
         :rtype: int
         """
-        pass
+        return self._x
     
     @property
     def y(self):
@@ -93,7 +152,7 @@ class CPUInfo(object):
         :return: The y-coordinate of the chip
         :rtype: int
         """
-        pass
+        return self._y
     
     @property
     def p(self):
@@ -102,7 +161,7 @@ class CPUInfo(object):
         :return: The id of the core
         :rtype: int
         """
-        pass
+        return self._p
     
     @property
     def state(self):
@@ -111,7 +170,7 @@ class CPUInfo(object):
         :return: The state of the core
         :rtype: State
         """
-        pass
+        return self._state
         
     @property
     def application_name(self):
@@ -120,7 +179,7 @@ class CPUInfo(object):
         :return: The name of the application
         :rtype: str
         """
-        pass
+        return self._application_name
     
     @property
     def application_id(self):
@@ -129,7 +188,7 @@ class CPUInfo(object):
         :return: The id of the application
         :rtype: int
         """
-        pass
+        return self._application_id
     
     @property
     def time(self):
@@ -138,7 +197,7 @@ class CPUInfo(object):
         :return: The time in seconds since 00:00:00 on the 1st January 1970
         :rtype: long
         """
-        pass
+        return self._time
     
     @property
     def run_time_error(self):
@@ -147,7 +206,7 @@ class CPUInfo(object):
         :return: The run time error
         :rtype: RunTimeError
         """
-        pass
+        return self._run_time_error
     
     @property
     def application_mailbox_command(self):
@@ -157,7 +216,7 @@ class CPUInfo(object):
         :return: The command
         :rtype: MailboxCommand
         """
-        pass
+        return self._application_mailbox_command
     
     @property
     def application_mailbox_data_address(self):
@@ -166,7 +225,7 @@ class CPUInfo(object):
         :return: The address of the data
         :rtype: int
         """
-        pass
+        return self._application_mailbox_data_address
     
     @property
     def monitor_mailbox_command(self):
@@ -176,6 +235,7 @@ class CPUInfo(object):
         :return: The command
         :rtype: MailboxCommand
         """
+        return self._monitor_mailbox_command
     
     @property
     def monitor_mailbox_data_address(self):
@@ -184,7 +244,7 @@ class CPUInfo(object):
         :return: The address of the data
         :rtype: int
         """
-        pass
+        return self._monitor_mailbox_data_address
     
     @property
     def software_error_count(self):
@@ -193,16 +253,16 @@ class CPUInfo(object):
         :return: The number of software errors
         :rtype: int
         """
-        pass
+        return self._software_error_count
     
     @property
-    def software_source_filename(self):
-        """ The filename of the software source
+    def software_source_filename_address(self):
+        """ The address of the filename of the software source
         
         :return: The filename
         :rtype: str
         """
-        pass
+        return self._software_source_filename_address
     
     @property
     def software_source_line_number(self):
@@ -211,7 +271,7 @@ class CPUInfo(object):
         :return: The line number
         :rtype: int
         """
-        pass
+        return self._software_source_line_number
     
     @property
     def processor_state_register(self):
@@ -220,7 +280,7 @@ class CPUInfo(object):
         :return: The psr value
         :rtype: int
         """
-        pass
+        return self._processor_state_register
     
     @property
     def stack_pointer(self):
@@ -229,7 +289,7 @@ class CPUInfo(object):
         :return: The sp value
         :rtype: int
         """
-        pass
+        return self._stack_pointer
     
     @property
     def link_register(self):
@@ -238,7 +298,7 @@ class CPUInfo(object):
         :return: The lr value
         :rtype: int
         """
-        pass
+        return self._link_register
     
     @property
     def registers(self):
@@ -247,7 +307,7 @@ class CPUInfo(object):
         :return: An array of 8 values, one for each register
         :rtype: array of int
         """
-        pass
+        return self._registers
     
     @property
     def user(self):
@@ -256,7 +316,7 @@ class CPUInfo(object):
         :return: An array of 4 values, one for each user value
         :rtype: array of int
         """
-        pass
+        return self._user
     
     @property
     def iobuf_address(self):
@@ -265,4 +325,4 @@ class CPUInfo(object):
         :return: The address
         :rtype: int
         """
-        pass
+        return self._iobuf_address

@@ -1,3 +1,4 @@
+from spinnman.exceptions import SpinnmanInvalidParameterException
 class CoreSubset(object):
     """ Represents a subset of the cores on a chip
     """
@@ -15,7 +16,13 @@ class CoreSubset(object):
         """
         self._x = x
         self._y = y
-        self._processor_ids = processor_ids
+        self._processor_ids = set()
+        for processor_id in processor_ids:
+            if processor_id in self._processor_ids:
+                raise SpinnmanInvalidParameterException(
+                        "processor_ids", processor_id, 
+                        "Each processor id must only occur once")
+            self._processor_ids.add(processor_id)
 
     @property
     def x(self):
