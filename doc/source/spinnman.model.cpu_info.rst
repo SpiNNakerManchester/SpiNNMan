@@ -12,6 +12,7 @@ spinnman.model.cpu_info module
     MailboxCommands
     RunTimeError
     State
+    array
 
 .. autoclass:: CPUInfo
     :show-inheritance:
@@ -94,4 +95,60 @@ spinnman.model.cpu_info module
         SYNC0
         SYNC1
         WATCHDOG
+
+.. autoclass:: array
+    :show-inheritance:
+
+    .. rubric:: Attributes
+
+    .. autosummary::
+        itemsize
+        typecode
+
+    .. rubric:: Methods
+
+    .. autosummary::
+        append
+        buffer_info
+        byteswap
+        count
+        extend
+        fromfile
+        fromlist
+        fromstring
+        fromunicode
+        index
+        insert
+        pop
+        read
+        remove
+        reverse
+        tofile
+        tolist
+        tostring
+        tounicode
+        write
+
+    .. rubric:: Detailed Methods
+
+    .. automethod:: append
+    .. automethod:: buffer_info
+    .. automethod:: byteswap
+    .. automethod:: count
+    .. automethod:: extend
+    .. automethod:: fromfile
+    .. automethod:: fromlist
+    .. automethod:: fromstring
+    .. automethod:: fromunicode
+    .. automethod:: index
+    .. automethod:: insert
+    .. automethod:: pop
+    .. automethod:: read
+    .. automethod:: remove
+    .. automethod:: reverse
+    .. automethod:: tofile
+    .. automethod:: tolist
+    .. automethod:: tostring
+    .. automethod:: tounicode
+    .. automethod:: write
 

@@ -25,3 +25,13 @@ spinnman.messages.spinnaker_boot_message module
 .. autoclass:: SpinnakerBootMessage
     :show-inheritance:
 
+    .. rubric:: Attributes
+
+    .. autosummary::
+        data
+        opcode
+        operand_1
+        operand_2
+        operand_3
+        version
+

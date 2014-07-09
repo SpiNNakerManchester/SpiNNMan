@@ -8,7 +8,8 @@ SpiNNMan
 
 .. automodule:: spinnman
 
-Contents:
+Contents
+--------
 
 .. toctree::
    :maxdepth: 4
@@ -17,7 +18,7 @@ Contents:
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
