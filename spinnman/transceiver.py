@@ -57,9 +57,12 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+        # Create a connection list and discover new connections if requested
         self._connections = list(connections)
         if discover:
             self.discover_connections()
+        
+        # Update the queues for the connections
         self._connection_queues = dict()
         self._update_connection_queues()
         
@@ -71,7 +74,9 @@ class Transceiver(object):
             
             # Only add a new queue if there isn't one currently
             if connection not in self._connection_queues:
-                pass
+                self._connection_queues[connection] =\
+                        _ConnectionQueue(connection)
+                self._connection_queues[connection].start()
     
     def discover_connections(self):
         """ Find connections to the board and store these for future use.\
@@ -104,6 +109,7 @@ class Transceiver(object):
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
+        return self._connections
     
     def get_machine_dimensions(self):
         """ Get the maximum chip x-coordinate and maximum chip y-coordinate of\
