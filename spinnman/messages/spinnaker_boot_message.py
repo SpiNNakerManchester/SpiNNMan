@@ -1,18 +1,4 @@
-from enum import Enum
 from spinnman.exceptions import SpinnmanInvalidParameterException
-
-class OpCode(Enum):
-    """ Boot message Operation Codes
-    """
-    
-    HELLO = 0x41
-    FLOOD_FILL_START = 0x1
-    FLOOD_FILL_BLOCK = 0x3
-    FLOOD_FILL_CONTROL = 0x5
-    
-    def __init__(self, value, doc=""):
-        self._value_ = value
-        self.__doc__ = doc
         
 BOOT_MESSAGE_VERSION = 1
 
@@ -23,7 +9,7 @@ class SpinnakerBootMessage(object):
     def __init__(self, opcode, operand_1, operand_2, operand_3, data=None):
         """
         :param opcode: The operation of this packet
-        :type opcode: :py:class:`OpCode`
+        :type opcode: :py:class:`spinnman.messages.spinnaker_boot_op_code.SpinnakerBootOpCode`
         :param operand_1: The first operand
         :type operand_1: int
         :param operand_2: The second operand
@@ -51,7 +37,7 @@ class SpinnakerBootMessage(object):
         """ The operation of this packet
         
         :return: The operation code
-        :rtype: :py:class:`OpCode`
+        :rtype: :py:class:`spinnman.messages.spinnaker_boot_op_code.SpinnakerBootOpCode`
         """
         return self._opcode
     
