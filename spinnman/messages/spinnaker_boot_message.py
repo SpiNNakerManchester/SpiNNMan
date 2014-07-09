@@ -35,7 +35,7 @@ class SpinnakerBootMessage(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     opcode is not a valid value
         """
-        if len(data) > (256 * 4):
+        if data is not None and len(data) > (256 * 4):
             raise SpinnmanInvalidParameterException(
                     "len(data)", len(data),
                     "A boot packet can contain at most 256 words of data")
