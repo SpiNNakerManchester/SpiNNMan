@@ -1,3 +1,6 @@
+from spinnman.connections.udp_connection import UDPConnection
+from spinnman.connections._connection_queue import _ConnectionQueue
+
 def create_transceiver_from_hostname(hostname):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), discovering any\
@@ -18,7 +21,8 @@ def create_transceiver_from_hostname(hostname):
     :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                 a response indicates an error during the exchange
     """
-    pass
+    connection = UDPConnection(remote_host = hostname)
+    return Transceiver(connections=[connection])
 
 class Transceiver(object):
     """ An encapsulation of various communications with the spinnaker board.\
@@ -53,7 +57,21 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        self._connections = list(connections)
+        if discover:
+            self.discover_connections()
+        self._connection_queues = dict()
+        self._update_connection_queues()
+        
+    def _update_connection_queues(self):
+        """ Creates and deletes queues of connections depending upon what\
+            connections are now available
+        """
+        for connection in self._connections:
+            
+            # Only add a new queue if there isn't one currently
+            if connection not in self._connection_queues:
+                pass
     
     def discover_connections(self):
         """ Find connections to the board and store these for future use.\

@@ -25,7 +25,7 @@ class _CallbackQueue(Thread):
         """
         self._queue_condition.aquire()
         self._queue.appendleft(item)
-        self._queue_condition.notify()
+        self._queue_condition.notify_all()
         self._queue_condition.release()
     
     def run(self):
@@ -46,5 +46,5 @@ class _CallbackQueue(Thread):
         """
         self._running = False
         self._queue_condition.aquire()
-        self._queue_condition.notify()
+        self._queue_condition.notify_all()
         self._queue_condition.release()    
