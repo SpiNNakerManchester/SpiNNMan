@@ -23,23 +23,22 @@ class UDPConnection(object):
         try :
             self.s.sendto(msg, (self.host, self.port))
 
-            d = self.s.recvfrom(1024)
-            reply, addr = d
+            return self.receive_message()
 
-            return reply
 
         except socket.error, msg:
             return 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
 
+    def receive_message(self):
+        d = self.s.recvfrom(1024)
+        reply, addr = d
 
+        return reply
     def send_scp_message(self,msg):
         try :
             self.s.sendto(msg, (self.host, self.port))
 
-            d = self.s.recvfrom(1024)
-            reply, addr = d
-
-            return reply
+            return self.receive_message()
 
         except socket.error, msg:
             return 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
@@ -49,14 +48,16 @@ class UDPConnection(object):
         try :
             self.s.sendto(msg, (self.host, self.port))
 
-            d = self.s.recvfrom(1024)
-            reply, addr = d
-
-            return reply
+            return self.receive_message()
 
         except socket.error, msg:
             return 'Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
 
+
+    def sniff_socket(self,socket):
+        d = socket.recvfrom(1024)
+        reply, addr = d
+        return reply
 
     def close(self):
         try:
