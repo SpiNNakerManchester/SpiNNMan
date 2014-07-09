@@ -12,10 +12,61 @@ from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.sdp_message import SDPMessage
 from spinnman.messages.scp_message import SCPMessage
 from spinnman.messages.spinnaker_boot_message import SpinnakerBootMessage
+from spinnman.messages.spinnaker_boot_message import BOOT_MESSAGE_VERSION
+
+from spinnman._utils import _get_int_from_little_endian_bytearray
+from spinnman._utils import _get_short_from_little_endian_bytearray
+from spinnman._utils import _put_int_in_little_endian_byte_array
+from spinnman._utils import _put_short_in_little_endian_byte_array
+from spinnman._utils import _get_int_from_big_endian_bytearray
+from spinnman._utils import _get_short_from_big_endian_bytearray
+from spinnman._utils import _put_int_in_big_endian_byte_array
+from spinnman._utils import _put_short_in_big_endian_byte_array
 
 import platform
 import subprocess
 import socket
+
+def _get_int_from_scp(array, offset):
+    """ Wrapper function in case the endianness changes
+    """
+    return _get_int_from_little_endian_bytearray(array, offset)
+
+def _get_short_from_scp(array, offset):
+    """ Wrapper function in case the endianness changes
+    """
+    return _get_short_from_little_endian_bytearray(array, offset)
+
+def _put_int_in_scp(array, offset, value):
+    """ Wrapper function in case endianness changes
+    """
+    _put_int_in_little_endian_byte_array(array, offset, value)
+    
+def _put_short_in_scp(array, offset, value):
+    """ Wrapper function in case endianness changes
+    """
+    _put_short_in_little_endian_byte_array(array, offset, value)
+
+def _get_int_from_boot(array, offset):
+    """ Wrapper function in case the endianness changes
+    """
+    return _get_int_from_big_endian_bytearray(array, offset)
+
+def _get_short_from_boot(array, offset):
+    """ Wrapper function in case the endianness changes
+    """
+    return _get_short_from_big_endian_bytearray(array, offset)
+
+def _put_int_in_boot(array, offset, value):
+    """ Wrapper function in case endianness changes
+    """
+    _put_int_in_big_endian_byte_array(array, offset, value)
+    
+def _put_short_in_boot(array, offset, value):
+    """ Wrapper function in case endianness changes
+    """
+    _put_short_in_big_endian_byte_array(array, offset, value)
+
 
 class UDPConnection(
         AbstractSDPSender, AbstractSDPReceiver, 
@@ -277,22 +328,11 @@ class UDPConnection(
         packet[9] = scp_message.source_chip_y
         
         # Put all the SCP message headers in to the packet (little-endian)
-        packet[10] = scp_message.cmd & 0xFF
-        packet[11] = (scp_message.cmd >> 8) & 0xFF
-        packet[12] = scp_message.sequence & 0xFF
-        packet[13] = (scp_message.sequence >> 8) & 0xFF
-        packet[14] = scp_message.arg1 & 0xFF
-        packet[15] = (scp_message.arg1 >> 8) & 0xFF
-        packet[16] = (scp_message.arg1 >> 16) & 0xFF
-        packet[17] = (scp_message.arg1 >> 24) & 0xFF
-        packet[18] = scp_message.arg2 & 0xFF
-        packet[19] = (scp_message.arg2 >> 8) & 0xFF
-        packet[20] = (scp_message.arg2 >> 16) & 0xFF
-        packet[21] = (scp_message.arg2 >> 24) & 0xFF
-        packet[22] = scp_message.arg3 & 0xFF
-        packet[23] = (scp_message.arg3 >> 8) & 0xFF
-        packet[24] = (scp_message.arg3 >> 16) & 0xFF
-        packet[25] = (scp_message.arg3 >> 24) & 0xFF
+        _put_short_in_scp(packet, 10, scp_message.command)
+        _put_short_in_scp(packet, 12, scp_message.sequence)
+        _put_int_in_scp(packet, 14, scp_message.argument_1)
+        _put_int_in_scp(packet, 18, scp_message.argument_2)
+        _put_int_in_scp(packet, 22, scp_message.argument_3)
         
         # Put the data in to the packet
         if data_length > 0:
@@ -343,14 +383,11 @@ class UDPConnection(
                 source_chip_x = packet[8], 
                 source_chip_y = packet[9], 
                 source_cpu = packet[5] & 0x1F, 
-                command = (packet[11] << 8) | packet[10], 
-                sequence = (packet[13] << 8) | packet[12], 
-                argument_1 = ((packet[17] << 24) | (packet[16] << 16) 
-                        | (packet[15] << 8) | packet[14]), 
-                argument_2 = ((packet[21] << 24) | (packet[20] << 16) 
-                        | (packet[19] << 8) | packet[18]), 
-                argument_3 = ((packet[25] << 24) | (packet[24] << 16) 
-                        | (packet[23] << 8) | packet[22]), 
+                command = _get_short_from_scp(packet, 10), 
+                sequence = _get_short_from_scp(packet, 12), 
+                argument_1 = _get_int_from_scp(packet, 14), 
+                argument_2 = _get_int_from_scp(packet, 18), 
+                argument_3 = _get_int_from_scp(packet, 22), 
                 data = data)
         return message
     
@@ -364,25 +401,11 @@ class UDPConnection(
         packet = bytearray(18 + data_length)
         
         # Put the headers into the message (big-endian)
-        opcode = boot_message.opcode.value()
-        packet[0] = (boot_message.version >> 8) & 0xFF
-        packet[1] = boot_message.version & 0xFF
-        packet[2] = (opcode >> 24) & 0xFF
-        packet[3] = (opcode >> 16) & 0xFF
-        packet[4] = (opcode >> 8) & 0xFF
-        packet[5] = opcode & 0xFF
-        packet[6] = (boot_message.operand_1 >> 24) & 0xFF
-        packet[7] = (boot_message.operand_1 >> 16) & 0xFF
-        packet[8] = (boot_message.operand_1 >> 8) & 0xFF
-        packet[9] = boot_message.operand_1 & 0xFF
-        packet[10] = (boot_message.operand_2 >> 24) & 0xFF
-        packet[11] = (boot_message.operand_2 >> 16) & 0xFF
-        packet[12] = (boot_message.operand_2 >> 8) & 0xFF
-        packet[13] = boot_message.operand_2 & 0xFF
-        packet[14] = (boot_message.operand_3 >> 24) & 0xFF
-        packet[15] = (boot_message.operand_3 >> 16) & 0xFF
-        packet[16] = (boot_message.operand_3 >> 8) & 0xFF
-        packet[17] = boot_message.operand_3 & 0xFF
+        _put_short_in_boot(packet, 0, BOOT_MESSAGE_VERSION)
+        _put_int_in_boot(packet, 2, boot_message.opcode.value)
+        _put_int_in_boot(packet, 6, boot_message.operand_1)
+        _put_int_in_boot(packet, 10, boot_message.operand_2)
+        _put_int_in_boot(packet, 14, boot_message.operand_3)
         
         # Put the data in to the packet
         if data_length > 0:
@@ -433,13 +456,9 @@ class UDPConnection(
             
         # Parse the header (big endian)
         message = SpinnakerBootMessage(
-                opcode = ((packet[2] << 24) | (packet[3] << 16) 
-                        | (packet[4] << 8) | packet[5]), 
-                operand_1 = ((packet[6] << 24) | (packet[7] << 16) 
-                        | (packet[8] << 8) | packet[9]), 
-                operand_2 = ((packet[10] << 24) | (packet[11] << 16) 
-                        | (packet[12] << 8) | packet[13]),
-                operand_3 = ((packet[14] << 24) | (packet[15] << 16) 
-                        | (packet[16] << 8) | packet[17]), 
+                opcode = _get_int_from_boot(packet, 2), 
+                operand_1 = _get_int_from_boot(packet, 6), 
+                operand_2 = _get_int_from_boot(packet, 10),
+                operand_3 = _get_int_from_boot(packet, 14), 
                 data = data)
         return message

@@ -14,7 +14,7 @@ class OpCode(Enum):
         self._value_ = value
         self.__doc__ = doc
         
-VERSION = 1
+BOOT_MESSAGE_VERSION = 1
 
 class SpinnakerBootMessage(object):
     """ A message used for booting the board
