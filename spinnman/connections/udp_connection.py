@@ -5,12 +5,17 @@ from spinnman.connections.abstract_scp_receiver import AbstractSCPReceiver
 from spinnman.connections.abstract_spinnaker_boot_sender import AbstractSpinnakerBootSender
 from spinnman.connections.abstract_spinnaker_boot_receiver import AbstractSpinnakerBootReceiver
 
-import socket
-from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException,\
-    SpinnmanInvalidParameterException, SpinnmanInvalidPacketException
+from spinnman.exceptions import SpinnmanIOException
+from spinnman.exceptions import SpinnmanTimeoutException
+from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.sdp_message import SDPMessage
 from spinnman.messages.scp_message import SCPMessage
 from spinnman.messages.spinnaker_boot_message import SpinnakerBootMessage
+
+import platform
+import subprocess
+import socket
 
 class UDPConnection(
         AbstractSDPSender, AbstractSDPReceiver, 
@@ -62,13 +67,9 @@ class UDPConnection(
         if local_host is not None:
             local_bind_host = str(local_host)
         
-        self._local_ip_address = None
-        self._local_port = None
         try:
             # Bind the socket
             self._socket.bind((local_bind_host, local_bind_port))
-            self._local_ip_address, self._local_port\
-                    = self._socket.getsockname()
             
         except Exception as exception:
             raise SpinnmanIOException(
@@ -78,6 +79,7 @@ class UDPConnection(
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
         self._can_send = False
+        self._remote_ip_address = None
             
         # Get the host to connect to remotely
         remote_connect_host = None
@@ -97,7 +99,7 @@ class UDPConnection(
                 
             connection_address = None
             try:
-                connection_address = socket.gethostbyname(
+                self._remote_ip_address = socket.gethostbyname(
                         remote_connect_host)
             except Exception as exception:
                 raise SpinnmanIOException(
@@ -105,12 +107,55 @@ class UDPConnection(
                                 remote_connect_host, exception))
             
             try:
-                self._socket.connect((connection_address, remote_port))
+                self._socket.connect((self._remote_ip_address, remote_port))
             except Exception as exception:
                 raise SpinnmanIOException(
                         "Error connecting to {}:{}: {}".format(
                                 connection_address, remote_port, exception))
         
+        # Get the details of where the socket is connected
+        self._local_ip_address = None
+        self._local_port = None
+        try:
+            self._local_ip_address, self._local_port =\
+                    self._socket.getsockname()
+        except Exception as exception:
+            raise SpinnmanIOException("Error querying socket: {}".format(
+                    exception))
+        
+    def is_connected(self):
+        """ See :py:meth:`spinnman.connections.AbstractConnection.abstract_connection.is_connected`
+        """
+        
+        # If this is not a sending socket, it is not connected
+        if not self._can_send:
+            return False
+        
+        # check if machine is active and on the network
+        pingtimeout=5
+        while pingtimeout > 0:
+            
+            # Start a ping process
+            process = None
+            if (platform.platform().lower().startswith("windows")):
+                process = subprocess.Popen(
+                        "ping -n 1 -w 1 " + self._remote_ip_address, shell=True,
+                        stdout=subprocess.PIPE)
+            else:
+                process = subprocess.Popen(
+                        "ping -c 1 -W 1 " + self._remote_ip_address, shell=True,
+                        stdout=subprocess.PIPE)
+            process.wait()
+            
+            if process.returncode == 0:
+                
+                # ping worked
+                return True
+            else:
+                pingtimeout-=1
+            
+        # If the ping fails this number of times, the host cannot be contacted
+        return False
     
     @property
     def local_ip_address(self):
