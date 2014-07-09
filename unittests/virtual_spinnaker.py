@@ -10,7 +10,7 @@ import bitstring as bitstring
 
 class VirtualSpiNNaker(machine.Machine):
 
-    def __init__(self):
+    def __init__(self, host, port):
         flops = 1000
         (E, NE, N, W, SW, S) = range(6)
 
@@ -31,7 +31,7 @@ class VirtualSpiNNaker(machine.Machine):
         links.append(link.Link(1,0,3,0,1,W,W))
         r = router.Router(links,False,100,1024)
 
-        ip = "192.162.240.253"
+        ip = "127.0.0.1"
         chips = list()
         for x in range(5):
             for y in range(5):
@@ -39,8 +39,8 @@ class VirtualSpiNNaker(machine.Machine):
 
         super(VirtualSpiNNaker,self).__init__(chips)
 
-        self.host = 'localhost'
-        self.port = 17893
+        self.host = host#'localhost'
+        self.port = port#17893
         print "Booting vSpiNNaker"
         self._record = False
         self.my_socket = socket.socket(type= socket.SOCK_DGRAM)
@@ -53,18 +53,35 @@ class VirtualSpiNNaker(machine.Machine):
 
     def rcv(self):
         while True:
-            data, addr = self.my_socket.recvfrom(self.port)
-            cmd = self.decode(data)#scp_message.Command(data)
-            if  cmd is None:
-                print 'Contacted by ', addr
-                print 'Sending response back'
-                reply = "This is what vSpiNNaker received: " + data
-                self.my_socket.sendto(reply, addr)
+            self.receive_message()
+
+    def receive_message(self):
+        data, addr = self.my_socket.recvfrom(self.port)
+        cmd = self.decode(data)#scp_message.Command(data)
+        if  cmd is None:
+            print 'Not a command number'
+            print '|-Checking if it a stand-alone SCP message'
+            cmd = self.decode_scp(data)
+            if cmd is None:
+                print 'Not a stand-alone SCP message'
+                print ' |-Checking if it is wrapped in an SDP message'
+                cmd = self.decode_sdp(data)
+                if cmd is None:
+                    print 'Message seems to be random. Echoing...\n\n\n'
+                    reply = "This is what vSpiNNaker received: " + data
+                    self.my_socket.sendto(reply, addr)
+                else:
+                    print 'Received a SDP message\n\n\n'
+                    reply = "vSpiNNaker decoded the following command: " + str(cmd)
+                    self.my_socket.sendto(reply, addr)
             else:
-                print 'Received special command ', cmd
+                print 'Received stand-alone SCP message\n\n\n'
                 reply = "vSpiNNaker decoded the following command: " + str(cmd)
                 self.my_socket.sendto(reply, addr)
-        print "Stopped receiving messages"
+        else:
+            print 'Received special command ', cmd,  '\n\n\n'
+            reply = "vSpiNNaker decoded the following command: " + str(cmd)
+            self.my_socket.sendto(reply, addr)
 
     def decode(self, value):
         for k,v in scp_message.Command._value2member_map_.items():
@@ -79,32 +96,36 @@ class VirtualSpiNNaker(machine.Machine):
                 return v
         return None
 
+
     def decode_scp(self,packet):
-        bs = bitstring.BitArray(bytes= packet)
-        cmd_rc =bs[8:9].uint
-        return self.decode(cmd_rc)
+        try:
+            bs = bitstring.BitArray(packet)
+            cmd_rc =bs[0:15].uint
+            seq = bs[16:31].uint
+            return self.decode(cmd_rc)
+        except Exception as e:
+            return None
 
 
     def decode_sdp(self,packet):
-        bs = bitstring.BitArray(packet)
-
+        try:
+            bs = bitstring.BitArray(packet)
+            flag = bs[0:63].uint
+            cmd_rc =bs[64:71].uint
+            dest_port=bs[72:95].uint
+            #dest_cpu = bs[]
+            return self.decode(cmd_rc)
+        except Exception as e:
+            return None
 
 
     def close(self):
         self.my_socket.close()
 
-    @property
-    def is_receiving_messages(self):
-        return self._record
-
-    @is_receiving_messages.setter
-    def is_receiving_messages(self, value = True):
-        self._record = value
 
 if __name__ == "__main__":
     try:
-        vs = VirtualSpiNNaker()
-        vs.is_receiving_messages = True
+        vs = VirtualSpiNNaker('localhost',17893)
         vs.rcv()
     except Exception as e:
         print e
