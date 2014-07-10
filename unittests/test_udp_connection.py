@@ -6,23 +6,28 @@ import spinnman.messages.scp_message as scp_msg
 import spinnman.messages.sdp_message as sdp_msg
 import unittests.udp_connection as hack_udp
 import unittests.virtual_spinnaker as virtual_spinnaker
+import spinnman.exceptions as exc
+import spinnman.messages.sdp_flag as flags
+import spinnman.messages.scp_command as cmds
 
 class TestUDPConnection(unittest.TestCase):
 
-    def setUp(self):
-        self.vs = virtual_spinnaker.VirtualSpiNNaker('localhost',17893)
-        self.udp = hack_udp.UDPConnection('localhost',17893)
-
-    def tearDown(self):
-        self.vs.close()
-        self.udp.close()
+    # def setUp(self):
+    #    self.vs = virtual_spinnaker.VirtualSpiNNaker('localhost',17893)
+    #    self.udp = hack_udp.UDPConnection('localhost',17893)
+    #
+    # def tearDown(self):
+    #    self.vs.close()
+    #    self.udp.close()
 
     def test_setup_new_udp_connection(self):
+        self.vs = virtual_spinnaker.VirtualSpiNNaker('localhost',17893)
+        #self.udp = hack_udp.UDPConnection('localhost',17893)
         localhost = "127.0.0.1"
         localport = 54321
-        remotehost = "192.16.240.253"
-        remoteport = 12345
-        connection = udp_conn.UDPConnection(localhost,localport, remotehost)
+        remotehost = "127.0.0.1"
+        remoteport = 17893
+        connection = udp_conn.UDPConnection(localhost,localport, remotehost,remoteport)
 
         self.assertEqual(connection.local_ip_address, localhost)
         self.assertEqual(connection.local_port,localport)
@@ -32,8 +37,8 @@ class TestUDPConnection(unittest.TestCase):
         localport = 54321
         remotehost = "127.0.0.1"
         remoteport = 17893
-        connection = udp_conn.UDPConnection(localhost,localport, remotehost)
-        msg = scp_msg.SCPMessage(sdp_msg.Flag.REPLY_EXPECTED,0,1,0,0,0,1,0,0,0,scp_msg.Command.CMD_APLX,0,1,2,3,bytearray(0))
+        connection = udp_conn.UDPConnection(localhost,localport, remotehost,remoteport)
+        msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_EXPECTED,0,1,0,0,0,1,0,0,0,cmds.SCPCommand.CMD_APLX,0,1,2,3,bytearray(0))
 
         connection.send_scp_message(msg)
         response = connection.receive_scp_message()
@@ -46,21 +51,13 @@ class TestUDPConnection(unittest.TestCase):
         localport = 54321
         remotehost = "127.0.0.1"
         remoteport = 17893
-        connection = udp_conn.UDPConnection(localhost,localport, remotehost)
-        msg = scp_msg.SCPMessage(sdp_msg.Flag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,scp_msg.Command.CMD_APLX,0,1,2,3,bytearray(0))
+        connection = udp_conn.UDPConnection(localhost,localport, remotehost,remoteport)
+        msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,cmds.SCPCommand.CMD_APLX,0,1,2,3,bytearray(0))
         connection.send_scp_message(msg)
 
         #TODO -> Have to manually build an SCP packet and check against the one created by the constructor of SCPMessage
         #TODO -> Add test checking the translation was succesful in Virtual SpiNNaker
 
-
-    def test_send_non_wrapped_scp_message_with_confirmation(self):
-        #TODO -> Have to manually build an SCP packet and check against the one created by the constructor of SCPMessage
-        self.assertEqual(True,False)
-
-    def test_send_non_wrapped_scp_message_without_confirmation(self):
-        #TODO -> Have to manually build an SCP packet and check against the one created by the constructor of SCPMessage
-        self.assertEqual(True,False)
 
     def test_send_sdp_message_with_confirmation(self):
         self.assertEqual(True,False)
@@ -83,6 +80,13 @@ class TestUDPConnection(unittest.TestCase):
     def test_send_message_with_low_timeout(self):
         self.assertEqual(True,False)
 
+    def test_create_connection_without_remote_host(self):
+        with self.assertRaises(exc.SpinnmanIOException):
+            localhost = "127.0.0.1"
+            localport = 54321
+            remotehost = "127.0.0.1"
+            remoteport = 12345
+            connection = udp_conn.UDPConnection(localhost,localport, remotehost,remoteport)
     '''
     def test_virtual_spinnaker_basic_message(self):
         localhost = "127.0.0.1"
@@ -93,13 +97,13 @@ class TestUDPConnection(unittest.TestCase):
     '''
 
     def test_send_scp_message_to_inexistent_host(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(exc.SpinnmanIOException):
             localhost = "127.0.0.1"
             localport = 54321
             remotehost = "127.0.0.1"
             remoteport = 61616
-            connection = udp_conn.UDPConnection(localhost,localport, remotehost)
-            msg = scp_msg.SCPMessage(sdp_msg.Flag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,scp_msg.Command.CMD_APLX,0,1,2,3,bytearray(0))
+            connection = udp_conn.UDPConnection(localhost,localport, None)
+            msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,cmds.SCPCommand.CMD_APLX,0,1,2,3,bytearray(0))
             connection.send_scp_message(msg)
 
 
