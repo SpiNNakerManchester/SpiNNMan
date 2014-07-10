@@ -9,8 +9,8 @@ import spinnman.messages.scp_command as cmds
 
 class TestSCPMessageAssembly(unittest.TestCase):
     def test_create_new_scp_message(self):
-        msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-                                 cmds.SCPCommand.CMD_APLX, 0, 1, 2, 3, bytearray(0))
+        msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3,0, 0, 1, 0,0,
+                                  0, bytearray(0))
 
         self.assertEqual(msg.flags,flags.SDPFlag.REPLY_NOT_EXPECTED)
         self.assertEqual(msg.argument_1,1)

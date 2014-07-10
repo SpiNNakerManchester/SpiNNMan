@@ -9,7 +9,7 @@ import spinnman.messages.scp_command as cmds
 
 class TestSDPMessageAssembly(unittest.TestCase):
     def test_create_new_sdp_message(self):
-        msg = sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,bytearray(0))
+        msg = sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,1,0,0,0,0,1,0,0,0,bytearray(0))
 
         self.assertEqual(msg.flags,flags.SDPFlag.REPLY_NOT_EXPECTED)
         self.assertEqual(msg.tag,0)
@@ -38,10 +38,10 @@ class TestSDPMessageAssembly(unittest.TestCase):
 
     def test_throwing_of_exception_port(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
-             msg = sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 0, -1, 0, 0, 0, 1, 0, 0, 0,bytearray(0))
+             msg = sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,-1,0,0,0,0,1,0,0,0,bytearray(0))
 
     def test_throwing_of_exception_coordinates(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
-             msg = sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 0, 1, -1, 0, 0, 1, 0, 0, 0,bytearray(0))
+             msg = sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,1,0,-1,0,0,1,0,0,0,bytearray(0))
 if __name__ == '__main__':
     unittest.main()
