@@ -3,13 +3,16 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class SCPMessage(SDPMessage):
-    """ Wraps up an SCP Message inside an SDP Message
+    """ Wraps up an SCP Message inside an SDP Message.  The sequence number can\
+        be set once, either in the constructor or via the setter.  An exception\
+        will occur if an attempt is made to set it more than once.
     """
     
-    def __init__(self, flags, tag, destination_port, destination_chip_x, 
-            destination_chip_y, destination_cpu, source_port,
-            source_chip_x, source_chip_y, source_cpu, command, sequence, 
-            argument_1, argument_2, argument_3, data=None):
+    def __init__(self, flags, destination_port, destination_chip_x, 
+            destination_chip_y, destination_cpu, command, argument_1, 
+            argument_2, argument_3, sequence=None, tag=None, source_port=None,
+            source_chip_x=None, source_chip_y=None, source_cpu=None, 
+            data=None):
         """
         :param flags: Any flags for the packet
         :type flags: :py:class:`spinnman.messages.sdp_flag.SDPFlag`
@@ -54,24 +57,25 @@ class SCPMessage(SDPMessage):
                     the parameters is incorrect
         """
         
-        if sequence < 0 or sequence > 65535:
-            raise SpinnmanInvalidParameterException(
-                    "sequence", str(sequence),
-                    "The sequence must be between 0 and 65535")
-        
         if data is not None and len(data) > 256:
             raise SpinnmanInvalidParameterException(
                     "len(data)", str(len(data)), 
                     "The length of the data cannot exceed 256 bytes")
         
-        super(SCPMessage, self).__init__(flags, tag, destination_port, 
-                destination_chip_x, destination_chip_y, destination_cpu, 
-                source_port, source_chip_x, source_chip_y, source_cpu, data)
+        super(SCPMessage, self).__init__(
+                flags=flags, tag=tag, destination_port=destination_port, 
+                destination_chip_x=destination_chip_x, 
+                destination_chip_y=destination_chip_y, 
+                destination_cpu=destination_cpu, source_port=source_port, 
+                source_chip_x=source_chip_x, source_chip_y=source_chip_y, 
+                source_cpu=source_cpu, data=data)
         self._command = command
-        self._sequence = sequence
+        self._sequence = None
         self._argument_1 = argument_1
         self._argument_2 = argument_2
         self._argument_3 = argument_3
+        
+        self.sequence = sequence
     
     @property
     def command(self):
@@ -90,6 +94,27 @@ class SCPMessage(SDPMessage):
         :rtype: int
         """
         return self._sequence
+    
+    @sequence.setter
+    def sequence(self, sequence):
+        """ Set the sequence number of the SCP packet
+        
+        :param sequence: The sequence number to set, between 0 and 65535
+        :type sequence: int
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
+                    sequence is out of range, or if it has already been set
+        """
+        if self._sequence is not None:
+            raise SpinnmanInvalidParameterException(
+                    "sequence", str(sequence),
+                    "The sequence has already been set")
+        if sequence < 0 or sequence > 65535:
+            raise SpinnmanInvalidParameterException(
+                    "sequence", str(sequence),
+                    "The sequence must be between 0 and 65535")
+        self._sequence = sequence
     
     @property
     def argument_1(self):

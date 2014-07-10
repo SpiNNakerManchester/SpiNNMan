@@ -76,8 +76,14 @@ class UDPConnection(
         receive data
     """
     
+    # Values defined for the source of an SDP packet over Ethernet
+    _SDP_SOURCE_PORT = 7
+    _SDP_SOURCE_CPU = 31
+    _SDP_SOURCE_CHIP_X = 0
+    _SDP_SOURCE_CHIP_Y = 0
+    
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-            remote_port=17893):
+            remote_port=17893, default_sdp_tag=0xFF):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces, unless\
@@ -94,9 +100,18 @@ class UDPConnection(
         :type remote_host: str
         :param remote_port: The remote port to send packets to.  If remote_host\
                     is None, this is ignored.
+        :param default_sdp_tag: The default tag to use with sdp packets sent\
+                    via this connection that do not have a tag set
+        :type default_sdp_tag: int
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     setting up the communication channel
         """
+        
+        # Store the default sdp tag
+        self._default_sdp_tag = default_sdp_tag
+        
+        # Keep track of the current scp sequence number
+        self._scp_sequence = 0
         
         self._socket = None
         try:
@@ -214,6 +229,68 @@ class UDPConnection(
         :raise None: No known exceptions are thrown
         """
         return self._local_port
+    
+    def _put_sdp_headers_into_message(self, packet, offset, sdp_message):
+        """ Adds the headers of an SDP message into a packet buffer,
+            applying defaults where the values have not been set
+        
+        :param packet: The packet buffer
+        :type packet: bytearray
+        :param offset: The offset in to the buffer where the headers should\
+                    start
+        :type offset: int
+        :param sdp_message: The SDP message containing the header values
+        :type sdp_message: :py:class:`spinnman.messages.sdp_message.SDPMessage`
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
+                    packet already has a source_port != 7, a source_cpu != 31,\
+                    a source_chip_x != 0, or a source_chip_y != 0
+        """
+        tag = sdp_message.tag
+        if tag is None:
+            tag = self._default_sdp_tag
+            
+        if (sdp_message.source_port is not None 
+                and sdp_message.source_port != UDPConnection._SDP_SOURCE_PORT):
+            raise SpinnmanInvalidParameterException(
+                    "message.source_port", sdp_message.source_port, 
+                    "The source port must be {} to work with this connection"
+                    .format(UDPConnection._SDP_SOURCE_PORT))
+        
+        if (sdp_message.source_cpu is not None 
+                and sdp_message.source_cpu != UDPConnection._SDP_SOURCE_CPU):
+            raise SpinnmanInvalidParameterException(
+                    "message.source_cpu", sdp_message.source_cpu, 
+                    "The source cpu must be {} to work with this connection"
+                    .format(UDPConnection._SDP_SOURCE_CPU))
+        
+        if (sdp_message.source_chip_x is not None 
+                and sdp_message.source_chip_x 
+                        != UDPConnection._SDP_SOURCE_CHIP_X):
+            raise SpinnmanInvalidParameterException(
+                    "message.source_chip_x", sdp_message.source_chip_x, 
+                    "The source chip x must be {} to work with this connection"
+                    .format(UDPConnection._SDP_SOURCE_CHIP_X))
+        
+        if (sdp_message.source_chip_y is not None 
+                and sdp_message.source_chip_y 
+                        != UDPConnection._SDP_SOURCE_CHIP_Y):
+            raise SpinnmanInvalidParameterException(
+                    "message.source_chip_y", sdp_message.source_chip_y, 
+                    "The source chip y must be {} to work with this connection"
+                    .format(UDPConnection._SDP_SOURCE_CHIP_Y))
+        
+        packet[offset] = sdp_message.flags.value
+        packet[offset + 1] = tag
+        packet[offset + 2] = (((sdp_message.destination_port & 0x7) << 5) |
+                               (sdp_message.destination_cpu & 0x1F)) 
+        packet[offset + 3] = (((UDPConnection._SDP_SOURCE_PORT & 0x7) << 5) |
+                               (UDPConnection._SDP_SOURCE_CPU & 0x1F))
+        packet[offset + 4] = sdp_message.destination_chip_x
+        packet[offset + 5] = sdp_message.destination_chip_y
+        packet[offset + 6] = UDPConnection._SDP_SOURCE_CHIP_X
+        packet[offset + 7] = UDPConnection._SDP_SOURCE_CHIP_Y
 
     def send_sdp_message(self, sdp_message):
         """ See :py:meth:`spinnman.connections.abstract_sdp_sender.AbstractSDPSender.send_sdp_message`
@@ -229,16 +306,7 @@ class UDPConnection(
         packet[1] = 0
         
         # Put all the message headers in to the packet
-        packet[2] = sdp_message.flags
-        packet[3] = sdp_message.tag
-        packet[4] = (((sdp_message.destination_port & 0x7) << 5) |
-                (sdp_message.destination_cpu & 0x1F)) 
-        packet[5] = (((sdp_message.source_port & 0x7) << 5) |
-                (sdp_message.source_cpu & 0x1F))
-        packet[6] = sdp_message.destination_chip_x
-        packet[7] = sdp_message.destination_chip_y
-        packet[8] = sdp_message.source_chip_x
-        packet[9] = sdp_message.source_chip_y
+        self._put_sdp_headers_into_message(packet, 2, sdp_message)
         
         # Put the data in to the packet
         if data_length > 0:
@@ -303,20 +371,17 @@ class UDPConnection(
         packet[1] = 0
         
         # Put all the SDP message headers in to the packet
-        packet[2] = scp_message.flags
-        packet[3] = scp_message.tag
-        packet[4] = (((scp_message.destination_port & 0x7) << 5) |
-                (scp_message.destination_cpu & 0x1F)) 
-        packet[5] = (((scp_message.source_port & 0x7) << 5) |
-                (scp_message.source_cpu & 0x1F))
-        packet[6] = scp_message.destination_chip_x
-        packet[7] = scp_message.destination_chip_y
-        packet[8] = scp_message.source_chip_x
-        packet[9] = scp_message.source_chip_y
+        self._put_sdp_headers_into_message(packet, 2, scp_message)
+        
+        # Work out the sequence number
+        sequence = scp_message.sequence
+        if sequence is None:
+            sequence = self._scp_sequence
+            self._scp_sequence = (self._scp_sequence + 1) % 65536
         
         # Put all the SCP message headers in to the packet (little-endian)
-        _put_short_in_scp(packet, 10, scp_message.command)
-        _put_short_in_scp(packet, 12, scp_message.sequence)
+        _put_short_in_scp(packet, 10, scp_message.command.value)
+        _put_short_in_scp(packet, 12, sequence)
         _put_int_in_scp(packet, 14, scp_message.argument_1)
         _put_int_in_scp(packet, 18, scp_message.argument_2)
         _put_int_in_scp(packet, 22, scp_message.argument_3)
