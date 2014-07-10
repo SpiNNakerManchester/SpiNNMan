@@ -49,8 +49,96 @@ class _ConnectionQueue(Thread):
         
         # Marker to indicate if the queue has been closed
         self._done = False
+    
+    def _check_message_type(self, message, response_required):
+        """ Check if the message type is supported, raising an exception if not
         
-    def send_message(self, message, wait_for_response):
+        :param message: The message to determine support for
+        :type message: One of:
+                    * :py:class:`spinnman.messages.sdp_message.SDPMessage`
+                    * :py:class:`spinnman.messages.scp_message.SCPMessage`
+                    * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+                    * :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
+        :param response_required: True if a response is required, False\
+                    otherwise
+        :type response_required: bool
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
+                    the message type is unsupported
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
+                    message type is not recognized
+        """
+        if isinstance(message, SDPMessage):
+            if not isinstance(self._connection, AbstractSDPSender):
+                raise SpinnmanUnsupportedOperationException(
+                        "Send SDP Message")
+            if response_required and not isinstance(self._connection, 
+                                                    AbstractSDPReceiver):
+                raise SpinnmanUnsupportedOperationException(
+                        "Receive SDP Message")
+        
+        elif isinstance(message, SCPMessage):
+            if not isinstance(self._connection, AbstractSCPSender):
+                raise SpinnmanUnsupportedOperationException(
+                        "Send SCP Message")
+            if response_required and not isinstance(self._connection,
+                                                     AbstractSCPReceiver):
+                raise SpinnmanUnsupportedOperationException(
+                        "Receive SCP Message")
+        
+        elif isinstance(message, MulticastMessage):
+            if not isinstance(self._connection, AbstractMulticastSender):
+                raise SpinnmanUnsupportedOperationException(
+                        "Send Multicast Message")
+            if response_required and not isinstance(self._connection,
+                                                    AbstractMulticastReceiver):
+                raise SpinnmanUnsupportedOperationException(
+                        "Receive Multicast Message")
+        elif isinstance(message, SpinnakerBootMessage):
+            if not isinstance(self._connection, AbstractSpinnakerBootSender):
+                raise SpinnmanUnsupportedOperationException(
+                        "Send Spinnaker Boot Message")
+            if response_required and not isinstance(self._connection,
+                                                AbstractSpinnakerBootReceiver):
+                raise SpinnmanUnsupportedOperationException(
+                        "Receive Spinnaker Boot Message")
+        else:
+            raise SpinnmanInvalidPacketException(
+                    message.__class__, "This type is not known to this class")
+        
+    def message_type_supported(self, message, response_required):
+        """ Determine if a given message type is supported by this queue
+        
+        :param message: The message to determine support for
+        :type message: One of:
+                    * :py:class:`spinnman.messages.sdp_message.SDPMessage`
+                    * :py:class:`spinnman.messages.scp_message.SCPMessage`
+                    * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+                    * :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
+        :param response_required: True if a response is required, False\
+                    otherwise
+        :type response_required: bool
+        :return: True if the message type is supported, False otherwise
+        :rtype: bool
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
+                    message type is not recognized
+        """
+        try:
+            self._check_message_type(message, response_required)
+            return True
+        except SpinnmanUnsupportedOperationException:
+            return False
+        
+    def queue_length(self):
+        """ Get the current length of the queue
+        
+        :return: The length of the queue
+        :rtype: int
+        """
+        return len(self._message_queue)
+        
+    def send_message(self, message, response_required):
         """ Send a message, waiting for the response if requested
             
         :param message: A message to be sent
@@ -59,9 +147,9 @@ class _ConnectionQueue(Thread):
                     * :py:class:`spinnman.messages.scp_message.SCPMessage`
                     * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
                     * :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
-        :param wait_for_response: True if a response is required, False\
+        :param response_required: True if a response is required, False\
                     otherwise
-        :type wait_for_response: bool
+        :type response_required: bool
         :return: A message in response
         :rtype: Same type as the received message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
@@ -79,43 +167,7 @@ class _ConnectionQueue(Thread):
         """
         
         # Check that the connection can deal with the message
-        if isinstance(message, SDPMessage):
-            if not isinstance(self._connection, AbstractSDPSender):
-                raise SpinnmanUnsupportedOperationException(
-                        "Send SDP Message")
-            if wait_for_response and not isinstance(self._connection, 
-                                                    AbstractSDPReceiver):
-                raise SpinnmanUnsupportedOperationException(
-                        "Receive SDP Message")
-        
-        elif isinstance(message, SCPMessage):
-            if not isinstance(self._connection, AbstractSCPSender):
-                raise SpinnmanUnsupportedOperationException(
-                        "Send SCP Message")
-            if wait_for_response and not isinstance(self._connection,
-                                                     AbstractSCPReceiver):
-                raise SpinnmanUnsupportedOperationException(
-                        "Receive SCP Message")
-        
-        elif isinstance(message, MulticastMessage):
-            if not isinstance(self._connection, AbstractMulticastSender):
-                raise SpinnmanUnsupportedOperationException(
-                        "Send Multicast Message")
-            if wait_for_response and not isinstance(self._connection,
-                                                    AbstractMulticastReceiver):
-                raise SpinnmanUnsupportedOperationException(
-                        "Receive Multicast Message")
-        elif isinstance(message, SpinnakerBootMessage):
-            if not isinstance(self._connection, AbstractSpinnakerBootSender):
-                raise SpinnmanUnsupportedOperationException(
-                        "Send Spinnaker Boot Message")
-            if wait_for_response and not isinstance(self._connection,
-                                                AbstractSpinnakerBootReceiver):
-                raise SpinnmanUnsupportedOperationException(
-                        "Received Spinnaker Boot Message")
-        else:
-            raise SpinnmanInvalidPacketException(
-                    message.__class__, "This type is not known to this class")
+        self._check_message_type(message, response_required)
         
         # Create a callback for the message
         callback = _MessageCallback()
@@ -124,14 +176,15 @@ class _ConnectionQueue(Thread):
         self._queue_condition.aquire()
         self._message_queue.appendleft(message)
         self._callback_queue.appendleft(callback)
-        self._wait_for_response_queue.appendleft(wait_for_response)
+        self._wait_for_response_queue.appendleft(response_required)
         self._queue_condition.notify_all()
         self._queue_condition.release()
         
         # Wait for the callback to indicate completion
         callback.wait_for_send()
-        if wait_for_response:
-            callback.wait_for_receive()
+        if response_required:
+            return callback.wait_for_receive()
+        return None
         
     def run(self):
         """ The main method of the thread
