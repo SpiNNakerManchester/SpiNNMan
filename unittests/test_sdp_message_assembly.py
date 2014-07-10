@@ -20,7 +20,7 @@ class TestSDPMessageAssembly(unittest.TestCase):
         self.assertEqual(msg.source_chip_x,0)
         self.assertEqual(msg.source_chip_y,0)
         self.assertEqual(msg.destination_cpu,0)
-        self.assertEqual(msg.destination_cpu,0)
+        self.assertEqual(msg.source_cpu,31)
         self.assertEqual(msg.data,bytearray(0))
     """
     def test_throwing_of_exception_flag(self):
