@@ -125,4 +125,4 @@ class SCPMessage(SDPMessage):
         :return: The data
         :rtype: bytearray
         """
-        return super(SCPMessage, self).data()
+        return super(SCPMessage, self).data
