@@ -5,8 +5,8 @@ from collections import deque
 from spinnman.connections._message_callback import _MessageCallback
 from spinnman.messages.sdp_message import SDPMessage
 from spinnman.connections.abstract_sdp_sender import AbstractSDPSender
-from spinnman.exceptions import SpinnmanUnsupportedOperationException,\
-    SpinnmanInvalidPacketException
+from spinnman.exceptions import SpinnmanUnsupportedOperationException
+from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.connections.abstract_sdp_receiver import AbstractSDPReceiver
 from spinnman.messages.scp_message import SCPMessage
 from spinnman.connections.abstract_scp_sender import AbstractSCPSender
