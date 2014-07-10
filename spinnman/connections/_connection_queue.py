@@ -130,6 +130,7 @@ class _ConnectionQueue(Thread):
         except SpinnmanUnsupportedOperationException:
             return False
         
+    @property
     def queue_length(self):
         """ Get the current length of the queue
         
