@@ -326,7 +326,7 @@ class UDPConnection(
         raw_data = None
         try:
             self._socket.settimeout(timeout)
-            raw_data, _ = self._socket.recv(512)
+            raw_data = self._socket.recv(512)
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_sdp_message", timeout)
         except Exception as e:
@@ -372,7 +372,7 @@ class UDPConnection(
         
         # Put all the SDP message headers in to the packet
         self._put_sdp_headers_into_message(packet, 2, scp_message)
-        
+
         # Work out the sequence number
         sequence = scp_message.sequence
         if sequence is None:
@@ -404,7 +404,7 @@ class UDPConnection(
         raw_data = None
         try:
             self._socket.settimeout(timeout)
-            raw_data, _ = self._socket.recv(512)
+            raw_data = self._socket.recv(512)
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_scp_message", timeout)
         except Exception as e:
@@ -477,7 +477,7 @@ class UDPConnection(
         raw_data = None
         try:
             self._socket.settimeout(timeout)
-            raw_data, _ = self._socket.recv(2048)
+            raw_data = self._socket.recv(2048)
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_scp_message", timeout)
         except Exception as e:
