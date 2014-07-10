@@ -139,7 +139,7 @@ class UDPConnection(
             
             # Change connections to localhost to actually connect to
             # the local hostname
-            if (remote_host.lower() in ('localhost', '127.0.0.1')):
+            if (remote_host.lower() in ('localhost')):
                 
                 try:
                     remote_connect_host = socket.gethostname()
@@ -147,8 +147,9 @@ class UDPConnection(
                     raise SpinnmanIOException(
                             "Error getting local hostname: {}".format(
                                     exception))
-                
-            connection_address = None
+            else:
+                remote_connect_host = remote_host
+            
             try:
                 self._remote_ip_address = socket.gethostbyname(
                         remote_connect_host)
@@ -162,7 +163,7 @@ class UDPConnection(
             except Exception as exception:
                 raise SpinnmanIOException(
                         "Error connecting to {}:{}: {}".format(
-                                connection_address, remote_port, exception))
+                            self._remote_ip_address, remote_port, exception))
         
         # Get the details of where the socket is connected
         self._local_ip_address = None
