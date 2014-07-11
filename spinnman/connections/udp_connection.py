@@ -10,9 +10,12 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.sdp_message import SDPMessage
+from spinnman.messages.sdp_flag import SDPFlag
 from spinnman.messages.scp_message import SCPMessage
+from spinnman.messages.scp_command import SCPCommand
 from spinnman.messages.spinnaker_boot_message import SpinnakerBootMessage
 from spinnman.messages.spinnaker_boot_message import BOOT_MESSAGE_VERSION
+from spinnman.messages.spinnaker_boot_op_code import SpinnakerBootOpCode
 
 from spinnman._utils import _get_int_from_little_endian_bytearray
 from spinnman._utils import _get_short_from_little_endian_bytearray
@@ -390,7 +393,7 @@ class UDPConnection(
             
         # Parse the header
         message = SDPMessage(
-                flags=packet[2],
+                flags=SDPFlag(packet[2]),
                 tag=packet[3],
                 destination_port=(packet[4] >> 5) & 0x7,
                 destination_chip_x=packet[6],
@@ -496,7 +499,7 @@ class UDPConnection(
             
         # Parse the header (little endian)
         message = SCPMessage(
-                flags=packet[2],
+                flags=SDPFlag(packet[2]),
                 tag=packet[3],
                 destination_port=(packet[4] >> 5) & 0x7,
                 destination_chip_x=packet[6],
@@ -506,7 +509,7 @@ class UDPConnection(
                 source_chip_x=packet[8],
                 source_chip_y=packet[9],
                 source_cpu=packet[5] & 0x1F,
-                command=_get_short_from_scp(packet, 10),
+                command=SCPCommand(_get_short_from_scp(packet, 10)),
                 sequence=_get_short_from_scp(packet, 12),
                 argument_1=argument_1,
                 argument_2=argument_2,
@@ -582,7 +585,7 @@ class UDPConnection(
             
         # Parse the header (big endian)
         message = SpinnakerBootMessage(
-                opcode=_get_int_from_boot(packet, 2),
+                opcode=SpinnakerBootOpCode(_get_int_from_boot(packet, 2)),
                 operand_1=_get_int_from_boot(packet, 6),
                 operand_2=_get_int_from_boot(packet, 10),
                 operand_3=_get_int_from_boot(packet, 14),
