@@ -25,7 +25,7 @@ class TestSCPMessageAssembly(unittest.TestCase):
         self.assertEqual(msg.source_chip_x,0)
         self.assertEqual(msg.source_chip_y,0)
         self.assertEqual(msg.destination_cpu,0)
-        self.assertEqual(msg.destination_cpu,0)
+        self.assertEqual(msg.source_cpu,0)
         self.assertEqual(msg.sequence,0)
         #self.assertEqual(msg.data,bytearray(0))
     """

@@ -6,7 +6,8 @@ import spinn_machine.machine as machine
 import logging
 import time
 import spinnman.messages.scp_message as scp_message
-import bitstring as bitstring
+import spinnman.messages.scp_command as scp_cmd
+import spinnman.messages.sdp_flag as sdp_flg
 
 class VirtualSpiNNaker(machine.Machine):
 
@@ -57,34 +58,22 @@ class VirtualSpiNNaker(machine.Machine):
 
     def receive_message(self):
         data, addr = self.my_socket.recvfrom(self.port)
-        cmd = self.decode(data)#scp_message.Command(data)
+        print "ADDRESS -----------------------",addr
+        self.my_socket.sendto(data, addr)
+        cmd = None
+        #cmd = self.decode_sdp(data)#scp_message.Command(data)
         if  cmd is None:
-            print 'Not a command number'
-            print '|-Checking if it a stand-alone SCP message'
-            cmd = self.decode_scp(data)
-            if cmd is None:
-                print 'Not a stand-alone SCP message'
-                print ' |-Checking if it is wrapped in an SDP message'
-                cmd = self.decode_sdp(data)
-                if cmd is None:
-                    print 'Message seems to be random. Echoing...\n\n\n'
-                    reply = "This is what vSpiNNaker received: " + data
-                    self.my_socket.sendto(reply, addr)
-                else:
-                    print 'Received a SDP message\n\n\n'
-                    reply = "vSpiNNaker decoded the following command: " + str(cmd)
-                    self.my_socket.sendto(reply, addr)
-            else:
-                print 'Received stand-alone SCP message\n\n\n'
-                reply = "vSpiNNaker decoded the following command: " + str(cmd)
-                self.my_socket.sendto(reply, addr)
+                print 'Message seems to be random. Echoing...\n\n\n'
+                reply = "This is what vSpiNNaker received: " + data
+                self.my_socket.sendto(str(cmd), addr)
         else:
-            print 'Received special command ', cmd,  '\n\n\n'
+            print 'Received a SDP message\n\n\n'
             reply = "vSpiNNaker decoded the following command: " + str(cmd)
-            self.my_socket.sendto(reply, addr)
+            self.my_socket.sendto(str(cmd), addr)
 
-    def decode(self, value):
-        for k,v in scp_message.Command._value2member_map_.items():
+
+    def decode_cmd(self, value):
+        for k,v in scp_cmd.SCPCommand._value2member_map_.items():
             k1 = int()
             k2 = str()
             if isinstance(k, tuple):
@@ -92,30 +81,37 @@ class VirtualSpiNNaker(machine.Machine):
             else:
                 k1 = k
                 k2 = ""
-            if value.isdigit() and k1 == int(value):
+            if str(value).isdigit() and k1 == int(value):
                 return v
         return None
 
 
-    def decode_scp(self,packet):
-        try:
-            bs = bitstring.BitArray(packet)
-            cmd_rc =bs[0:15].uint
-            seq = bs[16:31].uint
-            return self.decode(cmd_rc)
-        except Exception as e:
-            return None
+    # def decode_scp(self,packet):
+    #     try:
+    #         ba = bytearray(packet)
+    #         cmd_rc =bs[0:15].uint
+    #         seq = bs[16:31].uint
+    #         return self.decode(cmd_rc)
+    #     except Exception as e:
+    #         return None
 
 
     def decode_sdp(self,packet):
         try:
-            bs = bitstring.BitArray(packet)
-            flag = bs[0:63].uint
-            cmd_rc =bs[64:71].uint
-            dest_port=bs[72:95].uint
-            #dest_cpu = bs[]
-            return self.decode(cmd_rc)
+            bs = bytearray(packet)
+            flags = int(bs[0])
+            if flags == sdp_flg.SDPFlag.REPLY_NOT_EXPECTED.value:
+                print 'No reply expected'
+            print 'flags =', flags
+            sdp_header = int(str(bs[0:8]), 16)
+            print 'sdp_header =', sdp_header
+            scp_body = bs[9:24]
+            print 'scp_body =', scp_body
+            cmd_rc = int(scp_body[0:1])
+            print 'cmd_rc =', cmd_rc
+            return self.decode_cmd(cmd_rc)
         except Exception as e:
+            print e.message
             return None
 
 
