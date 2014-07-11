@@ -471,17 +471,28 @@ class UDPConnection(
         
         # Parse the data
         packet = bytearray(raw_data)
-        if len(packet) < 26:
+        if len(packet) < 14:
             raise SpinnmanInvalidPacketException(
                     "SCP", "Only {} bytes of data received, but the minimum"
-                    " for SCP is {}".format(len(packet), 26))
+                    " for SCP is {}".format(len(packet), 14))
         if len(packet) > 26 + 256:
             raise SpinnmanInvalidPacketException(
                     "SCP", "{} bytes of data received, but the maximum for SCP"
                     "is {}".format(len(packet), 26 + 256))
+            
+        # There can only be arguments and data if the packet is longer than 14
+        argument_1 = 0
+        argument_2 = 0
+        argument_3 = 0
         data = None
-        if len(packet) > 26:
-            data = packet[26:]
+        if len(packet) >= 18:
+            argument_1 = _get_int_from_scp(packet, 14)
+            if len(packet) >= 22:
+                argument_2 = _get_int_from_scp(packet, 18)
+                if len(packet) >= 26:
+                    argument_3 = _get_int_from_scp(packet, 22)
+                    if len(packet) > 26:
+                        data = packet[26:]
             
         # Parse the header (little endian)
         message = SCPMessage(
@@ -497,9 +508,9 @@ class UDPConnection(
                 source_cpu=packet[5] & 0x1F,
                 command=_get_short_from_scp(packet, 10),
                 sequence=_get_short_from_scp(packet, 12),
-                argument_1=_get_int_from_scp(packet, 14),
-                argument_2=_get_int_from_scp(packet, 18),
-                argument_3=_get_int_from_scp(packet, 22),
+                argument_1=argument_1,
+                argument_2=argument_2,
+                argument_3=argument_3,
                 data=data)
         return message
     

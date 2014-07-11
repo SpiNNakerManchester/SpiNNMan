@@ -110,7 +110,7 @@ class SCPMessage(SDPMessage):
             raise SpinnmanInvalidParameterException(
                     "sequence", str(sequence),
                     "The sequence has already been set")
-        if sequence < 0 or sequence > 65535:
+        if sequence is not None and (sequence < 0 or sequence > 65535):
             raise SpinnmanInvalidParameterException(
                     "sequence", str(sequence),
                     "The sequence must be between 0 and 65535")
