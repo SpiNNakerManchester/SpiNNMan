@@ -11,6 +11,11 @@ class MailboxCommand(Enum):
     SHM_SIGNAL = (3, "The mailbox contains a signal")
     SHM_CMD = (4, "The mailbox contains a command")
     
+    def __new__(cls, value, doc=""):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
+    
     def __init__(self, value, doc=""):
         self._value_ = value
         self.__doc__ = doc

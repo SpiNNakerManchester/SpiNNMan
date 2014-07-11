@@ -22,6 +22,11 @@ class SCPSignal(Enum):
     AND = (17, 1)
     COUNT = (18, 1)
     
+    def __new__(cls, value, signal_type, doc=""):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
+    
     def __init__(self, value, signal_type, doc=""):
         """
         
