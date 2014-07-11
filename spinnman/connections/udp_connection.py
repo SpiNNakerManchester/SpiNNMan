@@ -75,6 +75,9 @@ def _put_short_in_boot(array, offset, value):
     """
     _put_short_in_big_endian_byte_array(array, offset, value)
 
+# The default port of the connection
+UDP_CONNECTION_DEFAULT_PORT = 17893
+
 
 class UDPConnection(
         AbstractSDPSender, AbstractSDPReceiver,
@@ -99,7 +102,7 @@ class UDPConnection(
     _SDP_SOURCE_CHIP_Y = 0
     
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-            remote_port=17893, default_sdp_tag=0xFF):
+            remote_port=UDP_CONNECTION_DEFAULT_PORT, default_sdp_tag=0xFF):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
