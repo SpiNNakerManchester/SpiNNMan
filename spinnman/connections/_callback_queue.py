@@ -23,7 +23,7 @@ class _CallbackQueue(Thread):
         :return: Nothing is returned
         :rtype: None
         """
-        self._queue_condition.aquire()
+        self._queue_condition.acquire()
         self._queue.appendleft(item)
         self._queue_condition.notify_all()
         self._queue_condition.release()
@@ -33,7 +33,7 @@ class _CallbackQueue(Thread):
         """
         self._running = True
         while self._running:
-            self._queue_condition.aquire()
+            self._queue_condition.acquire()
             while self._running and len(self._queue) == 0:
                 self._queue_condition.wait()
             if not self._queue.empty():
@@ -45,6 +45,6 @@ class _CallbackQueue(Thread):
         """ Stops the queue from transferring items
         """
         self._running = False
-        self._queue_condition.aquire()
+        self._queue_condition.acquire()
         self._queue_condition.notify_all()
         self._queue_condition.release()    
