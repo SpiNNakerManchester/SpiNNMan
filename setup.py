@@ -15,6 +15,5 @@ setup(
             'spinnman.messages.scp',
             'spinnman.messages.scp.impl',
             'spinnman.messages.sdp'
-            'spinnman.model'],
-    install_requires=['six', 'enum34', 'SpiNNMachine'],
+            'spinnman.model']
 )
