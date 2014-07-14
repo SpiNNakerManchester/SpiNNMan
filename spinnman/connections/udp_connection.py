@@ -35,10 +35,12 @@ class UDPConnection(
         receive data.  This supports SDP, SCP and SpiNNaker boot.  Note that\
         SCP messages sent through this connection must have the following\
         properties:
+        
             * source_port is None or 7
             * source_cpu is None or 31
             * source_chip_x is None or 0
             * source_chip_y is None or 0
+        
         The tag of an SDP or SCP message can be assigned; if it is not, it\
         will have a default value assigned before being sent.
     """
@@ -343,10 +345,12 @@ class UDPConnection(
         """ See :py:meth:`spinnman.connections.abstract_scp_sender.AbstractSCPSender.send_scp_message`
         
         Messages must have the following properties:
+        
             * source_port is None or 7
             * source_cpu is None or 31
             * source_chip_x is None or 0
             * source_chip_y is None or 0
+        
         tag in the message is optional - if not set the default set in the\
         constructor will be used.
         sequence in the message is optional - if not set (sequence number\

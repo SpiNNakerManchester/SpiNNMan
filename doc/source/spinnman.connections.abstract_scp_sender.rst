@@ -11,9 +11,9 @@ spinnman.connections.abstract_scp_sender module
     .. rubric:: Abstract Methods
 
     .. autosummary::
-        send_scp_message
+        send_scp_request
 
     .. rubric:: Detailed Methods
 
-    .. automethod:: send_scp_message
+    .. automethod:: send_scp_request
 

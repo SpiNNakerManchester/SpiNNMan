@@ -1,20 +1,24 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from enum import Enum
-    
-_REGISTERS = Enum([("LOC_MC", 0),
-                  ("EXT_MC", 1),
-                  ("LOC_PP", 2),
-                  ("EXT_PP", 3),
-                  ("LOC_NN", 4),
-                  ("EXT_NN", 5),
-                  ("LOC_FR", 6),
-                  ("EXT_FR", 7),
-                  ("DUMP_MC", 8),
-                  ("DUMP_PP", 9),
-                  ("DUMP_NN", 10),
-                  ("DUMP_FR", 11),
-                  ("USER_START", 12),
-                  ("USER_END", 16)])
+
+
+_REGISTERS = Enum(
+        value="Registers",
+        names=[("LOC_MC", 0),
+              ("EXT_MC", 1),
+              ("LOC_PP", 2),
+              ("EXT_PP", 3),
+              ("LOC_NN", 4),
+              ("EXT_NN", 5),
+              ("LOC_FR", 6),
+              ("EXT_FR", 7),
+              ("DUMP_MC", 8),
+              ("DUMP_PP", 9),
+              ("DUMP_NN", 10),
+              ("DUMP_FR", 11),
+              ("USER_START", 12),
+              ("USER_END", 16)])
+
 
 class RouterDiagnostics(object):
     """ Represents a set of diagnostic information available from a chip router

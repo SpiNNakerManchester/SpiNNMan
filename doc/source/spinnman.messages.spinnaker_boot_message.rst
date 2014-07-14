@@ -5,23 +5,6 @@ spinnman.messages.spinnaker_boot_message module
 
 .. currentmodule:: spinnman.messages.spinnaker_boot_message
 
-.. rubric:: Classes
-
-.. autosummary::
-    OpCode
-    SpinnakerBootMessage
-
-.. autoclass:: OpCode
-    :show-inheritance:
-
-    .. rubric:: Attributes
-
-    .. autosummary::
-        FLOOD_FILL_BLOCK
-        FLOOD_FILL_CONTROL
-        FLOOD_FILL_START
-        HELLO
-
 .. autoclass:: SpinnakerBootMessage
     :show-inheritance:
 
@@ -33,5 +16,4 @@ spinnman.messages.spinnaker_boot_message module
         operand_1
         operand_2
         operand_3
-        version
 

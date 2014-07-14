@@ -13,7 +13,6 @@ spinnman.model.version_info module
     .. autosummary::
         build_date
         hardware
-        hardware_version
         name
         p
         version_number

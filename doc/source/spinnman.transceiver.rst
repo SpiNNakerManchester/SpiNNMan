@@ -9,8 +9,10 @@ spinnman.transceiver module
 
 .. autosummary::
     create_transceiver_from_hostname
+    sleep
 
 .. autofunction:: create_transceiver_from_hostname
+.. autofunction:: sleep
 .. autoclass:: Transceiver
     :show-inheritance:
 

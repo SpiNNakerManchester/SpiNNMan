@@ -1,7 +1,6 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
-from __builtin__ import property
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_response_header import SCPResponseHeader
 

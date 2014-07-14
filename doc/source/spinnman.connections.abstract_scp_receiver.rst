@@ -11,9 +11,9 @@ spinnman.connections.abstract_scp_receiver module
     .. rubric:: Abstract Methods
 
     .. autosummary::
-        receive_scp_message
+        receive_scp_response
 
     .. rubric:: Detailed Methods
 
-    .. automethod:: receive_scp_message
+    .. automethod:: receive_scp_response
 
