@@ -54,7 +54,7 @@ class _MessageCallback(object):
         :raise spinnman.exceptions.SpinnmanException: If an exception is raised\
                     before the message has been sent
         """
-        self._message_sent_condition.aquire()
+        self._message_sent_condition.acquire()
         while not self._message_sent and self._message_send_exception is None:
             self._message_sent_condition.wait()
         self._message_sent_condition.release()
@@ -104,10 +104,10 @@ class _MessageCallback(object):
         :raise spinnman.exceptions.SpinnmanException: If an exception is raised\
                     before the message has been received
         """
-        self._message_received_condition.aquire()
+        self._message_received_condition.acquire()
         while (self._message_received is None 
                 and self._message_receive_exception is None):
-            self._message_received_condition.aquire()
+            self._message_received_condition.acquire()
         self._message_received_condition.release()
             
         if self._message_receive_exception is not None:

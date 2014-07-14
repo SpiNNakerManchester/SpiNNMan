@@ -174,7 +174,7 @@ class _ConnectionQueue(Thread):
         callback = _MessageCallback()
         
         # Add the details to the queues
-        self._queue_condition.aquire()
+        self._queue_condition.acquire()
         self._message_queue.appendleft(message)
         self._callback_queue.appendleft(callback)
         self._wait_for_response_queue.appendleft(response_required)
@@ -193,7 +193,7 @@ class _ConnectionQueue(Thread):
         while not self._done:
             
             # Wait for a message to appear in the queue
-            self._queue_condition.aquire()
+            self._queue_condition.acquire()
             while not self._done and len(self._message_queue) == 0:
                 self._queue_condition.wait()
             
@@ -248,7 +248,7 @@ class _ConnectionQueue(Thread):
     def stop(self):
         """ Stop the queue thread
         """
-        self._queue_condition.aquire()
+        self._queue_condition.acquire()
         self._done = True
         self._queue_condition.notify_all()
         self._queue_condition.release()
