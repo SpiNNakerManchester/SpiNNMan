@@ -20,28 +20,15 @@ class TestSDPMessageAssembly(unittest.TestCase):
         self.assertEqual(msg.source_chip_x,0)
         self.assertEqual(msg.source_chip_y,0)
         self.assertEqual(msg.destination_cpu,0)
-        self.assertEqual(msg.source_cpu,31)
+        self.assertEqual(msg.source_cpu,0)
         self.assertEqual(msg.data,bytearray(0))
-    """
-    def test_throwing_of_exception_flag(self):
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            msg = scp_msg.SCPMessage(5,0,1,0,0,0,1,0,0,0,scp_msg.Command.CMD_APLX,0,1,2,3,bytearray(0))
-
-    def test_throwing_of_exception_command(self):
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,10,0,1,2,3,bytearray(0))
-
-    def test_throwing_of_exception_data(self):
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,scp_msg.Command.CMD_APLX,0,1,2,3,0)
-    """
 
     def test_throwing_of_exception_port(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
-             msg = sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,-1,0,0,0,0,1,0,0,0,bytearray(0))
+             sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,-1,0,0,0,0,1,0,0,0,bytearray(0))
 
     def test_throwing_of_exception_coordinates(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
-             msg = sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,1,0,-1,0,0,1,0,0,0,bytearray(0))
+             sdp_msg.SDPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED,1,0,-1,0,0,1,0,0,0,bytearray(0))
 if __name__ == '__main__':
     unittest.main()
