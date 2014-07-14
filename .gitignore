@@ -4,3 +4,4 @@
 /.settings
 /doc/build
 *.pyc
+/quick_tests.py
