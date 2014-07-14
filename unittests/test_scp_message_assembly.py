@@ -28,19 +28,7 @@ class TestSCPMessageAssembly(unittest.TestCase):
         self.assertEqual(msg.source_cpu,0)
         self.assertEqual(msg.sequence,0)
         #self.assertEqual(msg.data,bytearray(0))
-    """
-    def test_throwing_of_exception_flag(self):
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            msg = scp_msg.SCPMessage(-1,0,1,0,0,0,1,0,0,0,scp_msg.Command.CMD_APLX,0,1,2,3,bytearray(0))
 
-    def test_throwing_of_exception_command(self):
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            msg = scp_msg.SCPMessage(sdp_msg.Flag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,-1,0,1,2,3,bytearray(0))
-
-    def test_throwing_of_exception_data(self):
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            msg = scp_msg.SCPMessage(sdp_msg.Flag.REPLY_NOT_EXPECTED,0,1,0,0,0,1,0,0,0,scp_msg.Command.CMD_APLX,0,1,2,3,0)
-    """
     def test_throwing_of_exception_port(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
              msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 0, -1, 0, 0, 0, 1, 0, 0, 0,
