@@ -4,6 +4,7 @@ from six import add_metaclass
 
 from spinnman.connections.abstract_connection import AbstractConnection
 
+
 @add_metaclass(ABCMeta)
 class AbstractMulticastSender(AbstractConnection):
     """ A sender of Multicast messages
@@ -26,7 +27,8 @@ class AbstractMulticastSender(AbstractConnection):
         """ Sends a SpiNNaker multicast message using this connection
         
         :param multicast_message: The message to be sent
-        :type multicast_message: spinnman.messages.multicast_message.MulticastMessage
+        :type multicast_message:\
+                    :py:class:`spinnman.messages.multicast_message.MulticastMessage`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\

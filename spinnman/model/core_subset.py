@@ -1,10 +1,12 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
+
+
 class CoreSubset(object):
     """ Represents a subset of the cores on a chip
     """
     
     def __init__(self, x, y, processor_ids):
-        """ 
+        """
         :param x: The x-coordinate of the chip
         :type x: int
         :param y: The y-coordinate of the chip
@@ -20,7 +22,7 @@ class CoreSubset(object):
         for processor_id in processor_ids:
             if processor_id in self._processor_ids:
                 raise SpinnmanInvalidParameterException(
-                        "processor_ids", processor_id, 
+                        "processor_ids", processor_id,
                         "Each processor id must only occur once")
             self._processor_ids.add(processor_id)
 

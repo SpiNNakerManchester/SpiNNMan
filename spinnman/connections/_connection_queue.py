@@ -3,12 +3,12 @@ from threading import Condition
 from collections import deque
 
 from spinnman.connections._message_callback import _MessageCallback
-from spinnman.messages.sdp_message import SDPMessage
+from spinnman.messages.sdp.sdp_message import SDPMessage
 from spinnman.connections.abstract_sdp_sender import AbstractSDPSender
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.connections.abstract_sdp_receiver import AbstractSDPReceiver
-from spinnman.messages.scp_message import SCPMessage
+from spinnman.messages.scp.abstract_scp_request import AbstractSCPRequest
 from spinnman.connections.abstract_scp_sender import AbstractSCPSender
 from spinnman.connections.abstract_scp_receiver import AbstractSCPReceiver
 from spinnman.messages.multicast_message import MulticastMessage
@@ -17,6 +17,7 @@ from spinnman.connections.abstract_multicast_receiver import AbstractMulticastRe
 from spinnman.messages.spinnaker_boot_message import SpinnakerBootMessage
 from spinnman.connections.abstract_spinnaker_boot_sender import AbstractSpinnakerBootSender
 from spinnman.connections.abstract_spinnaker_boot_receiver import AbstractSpinnakerBootReceiver
+
 
 class _ConnectionQueue(Thread):
     """ A queue of messages to be sent down a connection, and callbacks\
@@ -55,8 +56,8 @@ class _ConnectionQueue(Thread):
         
         :param message: The message to determine support for
         :type message: One of:
-                    * :py:class:`spinnman.messages.sdp_message.SDPMessage`
-                    * :py:class:`spinnman.messages.scp_message.SCPMessage`
+                    * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
+                    * :py:class:`spinnman.messages.scp.abstract_scp_request.SCPRequest`
                     * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
                     * :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
         :param response_required: True if a response is required, False\
@@ -73,12 +74,12 @@ class _ConnectionQueue(Thread):
             if not isinstance(self._connection, AbstractSDPSender):
                 raise SpinnmanUnsupportedOperationException(
                         "Send SDP Message")
-            if response_required and not isinstance(self._connection, 
+            if response_required and not isinstance(self._connection,
                                                     AbstractSDPReceiver):
                 raise SpinnmanUnsupportedOperationException(
                         "Receive SDP Message")
         
-        elif isinstance(message, SCPMessage):
+        elif isinstance(message, AbstractSCPRequest):
             if not isinstance(self._connection, AbstractSCPSender):
                 raise SpinnmanUnsupportedOperationException(
                         "Send SCP Message")
@@ -112,8 +113,8 @@ class _ConnectionQueue(Thread):
         
         :param message: The message to determine support for
         :type message: One of:
-                    * :py:class:`spinnman.messages.sdp_message.SDPMessage`
-                    * :py:class:`spinnman.messages.scp_message.SCPMessage`
+                    * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
+                    * :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
                     * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
                     * :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
         :param response_required: True if a response is required, False\
@@ -144,8 +145,8 @@ class _ConnectionQueue(Thread):
             
         :param message: A message to be sent
         :type message: One of:
-                    * :py:class:`spinnman.messages.sdp_message.SDPMessage`
-                    * :py:class:`spinnman.messages.scp_message.SCPMessage`
+                    * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
+                    * :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
                     * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
                     * :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
         :param response_required: True if a response is required, False\
@@ -155,12 +156,11 @@ class _ConnectionQueue(Thread):
         :rtype: Same type as the received message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
                     timeout before a message is received
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one of\
-                    the fields of the received message is invalid
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
+                    of the fields of the received message is invalid
         :raise spinnman.exceptions.SpinnmanInvalidPacketException:
                     * If the message is not one of the indicated types
-                    * If a packet is received that is not of the same type\
-                      as that sent
+                    * If a packet is received that is not a valid response
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
                     the connection cannot send the type of message given
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -216,8 +216,8 @@ class _ConnectionQueue(Thread):
                 try:
                     if isinstance(message, SDPMessage):
                         self._connection.send_sdp_message(message)
-                    elif isinstance(message, SCPMessage):
-                        self._connection.send_scp_message(message)
+                    elif isinstance(message, AbstractSCPRequest):
+                        self._connection.send_scp_request(message)
                     elif isinstance(message, MulticastMessage):
                         self._connection.send_multicast_message(message)
                     elif isinstance(message, SpinnakerBootMessage):
@@ -234,8 +234,9 @@ class _ConnectionQueue(Thread):
                         response = None
                         if isinstance(message, SDPMessage):
                             response = self._connection.receive_sdp_message()
-                        elif isinstance(message, SCPMessage):
-                            response = self._connection.receive_scp_message()
+                        elif isinstance(message, AbstractSCPRequest):
+                            response = message.scp_response
+                            self._connection.receive_scp_response(response)
                         elif isinstance(message, MulticastMessage):
                             response =\
                                 self._connection.receive_multicast_message()

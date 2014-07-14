@@ -2,6 +2,7 @@ from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
 
+
 @add_metaclass(ABCMeta)
 class AbstractConnection(object):
     """ An abstract connection to the SpiNNaker board over some medium

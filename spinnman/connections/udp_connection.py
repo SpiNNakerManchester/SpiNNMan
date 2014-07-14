@@ -9,74 +9,19 @@ from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanInvalidPacketException
-from spinnman.messages.sdp_message import SDPMessage
-from spinnman.messages.sdp_flag import SDPFlag
-from spinnman.messages.scp_message import SCPMessage
-from spinnman.messages.scp_command import SCPCommand
+from spinnman.messages.sdp.sdp_message import SDPMessage
 from spinnman.messages.spinnaker_boot_message import SpinnakerBootMessage
 from spinnman.messages.spinnaker_boot_message import BOOT_MESSAGE_VERSION
 from spinnman.messages.spinnaker_boot_op_code import SpinnakerBootOpCode
-
-from spinnman._utils import _get_int_from_little_endian_bytearray
-from spinnman._utils import _get_short_from_little_endian_bytearray
-from spinnman._utils import _put_int_in_little_endian_byte_array
-from spinnman._utils import _put_short_in_little_endian_byte_array
-from spinnman._utils import _get_int_from_big_endian_bytearray
-from spinnman._utils import _get_short_from_big_endian_bytearray
-from spinnman._utils import _put_int_in_big_endian_byte_array
-from spinnman._utils import _put_short_in_big_endian_byte_array
+from spinnman.data.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
+from spinnman.data.little_endian_byte_array_byte_writer import LittleEndianByteArrayByteWriter
+from spinnman.data.big_endian_byte_array_byte_reader import BigEndianByteArrayByteReader
+from spinnman.data.big_endian_byte_array_byte_writer import BigEndianByteArrayByteWriter
 
 import platform
 import subprocess
 import socket
-
-
-def _get_int_from_scp(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return _get_int_from_little_endian_bytearray(array, offset)
-
-
-def _get_short_from_scp(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return _get_short_from_little_endian_bytearray(array, offset)
-
-
-def _put_int_in_scp(array, offset, value):
-    """ Wrapper function in case endianness changes
-    """
-    _put_int_in_little_endian_byte_array(array, offset, value)
-    
-
-def _put_short_in_scp(array, offset, value):
-    """ Wrapper function in case endianness changes
-    """
-    _put_short_in_little_endian_byte_array(array, offset, value)
-
-
-def _get_int_from_boot(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return _get_int_from_big_endian_bytearray(array, offset)
-
-
-def _get_short_from_boot(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return _get_short_from_big_endian_bytearray(array, offset)
-
-
-def _put_int_in_boot(array, offset, value):
-    """ Wrapper function in case endianness changes
-    """
-    _put_int_in_big_endian_byte_array(array, offset, value)
-
-
-def _put_short_in_boot(array, offset, value):
-    """ Wrapper function in case endianness changes
-    """
-    _put_short_in_big_endian_byte_array(array, offset, value)
+from spinnman.messages.sdp.sdp_header import SDPHeader
 
 # The default port of the connection
 UDP_CONNECTION_DEFAULT_PORT = 17893
@@ -273,67 +218,56 @@ class UDPConnection(
         """
         return self._remote_port
     
-    def _put_sdp_headers_into_message(self, packet, offset, sdp_message):
-        """ Adds the headers of an SDP message into a packet buffer,
-            applying defaults where the values have not been set
+    def _update_sdp_header(self, sdp_header):
+        """ Apply defaults to the sdp header where the values have not been set
         
-        :param packet: The packet buffer
-        :type packet: bytearray
-        :param offset: The offset in to the buffer where the headers should\
-                    start
-        :type offset: int
-        :param sdp_message: The SDP message containing the header values
-        :type sdp_message: :py:class:`spinnman.messages.sdp_message.SDPMessage`
+        :param sdp_header: The SDP header values
+        :type sdp_header:\
+                    :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     packet already has a source_port != 7, a source_cpu != 31,\
                     a source_chip_x != 0, or a source_chip_y != 0
         """
-        tag = sdp_message.tag
-        if tag is None:
-            tag = self._default_sdp_tag
+        if sdp_header.tag is None:
+            sdp_header.tag = self._default_sdp_tag
             
-        if (sdp_message.source_port is not None
-                and sdp_message.source_port != UDPConnection._SDP_SOURCE_PORT):
-            raise SpinnmanInvalidParameterException(
-                    "message.source_port", sdp_message.source_port,
-                    "The source port must be {} to work with this connection"
-                    .format(UDPConnection._SDP_SOURCE_PORT))
+        if sdp_header.source_port is not None:
+            if sdp_header.source_port != UDPConnection._SDP_SOURCE_PORT:
+                raise SpinnmanInvalidParameterException(
+                        "message.source_port", sdp_header.source_port,
+                        "The source port must be {} to work with this"
+                        " connection".format(UDPConnection._SDP_SOURCE_PORT))
+        else:
+            sdp_header.source_port = UDPConnection._SDP_SOURCE_PORT
         
-        if (sdp_message.source_cpu is not None
-                and sdp_message.source_cpu != UDPConnection._SDP_SOURCE_CPU):
-            raise SpinnmanInvalidParameterException(
-                    "message.source_cpu", sdp_message.source_cpu,
-                    "The source cpu must be {} to work with this connection"
-                    .format(UDPConnection._SDP_SOURCE_CPU))
+        if sdp_header.source_cpu is not None:
+            if sdp_header.source_cpu != UDPConnection._SDP_SOURCE_CPU:
+                raise SpinnmanInvalidParameterException(
+                        "message.source_cpu", sdp_header.source_cpu,
+                        "The source cpu must be {} to work with this"
+                        " connection".format(UDPConnection._SDP_SOURCE_CPU))
+        else:
+            sdp_header.source_cpu = UDPConnection._SDP_SOURCE_CPU
         
-        if (sdp_message.source_chip_x is not None
-                and sdp_message.source_chip_x
-                        != UDPConnection._SDP_SOURCE_CHIP_X):
-            raise SpinnmanInvalidParameterException(
-                    "message.source_chip_x", sdp_message.source_chip_x,
-                    "The source chip x must be {} to work with this connection"
-                    .format(UDPConnection._SDP_SOURCE_CHIP_X))
+        if sdp_header.source_chip_x is not None:
+            if sdp_header.source_chip_x != UDPConnection._SDP_SOURCE_CHIP_X:
+                raise SpinnmanInvalidParameterException(
+                        "message.source_chip_x", sdp_header.source_chip_x,
+                        "The source chip x must be {} to work with this"
+                        " connection".format(UDPConnection._SDP_SOURCE_CHIP_X))
+        else:
+            sdp_header.source_chip_x = UDPConnection._SDP_SOURCE_CHIP_X
         
-        if (sdp_message.source_chip_y is not None
-                and sdp_message.source_chip_y
-                        != UDPConnection._SDP_SOURCE_CHIP_Y):
-            raise SpinnmanInvalidParameterException(
-                    "message.source_chip_y", sdp_message.source_chip_y,
-                    "The source chip y must be {} to work with this connection"
-                    .format(UDPConnection._SDP_SOURCE_CHIP_Y))
-        
-        packet[offset] = sdp_message.flags.value
-        packet[offset + 1] = tag
-        packet[offset + 2] = (((sdp_message.destination_port & 0x7) << 5) |
-                               (sdp_message.destination_cpu & 0x1F))
-        packet[offset + 3] = (((UDPConnection._SDP_SOURCE_PORT & 0x7) << 5) |
-                               (UDPConnection._SDP_SOURCE_CPU & 0x1F))
-        packet[offset + 4] = sdp_message.destination_chip_x
-        packet[offset + 5] = sdp_message.destination_chip_y
-        packet[offset + 6] = UDPConnection._SDP_SOURCE_CHIP_X
-        packet[offset + 7] = UDPConnection._SDP_SOURCE_CHIP_Y
+        if sdp_header.source_chip_y is not None:
+            if sdp_header.source_chip_y != UDPConnection._SDP_SOURCE_CHIP_Y:
+                raise SpinnmanInvalidParameterException(
+                        "message.source_chip_y", sdp_header.source_chip_y,
+                        "The source chip y must be {} to work with this"
+                        " connection".format(UDPConnection._SDP_SOURCE_CHIP_Y))
+        else:
+            sdp_header.source_chip_y = UDPConnection._SDP_SOURCE_CHIP_Y
 
     def send_sdp_message(self, sdp_message):
         """ See :py:meth:`spinnman.connections.abstract_sdp_sender.AbstractSDPSender.send_sdp_message`
@@ -344,26 +278,28 @@ class UDPConnection(
         if not self._can_send:
             raise SpinnmanIOException("Not connected to a remote host")
         
-        # Create an array with the correct number of entries
+        # Update the SDP headers for this connection
+        self._update_sdp_header(sdp_message.sdp_header)
+        
+        # Create a writer for the mesage
         data_length = 0
         if sdp_message.data is not None:
             data_length = len(sdp_message.data)
-        packet = bytearray(10 + data_length)
+        writer = LittleEndianByteArrayByteWriter(size=(10 + data_length))
         
         # Add the UDP padding
-        packet[0] = 0
-        packet[1] = 0
+        writer.write_short(0)
         
-        # Put all the message headers in to the packet
-        self._put_sdp_headers_into_message(packet, 2, sdp_message)
+        # Write the header
+        sdp_message.sdp_header.write_sdp_header(writer)
         
-        # Put the data in to the packet
-        if data_length > 0:
-            packet[10:] = sdp_message.data
+        # Write any data
+        if data_length != 0:
+            writer.write_bytes(sdp_message.data)
         
         # Send the packet
         try:
-            self._socket.send(packet)
+            self._socket.send(writer.data)
         except Exception as e:
             raise SpinnmanIOException(str(e))
     
@@ -381,32 +317,29 @@ class UDPConnection(
         except Exception as e:
             raise SpinnmanIOException(str(e))
         
-        # Parse the data
+        # Set up for reading
         packet = bytearray(raw_data)
-        if len(packet) < 10:
-            raise SpinnmanInvalidPacketException(
-                    "SDP", "Only {} bytes of data received, but the minimum"
-                    " for SDP is {}".format(len(packet), 10))
-        data = None
-        if len(packet) > 10:
-            data = packet[10:]
+        reader = LittleEndianByteArrayByteReader(packet)
+        
+        # Read the padding
+        try:
+            reader.read_short()
+        except EOFError:
+            raise SpinnmanInvalidPacketException("SDP",
+                    "Not enough bytes to read the pre-packet padding")
+    
+        # Read the header and data
+        sdp_header = SDPHeader()
+        sdp_header.read_sdp_header(reader)
+        data = reader.read_bytes()
+        if len(data) == 0:
+            data = None
             
-        # Parse the header
-        message = SDPMessage(
-                flags=SDPFlag(packet[2]),
-                tag=packet[3],
-                destination_port=(packet[4] >> 5) & 0x7,
-                destination_chip_x=packet[6],
-                destination_chip_y=packet[7],
-                destination_cpu=packet[4] & 0x1F,
-                source_port=(packet[5] >> 5) & 0x7,
-                source_chip_x=packet[8],
-                source_chip_y=packet[9],
-                source_cpu=packet[5] & 0x1F,
-                data=data)
+        # Create and return the message
+        message = SDPMessage(sdp_header=sdp_header, data=data)
         return message
     
-    def send_scp_message(self, scp_message):
+    def send_scp_request(self, scp_request):
         """ See :py:meth:`spinnman.connections.abstract_scp_sender.AbstractSCPSender.send_scp_message`
         
         Messages must have the following properties:
@@ -422,43 +355,30 @@ class UDPConnection(
         if not self._can_send:
             raise SpinnmanIOException("Not connected to a remote host")
         
-        # Create an array with the correct number of entries
-        data_length = 0
-        if scp_message.data is not None:
-            data_length = len(scp_message.data)
-        packet = bytearray(26 + data_length)
+        # Update the SDP headers for this connection
+        self._update_sdp_header(scp_request.sdp_header)
         
-        # Add the UDP padding
-        packet[0] = 0
-        packet[1] = 0
-        
-        # Put all the SDP message headers in to the packet
-        self._put_sdp_headers_into_message(packet, 2, scp_message)
-
-        # Work out the sequence number
-        sequence = scp_message.sequence
-        if sequence is None:
-            sequence = self._scp_sequence
+        # Update the sequence for this connection
+        if scp_request.scp_request_header.sequence is None:
+            scp_request.scp_request_header.sequence = self._scp_sequence
             self._scp_sequence = (self._scp_sequence + 1) % 65536
         
-        # Put all the SCP message headers in to the packet (little-endian)
-        _put_short_in_scp(packet, 10, scp_message.command.value)
-        _put_short_in_scp(packet, 12, sequence)
-        _put_int_in_scp(packet, 14, scp_message.argument_1)
-        _put_int_in_scp(packet, 18, scp_message.argument_2)
-        _put_int_in_scp(packet, 22, scp_message.argument_3)
+        # Create a writer for the mesage
+        writer = LittleEndianByteArrayByteWriter()
         
-        # Put the data in to the packet
-        if data_length > 0:
-            packet[26:] = scp_message.data
+        # Add the UDP padding
+        writer.write_short(0)
+        
+        # Write the SCP message
+        scp_request.write_scp_request(writer)
         
         # Send the packet
         try:
-            self._socket.send(packet)
+            self._socket.send(writer.data)
         except Exception as e:
             raise SpinnmanIOException(str(e))
     
-    def receive_scp_message(self, timeout=None):
+    def receive_scp_response(self, scp_response, timeout=None):
         """ See :py:meth:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver.receive_scp_message`
         """
         
@@ -472,50 +392,19 @@ class UDPConnection(
         except Exception as e:
             raise SpinnmanIOException(str(e))
         
-        # Parse the data
+        # Set up for reading
         packet = bytearray(raw_data)
-        if len(packet) < 14:
-            raise SpinnmanInvalidPacketException(
-                    "SCP", "Only {} bytes of data received, but the minimum"
-                    " for SCP is {}".format(len(packet), 14))
-        if len(packet) > 26 + 256:
-            raise SpinnmanInvalidPacketException(
-                    "SCP", "{} bytes of data received, but the maximum for SCP"
-                    "is {}".format(len(packet), 26 + 256))
-            
-        # There can only be arguments and data if the packet is longer than 14
-        argument_1 = 0
-        argument_2 = 0
-        argument_3 = 0
-        data = None
-        if len(packet) >= 18:
-            argument_1 = _get_int_from_scp(packet, 14)
-            if len(packet) >= 22:
-                argument_2 = _get_int_from_scp(packet, 18)
-                if len(packet) >= 26:
-                    argument_3 = _get_int_from_scp(packet, 22)
-                    if len(packet) > 26:
-                        data = packet[26:]
-            
-        # Parse the header (little endian)
-        message = SCPMessage(
-                flags=SDPFlag(packet[2]),
-                tag=packet[3],
-                destination_port=(packet[4] >> 5) & 0x7,
-                destination_chip_x=packet[6],
-                destination_chip_y=packet[7],
-                destination_cpu=packet[4] & 0x1F,
-                source_port=(packet[5] >> 5) & 0x7,
-                source_chip_x=packet[8],
-                source_chip_y=packet[9],
-                source_cpu=packet[5] & 0x1F,
-                command=SCPCommand(_get_short_from_scp(packet, 10)),
-                sequence=_get_short_from_scp(packet, 12),
-                argument_1=argument_1,
-                argument_2=argument_2,
-                argument_3=argument_3,
-                data=data)
-        return message
+        reader = LittleEndianByteArrayByteReader(packet)
+        
+        # Read the padding
+        try:
+            reader.read_short()
+        except EOFError:
+            raise SpinnmanInvalidPacketException("SCP",
+                    "Not enough bytes to read the pre-packet padding")
+        
+        # Read the response
+        scp_response.read_scp_response(reader)
     
     def send_boot_message(self, boot_message):
         """ See :py:meth:`spinnman.connections.abstract_spinnaker_boot_sender.AbstractSpinnakerBootSender.send_boot_message`
@@ -523,26 +412,26 @@ class UDPConnection(
         if not self._can_send:
             raise SpinnmanIOException("Not connected to a remote host")
         
-        # Create an array with the correct number of entries
+        # Create a writer for the mesage
         data_length = 0
         if boot_message.data is not None:
             data_length = len(boot_message.data)
-        packet = bytearray(18 + data_length)
+        writer = BigEndianByteArrayByteWriter(size=(18 + data_length))
         
         # Put the headers into the message (big-endian)
-        _put_short_in_boot(packet, 0, BOOT_MESSAGE_VERSION)
-        _put_int_in_boot(packet, 2, boot_message.opcode.value)
-        _put_int_in_boot(packet, 6, boot_message.operand_1)
-        _put_int_in_boot(packet, 10, boot_message.operand_2)
-        _put_int_in_boot(packet, 14, boot_message.operand_3)
+        writer.write_short(BOOT_MESSAGE_VERSION)
+        writer.write_int(boot_message.opcode.value)
+        writer.write_int(boot_message.operand_1)
+        writer.write_int(boot_message.operand_2)
+        writer.write_int(boot_message.operand_3)
         
         # Put the data in to the packet
         if data_length > 0:
-            packet[18:] = boot_message.data
+            writer.write_bytes(boot_message.data)
         
         # Send the packet
         try:
-            self._socket.send(packet)
+            self._socket.send(writer.data)
         except Exception as e:
             raise SpinnmanIOException(str(e))
     
@@ -560,34 +449,40 @@ class UDPConnection(
         except Exception as e:
             raise SpinnmanIOException(str(e))
         
-        # Parse the data
+        # Create a reader
         packet = bytearray(raw_data)
-        if len(packet) < 18:
-            raise SpinnmanInvalidPacketException(
-                    "SpiNNaker Boot", "Only {} bytes of data received, but the"
-                    " minimum for Boot packets is {}".format(len(packet), 18))
-        if len(packet) > 18 + (256 * 4):
-            raise SpinnmanInvalidPacketException(
-                    "SpiNNaker Boot", "{} bytes of data received, but the"
-                    " maximum for Boot packets is {}".format(len(packet),
-                            18 + (256 * 4)))
-        data = None
-        if len(packet) > 18:
-            data = packet[18:]
-            
-        # Check the version
-        version = (packet[0] << 8) | packet[1]
-        if version != 1:
+        reader = BigEndianByteArrayByteReader(packet)
+        
+        opcode_value = None
+        try:
+            # Check the version
+            version = reader.read_short()
+            if version != 1:
+                raise SpinnmanInvalidParameterException(
+                        "boot message version", version,
+                        "Only version 1 of the spinnaker boot protocol is"
+                        " currently supported")
+                
+            # Read the values
+            opcode_value = reader.read_int()
+            opcode = SpinnakerBootOpCode(opcode_value)
+            operand_1 = reader.read_int()
+            operand_2 = reader.read_int()
+            operand_3 = reader.read_int()
+            data = reader.read_bytes()
+            if len(data) == 0:
+                data = None
+                
+            # Parse the header (big endian)
+            message = SpinnakerBootMessage(
+                    opcode=opcode, operand_1=operand_1, operand_2=operand_2,
+                    operand_3=operand_3, data=data)
+            return message
+        except IOError as exception:
+            raise SpinnmanIOException(str(exception))
+        except EOFError:
+            raise SpinnmanInvalidPacketException("Boot",
+                    "Not enough bytes in the packet")
+        except ValueError:
             raise SpinnmanInvalidParameterException(
-                    "boot message version", version,
-                    "Only version 1 of the spinnaker boot protocol is"
-                    " currently supported")
-            
-        # Parse the header (big endian)
-        message = SpinnakerBootMessage(
-                opcode=SpinnakerBootOpCode(_get_int_from_boot(packet, 2)),
-                operand_1=_get_int_from_boot(packet, 6),
-                operand_2=_get_int_from_boot(packet, 10),
-                operand_3=_get_int_from_boot(packet, 14),
-                data=data)
-        return message
+                    "opcode", opcode_value, "Unrecognized value")

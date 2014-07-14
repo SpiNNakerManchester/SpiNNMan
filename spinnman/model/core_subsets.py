@@ -7,7 +7,7 @@ class CoreSubsets(object):
     """
     
     def __init__(self, core_subsets=None):
-        """ 
+        """
         :param core_subsets: An iterable of cores for each desired chip
         :type core_subsets: iterable of\
                     :py:class:`spinnman.model.core_subset.CoreSubset`
@@ -33,7 +33,7 @@ class CoreSubsets(object):
         """
         if (core_subset.x, core_subset.y) in self._core_subsets:
             raise SpinnmanInvalidParameterException(
-                    "core_subset.(x, y)", 
+                    "core_subset.(x, y)",
                     "{}, {}".format(core_subset.x, core_subset.y),
                     "There can be only one set of cores for each chip")
         self._core_subsets[(core_subset.x, core_subset.y)] = core_subset

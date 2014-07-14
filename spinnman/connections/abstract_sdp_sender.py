@@ -14,7 +14,7 @@ class AbstractSDPSender(AbstractConnection):
         """ Sends an SDP message down this connection
         
         :param sdp_message: The SDP message to be sent
-        :type sdp_message: spinnman.messages.sdp_message.SDPMessage
+        :type sdp_message: spinnman.messages.sdp.sdp_message.SDPMessage
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\

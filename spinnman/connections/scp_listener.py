@@ -5,6 +5,7 @@ from _callback_queue import _CallbackQueue
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
+
 def _function_has_free_argument_count(func, count):
     """ Determines if a function has a given free argument count (such that the
         function can be called with the given number of arguments)
@@ -14,7 +15,7 @@ def _function_has_free_argument_count(func, count):
     :param count: The amount of free arguments to check for
     :type count: int
     :return: True if func has count free arguments, false otherwise
-    :rtype: bool 
+    :rtype: bool
     """
     (args, varargs, keywords, defaults) = inspect.getargspec(func)
     
@@ -33,20 +34,26 @@ def _function_has_free_argument_count(func, count):
     # Otherwise it must not match
     return False
 
+
 class SCPListener(Thread):
     """ Listens for SCP packets received from a connection,\
         calling a callback function with received packets
     """
 
-    def __init__(self, scp_receiver, callback, error_callback=None):
+    def __init__(self, scp_receiver, response_class, callback,
+            error_callback=None):
         """
         :param scp_receiver: The SCP Receiver to receive packets from
-        :type scp_receiver: 
+        :type scp_receiver:\
                     :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
+        :param response_class: The SCP response
+        :type response_class: class of implementation of\
+                    :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
         :param callback: The callback function to call on reception of each\
                     packet; the function should take one parameter, which is\
                     the SCP packet received
-        :type callback: function(:py:class:`spinnman.messages.scp_message.SCPMessage`)
+        :type callback: function(\
+                    :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`)
         :param error_callback: The callback function to call if there is an\
                     error receiving a packet; the function should take two\
                     parameters:
@@ -62,13 +69,14 @@ class SCPListener(Thread):
                     "callback", repr(callback),
                     "Incorrect number of parameters")
         
-        if (error_callback is not None 
+        if (error_callback is not None
                 and not _function_has_free_argument_count(error_callback, 2)):
             raise SpinnmanInvalidParameterException(
                     "error_callback", repr(error_callback),
                     "Incorrect number of parameters")
         
         self._scp_receiver = scp_receiver
+        self._response_class = response_class
         self._error_callback = error_callback
         self._queue_consumer = _CallbackQueue(callback)
         self._running = False
@@ -87,10 +95,11 @@ class SCPListener(Thread):
         """ Overridden method of Thread that runs this listener
         """
         self._running = True
-        while self._running and self._sdp_receiver.is_connected():
+        while self._running and self._scp_receiver.is_connected():
             try:
-                sdp_message = self._sdp_receiver.receive_sdp_message()
-                self._queue_consumer.add_item(sdp_message)
+                scp_response = self._response_class()
+                self._scp_receiver.receive_scp_response(scp_response)
+                self._queue_consumer.add_item(scp_response)
             except Exception as exception:
                 self._running = False
                 self._error_callback(exception, "Error receiving packet")

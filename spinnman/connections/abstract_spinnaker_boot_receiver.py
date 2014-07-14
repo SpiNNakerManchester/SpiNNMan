@@ -4,6 +4,7 @@ from six import add_metaclass
 
 from spinnman.connections.abstract_connection import AbstractConnection
 
+
 @add_metaclass(ABCMeta)
 class AbstractSpinnakerBootReceiver(AbstractConnection):
     """ A receiver of Spinnaker boot messages
@@ -26,7 +27,7 @@ class AbstractSpinnakerBootReceiver(AbstractConnection):
                     timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
                     received packet is not a valid spinnaker boot message
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one of\
-                    the fields of the spinnaker boot message is invalid
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
+                    of the fields of the spinnaker boot message is invalid
         """
         pass

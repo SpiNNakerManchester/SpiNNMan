@@ -1,12 +1,13 @@
-
 class SpinnmanException(Exception):
-    """ Superclass of exceptions that occur when dealing with communication with
-        SpiNNaker
+    """ Superclass of exceptions that occur when dealing with communication\
+        with SpiNNaker
     """
     pass
     
+
 class SpinnmanInvalidPacketException(SpinnmanException):
-    """ An exception that indicates that a packet was not in the expected format
+    """ An exception that indicates that a packet was not in the expected\
+        format
     """
     
     def __init__(self, packet_type, problem):
@@ -34,6 +35,7 @@ class SpinnmanInvalidPacketException(SpinnmanException):
         """
         return self._problem
     
+
 class SpinnmanInvalidParameterException(SpinnmanException):
     """ An exception that indicates that the value of one of the parameters\
         passed was invalid
@@ -171,7 +173,7 @@ class SpinnmanUnsupportedOperationException(SpinnmanException):
     """
     
     def __init__(self, operation):
-        """ 
+        """
         :param operation: The operation being requested
         :type operation: str
         """

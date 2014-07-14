@@ -2,6 +2,7 @@ from threading import Thread
 from threading import Condition
 from collections import deque
 
+
 class _CallbackQueue(Thread):
     """ Consumes items from a queue calling a callback function with each item
     """
@@ -29,7 +30,7 @@ class _CallbackQueue(Thread):
         self._queue_condition.release()
     
     def run(self):
-        """ Overridden method of Thread - consumes the queue
+        """ Overridden method of Thread - consumes the queue.
         """
         self._running = True
         while self._running:
@@ -47,4 +48,4 @@ class _CallbackQueue(Thread):
         self._running = False
         self._queue_condition.aquire()
         self._queue_condition.notify_all()
-        self._queue_condition.release()    
+        self._queue_condition.release()
