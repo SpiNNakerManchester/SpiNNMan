@@ -32,7 +32,7 @@ class _ConnectionQueue(Thread):
         :type connection: :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        
+        super(_ConnectionQueue,self).__init__()
         # Store the calls
         self._connection = connection
         
