@@ -14,6 +14,6 @@ setup(
             'spinnman.messages',
             'spinnman.messages.scp',
             'spinnman.messages.scp.impl',
-            'spinnman.messages.sdp'
+            'spinnman.messages.sdp',
             'spinnman.model']
 )
