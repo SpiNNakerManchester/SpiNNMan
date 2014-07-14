@@ -36,7 +36,7 @@ class _CallbackQueue(Thread):
             self._queue_condition.acquire()
             while self._running and len(self._queue) == 0:
                 self._queue_condition.wait()
-            if not self._queue.empty():
+            if self._queue:
                 item = self._queue.pop()
                 self._callback(item)
             self._queue_condition.release()
