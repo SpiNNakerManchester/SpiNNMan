@@ -2,188 +2,129 @@ __author__ = 'Petrut'
 
 import unittest
 import spinnman.connections.udp_connection as udp_conn
-import spinnman.messages.scp_message as scp_msg
-import spinnman.messages.sdp_message as sdp_msg
-import unittests.udp_connection as hack_udp
-import unittests.virtual_spinnaker as virtual_spinnaker
+import spinnman.messages.scp.scp_request_header as scp_msg
 import spinnman.exceptions as exc
-import spinnman.messages.sdp_flag as flags
-import spinnman.messages.scp_command as cmds
+import spinnman.messages.sdp.sdp_header as sdp_header
+import spinnman.messages.sdp.sdp_flag as flags
+import spinnman.messages.scp.scp_command as cmds
+from spinnman.messages.scp.impl import scp_read_link_request,scp_read_link_response,scp_read_memory_request,scp_read_memory_response\
+                ,scp_version_request, scp_version_response
+from spinnman.messages.scp.scp_result import SCPResult
 import time
 import thread
 
 class TestUDPConnection(unittest.TestCase):
 
-    # def setUp(self):
-    #     #TODO ---> Run vSpiNNaker on a different thread and don't forget to run receive_message()
-    #     #self.vs = virtual_spinnaker.VirtualSpiNNakerMessageReader('1','Virtual Spinnaker Threaded Message Reader',
-    #     #                                                          1,)
-    #
-    #     self.vs = virtual_spinnaker.VirtualSpiNNaker('localhost',17893)
-    #     thread.start_new_thread(self.vs.receive_message,())
-    #     #self.vs.receive_message()
-    #     #self.vs.run()
-    #     self.udp = hack_udp.UDPConnection('localhost',17893)
+    def set_up_local_virtual_board(self):
+        self.localhost = "127.0.0.1"
+        self.localport = 54321
+        self.remotehost = "127.0.0.1"
+        self.remoteport = 17893
 
-    def tearDown(self):
-        # self.vs.close()
-        # self.udp.close()
-        time.sleep(2)
+    def set_up_remote_board(self):
+        self.localhost = "192.168.240.254"
+        self.localport = 54321
+        self.remotehost = "192.168.240.253"
+        self.remoteport = 17893
 
-    def test_setup_new_udp_connection(self):
-        #self.udp = hack_udp.UDPConnection('localhost',17893)
-        localhost = "127.0.0.1"
-        localport = 54321
-        remotehost = "127.0.0.1"
-        remoteport = 17893
-        connection = udp_conn.UDPConnection(localhost,localport, remotehost,remoteport)
+    def test_setup_new_local_udp_connection(self):
+        self.set_up_local_virtual_board()
+        connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+        self.assertEqual(connection.local_ip_address, self.localhost)
+        self.assertEqual(connection.local_port, self.localport)
 
-        self.assertEqual(connection.local_ip_address, localhost)
-        self.assertEqual(connection.local_port,localport)
+    def test_setup_new_remote_udp_connection(self):
+        self.set_up_remote_board()
+        connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+        self.assertEqual(connection.local_ip_address, self.localhost)
+        self.assertEqual(connection.local_port, self.localport)
 
-    def test_send_scp_message_with_confirmation(self):
-        localhost = "127.0.0.1"
-        localport = 54321
-        remotehost = "127.0.0.1"
-        remoteport = 17893
-        connection = udp_conn.UDPConnection(localhost,localport,remote_host = remotehost,remote_port= remoteport)
-        msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3, 0)
-
-        connection.send_scp_message(msg)
-        response = connection.receive_scp_message(2)
-
-        #self.assertEqual(response.flags,flags.SDPFlag.REPLY_NOT_EXPECTED)
-        self.assertEqual(response.argument_1,1)
-        self.assertEqual(response.argument_2,2)
-        self.assertEqual(response.argument_3,3)
-        self.assertEqual(response.command,cmds.SCPCommand.CMD_APLX.value)
-        self.assertEqual(response.tag,0)
-        self.assertEqual(response.destination_port,1)
-        self.assertEqual(response.source_port,7)
-        self.assertEqual(response.destination_chip_x,0)
-        self.assertEqual(response.destination_chip_y,0)
-        self.assertEqual(response.source_chip_x,0)
-        self.assertEqual(response.source_chip_y,0)
-        self.assertEqual(response.destination_cpu,0)
-        self.assertEqual(response.source_cpu,31)
-        self.assertEqual(response.sequence,0)
-
-    def test_send_random_scp_msg_to_booted_spinnaker_board_with_confirmation(self):
-        localhost = "192.168.240.254"
-        localport = 54321
-        remotehost = "192.168.240.253"
-        remoteport = 17893
-        connection = udp_conn.UDPConnection(localhost,localport,remote_host = remotehost,remote_port= remoteport)
-        msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3, 0)
-
-        connection.send_scp_message(msg)
-        response = connection.receive_scp_message(2)
+    def test_scp_version_request_and_response_board(self):
+        self.set_up_remote_board()
+        connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+        scp_req = scp_version_request.SCPVersionRequest(0,0,0)
+        scp_response = scp_version_response.SCPVersionResponse()
+        connection.send_scp_request(scp_req)
+        connection.receive_scp_response(scp_response)
+        print scp_response.version_info
+        self.assertEqual(scp_response._scp_response_header._result, SCPResult.RC_OK)
 
 
-    def test_send_random_scp_msg_to_booted_spinnaker_board_without_confirmation(self):
-        with self.assertRaises(Exception):
+    def test_scp_version_request_and_response_board_invalid_x(self):
+        with self.assertRaises(exc.SpinnmanInvalidParameterException):
+            self.set_up_remote_board()
+            connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+            scp_req = scp_version_request.SCPVersionRequest(256,0,0)
+
+
+    def test_scp_version_request_and_response_board_invalid_y(self):
+        with self.assertRaises(exc.SpinnmanInvalidParameterException):
+            self.set_up_remote_board()
+            connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+            scp_req = scp_version_request.SCPVersionRequest(0,256,0)
+
+
+    def test_scp_version_request_and_response_board_invalid_processor(self):
+        with self.assertRaises(exc.SpinnmanInvalidParameterException):
+            self.set_up_remote_board()
+            connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+            scp_req = scp_version_request.SCPVersionRequest(0,0,32)
+
+
+    def test_scp_read_link_request_and_response_board(self):
+        self.set_up_remote_board()
+        connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+        scp_link = scp_read_link_request.SCPReadLinkRequest(0,0,0,0,250)
+        scp_link_reader = scp_read_link_response.SCPReadLinkResponse()
+        connection.send_scp_request(scp_link)
+        connection.receive_scp_response(scp_link_reader)
+        self.assertEqual(scp_link_reader._scp_response_header._result, SCPResult.RC_OK)
+
+    def test_scp_read_memory_request_and_response_board(self):
+        self.set_up_remote_board()
+        connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+        scp_link = scp_read_memory_request.SCPReadMemoryRequest(0,0,0,256)
+        scp_link_reader = scp_read_memory_response.SCPReadMemoryResponse()
+        connection.send_scp_request(scp_link)
+        connection.receive_scp_response(scp_link_reader)
+        self.assertEqual(scp_link_reader._scp_response_header._result, SCPResult.RC_OK)
+
+
+    def test_scp_read_memory_request_and_response_board_more_than_256_bytes(self):
+        with self.assertRaises(exc.SpinnmanInvalidParameterException):
+            self.set_up_remote_board()
+            connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+            scp_link = scp_read_memory_request.SCPReadMemoryRequest(0,0,0,257)
+
+    def test_scp_read_memory_request_and_response_board_0_bytes(self):
+        with self.assertRaises(exc.SpinnmanInvalidParameterException):
+            self.set_up_remote_board()
+            connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+            scp_link = scp_read_memory_request.SCPReadMemoryRequest(0,0,0,0)
+
+    def test_send_scp_request_to_nonexistent_host(self):
+        with self.assertRaises(exc.SpinnmanTimeoutException):
             localhost = "192.168.240.254"
             localport = 54321
             remotehost = "192.168.240.253"
-            remoteport = 17893
-            connection = udp_conn.UDPConnection(localhost,localport,remote_host = remotehost,remote_port= remoteport)
-            msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3, 0)
+            remoteport = 11111
+            connection = udp_conn.UDPConnection(localhost,localport,remotehost,remoteport)
+            scp = scp_read_memory_request.SCPReadMemoryRequest(0,0,0,256)
+            scp_reader = scp_read_memory_response.SCPReadMemoryResponse()
+            connection.send_scp_request(scp)
+            connection.receive_scp_response(scp_reader,2)
 
-            connection.send_scp_message(msg)
-            response = connection.receive_scp_message(2)
-
-    def test_send_scp_message_without_confirmation(self):
-        localhost = "127.0.0.1"
-        localport = 54321
-        remotehost = "127.0.0.1"
-        remoteport = 17893
-        connection = udp_conn.UDPConnection(localhost,localport, remotehost,remoteport)
-        msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3,0, 0, 7, 0,0,
-                                  31, bytearray(0))
-        connection.send_scp_message(msg)
-
-    def test_send_cmd_ver_to_spinnaker_board(self):
-        localhost = "192.168.240.254"
-        localport = 54321
-        remotehost = "192.168.240.253"
-        remoteport = 17893
-        connection = udp_conn.UDPConnection(localhost,localport,remote_host = remotehost,remote_port= remoteport)
-        msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_VER, 1, 2, 3, 0)
-
-        connection.send_scp_message(msg)
-        response = connection.receive_scp_message(2)
-        self.assertEquals(response.command,cmds.SCPCommand.CMD_APLX.value)
-    # def test_send_sdp_message_with_confirmation(self):
-    #     self.assertEqual(True,False)
-    #
-    # def test_send_sdp_message_without_confirmation(self):
-    #     self.assertEqual(True,False)
-    #
     # def test_send_boot_message(self):
-    #     self.assertEqual(True,False)
-    #
-    # def test_receive_boot_message(self):
-    #     self.assertEqual(True,False)
-    #
-    # def test_receive_scp_message(self):
-    #     self.assertEqual(True,False)
-    #
-    # def test_receive_sdp_message(self):
-    #     self.assertEqual(True,False)
-    #
-    # def test_send_message_with_low_timeout(self):
-    #     self.assertEqual(True,False)
+    #     self.set_up_remote_board()
+    #     connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
 
-    def test_create_connection_without_remote_host(self):
-        with self.assertRaises(exc.SpinnmanIOException):
-            localhost = "127.0.0.1"
-            localport = 54321
-            remotehost = "127.0.0.1"
-            remoteport = 12345
-            connection = udp_conn.UDPConnection(localhost,localport)
-            msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3,0, 0, 7, 0,0,
-                                  31, bytearray(0))
-            connection.send_scp_message(msg)
-
-    def test_send_scp_message_to_inexistent_host(self):
-        with self.assertRaises(exc.SpinnmanIOException):
-            localhost = "127.0.0.1"
-            localport = 54321
-            remotehost = "192.168.240.253"
-            remoteport = 61616
-            connection = udp_conn.UDPConnection(localhost,localport,remotehost,remoteport)
-            msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3,0, 0,7, 0,0,
-                                  31, bytearray(0))
-            connection.send_scp_message(msg)
-
-    def test_send_scp_message_with_invalid_port_number(self):
-        """
-        The port number used when sending a packet over UDP has to be 7
-        """
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            localhost = "127.0.0.1"
-            localport = 54321
-            remotehost = "127.0.0.1"
-            remoteport = 61616
-            connection = udp_conn.UDPConnection(localhost,localport,remotehost,remoteport)
-            msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3,0, 0, 1, 0,0,
-                                  0, bytearray(0))
-            connection.send_scp_message(msg)
-
-    def test_send_scp_message_with_invalid_cpu_number(self):
-        """
-        The cpu number used when sending a packet over UDP has to be 31
-        """
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            localhost = "127.0.0.1"
-            localport = 54321
-            remotehost = "127.0.0.1"
-            remoteport = 61616
-            connection = udp_conn.UDPConnection(localhost,localport,remotehost,remoteport)
-            msg = scp_msg.SCPMessage(flags.SDPFlag.REPLY_NOT_EXPECTED, 1, 0, 0, 0, cmds.SCPCommand.CMD_APLX, 1, 2, 3,0, 0, 7, 0,0,
-                                  0, bytearray(0))
-            connection.send_scp_message(msg)
-
+    # def test_scp_read_link_request_and_response_virtual_board(self):
+    #     self.set_up_local_virtual_board()
+    #     connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
+    #     scp_link = scp_read_link_request.SCPReadLinkRequest(0,0,0,0,250)
+    #     scp_link_reader = scp_read_memory_response.SCPReadMemoryResponse()
+    #     connection.send_scp_request(scp_link)
+    #     print connection.receive_scp_response(scp_link_reader)
 
 if __name__ == '__main__':
     unittest.main()
