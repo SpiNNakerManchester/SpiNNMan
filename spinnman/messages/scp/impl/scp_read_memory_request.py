@@ -5,15 +5,15 @@ from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
 from spinnman.messages.scp.impl.scp_read_memory_response import SCPReadMemoryResponse
-   
+
 
 class SCPReadMemoryRequest(AbstractSCPRequest):
     """ An SCP request to read a region of memory on a chip
     """
-    
+
     def __init__(self, x, y, base_address, size):
         """
-        
+
         :param x: The x-coordinate of the chip to read from, between 0 and 255
         :type x: int
         :param y: The y-coordinate of the chip to read from, between 0 and 255
@@ -33,30 +33,19 @@ class SCPReadMemoryRequest(AbstractSCPRequest):
             raise SpinnmanInvalidParameterException(
                     "base_address", str(base_address),
                     "Must be a positive number")
-        
+
         if size < 1 or size > 256:
             raise SpinnmanInvalidParameterException(
                     "size", size, "Must be between 1 and 256")
-        
+
         super(SCPReadMemoryRequest, self).__init__(
                 SDPHeader(
                         flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                         destination_cpu=0, destination_chip_x=x,
                         destination_chip_y=y),
-                SCPRequestHeader(command=SCPCommand.CMD_READ))
-        self._base_address = base_address
-        self._size = size
-        
-    def write_scp_request(self, byte_writer):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.write_scp_request`
-        """
-        super(SCPReadMemoryRequest, self).write_scp_request(byte_writer)
-        
-        # Write the arguments
-        byte_writer.write_int(self._base_address)
-        byte_writer.write_int(self._size)
-        byte_writer.write_int(0)
-        
+                SCPRequestHeader(command=SCPCommand.CMD_READ),
+                argument_1=base_address, argument_2=size, argument_3=0)
+
     def get_scp_response(self):
         """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """

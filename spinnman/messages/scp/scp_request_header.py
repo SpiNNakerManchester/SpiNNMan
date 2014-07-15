@@ -8,10 +8,10 @@ class SCPRequestHeader(object):
         than None once, after which it is immutable.  It is an error to set a\
         parameter that is not currently None.
     """
-    
+
     def __init__(self, command, sequence=None):
         """
-        
+
         :param command: The SCP command
         :type command: :py:class:`spinnman.messages.scp.scp_command.SCPCommand`
         :param sequence: The number of the SCP packet in order of all packets\
@@ -22,31 +22,31 @@ class SCPRequestHeader(object):
         """
         self._command = command
         self._sequence = None
-        
+
         self.sequence = sequence
-        
+
     @property
     def command(self):
         """ The command of the SCP packet
-        
+
         :return: The command
         :rtype: :py:class:`spinnman.messages.scp.scp_command.SCPCommand`
         """
         return self._command
-    
+
     @property
     def sequence(self):
         """ The sequence number of the SCP packet
-        
+
         :return: The sequence number of the packet, between 0 and 65535
         :rtype: int
         """
         return self._sequence
-    
+
     @sequence.setter
     def sequence(self, sequence):
         """ Set the sequence number of the SCP packet
-        
+
         :param sequence: The sequence number to set, between 0 and 65535
         :type sequence: int
         :return: Nothing is returned
@@ -63,10 +63,10 @@ class SCPRequestHeader(object):
                     "sequence", str(sequence),
                     "The sequence must be between 0 and 65535")
         self._sequence = sequence
-    
+
     def write_scp_request_header(self, byte_writer):
         """ Write the SCP header to a byte_writer
-        
+
         :param byte_writer: The writer to write the data to
         :type byte_writer:\
                     :py:class:`spinnman.data.abstract_byte_writer.AbstractByteWriter`
@@ -83,7 +83,7 @@ class SCPRequestHeader(object):
         if self._sequence is None:
             raise SpinnmanInvalidParameterException(
                     "scp_header.sequence", None, "No value has been assigned")
-        
+
         try:
             byte_writer.write_short(self._command.value)
             byte_writer.write_short(self._sequence)

@@ -26,6 +26,7 @@ from time import sleep
 from collections import deque
 
 import logging
+from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
 
 logger = logging.getLogger(__name__)
 
@@ -469,11 +470,11 @@ class Transceiver(object):
                 return True
         return False
 
-    def get_scamp_version(self, retries=3, timeout=1):
+    def get_scamp_version(self, n_retries=3, timeout=1):
         """ Get the version of scamp which is running on the board
 
-        :param retries: The number of times to retry getting the version
-        :type retries: int
+        :param n_retries: The number of times to retry getting the version
+        :type n_retries: int
         :param timeout: The timeout for each retry in seconds
         :type timeout: int
         :return: The version identifier
@@ -486,7 +487,10 @@ class Transceiver(object):
                     retries resulted in a response before the timeout\
                     (suggesting that the board is not booted)
         """
-        pass
+        response = self._send_scp_message(
+                message=SCPVersionRequest(x=0, y=0, p=0),
+                n_retries=n_retries, timeout=timeout)
+        return response.version_info
 
     def boot_board(self, board_version):
         """ Attempt to boot the board.  No check is performed to see if the\
