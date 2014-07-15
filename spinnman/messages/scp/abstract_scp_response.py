@@ -35,7 +35,9 @@ class AbstractSCPResponse(object):
                     the response code indicates an error
         """
         self._sdp_header.read_sdp_header(byte_reader)
+        print "Read SDP header"
         self._scp_response_header.read_scp_response_header(byte_reader)
+        print "Read SCP response header"
     
     @property
     def sdp_header(self):

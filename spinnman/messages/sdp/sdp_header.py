@@ -475,7 +475,7 @@ class SDPHeader(object):
             self.source_chip_x = byte_reader.read_byte()
             self.source_chip_y = byte_reader.read_byte()
         except ValueError as exception:
-            raise SpinnmanInvalidParameterException("flags", flags_value, 
+            raise SpinnmanInvalidParameterException("flags", flags_value,
                     "Unrecognized value")
         except IOError as exception:
             raise SpinnmanIOException(str(exception))

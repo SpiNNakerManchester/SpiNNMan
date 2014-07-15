@@ -4,7 +4,7 @@ from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.messages.scp.impl.scp_read_link_response import SCPReadLinkResponse
+from spinnman.messages.scp.impl.scp_read_memory_response import SCPReadMemoryResponse
    
 
 class SCPReadMemoryRequest(AbstractSCPRequest):
@@ -57,7 +57,7 @@ class SCPReadMemoryRequest(AbstractSCPRequest):
         byte_writer.write_int(self._size)
         byte_writer.write_int(0)
         
-    def _get_scp_response(self):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest._get_scp_response`
+    def get_scp_response(self):
+        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
-        return SCPReadLinkResponse()
+        return SCPReadMemoryResponse()

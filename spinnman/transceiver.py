@@ -2,6 +2,7 @@ from spinnman.connections.udp_connection import UDPConnection
 from spinnman.connections.udp_connection import UDP_CONNECTION_DEFAULT_PORT
 from spinnman.connections._connection_queue import _ConnectionQueue
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
+from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.model.system_variables import SystemVariables
 from spinnman.model.system_variables import _SYSTEM_VARIABLE_BASE_ADDRESS
@@ -21,6 +22,11 @@ from time import sleep
 from spinn_machine.link import Link
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.messages.scp.scp_result import SCPResult
+
+import logging
+from spinn_machine.sdram import SDRAM
+
+logger = logging.getLogger(__name__)
 
 
 def create_transceiver_from_hostname(hostname):
@@ -115,7 +121,8 @@ class Transceiver(object):
                         _ConnectionQueue(connection)
                 self._connection_queues[connection].start()
                 
-    def _send_message(self, message, response_required, connection=None):
+    def _send_message(self, message, response_required, connection=None,
+            timeout=1):
         """ Sends a message using one of the connections, and gets a response\
             if requested
             
@@ -131,6 +138,8 @@ class Transceiver(object):
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :param timeout: Timeout to use when waiting for a response
+        :type timeout: int
         :return: The response if requested, or None otherwise
         :rtype: The same type as message, or\
                     :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`\
@@ -167,7 +176,7 @@ class Transceiver(object):
                         message, response_required):
                     connection_queue_size = connection_queue.queue_length
                     if (best_connection_queue is None
-                            or connection_queue_size 
+                            or connection_queue_size
                                     < best_connection_queue_size):
                         best_connection_queue = connection_queue
                         best_connection_queue_size = connection_queue_size
@@ -178,13 +187,15 @@ class Transceiver(object):
                     "Sending and receiving {}".format(message.__class__))
         
         # Send the message with the best queue
-        return best_connection_queue.send_message(message, response_required)
+        logger.debug("Sending message with {}".format(best_connection_queue))
+        return best_connection_queue.send_message(
+                message, response_required, timeout)
     
     def _send_scp_message(
             self, message, retry_codes=[
                 SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_TIMEOUT,
                 SCPResult.RC_LEN],
-            n_retries=10, connection=None):
+            n_retries=10, timeout=1, connection=None):
         """ Sends an SCP message, and gets a response
         
         :param message: The message to send
@@ -196,6 +207,9 @@ class Transceiver(object):
                     :py:class:`spinnman.messages.scp.scp_result.SCPResult`
         :param n_retries: The number of times to retry when a retry code is\
                 received
+        :type n_retries: int
+        :param timeout: The timeout to use when receiving a response
+        :type timeout: int
         :param connection: The connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
@@ -219,16 +233,24 @@ class Transceiver(object):
         retries_to_go = n_retries
         response = None
         while retries_to_go >= 0:
-            response = self._send_message(
-                    message=message, response_required=True, 
-                    connection=connection)
+            retry = False
+            try:
+                response = self._send_message(
+                        message=message, response_required=True,
+                        connection=connection)
+                
+                if response.scp_response_header.result == SCPResult.RC_OK:
+                    return response
+                
+                if response.scp_response_header.result in retry_codes:
+                    retry = True
+            except SpinnmanTimeoutException:
+                retry = True
             
-            if response.scp_response_header.result == SCPCommand.RC_OK:
-                return response
-            
-            if response.scp_response_header.result in retry_codes:
+            if retry:
                 retries_to_go -= 1
                 sleep(0.1)
+        
         raise SpinnmanUnexpectedResponseCodeException(
                 "SCP", message.scp_request_header.command.name,
                 response.scp_response_header.result.name)
@@ -248,12 +270,12 @@ class Transceiver(object):
         processors = list()
         for virtual_core_id in chip_details.virtual_core_ids:
             processors.append(Processor(
-                    virtual_core_id, chip_details.cpu_clock_mhz() * 1000000,
+                    virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
                     virtual_core_id == 0))
             
         # Create the router - add the links later during search
         router = Router(
-                links=list(), emergengy_routing_enabled=False,
+                links=list(), emergency_routing_enabled=False,
                 clock_speed=ROUTER_DEFAULT_CLOCK_SPEED,
                 n_available_multicast_entries=ROUTER_DEFAULT_AVAILABLE_ENTRIES
                     - chip_details.first_free_router_entry)
@@ -261,7 +283,7 @@ class Transceiver(object):
         # Create the chip
         chip = Chip(
                 x=chip_details.x, y=chip_details.y, processors=processors,
-                router=router, sdram=CHIP_DEFAULT_SDRAM_AVAIABLE,
+                router=router, sdram=SDRAM(CHIP_DEFAULT_SDRAM_AVAIABLE),
                 ip_address=chip_details.ip_address)
         return chip
     
@@ -270,6 +292,7 @@ class Transceiver(object):
         """
         
         # Ask the chip at 0, 0 for details
+        logger.debug("Getting details of chip 0, 0")
         response = self._send_scp_message(SCPReadMemoryRequest(
                 x=0, y=0, base_address=_SYSTEM_VARIABLE_BASE_ADDRESS,
                 size=_SYSTEM_VARIABLE_BYTES))
@@ -287,6 +310,9 @@ class Transceiver(object):
             # Examine the links of the chip to find the next chips
             for link in links:
                 try:
+                    logger.debug(
+                            "Searching down link {} from chip {}, {}".format(
+                                    link, chip.x, chip.y))
                     response = self._send_scp_message(SCPReadLinkRequest(
                         x=chip.x, y=chip.y, link=link,
                         base_address=_SYSTEM_VARIABLE_BASE_ADDRESS,
@@ -321,6 +347,8 @@ class Transceiver(object):
                     # Add the new chip if it doesn't exist
                     if not self._machine.is_chip_at(
                             new_chip_details.x, new_chip_details.y):
+                        logger.debug("Found new chip {}, {}".format(
+                                new_chip_details.x, new_chip_details.y))
                         new_chip = self._make_chip(new_chip_details)
                         self._machine.add_chip(new_chip)
                         search.append(
@@ -1051,3 +1079,13 @@ class Transceiver(object):
                     * If the received packet has an invalid parameter
         """
         pass
+    
+    def close(self):
+        """ Close the transceiver and any threads that are running
+        
+        :return: Nothing is returned
+        :rtype: None
+        :raise None: No known exceptions are raised
+        """
+        for connection_queue in self._connection_queues.itervalues():
+            connection_queue.stop()

@@ -18,6 +18,10 @@ from spinnman.messages.spinnaker_boot_message import SpinnakerBootMessage
 from spinnman.connections.abstract_spinnaker_boot_sender import AbstractSpinnakerBootSender
 from spinnman.connections.abstract_spinnaker_boot_receiver import AbstractSpinnakerBootReceiver
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class _ConnectionQueue(Thread):
     """ A queue of messages to be sent down a connection, and callbacks\
@@ -32,7 +36,7 @@ class _ConnectionQueue(Thread):
         :type connection: :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        super(_ConnectionQueue,self).__init__()
+        super(_ConnectionQueue, self).__init__()
         # Store the calls
         self._connection = connection
         
@@ -44,6 +48,9 @@ class _ConnectionQueue(Thread):
         
         # Set up a queue which indicates whether a response is expected
         self._wait_for_response_queue = deque()
+        
+        # Set up a queue for the timeout
+        self._timeout_queue = deque()
         
         # Set up a condition for thread control
         self._queue_condition = Condition()
@@ -140,7 +147,7 @@ class _ConnectionQueue(Thread):
         """
         return len(self._message_queue)
         
-    def send_message(self, message, response_required):
+    def send_message(self, message, response_required, timeout):
         """ Send a message, waiting for the response if requested
             
         :param message: A message to be sent
@@ -152,6 +159,8 @@ class _ConnectionQueue(Thread):
         :param response_required: True if a response is required, False\
                     otherwise
         :type response_required: bool
+        :param timeout: The timeout for a response in seconds
+        :type timeout: int
         :return: A message in response
         :rtype: Same type as the received message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
@@ -178,6 +187,7 @@ class _ConnectionQueue(Thread):
         self._message_queue.appendleft(message)
         self._callback_queue.appendleft(callback)
         self._wait_for_response_queue.appendleft(response_required)
+        self._timeout_queue.appendleft(timeout)
         self._queue_condition.notify_all()
         self._queue_condition.release()
         
@@ -200,11 +210,13 @@ class _ConnectionQueue(Thread):
             # If there is a message, get it
             message = None
             callback = None
-            wait_for_response = False
+            wait_for_response = None
+            timeout = None
             if not self._done:
                 message = self._message_queue.pop()
                 callback = self._callback_queue.pop()
                 wait_for_response = self._wait_for_response_queue.pop()
+                timeout = self._timeout_queue.pop()
                 
             # Release the queue
             self._queue_condition.release()
@@ -213,6 +225,7 @@ class _ConnectionQueue(Thread):
                     
                 # Send the message
                 send_error = False
+                logger.debug("Sending message")
                 try:
                     if isinstance(message, SDPMessage):
                         self._connection.send_sdp_message(message)
@@ -222,6 +235,7 @@ class _ConnectionQueue(Thread):
                         self._connection.send_multicast_message(message)
                     elif isinstance(message, SpinnakerBootMessage):
                         self._connection.send_boot_message(message)
+                    logger.debug("Message sent - notifying callback")
                     callback.message_sent()
                 except Exception as exception:
                     callback.send_exception(exception)
@@ -230,18 +244,26 @@ class _ConnectionQueue(Thread):
                 # If there was no error, and a response is required,
                 # get the response
                 if not send_error and wait_for_response:
+                    logger.debug("Waiting for response, timeout={}".format(
+                            timeout))
                     try:
                         response = None
                         if isinstance(message, SDPMessage):
-                            response = self._connection.receive_sdp_message()
+                            response = self._connection.receive_sdp_message(
+                                    timeout=timeout)
                         elif isinstance(message, AbstractSCPRequest):
-                            response = message.scp_response
-                            self._connection.receive_scp_response(response)
+                            response = message.get_scp_response()
+                            self._connection.receive_scp_response(
+                                    scp_response=response,
+                                    timeout=timeout)
                         elif isinstance(message, MulticastMessage):
                             response =\
-                                self._connection.receive_multicast_message()
+                                self._connection.receive_multicast_message(
+                                        timeout=timeout)
                         elif isinstance(message, SpinnakerBootMessage):
-                            response = self._connection.receive_boot_message()
+                            response = self._connection.receive_boot_message(
+                                    timeout=timeout)
+                        logger.debug("Response received - notifying callback")
                         callback.message_received(response)
                     except Exception as exception:
                         callback.receive_exception(exception)

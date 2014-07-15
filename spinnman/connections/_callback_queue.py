@@ -6,21 +6,21 @@ from collections import deque
 class _CallbackQueue(Thread):
     """ Consumes items from a queue calling a callback function with each item
     """
-    
+
     def __init__(self, callback):
         """
         :param callback: Callback function to call with each packet
         :type callback: callable
         """
-        super(_CallbackQueue,self).__init__()
+        super(_CallbackQueue, self).__init__()
         self._queue = deque()
         self._callback = callback
         self._running = False
         self._queue_condition = Condition()
-        
+
     def add_item(self, item):
         """ Adds an item to the queue
-        
+
         :param item: The item to add
         :return: Nothing is returned
         :rtype: None
@@ -29,7 +29,7 @@ class _CallbackQueue(Thread):
         self._queue.appendleft(item)
         self._queue_condition.notify_all()
         self._queue_condition.release()
-    
+
     def run(self):
         """ Overridden method of Thread - consumes the queue.
         """
@@ -42,7 +42,7 @@ class _CallbackQueue(Thread):
                 item = self._queue.pop()
                 self._callback(item)
             self._queue_condition.release()
-    
+
     def stop(self):
         """ Stops the queue from transferring items
         """

@@ -51,7 +51,7 @@ class SystemVariables(object):
         self._links_available = list()
         for i in range(0, 8):
             if ((system_data[12] >> i) & 0x1) != 0:
-                self._links_up.append(i)
+                self._links_available.append(i)
                 
         self._peer_to_peer_sequence_length = system_data[13]
         self._clock_divisor = system_data[14]
@@ -224,6 +224,7 @@ class SystemVariables(object):
         """
         return self._physical_to_virtual_core_map
     
+    @property
     def virtual_core_ids(self):
         """ A list of available cores by virtual core id (including the monitor)
         

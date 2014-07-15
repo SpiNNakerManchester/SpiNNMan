@@ -10,6 +10,7 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.sdp.sdp_message import SDPMessage
+from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.spinnaker_boot_message import SpinnakerBootMessage
 from spinnman.messages.spinnaker_boot_message import BOOT_MESSAGE_VERSION
 from spinnman.messages.spinnaker_boot_op_code import SpinnakerBootOpCode
@@ -21,7 +22,7 @@ from spinnman.data.big_endian_byte_array_byte_writer import BigEndianByteArrayBy
 import platform
 import subprocess
 import socket
-from spinnman.messages.sdp.sdp_header import SDPHeader
+import select
 
 # The default port of the connection
 UDP_CONNECTION_DEFAULT_PORT = 17893
@@ -146,6 +147,10 @@ class UDPConnection(
         except Exception as exception:
             raise SpinnmanIOException("Error querying socket: {}".format(
                     exception))
+            
+        # Set a general timeout on the socket
+        self._socket.settimeout(1.0)
+        self._socket.setblocking(0)
         
     def is_connected(self):
         """ See :py:meth:`spinnman.connections.AbstractConnection.abstract_connection.is_connected`
@@ -312,7 +317,9 @@ class UDPConnection(
         # Receive the data
         raw_data = None
         try:
-            self._socket.settimeout(timeout)
+            read_ready, _, _ = select.select([self._socket], [], [], timeout)
+            if not read_ready:
+                raise socket.timeout()
             raw_data = self._socket.recv(512)
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_sdp_message", timeout)
@@ -389,7 +396,9 @@ class UDPConnection(
         # Receive the data
         raw_data = None
         try:
-            self._socket.settimeout(timeout)
+            ready_read, _, _ = select.select([self._socket], [], [], timeout)
+            if not ready_read:
+                raise socket.timeout()
             raw_data = self._socket.recv(512)
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_scp_message", timeout)
@@ -409,6 +418,7 @@ class UDPConnection(
         
         # Read the response
         scp_response.read_scp_response(reader)
+        print "Read response"
     
     def send_boot_message(self, boot_message):
         """ See :py:meth:`spinnman.connections.abstract_spinnaker_boot_sender.AbstractSpinnakerBootSender.send_boot_message`
@@ -446,7 +456,9 @@ class UDPConnection(
         # Receive the data
         raw_data = None
         try:
-            self._socket.settimeout(timeout)
+            read_ready, _, _ = select.select([self._socket], [], [], timeout)
+            if not read_ready:
+                raise socket.timeout()
             raw_data = self._socket.recv(2048)
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_scp_message", timeout)

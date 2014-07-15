@@ -60,7 +60,7 @@ class SCPReadLinkRequest(AbstractSCPRequest):
         byte_writer.write_int(self._size)
         byte_writer.write_int(self._link)
         
-    def _get_scp_response(self):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest._get_scp_response`
+    def get_scp_response(self):
+        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
         return SCPReadLinkResponse()

@@ -56,7 +56,7 @@ class AbstractSCPRequest(object):
         self._scp_request_header.write_scp_request_header(byte_writer)
         
     @abstractmethod
-    def _get_scp_response(self):
+    def get_scp_response(self):
         """ Get an SCP response message to be used to process any response\
             received
         
@@ -65,7 +65,3 @@ class AbstractSCPRequest(object):
         :raise None: No known exceptions are raised
         """
         pass
-    
-    scp_response = property(_get_scp_response, None, None,
-            "An SCP response message to be used to process any response"
-            " received, or None if no response is required")
