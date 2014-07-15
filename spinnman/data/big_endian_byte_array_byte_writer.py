@@ -53,8 +53,8 @@ class BigEndianByteArrayByteWriter(AbstractByteWriter):
         self._data.append((long_value >> 8) & 0xFF)
         self._data.append(long_value & 0xFF)
 
-    def n_bytes_written(self):
-        """ See :py:meth:`spinnman.data.abstract_byte_writer.AbstractByteWriter.n_bytes_written`
+    def get_n_bytes_written(self):
+        """ See :py:meth:`spinnman.data.abstract_byte_writer.AbstractByteWriter.get_n_bytes_written`
         """
         return len(self._data)
 
