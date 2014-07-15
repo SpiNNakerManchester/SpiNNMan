@@ -26,8 +26,6 @@ class SCPReadMemoryRequest(AbstractSCPRequest):
                     * If the chip coordinates are out of range
                     * If the base address is not a positive number
                     * If the size is out of range
-                    * If the tag is out of range
-                    * If the sequence number if not a positive number
         """
         if base_address < 0:
             raise SpinnmanInvalidParameterException(

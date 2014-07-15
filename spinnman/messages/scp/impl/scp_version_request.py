@@ -22,7 +22,7 @@ class SCPVersionRequest(AbstractSCPRequest):
         :type p: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
                     * If the chip coordinates are out of range
-                    * If the processor if is out of range
+                    * If the processor is out of range
         """
         super(SCPVersionRequest, self).__init__(
                 SDPHeader(
