@@ -1,5 +1,3 @@
-__author__ = 'Petrut'
-
 import unittest
 import spinnman.connections.udp_connection as udp_conn
 import spinnman.messages.scp.scp_request_header as scp_msg
