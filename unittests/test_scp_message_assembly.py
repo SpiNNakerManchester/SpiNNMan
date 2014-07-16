@@ -55,10 +55,6 @@ class TestSCPMessageAssembly(unittest.TestCase):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             SCPReadLinkRequest(0,256,0,0,256)
 
-    def test_create_new_link_scp_pkt_with_invalid_link(self):
-        with self.assertRaises(exc.SpinnmanInvalidParameterException):
-            SCPReadLinkRequest(0,0,0,6,256)
-
     def test_create_new_link_scp_pkt_with_invalid_data_size(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             SCPReadLinkRequest(0,0,0,0,257)
