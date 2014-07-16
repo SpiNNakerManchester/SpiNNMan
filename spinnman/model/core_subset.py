@@ -24,8 +24,9 @@ class CoreSubset(object):
 
     def add_processor(self, processor_id):
         """ Adds a processor id to this subset
-        :param processor_ids: An iterable of processor ids on the chip
-        :type processor_ids: iterable of int
+
+        :param processor_ids: A processor id
+        :type processor_ids: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
