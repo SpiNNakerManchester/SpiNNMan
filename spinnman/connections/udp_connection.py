@@ -410,7 +410,6 @@ class UDPConnection(
 
         # Read the response
         scp_response.read_scp_response(reader)
-        print "Read response"
 
     def close(self):
         """ See :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`

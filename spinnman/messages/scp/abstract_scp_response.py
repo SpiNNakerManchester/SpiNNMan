@@ -9,17 +9,17 @@ from spinnman.messages.scp.scp_response_header import SCPResponseHeader
 class AbstractSCPResponse(object):
     """ Represents an abstract SCP Response
     """
-    
+
     def __init__(self):
         """
         """
         self._sdp_header = SDPHeader()
         self._scp_response_header = SCPResponseHeader()
-    
+
     @abstractmethod
     def read_scp_response(self, byte_reader):
         """ Read the scp response from the given reader
-        
+
         :param byte_reader: The reader to read from
         :type byte_reader:\
                     :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`
@@ -35,24 +35,22 @@ class AbstractSCPResponse(object):
                     the response code indicates an error
         """
         self._sdp_header.read_sdp_header(byte_reader)
-        print "Read SDP header"
         self._scp_response_header.read_scp_response_header(byte_reader)
-        print "Read SCP response header"
-    
+
     @property
     def sdp_header(self):
         """ The SDP header from the response
-        
+
         :return: The SDP header
         :rtype: :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
         :raise None: No known exceptions are raised
         """
         return self._sdp_header
-    
+
     @property
     def scp_response_header(self):
         """ The SCP header from the response
-        
+
         :return: The SCP header
         :rtype: :py:class:`spinnman.messages.scp.scp_response_header.SCPResponseHeader`
         :raise None: No known exceptions are raised
