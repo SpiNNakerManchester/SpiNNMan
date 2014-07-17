@@ -176,6 +176,44 @@ class _ConnectionQueue(Thread):
                     sending the message or receiving the response
         """
 
+        callback = self.send_message_non_blocking(message, response_required,
+                timeout)
+
+        # Wait for the callback to indicate completion
+        callback.wait_for_send()
+        if response_required:
+            return callback.wait_for_receive()
+        return None
+
+    def send_message_non_blocking(self, message, response_required, timeout):
+        """ Send a message but return immediately
+
+        :param message: A message to be sent
+        :type message: One of:
+                    * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
+                    * :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
+                    * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+                    * :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
+        :param response_required: True if a response is required, False\
+                    otherwise
+        :type response_required: bool
+        :param timeout: The timeout for a response in seconds
+        :type timeout: int
+        :return: A message callback object which can be used to wait for the\
+                    message to be sent, or for a response
+        :rtype: :py:class:`spinnman.connections._message_callback._MessageCallback`
+        :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
+                    timeout before a message is received
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
+                    of the fields of the received message is invalid
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException:
+                    * If the message is not one of the indicated types
+                    * If a packet is received that is not a valid response
+        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
+                    the connection cannot send the type of message given
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    sending the message or receiving the response
+        """
         # Check that the connection can deal with the message
         self._check_message_type(message, response_required)
 
@@ -191,11 +229,7 @@ class _ConnectionQueue(Thread):
         self._queue_condition.notify_all()
         self._queue_condition.release()
 
-        # Wait for the callback to indicate completion
-        callback.wait_for_send()
-        if response_required:
-            return callback.wait_for_receive()
-        return None
+        return callback
 
     def run(self):
         """ The main method of the thread

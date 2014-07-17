@@ -55,7 +55,7 @@ class CoreSubsets(object):
         """
         if (x, y) not in self._core_subsets:
             self.add_core_subset(CoreSubset(x, y, []))
-        self._core_subsets((x, y)).add_processor(processor_id)
+        self._core_subsets[(x, y)].add_processor(processor_id)
 
     @property
     def core_subsets(self):

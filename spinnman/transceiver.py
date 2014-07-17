@@ -37,6 +37,11 @@ from collections import deque
 import logging
 from spinnman.model.cpu_info import CPU_INFO_BYTES
 from spinnman.model.cpu_info import CPUInfo
+from __builtin__ import type
+from threading import Thread
+from spinnman.connections import _scp_message_callback
+from spinnman.connections._scp_message_callback import _SCPMessageCallback
+from spinnman.model import core_subsets
 
 logger = logging.getLogger(__name__)
 
@@ -153,10 +158,9 @@ class Transceiver(object):
                         _ConnectionQueue(connection)
                 self._connection_queues[connection].start()
 
-    def _send_message(self, message, response_required, connection=None,
-            timeout=1):
-        """ Sends a message using one of the connections, and gets a response\
-            if requested
+    def _find_best_connection_queue(self, message, response_required,
+            connection=None):
+        """ Finds the best connection queue to use to send a message
 
         :param message: The message to send
         :type message: One of:
@@ -170,25 +174,11 @@ class Transceiver(object):
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :param timeout: Timeout to use when waiting for a response
-        :type timeout: int
-        :return: The response if requested, or None otherwise
-        :rtype: The same type as message, or\
-                    :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`\
-                    if message is an AbstractSCPRequest
-        :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
-                    timeout before a message is received
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
-                    of the fields of the received message is invalid
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException:
-                    * If the message is not one of the indicated types
-                    * If a packet is received is not a valid response
+        :return: The best connection queue
+        :rtype: :py:class:`spinnman.connections._connection_queue.ConnectionQueue`
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
                     no connection can send the type of message given
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    sending the message or receiving the response
         """
-
         best_connection_queue = None
 
         # If a connection is given, use it
@@ -218,8 +208,66 @@ class Transceiver(object):
             raise SpinnmanUnsupportedOperationException(
                     "Sending and receiving {}".format(message.__class__))
 
-        # Send the message with the best queue
+        return best_connection_queue
+
+    def _send_message(self, message, response_required, connection=None,
+            timeout=1, get_callback=False):
+        """ Sends a message using one of the connections, and gets a response\
+            if requested
+
+        :param message: The message to send
+        :type message: One of:
+                    * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
+                    * :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
+                    * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+                    * :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
+        :param response_required: True if a response is required, False\
+                    otherwise
+        :type response_required: bool
+        :param connection: An optional connection to use
+        :type connection:\
+                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :param timeout: Timeout to use when waiting for a response
+        :type timeout: int
+        :param get_callback: Determines if the function should return the\
+                    callback which can be used to send messages asynchronously
+        :type get_callback: bool
+        :return:
+                    * If get_callback is False, and response_required is True,\
+                      the response
+                    * If get_callback is False, and response_required is\
+                      False, None
+                    * If get_callback is True, the callback
+        :rtype:
+                    * If get_callback is False, and response_required is True,
+                      and the message type is AbstractSCPRequest then\
+                      :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
+                    * If get_callback is False, and response_required is True,
+                      then the same type as the message
+                    * If get_callback is False, and response_required is False,
+                      then None
+                    * If get_callback is True, then\
+                      :py:class:`spinnman.connections._message_callback._MessageCallback`
+        :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
+                    timeout before a message is received
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
+                    of the fields of the received message is invalid
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException:
+                    * If the message is not one of the indicated types
+                    * If a packet is received is not a valid response
+        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
+                    no connection can send the type of message given
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    sending the message or receiving the response
+        """
+        best_connection_queue = self._find_best_connection_queue(message,
+                response_required, connection)
         logger.debug("Sending message with {}".format(best_connection_queue))
+
+        # Send the message with the best queue
+        if get_callback:
+            return best_connection_queue.send_message_non_blocking(
+                    message, response_required, timeout)
         return best_connection_queue.send_message(
                 message, response_required, timeout)
 
@@ -227,7 +275,8 @@ class Transceiver(object):
             self, message, retry_codes=(
                 SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_TIMEOUT,
                 SCPResult.RC_LEN),
-            n_retries=10, timeout=1, connection=None):
+            n_retries=10, timeout=1, connection=None,
+            get_callback=False, start_callback=True):
         """ Sends an SCP message, and gets a response
 
         :param message: The message to send
@@ -245,9 +294,15 @@ class Transceiver(object):
         :param connection: The connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :type n_retries: int
-        :return: The received response
-        :rtype: :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
+        :param get_callback: True if a callback should be returned,\
+                    False otherwise
+        :type get_callback: bool
+        :param start_callback: True if the returned callback should be\
+                    started, False otherwise
+        :return: The received response, or the callback if get_callback is True
+        :rtype: :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`\
+                    or :py:class:`spinnman.connections._scp_message_callback._SCPMessageCallback`\
+                    if get_callback is True
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
                     timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
@@ -262,36 +317,16 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     the response is not one of the expected codes
         """
-        retries_to_go = n_retries
-        response = None
-        timeout = None
-        while retries_to_go >= 0:
-            retry = False
-            timeout = None
-            try:
-                response = self._send_message(
-                        message=message, response_required=True,
-                        connection=connection)
-
-                if response.scp_response_header.result == SCPResult.RC_OK:
-                    return response
-
-                if response.scp_response_header.result in retry_codes:
-                    retry = True
-            except SpinnmanTimeoutException as exception:
-                retry = True
-                timeout = exception
-
-            if retry:
-                retries_to_go -= 1
-                sleep(0.1)
-
-        if timeout is not None:
-            raise timeout
-
-        raise SpinnmanUnexpectedResponseCodeException(
-                "SCP", message.scp_request_header.command.name,
-                response.scp_response_header.result.name)
+        best_connection_queue = self._find_best_connection_queue(
+                message, True, connection)
+        callback = _SCPMessageCallback(
+                message=message, connection_queue=best_connection_queue,
+                retry_codes=retry_codes, n_retries=n_retries, timeout=timeout)
+        if not get_callback or start_callback:
+            callback.start()
+        if get_callback:
+            return callback
+        return callback.get_response()
 
     def _make_chip(self, chip_details):
         """ Creates a chip from a ChipInfo structure
@@ -613,24 +648,51 @@ class Transceiver(object):
         if self._machine is None:
             self._update_machine()
 
+        # Get all the cores if the subsets are not given
         if core_subsets is None:
-            cpu_information = list()
+            core_subsets = CoreSubsets()
             for chip_info in self._chip_info.itervalues():
                 x = chip_info.x
                 y = chip_info.y
                 for p in chip_info.virtual_core_ids:
-                    cpu_information.append(self.get_cpu_information_from_core(
-                        x, y, p))
-            return cpu_information
+                    core_subsets.add_processor(x, y, p)
 
         # Go through the requested chips
-        cpu_information = list()
+        callbacks = list()
+        callback_coordinates = list()
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
+
+            if not (x, y) in self._chip_info:
+                raise SpinnmanInvalidParameterException(
+                        "x, y", "{}, {}".format(x, y),
+                        "Not a valid chip on the current machine")
+            chip_info = self._chip_info[(x, y)]
+
             for p in core_subset.processor_ids:
-                cpu_information.append(self.get_cpu_information_from_core(
-                        x, y, p))
+                if p not in chip_info.virtual_core_ids:
+                    raise SpinnmanInvalidParameterException(
+                            "p", p, "Not a valid core on chip {}, {}".format(
+                                    x, y))
+                base_address = (chip_info.cpu_information_base_address
+                        + (CPU_INFO_BYTES * p))
+                callbacks.append(self._send_scp_message(
+                        SCPReadMemoryRequest(
+                                x, y, base_address, CPU_INFO_BYTES),
+                        get_callback=True, start_callback=False))
+                callback_coordinates.append((x, y, p))
+
+        # Start all the callbacks (not done before to ensure that no errors
+        # occur first
+        for callback in callbacks:
+            callback.start()
+
+        # Gather the results
+        cpu_information = list()
+        for callback, (x, y, p) in zip(callbacks, callback_coordinates):
+            cpu_information.append(CPUInfo(x, y, p,
+                    callback.get_response().data))
         return cpu_information
 
     def get_cpu_information_from_core(self, x, y, p):
@@ -655,25 +717,9 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        # Check that the chip exists
-        if not (x, y) in self._chip_info:
-            raise SpinnmanInvalidParameterException(
-                    "x, y", "{}, {}".format(x, y),
-                    "Not a valid chip on the current machine")
-        chip_info = self._chip_info[(x, y)]
-
-        # Check that the core exists
-        if p not in chip_info.virtual_core_ids:
-            raise SpinnmanInvalidParameterException(
-                    "p", p, "Not a valid core on chip {}, {}".format(x, y))
-
-        # Read the cpu information for the core
-        logger.debug("Getting cpu information for {}, {}, {}".format(x, y, p))
-        base_address = (chip_info.cpu_information_base_address
-                + (CPU_INFO_BYTES * p))
-        response = self._send_scp_message(SCPReadMemoryRequest(
-                x, y, base_address, CPU_INFO_BYTES))
-        return CPUInfo(x, y, p, response.data)
+        core_subsets = CoreSubsets()
+        core_subsets.add_processor(x, y, p)
+        return self.get_cpu_information(core_subsets)[0]
 
     def get_iobuf(self, core_subsets=None):
         """ Get the contents of the IOBUF buffer for a number of processors
@@ -686,6 +732,29 @@ class Transceiver(object):
         :return: An iterable of the buffers, which may not be in the order\
                     of core_subsets
         :rtype: iterable of :py:class:`spinnman.model.io_buffer.IOBuffer`
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If chip_and_cores contains invalid items
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        pass
+
+    def get_iobuf_from_core(self, x, y, p):
+        """ Get the contents of IOBUF for a given core
+
+        :param x: The x-coordinate of the chip containing the processor
+        :type x: int
+        :param y: The y-coordinate of the chip containing the processor
+        :type y: int
+        :param p: The id of the processor to get the IOBUF for
+        :type p: int
+        :return: An IOBUF buffer
+        :rtype: :py:class:`spinnman.model.io_buffer.IOBuffer`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -880,7 +949,23 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+
+        # Set up all the requests and get the callbacks
+        bytes_to_get = length
+        address_to_read = base_address
+        callbacks = list()
+        while bytes_to_get > 0:
+            data_size = bytes_to_get
+            if data_size > 256:
+                data_size = 256
+            callbacks.append(self._send_scp_message(SCPReadMemoryRequest(
+                    x, y, address_to_read, data_size), get_callback=True))
+            bytes_to_get -= data_size
+            address_to_read += data_size
+
+        # Go through the callbacks and return the responses in order
+        for callback in callbacks:
+            yield callback.get_response().data
 
     def send_signal(self, signal, app_id=None):
         """ Send a signal to an application
