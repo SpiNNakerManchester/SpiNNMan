@@ -2,19 +2,24 @@ from spinnman.connections.udp_connection import UDPConnection
 from spinnman.connections.udp_boot_connection import UDPBootConnection
 from spinnman.connections.udp_connection import UDP_CONNECTION_DEFAULT_PORT
 from spinnman.connections._connection_queue import _ConnectionQueue
+
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanTimeoutException
+from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+
 from spinnman.model.system_variables import SystemVariables
 from spinnman.model.system_variables import _SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.model.system_variables import _SYSTEM_VARIABLE_BYTES
 from spinnman.model.machine_dimensions import MachineDimensions
+from spinnman.model.core_subsets import CoreSubsets
+
+from spinnman.messages.spinnaker_boot.spinnaker_boot_messages import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
 from spinnman.messages.scp.scp_result import SCPResult
-
-from spinnman.messages.spinnaker_boot._system_variables._system_variable_boot_values import spinnaker_boot_values
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -30,10 +35,11 @@ from time import sleep
 from collections import deque
 
 import logging
-from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.spinnaker_boot.spinnaker_boot_messages import SpinnakerBootMessages
 
 logger = logging.getLogger(__name__)
+
+_SCAMP_NAME = "SC&MP"
+_SCAMP_VERSION = 1.31
 
 
 def create_transceiver_from_hostname(hostname, discover=True):
@@ -125,7 +131,6 @@ class Transceiver(object):
         # Discover any new connections, and update the queues if requested
         if discover:
             self.discover_connections()
-
 
     def _update_connection_queues(self):
         """ Creates and deletes queues of connections depending upon what\
@@ -538,6 +543,43 @@ class Transceiver(object):
         for boot_message in boot_messages.messages:
             self._send_message(boot_message, response_required=False)
 
+    def ensure_board_is_ready(self, board_version, n_retries=3):
+        """ Ensure that the board is ready to interact with this version\
+            of the transceiver.  Boots the board if not already booted and\
+            verifies that the version of SCAMP running is compatible with\
+            this transceiver.
+
+        :param board_version: The version of the board e.g. 3 for a SpiNN-3\
+                    board or 5 for a SpiNN-5 board.
+        :type board_version: int
+        :param n_retries: The number of times to retry booting
+        :type n_retries: int
+        :return: The version identifier
+        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
+        :raise: spinnman.exceptions.SpinnmanIOException:
+                    * If there is a problem booting the board
+                    * If the version of software on the board is not\
+                      compatible with this transceiver
+        """
+        version_info = None
+        tries_to_go = n_retries + 1
+        while version_info is None and tries_to_go > 0:
+            try:
+                version_info = self.get_scamp_version()
+            except SpinnmanTimeoutException:
+                self.boot_board(board_version)
+                tries_to_go -= 1
+
+        if version_info is None:
+            raise SpinnmanIOException("Could not boot the board")
+        if (version_info.name != _SCAMP_NAME
+                or version_info.version_number != _SCAMP_VERSION):
+            raise SpinnmanIOException("The board is currently booted with {}"
+                    " {} which is incompatible with this transceiver".format(
+                            version_info.name,
+                            version_info.version_number))
+        return version_info
+
     def get_cpu_information(self, core_subsets=None):
         """ Get information about the processors on the board
 
@@ -560,6 +602,32 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         pass
+
+    def get_cpu_information_from_core(self, x, y, p):
+        """ Get information about a specific processor on the board
+
+        :param x: The x-coordinate of the chip containing the processor
+        :type x: int
+        :param y: The y-coordinate of the chip containing the processor
+        :type y: int
+        :param p: The id of the processor to get the information about
+        :type p: int
+        :return: An iterable of the cpu information for the selected cores, or\
+                    all cores if core_subsets is not specified
+        :rtype: iterable of :py:class:`spinnman.model.cpu_info.CPUInfo`
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If chip_and_cores contains invalid items
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        core_subsets = CoreSubsets()
+        core_subsets.add_processor(x, y, p)
+        return self.get_cpu_information(core_subsets)
 
     def get_iobuf(self, core_subsets=None):
         """ Get the contents of the IOBUF buffer for a number of processors
