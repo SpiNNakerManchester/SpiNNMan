@@ -37,9 +37,9 @@ class VersionInfo(object):
         self._p = version_data[0]
         self._y = version_data[2]
         self._x = version_data[3]
-        self._version_number = (_get_short_from_bytearray(version_data, 4)
+        self._version_number = (_get_short_from_bytearray(version_data, 6)
                 / 100.0)
-        self._build_date = _get_int_from_bytearray(version_data, 6)
+        self._build_date = _get_int_from_bytearray(version_data, 8)
 
         self._version_string = version_data[12:-1].decode("ascii")
         try:

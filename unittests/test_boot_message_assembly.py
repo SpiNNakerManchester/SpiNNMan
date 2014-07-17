@@ -2,8 +2,8 @@ __author__ = 'Petrut'
 
 import unittest
 import spinnman.exceptions as exc
-import spinnman.messages.spinnaker_boot_message as boot_msg
-from spinnman.messages.spinnaker_boot_op_code import SpinnakerBootOpCode
+import spinnman.messages.spinnaker_boot.spinnaker_boot_message as boot_msg
+from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code import SpinnakerBootOpCode
 
 class TestSpiNNakerBootMessage(unittest.TestCase):
     def test_create_new_boot_message(self):

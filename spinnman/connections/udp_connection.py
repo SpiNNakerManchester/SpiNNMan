@@ -2,8 +2,6 @@ from spinnman.connections.abstract_sdp_sender import AbstractSDPSender
 from spinnman.connections.abstract_sdp_receiver import AbstractSDPReceiver
 from spinnman.connections.abstract_scp_sender import AbstractSCPSender
 from spinnman.connections.abstract_scp_receiver import AbstractSCPReceiver
-from spinnman.connections.abstract_spinnaker_boot_sender import AbstractSpinnakerBootSender
-from spinnman.connections.abstract_spinnaker_boot_receiver import AbstractSpinnakerBootReceiver
 
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanTimeoutException
@@ -11,13 +9,8 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.sdp.sdp_message import SDPMessage
 from spinnman.messages.sdp.sdp_header import SDPHeader
-from spinnman.messages.spinnaker_boot_message import SpinnakerBootMessage
-from spinnman.messages.spinnaker_boot_message import BOOT_MESSAGE_VERSION
-from spinnman.messages.spinnaker_boot_op_code import SpinnakerBootOpCode
 from spinnman.data.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
 from spinnman.data.little_endian_byte_array_byte_writer import LittleEndianByteArrayByteWriter
-from spinnman.data.big_endian_byte_array_byte_reader import BigEndianByteArrayByteReader
-from spinnman.data.big_endian_byte_array_byte_writer import BigEndianByteArrayByteWriter
 
 import platform
 import subprocess
@@ -30,28 +23,27 @@ UDP_CONNECTION_DEFAULT_PORT = 17893
 
 class UDPConnection(
         AbstractSDPSender, AbstractSDPReceiver,
-        AbstractSCPSender, AbstractSCPReceiver,
-        AbstractSpinnakerBootSender, AbstractSpinnakerBootReceiver):
+        AbstractSCPSender, AbstractSCPReceiver):
     """ A connection to the spinnaker board that uses UDP to send and/or\
-        receive data.  This supports SDP, SCP and SpiNNaker boot.  Note that\
+        receive data.  This supports SDP and SCP.  Note that\
         SCP messages sent through this connection must have the following\
         properties:
-        
+
             * source_port is None or 7
             * source_cpu is None or 31
             * source_chip_x is None or 0
             * source_chip_y is None or 0
-        
+
         The tag of an SDP or SCP message can be assigned; if it is not, it\
         will have a default value assigned before being sent.
     """
-    
+
     # Values defined for the source of an SDP packet over Ethernet
     _SDP_SOURCE_PORT = 7
     _SDP_SOURCE_CPU = 31
     _SDP_SOURCE_CHIP_X = 0
     _SDP_SOURCE_CHIP_Y = 0
-    
+
     def __init__(self, local_host=None, local_port=None, remote_host=None,
             remote_port=UDP_CONNECTION_DEFAULT_PORT, default_sdp_tag=0xFF):
         """
@@ -76,53 +68,53 @@ class UDPConnection(
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     setting up the communication channel
         """
-        
+
         # Store the default sdp tag
         self._default_sdp_tag = default_sdp_tag
-        
+
         # Keep track of the current scp sequence number
         self._scp_sequence = 0
-        
+
         self._socket = None
         try:
-            
+
             # Create a UDP Socket
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            
+
         except Exception as exception:
             raise SpinnmanIOException(
                     "Error setting up socket: {}".format(exception))
-            
+
         # Get the port to bind to locally
         local_bind_port = 0
         if local_port is not None:
             local_bind_port = int(local_port)
-        
+
         # Get the host to bind to locally
         local_bind_host = ""
         if local_host is not None:
             local_bind_host = str(local_host)
-        
+
         try:
             # Bind the socket
             self._socket.bind((local_bind_host, local_bind_port))
-            
+
         except Exception as exception:
             raise SpinnmanIOException(
                     "Error binding socket to {}:{}: {}".format(
                             local_bind_host, local_bind_port, exception))
-            
+
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
         self._can_send = False
         self._remote_ip_address = None
         self._remote_port = None
-            
+
         # Get the host to connect to remotely
         if remote_host is not None:
             self._can_send = True
             self._remote_port = remote_port
-            
+
             try:
                 self._remote_ip_address = socket.gethostbyname(
                         remote_host)
@@ -130,14 +122,14 @@ class UDPConnection(
                 raise SpinnmanIOException(
                         "Error getting ip address for {}: {}".format(
                                 remote_host, exception))
-            
+
             try:
                 self._socket.connect((self._remote_ip_address, remote_port))
             except Exception as exception:
                 raise SpinnmanIOException(
                         "Error connecting to {}:{}: {}".format(
                             self._remote_ip_address, remote_port, exception))
-        
+
         # Get the details of where the socket is connected
         self._local_ip_address = None
         self._local_port = None
@@ -147,23 +139,23 @@ class UDPConnection(
         except Exception as exception:
             raise SpinnmanIOException("Error querying socket: {}".format(
                     exception))
-            
+
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
         self._socket.setblocking(0)
-        
+
     def is_connected(self):
         """ See :py:meth:`spinnman.connections.AbstractConnection.abstract_connection.is_connected`
         """
-        
+
         # If this is not a sending socket, it is not connected
         if not self._can_send:
             return False
-        
+
         # check if machine is active and on the network
         pingtimeout = 5
         while pingtimeout > 0:
-            
+
             # Start a ping process
             process = None
             if (platform.platform().lower().startswith("windows")):
@@ -175,59 +167,59 @@ class UDPConnection(
                         "ping -c 1 -W 1 " + self._remote_ip_address,
                         shell=True, stdout=subprocess.PIPE)
             process.wait()
-            
+
             if process.returncode == 0:
-                
+
                 # ping worked
                 return True
             else:
                 pingtimeout -= 1
-            
+
         # If the ping fails this number of times, the host cannot be contacted
         return False
-    
+
     @property
     def local_ip_address(self):
         """ The local IP address to which the connection is bound.
-        
+
         :return: The local ip address as a dotted string e.g. 0.0.0.0
         :rtype: str
         :raise None: No known exceptions are thrown
         """
         return self._local_ip_address
-    
+
     @property
     def local_port(self):
         """ The local port to which the connection is bound.
-        
+
         :return: The local port number
         :rtype: int
         :raise None: No known exceptions are thrown
         """
         return self._local_port
-    
+
     @property
     def remote_ip_address(self):
         """ The remote ip address to which the connection is connected.
-        
+
         :return: The remote ip address as a dotted string, or None if not\
                     connected remotely
         :rtype: str
         """
         return self._remote_ip_address
-    
+
     @property
     def remote_port(self):
         """ The remote port to which the connection is connected.
-        
+
         :return: The remote port, or None if not connected remotely
         :rtype: int
         """
         return self._remote_port
-    
+
     def _update_sdp_header(self, sdp_header):
         """ Apply defaults to the sdp header where the values have not been set
-        
+
         :param sdp_header: The SDP header values
         :type sdp_header:\
                     :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
@@ -239,7 +231,7 @@ class UDPConnection(
         """
         if sdp_header.tag is None:
             sdp_header.tag = self._default_sdp_tag
-            
+
         if sdp_header.source_port is not None:
             if sdp_header.source_port != UDPConnection._SDP_SOURCE_PORT:
                 raise SpinnmanInvalidParameterException(
@@ -248,7 +240,7 @@ class UDPConnection(
                         " connection".format(UDPConnection._SDP_SOURCE_PORT))
         else:
             sdp_header.source_port = UDPConnection._SDP_SOURCE_PORT
-        
+
         if sdp_header.source_cpu is not None:
             if sdp_header.source_cpu != UDPConnection._SDP_SOURCE_CPU:
                 raise SpinnmanInvalidParameterException(
@@ -257,7 +249,7 @@ class UDPConnection(
                         " connection".format(UDPConnection._SDP_SOURCE_CPU))
         else:
             sdp_header.source_cpu = UDPConnection._SDP_SOURCE_CPU
-        
+
         if sdp_header.source_chip_x is not None:
             if sdp_header.source_chip_x != UDPConnection._SDP_SOURCE_CHIP_X:
                 raise SpinnmanInvalidParameterException(
@@ -266,7 +258,7 @@ class UDPConnection(
                         " connection".format(UDPConnection._SDP_SOURCE_CHIP_X))
         else:
             sdp_header.source_chip_x = UDPConnection._SDP_SOURCE_CHIP_X
-        
+
         if sdp_header.source_chip_y is not None:
             if sdp_header.source_chip_y != UDPConnection._SDP_SOURCE_CHIP_Y:
                 raise SpinnmanInvalidParameterException(
@@ -278,42 +270,42 @@ class UDPConnection(
 
     def send_sdp_message(self, sdp_message):
         """ See :py:meth:`spinnman.connections.abstract_sdp_sender.AbstractSDPSender.send_sdp_message`
-        
+
         tag is optional in the message - if not assigned, the default\
         specified in the constructor will be used.
         """
         if not self._can_send:
             raise SpinnmanIOException("Not connected to a remote host")
-        
+
         # Update the SDP headers for this connection
         self._update_sdp_header(sdp_message.sdp_header)
-        
+
         # Create a writer for the mesage
         data_length = 0
         if sdp_message.data is not None:
             data_length = len(sdp_message.data)
-        writer = LittleEndianByteArrayByteWriter(size=(10 + data_length))
-        
+        writer = LittleEndianByteArrayByteWriter()
+
         # Add the UDP padding
         writer.write_short(0)
-        
+
         # Write the header
         sdp_message.sdp_header.write_sdp_header(writer)
-        
+
         # Write any data
         if data_length != 0:
             writer.write_bytes(sdp_message.data)
-        
+
         # Send the packet
         try:
             self._socket.send(writer.data)
         except Exception as e:
             raise SpinnmanIOException(str(e))
-    
+
     def receive_sdp_message(self, timeout=None):
         """ See :py:meth:`spinnman.connections.abstract_sdp_receiver.AbstractSDPReceiver.receive_sdp_message`
         """
-        
+
         # Receive the data
         raw_data = None
         try:
@@ -325,39 +317,39 @@ class UDPConnection(
             raise SpinnmanTimeoutException("receive_sdp_message", timeout)
         except Exception as e:
             raise SpinnmanIOException(str(e))
-        
+
         # Set up for reading
         packet = bytearray(raw_data)
         reader = LittleEndianByteArrayByteReader(packet)
-        
+
         # Read the padding
         try:
             reader.read_short()
         except EOFError:
             raise SpinnmanInvalidPacketException("SDP",
                     "Not enough bytes to read the pre-packet padding")
-    
+
         # Read the header and data
         sdp_header = SDPHeader()
         sdp_header.read_sdp_header(reader)
         data = reader.read_bytes()
         if len(data) == 0:
             data = None
-            
+
         # Create and return the message
         message = SDPMessage(sdp_header=sdp_header, data=data)
         return message
-    
+
     def send_scp_request(self, scp_request):
         """ See :py:meth:`spinnman.connections.abstract_scp_sender.AbstractSCPSender.send_scp_message`
-        
+
         Messages must have the following properties:
-        
+
             * source_port is None or 7
             * source_cpu is None or 31
             * source_chip_x is None or 0
             * source_chip_y is None or 0
-        
+
         tag in the message is optional - if not set the default set in the\
         constructor will be used.
         sequence in the message is optional - if not set (sequence number\
@@ -365,34 +357,34 @@ class UDPConnection(
         """
         if not self._can_send:
             raise SpinnmanIOException("Not connected to a remote host")
-        
+
         # Update the SDP headers for this connection
         self._update_sdp_header(scp_request.sdp_header)
-        
+
         # Update the sequence for this connection
         if scp_request.scp_request_header.sequence is None:
             scp_request.scp_request_header.sequence = self._scp_sequence
             self._scp_sequence = (self._scp_sequence + 1) % 65536
-        
+
         # Create a writer for the mesage
         writer = LittleEndianByteArrayByteWriter()
-        
+
         # Add the UDP padding
         writer.write_short(0)
-        
+
         # Write the SCP message
         scp_request.write_scp_request(writer)
-        
+
         # Send the packet
         try:
             self._socket.send(writer.data)
         except Exception as e:
             raise SpinnmanIOException(str(e))
-    
+
     def receive_scp_response(self, scp_response, timeout=None):
         """ See :py:meth:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver.receive_scp_message`
         """
-        
+
         # Receive the data
         raw_data = None
         try:
@@ -404,101 +396,22 @@ class UDPConnection(
             raise SpinnmanTimeoutException("receive_scp_message", timeout)
         except Exception as e:
             raise SpinnmanIOException(str(e))
-        
+
         # Set up for reading
         packet = bytearray(raw_data)
         reader = LittleEndianByteArrayByteReader(packet)
-        
+
         # Read the padding
         try:
             reader.read_short()
         except EOFError:
             raise SpinnmanInvalidPacketException("SCP",
                     "Not enough bytes to read the pre-packet padding")
-        
+
         # Read the response
         scp_response.read_scp_response(reader)
-        print "Read response"
-    
-    def send_boot_message(self, boot_message):
-        """ See :py:meth:`spinnman.connections.abstract_spinnaker_boot_sender.AbstractSpinnakerBootSender.send_boot_message`
+
+    def close(self):
+        """ See :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
         """
-        if not self._can_send:
-            raise SpinnmanIOException("Not connected to a remote host")
-        
-        # Create a writer for the mesage
-        data_length = 0
-        if boot_message.data is not None:
-            data_length = len(boot_message.data)
-        writer = BigEndianByteArrayByteWriter(size=(18 + data_length))
-        
-        # Put the headers into the message (big-endian)
-        writer.write_short(BOOT_MESSAGE_VERSION)
-        writer.write_int(boot_message.opcode.value)
-        writer.write_int(boot_message.operand_1)
-        writer.write_int(boot_message.operand_2)
-        writer.write_int(boot_message.operand_3)
-        
-        # Put the data in to the packet
-        if data_length > 0:
-            writer.write_bytes(boot_message.data)
-        
-        # Send the packet
-        try:
-            self._socket.send(writer.data)
-        except Exception as e:
-            raise SpinnmanIOException(str(e))
-    
-    def receive_boot_message(self, timeout=None):
-        """ See :py:meth:`spinnman.connections.abstract_spinnaker_boot_receiver.AbstractSpinnakerBootReceiver.receive_boot_message`
-        """
-        
-        # Receive the data
-        raw_data = None
-        try:
-            read_ready, _, _ = select.select([self._socket], [], [], timeout)
-            if not read_ready:
-                raise socket.timeout()
-            raw_data = self._socket.recv(2048)
-        except socket.timeout:
-            raise SpinnmanTimeoutException("receive_scp_message", timeout)
-        except Exception as e:
-            raise SpinnmanIOException(str(e))
-        
-        # Create a reader
-        packet = bytearray(raw_data)
-        reader = BigEndianByteArrayByteReader(packet)
-        
-        opcode_value = None
-        try:
-            # Check the version
-            version = reader.read_short()
-            if version != 1:
-                raise SpinnmanInvalidParameterException(
-                        "boot message version", version,
-                        "Only version 1 of the spinnaker boot protocol is"
-                        " currently supported")
-                
-            # Read the values
-            opcode_value = reader.read_int()
-            opcode = SpinnakerBootOpCode(opcode_value)
-            operand_1 = reader.read_int()
-            operand_2 = reader.read_int()
-            operand_3 = reader.read_int()
-            data = reader.read_bytes()
-            if len(data) == 0:
-                data = None
-                
-            # Parse the header (big endian)
-            message = SpinnakerBootMessage(
-                    opcode=opcode, operand_1=operand_1, operand_2=operand_2,
-                    operand_3=operand_3, data=data)
-            return message
-        except IOError as exception:
-            raise SpinnmanIOException(str(exception))
-        except EOFError:
-            raise SpinnmanInvalidPacketException("Boot",
-                    "Not enough bytes in the packet")
-        except ValueError:
-            raise SpinnmanInvalidParameterException(
-                    "opcode", opcode_value, "Unrecognized value")
+        self._socket.close()

@@ -101,7 +101,7 @@ class _MessageCallback(object):
                     * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
                     * :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
                     * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-                    * :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
+                    * :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
         :raise spinnman.exceptions.SpinnmanException: If an exception is raised\
                     before the message has been received
         """
