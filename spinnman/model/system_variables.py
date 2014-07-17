@@ -34,11 +34,10 @@ class SystemVariables(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
                     the data doesn't contain valid system data information
         """
-
         self._x = system_data[0]
         self._y = system_data[1]
-        self._max_x = system_data[2]
-        self._max_y = system_data[3]
+        self._x_size = system_data[2]
+        self._y_size = system_data[3]
         self._debug_x = system_data[4]
         self._debug_y = system_data[5]
         self._is_peer_to_peer_available = system_data[6] != 0
@@ -138,10 +137,11 @@ class SystemVariables(object):
         self._mailbox_flags = _get_int_from_bytearray(system_data, 236)
 
         self._ip_address = None
-        if self._is_ethernet_available:
-            self._ip_address = "{}.{}.{}.{}".format(
-                system_data[240], system_data[241], system_data[242],
-                system_data[243])
+        self._ip_address = "{}.{}.{}.{}".format(
+            system_data[240], system_data[241], system_data[242],
+            system_data[243])
+        if self._ip_address == "0.0.0.0":
+            self._ip_address = None
 
     @property
     def x(self):
@@ -160,20 +160,20 @@ class SystemVariables(object):
         return self._y
 
     @property
-    def max_x(self):
-        """ The maximum x-coordinate of the machine
+    def x_size(self):
+        """ The number of chips in the x-dimension
 
         :rtype: int
         """
-        return self._max_x
+        return self._x_size
 
     @property
-    def max_y(self):
-        """ The maximum y-coordinate of the machine
+    def y_size(self):
+        """ The number of chips in the y-dimension
 
         :rtype: int
         """
-        return self._max_y
+        return self._y_size
 
     @property
     def nearest_ethernet_x(self):
@@ -226,7 +226,8 @@ class SystemVariables(object):
 
     @property
     def virtual_core_ids(self):
-        """ A list of available cores by virtual core id (including the monitor)
+        """ A list of available cores by virtual core id (including the\
+            monitor)
 
         :rtype: iterable of int
         """

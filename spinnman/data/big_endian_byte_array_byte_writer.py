@@ -5,17 +5,13 @@ class BigEndianByteArrayByteWriter(AbstractByteWriter):
     """ A byte writer that writes to a byte array using big endian notation
     """
 
-    def __init__(self, size=None):
+    def __init__(self):
         """
 
         :param size: Optional size that the array will be
         :type size: int
         """
-        self._data = None
-        if size is None:
-            self._data = bytearray()
-        else:
-            self._data = bytearray(size)
+        self._data = bytearray()
 
     def write_byte(self, byte_value):
         """ See :py:meth:`spinnman.data.abstract_byte_writer.AbstractByteWriter.write_byte`

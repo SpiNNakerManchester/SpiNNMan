@@ -1,4 +1,5 @@
 from spinnman.connections.udp_connection import UDPConnection
+from spinnman.connections.udp_boot_connection import UDPBootConnection
 from spinnman.connections.udp_connection import UDP_CONNECTION_DEFAULT_PORT
 from spinnman.connections._connection_queue import _ConnectionQueue
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
@@ -10,7 +11,10 @@ from spinnman.model.system_variables import _SYSTEM_VARIABLE_BYTES
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
+from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
 from spinnman.messages.scp.scp_result import SCPResult
+
+from spinnman.messages.spinnaker_boot._system_variables._system_variable_boot_values import spinnaker_boot_values
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -26,20 +30,25 @@ from time import sleep
 from collections import deque
 
 import logging
-from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
+from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinnman.messages.spinnaker_boot.spinnaker_boot_messages import SpinnakerBootMessages
 
 logger = logging.getLogger(__name__)
 
 
-def create_transceiver_from_hostname(hostname):
+def create_transceiver_from_hostname(hostname, discover=True):
     """ Create a Transceiver by creating a UDPConnection to the given\
-        hostname on port 17893 (the default SCAMP port), discovering any\
-        additional links using this connection, and then returning the\
-        transceiver created with the conjunction of the created\
-        UDPConnection and the discovered connections
+        hostname on port 17893 (the default SCAMP port), and a\
+        UDPBootConnection on port 54321 (the default boot port),
+        optionally discovering any additional links using the UDPConnection,\
+        and then returning the transceiver created with the conjunction of the\
+        created UDPConnection and the discovered connections
 
     :param hostname: The hostname or IP address of the board
     :type hostname: str
+    :param discover: True if further connections should be discovered, False\
+                otherwise
+    :type discover: bool
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -52,7 +61,9 @@ def create_transceiver_from_hostname(hostname):
                 a response indicates an error during the exchange
     """
     connection = UDPConnection(remote_host=hostname)
-    return Transceiver(connections=[connection])
+    boot_connection = UDPBootConnection(remote_host=hostname)
+    return Transceiver(connections=[connection, boot_connection],
+            discover=discover)
 
 
 class Transceiver(object):
@@ -88,8 +99,19 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+
+        # Place to keep the current machine
+        self._machine = None
+
         # Create a connection list
-        self._connections = list(connections)
+        self._connections = None
+        if connections is not None:
+            self._connections = list(connections)
+        else:
+            self._connections = list()
+        self._original_connections = set(self._connections)
+
+        # Update the list of UDP connections
         self._udp_connections = dict()
         for connection in self._connections:
             if isinstance(connection, UDPConnection):
@@ -104,8 +126,6 @@ class Transceiver(object):
         if discover:
             self.discover_connections()
 
-        # Place to keep the current machine
-        self._machine = None
 
     def _update_connection_queues(self):
         """ Creates and deletes queues of connections depending upon what\
@@ -133,7 +153,7 @@ class Transceiver(object):
                     * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
                     * :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
                     * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-                    * :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
+                    * :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
         :param response_required: True if a response is required, False\
                     otherwise
         :type response_required: bool
@@ -234,8 +254,10 @@ class Transceiver(object):
         """
         retries_to_go = n_retries
         response = None
+        timeout = None
         while retries_to_go >= 0:
             retry = False
+            timeout = None
             try:
                 response = self._send_message(
                         message=message, response_required=True,
@@ -246,12 +268,16 @@ class Transceiver(object):
 
                 if response.scp_response_header.result in retry_codes:
                     retry = True
-            except SpinnmanTimeoutException:
+            except SpinnmanTimeoutException as exception:
                 retry = True
+                timeout = exception
 
             if retry:
                 retries_to_go -= 1
                 sleep(0.1)
+
+        if timeout is not None:
+            raise timeout
 
         raise SpinnmanUnexpectedResponseCodeException(
                 "SCP", message.scp_request_header.command.name,
@@ -501,10 +527,16 @@ class Transceiver(object):
         :type board_version: int
         :return: Nothing is returned
         :rtype: None
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
+                    board version is not known
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         """
-        pass
+        logger.debug("Attempting to boot version {} board".format(
+                board_version))
+        boot_messages = SpinnakerBootMessages(board_version)
+        for boot_message in boot_messages.messages:
+            self._send_message(boot_message, response_required=False)
 
     def get_cpu_information(self, core_subsets=None):
         """ Get information about the processors on the board
@@ -556,7 +588,7 @@ class Transceiver(object):
         """ Get a count of the number of cores which have a given status
 
         :param status: The status count to get
-        :type status: :py:class:`spinnman.model.cpu_info.State`
+        :type status: :py:class:`spinnman.model.cpu_state.CPUState`
         :param app_id: The id of the application from which to get the count.\
                     If not specified, gets the count from all applications.
         :type app_id: int
@@ -1085,12 +1117,21 @@ class Transceiver(object):
         """
         pass
 
-    def close(self):
+    def close(self, close_original_connections=True):
         """ Close the transceiver and any threads that are running
 
+        :param close_original_connections: If True, the original connections\
+                    passed to the transceiver in the constructor are also\
+                    closed.  If False, only newly discovered connections are\
+                    closed.
         :return: Nothing is returned
         :rtype: None
         :raise None: No known exceptions are raised
         """
         for connection_queue in self._connection_queues.itervalues():
             connection_queue.stop()
+
+        for connection in self._connections:
+            if (close_original_connections
+                    or connection not in self._original_connections):
+                connection.close()

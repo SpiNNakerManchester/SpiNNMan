@@ -16,7 +16,7 @@ class AbstractSpinnakerBootSender(AbstractConnection):
         
         :param boot_message: The message to be sent
         :type boot_message:\
-                    :py:class:`spinnman.messages.spinnaker_boot_message.SpinnakerBootMessage`
+                    :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
