@@ -21,7 +21,7 @@ _SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 _SYSTEM_VARIABLE_BYTES = 0xFF
 
 
-class SystemVariables(object):
+class ChipInfo(object):
     """ Represents the system variables for a chip, received from the chip\
         SDRAM
     """
@@ -108,6 +108,7 @@ class SystemVariables(object):
                     physical_core_id]
             if virtual_core_id != 0xFF:
                 self._virtual_core_ids.append(virtual_core_id)
+        self._virtual_core_ids.sort()
 
         self._n_working_cores = system_data[188]
         self._n_scamp_working_cores = system_data[189]
