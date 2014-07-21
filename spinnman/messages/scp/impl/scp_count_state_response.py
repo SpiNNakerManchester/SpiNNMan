@@ -4,6 +4,8 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
 class SCPCountStateResponse(AbstractSCPResponse):
+    """ An SCP response to a request for the number of cores in a given state
+    """
 
     def __init__(self):
         """
