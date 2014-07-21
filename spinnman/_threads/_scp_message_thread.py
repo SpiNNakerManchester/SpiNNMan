@@ -8,23 +8,21 @@ from threading import Condition
 from time import sleep
 
 
-class _SCPMessageCallback(Thread):
-    """ A threaded callback that is used with a _ConnectionQueue\
-        for SCP, that can retry the send a number of times for a given set of\
-        error conditions (and also retries on timeouts).
+class _SCPMessageThread(Thread):
+    """ A thread for SCP, that can retry the send a number of times for a\
+        given set of error conditions (and also retries on timeouts).
     """
 
-    def __init__(self, message, connection_queue, retry_codes=(
+    def __init__(self, transceiver, message, retry_codes=(
                 SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_TIMEOUT,
                 SCPResult.RC_LEN),
-            n_retries=10, timeout=1):
+            n_retries=10, timeout=1, connection=None):
         """
+        :param transceiver: The transceiver that will send the message
+        :type transceiver: :py:class:`spinnman.transceiver.Transceiver`
         :param message: The message to send
         :type message:\
                     :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
-        :param connection_queue: The connection queue to send the message with
-        :type connection_queue:\
-                    :py:class:`spinnman.connections._connection_queue._ConnectionQueue
         :param retry_codes: The response codes which will result in a\
                     retry if received as a response
         :type retry_codes: iterable of\
@@ -34,11 +32,15 @@ class _SCPMessageCallback(Thread):
         :type n_retries: int
         :param timeout: The timeout to use when receiving a response
         :type timeout: int
+        :param connection: A connection which can send and receive SCP\
+                    messages
+        :type connection:\
+                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        super(_SCPMessageCallback, self).__init__()
+        super(_SCPMessageThread, self).__init__()
+        self._transceiver = transceiver
         self._message = message
-        self._connection_queue = connection_queue
         self._retry_codes = retry_codes
         self._n_retries = n_retries
         self._timeout = timeout
@@ -58,7 +60,7 @@ class _SCPMessageCallback(Thread):
             retry = False
             timeout = None
             try:
-                response = self._connection_queue.send_message(
+                response = self._transceiver.send_message(
                         message=self._message, response_required=True,
                         timeout=self._timeout)
 

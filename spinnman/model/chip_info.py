@@ -18,7 +18,7 @@ def _get_short_from_bytearray(array, offset):
 _SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 
 # The size of the system variable structure in bytes
-_SYSTEM_VARIABLE_BYTES = 0xFF
+_SYSTEM_VARIABLE_BYTES = 256
 
 
 class ChipInfo(object):
@@ -265,3 +265,11 @@ class ChipInfo(object):
         :rtype: str
         """
         return self._ip_address
+
+    @property
+    def iobuf_size(self):
+        """ The size of the iobuf buffers in bytes
+
+        :rtype: int
+        """
+        return self._iobuf_size

@@ -12,14 +12,19 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.model.chip_info import ChipInfo
 from spinnman.model.chip_info import _SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.model.chip_info import _SYSTEM_VARIABLE_BYTES
+from spinnman.model.cpu_info import CPU_INFO_BYTES
+from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
+
 
 from spinnman.messages.spinnaker_boot.spinnaker_boot_messages import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
 from spinnman.messages.scp.scp_result import SCPResult
+
+from spinnman._threads._scp_message_thread import _SCPMessageThread
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -31,17 +36,10 @@ from spinn_machine.router import ROUTER_DEFAULT_AVAILABLE_ENTRIES
 from spinn_machine.router import ROUTER_DEFAULT_CLOCK_SPEED
 from spinn_machine.link import Link
 
-from time import sleep
 from collections import deque
 
 import logging
-from spinnman.model.cpu_info import CPU_INFO_BYTES
-from spinnman.model.cpu_info import CPUInfo
-from __builtin__ import type
-from threading import Thread
-from spinnman.connections import _scp_message_callback
-from spinnman.connections._scp_message_callback import _SCPMessageCallback
-from spinnman.model import core_subsets
+from spinnman._threads._iobuf_thread import _IOBufThread
 
 logger = logging.getLogger(__name__)
 
@@ -210,7 +208,7 @@ class Transceiver(object):
 
         return best_connection_queue
 
-    def _send_message(self, message, response_required, connection=None,
+    def send_message(self, message, response_required, connection=None,
             timeout=1, get_callback=False):
         """ Sends a message using one of the connections, and gets a response\
             if requested
@@ -275,8 +273,7 @@ class Transceiver(object):
             self, message, retry_codes=(
                 SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_TIMEOUT,
                 SCPResult.RC_LEN),
-            n_retries=10, timeout=1, connection=None,
-            get_callback=False, start_callback=True):
+            n_retries=10, timeout=1, connection=None):
         """ Sends an SCP message, and gets a response
 
         :param message: The message to send
@@ -294,15 +291,8 @@ class Transceiver(object):
         :param connection: The connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :param get_callback: True if a callback should be returned,\
-                    False otherwise
-        :type get_callback: bool
-        :param start_callback: True if the returned callback should be\
-                    started, False otherwise
         :return: The received response, or the callback if get_callback is True
-        :rtype: :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`\
-                    or :py:class:`spinnman.connections._scp_message_callback._SCPMessageCallback`\
-                    if get_callback is True
+        :rtype: :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
                     timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
@@ -317,16 +307,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     the response is not one of the expected codes
         """
-        best_connection_queue = self._find_best_connection_queue(
-                message, True, connection)
-        callback = _SCPMessageCallback(
-                message=message, connection_queue=best_connection_queue,
-                retry_codes=retry_codes, n_retries=n_retries, timeout=timeout)
-        if not get_callback or start_callback:
-            callback.start()
-        if get_callback:
-            return callback
-        return callback.get_response()
+        thread = _SCPMessageThread(
+                transceiver=self, message=message, retry_codes=retry_codes,
+                n_retries=n_retries, timeout=timeout, connection=connection)
+        thread.start()
+        return thread.get_response()
 
     def _make_chip(self, chip_details):
         """ Creates a chip from a ChipInfo structure
@@ -584,7 +569,7 @@ class Transceiver(object):
                 board_version))
         boot_messages = SpinnakerBootMessages(board_version)
         for boot_message in boot_messages.messages:
-            self._send_message(boot_message, response_required=False)
+            self.send_message(boot_message, response_required=False)
 
     def ensure_board_is_ready(self, board_version, n_retries=3):
         """ Ensure that the board is ready to interact with this version\
@@ -677,10 +662,8 @@ class Transceiver(object):
                                     x, y))
                 base_address = (chip_info.cpu_information_base_address
                         + (CPU_INFO_BYTES * p))
-                callbacks.append(self._send_scp_message(
-                        SCPReadMemoryRequest(
-                                x, y, base_address, CPU_INFO_BYTES),
-                        get_callback=True, start_callback=False))
+                callbacks.append(_SCPMessageThread(self, SCPReadMemoryRequest(
+                                x, y, base_address, CPU_INFO_BYTES)))
                 callback_coordinates.append((x, y, p))
 
         # Start all the callbacks (not done before to ensure that no errors
@@ -689,11 +672,8 @@ class Transceiver(object):
             callback.start()
 
         # Gather the results
-        cpu_information = list()
         for callback, (x, y, p) in zip(callbacks, callback_coordinates):
-            cpu_information.append(CPUInfo(x, y, p,
-                    callback.get_response().data))
-        return cpu_information
+            yield CPUInfo(x, y, p, callback.get_response().data)
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
@@ -742,7 +722,28 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        # Ensure that the information about each chip is present
+        if self._machine is None:
+            self._update_machine()
+
+        # Get CPU Information for the requested chips
+        cpu_information = self.get_cpu_information(core_subsets)
+
+        # Go through the requested chips
+        callbacks = list()
+        for cpu_info in cpu_information:
+            chip_info = self._chip_info[(cpu_info.x, cpu_info.y)]
+            iobuf_bytes = chip_info.iobuf_size
+
+            thread = _IOBufThread(
+                    self, cpu_info.x, cpu_info.y, cpu_info.p,
+                    cpu_info.iobuf_address, iobuf_bytes)
+            thread.start()
+            callbacks.append(thread)
+
+        # Gather the results
+        for callback in callbacks:
+            yield callback.get_iobuf()
 
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
@@ -765,7 +766,9 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        core_subsets = CoreSubsets()
+        core_subsets.add_processor(x, y, p)
+        return self.get_iobuf(core_subsets).next()
 
     def get_core_status_count(self, status, app_id=None):
         """ Get a count of the number of cores which have a given status
@@ -951,6 +954,7 @@ class Transceiver(object):
         """
 
         # Set up all the requests and get the callbacks
+        logger.debug("Reading {} bytes of memory".format(length))
         bytes_to_get = length
         address_to_read = base_address
         callbacks = list()
@@ -958,8 +962,10 @@ class Transceiver(object):
             data_size = bytes_to_get
             if data_size > 256:
                 data_size = 256
-            callbacks.append(self._send_scp_message(SCPReadMemoryRequest(
-                    x, y, address_to_read, data_size), get_callback=True))
+            thread = _SCPMessageThread(self, SCPReadMemoryRequest(
+                    x, y, address_to_read, data_size))
+            thread.start()
+            callbacks.append(thread)
             bytes_to_get -= data_size
             address_to_read += data_size
 
@@ -971,7 +977,7 @@ class Transceiver(object):
         """ Send a signal to an application
 
         :param signal: The signal to send
-        :type signal: :py:class:`spinnman.messages.scp_message.Signal`
+        :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
         :param app_id: The id of the application to send to.  If not\
                     specified, the signal is sent to all applications
         :type app_id: int
