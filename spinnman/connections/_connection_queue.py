@@ -18,6 +18,7 @@ from spinnman.messages.spinnaker_boot.spinnaker_boot_message import SpinnakerBoo
 from spinnman.connections.abstract_spinnaker_boot_sender import AbstractSpinnakerBootSender
 from spinnman.connections.abstract_spinnaker_boot_receiver import AbstractSpinnakerBootReceiver
 
+import sys
 import logging
 
 logger = logging.getLogger(__name__)
@@ -277,7 +278,7 @@ class _ConnectionQueue(Thread):
                     logger.debug("Message sent - notifying callback")
                     callback.message_sent()
                 except Exception as exception:
-                    callback.send_exception(exception)
+                    callback.send_exception(exception, sys.exc_info()[2])
                     send_error = True
 
                 # If there was no error, and a response is required,
@@ -311,7 +312,8 @@ class _ConnectionQueue(Thread):
                         logger.debug("Response received - notifying callback")
                         callback.message_received(response)
                     except Exception as exception:
-                        callback.receive_exception(exception)
+                        callback.receive_exception(exception,
+                                sys.exc_info()[2])
 
     def stop(self):
         """ Stop the queue thread

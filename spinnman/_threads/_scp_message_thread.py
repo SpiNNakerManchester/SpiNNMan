@@ -6,6 +6,7 @@ from threading import Thread
 from threading import Condition
 
 from time import sleep
+import sys
 
 
 class _SCPMessageThread(Thread):
@@ -48,6 +49,7 @@ class _SCPMessageThread(Thread):
         self._response_condition = Condition()
         self._response = None
         self._exception = None
+        self._traceback = None
 
     def run(self):
         """ Run method of the Thread.  Note that start should be called to\
@@ -79,6 +81,7 @@ class _SCPMessageThread(Thread):
             except Exception as exception:
                 self._response_condition.acquire()
                 self._exception = exception
+                self._traceback = sys.exc_info()[2]
                 self._response_condition.notify_all()
                 self._response_condition.release()
                 return None
@@ -119,6 +122,6 @@ class _SCPMessageThread(Thread):
         self._response_condition.release()
 
         if self._exception is not None:
-            raise self._exception
+            raise self._exception, None, self._traceback
 
         return self._response

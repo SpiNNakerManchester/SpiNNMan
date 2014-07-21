@@ -13,9 +13,11 @@ class _MessageCallback(object):
         self._message_sent_condition = Condition()
         self._message_sent = False
         self._message_send_exception = None
+        self._message_send_traceback = None
         self._message_received_condition = Condition()
         self._message_received = None
         self._message_receive_exception = None
+        self._message_receive_traceback = None
 
     def message_sent(self):
         """ Called when a message has been sent
@@ -29,18 +31,21 @@ class _MessageCallback(object):
         self._message_sent_condition.notify_all()
         self._message_sent_condition.release()
 
-    def send_exception(self, exception):
+    def send_exception(self, exception, traceback):
         """ Called when an exception has been received while sending a\
             message
 
         :param exception: An exception
         :type exception: :py:class:`spinnman.exceptions.SpinnmanException`
+        :param traceback: A traceback of the exception
+        :type traceback: traceback
         :return: Nothing is returned
         :rtype: None
         :raise None: No known exceptions are raised
         """
         self._message_sent_condition.acquire()
         self._message_send_exception = exception
+        self._message_send_traceback = traceback
         self._message_sent_condition.notify_all()
         self._message_sent_condition.release()
 
@@ -61,7 +66,8 @@ class _MessageCallback(object):
         self._message_sent_condition.release()
 
         if self._message_send_exception is not None:
-            raise self._message_send_exception
+            raise (self._message_send_exception, None,
+                    self._message_send_traceback)
 
     def message_received(self, message):
         """ Called when a message has been received
@@ -75,18 +81,21 @@ class _MessageCallback(object):
         self._message_received_condition.notify_all()
         self._message_received_condition.release()
 
-    def receive_exception(self, exception):
+    def receive_exception(self, exception, traceback):
         """ Called when an exception has been received while attempting to\
             receive a message
 
         :param exception: An exception
         :type exception: :py:class:`spinnman.exceptions.SpinnmanException`
+        :param traceback: A traceback of the exception
+        :type traceback: traceback
         :return: Nothing is returned
         :rtype: None
         :raise None: No known exceptions are raised
         """
         self._message_received_condition.acquire()
         self._message_receive_exception = exception
+        self._message_receive_traceback = traceback
         self._message_received_condition.notify_all()
         self._message_received_condition.release()
 
@@ -112,6 +121,7 @@ class _MessageCallback(object):
         self._message_received_condition.release()
 
         if self._message_receive_exception is not None:
-            raise self._message_receive_exception
+            raise (self._message_receive_exception, None,
+                    self._message_receive_traceback)
 
         return self._message_received

@@ -18,18 +18,15 @@ class SCPSignal(Enum):
     USER_1 = (11, 0)
     USER_2 = (12, 0)
     USER_3 = (13, 0)
-    OR = (16, 1)
-    AND = (17, 1)
-    COUNT = (18, 1)
-    
+
     def __new__(cls, value, signal_type, doc=""):
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
-    
+
     def __init__(self, value, signal_type, doc=""):
         """
-        
+
         :param value: The value used for the signal
         :type value: int
         :param signal_type: The "type" of the signal, between 0 and 2
@@ -38,7 +35,7 @@ class SCPSignal(Enum):
         self._value_ = value
         self._signal_type = signal_type
         self.__doc__ = doc
-    
+
     @property
     def signal_type(self):
         return self._signal_type

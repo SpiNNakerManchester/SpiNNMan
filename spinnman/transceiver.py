@@ -22,9 +22,11 @@ from spinnman.messages.spinnaker_boot.spinnaker_boot_messages import SpinnakerBo
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
+from spinnman.messages.scp.impl.scp_count_state_request import SCPCountStateRequest
 from spinnman.messages.scp.scp_result import SCPResult
 
 from spinnman._threads._scp_message_thread import _SCPMessageThread
+from spinnman._threads._iobuf_thread import _IOBufThread
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -39,7 +41,6 @@ from spinn_machine.link import Link
 from collections import deque
 
 import logging
-from spinnman._threads._iobuf_thread import _IOBufThread
 
 logger = logging.getLogger(__name__)
 
@@ -770,14 +771,13 @@ class Transceiver(object):
         core_subsets.add_processor(x, y, p)
         return self.get_iobuf(core_subsets).next()
 
-    def get_core_status_count(self, status, app_id=None):
-        """ Get a count of the number of cores which have a given status
+    def get_core_state_count(self, app_id, state):
+        """ Get a count of the number of cores which have a given state
 
-        :param status: The status count to get
-        :type status: :py:class:`spinnman.model.cpu_state.CPUState`
-        :param app_id: The id of the application from which to get the count.\
-                    If not specified, gets the count from all applications.
+        :param app_id: The id of the application from which to get the count.
         :type app_id: int
+        :param state: The state count to get
+        :type state: :py:class:`spinnman.model.cpu_state.CPUState`
         :return: A count of the cores with the given status
         :rtype: int
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -785,13 +785,14 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If status is not a valid status
+                    * If state is not a valid status
                     * If app_id is not a valid application id
                     * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        response = self._send_scp_message(SCPCountStateRequest(app_id, state))
+        return response.count
 
     def execute(self, x, y, p, executable, app_id):
         """ Start an executable running on a single core

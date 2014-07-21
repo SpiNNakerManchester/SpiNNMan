@@ -2,9 +2,13 @@ from threading import Thread
 from threading import Condition
 from spinnman.model.io_buffer import IOBuffer
 from spinnman.data.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
-import sys
 from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
+
+import sys
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class _IOBufThread(Thread):
@@ -57,6 +61,9 @@ class _IOBufThread(Thread):
                 reader.read_int()  # time
                 reader.read_int()  # milliseconds
                 bytes_to_read = reader.read_int()
+                logger.debug("Reading {} bytes of IOBUF,"
+                        " next buffer at {}".format(
+                                bytes_to_read, next_base_address))
 
                 # Read the data out of the packet
                 data = reader.read_bytes()
