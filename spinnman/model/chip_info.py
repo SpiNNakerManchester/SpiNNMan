@@ -34,16 +34,16 @@ class ChipInfo(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
                     the data doesn't contain valid system data information
         """
-        self._x = system_data[0]
-        self._y = system_data[1]
-        self._x_size = system_data[2]
-        self._y_size = system_data[3]
-        self._debug_x = system_data[4]
-        self._debug_y = system_data[5]
+        self._y = system_data[0]
+        self._x = system_data[1]
+        self._y_size = system_data[2]
+        self._x_size = system_data[3]
+        self._debug_y = system_data[4]
+        self._debug_x = system_data[5]
         self._is_peer_to_peer_available = system_data[6] != 0
         self._nnbc_last_id = system_data[7]
-        self._nearest_ethernet_x = system_data[8]
-        self._nearest_ethernet_y = system_data[9]
+        self._nearest_ethernet_y = system_data[8]
+        self._nearest_ethernet_x = system_data[9]
         self._hardware_version = system_data[10]
         self._is_ethernet_available = system_data[11] != 0
 
