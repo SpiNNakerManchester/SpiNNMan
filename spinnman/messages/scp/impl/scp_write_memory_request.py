@@ -31,23 +31,24 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
 
         if base_address < 0:
             raise SpinnmanInvalidParameterException(
-                    "base_address", str(base_address),
-                    "Must be a positive integer")
+                "base_address", str(base_address),
+                "Must be a positive integer")
         if len(data) == 0:
             raise SpinnmanInvalidParameterException(
-                    "len(data)", len(data), "Must be something to write")
+                "len(data)", str(len(data)), "Must be something to write")
         if len(data) > 256:
             raise SpinnmanInvalidParameterException(
-                    "len(data)", str(len(data)),
-                    "Must be less than 256 bytes")
+                "len(data)", str(len(data)),
+                "Must be less than 256 bytes")
 
         super(SCPWriteMemoryRequest, self).__init__(
-                SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                        destination_cpu=0, destination_chip_x=x,
-                        destination_chip_y=y),
-                SCPRequestHeader(command=SCPCommand.CMD_WRITE),
-                argument_1=base_address, argument_2=len(data), argument_3=0,
-                data=data)
+            SDPHeader(
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                destination_cpu=0, destination_chip_x=x,
+                destination_chip_y=y),
+            SCPRequestHeader(command=SCPCommand.CMD_WRITE),
+            argument_1=base_address, argument_2=len(data), argument_3=0,
+            data=data)
 
     def get_scp_response(self):
         return SCPCheckOKResponse("WriteMemory", "CMD_WRITE")

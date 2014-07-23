@@ -20,7 +20,7 @@ class SCPCountStateResponse(AbstractSCPResponse):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                    "CountState", "CMD_SIGNAL", result.name)
+                "CountState", "CMD_SIGNAL", result.name)
         self._count = byte_reader.read_int()
 
     @property

@@ -26,4 +26,4 @@ class SCPCheckOKResponse(AbstractSCPResponse):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                    self._operation, self._command, result.name)
+                self._operation, self._command, result.name)

@@ -21,7 +21,7 @@ class SCPReadMemoryResponse(AbstractSCPResponse):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                    "Read", "CMD_READ", result.name)
+                "Read", "CMD_READ", result.name)
         self._data = byte_reader.read_bytes()
 
     @property

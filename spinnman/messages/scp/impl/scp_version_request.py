@@ -25,11 +25,11 @@ class SCPVersionRequest(AbstractSCPRequest):
                     * If the processor is out of range
         """
         super(SCPVersionRequest, self).__init__(
-                SDPHeader(
-                        flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                        destination_cpu=p, destination_chip_x=x,
-                        destination_chip_y=y),
-                SCPRequestHeader(command=SCPCommand.CMD_VER))
+            SDPHeader(
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                destination_cpu=p, destination_chip_x=x,
+                destination_chip_y=y),
+            SCPRequestHeader(command=SCPCommand.CMD_VER))
 
     def get_scp_response(self):
         """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
