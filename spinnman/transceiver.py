@@ -17,13 +17,19 @@ from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
 
-
 from spinnman.messages.spinnaker_boot.spinnaker_boot_messages import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
 from spinnman.messages.scp.impl.scp_count_state_request import SCPCountStateRequest
+from spinnman.messages.scp.impl.scp_write_memory_request import SCPWriteMemoryRequest
+from spinnman.messages.scp.impl.scp_flood_fill_start_request import SCPFloodFillStartRequest
+from spinnman.messages.scp.impl.scp_flood_fill_data_request import SCPFloodFillDataRequest
+from spinnman.messages.scp.impl.scp_flood_fill_end_request import SCPFloodFillEndRequest
+from spinnman.messages.scp.impl.scp_application_run_request import SCPApplicationRunRequest
 from spinnman.messages.scp.scp_result import SCPResult
+
+from spinnman.data.abstract_data_reader import AbstractDataReader
 
 from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman._threads._iobuf_thread import _IOBufThread
@@ -39,9 +45,10 @@ from spinn_machine.router import ROUTER_DEFAULT_CLOCK_SPEED
 from spinn_machine.link import Link
 
 from collections import deque
+from threading import Condition
 
 import logging
-from spinnman.messages.scp.impl.scp_write_memory_request import SCPWriteMemoryRequest
+import math
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +87,9 @@ def create_transceiver_from_hostname(hostname, discover=True):
 
 
 class Transceiver(object):
-    """ An encapsulation of various communications with the spinnaker board.\
-        Note that the methods of this class are designed to be thread-safe;\
+    """ An encapsulation of various communications with the spinnaker board.
+
+        The methods of this class are designed to be thread-safe;\
         thus you can make multiple calls to the same (or different) methods\
         from multiple threads and expect each call to work as if it had been\
         called sequentially, although the order of returns is not guaranteed.\
@@ -89,6 +97,8 @@ class Transceiver(object):
         threads in this way may result in an increase in the overall speed of\
         operation, since the multiple calls may be made separately over the\
         set of given connections.
+
+
     """
 
     def __init__(self, connections=None, discover=True):
@@ -96,7 +106,7 @@ class Transceiver(object):
 
         :param connections: An iterable of connections to the board.  If not\
                     specified, no communication will be possible until\
-                    connections are specified.
+                    connections are found.
         :type connections: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :param discover: Determines if discovery should take place.  If not\
@@ -104,7 +114,8 @@ class Transceiver(object):
                     to the board.
         :type discover: bool
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
+                    communicating with the board, or if no connections to the\
+                    board can be found (if connections is None)
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
@@ -141,6 +152,84 @@ class Transceiver(object):
         # Discover any new connections, and update the queues if requested
         if discover:
             self.discover_connections()
+            if len(self._connections) == 0:
+                raise SpinnmanIOException(
+                        "No connections to the board were found")
+
+        # The nearest neighbour start id and lock
+        self._next_nearest_neighbour_id = 2
+        self._next_nearest_neighbour_condition = Condition()
+
+        # A lock against multiple flood fill writes - needed as SCAMP cannot
+        # cope with this
+        self._flood_write_lock = Condition()
+
+        # A lock against single chip executions (entry is (x, y))
+        # The condition should be acquired before the locks are
+        # checked or updated
+        # The write lock condition should also be acquired to avoid a flood
+        # fill during an individual chip execute
+        self._chip_execute_locks = dict()
+        self._chip_execute_lock_condition = Condition()
+        self._n_chip_execute_locks = 0
+
+    def _get_chip_execute_lock(self, x, y):
+        """ Get a lock for executing an executable on a chip
+        """
+
+        # Check if there is a lock for the given chip
+        chip_lock = None
+        self._chip_execute_lock_condition.acquire()
+        if not (x, y) in self._chip_execute_locks:
+            chip_lock = Condition()
+            self._chip_execute_locks[(x, y)] = chip_lock
+        else:
+            chip_lock = self._chip_execute_locks[(x, y)]
+        self._chip_execute_lock_condition.release()
+
+        # Get the lock for the chip
+        chip_lock.acquire()
+
+        # Increment the lock counter (used for the flood lock)
+        self._chip_execute_lock_condition.acquire()
+        self._n_chip_execute_locks += 1
+        self._chip_execute_lock_condition.release()
+
+    def _release_chip_execute_lock(self, x, y):
+        """ Release the lock for executing on a chip
+        """
+
+        # Get the chip lock
+        self._chip_execute_lock_condition.acquire()
+        chip_lock = self._chip_execute_locks[(x, y)]
+
+        # Release the chip lock
+        chip_lock.release()
+
+        # Decrement the lock and notify
+        self._n_chip_execute_locks -= 1
+        self._chip_execute_lock_condition.notify_all()
+        self._chip_execute_lock_condition.release()
+
+    def _get_flood_execute_lock(self):
+        """ Get a lock for executing a flood fill of an executable
+        """
+
+        # Get the execute lock all together, so nothing can access it
+        self._chip_execute_lock_condition.acquire()
+
+        # Wait until nothing is executing
+        while self._n_chip_execute_locks > 0:
+            self._chip_execute_lock_condition.wait()
+
+        # When nothing is executing, we can return here
+
+    def _release_flood_execute_lock(self):
+        """ Release the lock for executing a flood fill
+        """
+
+        # Release the execute lock
+        self._chip_execute_lock_condition.release()
 
     def _update_connection_queues(self):
         """ Creates and deletes queues of connections depending upon what\
@@ -444,6 +533,8 @@ class Transceiver(object):
 
         # Currently, this only finds other UDP connections given a connection
         # that supports SCP - this is done via the machine
+        if self._udp_connections is None:
+            return list()
         self._update_machine()
 
         # Find all the new connections via the machine ethernet-connected chips
@@ -795,15 +886,16 @@ class Transceiver(object):
         response = self._send_scp_message(SCPCountStateRequest(app_id, state))
         return response.count
 
-    def execute(self, x, y, p, executable, app_id):
+    def execute(self, x, y, processors, executable, app_id, n_bytes=None):
         """ Start an executable running on a single core
 
         :param x: The x-coordinate of the chip on which to run the executable
         :type x: int
         :param y: The y-coordinate of the chip on which to run the executable
         :type y: int
-        :param p: The core on the chip on which to run the application
-        :type p: int
+        :param processors: The cores on the chip on which to run the\
+                    application
+        :type processors: iterable of int
         :param executable: The data that is to be executed.  Should be one of\
                     the following:
                     * An instance of AbstractDataReader
@@ -813,6 +905,13 @@ class Transceiver(object):
         :param app_id: The id of the application with which to associate the\
                     executable
         :type app_id: int
+        :param n_bytes: The size of the executable data in bytes.  If not\
+                    specified:
+                        * If data is an AbstractDataReader, an error is raised
+                        * If data is a bytearray, the length of the bytearray\
+                          will be used
+                        * If data is an int, 4 will be used
+        :type n_bytes: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -827,9 +926,29 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
 
-    def execute_flood(self, core_subsets, executable, app_id):
+        # Lock against updates
+        self._get_chip_execute_lock(x, y)
+
+        # Write the executable
+        self.write_memory(x, y, 0x67800000, executable, n_bytes)
+
+        # Request the start of the executable
+        self._send_scp_message(SCPApplicationRunRequest(app_id, x, y,
+                processors))
+
+        # Release the lock
+        self._release_chip_execute_lock(x, y)
+
+    def _get_next_nearest_neighbour_id(self):
+        self._next_nearest_neighbour_condition.acquire()
+        next_nearest_neighbour_id = self._next_nearest_neighbour_id
+        self._next_nearest_neighbour_id =\
+            (self._next_nearest_neighbour_id + 1) % 127
+        self._next_nearest_neighbour_condition.release()
+        return next_nearest_neighbour_id
+
+    def execute_flood(self, core_subsets, executable, app_id, n_bytes=None):
         """ Start an executable running on multiple places on the board.  This\
             will be optimized based on the selected cores, but it may still\
             require a number of communications with the board to execute.
@@ -845,6 +964,13 @@ class Transceiver(object):
         :param app_id: The id of the application with which to associate the\
                     executable
         :type app_id: int
+        :param n_bytes: The size of the executable data in bytes.  If not\
+                    specified:
+                        * If data is an AbstractDataReader, an error is raised
+                        * If data is a bytearray, the length of the bytearray\
+                          will be used
+                        * If data is an int, 4 will be used
+        :type n_bytes: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -856,12 +982,84 @@ class Transceiver(object):
                     * If one of the specified cores is not valid
                     * If app_id is an invalid application id
                     * If a packet is received that has invalid parameters
+                    * If data is an AbstractDataReader but n_bytes is not\
+                      specified
+                    * If data is an int and n_bytes is more than 4
+                    * If n_bytes is less than 0
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        # Lock against other executables
+        self._get_flood_execute_lock()
 
-    def write_memory(self, x, y, base_address, data):
+        # Flood fill the system with the binary
+        self.write_memory_flood(0x67800000, executable, n_bytes)
+
+        # Execute the binary on the cores on the chips where required
+        for core_subset in core_subsets:
+            x = core_subset.x
+            y = core_subset.y
+            nearest_neighbour_id = self._get_next_nearest_neighbour_id()
+            self._send_scp_message(SCPFloodFillStartRequest(
+                    nearest_neighbour_id, 0, x, y))
+            self._send_scp_message(SCPFloodFillEndRequest(
+                    nearest_neighbour_id, app_id, core_subset.processor_ids))
+
+        # Release the lock
+        self._release_flood_execute_lock()
+
+    def _get_bytes_to_write_and_data_to_write(self, data, n_bytes):
+        """ Converts a given data item an a number of bytes into the data\
+            and the amount of data to write
+
+        :param data: The data to write.  Should be one of the following:
+                    * An instance of AbstractDataReader
+                    * A bytearray
+                    * A single integer - will be written using little-endian\
+                      byte ordering
+        :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+                    or bytearray or int
+        :param n_bytes: The amount of data to be written in bytes.  If not\
+                    specified:
+                        * If data is an AbstractDataReader, an error is raised
+                        * If data is a bytearray, the length of the bytearray\
+                          will be used
+                        * If data is an int, 4 will be used
+        :type n_bytes: int
+        :return: The number of bytes and the data to write
+        :rtype: (int, int)
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If data is an AbstractDataReader but n_bytes is not\
+                      specified
+                    * If data is an int and n_bytes is more than 4
+                    * If n_bytes is less than 0
+        """
+        if n_bytes is not None and n_bytes < 0:
+            raise SpinnmanInvalidParameterException(
+                    "n_bytes", n_bytes, "Must be a positive integer")
+
+        bytes_to_write = n_bytes
+        data_to_write = data
+        if isinstance(data, AbstractDataReader) and n_bytes is None:
+            raise SpinnmanInvalidParameterException(
+                    "n_bytes", "None",
+                    "n_bytes must be specified when data is an"
+                    " AbstractDataReader")
+        if isinstance(data, bytearray) and n_bytes is None:
+            bytes_to_write = len(data)
+        if isinstance(data, int) and n_bytes is None:
+            bytes_to_write = 4
+        if isinstance(data, int) and n_bytes > 4:
+            raise SpinnmanInvalidParameterException(
+                    n_bytes, "n_bytes", "An integer is at most 4 bytes")
+        if isinstance(data, int):
+            data_to_write = bytearray(bytes_to_write)
+            for i in range(0, bytes_to_write):
+                data_to_write[i] = (data >> (8 * i)) & 0xFF
+
+        return bytes_to_write, data_to_write
+
+    def write_memory(self, x, y, base_address, data, n_bytes=None):
         """ Write to the SDRAM on the board
 
         :param x: The x-coordinate of the chip where the memory is to be\
@@ -876,9 +1074,17 @@ class Transceiver(object):
         :param data: The data to write.  Should be one of the following:
                     * An instance of AbstractDataReader
                     * A bytearray
-                    * A single integer
+                    * A single integer - will be written using little-endian\
+                      byte ordering
         :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
+        :param n_bytes: The amount of data to be written in bytes.  If not\
+                    specified:
+                        * If data is an AbstractDataReader, an error is raised
+                        * If data is a bytearray, the length of the bytearray\
+                          will be used
+                        * If data is an int, 4 will be used
+        :type n_bytes: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -889,39 +1095,50 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
                     * If x, y does not lead to a valid chip
                     * If a packet is received that has invalid parameters
+                    * If base_address is not a positive integer
+                    * If data is an AbstractDataReader but n_bytes is not\
+                      specified
+                    * If data is an int and n_bytes is more than 4
+                    * If n_bytes is less than 0
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+
+        bytes_to_write, data_to_write =\
+            self._get_bytes_to_write_and_data_to_write(data, n_bytes)
+
         # Set up all the requests and get the callbacks
-        logger.debug("Writing {} bytes of memory".format(len(data)))
-        bytes_to_write = len(data)
+        logger.debug("Writing {} bytes of memory".format(bytes_to_write))
         offset = 0
         address_to_write = base_address
         callbacks = list()
         while bytes_to_write > 0:
-            data_size = bytes_to_write
-            if data_size > 256:
-                data_size = 256
-            thread = _SCPMessageThread(self, SCPWriteMemoryRequest(
-                    x, y, address_to_write, data[offset:(offset + data_size)]))
-            thread.start()
-            callbacks.append(thread)
-            bytes_to_write -= data_size
-            address_to_write += data_size
-            offset += data_size
+            max_data_size = bytes_to_write
+            if max_data_size > 256:
+                max_data_size = 256
+            data_array = None
+            if isinstance(data_to_write, AbstractDataReader):
+                data_array = data_to_write.read(max_data_size)
+            elif isinstance(data_to_write, bytearray):
+                data_array = data_to_write[offset:(offset + max_data_size)]
+            data_size = len(data_array)
+
+            if data_size != 0:
+                thread = _SCPMessageThread(self, SCPWriteMemoryRequest(
+                        x, y, address_to_write, data_array))
+                thread.start()
+                callbacks.append(thread)
+                bytes_to_write -= data_size
+                address_to_write += data_size
+                offset += data_size
 
         # Go through the callbacks and check that the responses are OK
         for callback in callbacks:
             callback.get_response()
 
-    def write_memory_flood(self, core_subsets, base_address, data):
-        """ Write to the SDRAM of a number of chips.  This will be optimized\
-            based on the selected cores, but it may still require a number\
-            of communications with the board.
+    def write_memory_flood(self, base_address, data, n_bytes=None):
+        """ Write to the SDRAM of all chips.
 
-        :param core_subsets: Which chips to write the data to (the cores are\
-                    ignored)
-        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
         :param base_address: The address in SDRAM where the region of memory\
                     is to be written
         :type base_address: int
@@ -932,6 +1149,14 @@ class Transceiver(object):
                     * A single integer
         :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
+        :param n_bytes: The amount of data to be written in bytes.  If not\
+                    specified:
+                        * If data is an AbstractDataReader, an error is raised
+                        * If data is a bytearray, the length of the bytearray\
+                          will be used
+                        * If data is an int, 4 will be used
+                        * If n_bytes is less than 0
+        :type n_bytes: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -946,7 +1171,57 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+
+        # Ensure only one flood fill occurs at any one time
+        self._flood_write_lock.acquire()
+
+        bytes_to_write, data_to_write =\
+            self._get_bytes_to_write_and_data_to_write(data, n_bytes)
+
+        # Start the flood fill
+        nearest_neighbour_id = self._get_next_nearest_neighbour_id()
+        n_blocks = int(math.ceil(math.ceil(bytes_to_write / 4.0) / 256.0))
+        self._send_scp_message(SCPFloodFillStartRequest(nearest_neighbour_id,
+                n_blocks))
+
+        # Send the data blocks simultaneously
+        # Set up all the requests and get the callbacks
+        logger.debug("Writing {} bytes of memory".format(bytes_to_write))
+        offset = 0
+        address_to_write = base_address
+        callbacks = list()
+        block_no = 0
+        while bytes_to_write > 0:
+            max_data_size = bytes_to_write
+            if max_data_size > 256:
+                max_data_size = 256
+            data_array = None
+            if isinstance(data_to_write, AbstractDataReader):
+                data_array = data_to_write.read(max_data_size)
+            elif isinstance(data_to_write, bytearray):
+                data_array = data_to_write[offset:(offset + max_data_size)]
+            data_size = len(data_array)
+
+            if data_size != 0:
+                thread = _SCPMessageThread(self, SCPFloodFillDataRequest(
+                        nearest_neighbour_id, block_no, address_to_write,
+                        data_array))
+                thread.start()
+                callbacks.append(thread)
+                bytes_to_write -= data_size
+                address_to_write += data_size
+                offset += data_size
+                block_no += 1
+
+        # Go through the callbacks and check that the responses are OK
+        for callback in callbacks:
+            callback.get_response()
+
+        # Send the end packet
+        self._send_scp_message(SCPFloodFillEndRequest(nearest_neighbour_id))
+
+        # Release the lock to allow others to proceed
+        self._flood_write_lock.release()
 
     def read_memory(self, x, y, base_address, length):
         """ Read some areas of SDRAM from the board
