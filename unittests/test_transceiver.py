@@ -1,13 +1,19 @@
 import unittest
 import spinnman.transceiver as transceiver
 from spinnman.connections.udp_connection import UDPConnection
-
+import time
 class TestTransceiver(unittest.TestCase):
 
     def test_create_new_default_transceiver(self):
-        trans = transceiver.Transceiver()
+        trans = transceiver.Transceiver(discover=False)
 
-        self.assertEqual(trans.get_connections(), None)
+        self.assertEqual(trans.get_connections(), [])
+        trans.close()
+
+    def test_create_new_default_transceiver_discover(self):
+        trans = transceiver.Transceiver(discover=True)
+
+        self.assertNotEqual(trans.get_connections(), [])
         trans.close()
 
     def test_create_new_transceiver_one_connection_discovery(self):
@@ -61,10 +67,14 @@ class TestTransceiver(unittest.TestCase):
         print trans.get_scamp_version()
         print trans.get_cpu_information()
 
-        from spinnman.model.cpu_state import CPUState
-        print '{} READY cores |'.format(trans.get_core_status_count(CPUState.READY))
-        print '{} IDLE cores  |'.format(trans.get_core_status_count(CPUState.IDLE))
 
+        trans.close()
+
+    def test_boot_board(self):
+        self.set_up_remote_board()
+        trans = transceiver.create_transceiver_from_hostname(self.remotehost)
+        #self.assertFalse(trans.is_connected())
+        trans.boot_board(3)
         trans.close()
 
     def set_up_local_virtual_board(self):
