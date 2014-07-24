@@ -11,21 +11,21 @@ class AbstractByteReader(object):
         rather than calling read_byte 4 times unless a specific endianness is\
         being achieved.
     """
-    
+
     @abstractmethod
     def read_byte(self):
         """ Reads the next byte
-        
+
         :return: A byte
         :rtype: int
         :raise IOError: If there is an error reading from the stream
         :raise EOFError: If there are no more bytes to read
         """
         pass
-    
+
     def read_bytes(self, size=None):
         """ Reads an array of bytes
-        
+
         :param size: The number of bytes to read, or None to read all of the\
                     remaining bytes
         :type size: int
@@ -37,33 +37,33 @@ class AbstractByteReader(object):
                     None, an empty array will be returned
         """
         pass
-    
+
     @abstractmethod
-    def read_short(self, short_value):
+    def read_short(self):
         """ Reads the next two bytes as a short value
-        
+
         :return: A short
         :rtype: int
         :raise IOError: If there is an error reading from the stream
         :raise EOFError: If there are too few bytes to read a short
         """
         pass
-    
+
     @abstractmethod
-    def read_int(self, int_value):
+    def read_int(self):
         """ Read the next four bytes as in int value
-        
+
         :return: An int
         :rtype: int
         :raise IOError: If there is an error reading from the stream
         :raise EOFError: If there are too few bytes to read an int
         """
         pass
-    
+
     @abstractmethod
-    def read_long(self, long_value):
+    def read_long(self):
         """ Reads the next eight bytes as a long value
-        
+
         :return: A long
         :rtype: long
         :raise IOError: If there is an error reading from the stream
