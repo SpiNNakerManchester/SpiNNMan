@@ -65,7 +65,7 @@ class LittleEndianByteArrayByteReader(AbstractByteReader):
     def read_long(self):
         """ See :py:meth:`spinnman.data.abstract_byte_reader.AbstractByteReader.read_long`
         """
-        if self._read_pointer + 1 >= len(self._data):
+        if self._read_pointer + 7 >= len(self._data):
             raise EOFError("Not enough bytes to read a long")
         value = (self._data[self._read_pointer]
                  | (self._data[self._read_pointer + 1] << 8)
