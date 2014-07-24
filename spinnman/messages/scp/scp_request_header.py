@@ -56,12 +56,12 @@ class SCPRequestHeader(object):
         """
         if self._sequence is not None:
             raise SpinnmanInvalidParameterException(
-                    "sequence", str(sequence),
-                    "The sequence has already been set")
+                "sequence", str(sequence),
+                "The sequence has already been set")
         if sequence is not None and (sequence < 0 or sequence > 65535):
             raise SpinnmanInvalidParameterException(
-                    "sequence", str(sequence),
-                    "The sequence must be between 0 and 65535")
+                "sequence", str(sequence),
+                "The sequence must be between 0 and 65535")
         self._sequence = sequence
 
     def write_scp_request_header(self, byte_writer):
@@ -79,10 +79,10 @@ class SCPRequestHeader(object):
         """
         if self._command is None:
             raise SpinnmanInvalidParameterException(
-                    "scp_header.command", None, "No value has been assigned")
+                "scp_header.command", str(None), "No value has been assigned")
         if self._sequence is None:
             raise SpinnmanInvalidParameterException(
-                    "scp_header.sequence", None, "No value has been assigned")
+                "scp_header.sequence", str(None), "No value has been assigned")
 
         try:
             byte_writer.write_short(self._command.value)

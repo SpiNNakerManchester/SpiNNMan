@@ -12,10 +12,10 @@ class SDPHeader(object):
     """
     
     def __init__(self, flags=None, tag=None,
-            destination_port=None, destination_cpu=None,
-            destination_chip_x=None, destination_chip_y=None,
-            source_port=None, source_cpu=None,
-            source_chip_x=None, source_chip_y=None):
+                 destination_port=None, destination_cpu=None,
+                 destination_chip_x=None, destination_chip_y=None,
+                 source_port=None, source_cpu=None,
+                 source_chip_x=None, source_chip_y=None):
         """
         :param flags: Any flags for the packet
         :type flags: :py:class:`spinnman.messages.sdp.sdp_flag.SDPFlag`
@@ -92,7 +92,7 @@ class SDPHeader(object):
         """
         if self._flags is not None:
             raise SpinnmanInvalidParameterException(
-                    "flags", flags.name, "Already set")
+                "flags", flags.name, "Already set")
         self._flags = flags
     
     @property
@@ -117,10 +117,10 @@ class SDPHeader(object):
         """
         if self._tag is not None:
             raise SpinnmanInvalidParameterException(
-                    "tag", str(tag), "Already set")
+                "tag", str(tag), "Already set")
         if tag is not None and (tag < 0 or tag > 255):
             raise SpinnmanInvalidParameterException(
-                    "tag", str(tag), "Must be between 0 and 255")
+                "tag", str(tag), "Must be between 0 and 255")
             
         self._tag = tag
     
@@ -147,12 +147,12 @@ class SDPHeader(object):
         """
         if self._destination_port is not None:
             raise SpinnmanInvalidParameterException(
-                    "destination_port", str(destination_port), "Already set")
+                "destination_port", str(destination_port), "Already set")
         if destination_port is not None and (destination_port < 0
-                or destination_port > 7):
+                                             or destination_port > 7):
             raise SpinnmanInvalidParameterException(
-                    "destination_port", str(destination_port),
-                    "Must be between 0 and 7")
+                "destination_port", str(destination_port),
+                "Must be between 0 and 7")
             
         self._destination_port = destination_port
     
@@ -179,12 +179,12 @@ class SDPHeader(object):
         """
         if self._destination_cpu is not None:
             raise SpinnmanInvalidParameterException(
-                    "destination_cpu", str(destination_cpu), "Already set")
+                "destination_cpu", str(destination_cpu), "Already set")
         if destination_cpu is not None and (destination_cpu < 0
-                or destination_cpu > 31):
+                                            or destination_cpu > 31):
             raise SpinnmanInvalidParameterException(
-                    "destination_cpu", str(destination_cpu),
-                    "Must be between 0 and 31")
+                "destination_cpu", str(destination_cpu),
+                "Must be between 0 and 31")
             
         self._destination_cpu = destination_cpu
         
@@ -211,13 +211,13 @@ class SDPHeader(object):
         """
         if self._destination_chip_x is not None:
             raise SpinnmanInvalidParameterException(
-                    "destination_chip_x", str(destination_chip_x),
-                    "Already set")
+                "destination_chip_x", str(destination_chip_x),
+                "Already set")
         if destination_chip_x is not None and (destination_chip_x < 0
-                or destination_chip_x > 255):
+                                               or destination_chip_x > 255):
             raise SpinnmanInvalidParameterException(
-                    "destination_chip_x", str(destination_chip_x),
-                    "Must be between 0 and 255")
+                "destination_chip_x", str(destination_chip_x),
+                "Must be between 0 and 255")
             
         self._destination_chip_x = destination_chip_x
     
@@ -244,13 +244,13 @@ class SDPHeader(object):
         """
         if self._destination_chip_y is not None:
             raise SpinnmanInvalidParameterException(
-                    "destination_chip_y", str(destination_chip_y),
-                    "Already set")
+                "destination_chip_y", str(destination_chip_y),
+                "Already set")
         if destination_chip_y is not None and (destination_chip_y < 0
-                or destination_chip_y > 255):
+                                               or destination_chip_y > 255):
             raise SpinnmanInvalidParameterException(
-                    "destination_chip_y", str(destination_chip_y),
-                    "Must be between 0 and 255")
+                "destination_chip_y", str(destination_chip_y),
+                "Must be between 0 and 255")
             
         self._destination_chip_y = destination_chip_y
     
@@ -277,10 +277,10 @@ class SDPHeader(object):
         """
         if self._source_port is not None:
             raise SpinnmanInvalidParameterException(
-                    "source_port", str(source_port), "Already set")
+                "source_port", str(source_port), "Already set")
         if source_port is not None and (source_port < 0 or source_port > 7):
             raise SpinnmanInvalidParameterException(
-                    "source_port", str(source_port), "Must be between 0 and 7")
+                "source_port", str(source_port), "Must be between 0 and 7")
             
         self._source_port = source_port
         
@@ -307,10 +307,10 @@ class SDPHeader(object):
         """
         if self._source_cpu is not None:
             raise SpinnmanInvalidParameterException(
-                    "source_cpu", str(source_cpu), "Already set")
+                "source_cpu", str(source_cpu), "Already set")
         if source_cpu is not None and (source_cpu < 0 or source_cpu > 31):
             raise SpinnmanInvalidParameterException(
-                    "source_cpu", str(source_cpu), "Must be between 0 and 31")
+                "source_cpu", str(source_cpu), "Must be between 0 and 31")
             
         self._source_cpu = source_cpu
         
@@ -337,12 +337,12 @@ class SDPHeader(object):
         """
         if self._source_chip_x is not None:
             raise SpinnmanInvalidParameterException(
-                    "source_chip_x", str(source_chip_x), "Already set")
+                "source_chip_x", str(source_chip_x), "Already set")
         if source_chip_x is not None and (source_chip_x < 0
-                or source_chip_x > 255):
+                                          or source_chip_x > 255):
             raise SpinnmanInvalidParameterException(
-                    "source_chip_x", str(source_chip_x),
-                    "Must be between 0 and 255")
+                "source_chip_x", str(source_chip_x),
+                "Must be between 0 and 255")
             
         self._source_chip_x = source_chip_x
     
@@ -369,12 +369,12 @@ class SDPHeader(object):
         """
         if self._source_chip_y is not None:
             raise SpinnmanInvalidParameterException(
-                    "source_chip_y", str(source_chip_y), "Already set")
+                "source_chip_y", str(source_chip_y), "Already set")
         if source_chip_y is not None and (source_chip_y < 0
-                or source_chip_y > 255):
+                                          or source_chip_y > 255):
             raise SpinnmanInvalidParameterException(
-                    "source_chip_y", str(source_chip_y),
-                    "Must be between 0 and 255")
+                "source_chip_y", str(source_chip_y),
+                "Must be between 0 and 255")
             
         self._source_chip_y = source_chip_y
         
@@ -393,42 +393,42 @@ class SDPHeader(object):
         """
         if self._flags is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.flags", None, "No value has been assigned")
+                "sdp_header.flags", str(None), "No value has been assigned")
         if self._tag is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.tag", None, "No value has been assigned")
+                "sdp_header.tag", str(None), "No value has been assigned")
         if self._destination_port is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.destination_port", None,
-                    "No value has been assigned")
+                "sdp_header.destination_port", str(None),
+                "No value has been assigned")
         if self._destination_cpu is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.destination_cpu", None,
-                    "No value has been assigned")
+                "sdp_header.destination_cpu", str(None),
+                "No value has been assigned")
         if self._destination_chip_x is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.destination_chip_x", None,
-                    "No value has been assigned")
+                "sdp_header.destination_chip_x", str(None),
+                "No value has been assigned")
         if self._destination_chip_y is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.destination_chip_y", None,
-                    "No value has been assigned")
+                "sdp_header.destination_chip_y", str(None),
+                "No value has been assigned")
         if self._source_port is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.source_port", None,
-                    "No value has been assigned")
+                "sdp_header.source_port", str(None),
+                "No value has been assigned")
         if self._source_cpu is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.source_cpu", None,
-                    "No value has been assigned")
+                "sdp_header.source_cpu", str(None),
+                "No value has been assigned")
         if self._source_chip_x is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.source_chip_x", None,
-                    "No value has been assigned")
+                "sdp_header.source_chip_x", str(None),
+                "No value has been assigned")
         if self._source_chip_y is None:
             raise SpinnmanInvalidParameterException(
-                    "sdp_header.source_chip_y", None,
-                    "No value has been assigned")
+                "sdp_header.source_chip_y", str(None),
+                "No value has been assigned")
         
         try:
             byte_writer.write_byte(self._flags.value)
@@ -475,10 +475,12 @@ class SDPHeader(object):
             self.source_chip_x = byte_reader.read_byte()
             self.source_chip_y = byte_reader.read_byte()
         except ValueError as exception:
-            raise SpinnmanInvalidParameterException("flags", flags_value,
-                    "Unrecognized value")
+            raise SpinnmanInvalidParameterException(
+                "flags", flags_value,
+                "Unrecognized value")
         except IOError as exception:
             raise SpinnmanIOException(str(exception))
         except EOFError as exception:
-            raise SpinnmanInvalidPacketException("SDP (header)",
-                    "Not enough bytes to read a header")
+            raise SpinnmanInvalidPacketException(
+                "SDP (header)",
+                "Not enough bytes to read a header")
