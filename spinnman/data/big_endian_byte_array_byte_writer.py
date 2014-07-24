@@ -7,9 +7,6 @@ class BigEndianByteArrayByteWriter(AbstractByteWriter):
 
     def __init__(self):
         """
-
-        :param size: Optional size that the array will be
-        :type size: int
         """
         self._data = bytearray()
 

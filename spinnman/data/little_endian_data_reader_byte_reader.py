@@ -53,7 +53,7 @@ class LittleEndianDataReaderByteReader(AbstractByteReader):
         """
         try:
             value = (self.read_byte() | (self.read_byte() << 8)
-                    | (self.read_byte() << 16) | (self.read_byte() << 24))
+                     | (self.read_byte() << 16) | (self.read_byte() << 24))
             return value
         except EOFError:
             raise EOFError("Not enough bytes to read a short")
@@ -63,9 +63,9 @@ class LittleEndianDataReaderByteReader(AbstractByteReader):
         """
         try:
             value = (self.read_byte() | (self.read_byte() << 8)
-                    | (self.read_byte() << 16) | (self.read_byte() << 24)
-                    | (self.read_byte() << 32) | (self.read_byte() << 40)
-                    | (self.read_byte() << 48) | (self.read_byte() << 56))
+                     | (self.read_byte() << 16) | (self.read_byte() << 24)
+                     | (self.read_byte() << 32) | (self.read_byte() << 40)
+                     | (self.read_byte() << 48) | (self.read_byte() << 56))
             return value
         except EOFError:
             raise EOFError("Not enough bytes to read a short")

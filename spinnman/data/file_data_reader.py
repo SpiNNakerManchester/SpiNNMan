@@ -2,6 +2,7 @@ from spinnman.data.abstract_data_reader import AbstractDataReader
 from io import FileIO
 from spinnman.exceptions import SpinnmanIOException
 
+
 class FileDataReader(AbstractDataReader):
     """ A reader that can read data from a file
     """
