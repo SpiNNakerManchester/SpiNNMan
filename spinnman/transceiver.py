@@ -28,12 +28,19 @@ from spinnman.messages.scp.impl.scp_flood_fill_data_request import SCPFloodFillD
 from spinnman.messages.scp.impl.scp_flood_fill_end_request import SCPFloodFillEndRequest
 from spinnman.messages.scp.impl.scp_application_run_request import SCPApplicationRunRequest
 from spinnman.messages.scp.impl.scp_send_signal_request import SCPSendSignalRequest
+from spinnman.messages.scp.impl.scp_iptag_set_request import SCPIPTagSetRequest
+from spinnman.messages.scp.impl.scp_iptag_clear_request import SCPIPTagClearRequest
+from spinnman.messages.scp.impl.scp_iptag_info_request import SCPIPTagInfoRequest
+from spinnman.messages.scp.impl.scp_iptag_info_response import SCPIPTagInfoResponse
+from spinnman.messages.scp.impl.scp_iptag_get_request import SCPIPTagGetRequest
+from spinnman.messages.scp.impl.scp_iptag_get_response import SCPIPTagGetResponse
 from spinnman.messages.scp.scp_result import SCPResult
 
 from spinnman.data.abstract_data_reader import AbstractDataReader
 
 from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman._threads._iobuf_thread import _IOBufThread
+from spinnman._threads._get_iptags_thread import _GetIPTagsThread
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -47,10 +54,11 @@ from spinn_machine.link import Link
 
 from collections import deque
 from threading import Condition
-from time import sleep
+from socket import gethostbyname
 
 import logging
 import math
+from _socket import inet_aton
 
 logger = logging.getLogger(__name__)
 
@@ -545,7 +553,9 @@ class Transceiver(object):
             if (ethernet_connected_chip.ip_address,
                     UDP_CONNECTION_DEFAULT_PORT) not in self._udp_connections:
                 new_connection = UDPConnection(
-                        remote_host=ethernet_connected_chip.ip_address)
+                        remote_host=ethernet_connected_chip.ip_address,
+                        chip_x=ethernet_connected_chip.x,
+                        chip_y=ethernet_connected_chip.y)
                 new_connections.append(new_connection)
                 self._connections.append(new_connection)
                 self._udp_connections[(ethernet_connected_chip.ip_address,
@@ -1303,11 +1313,11 @@ class Transceiver(object):
 
         :param iptag: The iptag to set up
         :type iptag: :py:class:`spinnman.model.iptag.IPTag`
-        :param connection: Connection where the tag should be set up.  If not\
-                    specified, all SCPSender connections will send the message\
+        :param connection: UDPConnection where the tag should be set up.\
+                    If not specified, all UDPConnections will send the message\
                     to set up the tag
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
+                    :py:class:`spinnman.connections.udp_connetion.UDPConnection`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1321,7 +1331,30 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        connections = None
+        if connection is not None:
+            connections = (connection)
+        else:
+            connections = self._udp_connections.values()
+
+        callbacks = list()
+        for conn in connections:
+            host_string = ip_tag.address
+            if host_string == "localhost" or host_string == ".":
+                host_string = conn.local_ip_address
+            ip_string = gethostbyname(host_string)
+            ip_address = bytearray(inet_aton(ip_string))
+            thread = _SCPMessageThread(
+                    self,
+                    message=SCPIPTagSetRequest(
+                            conn.chip_x, conn.chip_y, ip_address, ip_tag.port,
+                            ip_tag.tag),
+                    connection=conn)
+            thread.start()
+            callbacks.append(thread)
+
+        for callback in callbacks:
+            callback.get_response()
 
     def clear_ip_tag(self, tag, connection=None):
         """ Clear the setting of an ip tag
@@ -1346,7 +1379,24 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        connections = None
+        if connection is not None:
+            connections = (connection)
+        else:
+            connections = self._udp_connections.values()
+
+        callbacks = list()
+        for conn in connections:
+            thread = _SCPMessageThread(
+                    self,
+                    message=SCPIPTagClearRequest(
+                            conn.chip_x, conn.chip_y, tag),
+                    connection=conn)
+            thread.start()
+            callbacks.append(thread)
+
+        for callback in callbacks:
+            callback.get_response()
 
     def get_ip_tags(self, connection=None):
         """ Get the current set of ip tags that have been set on the board
@@ -1368,7 +1418,22 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        connections = None
+        if connection is not None:
+            connections = (connection)
+        else:
+            connections = self._udp_connections.values()
+
+        callbacks = list()
+        for conn in connections:
+            thread = _GetIPTagsThread(self, conn)
+            thread.start()
+            callbacks.append(thread)
+
+        all_tags = list()
+        for callback in callbacks:
+            all_tags.extend(callback.get_iptags())
+        return all_tags
 
     def load_multicast_routes(self, app_id, x, y, routes):
         """ Load a set of multicast routes on to a chip
