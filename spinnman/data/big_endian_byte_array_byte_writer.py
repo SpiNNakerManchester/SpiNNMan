@@ -13,7 +13,7 @@ class BigEndianByteArrayByteWriter(AbstractByteWriter):
     def write_byte(self, byte_value):
         """ See :py:meth:`spinnman.data.abstract_byte_writer.AbstractByteWriter.write_byte`
         """
-        self._data.append(byte_value)
+        self._data.append(byte_value & 0xFF)
 
     def write_bytes(self, byte_iterable):
         """ See :py:meth:`spinnman.data.abstract_byte_writer.AbstractByteWriter.write_bytes`
