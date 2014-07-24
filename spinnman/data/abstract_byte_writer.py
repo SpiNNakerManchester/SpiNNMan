@@ -27,8 +27,8 @@ class AbstractByteWriter(object):
     def write_bytes(self, byte_iterable):
         """ Writes a set of bytes
 
-        :param bytes: The bytes to write
-        :type bytes: iterable of bytes
+        :param byte_iterable: The bytes to write
+        :type byte_iterable: iterable of bytes
         :return: Nothing is returned
         :rtype: None
         :raise IOError: If there is an error writing to the stream
@@ -64,7 +64,7 @@ class AbstractByteWriter(object):
         """ Writes an eight byte value
 
         :param long_value: The long to write
-        :type long: long
+        :type long_value: long
         :return: Nothing is returned
         :rtype: None
         :raise IOError: If there is an error writing to the stream
