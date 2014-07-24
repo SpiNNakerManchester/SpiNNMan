@@ -16,9 +16,9 @@ class SCPApplicationRunRequest(AbstractSCPRequest):
 
         :param app_id: The id of the application to run, between 16 and 255
         :type app_id: int
-        :param x: The x-coordinate of the chip to read from, between 0 and 255
+        :param x: The x-coordinate of the chip to run on, between 0 and 255
         :type x: int
-        :param y: The y-coordinate of the chip to read from, between 0 and 255
+        :param y: The y-coordinate of the chip to run on, between 0 and 255
         :type y: int
         :param processors: The processors on the chip where the executable\
                     should be started, between 1 and 17
