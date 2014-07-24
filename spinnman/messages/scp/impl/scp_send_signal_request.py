@@ -3,8 +3,6 @@ from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.messages.scp.impl.scp_count_state_response import \
-    SCPCountStateResponse
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 
