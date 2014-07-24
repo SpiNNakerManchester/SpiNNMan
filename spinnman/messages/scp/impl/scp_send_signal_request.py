@@ -25,8 +25,8 @@ class SCPSendSignalRequest(AbstractSCPRequest):
 
         :param app_id: The id of the application, between 0 and 255
         :type app_id: int
-        :param state: The signal to send
-        :type state: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
+        :param signal: The signal to send
+        :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
             app_id is out of range
         """
