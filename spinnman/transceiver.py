@@ -46,6 +46,7 @@ from spinn_machine.link import Link
 
 from collections import deque
 from threading import Condition
+from time import sleep
 
 import logging
 import math
@@ -996,14 +997,18 @@ class Transceiver(object):
         self.write_memory_flood(0x67800000, executable, n_bytes)
 
         # Execute the binary on the cores on the chips where required
+        callbacks = list()
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
-            nearest_neighbour_id = self._get_next_nearest_neighbour_id()
-            self._send_scp_message(SCPFloodFillStartRequest(
-                    nearest_neighbour_id, 0, x, y))
-            self._send_scp_message(SCPFloodFillEndRequest(
-                    nearest_neighbour_id, app_id, core_subset.processor_ids))
+            thread = _SCPMessageThread(self, SCPApplicationRunRequest(
+                    app_id, x, y, core_subset.processor_ids))
+            thread.start()
+            callbacks.append(thread)
+
+        # Go through the callbacks and check that the responses are OK
+        for callback in callbacks:
+            callback.get_response()
 
         # Release the lock
         self._release_flood_execute_lock()
