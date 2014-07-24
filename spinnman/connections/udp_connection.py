@@ -45,7 +45,8 @@ class UDPConnection(
     _SDP_SOURCE_CHIP_Y = 0
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-            remote_port=UDP_CONNECTION_DEFAULT_PORT, default_sdp_tag=0xFF):
+            remote_port=UDP_CONNECTION_DEFAULT_PORT, default_sdp_tag=0xFF,
+            chip_x=0, chip_y=0):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
@@ -65,12 +66,22 @@ class UDPConnection(
         :param default_sdp_tag: The default tag to use with sdp packets sent\
                     via this connection that do not have a tag set
         :type default_sdp_tag: int
+        :param chip_x: The x-coordinate of the chip to which this connection\
+                    is connected
+        :type chip_x: int
+        :param chip_y: The y-coordinate of the chip to which this connection\
+                    is connected
+        :type chip_y: int
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     setting up the communication channel
         """
 
         # Store the default sdp tag
         self._default_sdp_tag = default_sdp_tag
+
+        # Store the chip coordinates
+        self._chip_x = chip_x
+        self._chip_y = chip_y
 
         # Keep track of the current scp sequence number
         self._scp_sequence = 0
@@ -415,3 +426,21 @@ class UDPConnection(
         """ See :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
         """
         self._socket.close()
+
+    @property
+    def chip_x(self):
+        """ The x-coordinate of the chip with the ethernet connection to\
+            which all packets will be sent
+
+        :rtype: int
+        """
+        return self._chip_x
+
+    @property
+    def chip_y(self):
+        """ The y-coordinate of the chip with the ethernet connection to\
+            which all packets will be sent
+
+        :rtype: int
+        """
+        return self._chip_y

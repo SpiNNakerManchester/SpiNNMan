@@ -20,9 +20,14 @@ class _IOBufThread(Thread):
 
         :param transceiver: The transceiver to use to send the message
         :type transceiver: :py:class:`spinnman.transceiver.Transceiver`
-        :param cpu_information: The cpu information for the core
-        :type cpu_information :py:class:`spinnman.model.cpu_info.CPUInfo`
+        :param x: The x-coordinate of the chip to get the IO Buf from
+        :type x: int
+        :param y: The y-coordinate of the chip to get the IO Buf from
+        :type y: int
+        :param iobuf_address: The address of IOBuf in SDRAM
+        :type iobuf_address: int
         :param iobuf_bytes: The size of each buffer of iobuf in bytes
+        :type iobuf_bytes: int
         :raise None: No known exceptions are thrown
         """
         super(_IOBufThread, self).__init__()
