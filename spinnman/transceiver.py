@@ -27,6 +27,7 @@ from spinnman.messages.scp.impl.scp_flood_fill_start_request import SCPFloodFill
 from spinnman.messages.scp.impl.scp_flood_fill_data_request import SCPFloodFillDataRequest
 from spinnman.messages.scp.impl.scp_flood_fill_end_request import SCPFloodFillEndRequest
 from spinnman.messages.scp.impl.scp_application_run_request import SCPApplicationRunRequest
+from spinnman.messages.scp.impl.scp_send_signal_request import SCPSendSignalRequest
 from spinnman.messages.scp.scp_result import SCPResult
 
 from spinnman.data.abstract_data_reader import AbstractDataReader
@@ -1275,14 +1276,13 @@ class Transceiver(object):
         for callback in callbacks:
             yield callback.get_response().data
 
-    def send_signal(self, signal, app_id=None):
+    def send_signal(self, app_id, signal):
         """ Send a signal to an application
 
+        :param app_id: The id of the application to send to
+        :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
-        :param app_id: The id of the application to send to.  If not\
-                    specified, the signal is sent to all applications
-        :type app_id: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1296,7 +1296,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        self._send_scp_message(SCPSendSignalRequest(app_id, signal))
 
     def set_ip_tag(self, ip_tag, connection=None):
         """ Set up an ip tag
