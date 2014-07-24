@@ -22,7 +22,7 @@ class SCPReadLinkResponse(AbstractSCPResponse):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                    "ReadLink", "CMD_READ_LINK", result.name)
+                "ReadLink", "CMD_READ_LINK", result.name)
         self._data = byte_reader.read_bytes()
 
     @property

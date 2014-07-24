@@ -21,7 +21,7 @@ class SCPVersionResponse(AbstractSCPResponse):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                    "Version", "CMD_VER", result.name)
+                "Version", "CMD_VER", result.name)
         data = byte_reader.read_bytes()
         self._version_info = VersionInfo(data)
 
