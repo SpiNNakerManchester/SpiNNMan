@@ -52,11 +52,13 @@ class SCPResponseHeader(object):
             result_value = byte_reader.read_short()
             self._result = SCPResult(result_value)
             self._sequence = byte_reader.read_short()
-        except ValueError as exception:
-            raise SpinnmanInvalidParameterException("result", result_value,
-                    "Unrecognized result")
+        except ValueError:
+            raise SpinnmanInvalidParameterException(
+                "result", result_value,
+                "Unrecognized result")
         except IOError as exception:
             raise SpinnmanIOException(str(exception))
-        except EOFError as exception:
-            raise SpinnmanInvalidPacketException("SCP (header)",
-                    "Not enough data to read the header")
+        except EOFError:
+            raise SpinnmanInvalidPacketException(
+                "SCP (header)",
+                "Not enough data to read the header")
