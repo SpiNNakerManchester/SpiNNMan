@@ -43,6 +43,6 @@ class FileDataReader(AbstractDataReader):
                     cannot be closed
         """
         try:
-            self._fileop.close()
+            self._fileio.close()
         except IOError as e:
             raise SpinnmanIOException(str(e))
