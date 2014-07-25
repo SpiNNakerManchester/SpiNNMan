@@ -273,3 +273,10 @@ class ChipInfo(object):
         :rtype: int
         """
         return self._iobuf_size
+
+    def router_table_copy_address(self):
+        """ The address of the copy of the router table
+
+        :rtype: int
+        """
+        return self._router_table_copy_address

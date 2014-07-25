@@ -4,7 +4,6 @@
 /.settings
 /doc/build
 *.pyc
-/quick_tests.py
 /boot.py
 /IF_curr_exp.aplx
 /testdata.dat

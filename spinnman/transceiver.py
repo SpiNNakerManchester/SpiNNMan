@@ -30,13 +30,14 @@ from spinnman.messages.scp.impl.scp_application_run_request import SCPApplicatio
 from spinnman.messages.scp.impl.scp_send_signal_request import SCPSendSignalRequest
 from spinnman.messages.scp.impl.scp_iptag_set_request import SCPIPTagSetRequest
 from spinnman.messages.scp.impl.scp_iptag_clear_request import SCPIPTagClearRequest
-from spinnman.messages.scp.impl.scp_iptag_info_request import SCPIPTagInfoRequest
-from spinnman.messages.scp.impl.scp_iptag_info_response import SCPIPTagInfoResponse
-from spinnman.messages.scp.impl.scp_iptag_get_request import SCPIPTagGetRequest
-from spinnman.messages.scp.impl.scp_iptag_get_response import SCPIPTagGetResponse
+from spinnman.messages.scp.impl.scp_router_alloc_request import SCPRouterAllocRequest
+from spinnman.messages.scp.impl.scp_router_init_request import SCPRouterInitRequest
+from spinnman.messages.scp.impl.scp_router_clear_request import SCPRouterClearRequest
 from spinnman.messages.scp.scp_result import SCPResult
 
 from spinnman.data.abstract_data_reader import AbstractDataReader
+from spinnman.data.little_endian_byte_array_byte_writer import LittleEndianByteArrayByteWriter
+from spinnman.data.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
 
 from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman._threads._iobuf_thread import _IOBufThread
@@ -51,14 +52,18 @@ from spinn_machine.router import Router
 from spinn_machine.router import ROUTER_DEFAULT_AVAILABLE_ENTRIES
 from spinn_machine.router import ROUTER_DEFAULT_CLOCK_SPEED
 from spinn_machine.link import Link
+from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
 from collections import deque
 from threading import Condition
 from socket import gethostbyname
+from socket import inet_aton
 
 import logging
 import math
-from _socket import inet_aton
+from spinnman.model.router_diagnostics import RouterDiagnostics
+from spinnman.messages.scp.impl.scp_read_memory_words_request import SCPReadMemoryWordsRequest
+from spinnman.messages.scp.impl.scp_write_memory_words_request import SCPWriteMemoryWordsRequest
 
 logger = logging.getLogger(__name__)
 
@@ -1435,18 +1440,16 @@ class Transceiver(object):
             all_tags.extend(callback.get_iptags())
         return all_tags
 
-    def load_multicast_routes(self, app_id, x, y, routes):
+    def load_multicast_routes(self, x, y, routes):
         """ Load a set of multicast routes on to a chip
 
-        :param app_id: The id of the application to associate routes with
-        :type app_id: int
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
         :type y: int
         :param route_data_item: An iterable of multicast routes to load
         :type route_data_item: iterable of\
-                    :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
+                    :py:class:`spinnmachine.multicast_routing_entry.MulticastRoutingEntry`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1459,20 +1462,60 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
 
-    def get_multicast_routes(self, x, y, app_id=None):
+        # Create the routing data
+        route_writer = LittleEndianByteArrayByteWriter()
+        n_entries = 0
+        for route in routes:
+            route_writer.write_short(n_entries)
+            route_writer.write_short(0)
+            route_entry = 0
+            for processor_id in route.processor_ids:
+                if processor_id > 26 or processor_id < 0:
+                    raise SpinnmanInvalidParameterException(
+                            "route.processor_ids", str(route.processor_ids),
+                            "Processor ids must be between 0 and 26")
+                route_entry |= (1 << (6 + processor_id))
+            for link_id in route.link_ids:
+                if link_id > 5 or link_id < 0:
+                    raise SpinnmanInvalidParameterException(
+                            "route.link_ids", str(route.link_ids),
+                            "Link ids must be between 0 and 5")
+                route_entry |= (1 << link_id)
+            route_writer.write_int(route_entry)
+            route_writer.write_int(route.key)
+            route_writer.write_int(route.mask)
+            n_entries += 1
+
+        # Upload the data
+        route_writer.write_int(0xFFFFFFFF)
+        route_writer.write_int(0xFFFFFFFF)
+        route_writer.write_int(0xFFFFFFFF)
+        route_writer.write_int(0xFFFFFFFF)
+        data = route_writer.data
+        table_address = 0x67800000
+        self.write_memory(x, y, table_address, data)
+
+        # Allocate enough space for the entries
+        alloc_response = self._send_scp_message(SCPRouterAllocRequest(
+                x, y, 0, n_entries))
+        base_address = alloc_response.base_address
+        if base_address == 0:
+            raise SpinnmanInvalidParameterException(
+                    "Allocation base address", str(base_address),
+                    "Not enough space to allocate the entries")
+
+        # Load the entries
+        self._send_scp_message(SCPRouterInitRequest(x, y, n_entries,
+                table_address, base_address))
+
+    def get_multicast_routes(self, x, y):
         """ Get the current multicast routes set up on a chip
 
         :param x: The x-coordinate of the chip from which to get the routes
         :type x: int
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
-        :param app_id: Optional application id of the routes.  If not\
-                    specified all the routes will be returned.  If specified,\
-                    the routes will be filtered so that only those for the\
-                    given application are returned.
-        :type app_id: int
         :return: An iterable of multicast routes
         :rtype: iterable of :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1484,18 +1527,46 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        if self._machine is None:
+            self._update_machine()
+        chip_info = self._chip_info[(x, y)]
+        base_address = chip_info.router_table_copy_address()
+        length = 1024 * 16
+        data = self.read_memory(x, y, base_address, length)
+        all_data = bytearray()
+        for data_item in data:
+            all_data.extend(data_item)
+        reader = LittleEndianByteArrayByteReader(all_data)
 
-    def clear_multicast_routes(self, x, y, app_id=None):
+        routes = list()
+        for _ in range(0, 1024):
+            reader.read_short()  # next
+            reader.read_byte()  # core
+            reader.read_byte()  # app_id
+            route = reader.read_int()
+            processor_ids = list()
+            for processor_id in range(0, 26):
+                if (route & (1 << (6 + processor_id))) != 0:
+                    processor_ids.append(processor_id)
+            link_ids = list()
+            for link_id in range(0, 6):
+                if (route & (1 << link_id)) != 0:
+                    link_ids.append(link_id)
+            key = reader.read_int()
+            mask = reader.read_int()
+
+            if route < 0xFF000000:
+                routes.append(MulticastRoutingEntry(key, mask, processor_ids,
+                    link_ids))
+
+        return routes
+
+    def clear_multicast_routes(self, x, y):
         """ Remove all the multicast routes on a chip
         :param x: The x-coordinate of the chip on which to clear the routes
         :type x: int
         :param y: The y-coordinate of the chip on which to clear the routes
         :type y: int
-        :param app_id: Optional application id of the routes.  If not\
-                    specified all the routes will be cleared.  If specified,\
-                    only the routes with the given application id will be\
-                    removed.
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1507,7 +1578,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        self._send_scp_message(SCPRouterClearRequest(x, y))
 
     def get_router_diagnostics(self, x, y):
         """ Get router diagnostic information from a chip
@@ -1529,7 +1600,40 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        pass
+        router_data = bytearray()
+        router_data.extend(self._send_scp_message(
+                SCPReadMemoryWordsRequest(x, y, 0xe1000000, 1)).data)
+        router_data.extend(self._send_scp_message(
+                SCPReadMemoryWordsRequest(x, y, 0xe1000014, 1)).data)
+        router_data.extend(self._send_scp_message(
+                SCPReadMemoryWordsRequest(x, y, 0xe1000300, 16)).data)
+        reader = LittleEndianByteArrayByteReader(router_data)
+        return RouterDiagnostics(
+                control_register=reader.read_int(),
+                error_status=reader.read_int(),
+                register_values=[reader.read_int() for _ in range(0, 16)])
+
+    def clear_router_diagnostics(self, x, y):
+        """ Clear router diagnostic information om a chip
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :return: None
+        :rtype: Nothing is returned
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                    packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        clear_data = [0xFFFFFFFF]
+        self._send_scp_message(SCPWriteMemoryWordsRequest(
+                x, y, 0xf100002c, clear_data))
 
     def send_multicast(self, x, y, multicast_message, connection=None):
         """ Sends a multicast message to the board

@@ -22,18 +22,20 @@ class SCPCommand(Enum):
     CMD_LED = (25, "Control the LEDs")
     CMD_IPTAG = (26, "Set an IPTAG")
     CMD_SROM = 27
+    CMD_ALLOC = (28, "Router allocation")
+    CMD_RTR = (29, "Router initialization")
     CMD_FLASH_COPY = 49
     CMD_FLASH_ERASE = 50
     CMD_FLASH_WRITE = 51
     CMD_RESET = 55
     CMD_POWER = 57
     CMD_TUBE = 64
-    
+
     def __new__(cls, value, doc=""):
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
-    
+
     def __init__(self, value, doc=""):
         self._value_ = value
         self.__doc__ = doc
