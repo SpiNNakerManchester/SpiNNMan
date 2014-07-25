@@ -713,9 +713,10 @@ class Transceiver(object):
         if (version_info.name != _SCAMP_NAME
                 or version_info.version_number != _SCAMP_VERSION):
             raise SpinnmanIOException("The board is currently booted with {}"
-                    " {} which is incompatible with this transceiver".format(
-                            version_info.name,
-                            version_info.version_number))
+                    " {} which is incompatible with this transceiver, "
+                    "required version is {} {}".format(
+                            version_info.name, version_info.version_number,
+                            _SCAMP_NAME, _SCAMP_VERSION))
         return version_info
 
     def get_cpu_information(self, core_subsets=None):
