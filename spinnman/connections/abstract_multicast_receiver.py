@@ -9,12 +9,24 @@ from spinnman.connections.abstract_connection import AbstractConnection
 class AbstractMulticastReceiver(AbstractConnection):
     """ A receiver of Multicast messages
     """
-    
+
+    @abstractmethod
+    def get_input_chips(self):
+        """ Get a list of chips which identify the chips from which this\
+            receiver can receive receive packets directly
+
+        :return: An iterable of tuples of (x, y) where x is the x-coordinate\
+                    of the chip and y is the y-coordinate of the chip
+        :rtype: iterable of (int, int)
+        :raise None: No known exceptions are raised
+        """
+        pass
+
     @abstractmethod
     def receive_multicast_message(self, timeout=None):
         """ Receives a multicast message from this connection.  Blocks\
             until a message has been received, or a timeout occurs.
-        
+
         :param timeout: The time in seconds to wait for the message to arrive;\
                     if not specified, will wait forever, or until the\
                     connection is closed

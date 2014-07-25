@@ -2,6 +2,8 @@ from spinnman.connections.udp_connection import UDPConnection
 from spinnman.connections.udp_boot_connection import UDPBootConnection
 from spinnman.connections.udp_connection import UDP_CONNECTION_DEFAULT_PORT
 from spinnman.connections._connection_queue import _ConnectionQueue
+from spinnman.connections.abstract_multicast_sender import AbstractMulticastSender
+from spinnman.connections.abstract_multicast_receiver import AbstractMulticastReceiver
 
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanTimeoutException
@@ -16,6 +18,7 @@ from spinnman.model.cpu_info import CPU_INFO_BYTES
 from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
+from spinnman.model.router_diagnostics import RouterDiagnostics
 
 from spinnman.messages.spinnaker_boot.spinnaker_boot_messages import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
@@ -33,6 +36,8 @@ from spinnman.messages.scp.impl.scp_iptag_clear_request import SCPIPTagClearRequ
 from spinnman.messages.scp.impl.scp_router_alloc_request import SCPRouterAllocRequest
 from spinnman.messages.scp.impl.scp_router_init_request import SCPRouterInitRequest
 from spinnman.messages.scp.impl.scp_router_clear_request import SCPRouterClearRequest
+from spinnman.messages.scp.impl.scp_read_memory_words_request import SCPReadMemoryWordsRequest
+from spinnman.messages.scp.impl.scp_write_memory_words_request import SCPWriteMemoryWordsRequest
 from spinnman.messages.scp.scp_result import SCPResult
 
 from spinnman.data.abstract_data_reader import AbstractDataReader
@@ -61,9 +66,7 @@ from socket import inet_aton
 
 import logging
 import math
-from spinnman.model.router_diagnostics import RouterDiagnostics
-from spinnman.messages.scp.impl.scp_read_memory_words_request import SCPReadMemoryWordsRequest
-from spinnman.messages.scp.impl.scp_write_memory_words_request import SCPWriteMemoryWordsRequest
+from spinnman.connections.abstract_sdp_sender import AbstractSDPSender
 
 logger = logging.getLogger(__name__)
 
@@ -1663,7 +1666,23 @@ class Transceiver(object):
                     * If there is no connection that can make the packet\
                       arrive at the selected chip (ignoring routing tables)
         """
-        pass
+        conn = None
+        connections = self._connections
+        if connection is not None:
+            connections = (connection)
+        for my_conn in connections:
+            if isinstance(connection, AbstractMulticastSender):
+                for (conn_x, conn_y) in my_conn.get_input_chips():
+                    if x == conn_x and y == conn_y:
+                        conn = my_conn
+                        break
+
+        if conn is not None:
+            return self.send_message(multicast_message, False,
+                    connection)
+
+        raise SpinnmanUnsupportedOperationException(
+                "Send multicast message to {}, {}".format(x, y))
 
     def receive_multicast(self, x, y, timeout=None, connection=None):
         """ Receives a multicast message from the board
@@ -1698,101 +1717,22 @@ class Transceiver(object):
                     * If the timeout value is not valid
                     * If the received packet has an invalid parameter
         """
-        pass
+        conn = None
+        connections = self._connections
+        if connection is not None:
+            connections = (connection)
+        for my_conn in connections:
+            if isinstance(connection, AbstractMulticastReceiver):
+                for (conn_x, conn_y) in my_conn.get_input_chips():
+                    if x == conn_x and y == conn_y:
+                        conn = my_conn
+                        break
 
-    def send_sdp_message(self, sdp_message, connection=None):
-        """ Sends an SDP message to the board
+        if conn is not None:
+            return conn.receive_multicast_message(timeout)
 
-        :param sdp_message: The SDP message to send
-        :type sdp_message: :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
-        :param connection: A specific connection over which to send the\
-                    message.  If not specified, an appropriate connection is\
-                    chosen automatically
-        :type connection:\
-                    :py:class:`spinnman.connections.abstract_sdp_sender.AbstractSDPSender`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
-                    there is no connection that supports sending SDP\
-                    messages (or the given connection does not)
-        """
-        pass
-
-    def receive_sdp_message(self, timeout=None, connection=None):
-        """ Receives an SDP message from the board
-
-        :param timeout: Amount of time to wait for the message to arrive in\
-                    seconds before a timeout.  If not specified, will wait\
-                    indefinitely, or until the selected connection is closed
-        :type timeout: int
-        :param connection: A specific connection from which to receive the\
-                    message.  If not specified, an appropriate connection is\
-                    chosen automatically
-        :type connection:\
-                    :py:class:`spinnman.connections.abstract_sdp_receiver.AbstractSDPReceiver`
-        :return: The received message
-        :rtype: :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
-                    there is no connection that supports reception of\
-                    SDP (or the given connection does not)
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
-                    message received is not a valid SDP message
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the timeout value is not valid
-                    * If the received packet has an invalid parameter
-        """
-        pass
-
-    def send_scp_message(self, scp_message, connection=None):
-        """ Sends an SCP message to the board
-
-        :param scp_message: The SDP message to send
-        :type scp_message: :py:class:`spinnman.messages.scp_message.SCPMessage`
-        :param connection: A specific connection over which to send the\
-                    message.  If not specified, an appropriate connection is\
-                    chosen automatically
-        :type connection:\
-                    :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
-                    there is no connection that supports sending SCP\
-                    messages (or the given connection does not)
-        """
-        pass
-
-    def receive_scp_message(self, timeout=None, connection=None):
-        """ Receives an SCP message from the board
-
-        :param timeout: Amount of time to wait for the message to arrive in\
-                    seconds before a timeout.  If not specified, will wait\
-                    indefinitely, or until the selected connection is closed
-        :type timeout: int
-        :param connection: A specific connection from which to receive the\
-                    message.  If not specified, an appropriate connection is\
-                    chosen automatically
-        :type connection:\
-                    :py:class:`spinnman.connections.abstract_scp_receiver.AbstractSCPReceiver`
-        :return: The received message
-        :rtype: :py:class:`spinnman.messages.scp_message.SCPMessage`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
-                    there is no connection that supports reception of\
-                    SCP (or the given connection does not)
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
-                    message received is not a valid SCP message
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the timeout value is not valid
-                    * If the received packet has an invalid parameter
-        """
-        pass
+        raise SpinnmanUnsupportedOperationException(
+                "Receive multicast message from {}, {}".format(x, y))
 
     def close(self, close_original_connections=True):
         """ Close the transceiver and any threads that are running
