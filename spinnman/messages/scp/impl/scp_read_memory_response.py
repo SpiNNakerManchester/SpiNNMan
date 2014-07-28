@@ -1,7 +1,6 @@
-from spinnman.messages.scp.abstract_scp_response import AbstractSCPResponse
+from spinnman.messages.scp.abstract_messages.abstract_scp_response import AbstractSCPResponse
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.scp_command import SCPCommand
 
 
 class SCPReadMemoryResponse(AbstractSCPResponse):

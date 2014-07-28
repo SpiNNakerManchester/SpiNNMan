@@ -1295,17 +1295,13 @@ class Transceiver(object):
         for callback in callbacks:
             yield callback.get_response().data
 
-    def send_signal(self, app_id, signal, signal_target=None):
+    def send_signal(self, app_id, signal):
         """ Send a signal to an application
 
         :param app_id: The id of the application to send to
         :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
-        :param signal_target: the target of signals which require an extra
-                              arguement (such as count where signal_target is
-                              the state to count)
-        :type signal_target:
          :py:class:`spinnman.messages.scp.scp_signal.SCPSignal'
         :return: Nothing is returned
         :rtype: None
