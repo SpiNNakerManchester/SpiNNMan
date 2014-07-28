@@ -4,6 +4,7 @@ from six import add_metaclass
 
 from spinnman.connections.abstract_connection import AbstractConnection
 
+
 @add_metaclass(ABCMeta)
 class AbstractSDPSender(AbstractConnection):
     """ A sender of SDP messages

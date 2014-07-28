@@ -67,7 +67,7 @@ class _MessageCallback(object):
 
         if self._message_send_exception is not None:
             raise (self._message_send_exception, None,
-                    self._message_send_traceback)
+                   self._message_send_traceback)
 
     def message_received(self, message):
         """ Called when a message has been received
@@ -122,6 +122,6 @@ class _MessageCallback(object):
 
         if self._message_receive_exception is not None:
             raise (self._message_receive_exception, None,
-                    self._message_receive_traceback)
+                   self._message_receive_traceback)
 
         return self._message_received

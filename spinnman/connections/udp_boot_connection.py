@@ -1,15 +1,22 @@
-from spinnman.connections.abstract_spinnaker_boot_sender import AbstractSpinnakerBootSender
-from spinnman.connections.abstract_spinnaker_boot_receiver import AbstractSpinnakerBootReceiver
+from spinnman.connections.abstract_spinnaker_boot_sender \
+    import AbstractSpinnakerBootSender
+from spinnman.connections.abstract_spinnaker_boot_receiver \
+    import AbstractSpinnakerBootReceiver
 
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanInvalidPacketException
-from spinnman.messages.spinnaker_boot.spinnaker_boot_message import SpinnakerBootMessage
-from spinnman.messages.spinnaker_boot.spinnaker_boot_message import BOOT_MESSAGE_VERSION
-from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code import SpinnakerBootOpCode
-from spinnman.data.big_endian_byte_array_byte_reader import BigEndianByteArrayByteReader
-from spinnman.data.big_endian_byte_array_byte_writer import BigEndianByteArrayByteWriter
+from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
+    import SpinnakerBootMessage
+from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
+    import BOOT_MESSAGE_VERSION
+from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
+    import SpinnakerBootOpCode
+from spinnman.data.big_endian_byte_array_byte_reader \
+    import BigEndianByteArrayByteReader
+from spinnman.data.big_endian_byte_array_byte_writer \
+    import BigEndianByteArrayByteWriter
 
 import platform
 import subprocess
@@ -26,7 +33,7 @@ class UDPBootConnection(
     """
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-            remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
+                 remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
@@ -58,7 +65,7 @@ class UDPBootConnection(
 
         except Exception as exception:
             raise SpinnmanIOException(
-                    "Error setting up socket: {}".format(exception))
+                "Error setting up socket: {}".format(exception))
 
         # Get the port to bind to locally
         local_bind_port = 0
@@ -76,8 +83,8 @@ class UDPBootConnection(
 
         except Exception as exception:
             raise SpinnmanIOException(
-                    "Error binding socket to {}:{}: {}".format(
-                            local_bind_host, local_bind_port, exception))
+                "Error binding socket to {}:{}: {}".format(
+                    local_bind_host, local_bind_port, exception))
 
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
@@ -91,29 +98,28 @@ class UDPBootConnection(
             self._remote_port = remote_port
 
             try:
-                self._remote_ip_address = socket.gethostbyname(
-                        remote_host)
+                self._remote_ip_address = socket.gethostbyname(remote_host)
             except Exception as exception:
                 raise SpinnmanIOException(
-                        "Error getting ip address for {}: {}".format(
-                                remote_host, exception))
+                    "Error getting ip address for {}: {}".format(
+                        remote_host, exception))
 
             try:
                 self._socket.connect((self._remote_ip_address, remote_port))
             except Exception as exception:
                 raise SpinnmanIOException(
-                        "Error connecting to {}:{}: {}".format(
-                            self._remote_ip_address, remote_port, exception))
+                    "Error connecting to {}:{}: {}".format(
+                        self._remote_ip_address, remote_port, exception))
 
         # Get the details of where the socket is connected
         self._local_ip_address = None
         self._local_port = None
         try:
             self._local_ip_address, self._local_port =\
-                    self._socket.getsockname()
+                self._socket.getsockname()
         except Exception as exception:
             raise SpinnmanIOException("Error querying socket: {}".format(
-                    exception))
+                exception))
 
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
@@ -133,14 +139,14 @@ class UDPBootConnection(
 
             # Start a ping process
             process = None
-            if (platform.platform().lower().startswith("windows")):
+            if platform.platform().lower().startswith("windows"):
                 process = subprocess.Popen(
-                        "ping -n 1 -w 1 " + self._remote_ip_address,
-                        shell=True, stdout=subprocess.PIPE)
+                    "ping -n 1 -w 1 " + self._remote_ip_address,
+                    shell=True, stdout=subprocess.PIPE)
             else:
                 process = subprocess.Popen(
-                        "ping -c 1 -W 1 " + self._remote_ip_address,
-                        shell=True, stdout=subprocess.PIPE)
+                    "ping -c 1 -W 1 " + self._remote_ip_address,
+                    shell=True, stdout=subprocess.PIPE)
             process.wait()
 
             if process.returncode == 0:
@@ -247,9 +253,9 @@ class UDPBootConnection(
             version = reader.read_short()
             if version != 1:
                 raise SpinnmanInvalidParameterException(
-                        "boot message version", version,
-                        "Only version 1 of the spinnaker boot protocol is"
-                        " currently supported")
+                    "boot message version", version,
+                    "Only version 1 of the spinnaker boot protocol is"
+                    " currently supported")
 
             # Read the values
             opcode_value = reader.read_int()
@@ -263,17 +269,17 @@ class UDPBootConnection(
 
             # Parse the header (big endian)
             message = SpinnakerBootMessage(
-                    opcode=opcode, operand_1=operand_1, operand_2=operand_2,
-                    operand_3=operand_3, data=data)
+                opcode=opcode, operand_1=operand_1, operand_2=operand_2,
+                operand_3=operand_3, data=data)
             return message
         except IOError as exception:
             raise SpinnmanIOException(str(exception))
         except EOFError:
-            raise SpinnmanInvalidPacketException("Boot",
-                    "Not enough bytes in the packet")
+            raise SpinnmanInvalidPacketException(
+                "Boot", "Not enough bytes in the packet")
         except ValueError:
             raise SpinnmanInvalidParameterException(
-                    "opcode", opcode_value, "Unrecognized value")
+                "opcode", opcode_value, "Unrecognized value")
 
     def close(self):
         """ See :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`

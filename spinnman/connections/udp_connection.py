@@ -9,8 +9,10 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.sdp.sdp_message import SDPMessage
 from spinnman.messages.sdp.sdp_header import SDPHeader
-from spinnman.data.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
-from spinnman.data.little_endian_byte_array_byte_writer import LittleEndianByteArrayByteWriter
+from spinnman.data.little_endian_byte_array_byte_reader \
+    import LittleEndianByteArrayByteReader
+from spinnman.data.little_endian_byte_array_byte_writer \
+    import LittleEndianByteArrayByteWriter
 
 import platform
 import subprocess
@@ -45,8 +47,8 @@ class UDPConnection(
     _SDP_SOURCE_CHIP_Y = 0
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-            remote_port=UDP_CONNECTION_DEFAULT_PORT, default_sdp_tag=0xFF,
-            chip_x=0, chip_y=0):
+                 remote_port=UDP_CONNECTION_DEFAULT_PORT, default_sdp_tag=0xFF,
+                 chip_x=0, chip_y=0):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
@@ -94,7 +96,7 @@ class UDPConnection(
 
         except Exception as exception:
             raise SpinnmanIOException(
-                    "Error setting up socket: {}".format(exception))
+                "Error setting up socket: {}".format(exception))
 
         # Get the port to bind to locally
         local_bind_port = 0
@@ -112,8 +114,8 @@ class UDPConnection(
 
         except Exception as exception:
             raise SpinnmanIOException(
-                    "Error binding socket to {}:{}: {}".format(
-                            local_bind_host, local_bind_port, exception))
+                "Error binding socket to {}:{}: {}".format(
+                    local_bind_host, local_bind_port, exception))
 
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
@@ -127,29 +129,28 @@ class UDPConnection(
             self._remote_port = remote_port
 
             try:
-                self._remote_ip_address = socket.gethostbyname(
-                        remote_host)
+                self._remote_ip_address = socket.gethostbyname(remote_host)
             except Exception as exception:
                 raise SpinnmanIOException(
-                        "Error getting ip address for {}: {}".format(
-                                remote_host, exception))
+                    "Error getting ip address for {}: {}".format(
+                        remote_host, exception))
 
             try:
                 self._socket.connect((self._remote_ip_address, remote_port))
             except Exception as exception:
                 raise SpinnmanIOException(
-                        "Error connecting to {}:{}: {}".format(
-                            self._remote_ip_address, remote_port, exception))
+                    "Error connecting to {}:{}: {}".format(
+                        self._remote_ip_address, remote_port, exception))
 
         # Get the details of where the socket is connected
         self._local_ip_address = None
         self._local_port = None
         try:
             self._local_ip_address, self._local_port =\
-                    self._socket.getsockname()
+                self._socket.getsockname()
         except Exception as exception:
             raise SpinnmanIOException("Error querying socket: {}".format(
-                    exception))
+                exception))
 
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
@@ -169,14 +170,14 @@ class UDPConnection(
 
             # Start a ping process
             process = None
-            if (platform.platform().lower().startswith("windows")):
+            if platform.platform().lower().startswith("windows"):
                 process = subprocess.Popen(
-                        "ping -n 1 -w 1 " + self._remote_ip_address,
-                        shell=True, stdout=subprocess.PIPE)
+                    "ping -n 1 -w 1 " + self._remote_ip_address,
+                    shell=True, stdout=subprocess.PIPE)
             else:
                 process = subprocess.Popen(
-                        "ping -c 1 -W 1 " + self._remote_ip_address,
-                        shell=True, stdout=subprocess.PIPE)
+                    "ping -c 1 -W 1 " + self._remote_ip_address,
+                    shell=True, stdout=subprocess.PIPE)
             process.wait()
 
             if process.returncode == 0:
@@ -246,36 +247,36 @@ class UDPConnection(
         if sdp_header.source_port is not None:
             if sdp_header.source_port != UDPConnection._SDP_SOURCE_PORT:
                 raise SpinnmanInvalidParameterException(
-                        "message.source_port", sdp_header.source_port,
-                        "The source port must be {} to work with this"
-                        " connection".format(UDPConnection._SDP_SOURCE_PORT))
+                    "message.source_port", str(sdp_header.source_port),
+                    "The source port must be {} to work with this"
+                    " connection".format(UDPConnection._SDP_SOURCE_PORT))
         else:
             sdp_header.source_port = UDPConnection._SDP_SOURCE_PORT
 
         if sdp_header.source_cpu is not None:
             if sdp_header.source_cpu != UDPConnection._SDP_SOURCE_CPU:
                 raise SpinnmanInvalidParameterException(
-                        "message.source_cpu", sdp_header.source_cpu,
-                        "The source cpu must be {} to work with this"
-                        " connection".format(UDPConnection._SDP_SOURCE_CPU))
+                    "message.source_cpu", str(sdp_header.source_cpu),
+                    "The source cpu must be {} to work with this"
+                    " connection".format(UDPConnection._SDP_SOURCE_CPU))
         else:
             sdp_header.source_cpu = UDPConnection._SDP_SOURCE_CPU
 
         if sdp_header.source_chip_x is not None:
             if sdp_header.source_chip_x != UDPConnection._SDP_SOURCE_CHIP_X:
                 raise SpinnmanInvalidParameterException(
-                        "message.source_chip_x", sdp_header.source_chip_x,
-                        "The source chip x must be {} to work with this"
-                        " connection".format(UDPConnection._SDP_SOURCE_CHIP_X))
+                    "message.source_chip_x", str(sdp_header.source_chip_x),
+                    "The source chip x must be {} to work with this"
+                    " connection".format(UDPConnection._SDP_SOURCE_CHIP_X))
         else:
             sdp_header.source_chip_x = UDPConnection._SDP_SOURCE_CHIP_X
 
         if sdp_header.source_chip_y is not None:
             if sdp_header.source_chip_y != UDPConnection._SDP_SOURCE_CHIP_Y:
                 raise SpinnmanInvalidParameterException(
-                        "message.source_chip_y", sdp_header.source_chip_y,
-                        "The source chip y must be {} to work with this"
-                        " connection".format(UDPConnection._SDP_SOURCE_CHIP_Y))
+                    "message.source_chip_y", str(sdp_header.source_chip_y),
+                    "The source chip y must be {} to work with this"
+                    " connection".format(UDPConnection._SDP_SOURCE_CHIP_Y))
         else:
             sdp_header.source_chip_y = UDPConnection._SDP_SOURCE_CHIP_Y
 
@@ -337,8 +338,8 @@ class UDPConnection(
         try:
             reader.read_short()
         except EOFError:
-            raise SpinnmanInvalidPacketException("SDP",
-                    "Not enough bytes to read the pre-packet padding")
+            raise SpinnmanInvalidPacketException(
+                "SDP", "Not enough bytes to read the pre-packet padding")
 
         # Read the header and data
         sdp_header = SDPHeader()
@@ -416,8 +417,8 @@ class UDPConnection(
         try:
             reader.read_short()
         except EOFError:
-            raise SpinnmanInvalidPacketException("SCP",
-                    "Not enough bytes to read the pre-packet padding")
+            raise SpinnmanInvalidPacketException(
+                "SCP", "Not enough bytes to read the pre-packet padding")
 
         # Read the response
         scp_response.read_scp_response(reader)
