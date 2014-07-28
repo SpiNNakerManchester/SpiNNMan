@@ -12,7 +12,7 @@ class _CallbackQueue(Thread):
         :param callback: Callback function to call with each packet
         :type callback: callable
         """
-        super(_CallbackQueue, self).__init__()
+        Thread.__init__(self)
         self._queue = deque()
         self._callback = callback
         self._running = False

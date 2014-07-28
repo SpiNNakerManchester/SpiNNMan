@@ -12,11 +12,16 @@ from spinnman.messages.scp.abstract_scp_request import AbstractSCPRequest
 from spinnman.connections.abstract_scp_sender import AbstractSCPSender
 from spinnman.connections.abstract_scp_receiver import AbstractSCPReceiver
 from spinnman.messages.multicast_message import MulticastMessage
-from spinnman.connections.abstract_multicast_sender import AbstractMulticastSender
-from spinnman.connections.abstract_multicast_receiver import AbstractMulticastReceiver
-from spinnman.messages.spinnaker_boot.spinnaker_boot_message import SpinnakerBootMessage
-from spinnman.connections.abstract_spinnaker_boot_sender import AbstractSpinnakerBootSender
-from spinnman.connections.abstract_spinnaker_boot_receiver import AbstractSpinnakerBootReceiver
+from spinnman.connections.abstract_multicast_sender \
+    import AbstractMulticastSender
+from spinnman.connections.abstract_multicast_receiver \
+    import AbstractMulticastReceiver
+from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
+    import SpinnakerBootMessage
+from spinnman.connections.abstract_spinnaker_boot_sender \
+    import AbstractSpinnakerBootSender
+from spinnman.connections.abstract_spinnaker_boot_receiver \
+    import AbstractSpinnakerBootReceiver
 
 import sys
 import logging
@@ -37,7 +42,7 @@ class _ConnectionQueue(Thread):
         :type connection: :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        super(_ConnectionQueue, self).__init__()
+        Thread.__init__(self)
         # Store the calls
         self._connection = connection
 
@@ -81,40 +86,40 @@ class _ConnectionQueue(Thread):
         if isinstance(message, SDPMessage):
             if not isinstance(self._connection, AbstractSDPSender):
                 raise SpinnmanUnsupportedOperationException(
-                        "Send SDP Message")
+                    "Send SDP Message")
             if response_required and not isinstance(self._connection,
                                                     AbstractSDPReceiver):
                 raise SpinnmanUnsupportedOperationException(
-                        "Receive SDP Message")
+                    "Receive SDP Message")
 
         elif isinstance(message, AbstractSCPRequest):
             if not isinstance(self._connection, AbstractSCPSender):
                 raise SpinnmanUnsupportedOperationException(
-                        "Send SCP Message")
+                    "Send SCP Message")
             if response_required and not isinstance(self._connection,
-                                                     AbstractSCPReceiver):
+                                                    AbstractSCPReceiver):
                 raise SpinnmanUnsupportedOperationException(
-                        "Receive SCP Message")
+                    "Receive SCP Message")
 
         elif isinstance(message, MulticastMessage):
             if not isinstance(self._connection, AbstractMulticastSender):
                 raise SpinnmanUnsupportedOperationException(
-                        "Send Multicast Message")
+                    "Send Multicast Message")
             if response_required and not isinstance(self._connection,
                                                     AbstractMulticastReceiver):
                 raise SpinnmanUnsupportedOperationException(
-                        "Receive Multicast Message")
+                    "Receive Multicast Message")
         elif isinstance(message, SpinnakerBootMessage):
             if not isinstance(self._connection, AbstractSpinnakerBootSender):
                 raise SpinnmanUnsupportedOperationException(
-                        "Send Spinnaker Boot Message")
-            if response_required and not isinstance(self._connection,
-                                                AbstractSpinnakerBootReceiver):
+                    "Send Spinnaker Boot Message")
+            if response_required and not isinstance(
+                    self._connection, AbstractSpinnakerBootReceiver):
                 raise SpinnmanUnsupportedOperationException(
-                        "Receive Spinnaker Boot Message")
+                    "Receive Spinnaker Boot Message")
         else:
             raise SpinnmanInvalidPacketException(
-                    message.__class__, "This type is not known to this class")
+                message.__class__, "This type is not known to this class")
 
     def message_type_supported(self, message, response_required):
         """ Determine if a given message type is supported by this queue
@@ -178,7 +183,7 @@ class _ConnectionQueue(Thread):
         """
 
         callback = self.send_message_non_blocking(message, response_required,
-                timeout)
+                                                  timeout)
 
         # Wait for the callback to indicate completion
         callback.wait_for_send()
@@ -270,7 +275,7 @@ class _ConnectionQueue(Thread):
                         self._connection.send_scp_request(message)
                     elif isinstance(message, MulticastMessage):
                         logger.debug("Sending Multicast message {}".format(
-                                message))
+                            message))
                         self._connection.send_multicast_message(message)
                     elif isinstance(message, SpinnakerBootMessage):
                         logger.debug("Sending Boot message {}".format(message))
@@ -288,32 +293,32 @@ class _ConnectionQueue(Thread):
                         response = None
                         if isinstance(message, SDPMessage):
                             logger.debug("Waiting for SDP response,"
-                                    " timeout={}".format(timeout))
+                                         " timeout={}".format(timeout))
                             response = self._connection.receive_sdp_message(
-                                    timeout=timeout)
+                                timeout=timeout)
                         elif isinstance(message, AbstractSCPRequest):
                             logger.debug("Waiting for SCP response,"
-                                    " timeout={}".format(timeout))
+                                         " timeout={}".format(timeout))
                             response = message.get_scp_response()
                             self._connection.receive_scp_response(
-                                    scp_response=response,
-                                    timeout=timeout)
+                                scp_response=response,
+                                timeout=timeout)
                         elif isinstance(message, MulticastMessage):
                             logger.debug("Waiting for Multicast response,"
-                                    " timeout={}".format(timeout))
+                                         " timeout={}".format(timeout))
                             response =\
                                 self._connection.receive_multicast_message(
-                                        timeout=timeout)
+                                    timeout=timeout)
                         elif isinstance(message, SpinnakerBootMessage):
                             logger.debug("Waiting for Boot response,"
-                                    " timeout={}".format(timeout))
+                                         " timeout={}".format(timeout))
                             response = self._connection.receive_boot_message(
-                                    timeout=timeout)
+                                timeout=timeout)
                         logger.debug("Response received - notifying callback")
                         callback.message_received(response)
                     except Exception as exception:
                         callback.receive_exception(exception,
-                                sys.exc_info()[2])
+                                                   sys.exc_info()[2])
 
     def stop(self):
         """ Stop the queue thread
