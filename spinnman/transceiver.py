@@ -1302,6 +1302,7 @@ class Transceiver(object):
         :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
+         :py:class:`spinnman.messages.scp.scp_signal.SCPSignal'
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\

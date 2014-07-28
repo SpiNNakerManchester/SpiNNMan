@@ -1,4 +1,5 @@
-from spinnman.messages.scp.abstract_scp_request import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages.abstract_scp_request \
+    import AbstractSCPRequest
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.sdp.sdp_header import SDPHeader
