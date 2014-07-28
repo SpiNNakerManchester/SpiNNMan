@@ -18,13 +18,13 @@ def _function_has_free_argument_count(func, count):
     :rtype: bool
     """
     (args, varargs, keywords, defaults) = inspect.getargspec(func)
-    
+
     # If the function has count args, it is fine
     if len(args) == count:
         return True
     
     # If the function has count args once the defaults are assigned, it is fine
-    if len(args) - len(defaults) == count:
+    if defaults and len(args) - len(defaults) == count:
         return True
     
     # Otherwise, if the function has a "varargs" or "keywords", it is fine
@@ -41,7 +41,7 @@ class SCPListener(Thread):
     """
 
     def __init__(self, scp_receiver, response_class, callback,
-            error_callback=None):
+                 error_callback=None):
         """
         :param scp_receiver: The SCP Receiver to receive packets from
         :type scp_receiver:\
@@ -64,16 +64,17 @@ class SCPListener(Thread):
                     the callback or the error_callback do not take the\
                     expected number of arguments
         """
+        Thread.__init__(self)
         if not _function_has_free_argument_count(callback, 1):
             raise SpinnmanInvalidParameterException(
-                    "callback", repr(callback),
-                    "Incorrect number of parameters")
+                "callback", repr(callback),
+                "Incorrect number of parameters")
         
         if (error_callback is not None
                 and not _function_has_free_argument_count(error_callback, 2)):
             raise SpinnmanInvalidParameterException(
-                    "error_callback", repr(error_callback),
-                    "Incorrect number of parameters")
+                "error_callback", repr(error_callback),
+                "Incorrect number of parameters")
         
         self._scp_receiver = scp_receiver
         self._response_class = response_class
@@ -95,14 +96,15 @@ class SCPListener(Thread):
         """ Overridden method of Thread that runs this listener
         """
         self._running = True
+        scp_response = self._response_class()
         while self._running and self._scp_receiver.is_connected():
             try:
-                scp_response = self._response_class()
                 self._scp_receiver.receive_scp_response(scp_response)
                 self._queue_consumer.add_item(scp_response)
             except Exception as exception:
                 self._running = False
                 self._error_callback(exception, "Error receiving packet")
+        self.stop()
     
     def stop(self):
         """ Stops the reception of packets
