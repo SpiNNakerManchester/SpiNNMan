@@ -18,6 +18,6 @@ setup(
             'spinnman.messages.spinnaker_boot',
             'spinnman.messages.spinnaker_boot._system_variables'
             'spinnman.model'],
-    package_data={'spinnman.messages.spinnkaer_boot', ['boot_data/*.boot']},
+    package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot'],},
     install_requires=['six', 'enum34', 'SpiNNMachine']
 )
