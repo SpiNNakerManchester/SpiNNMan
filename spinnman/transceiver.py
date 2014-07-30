@@ -309,7 +309,7 @@ class Transceiver(object):
             # Only add a new queue if there isn't one currently
             if connection not in self._connection_queues:
                 self._connection_queues[connection] = \
-                    _ConnectionQueue
+                    _ConnectionQueue(connection)
                 self._connection_queues[connection].start()
 
     def _find_best_connection_queue(self, message, response_required,
