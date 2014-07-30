@@ -70,6 +70,8 @@ from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman._threads._iobuf_thread import _IOBufThread
 from spinnman._threads._get_iptags_thread import _GetIPTagsThread
 
+from spinnman import reports
+
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
@@ -94,7 +96,9 @@ _SCAMP_NAME = "SC&MP"
 _SCAMP_VERSION = 1.31
 
 
-def create_transceiver_from_hostname(hostname, discover=True):
+def create_transceiver_from_hostname(hostname, discover=True,
+                                     generate_reports=True,
+                                     default_report_directory=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -107,6 +111,12 @@ def create_transceiver_from_hostname(hostname, discover=True):
     :param discover: True if further connections should be discovered, False\
                 otherwise
     :type discover: bool
+    :param generate_reports: True if reports are to be generated, False \
+                otherwise
+    :type generate_reports: bool
+    :param default_report_directory: a file path or None if reports are not
+                enabled
+    :type default_report_directory: file path or None
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -121,7 +131,8 @@ def create_transceiver_from_hostname(hostname, discover=True):
     connection = UDPConnection(remote_host=hostname)
     boot_connection = UDPBootConnection(remote_host=hostname)
     return Transceiver(connections=[connection, boot_connection],
-                       discover=discover)
+                       discover=discover, generate_reports=generate_reports,
+                       default_report_directory=default_report_directory)
 
 
 class Transceiver(object):
@@ -139,7 +150,8 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, discover=True):
+    def __init__(self, connections=None, discover=True, generate_reports=True,
+                 default_report_directory=None):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -151,6 +163,12 @@ class Transceiver(object):
                     specified, an attempt will be made to discover connections\
                     to the board.
         :type discover: bool
+        :param generate_reports: True if reports are to be generated, False \
+                otherwise
+        :type generate_reports: bool
+        :param default_report_directory: a file path or None if reports are not
+                enabled
+        :type default_report_directory: file path or None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board, or if no connections to the\
                     board can be found (if connections is None)
@@ -164,6 +182,11 @@ class Transceiver(object):
 
         # Place to keep the current machine
         self._machine = None
+
+        #place holder for report checks
+        self._generate_reports = generate_reports
+        #if resports are enbaled then report folder will be initilised
+        self._default_report_directroy = default_report_directory
 
         # Place to keep the known chip information
         self._chip_info = dict()
@@ -190,6 +213,10 @@ class Transceiver(object):
         # Discover any new connections, and update the queues if requested
         if discover:
             self.discover_connections()
+            if self._generate_reports:
+                reports.generate_machine_report(
+                    connections=self._udp_connections, machine=self._machine,
+                    report_directory=self._default_report_directroy)
             if len(self._connections) == 0:
                 raise SpinnmanIOException(
                     "No connections to the board were found")
