@@ -77,8 +77,6 @@ from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
 from spinn_machine.processor import Processor
 from spinn_machine.router import Router
-from spinn_machine.router import ROUTER_DEFAULT_AVAILABLE_ENTRIES
-from spinn_machine.router import ROUTER_DEFAULT_CLOCK_SPEED
 from spinn_machine.link import Link
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
@@ -490,9 +488,9 @@ class Transceiver(object):
         # Create the router - add the links later during search
         router = Router(
             links=list(), emergency_routing_enabled=False,
-            clock_speed=ROUTER_DEFAULT_CLOCK_SPEED,
+            clock_speed=Router.ROUTER_DEFAULT_CLOCK_SPEED,
             n_available_multicast_entries=
-            ROUTER_DEFAULT_AVAILABLE_ENTRIES
+            Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES
             - chip_details.first_free_router_entry)
 
         # Create the chip
