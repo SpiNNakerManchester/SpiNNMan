@@ -24,7 +24,7 @@ class SpinnakerBootMessage(object):
         """
         if data is not None and len(data) > (256 * 4):
             raise SpinnmanInvalidParameterException(
-                    "len(data)", len(data),
+                    "len(data)", str(len(data)),
                     "A boot packet can contain at most 256 words of data")
 
         self._opcode = opcode

@@ -45,9 +45,9 @@ class SCPApplicationRunRequest(AbstractSCPRequest):
 
         super(SCPApplicationRunRequest, self).__init__(
                 SDPHeader(
-                        flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                        destination_cpu=0, destination_chip_x=x,
-                        destination_chip_y=y),
+                    flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                    destination_cpu=0, destination_chip_x=x,
+                    destination_chip_y=y),
                 SCPRequestHeader(command=SCPCommand.CMD_AR),
                 argument_1=processor_mask)
 
