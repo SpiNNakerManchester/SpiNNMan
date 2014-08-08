@@ -14,7 +14,7 @@ def _get_short_from_bytearray(array, offset):
     return _get_short_from_little_endian_bytearray(array, offset)
 
 
-# The base address of the system variable structure in SDRAM
+# The base address of the system variable structure in System ram
 _SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 
 # The size of the system variable structure in bytes
