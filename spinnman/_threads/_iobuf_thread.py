@@ -43,6 +43,8 @@ class _IOBufThread(Thread):
         self._exception = None
         self._traceback = None
 
+        self.setDaemon(True)
+
     def run(self):
         """ Run method of the thread.  Note callers should call start() to\
             actually run this in a separate thread.

@@ -17,6 +17,7 @@ class _CallbackQueue(Thread):
         self._callback = callback
         self._running = False
         self._queue_condition = Condition()
+        self.setDaemon(True)
 
     def add_item(self, item):
         """ Adds an item to the queue

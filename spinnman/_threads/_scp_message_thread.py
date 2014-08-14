@@ -51,6 +51,8 @@ class _SCPMessageThread(Thread):
         self._exception = None
         self._traceback = None
 
+        self.setDaemon(True)
+
     def run(self):
         """ Run method of the Thread.  Note that start should be called to\
             start the thread running.

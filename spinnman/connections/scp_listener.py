@@ -9,7 +9,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 def _function_has_free_argument_count(func, count):
     """ Determines if a function has a given free argument count (such that the
         function can be called with the given number of arguments)
-    
+
     :param func: The function to determine the free argument count of
     :type func: callable
     :param count: The amount of free arguments to check for
@@ -22,15 +22,15 @@ def _function_has_free_argument_count(func, count):
     # If the function has count args, it is fine
     if len(args) == count:
         return True
-    
+
     # If the function has count args once the defaults are assigned, it is fine
     if defaults and len(args) - len(defaults) == count:
         return True
-    
+
     # Otherwise, if the function has a "varargs" or "keywords", it is fine
     if varargs is not None or keywords is not None:
         return True
-    
+
     # Otherwise it must not match
     return False
 
@@ -69,29 +69,31 @@ class SCPListener(Thread):
             raise SpinnmanInvalidParameterException(
                 "callback", repr(callback),
                 "Incorrect number of parameters")
-        
+
         if (error_callback is not None
                 and not _function_has_free_argument_count(error_callback, 2)):
             raise SpinnmanInvalidParameterException(
                 "error_callback", repr(error_callback),
                 "Incorrect number of parameters")
-        
+
         self._scp_receiver = scp_receiver
         self._response_class = response_class
         self._error_callback = error_callback
         self._queue_consumer = _CallbackQueue(callback)
         self._running = False
 
+        self.setDaemon(True)
+
     def start(self):
         """ Starts listening and sending callbacks
-        
+
         :return: Nothing is returned
         :rtype: None
         :raise None: No known exceptions are raised
         """
         self._queue_consumer.start()
         super(SCPListener, self).start()
-    
+
     def run(self):
         """ Overridden method of Thread that runs this listener
         """
@@ -105,10 +107,10 @@ class SCPListener(Thread):
                 self._running = False
                 self._error_callback(exception, "Error receiving packet")
         self.stop()
-    
+
     def stop(self):
         """ Stops the reception of packets
-        
+
         :return: Nothing is returned
         :rtype: None
         :raise None: No known exceptions are raised

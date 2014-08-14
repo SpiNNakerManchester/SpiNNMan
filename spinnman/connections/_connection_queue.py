@@ -64,6 +64,8 @@ class _ConnectionQueue(Thread):
         # Marker to indicate if the queue has been closed
         self._done = False
 
+        self.setDaemon(True)
+
     def _check_message_type(self, message, response_required):
         """ Check if the message type is supported, raising an exception if not
 

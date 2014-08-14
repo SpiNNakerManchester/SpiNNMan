@@ -34,6 +34,7 @@ class _GetIPTagsThread(Thread):
         self._traceback = None
         self._iptags = None
         self._condition = Condition()
+        self.setDaemon(True)
 
     def run(self):
         """ Run method of the thread.  Note callers should call start() to\
