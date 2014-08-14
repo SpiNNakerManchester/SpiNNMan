@@ -1611,7 +1611,7 @@ class Transceiver(object):
 
             if route < 0xFF000000:
                 routes.append(MulticastRoutingEntry(key, mask, processor_ids,
-                                                    link_ids))
+                                                    link_ids, False))
 
         return routes
 

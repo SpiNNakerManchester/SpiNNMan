@@ -137,7 +137,7 @@ try:
     print "Load Routes"
     print "==========="
     routes = [MulticastRoutingEntry(0x10000000, 0xFFFF7000,
-            (1, 2, 3, 4, 5), (0, 1, 2))]
+            (1, 2, 3, 4, 5), (0, 1, 2), False)]
     transceiver.load_multicast_routes(0, 0, routes)
     routes = transceiver.get_multicast_routes(0, 0)
     for route in routes:
