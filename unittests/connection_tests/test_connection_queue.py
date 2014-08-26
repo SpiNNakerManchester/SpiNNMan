@@ -74,12 +74,12 @@ class TestConnectionQueue(unittest.TestCase):
 
 
     def test_check_message_type_not_supported(self):
+        remotehost = "192.168.240.253"
+        connection = udp_conn.UDPConnection(remote_host= remotehost)
+        conn_queue = c_q._ConnectionQueue(connection)
+        header = SDPHeader()
+        msg = SDPMessage(header)
         with self.assertRaises(SpinnmanInvalidPacketException):
-            remotehost = "192.168.240.253"
-            connection = udp_conn.UDPConnection(remote_host= remotehost)
-            conn_queue = c_q._ConnectionQueue(connection)
-            header = SDPHeader()
-            msg = SDPMessage(header)
             conn_queue.message_type_supported("someMessage", True)
 
 if __name__ == '__main__':
