@@ -17,6 +17,7 @@ from spinnman.model.chip_info import ChipInfo
 from spinnman.model.chip_info import _SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.model.chip_info import _SYSTEM_VARIABLE_BYTES
 from spinnman.model.cpu_info import CPU_INFO_BYTES
+from spinnman.model.cpu_info import CPU_USER_0_START_ADDRESS
 from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
@@ -836,6 +837,46 @@ class Transceiver(object):
         # Gather the results
         for callback, (x, y, p) in zip(callbacks, callback_coordinates):
             yield CPUInfo(x, y, p, callback.get_response().data)
+
+    def get_user_0_register_address_from_core(self, x, y, p):
+        """Get the address of user 0 for a given processor on the board
+
+        :param x: the x-coordinate of the chip containing the processor
+        :param y: the y-coordinate of the chip containing the processor
+        :param p: The id of the processor to get the user 0 address from
+        :type x: int
+        :type y: int
+        :type p: int
+        :return:The address for user 0 register for this processor
+        :rtype: int
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If x, y, p is not a valid processor
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        # Ensure that the information about each chip is present
+        if self._machine is None:
+            self._update_machine()
+
+        # check the chip exists in the infos
+        if not (x, y) in self._chip_info:
+            raise SpinnmanInvalidParameterException(
+                "x, y", "{}, {}".format(x, y),
+                "Not a valid chip on the current machine")
+        #collect the chip info for the associated chip
+        chip_info = self._chip_info[(x, y)]
+        #check that p is a valid processor for this chip
+        if p not in chip_info.virtual_core_ids:
+            raise SpinnmanInvalidParameterException(
+                "p", p, "Not a valid core on chip {}, {}".format(x, y))
+        #locate the base address for this chip info
+        base_address = (chip_info.cpu_information_base_address +
+                        (CPU_INFO_BYTES * p))
+        base_address += CPU_USER_0_START_ADDRESS
+        return base_address
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board

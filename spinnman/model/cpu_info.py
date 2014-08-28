@@ -18,7 +18,7 @@ def _get_short_from_bytearray(array, offset):
     return _get_short_from_little_endian_bytearray(array, offset)
 
 CPU_INFO_BYTES = 128
-
+CPU_USER_0_START_ADDRESS = 112
 
 class CPUInfo(object):
     """ Represents information about the state of a CPU
@@ -69,7 +69,7 @@ class CPUInfo(object):
         self._application_name = cpu_data[72:88].decode("ascii")
         self._iobuf_address = _get_int_from_bytearray(cpu_data, 88)
         self._user = [_get_int_from_bytearray(cpu_data, i)
-                      for i in range(112, 128, 4)]
+                      for i in range(CPU_USER_0_START_ADDRESS, 128, 4)]
 
     @property
     def x(self):
