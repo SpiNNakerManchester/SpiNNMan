@@ -902,7 +902,7 @@ class Transceiver(object):
 
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        return self.get_cpu_information(core_subsets)[0]
+        return list(self.get_cpu_information(core_subsets))[0]
 
     def get_iobuf(self, core_subsets=None):
         """ Get the contents of the IOBUF buffer for a number of processors
@@ -1591,8 +1591,8 @@ class Transceiver(object):
         self.write_memory(x, y, table_address, data)
 
         # Allocate enough space for the entries
-        alloc_response = self._send_scp_message(SCPRouterAllocRequest(
-            x, y, 0, n_entries))
+        alloc_response = \
+            self._send_scp_message(SCPRouterAllocRequest(x, y, 0, n_entries))
         base_address = alloc_response.base_address
         if base_address == 0:
             raise SpinnmanInvalidParameterException(
