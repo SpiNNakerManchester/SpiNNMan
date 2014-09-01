@@ -59,6 +59,8 @@ from spinnman.messages.scp.impl.scp_read_memory_words_request \
     import SCPReadMemoryWordsRequest
 from spinnman.messages.scp.impl.scp_write_memory_words_request \
     import SCPWriteMemoryWordsRequest
+from spinnman.messages.scp.impl.scp_led_request \
+    import SCPLEDRequest
 from spinnman.messages.scp.scp_result import SCPResult
 
 from spinnman.data.abstract_data_reader import AbstractDataReader
@@ -1406,6 +1408,31 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         self._send_scp_message(SCPSendSignalRequest(app_id, signal))
+    
+    
+    def set_leds(self, x, y, cpu, led_states):
+        """ Set LED states.
+        :param x: The x-coordinate of the chip on which to set the LEDs
+        :type x: int
+        :param y: The x-coordinate of the chip on which to set the LEDs
+        :type y: int
+        :param cpu: The CPU of the chip on which to set the LEDs
+        :type cpu: int
+        :param led_states: A dictionary mapping LED index to state with 0 being
+                           off, 1 on and 2 inverted.
+        :type led_states: dict
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                    packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        self._send_scp_message(SCPLEDRequest(x, y, cpu, led_states))
 
     def set_ip_tag(self, ip_tag, connection=None):
         """ Set up an ip tag
