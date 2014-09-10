@@ -12,13 +12,16 @@ class SCPReadLinkRequest(AbstractSCPRequest):
     """ An SCP request to read a region of memory via a link on a chip
     """
 
-    def __init__(self, x, y, link, base_address, size):
+    def __init__(self, x, y, cpu, link, base_address, size):
         """
 
         :param x: The x-coordinate of the chip to read from, between 0 and 255
         :type x: int
         :param y: The y-coordinate of the chip to read from, between 0 and 255
         :type y: int
+        :param cpu: The CPU core to use, normally 0 (or if a BMP, the board \
+                      slot number)
+        :type cpu: int
         :param link: The id of the link down which to send the query
         :type link: int
         :param base_address: The positive base address to start the read from
@@ -42,7 +45,7 @@ class SCPReadLinkRequest(AbstractSCPRequest):
         super(SCPReadLinkRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=x,
+                destination_cpu=cpu, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_LINK_READ),
             argument_1=base_address, argument_2=size, argument_3=link)
