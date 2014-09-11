@@ -1165,12 +1165,12 @@ class Transceiver(object):
                 " AbstractDataReader")
         if isinstance(data, bytearray) and n_bytes is None:
             bytes_to_write = len(data)
-        if isinstance(data, int) and n_bytes is None:
+        if isinstance(data, (int,long)) and n_bytes is None:
             bytes_to_write = 4
-        if isinstance(data, int) and n_bytes > 4:
+        if isinstance(data, (int,long)) and n_bytes > 4:
             raise SpinnmanInvalidParameterException(
                 str(n_bytes), "n_bytes", "An integer is at most 4 bytes")
-        if isinstance(data, int):
+        if isinstance(data, (int,long)):
             data_to_write = bytearray(bytes_to_write)
             for i in range(0, bytes_to_write):
                 data_to_write[i] = (data >> (8 * i)) & 0xFF
