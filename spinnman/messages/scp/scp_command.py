@@ -11,8 +11,8 @@ class SCPCommand(Enum):
     CMD_APLX = 4
     CMD_FILL = 5
     CMD_REMAP = 16
-    CMD_LINK_READ = (17, "Read chip link information")
-    CMD_LINK_WRITE = 18
+    CMD_LINK_READ = (17, "Read neighbouring chip's memory.")
+    CMD_LINK_WRITE = (18, "Write neighbouring chip's memory.")
     CMD_AR = 19
     CMD_NNP = (20, "Send a Nearest-Neighbour packet")
     CMD_P2PC = 21

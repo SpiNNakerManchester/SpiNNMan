@@ -27,6 +27,8 @@ from spinnman.messages.spinnaker_boot.spinnaker_boot_messages \
     import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_link_request \
     import SCPReadLinkRequest
+from spinnman.messages.scp.impl.scp_write_link_request \
+    import SCPWriteLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_version_request \
@@ -531,7 +533,7 @@ class Transceiver(object):
                         "Searching down link {} from chip {}, {}".format(
                             link, chip.x, chip.y))
                     response = self._send_scp_message(SCPReadLinkRequest(
-                        x=chip.x, y=chip.y, link=link,
+                        x=chip.x, y=chip.y, cpu=0, link=link,
                         base_address=_SYSTEM_VARIABLE_BASE_ADDRESS,
                         size=_SYSTEM_VARIABLE_BYTES))
                     new_chip_details = ChipInfo(response.data)
@@ -1163,12 +1165,12 @@ class Transceiver(object):
                 " AbstractDataReader")
         if isinstance(data, bytearray) and n_bytes is None:
             bytes_to_write = len(data)
-        if isinstance(data, int) and n_bytes is None:
+        if isinstance(data, (int,long)) and n_bytes is None:
             bytes_to_write = 4
-        if isinstance(data, int) and n_bytes > 4:
+        if isinstance(data, (int,long)) and n_bytes > 4:
             raise SpinnmanInvalidParameterException(
                 str(n_bytes), "n_bytes", "An integer is at most 4 bytes")
-        if isinstance(data, int):
+        if isinstance(data, (int,long)):
             data_to_write = bytearray(bytes_to_write)
             for i in range(0, bytes_to_write):
                 data_to_write[i] = (data >> (8 * i)) & 0xFF
@@ -1242,6 +1244,90 @@ class Transceiver(object):
             if data_size != 0:
                 thread = _SCPMessageThread(self, SCPWriteMemoryRequest(
                     x, y, address_to_write, data_array))
+                thread.start()
+                callbacks.append(thread)
+                bytes_to_write -= data_size
+                address_to_write += data_size
+                offset += data_size
+
+        # Go through the callbacks and check that the responses are OK
+        for callback in callbacks:
+            callback.get_response()
+
+    def write_neighbour_memory(self, x, y, cpu, link, base_address, data, n_bytes=None):
+        """ Write to the memory of a neighbouring chip using a LINK_READ SCP
+        command. If sent to a BMP, this command can be used to communicate with
+        the FPGAs' debug registers.
+
+        :param x: The x-coordinate of the chip whose neighbour is to be\
+                    written to
+        :type x: int
+        :param y: The y-coordinate of the chip whose neighbour is to be\
+                    written to
+        :type y: int
+        :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
+        :type cpu: int
+        :param link: The link index to send the request to (or if BMP, the FPGA
+        number)
+        :type link: int
+        :param base_address: The address in SDRAM where the region of memory\
+                    is to be written
+        :type base_address: int
+        :param data: The data to write.  Should be one of the following:
+                    * An instance of AbstractDataReader
+                    * A bytearray
+                    * A single integer - will be written using little-endian\
+                      byte ordering
+        :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+                    or bytearray or int
+        :param n_bytes: The amount of data to be written in bytes.  If not\
+                    specified:
+                        * If data is an AbstractDataReader, an error is raised
+                        * If data is a bytearray, the length of the bytearray\
+                          will be used
+                        * If data is an int, 4 will be used
+        :type n_bytes: int
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException:
+                    * If there is an error communicating with the board
+                    * If there is an error reading the data
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If x, y does not lead to a valid chip
+                    * If a packet is received that has invalid parameters
+                    * If base_address is not a positive integer
+                    * If data is an AbstractDataReader but n_bytes is not\
+                      specified
+                    * If data is an int and n_bytes is more than 4
+                    * If n_bytes is less than 0
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+
+        bytes_to_write, data_to_write = \
+            self._get_bytes_to_write_and_data_to_write(data, n_bytes)
+
+        # Set up all the requests and get the callbacks
+        logger.debug("Writing {} bytes of memory to neighbour {}.".format(bytes_to_write, link))
+        offset = 0
+        address_to_write = base_address
+        callbacks = list()
+        while bytes_to_write > 0:
+            max_data_size = bytes_to_write
+            if max_data_size > 256:
+                max_data_size = 256
+            data_array = None
+            if isinstance(data_to_write, AbstractDataReader):
+                data_array = data_to_write.read(max_data_size)
+            elif isinstance(data_to_write, bytearray):
+                data_array = data_to_write[offset:(offset + max_data_size)]
+            data_size = len(data_array)
+
+            if data_size != 0:
+                thread = _SCPMessageThread(self, SCPWriteLinkRequest(
+                    x, y, cpu, link, address_to_write, data_array))
                 thread.start()
                 callbacks.append(thread)
                 bytes_to_write -= data_size
@@ -1377,6 +1463,60 @@ class Transceiver(object):
                 data_size = 256
             thread = _SCPMessageThread(self, SCPReadMemoryRequest(
                 x, y, address_to_read, data_size))
+            thread.start()
+            callbacks.append(thread)
+            bytes_to_get -= data_size
+            address_to_read += data_size
+
+        # Go through the callbacks and return the responses in order
+        for callback in callbacks:
+            yield callback.get_response().data
+
+    def read_neighbour_memory(self, x, y, cpu, link, base_address, length):
+        """ Read some areas of memory on a neighbouring chip using a LINK_READ
+        SCP command. If sent to a BMP, this command can be used to communicate
+        with the FPGAs' debug registers.
+
+        :param x: The x-coordinate of the chip whose neighbour is to be\
+                    read from
+        :type x: int
+        :param y: The y-coordinate of the chip whose neighbour is to be\
+                    read from
+        :type y: int
+        :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
+        :type cpu: int
+        :param link: The link index to send the request to (or if BMP, the FPGA
+        number)
+        :type link: int
+        :param base_address: The address in SDRAM where the region of memory\
+                    to be read starts
+        :type base_address: int
+        :param length: The length of the data to be read in bytes
+        :type length: int
+        :return: An iterable of chunks of data read in order
+        :rtype: iterable of bytearray
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If one of x, y, p, base_address or length is invalid
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+
+        # Set up all the requests and get the callbacks
+        logger.debug("Reading {} bytes of neighbour {}'s memory".format(length, link))
+        bytes_to_get = length
+        address_to_read = base_address
+        callbacks = list()
+        while bytes_to_get > 0:
+            data_size = bytes_to_get
+            if data_size > 256:
+                data_size = 256
+            thread = _SCPMessageThread(self, SCPReadLinkRequest(
+                x, y, cpu, link, address_to_read, data_size))
             thread.start()
             callbacks.append(thread)
             bytes_to_get -= data_size
