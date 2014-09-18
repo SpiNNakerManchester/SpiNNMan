@@ -1548,8 +1548,8 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         self._send_scp_message(SCPSendSignalRequest(app_id, signal))
-    
-    
+
+
     def set_leds(self, x, y, cpu, led_states):
         """ Set LED states.
         :param x: The x-coordinate of the chip on which to set the LEDs
@@ -1701,7 +1701,7 @@ class Transceiver(object):
             all_tags.extend(callback.get_iptags())
         return all_tags
 
-    def load_multicast_routes(self, x, y, routes):
+    def load_multicast_routes(self, x, y, routes, app_id=0):
         """ Load a set of multicast routes on to a chip
 
         :param x: The x-coordinate of the chip onto which to load the routes
@@ -1711,6 +1711,9 @@ class Transceiver(object):
         :param routes: An iterable of multicast routes to load
         :type routes: iterable of\
                     :py:class:`spinnmachine.multicast_routing_entry.MulticastRoutingEntry`
+        :param app_id: The id of the application with which to associate the\
+                    routes.  If not specified, defaults to 0.
+        :type app_id: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1759,7 +1762,8 @@ class Transceiver(object):
 
         # Allocate enough space for the entries
         alloc_response = \
-            self._send_scp_message(SCPRouterAllocRequest(x, y, 0, n_entries))
+            self._send_scp_message(SCPRouterAllocRequest(x, y, app_id,
+                    n_entries))
         base_address = alloc_response.base_address
         if base_address == 0:
             raise SpinnmanInvalidParameterException(
@@ -1804,7 +1808,8 @@ class Transceiver(object):
         for _ in range(0, 1024):
             reader.read_short()  # next
             reader.read_byte()  # core
-            reader.read_byte()  # app_id
+            reader.read_byte() # app_id
+
             route = reader.read_int()
             processor_ids = list()
             for processor_id in range(0, 26):
