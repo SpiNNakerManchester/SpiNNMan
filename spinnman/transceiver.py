@@ -53,8 +53,6 @@ from spinnman.messages.scp.impl.scp_iptag_clear_request \
     import SCPIPTagClearRequest
 from spinnman.messages.scp.impl.scp_router_alloc_request \
     import SCPRouterAllocRequest
-from spinnman.messages.scp.impl.scp_router_free_request \
-    import SCPRouterFreeRequest
 from spinnman.messages.scp.impl.scp_router_init_request \
     import SCPRouterInitRequest
 from spinnman.messages.scp.impl.scp_router_clear_request \
@@ -1733,7 +1731,7 @@ class Transceiver(object):
             all_tags.extend(callback.get_iptags())
         return all_tags
 
-    def load_multicast_routes(self, x, y, routes, app_id):
+    def load_multicast_routes(self, x, y, routes, app_id=0):
         """ Load a set of multicast routes on to a chip
 
         :param x: The x-coordinate of the chip onto which to load the routes
@@ -1744,7 +1742,7 @@ class Transceiver(object):
         :type routes: iterable of\
                     :py:class:`spinnmachine.multicast_routing_entry.MulticastRoutingEntry`
         :param app_id: The id of the application with which to associate the\
-                    routes, between 0 and 255.
+                    routes.  If not specified, defaults to 0.
         :type app_id: int
         :return: Nothing is returned
         :rtype: None
@@ -1860,34 +1858,8 @@ class Transceiver(object):
 
         return routes
 
-    def clear_multicast_routes(self, x, y, app_id, clear_registers=True):
-        """ Reset the multicast router on a chip
-        :param x: The x-coordinate of the chip on which to clear the routes
-        :type x: int
-        :param y: The y-coordinate of the chip on which to clear the routes
-        :type y: int
-        :param app_id: The id of the application of which the routes are to be\
-                    cleared, between 0 and 255.
-        :type app_id: int
-        :param clear_registers: True if the router registers should also be\
-                    cleared (default), False to leave the registers
-        :type clear_registers: bool
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-                    packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
-        """
-        self._send_scp_message(SCPRouterFreeRequest(x, y, app_id,
-                clear_registers))
-
-    def reset_multicast_router(self, x, y):
-        """ Reset the multicast router on a chip
+    def clear_multicast_routes(self, x, y):
+        """ Remove all the multicast routes on a chip
         :param x: The x-coordinate of the chip on which to clear the routes
         :type x: int
         :param y: The y-coordinate of the chip on which to clear the routes
