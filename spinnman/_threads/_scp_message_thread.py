@@ -59,10 +59,10 @@ class _SCPMessageThread(Thread):
         """
         retries_to_go = self._n_retries
         response = None
-        timeout = None
+        last_exception = None
         while retries_to_go >= 0:
             retry = False
-            timeout = None
+            last_exception = None
             try:
                 response = self._transceiver.send_message(
                         message=self._message, response_required=True,
@@ -77,9 +77,22 @@ class _SCPMessageThread(Thread):
 
                 if response.scp_response_header.result in self._retry_codes:
                     retry = True
+            except SpinnmanUnexpectedResponseCodeException as exception:
+                response_code = SCPResult[exception.response]
+                if response_code in self._retry_codes:
+                    print "Retry due to", response_code
+                    retry = True
+                    last_exception = exception
+                else:
+                    self._response_condition.acquire()
+                    self._exception = exception
+                    self._traceback = sys.exc_info()[2]
+                    self._response_condition.notify_all()
+                    self._response_condition.release()
+                    return None
             except SpinnmanTimeoutException as exception:
                 retry = True
-                timeout = exception
+                last_exception = exception
             except Exception as exception:
                 self._response_condition.acquire()
                 self._exception = exception
@@ -93,8 +106,8 @@ class _SCPMessageThread(Thread):
                 sleep(0.1)
 
         self._response_condition.acquire()
-        if timeout is not None:
-            self._exception = timeout
+        if last_exception is not None:
+            self._exception = last_exception
         else:
             self._exception = SpinnmanUnexpectedResponseCodeException(
                     "SCP", self._message.scp_request_header.command.name,

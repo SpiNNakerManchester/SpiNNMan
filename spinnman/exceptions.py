@@ -3,13 +3,13 @@ class SpinnmanException(Exception):
         with SpiNNaker
     """
     pass
-    
+
 
 class SpinnmanInvalidPacketException(SpinnmanException):
     """ An exception that indicates that a packet was not in the expected\
         format
     """
-    
+
     def __init__(self, packet_type, problem):
         """
         :param packet_type: The type of packet expected
@@ -22,25 +22,25 @@ class SpinnmanInvalidPacketException(SpinnmanException):
                         packet_type, problem))
         self._packet_type = packet_type
         self._problem = problem
-        
+
     @property
     def packet_type(self):
         """ The packet type
         """
         return self._packet_type
-    
+
     @property
     def problem(self):
         """ The problem with the packet
         """
         return self._problem
-    
+
 
 class SpinnmanInvalidParameterException(SpinnmanException):
     """ An exception that indicates that the value of one of the parameters\
         passed was invalid
     """
-    
+
     def __init__(self, parameter, value, problem):
         """
         :param parameter: The name of the parameter that is invalid
@@ -56,30 +56,30 @@ class SpinnmanInvalidParameterException(SpinnmanException):
         self._parameter = parameter
         self._value = value
         self._problem = problem
-        
+
     @property
     def parameter(self):
         """ The parameter with an invalid value
         """
         return self._parameter
-    
+
     @property
     def value(self):
         """ The value that is invalid
         """
         return self._value
-    
+
     @property
     def problem(self):
         """ The problem with the parameter value
         """
         return self._problem
 
-    
+
 class SpinnmanIOException(SpinnmanException):
     """ An exception that something went wrong with the underlying IO
     """
-    
+
     def __init__(self, problem):
         """
         :param problem: The problem with the IO
@@ -88,7 +88,7 @@ class SpinnmanIOException(SpinnmanException):
         super(SpinnmanIOException, self).__init__("IO Error: {}".format(
                 problem))
         self._problem = problem
-    
+
     @property
     def problem(self):
         """ The problem with IO
@@ -100,7 +100,7 @@ class SpinnmanTimeoutException(SpinnmanException):
     """ An exception that indicates that a timeout occurred before an operation
         could finish
     """
-    
+
     def __init__(self, operation, timeout):
         """
         :param operation: The operation being performed
@@ -111,16 +111,16 @@ class SpinnmanTimeoutException(SpinnmanException):
         super(SpinnmanTimeoutException, self).__init__(
                 "Operation {} timed out after {} seconds".format(
                         operation, timeout))
-        
+
         self._operation = operation
         self._timeout = timeout
-        
+
     @property
     def operation(self):
         """ The operation that was performed
         """
         return self._operation
-    
+
     @property
     def timeout(self):
         """ The timeout value in seconds
@@ -132,7 +132,7 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
     """ Indicate that a response code returned from the board was unexpected\
         for the current operation
     """
-    
+
     def __init__(self, operation, command, response):
         """
         :param operation: The operation being performed
@@ -148,19 +148,19 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         self._operation = operation
         self._command = command
         self._response = response
-        
+
     @property
     def operation(self):
         """ The operation being performed
         """
         return self._operation
-    
+
     @property
     def command(self):
         """ The command being executed
         """
         return self._command
-    
+
     @property
     def response(self):
         """ The unexpected response
@@ -171,7 +171,7 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
 class SpinnmanUnsupportedOperationException(SpinnmanException):
     """ An exception that indicates that the given operation is not supported
     """
-    
+
     def __init__(self, operation):
         """
         :param operation: The operation being requested
@@ -180,7 +180,7 @@ class SpinnmanUnsupportedOperationException(SpinnmanException):
         super(SpinnmanUnsupportedOperationException, self).__init__(
                 "Operation {} is not supported".format(operation))
         self._operation = operation
-    
+
     @property
     def operation(self):
         """ The unsupported operation requested
