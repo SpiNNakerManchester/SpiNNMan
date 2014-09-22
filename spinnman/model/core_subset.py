@@ -39,6 +39,9 @@ class CoreSubset(object):
 
         self._processor_ids.add(processor_id)
 
+    def __contains__(self, processor_id):
+        return processor_id in self._processor_ids
+
     @property
     def x(self):
         """ The x-coordinate of the chip

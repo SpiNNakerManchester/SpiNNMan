@@ -53,6 +53,8 @@ from spinnman.messages.scp.impl.scp_iptag_clear_request \
     import SCPIPTagClearRequest
 from spinnman.messages.scp.impl.scp_router_alloc_request \
     import SCPRouterAllocRequest
+from spinnman.messages.scp.impl.scp_router_free_request \
+    import SCPRouterFreeRequest
 from spinnman.messages.scp.impl.scp_router_init_request \
     import SCPRouterInitRequest
 from spinnman.messages.scp.impl.scp_router_clear_request \
@@ -100,8 +102,7 @@ _SCAMP_VERSION = 1.31
 
 
 def create_transceiver_from_hostname(hostname, discover=True,
-                                     generate_reports=True,
-                                     default_report_directory=None):
+            ignore_chips=None, ignore_cores=None, max_core_id=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -114,12 +115,19 @@ def create_transceiver_from_hostname(hostname, discover=True,
     :param discover: True if further connections should be discovered, False\
                 otherwise
     :type discover: bool
-    :param generate_reports: True if reports are to be generated, False \
-                otherwise
-    :type generate_reports: bool
-    :param default_report_directory: a file path or None if reports are not
-                enabled
-    :type default_report_directory: file path or None
+    :param ignore_chips: An optional set of chips to ignore in the\
+                machine.  Requests for a "machine" will have these chips\
+                excluded, as if they never existed.  The processor_ids of\
+                the specified chips are ignored.
+    :type ignore_chips: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+    :param ignore_cores: An optional set of cores to ignore in the\
+                machine.  Requests for a "machine" will have these cores\
+                excluded, as if they never existed.
+    :type ignore_cores: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+    :param max_core_id: The maximum core id in any discovered machine.\
+                Requests for a "machine" will only have core ids up to\
+                this value.
+    :type max_core_id: int
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -134,8 +142,8 @@ def create_transceiver_from_hostname(hostname, discover=True,
     connection = UDPConnection(remote_host=hostname)
     boot_connection = UDPBootConnection(remote_host=hostname)
     return Transceiver(connections=[connection, boot_connection],
-                       discover=discover, generate_reports=generate_reports,
-                       default_report_directory=default_report_directory)
+                       discover=discover, ignore_chips=ignore_chips,
+                       ignore_cores=ignore_cores, max_core_id=max_core_id)
 
 
 class Transceiver(object):
@@ -153,8 +161,8 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, discover=True, generate_reports=True,
-                 default_report_directory=None):
+    def __init__(self, connections=None, discover=True, ignore_chips=None,
+            ignore_cores=None, max_core_id=None):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -166,12 +174,19 @@ class Transceiver(object):
                     specified, an attempt will be made to discover connections\
                     to the board.
         :type discover: bool
-        :param generate_reports: True if reports are to be generated, False \
-                otherwise
-        :type generate_reports: bool
-        :param default_report_directory: a file path or None if reports are not
-                enabled
-        :type default_report_directory: file path or None
+        :param ignore_chips: An optional set of chips to ignore in the\
+                    machine.  Requests for a "machine" will have these chips\
+                    excluded, as if they never existed.  The processor_ids of\
+                    the specified chips are ignored.
+        :type ignore_chips: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :param ignore_cores: An optional set of cores to ignore in the\
+                    machine.  Requests for a "machine" will have these cores\
+                    excluded, as if they never existed.
+        :type ignore_cores: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :param max_core_id: The maximum core id in any discovered machine.\
+                    Requests for a "machine" will only have core ids up to and\
+                    including this value.
+        :type max_core_id: int
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board, or if no connections to the\
                     board can be found (if connections is None)
@@ -185,11 +200,9 @@ class Transceiver(object):
 
         # Place to keep the current machine
         self._machine = None
-
-        #place holder for report checks
-        self._generate_reports = generate_reports
-        #if resports are enbaled then report folder will be initilised
-        self._default_report_directroy = default_report_directory
+        self._ignore_chips = ignore_chips
+        self._ignore_cores = ignore_cores
+        self._max_core_id = max_core_id
 
         # Place to keep the known chip information
         self._chip_info = dict()
@@ -216,10 +229,6 @@ class Transceiver(object):
         # Discover any new connections, and update the queues if requested
         if discover:
             self.discover_connections()
-            if self._generate_reports:
-                reports.generate_machine_report(
-                    connections=self._udp_connections, machine=self._machine,
-                    report_directory=self._default_report_directroy)
             if len(self._connections) == 0:
                 raise SpinnmanIOException(
                     "No connections to the board were found")
@@ -486,6 +495,19 @@ class Transceiver(object):
         # Create the processor list
         processors = list()
         for virtual_core_id in chip_details.virtual_core_ids:
+            if (self._ignore_cores is not None
+                    and self._ignore_cores.is_core(chip_details.x,
+                            chip_details.y, virtual_core_id)):
+                logger.debug("Ignoring core {} on chip {}, {}".format(
+                        chip_details.x, chip_details.y, virtual_core_id))
+                continue
+            if (self._max_core_id is not None
+                    and virtual_core_id > self._max_core_id):
+                logger.debug("Ignoring core {} on chip {}, {} as > {}".format(
+                        chip_details.x, chip_details.y, virtual_core_id,
+                        self._max_core_id))
+                continue
+
             processors.append(Processor(
                 virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
                 virtual_core_id == 0))
@@ -537,6 +559,14 @@ class Transceiver(object):
                         base_address=_SYSTEM_VARIABLE_BASE_ADDRESS,
                         size=_SYSTEM_VARIABLE_BYTES))
                     new_chip_details = ChipInfo(response.data)
+                    logger.debug("Found chip {}, {}".format(
+                            new_chip_details.x, new_chip_details.y))
+                    if (self._ignore_chips is not None
+                            and self._ignore_chips.is_chip(
+                                new_chip_details.x, new_chip_details.y)):
+                        logger.debug("Ignoring chip {}, {}".format(
+                                new_chip_details.x, new_chip_details.y))
+                        continue
 
                     # Standard links use the opposite link id (with ids between
                     # 0 and 5) as default
@@ -544,6 +574,8 @@ class Transceiver(object):
 
                     # Update the defaults of any existing link
                     if chip.router.is_link(opposite_link_id):
+                        logger.debug("Opposite link {} found".format(
+                                opposite_link_id))
                         opposite_link = chip.router.get_link(opposite_link_id)
                         opposite_link.multicast_default_to = link
                         opposite_link.multicast_default_from = link
@@ -575,10 +607,11 @@ class Transceiver(object):
                         search.append(
                             (new_chip, new_chip_details.links_available))
 
-                except SpinnmanUnexpectedResponseCodeException:
+                except SpinnmanUnexpectedResponseCodeException as error:
 
                     # If there is an error, assume the link is down
-                    pass
+                    logger.debug("Error searching down link {}".format(link))
+                    logger.debug(error)
 
     def discover_connections(self):
         """ Find connections to the board and store these for future use.\
@@ -658,7 +691,7 @@ class Transceiver(object):
         return MachineDimensions(self._machine.max_chip_x,
                                  self._machine.max_chip_y)
 
-    def get_machine_details(self):
+    def get_machine_details(self, skip_chips=None, skip_cores=None):
         """ Get the details of the machine made up of chips on a board and how\
             they are connected to each other.
 
@@ -1549,7 +1582,6 @@ class Transceiver(object):
         """
         self._send_scp_message(SCPSendSignalRequest(app_id, signal))
 
-
     def set_leds(self, x, y, cpu, led_states):
         """ Set LED states.
         :param x: The x-coordinate of the chip on which to set the LEDs
@@ -1701,7 +1733,7 @@ class Transceiver(object):
             all_tags.extend(callback.get_iptags())
         return all_tags
 
-    def load_multicast_routes(self, x, y, routes, app_id=0):
+    def load_multicast_routes(self, x, y, routes, app_id):
         """ Load a set of multicast routes on to a chip
 
         :param x: The x-coordinate of the chip onto which to load the routes
@@ -1712,7 +1744,7 @@ class Transceiver(object):
         :type routes: iterable of\
                     :py:class:`spinnmachine.multicast_routing_entry.MulticastRoutingEntry`
         :param app_id: The id of the application with which to associate the\
-                    routes.  If not specified, defaults to 0.
+                    routes, between 0 and 255.
         :type app_id: int
         :return: Nothing is returned
         :rtype: None
@@ -1828,8 +1860,34 @@ class Transceiver(object):
 
         return routes
 
-    def clear_multicast_routes(self, x, y):
-        """ Remove all the multicast routes on a chip
+    def clear_multicast_routes(self, x, y, app_id, clear_registers=True):
+        """ Reset the multicast router on a chip
+        :param x: The x-coordinate of the chip on which to clear the routes
+        :type x: int
+        :param y: The y-coordinate of the chip on which to clear the routes
+        :type y: int
+        :param app_id: The id of the application of which the routes are to be\
+                    cleared, between 0 and 255.
+        :type app_id: int
+        :param clear_registers: True if the router registers should also be\
+                    cleared (default), False to leave the registers
+        :type clear_registers: bool
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
+                    packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        self._send_scp_message(SCPRouterFreeRequest(x, y, app_id,
+                clear_registers))
+
+    def reset_multicast_router(self, x, y):
+        """ Reset the multicast router on a chip
         :param x: The x-coordinate of the chip on which to clear the routes
         :type x: int
         :param y: The y-coordinate of the chip on which to clear the routes
