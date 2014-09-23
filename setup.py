@@ -9,15 +9,17 @@ setup(
     description="Interaction with a SpiNNaker Machine",
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
     packages=['spinnman',
+            'spinnman._threads'
             'spinnman.connections',
             'spinnman.data',
             'spinnman.messages',
             'spinnman.messages.scp',
+            'spinnman.messages.scp.abstract_messages',
             'spinnman.messages.scp.impl',
             'spinnman.messages.sdp',
             'spinnman.messages.spinnaker_boot',
             'spinnman.messages.spinnaker_boot._system_variables',
             'spinnman.model'],
-    package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot'],},
+    package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot']},
     install_requires=['six', 'enum34', 'SpiNNMachine']
 )
