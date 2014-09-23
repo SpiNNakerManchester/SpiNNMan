@@ -10,7 +10,7 @@ setup(
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
     license="GNU GPLv3.0",
     packages=['spinnman',
-            'spinnman._threads'
+            'spinnman._threads',
             'spinnman.connections',
             'spinnman.data',
             'spinnman.messages',
