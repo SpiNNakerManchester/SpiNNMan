@@ -12,22 +12,26 @@ from spinnman.messages.scp.scp_signal import SCPSignal
 from spinnman.model.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 
-machine = "spinn-10.cs.man.ac.uk"
-version = 2
+#machine = "spinn-10.cs.man.ac.uk"
+#version = 2
 
 #machine = "spinn-1.cs.man.ac.uk"
 #version = 5
 
-#machine = "192.168.240.253"
-#version = 3
+machine = "192.168.240.253"
+version = 3
 
 n_cores = 20
 core_subsets = CoreSubsets(core_subsets=[CoreSubset(0, 0, range(1, 11)),
                                          CoreSubset(1, 1, range(1, 11))])
 app_id = 30
 
-transceiver = create_transceiver_from_hostname(machine, False)
+down_cores = CoreSubsets()
+down_cores.add_processor(0, 0, 5)
+down_chips = CoreSubsets(core_subsets=[CoreSubset(0, 1, [])])
+transceiver = create_transceiver_from_hostname(machine, False, ignore_cores=down_cores, ignore_chips=down_chips)
 
 try:
     print "Version Information"

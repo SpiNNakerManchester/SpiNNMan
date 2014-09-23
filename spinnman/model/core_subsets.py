@@ -57,6 +57,35 @@ class CoreSubsets(object):
             self.add_core_subset(CoreSubset(x, y, []))
         self._core_subsets[(x, y)].add_processor(processor_id)
 
+    def is_chip(self, x, y):
+        """ Determine if the chip with coordinates (x, y) is in the subset
+
+        :param x: The x-coordinate of a chip
+        :type x: int
+        :param y: The y-coordinate of a chip
+        :type y: int
+        :return: True if the chip with coordinates (x, y) is in the subset
+        :rtype: bool
+        """
+        return (x, y) in self._core_subsets
+
+    def is_core(self, x, y, processor_id):
+        """ Determine if there is a chip with coordinates (x, y) in the\
+            subset, which has a core with the given id in the subset
+
+        :param x: The x-coordinate of a chip
+        :type x: int
+        :param y: The y-coordinate of a chip
+        :type y: int
+        :param processor_id: The id of a core
+        :type processor_id: int
+        :return: True if there is a chip with coordinates (x, y) in the\
+                    subset, which has a core with the given id in the subset
+        """
+        if (x, y) not in self._core_subsets:
+            return False
+        return processor_id in self._core_subsets[(x, y)]
+
     @property
     def core_subsets(self):
         """ The one-per-chip subsets
