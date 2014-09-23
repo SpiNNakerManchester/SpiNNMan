@@ -8,6 +8,7 @@ setup(
     version="0.1-SNAPSHOT",
     description="Interaction with a SpiNNaker Machine",
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
+    license="GNU GPLv3.0",
     packages=['spinnman',
             'spinnman._threads'
             'spinnman.connections',

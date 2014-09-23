@@ -8,3 +8,6 @@
 /IF_curr_exp.aplx
 /testdata.dat
 /hello.aplx
+build/
+dist/
+SpiNNMan.egg-info
