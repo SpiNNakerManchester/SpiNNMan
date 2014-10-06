@@ -1,14 +1,14 @@
-class IPTag(object):
+class ReverseIPTag(object):
     """ Used to hold data that is contained within an IPTag
     """
 
     def __init__(self, address, port, tag):
         """
-        :param address: The IP address to which SCP packets with the tag will\
-                    be sent
+        :param address: The IP address to which SCP packets with the reverse\
+         tag will be sent
         :type address: str
-        :param port: The port to which the SCP packets with the tag will be\
-                    sent
+        :param port: The port to which the SCP packets with the reverse tag \
+        will be sent
         :type port: int
         :param tag: The tag of the SCP packet
         :type tag: int
