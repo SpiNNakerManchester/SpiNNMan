@@ -9,24 +9,24 @@ from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 _IPTAG_SET = 1
 
 
-class SCPIPTagSetRequest(AbstractSCPRequest):
+class SCPReverseIPTagSetRequest(AbstractSCPRequest):
     """ An SCP Request to set an IP Tag
     """
 
-    def __init__(self, x, y, host, port, tag, stripe=False):
+    def __init__(self, x, y, p, host, port, tag, port_num):
         """
         :param x: The x-coordinate of a chip, between 0 and 255
         :type x: int
         :param y: The y-coordinate of a chip, between 0 and 255
         :type y: int
+        :param p: the p value of a processor. between 0 and 17
+        :type p: int
         :param host: The host address, as an array of 4 bytes
         :type host: bytearray
         :param port: The port, between 0 and 65535
         :type port: int
         :param tag: The tag, between 0 and 7
         :type tag: int
-        :param stripe: if the SDP header should be striped from the packet.
-        :type stripe: bool
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
                     * The chip-coordinates are out of range
                     * If the host is not 4 bytes
@@ -43,23 +43,23 @@ class SCPIPTagSetRequest(AbstractSCPRequest):
             raise SpinnmanInvalidParameterException(
                 "tag", str(tag), "Must be between 0 and 7")
 
-        stripe_value = 0
-        if stripe:
-            stripe_value = 1
+        stripe_value = 1
+        reverse_value = 1
 
-        reverse_value = 0
+        arg1 = ((reverse_value << 29) | (stripe_value << 28)
+                | (_IPTAG_SET << 16) | (port_num << 13) | (p << 8) | tag)
+        arg2 = ((x << 32) | (y << 24) | port)
+        arg3 = ((host[3] << 24) | (host[2] << 16) | (host[1] << 8) | host[0])
 
-        super(SCPIPTagSetRequest, self).__init__(
+        super(SCPReverseIPTagSetRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_IPTAG),
-            argument_1=((reverse_value << 28) | (stripe_value << 27)
-                        | (_IPTAG_SET << 16) | tag),
-            argument_2=port,
-            argument_3=((host[3] << 24) | (host[2] << 16)
-                        | (host[1] << 8) | host[0]))
+            argument_1= arg1,
+            argument_2= arg2,
+            argument_3= arg3)
 
     def get_scp_response(self):
         return SCPCheckOKResponse("Set IP Tag", "CMD_IPTAG")

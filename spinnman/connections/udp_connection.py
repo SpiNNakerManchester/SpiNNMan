@@ -314,6 +314,47 @@ class UDPConnection(
         except Exception as e:
             raise SpinnmanIOException(str(e))
 
+    def send_raw(self, message):
+        """
+        sends a raw udp packet
+        :param message: the message sent in the udp packet
+
+        :return: None
+        """
+        # Send the packet
+        try:
+            self._socket.send(message)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
+    def send_eidio_message(self, eidio_message):
+        """
+        sends a eidio message in a udp packet
+        :param eidio_message: the message sent in the udp packet
+        :return:
+        """
+        if not self._can_send:
+            raise SpinnmanIOException("Not connected to a remote host")
+
+        # Create a writer for the mesage
+        data_length = 0
+        if eidio_message.data is not None:
+            data_length = len(eidio_message.data)
+        writer = LittleEndianByteArrayByteWriter()
+
+        # Write the header
+        eidio_message.eidio_header.write_eidio_header(writer)
+
+        # Write any data
+        if data_length != 0:
+            writer.write_bytes(eidio_message.data)
+
+        # Send the packet
+        try:
+            self._socket.send(writer.data)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
     def receive_sdp_message(self, timeout=None):
         """ See :py:meth:`spinnman.connections.abstract_sdp_receiver.AbstractSDPReceiver.receive_sdp_message`
         """
