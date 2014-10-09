@@ -1,8 +1,8 @@
 from enum import Enum
 
 
-class EIDIOTypeParam(Enum):
-    """ eidio type Flag for the message
+class EIEIOTypeParam(Enum):
+    """ eieio type Flag for the message
     """
     KEY_16_BIT = (0, "Indicates that data is keys which are 16 bits")
     KEY_PAYLOAD_16_BIT = (1, "Indicates that data is keys and payloads of 16 bits")

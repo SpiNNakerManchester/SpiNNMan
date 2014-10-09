@@ -1,8 +1,8 @@
 from enum import Enum
 
 
-class EIDIOPrefixType(Enum):
-    """ eidio type Flag for the message
+class EIEIOPrefixType(Enum):
+    """ eieio type Flag for the message
     """
     LOWER_HALF_WORD = (0, "apply prefix on lower half of the word")
     UPPER_HALF_WORD = (1, "apply prefix on top half of the word")

@@ -4,7 +4,7 @@ from abc import abstractmethod
 from six import add_metaclass
 
 @add_metaclass(ABCMeta)
-class AbstractEIDIOMessage(object):
+class AbstractEIEIOMessage(object):
 
     def __init__(self, data):
         self._data = data
@@ -19,7 +19,7 @@ class AbstractEIDIOMessage(object):
         return self._data
 
     @abstractmethod
-    def is_EIDIO_message(self):
+    def is_EIEIO_message(self):
         """ the extra method for is instance to work
 
         :return:

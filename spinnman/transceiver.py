@@ -1,6 +1,6 @@
 from spinnman.connections.udp_connection import UDPConnection
 from spinnman.connections.udp_boot_connection import UDPBootConnection
-from spinnman.connections.udp_connection import UDP_CONNECTION_DEFAULT_PORT
+from spinnman import constants
 from spinnman.connections._connection_queue import _ConnectionQueue
 from spinnman.connections.abstract_multicast_sender import \
     AbstractMulticastSender
@@ -643,7 +643,7 @@ class Transceiver(object):
         new_connections = list()
         for ethernet_connected_chip in self._machine.ethernet_connected_chips:
             if (ethernet_connected_chip.ip_address,
-                    UDP_CONNECTION_DEFAULT_PORT) not in self._udp_connections:
+                    constants.UDP_CONNECTION_DEFAULT_PORT) not in self._udp_connections:
                 new_connection = UDPConnection(
                     remote_host=ethernet_connected_chip.ip_address,
                     chip_x=ethernet_connected_chip.x,
@@ -652,7 +652,7 @@ class Transceiver(object):
                 self._connections.append(new_connection)
                 self._udp_connections[
                     (ethernet_connected_chip.ip_address,
-                     UDP_CONNECTION_DEFAULT_PORT)] = new_connection
+                     constants.UDP_CONNECTION_DEFAULT_PORT)] = new_connection
 
         # Update the connection queues after finding new connections
         self._update_connection_queues()

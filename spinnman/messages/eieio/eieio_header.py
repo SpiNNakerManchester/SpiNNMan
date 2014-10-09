@@ -1,11 +1,11 @@
-from spinnman.messages.eidio.eidio_type_param import EIDIOTypeParam
+from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman import exceptions
 
-class EIDIOHeader(object):
+class EIEIOHeader(object):
 
     def __init__(self, type_param, count_param, tag_param=0, prefix_param=None,
                  payload_base=None, prefix_type=None, is_time=False):
-        """the basic eidio header
+        """the basic eieio header
 
         :param prefix_param: the prefix if needed, or None
         :param payload_base: the data to replace the prefix if not prefix set/
@@ -17,25 +17,25 @@ class EIDIOHeader(object):
         :param is_time: is the time param set
         :type prefix_param: int or None
         :type payload_base: int or None
-        :type type_param: spinnman.spinnman.messages.eidio.eidio_type_param.EIDIOTypeParam
+        :type type_param: spinnman.spinnman.messages.eieio.eidio_type_param.EIEIOTypeParam
         :type count_param: int
         :type tag_param: int
-        :type prefix_type: spinnman.spinnman.messages.eidio.eidio_prefix_type
+        :type prefix_type: spinnman.spinnman.messages.eieio.eidio_prefix_type
         :type is_time: bool
         :return:
         """
         self._prefix_param = prefix_param
         self._payload_base = payload_base
-        if not isinstance(type_param, EIDIOTypeParam):
+        if not isinstance(type_param, EIEIOTypeParam):
             raise exceptions.SpinnmanInvalidParameterException(
-                "the eidio type_param is not a valid EIDIOTypeParam", "", "")
+                "the eieio type_param is not a valid EIEIOTypeParam", "", "")
         self._type_param = type_param
         self._count_param = count_param
         self._tag_param = tag_param
         self._prefix_type = prefix_type
         self._is_time = is_time
 
-    def write_eidio_header(self, byte_writer):
+    def write_eieio_header(self, byte_writer):
         data = 0
         # the flag for no prefix
         if self._prefix_param is not None:

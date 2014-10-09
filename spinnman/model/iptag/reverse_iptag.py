@@ -1,4 +1,7 @@
-class ReverseIPTag(object):
+from spinnman.model.iptag.abstract_iptag import AbstractIPTAG
+
+
+class ReverseIPTag(AbstractIPTAG):
     """ Used to hold data that is contained within an IPTag
     """
 
@@ -15,8 +18,8 @@ class ReverseIPTag(object):
         :type tag: int
         :raise None: No known exceptions are raised
         """
+        AbstractIPTAG.__init__(self, port)
         self._address = address
-        self._port = port
         self._tag = tag
         self._destination_x = destination_x
         self._destination_y = destination_y

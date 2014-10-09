@@ -14,13 +14,12 @@ from spinnman.data.little_endian_byte_array_byte_reader \
 from spinnman.data.little_endian_byte_array_byte_writer \
     import LittleEndianByteArrayByteWriter
 
+from spinnman import constants
+
 import platform
 import subprocess
 import socket
 import select
-
-# The default port of the connection
-UDP_CONNECTION_DEFAULT_PORT = 17893
 
 
 class UDPConnection(
@@ -47,8 +46,8 @@ class UDPConnection(
     _SDP_SOURCE_CHIP_Y = 0
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=UDP_CONNECTION_DEFAULT_PORT, default_sdp_tag=0xFF,
-                 chip_x=0, chip_y=0):
+                 remote_port=constants.UDP_CONNECTION_DEFAULT_PORT,
+                 default_sdp_tag=0xFF, chip_x=0, chip_y=0):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
@@ -329,7 +328,7 @@ class UDPConnection(
 
     def send_eidio_message(self, eidio_message):
         """
-        sends a eidio message in a udp packet
+        sends a eieio message in a udp packet
         :param eidio_message: the message sent in the udp packet
         :return:
         """
@@ -343,7 +342,7 @@ class UDPConnection(
         writer = LittleEndianByteArrayByteWriter()
 
         # Write the header
-        eidio_message.eidio_header.write_eidio_header(writer)
+        eidio_message.eidio_header.write_eieio_header(writer)
 
         # Write any data
         if data_length != 0:

@@ -17,14 +17,12 @@ from spinnman.data.big_endian_byte_array_byte_reader \
     import BigEndianByteArrayByteReader
 from spinnman.data.big_endian_byte_array_byte_writer \
     import BigEndianByteArrayByteWriter
+from spinnman import constants
 
 import platform
 import subprocess
 import socket
 import select
-
-# The default port of the connection
-UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
 
 
 class UDPBootConnection(
@@ -33,7 +31,7 @@ class UDPBootConnection(
     """
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
+                 remote_port=constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\

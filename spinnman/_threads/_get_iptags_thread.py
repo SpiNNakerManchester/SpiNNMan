@@ -4,7 +4,7 @@ from threading import Condition
 from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman.messages.scp.impl.scp_iptag_info_request import SCPIPTagInfoRequest
 from spinnman.messages.scp.impl.scp_iptag_get_request import SCPIPTagGetRequest
-from spinnman.model.iptag import IPTag
+from spinnman.model.iptag.iptag import IPTag
 
 import sys
 import logging

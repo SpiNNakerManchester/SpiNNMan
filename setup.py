@@ -20,7 +20,8 @@ setup(
             'spinnman.messages.sdp',
             'spinnman.messages.spinnaker_boot',
             'spinnman.messages.spinnaker_boot._system_variables',
-            'spinnman.model'],
+            'spinnman.model',
+            'spinnman.model.iptag'],
     package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot']},
     install_requires=['six', 'enum34', 'SpiNNMachine']
 )

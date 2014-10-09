@@ -1,4 +1,7 @@
-class IPTag(object):
+from spinnman.model.iptag.abstract_iptag import AbstractIPTAG
+
+
+class IPTag(AbstractIPTAG):
     """ Used to hold data that is contained within an IPTag
     """
 
@@ -14,8 +17,8 @@ class IPTag(object):
         :type tag: int
         :raise None: No known exceptions are raised
         """
+        AbstractIPTAG.__init__(self, port)
         self._address = address
-        self._port = port
         self._tag = tag
 
     @property
