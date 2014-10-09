@@ -326,27 +326,27 @@ class UDPConnection(
         except Exception as e:
             raise SpinnmanIOException(str(e))
 
-    def send_eidio_message(self, eidio_message):
+    def send_eieio_message(self, eieio_message):
         """
         sends a eieio message in a udp packet
-        :param eidio_message: the message sent in the udp packet
+        :param eieio_message: the message sent in the udp packet
         :return:
         """
         if not self._can_send:
             raise SpinnmanIOException("Not connected to a remote host")
 
-        # Create a writer for the mesage
+        # Create a writer for the message
         data_length = 0
-        if eidio_message.data is not None:
-            data_length = len(eidio_message.data)
+        if eieio_message.data is not None:
+            data_length = len(eieio_message.data)
         writer = LittleEndianByteArrayByteWriter()
 
         # Write the header
-        eidio_message.eidio_header.write_eieio_header(writer)
+        eieio_message.eieio_header.write_eieio_header(writer)
 
         # Write any data
         if data_length != 0:
-            writer.write_bytes(eidio_message.data)
+            writer.write_bytes(eieio_message.data)
 
         # Send the packet
         try:

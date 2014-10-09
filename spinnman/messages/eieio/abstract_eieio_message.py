@@ -27,7 +27,7 @@ class AbstractEIEIOMessage(object):
 
 
     @abstractmethod
-    def eidio_header(self):
+    def eieio_header(self):
         """
         method to return the implemntations versions of headers
         :return:

@@ -8,7 +8,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         self._eieio_command_header = eieio_command_header
 
     @property
-    def eidio_header(self):
+    def eieio_header(self):
         return self._eieio_command_header
 
     def is_EIEIO_message(self):
