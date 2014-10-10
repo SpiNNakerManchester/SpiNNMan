@@ -35,6 +35,10 @@ class EIEIOHeader(object):
         self._prefix_type = prefix_type
         self._is_time = is_time
 
+    @property
+    def type_param(self):
+        return self._type_param
+
     def write_eieio_header(self, byte_writer):
         #writes in little endian form
         #count param

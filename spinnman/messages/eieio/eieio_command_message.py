@@ -13,3 +13,4 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
 
     def is_EIEIO_message(self):
         return True
+
