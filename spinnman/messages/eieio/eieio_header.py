@@ -36,6 +36,10 @@ class EIEIOHeader(object):
         self._is_time = is_time
 
     def write_eieio_header(self, byte_writer):
+        #writes in little endian form
+        #count param
+        byte_writer.write_byte(self._count_param)
+
         data = 0
         # the flag for no prefix
         if self._prefix_param is not None:
@@ -61,6 +65,3 @@ class EIEIOHeader(object):
         #tag param
         data |= self._tag_param
         byte_writer.write_byte(data)
-
-        #count param
-        byte_writer.write_byte(self._count_param)
