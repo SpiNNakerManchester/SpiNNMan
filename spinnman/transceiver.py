@@ -1,6 +1,6 @@
 from spinnman.connections.udp_connection import UDPConnection
 from spinnman.connections.udp_boot_connection import UDPBootConnection
-from spinnman.connections.udp_connection import UDP_CONNECTION_DEFAULT_PORT
+from spinnman import constants
 from spinnman.connections._connection_queue import _ConnectionQueue
 from spinnman.connections.abstract_multicast_sender import \
     AbstractMulticastSender
@@ -12,6 +12,8 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
+    SCPReverseIPTagSetRequest
 
 from spinnman.model.chip_info import ChipInfo
 from spinnman.model.chip_info import _SYSTEM_VARIABLE_BASE_ADDRESS
@@ -96,7 +98,7 @@ import math
 logger = logging.getLogger(__name__)
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = 1.31
+_SCAMP_VERSION = 1.33
 
 
 def create_transceiver_from_hostname(hostname, discover=True,
@@ -641,7 +643,7 @@ class Transceiver(object):
         new_connections = list()
         for ethernet_connected_chip in self._machine.ethernet_connected_chips:
             if (ethernet_connected_chip.ip_address,
-                    UDP_CONNECTION_DEFAULT_PORT) not in self._udp_connections:
+                    constants.UDP_CONNECTION_DEFAULT_PORT) not in self._udp_connections:
                 new_connection = UDPConnection(
                     remote_host=ethernet_connected_chip.ip_address,
                     chip_x=ethernet_connected_chip.x,
@@ -650,7 +652,7 @@ class Transceiver(object):
                 self._connections.append(new_connection)
                 self._udp_connections[
                     (ethernet_connected_chip.ip_address,
-                     UDP_CONNECTION_DEFAULT_PORT)] = new_connection
+                     constants.UDP_CONNECTION_DEFAULT_PORT)] = new_connection
 
         # Update the connection queues after finding new connections
         self._update_connection_queues()
@@ -906,7 +908,7 @@ class Transceiver(object):
         #check that p is a valid processor for this chip
         if p not in chip_info.virtual_core_ids:
             raise SpinnmanInvalidParameterException(
-                "p", p, "Not a valid core on chip {}, {}".format(x, y))
+                "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
         #locate the base address for this chip info
         base_address = (chip_info.cpu_information_base_address +
                         (CPU_INFO_BYTES * p))
@@ -1157,7 +1159,8 @@ class Transceiver(object):
         # Release the lock
         self._release_flood_execute_lock()
 
-    def _get_bytes_to_write_and_data_to_write(self, data, n_bytes):
+    @staticmethod
+    def _get_bytes_to_write_and_data_to_write(data, n_bytes):
         """ Converts a given data item an a number of bytes into the data\
             and the amount of data to write
 
@@ -1196,12 +1199,12 @@ class Transceiver(object):
                 " AbstractDataReader")
         if isinstance(data, bytearray) and n_bytes is None:
             bytes_to_write = len(data)
-        if isinstance(data, (int,long)) and n_bytes is None:
+        if isinstance(data, (int, long)) and n_bytes is None:
             bytes_to_write = 4
-        if isinstance(data, (int,long)) and n_bytes > 4:
+        if isinstance(data, (int, long)) and n_bytes > 4:
             raise SpinnmanInvalidParameterException(
                 str(n_bytes), "n_bytes", "An integer is at most 4 bytes")
-        if isinstance(data, (int,long)):
+        if isinstance(data, (int, long)):
             data_to_write = bytearray(bytes_to_write)
             for i in range(0, bytes_to_write):
                 data_to_write[i] = (data >> (8 * i)) & 0xFF
@@ -1627,7 +1630,6 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        connections = None
         if connection is not None:
             connections = connection
         else:
@@ -1645,6 +1647,55 @@ class Transceiver(object):
                 message=SCPIPTagSetRequest(
                     conn.chip_x, conn.chip_y, ip_address, ip_tag.port,
                     ip_tag.tag),
+                connection=conn)
+            thread.start()
+            callbacks.append(thread)
+
+        for callback in callbacks:
+            callback.get_response()
+
+    def set_reverse_ip_tag(self, reverse_ip_tag, connection=None):
+        """ Set up an reverse ip tag
+
+        :param reverse_ip_tag: The reverse iptag to set up
+        :type reverse_ip_tag: :py:class:`spinnman.model.reverse_iptag.ReverseIPTag`
+        :param connection: UDPConnection where the tag should be set up.\
+                    If not specified, all UDPConnections will send the message\
+                    to set up the tag
+        :type connection:\
+                    :py:class:`spinnman.connections.udp_connetion.UDPConnection`
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If the ip tag fields are incorrect
+                    * If the connection cannot send SDP messages
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        if connection is not None:
+            connections = connection
+        else:
+            connections = self._udp_connections.values()
+
+        callbacks = list()
+        for conn in connections:
+            host_string = reverse_ip_tag.address
+            if host_string == "localhost" or host_string == ".":
+                host_string = conn.local_ip_address
+            ip_string = gethostbyname(host_string)
+            ip_address = bytearray(inet_aton(ip_string))
+            thread = _SCPMessageThread(
+                self,
+                message=SCPReverseIPTagSetRequest(
+                    reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
+                    reverse_ip_tag.destination_p, ip_address,
+                    reverse_ip_tag.port, reverse_ip_tag.tag,
+                    reverse_ip_tag.port_num),
                 connection=conn)
             thread.start()
             callbacks.append(thread)
@@ -1675,7 +1726,6 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        connections = None
         if connection is not None:
             connections = connection
         else:
@@ -1714,7 +1764,6 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        connections = None
         if connection is not None:
             connections = connection
         else:
@@ -1793,7 +1842,7 @@ class Transceiver(object):
         # Allocate enough space for the entries
         alloc_response = \
             self._send_scp_message(SCPRouterAllocRequest(x, y, app_id,
-                    n_entries))
+                                                         n_entries))
         base_address = alloc_response.base_address
         if base_address == 0:
             raise SpinnmanInvalidParameterException(
@@ -1838,7 +1887,7 @@ class Transceiver(object):
         for _ in range(0, 1024):
             reader.read_short()  # next
             reader.read_byte()  # core
-            reader.read_byte() # app_id
+            reader.read_byte()  # app_id
 
             route = reader.read_int()
             processor_ids = list()

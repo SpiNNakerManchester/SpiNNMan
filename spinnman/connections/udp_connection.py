@@ -14,13 +14,12 @@ from spinnman.data.little_endian_byte_array_byte_reader \
 from spinnman.data.little_endian_byte_array_byte_writer \
     import LittleEndianByteArrayByteWriter
 
+from spinnman import constants
+
 import platform
 import subprocess
 import socket
 import select
-
-# The default port of the connection
-UDP_CONNECTION_DEFAULT_PORT = 17893
 
 
 class UDPConnection(
@@ -47,8 +46,8 @@ class UDPConnection(
     _SDP_SOURCE_CHIP_Y = 0
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=UDP_CONNECTION_DEFAULT_PORT, default_sdp_tag=0xFF,
-                 chip_x=0, chip_y=0):
+                 remote_port=constants.UDP_CONNECTION_DEFAULT_PORT,
+                 default_sdp_tag=0xFF, chip_x=0, chip_y=0):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
@@ -307,6 +306,47 @@ class UDPConnection(
         # Write any data
         if data_length != 0:
             writer.write_bytes(sdp_message.data)
+
+        # Send the packet
+        try:
+            self._socket.send(writer.data)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
+    def send_raw(self, message):
+        """
+        sends a raw udp packet
+        :param message: the message sent in the udp packet
+
+        :return: None
+        """
+        # Send the packet
+        try:
+            self._socket.send(message)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
+    def send_eieio_message(self, eieio_message):
+        """
+        sends a eieio message in a udp packet
+        :param eieio_message: the message sent in the udp packet
+        :return:
+        """
+        if not self._can_send:
+            raise SpinnmanIOException("Not connected to a remote host")
+
+        # Create a writer for the message
+        data_length = 0
+        if eieio_message.data is not None:
+            data_length = len(eieio_message.data)
+        writer = LittleEndianByteArrayByteWriter()
+
+        # Write the header
+        eieio_message.eieio_header.write_eieio_header(writer)
+
+        # Write any data
+        if data_length != 0:
+            writer.write_bytes(eieio_message.data)
 
         # Send the packet
         try:
