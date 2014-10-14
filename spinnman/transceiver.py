@@ -1,12 +1,19 @@
-from spinnman.connections.udp_connection import UDPConnection
-from spinnman.connections.udp_boot_connection import UDPBootConnection
-from spinnman import constants
-from spinnman.connections._connection_queue import _ConnectionQueue
-from spinnman.connections.abstract_multicast_sender import \
-    AbstractMulticastSender
-from spinnman.connections.abstract_multicast_receiver import \
-    AbstractMulticastReceiver
+from collections import deque
+from threading import Condition
+from socket import gethostbyname
+from socket import inet_aton
+import logging
 
+from spinnman.connections.udp_packet_connections.udp_scp_connection import UDPSCPConnection
+from spinnman.connections.udp_packet_connections.udp_boot_connection import UDPBootConnection
+from spinnman import constants
+from spinnman.connections.listeners._connection_queue import _ConnectionQueue
+from spinnman.connections.abstract_classes.abstract_multicast_sender import \
+    AbstractMulticastSender
+from spinnman.connections.abstract_classes.abstract_multicast_receiver import \
+    AbstractMulticastReceiver
+from spinnman.connections.udp_packet_connections.udp_sdp_connection import \
+    UDPSDPConnection
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -14,17 +21,11 @@ from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
-
 from spinnman.model.chip_info import ChipInfo
-from spinnman.model.chip_info import _SYSTEM_VARIABLE_BASE_ADDRESS
-from spinnman.model.chip_info import _SYSTEM_VARIABLE_BYTES
-from spinnman.model.cpu_info import CPU_INFO_BYTES
-from spinnman.model.cpu_info import CPU_USER_0_START_ADDRESS
 from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
 from spinnman.model.router_diagnostics import RouterDiagnostics
-
 from spinnman.messages.spinnaker_boot.spinnaker_boot_messages \
     import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_link_request \
@@ -66,19 +67,14 @@ from spinnman.messages.scp.impl.scp_write_memory_words_request \
 from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
 from spinnman.messages.scp.scp_result import SCPResult
-
 from spinnman.data.abstract_data_reader import AbstractDataReader
 from spinnman.data.little_endian_byte_array_byte_writer \
     import LittleEndianByteArrayByteWriter
 from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
-
 from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman._threads._iobuf_thread import _IOBufThread
 from spinnman._threads._get_iptags_thread import _GetIPTagsThread
-
-from spinnman import reports
-
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
@@ -86,14 +82,8 @@ from spinn_machine.processor import Processor
 from spinn_machine.router import Router
 from spinn_machine.link import Link
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
-
-from collections import deque
-from threading import Condition
-from socket import gethostbyname
-from socket import inet_aton
-
-import logging
 import math
+
 
 logger = logging.getLogger(__name__)
 
@@ -101,8 +91,9 @@ _SCAMP_NAME = "SC&MP"
 _SCAMP_VERSION = 1.33
 
 
-def create_transceiver_from_hostname(hostname, discover=True,
-            ignore_chips=None, ignore_cores=None, max_core_id=None):
+def create_transceiver_from_hostname(
+        hostname, discover=True, ignore_chips=None, ignore_cores=None,
+        max_core_id=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -139,7 +130,7 @@ def create_transceiver_from_hostname(hostname, discover=True,
     :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                 a response indicates an error during the exchange
     """
-    connection = UDPConnection(remote_host=hostname)
+    connection = UDPSCPConnection(remote_host=hostname)
     boot_connection = UDPBootConnection(remote_host=hostname)
     return Transceiver(connections=[connection, boot_connection],
                        discover=discover, ignore_chips=ignore_chips,
@@ -162,7 +153,7 @@ class Transceiver(object):
     """
 
     def __init__(self, connections=None, discover=True, ignore_chips=None,
-            ignore_cores=None, max_core_id=None):
+                 ignore_cores=None, max_core_id=None):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -218,15 +209,15 @@ class Transceiver(object):
         # Update the list of UDP connections
         self._udp_connections = dict()
         for connection in self._connections:
-            if isinstance(connection, UDPConnection):
-                self._udp_connections[(connection._remote_ip_address,
-                                       connection._remote_port)] = connection
+            if isinstance(connection, UDPSCPConnection):
+                self._udp_connections[(connection.remote_ip_address,
+                                       connection.remote_port)] = connection
 
-        # Update the queues for the given connections
+        # Update the listeners for the given connections
         self._connection_queues = dict()
         self._update_connection_queues()
 
-        # Discover any new connections, and update the queues if requested
+        # Discover any new connections, and update the listeners if requested
         if discover:
             self.discover_connections()
             if len(self._connections) == 0:
@@ -255,7 +246,6 @@ class Transceiver(object):
         """
 
         # Check if there is a lock for the given chip
-        chip_lock = None
         self._chip_execute_lock_condition.acquire()
         if not (x, y) in self._chip_execute_locks:
             chip_lock = Condition()
@@ -309,7 +299,7 @@ class Transceiver(object):
         self._chip_execute_lock_condition.release()
 
     def _update_connection_queues(self):
-        """ Creates and deletes queues of connections depending upon what\
+        """ Creates and deletes listeners of connections depending upon what\
             connections are now available
 
         :return: Nothing is returned
@@ -496,16 +486,16 @@ class Transceiver(object):
         processors = list()
         for virtual_core_id in chip_details.virtual_core_ids:
             if (self._ignore_cores is not None
-                    and self._ignore_cores.is_core(chip_details.x,
-                            chip_details.y, virtual_core_id)):
+                    and self._ignore_cores.is_core(
+                        chip_details.x, chip_details.y, virtual_core_id)):
                 logger.debug("Ignoring core {} on chip {}, {}".format(
-                        chip_details.x, chip_details.y, virtual_core_id))
+                             chip_details.x, chip_details.y, virtual_core_id))
                 continue
             if (self._max_core_id is not None
                     and virtual_core_id > self._max_core_id):
                 logger.debug("Ignoring core {} on chip {}, {} as > {}".format(
-                        chip_details.x, chip_details.y, virtual_core_id,
-                        self._max_core_id))
+                             chip_details.x, chip_details.y, virtual_core_id,
+                             self._max_core_id))
                 continue
 
             processors.append(Processor(
@@ -534,8 +524,8 @@ class Transceiver(object):
         # Ask the chip at 0, 0 for details
         logger.debug("Getting details of chip 0, 0")
         response = self._send_scp_message(SCPReadMemoryRequest(
-            x=0, y=0, base_address=_SYSTEM_VARIABLE_BASE_ADDRESS,
-            size=_SYSTEM_VARIABLE_BYTES))
+            x=0, y=0, base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
+            size=constants.SYSTEM_VARIABLE_BYTES))
         chip_0_0_details = ChipInfo(response.data)
         self._chip_info[(0, 0)] = chip_0_0_details
         chip_0_0 = self._make_chip(chip_0_0_details)
@@ -556,16 +546,16 @@ class Transceiver(object):
                             link, chip.x, chip.y))
                     response = self._send_scp_message(SCPReadLinkRequest(
                         x=chip.x, y=chip.y, cpu=0, link=link,
-                        base_address=_SYSTEM_VARIABLE_BASE_ADDRESS,
-                        size=_SYSTEM_VARIABLE_BYTES))
+                        base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
+                        size=constants.SYSTEM_VARIABLE_BYTES))
                     new_chip_details = ChipInfo(response.data)
                     logger.debug("Found chip {}, {}".format(
-                            new_chip_details.x, new_chip_details.y))
+                                 new_chip_details.x, new_chip_details.y))
                     if (self._ignore_chips is not None
                             and self._ignore_chips.is_chip(
                                 new_chip_details.x, new_chip_details.y)):
                         logger.debug("Ignoring chip {}, {}".format(
-                                new_chip_details.x, new_chip_details.y))
+                                     new_chip_details.x, new_chip_details.y))
                         continue
 
                     # Standard links use the opposite link id (with ids between
@@ -575,7 +565,7 @@ class Transceiver(object):
                     # Update the defaults of any existing link
                     if chip.router.is_link(opposite_link_id):
                         logger.debug("Opposite link {} found".format(
-                                opposite_link_id))
+                                     opposite_link_id))
                         opposite_link = chip.router.get_link(opposite_link_id)
                         opposite_link.multicast_default_to = link
                         opposite_link.multicast_default_from = link
@@ -644,7 +634,7 @@ class Transceiver(object):
         for ethernet_connected_chip in self._machine.ethernet_connected_chips:
             if (ethernet_connected_chip.ip_address,
                     constants.UDP_CONNECTION_DEFAULT_PORT) not in self._udp_connections:
-                new_connection = UDPConnection(
+                new_connection = UDPSDPConnection(
                     remote_host=ethernet_connected_chip.ip_address,
                     chip_x=ethernet_connected_chip.x,
                     chip_y=ethernet_connected_chip.y)
@@ -654,7 +644,7 @@ class Transceiver(object):
                     (ethernet_connected_chip.ip_address,
                      constants.UDP_CONNECTION_DEFAULT_PORT)] = new_connection
 
-        # Update the connection queues after finding new connections
+        # Update the connection listeners after finding new connections
         self._update_connection_queues()
 
         return new_connections
@@ -691,7 +681,7 @@ class Transceiver(object):
         return MachineDimensions(self._machine.max_chip_x,
                                  self._machine.max_chip_y)
 
-    def get_machine_details(self, skip_chips=None, skip_cores=None):
+    def get_machine_details(self):
         """ Get the details of the machine made up of chips on a board and how\
             they are connected to each other.
 
@@ -722,7 +712,11 @@ class Transceiver(object):
         :rtype: bool
         :raise None: No known exceptions are raised
         """
-        for connection in self._connections:
+        if connection is None:
+            for connection in self._connections:
+                if connection.is_connected():
+                    return True
+        else:
             if connection.is_connected():
                 return True
         return False
@@ -861,9 +855,9 @@ class Transceiver(object):
                         "p", p, "Not a valid core on chip {}, {}".format(
                             x, y))
                 base_address = (chip_info.cpu_information_base_address
-                                + (CPU_INFO_BYTES * p))
+                                + (constants.CPU_INFO_BYTES * p))
                 callbacks.append(_SCPMessageThread(self, SCPReadMemoryRequest(
-                    x, y, base_address, CPU_INFO_BYTES)))
+                    x, y, base_address, constants.CPU_INFO_BYTES)))
                 callback_coordinates.append((x, y, p))
 
         # Start all the callbacks (not done before to ensure that no errors
@@ -911,8 +905,8 @@ class Transceiver(object):
                 "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
         #locate the base address for this chip info
         base_address = (chip_info.cpu_information_base_address +
-                        (CPU_INFO_BYTES * p))
-        base_address += CPU_USER_0_START_ADDRESS
+                        (constants.CPU_INFO_BYTES * p))
+        base_address += constants.CPU_USER_0_START_ADDRESS
         return base_address
 
     def get_cpu_information_from_core(self, x, y, p):
@@ -2094,3 +2088,6 @@ class Transceiver(object):
             if (close_original_connections
                     or connection not in self._original_connections):
                 connection.close()
+
+    def register_listener(self, callback, hostname, recieve_port_no):
+

@@ -1,7 +1,9 @@
 import unittest
 import spinnman.transceiver as transceiver
-from spinnman.connections.udp_connection import UDPConnection
+from spinnman.connections.udp_packet_connections.udp_scp_connection import UDPSCPConnection
 import time
+
+
 class TestTransceiver(unittest.TestCase):
 
     def test_create_new_default_transceiver(self):
@@ -19,7 +21,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_one_connection_discovery(self):
         self.set_up_remote_board()
         connections = list()
-        connections.append(UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
+        connections.append(UDPSCPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
         trans = transceiver.Transceiver(connections)
 
         self.assertEqual(trans.get_connections(), connections)
@@ -28,9 +30,9 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_from_list_connections_discovery(self):
         self.set_up_remote_board()
         connections = list()
-        connections.append(UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
+        connections.append(UDPSCPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
         self.set_up_local_virtual_board()
-        connections.append(UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
+        connections.append(UDPSCPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
         trans = transceiver.Transceiver(connections)
 
         self.assertEqual(trans.get_connections(), connections)
@@ -39,7 +41,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_one_connection_no_discovery(self):
         self.set_up_remote_board()
         connections = list()
-        connections.append(UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
+        connections.append(UDPSCPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
         trans = transceiver.Transceiver(connections,False)
         self.assertEqual(trans.get_connections(), connections)
         trans.close()
@@ -47,9 +49,9 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_from_list_connections_no_discovery(self):
         self.set_up_remote_board()
         connections = list()
-        connections.append(UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
+        connections.append(UDPSCPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
         self.set_up_local_virtual_board()
-        connections.append(UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
+        connections.append(UDPSCPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
         trans = transceiver.Transceiver(connections, False)
 
         self.assertEqual(trans.get_connections(), connections)
@@ -58,7 +60,7 @@ class TestTransceiver(unittest.TestCase):
     def test_retrieving_machine_details(self):
         self.set_up_remote_board()
         connections = list()
-        connections.append(UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
+        connections.append(UDPSCPConnection(self.localhost,self.localport,self.remotehost,self.remoteport))
         trans = transceiver.Transceiver(connections,False)
 
         self.assertEqual(trans.get_machine_dimensions().x_max,1)

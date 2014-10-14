@@ -1,7 +1,9 @@
 import unittest
-from spinnman.connections._message_callback import _MessageCallback as MC
 import thread
+
+from spinnman.connections.listeners._message_callback import _MessageCallback as MC
 import time
+
 
 def message_sent_after_n_seconds(self):
     time.sleep(1)

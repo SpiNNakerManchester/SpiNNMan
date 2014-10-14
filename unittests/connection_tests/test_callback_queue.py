@@ -1,7 +1,9 @@
 __author__ = 'Petrut'
 
 import unittest
-import spinnman.connections._callback_queue as c_q
+
+import spinnman.connections.listeners._callback_queue as c_q
+
 test_queue = list()
 
 def append_to_list(item):
