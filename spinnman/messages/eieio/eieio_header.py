@@ -69,6 +69,3 @@ class EIEIOHeader(object):
         #tag param
         data |= self._tag_param
         byte_writer.write_byte(data)
-
-    def read_eieio_header(self, reader):
-        raise NotImplementedError

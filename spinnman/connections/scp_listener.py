@@ -1,7 +1,8 @@
 import inspect
-from threading import Thread
 
-from spinnman.connections.listeners._callback_queue import _CallbackQueue
+from threading import Thread
+from _callback_queue import _CallbackQueue
+
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 

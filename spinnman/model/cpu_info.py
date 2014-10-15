@@ -17,7 +17,8 @@ def _get_short_from_bytearray(array, offset):
     """
     return _get_short_from_little_endian_bytearray(array, offset)
 
-
+CPU_INFO_BYTES = 128
+CPU_USER_0_START_ADDRESS = 112
 
 class CPUInfo(object):
     """ Represents information about the state of a CPU

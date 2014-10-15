@@ -2,20 +2,20 @@ from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
 
-from spinnman.connections.abstract_classes.abstract_connection import AbstractConnection
+from spinnman.connections.abstract_connection import AbstractConnection
 
 
 @add_metaclass(ABCMeta)
-class AbstractEIEIOSender(AbstractConnection):
-    """ A receiver of SCP messages
+class AbstractSDPSender(AbstractConnection):
+    """ A sender of SDP messages
     """
-
+    
     @abstractmethod
-    def send_eieio_message(self, eieio_message):
+    def send_sdp_message(self, sdp_message):
         """ Sends an SDP message down this connection
-
-        :param eieio_message: The eieio message to be sent
-        :type eieio_message: spinnman.messages.eieio.eieio_message.EIEIOMessage
+        
+        :param sdp_message: The SDP message to be sent
+        :type sdp_message: spinnman.messages.sdp.sdp_message.SDPMessage
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\

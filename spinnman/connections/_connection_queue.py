@@ -4,7 +4,7 @@ from collections import deque
 import sys
 import logging
 
-from spinnman.connections.listeners._message_callback import _MessageCallback
+from spinnman.connections._message_callback import _MessageCallback
 from spinnman.messages.sdp.sdp_message import SDPMessage
 from spinnman.connections.abstract_sdp_sender import AbstractSDPSender
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
@@ -16,7 +16,7 @@ from spinnman.connections.abstract_scp_receiver import AbstractSCPReceiver
 from spinnman.messages.multicast_message import MulticastMessage
 from spinnman.connections.abstract_multicast_sender \
     import AbstractMulticastSender
-from spinnman.connections.abstract_classes.abstract_multicast_receiver \
+from spinnman.connections.abstract_multicast_receiver \
     import AbstractMulticastReceiver
 from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
     import SpinnakerBootMessage
@@ -228,7 +228,7 @@ class _ConnectionQueue(Thread):
         # Create a callback for the message
         callback = _MessageCallback()
 
-        # Add the details to the listeners
+        # Add the details to the queues
         self._queue_condition.acquire()
         self._message_queue.appendleft(message)
         self._callback_queue.appendleft(callback)
