@@ -12,6 +12,9 @@ from spinnman.data.little_endian_byte_array_byte_writer import \
     LittleEndianByteArrayByteWriter
 from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException, \
     SpinnmanInvalidPacketException
+from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
+    AbstractSCPRequest
+from spinnman.messages.udp_utils.udp_utils import update_sdp_header
 import select
 
 
@@ -19,7 +22,7 @@ class UDPSCPConnection(AbstractUDPConnection, AbstractSCPReceiver,
                        AbstractSCPSender):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=constants.UDP_CONNECTION_DEFAULT_PORT):
+                 remote_port=None):
         AbstractUDPConnection.__init__(self, local_host, local_port,
                                        remote_host, remote_port)
 
@@ -42,7 +45,7 @@ class UDPSCPConnection(AbstractUDPConnection, AbstractSCPReceiver,
             raise SpinnmanIOException("Not connected to a remote host")
 
         # Update the SDP headers for this connection
-        self._update_sdp_header(scp_request.sdp_header)
+        update_sdp_header(scp_request.sdp_header, constants.DEFAULT_SDP_TAG)
 
         # Update the sequence for this connection
         if scp_request.scp_request_header.sequence is None:
@@ -96,3 +99,9 @@ class UDPSCPConnection(AbstractUDPConnection, AbstractSCPReceiver,
 
     def connection_label(self):
         return "scp"
+
+    def supports_message(self, message):
+        if isinstance(message, AbstractSCPRequest):
+            return True
+        else:
+            return False

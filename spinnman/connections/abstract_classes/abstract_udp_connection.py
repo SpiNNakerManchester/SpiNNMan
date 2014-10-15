@@ -14,7 +14,7 @@ import socket
 class AbstractUDPConnection(object):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=constants.UDP_CONNECTION_DEFAULT_PORT):
+                 remote_port=constants.SCP_SCAMP_PORT):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
@@ -184,27 +184,26 @@ class AbstractUDPConnection(object):
         """
         self._socket.close()
 
-    def set_up_recieve(self):
-        """ informs the trnasicever if this connection is able to receive
+    @property
+    def can_send(self):
+        """a helper property method to check if this connection can send
 
         :return:
         """
-        if self._remote_port is not None:
-            return True
-        return False
-
-    def setp_up_sender(self):
-        """ info
-
-        :return:
-        """
-        if self._local_port is not None:
-            return True
-        return False
+        return self._can_send
 
     @abstractmethod
     def connection_label(self):
         """
         method to help identify the connection
+        :return:
+        """
+
+    @abstractmethod
+    def supports_message(self, message):
+        """helper method to verify if the connection can deal with this message
+        format
+
+        :param message:
         :return:
         """

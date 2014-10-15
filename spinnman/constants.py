@@ -1,5 +1,5 @@
 # The default port of the connection
-UDP_CONNECTION_DEFAULT_PORT = 17893
+SCP_SCAMP_PORT = 17893
 
 # The default port of the connection
 UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
@@ -15,3 +15,6 @@ CPU_INFO_BYTES = 128
 
 # the address at which user0 register starts
 CPU_USER_0_START_ADDRESS = 112
+
+#default udp tag
+DEFAULT_SDP_TAG = 0xFF

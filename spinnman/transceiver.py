@@ -10,12 +10,6 @@ from spinnman.connections.udp_packet_connections.udp_scp_connection import UDPSC
 from spinnman.connections.udp_packet_connections.udp_boot_connection import UDPBootConnection
 from spinnman import constants
 from spinnman.connections.listeners._connection_queue import _ConnectionQueue
-from spinnman.connections.abstract_classes.abstract_multicast_sender import \
-    AbstractMulticastSender
-from spinnman.connections.abstract_classes.abstract_multicast_receiver import \
-    AbstractMulticastReceiver
-from spinnman.connections.udp_packet_connections.udp_sdp_connection import \
-    UDPSDPConnection
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -91,6 +85,7 @@ logger = logging.getLogger(__name__)
 
 _SCAMP_NAME = "SC&MP"
 _SCAMP_VERSION = 1.33
+_SCP_SCAMP_CONN_KEY = "SCP_COMMAND_CONNECTION"
 
 
 def create_transceiver_from_hostname(
@@ -132,11 +127,13 @@ def create_transceiver_from_hostname(
     :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                 a response indicates an error during the exchange
     """
-    connection = UDPSCPConnection(remote_host=hostname)
+    connection = UDPSCPConnection(remote_host=hostname,
+                                  remote_port=constants.SCP_SCAMP_PORT)
     boot_connection = UDPBootConnection(remote_host=hostname)
-    return Transceiver(connections=[connection, boot_connection],
-                       discover=discover, ignore_chips=ignore_chips,
-                       ignore_cores=ignore_cores, max_core_id=max_core_id)
+    return Transceiver(
+        connections=[connection, boot_connection], discover=discover,
+        shut_down_connections=True, ignore_chips=ignore_chips,
+        ignore_cores=ignore_cores, max_core_id=max_core_id)
 
 
 class Transceiver(object):
@@ -154,8 +151,9 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, discover=True, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None):
+    def __init__(
+            self, connections=None, discover=True, ignore_chips=None,
+            ignore_cores=None, max_core_id=None, shut_down_connections=False):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -200,22 +198,16 @@ class Transceiver(object):
         # Place to keep the known chip information
         self._chip_info = dict()
 
-        # Create the connection lists
-
-        if connections is not None:
-            self._connections = list(connections)
-        else:
-            self._connections = list()
-            self._original_connections = set(self._connections)
-
         self._boot_connection = None
-        self._original_connections = set(connections)
+
+        self.connections_to_not_shut_down = set()
+        if not shut_down_connections:
+            self.connections_to_not_shut_down = set(connections)
 
         # Update the list of UDP connections
         self._udp_connections = dict()
         self._receiving_udp_connections = dict()
         self._sending_udp_connections = dict()
-
         self._sort_out_connections(connections)
 
         # Update the listeners for the given connections
@@ -224,8 +216,10 @@ class Transceiver(object):
 
         # Discover any new connections, and update the listeners if requested
         if discover:
-            self.discover_connections()
-            if len(self._connections) == 0:
+            self.discover_scamp_connections()
+            number_of_connections = \
+                sum(len(v) for v in self._udp_connections.itervalues())
+            if len(number_of_connections) == 0:
                 raise SpinnmanIOException(
                     "No connections to the board were found")
 
@@ -254,48 +248,69 @@ class Transceiver(object):
                     "this connection format is currently not supported in this"
                     "version of SpinnMan", "", "")
             else:
-                #locate the only boot connection
-                if isinstance(connection, UDPBootConnection):
-                    if self._boot_connection is not None:
-                        raise SpinnmanInvalidParameterException(
-                            "this version of Spinnman only supports one boot"
-                            "connection", "", "")
-                    else:
-                        self._boot_connection = connection
-                # sort out connections by type
-                elif connection.connection_label() in self._udp_connections:
-                    # if already existing in dict, just add
-                    con_type_label = connection.connection_label()
+                self._sort_out_udp_connections(connection)
+
+    def _sort_out_udp_connections(self, connection):
+        #locate the only boot connection
+        if isinstance(connection, UDPBootConnection):
+            if self._boot_connection is not None:
+                raise SpinnmanInvalidParameterException(
+                    "this version of Spinnman only supports one boot"
+                    "connection", "", "")
+            else:
+                self._boot_connection = connection
+        else:
+            self._add_connection_to_storage(connection,
+                                            self._udp_connections)
+        #check if connection is a receive or sender or both connection
+        #check if the connection can recieve and is not using a already
+        # used portno
+        if connection.local_port in self._receiving_udp_connections:
+            raise SpinnmanInvalidParameterException(
+                "two connections are listening to packets from the "
+                "same port. This is deemed an error", "", "")
+        else:
+            self._receiving_udp_connections[connection.local_port] \
+                = connection
+        #check if the connection can send and is not using a already
+        # used portno
+        if connection.can_send:
+            if connection.remote_port in self._sending_udp_connections:
+                raise SpinnmanInvalidParameterException(
+                    "two connections are listening to packets from the "
+                    "same port. This is deemed an error", "", "")
+            else:
+                self._sending_udp_connections[connection.remote_port] \
+                    = connection
+            if (isinstance(connection, UDPSCPConnection) and
+                    connection.remote_port == constants.SCP_SCAMP_PORT):
+                if _SCP_SCAMP_CONN_KEY in self._udp_connections.keys():
+                    raise SpinnmanInvalidParameterException(
+                        "Spinnman cannot currently support more than one "
+                        "scp scamp connection. Please remove multiple "
+                        "scp scamp connections and try again.", "", "")
+                else:
+                    self._udp_connections[_SCP_SCAMP_CONN_KEY] = dict()
                     con_tuple = (connection.remote_ip_address,
                                  connection.remote_port)
-                    self._udp_connections[con_type_label][con_tuple] = connection
-                else:  # doesnt exist in dict, create dict and add
-                    con_type_label = connection.connection_label()
-                    self._udp_connections[con_type_label] = dict()
-                    con_tuple = (connection.remote_ip_address,
-                                 connection.remote_port)
-                    self._udp_connections[con_type_label][con_tuple] = connection
-                #check if connection is a receive or sender or both connection
-                #check if the connection can recieve and is not using a already
-                # used portno
-                if connection.set_up_recieve():
-                    if connection.remote_port in self._receiving_udp_connections:
-                        raise SpinnmanInvalidParameterException(
-                            "two connections are listening to packets from the "
-                            "same port. This is deemed an error", "", "")
-                    else:
-                        self._receiving_udp_connections[connection.remote_port] \
-                            = connection
-                #check if the connection can send and is not using a already
-                # used portno
-                if connection.setp_up_sender():
-                    if connection.local_port in self._sending_udp_connections:
-                        raise SpinnmanInvalidParameterException(
-                            "two connections are listening to packets from the "
-                            "same port. This is deemed an error", "", "")
-                    else:
-                        self._sending_udp_connections[connection.remote_port] \
-                            = connection
+                    self._udp_connections[_SCP_SCAMP_CONN_KEY][con_tuple] = \
+                        connection
+
+    @staticmethod
+    def _add_connection_to_storage(connection, connection_list):
+        # sort out connections by type
+        if connection.connection_label() in connection_list:
+            # if already existing in dict, just add
+            con_type_label = connection.connection_label()
+            con_tuple = (connection.remote_ip_address,
+                         connection.remote_port)
+            connection_list[con_type_label][con_tuple] = connection
+        else:  # doesnt exist in dict, create dict and add
+            con_type_label = connection.connection_label()
+            connection_list[con_type_label] = dict()
+            con_tuple = (connection.remote_ip_address,
+                         connection.remote_port)
+            connection_list[con_type_label][con_tuple] = connection
 
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
@@ -362,16 +377,15 @@ class Transceiver(object):
         :rtype: None
         :raise None: No known exceptions are raised
         """
-        for connection in self._connections:
+        for connection_type in self._udp_connections.keys():
+            for connection in self._udp_connections[connection_type].itervalues():
+                # Only add a new queue if there isn't one currently
+                if connection not in self._connection_queues:
+                    self._connection_queues[connection] = \
+                        _ConnectionQueue(connection)
+                    self._connection_queues[connection].start()
 
-            # Only add a new queue if there isn't one currently
-            if connection not in self._connection_queues:
-                self._connection_queues[connection] = \
-                    _ConnectionQueue(connection)
-                self._connection_queues[connection].start()
-
-    def _find_best_connection_queue(self, message, response_required,
-                                    connection=None):
+    def _find_best_connection_queue(self, message, connection=None):
         """ Finds the best connection queue to use to send a message
 
         :param message: The message to send
@@ -380,9 +394,6 @@ class Transceiver(object):
                     * :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
                     * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
                     * :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
-        :param response_required: True if a response is required, False\
-                    otherwise
-        :type response_required: bool
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
@@ -399,15 +410,16 @@ class Transceiver(object):
 
             # If the connection doesn't support the message,
             # reject the connection, and allow the error to be raised later
-            if not best_connection_queue.message_type_supported(message):
+            if not connection.supports_message(message):
                 best_connection_queue = None
         else:
 
             # Find the least congested way that supports the message type
             best_connection_queue_size = None
-            for connection_queue in self._connection_queues.values():
-                if connection_queue.message_type_supported(
-                        message, response_required):
+            for connection_key in self._sending_udp_connections.keys():
+                connection = self._sending_udp_connections[connection_key]
+                if connection.supports_message(message):
+                    connection_queue = self._connection_queues[connection]
                     connection_queue_size = connection_queue.queue_length
                     if (best_connection_queue is None
                         or connection_queue_size <
@@ -419,11 +431,10 @@ class Transceiver(object):
         if best_connection_queue is None:
             raise SpinnmanUnsupportedOperationException(
                 "Sending and receiving {}".format(message.__class__))
-
         return best_connection_queue
 
-    def send_message(self, message, response_required, connection=None,
-                     timeout=1, get_callback=False):
+    def _send_message(self, message, response_required, connection=None,
+                      timeout=1, get_callback=False):
         """ Sends a message using one of the connections, and gets a response\
             if requested
 
@@ -472,8 +483,8 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     sending the message or receiving the response
         """
-        best_connection_queue = self._find_best_connection_queue(
-            message, response_required, connection)
+        best_connection_queue = self._find_best_connection_queue(message,
+                                                                 connection)
         logger.debug("Sending message with {}".format(best_connection_queue))
 
         # Send the message with the best queue
@@ -659,7 +670,7 @@ class Transceiver(object):
                     logger.debug("Error searching down link {}".format(link))
                     logger.debug(error)
 
-    def discover_connections(self):
+    def discover_scamp_connections(self):
         """ Find connections to the board and store these for future use.\
             Note that connections can be empty, in which case another local\
             discovery mechanism will be used.  Note that an exception will be\
@@ -689,20 +700,17 @@ class Transceiver(object):
         new_connections = list()
         for ethernet_connected_chip in self._machine.ethernet_connected_chips:
             if (ethernet_connected_chip.ip_address,
-                    constants.UDP_CONNECTION_DEFAULT_PORT) not in self._udp_connections:
-                new_connection = UDPSDPConnection(
+                    constants.SCP_SCAMP_PORT) not in self._udp_connections:
+                new_connection = UDPSCPConnection(
                     remote_host=ethernet_connected_chip.ip_address,
-                    chip_x=ethernet_connected_chip.x,
-                    chip_y=ethernet_connected_chip.y)
+                    remote_port=constants.SCP_SCAMP_PORT)
                 new_connections.append(new_connection)
-                self._connections.append(new_connection)
-                self._udp_connections[
-                    (ethernet_connected_chip.ip_address,
-                     constants.UDP_CONNECTION_DEFAULT_PORT)] = new_connection
+                self._add_connection_to_storage(new_connection,
+                                                self._udp_connections)
 
         # Update the connection listeners after finding new connections
         self._update_connection_queues()
-
+        logger.debug(self._machine.cores_and_link_output_string())
         return new_connections
 
     def get_connections(self):
@@ -715,7 +723,11 @@ class Transceiver(object):
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        return self._connections
+        connections = list()
+        for connection_key in self._udp_connections.keys():
+            for connection in self._udp_connections[connection_key]:
+                connections.append(connection)
+        return connections.__iter__()
 
     def get_machine_dimensions(self):
         """ Get the maximum chip x-coordinate and maximum chip y-coordinate of\
@@ -769,9 +781,10 @@ class Transceiver(object):
         :raise None: No known exceptions are raised
         """
         if connection is None:
-            for connection in self._connections:
-                if connection.is_connected():
-                    return True
+            for connection_key in self._udp_connections.keys():
+                for connection in self._udp_connections[connection_key]:
+                    if connection.is_connected():
+                        return True
         else:
             if connection.is_connected():
                 return True
@@ -817,7 +830,7 @@ class Transceiver(object):
             board_version))
         boot_messages = SpinnakerBootMessages(board_version)
         for boot_message in boot_messages.messages:
-            self.send_message(boot_message, response_required=False)
+            self._send_message(boot_message, response_required=False)
 
     def ensure_board_is_ready(self, board_version, n_retries=3):
         """ Ensure that the board is ready to interact with this version\
@@ -2058,23 +2071,8 @@ class Transceiver(object):
                     * If there is no connection that can make the packet\
                       arrive at the selected chip (ignoring routing tables)
         """
-        conn = None
-        connections = self._connections
-        if connection is not None:
-            connections = connection
-        for my_conn in connections:
-            if isinstance(connection, AbstractMulticastSender):
-                for (conn_x, conn_y) in my_conn.get_input_chips():
-                    if x == conn_x and y == conn_y:
-                        conn = my_conn
-                        break
-
-        if conn is not None:
-            return self.send_message(multicast_message, False,
-                                     connection)
-
         raise SpinnmanUnsupportedOperationException(
-            "Send multicast message to {}, {}".format(x, y))
+            "This operation is currently not supported in spinnman.")
 
     def receive_multicast(self, x, y, timeout=None, connection=None):
         """ Receives a multicast message from the board
@@ -2109,22 +2107,8 @@ class Transceiver(object):
                     * If the timeout value is not valid
                     * If the received packet has an invalid parameter
         """
-        conn = None
-        connections = self._connections
-        if connection is not None:
-            connections = connection
-        for my_conn in connections:
-            if isinstance(connection, AbstractMulticastReceiver):
-                for (conn_x, conn_y) in my_conn.get_input_chips():
-                    if x == conn_x and y == conn_y:
-                        conn = my_conn
-                        break
-
-        if conn is not None:
-            return conn.receive_multicast_message(timeout)
-
         raise SpinnmanUnsupportedOperationException(
-            "Receive multicast message from {}, {}".format(x, y))
+            "This operation is currently not supported in spinnman.")
 
     def close(self, close_original_connections=True):
         """ Close the transceiver and any threads that are running
@@ -2140,10 +2124,11 @@ class Transceiver(object):
         for connection_queue in self._connection_queues.itervalues():
             connection_queue.stop()
 
-        for connection in self._connections:
-            if (close_original_connections
-                    or connection not in self._original_connections):
-                connection.close()
+        for connection_key in self._udp_connections.keys():
+            for connection in self._udp_connections[connection_key]:
+                if (close_original_connections
+                        or connection not in self.connections_to_not_shut_down):
+                    connection.close()
 
     def register_listener(self, callback, hostname, recieve_port_no):
         pass

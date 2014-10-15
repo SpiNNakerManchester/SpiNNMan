@@ -4,7 +4,7 @@ from spinnman.model.mailbox_command import MailboxCommand
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman._utils import _get_int_from_little_endian_bytearray
 from spinnman._utils import _get_short_from_little_endian_bytearray
-
+from spinnman import constants
 
 def _get_int_from_bytearray(array, offset):
     """ Wrapper function in case the endianness changes
@@ -36,7 +36,7 @@ class CPUInfo(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     array does not contain a cpu data structure
         """
-        if len(cpu_data) != CPU_INFO_BYTES:
+        if len(cpu_data) != constants.CPU_INFO_BYTES:
             raise SpinnmanInvalidParameterException(
                     "len(cpu_data)", str(len(cpu_data)),
                     "Must be 128 bytes of data")
@@ -68,7 +68,7 @@ class CPUInfo(object):
         self._application_name = cpu_data[72:88].decode("ascii")
         self._iobuf_address = _get_int_from_bytearray(cpu_data, 88)
         self._user = [_get_int_from_bytearray(cpu_data, i)
-                      for i in range(CPU_USER_0_START_ADDRESS, 128, 4)]
+                      for i in range(constants.CPU_USER_0_START_ADDRESS, 128, 4)]
 
     @property
     def x(self):
@@ -263,5 +263,5 @@ class CPUInfo(object):
 
     def __str__(self):
         return "{}:{}:{:02n} {:18} {:16s} {:3n}".format(
-                self.x, self.y, self.p, self._state.name,
-                self._application_name, self._application_id)
+            self.x, self.y, self.p, self._state.name, self._application_name,
+            self._application_id)

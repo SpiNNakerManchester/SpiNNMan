@@ -44,7 +44,13 @@ class UDPRawConnection(AbstractUDPConnection):
             raise SpinnmanIOException(str(e))
 
     def recieve_raw(self, timeout):
-        pass
+        raise NotImplementedError
 
     def connection_label(self):
         return "raw"
+
+    def supports_message(self, message):
+        if isinstance(message, bytearray):
+            return True
+        else:
+            return False

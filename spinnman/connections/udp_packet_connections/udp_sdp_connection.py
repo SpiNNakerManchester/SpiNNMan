@@ -10,9 +10,11 @@ from spinnman.data.little_endian_byte_array_byte_reader import \
 from spinnman.data.little_endian_byte_array_byte_writer import \
     LittleEndianByteArrayByteWriter
 from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException, \
-    SpinnmanInvalidPacketException, SpinnmanInvalidParameterException
+    SpinnmanInvalidPacketException
 from spinnman.messages.sdp.sdp_message import SDPMessage
 from spinnman.messages.sdp.sdp_header import SDPHeader
+from spinnman.messages.udp_utils.udp_utils import update_sdp_header
+
 
 import socket
 import select
@@ -21,23 +23,13 @@ import select
 class UDPSDPConnection(AbstractUDPConnection, AbstractSDPReceiver,
                        AbstractSDPSender):
 
-    _SDP_SOURCE_PORT = 7
-    _SDP_SOURCE_CPU = 31
-    _SDP_SOURCE_CHIP_X = 0
-    _SDP_SOURCE_CHIP_Y = 0
-
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=constants.UDP_CONNECTION_DEFAULT_PORT,
-                 default_sdp_tag=0xFF, chip_x=0, chip_y=0):
+                 remote_port=None, default_sdp_tag=constants.DEFAULT_SDP_TAG):
         AbstractUDPConnection.__init__(self, local_host, local_port,
                                        remote_host, remote_port)
 
         # Store the default sdp tag
         self._default_sdp_tag = default_sdp_tag
-
-        # Store the chip coordinates
-        self._chip_x = chip_x
-        self._chip_y = chip_y
 
     def send_sdp_message(self, sdp_message):
         """ See :py:meth:`spinnman.connections.abstract_sdp_sender.AbstractSDPSender.send_sdp_message`
@@ -49,7 +41,7 @@ class UDPSDPConnection(AbstractUDPConnection, AbstractSDPReceiver,
             raise SpinnmanIOException("Not connected to a remote host")
 
         # Update the SDP headers for this connection
-        self._update_sdp_header(sdp_message.sdp_header)
+        update_sdp_header(sdp_message.sdp_header, self._default_sdp_tag)
 
         # Create a writer for the mesage
         data_length = 0
@@ -111,56 +103,11 @@ class UDPSDPConnection(AbstractUDPConnection, AbstractSDPReceiver,
         message = SDPMessage(sdp_header=sdp_header, data=data)
         return message
 
-    def _update_sdp_header(self, sdp_header):
-        """ Apply defaults to the sdp header where the values have not been set
-
-        :param sdp_header: The SDP header values
-        :type sdp_header:\
-                    :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
-                    packet already has a source_port != 7, a source_cpu != 31,\
-                    a source_chip_x != 0, or a source_chip_y != 0
-        """
-        if sdp_header.tag is None:
-            sdp_header.tag = self._default_sdp_tag
-
-        if sdp_header.source_port is not None:
-            if sdp_header.source_port != self._SDP_SOURCE_PORT:
-                raise SpinnmanInvalidParameterException(
-                    "message.source_port", str(sdp_header.source_port),
-                    "The source port must be {} to work with this"
-                    " connection".format(self._SDP_SOURCE_PORT))
-        else:
-            sdp_header.source_port = self._SDP_SOURCE_PORT
-
-        if sdp_header.source_cpu is not None:
-            if sdp_header.source_cpu != self._SDP_SOURCE_CPU:
-                raise SpinnmanInvalidParameterException(
-                    "message.source_cpu", str(sdp_header.source_cpu),
-                    "The source cpu must be {} to work with this"
-                    " connection".format(self._SDP_SOURCE_CPU))
-        else:
-            sdp_header.source_cpu = self._SDP_SOURCE_CPU
-
-        if sdp_header.source_chip_x is not None:
-            if sdp_header.source_chip_x != self._SDP_SOURCE_CHIP_X:
-                raise SpinnmanInvalidParameterException(
-                    "message.source_chip_x", str(sdp_header.source_chip_x),
-                    "The source chip x must be {} to work with this"
-                    " connection".format(self._SDP_SOURCE_CHIP_X))
-        else:
-            sdp_header.source_chip_x = self._SDP_SOURCE_CHIP_X
-
-        if sdp_header.source_chip_y is not None:
-            if sdp_header.source_chip_y != self._SDP_SOURCE_CHIP_Y:
-                raise SpinnmanInvalidParameterException(
-                    "message.source_chip_y", str(sdp_header.source_chip_y),
-                    "The source chip y must be {} to work with this"
-                    " connection".format(self._SDP_SOURCE_CHIP_Y))
-        else:
-            sdp_header.source_chip_y = self._SDP_SOURCE_CHIP_Y
-
     def connection_label(self):
         return "sdp"
+
+    def supports_message(self, message):
+        if isinstance(message, SDPMessage):
+            return True
+        else:
+            return False

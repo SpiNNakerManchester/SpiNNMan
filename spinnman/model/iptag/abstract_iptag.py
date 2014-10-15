@@ -8,7 +8,7 @@ class AbstractIPTAG(object):
         self._check_port_nums_from_defaults()
 
     def _check_port_nums_from_defaults(self):
-        if (self._port == constants.UDP_CONNECTION_DEFAULT_PORT or
+        if (self._port == constants.SCP_SCAMP_PORT or
                 self._port == constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
             raise exceptions.SpinnmanInvalidParameterException(
                 "The port number speicified is one that is already used by "

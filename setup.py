@@ -21,6 +21,7 @@ setup(
             'spinnman.messages.scp.abstract_messages',
             'spinnman.messages.scp.impl',
             'spinnman.messages.sdp',
+            'spinnman.messages.udp_utils',
             'spinnman.messages.spinnaker_boot',
             'spinnman.messages.spinnaker_boot._system_variables',
             'spinnman.model',

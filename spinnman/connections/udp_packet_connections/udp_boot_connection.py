@@ -141,3 +141,9 @@ class UDPBootConnection(AbstractUDPConnection,
 
     def connection_label(self):
         return "boot"
+
+    def supports_message(self, message):
+        if isinstance(message, SpinnakerBootMessage):
+            return True
+        else:
+            return False

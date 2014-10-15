@@ -8,6 +8,7 @@ from spinnman import constants
 from spinnman.data.little_endian_byte_array_byte_writer import \
     LittleEndianByteArrayByteWriter
 from spinnman.exceptions import SpinnmanIOException
+from spinnman.messages.eieio.eieio_message import EIEIOMessage
 
 
 class UDPEIEIOConnection(AbstractUDPConnection, AbstractEIEIOReceiver,
@@ -52,3 +53,9 @@ class UDPEIEIOConnection(AbstractUDPConnection, AbstractEIEIOReceiver,
 
     def connection_label(self):
         return "eieio"
+
+    def supports_message(self, message):
+        if isinstance(message, EIEIOMessage):
+            return True
+        else:
+            return False
