@@ -45,3 +45,6 @@ class UDPRawConnection(AbstractUDPConnection):
 
     def recieve_raw(self, timeout):
         pass
+
+    def connection_label(self):
+        return "raw"

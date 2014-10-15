@@ -93,3 +93,6 @@ class UDPSCPConnection(AbstractUDPConnection, AbstractSCPReceiver,
 
         # Read the response
         scp_response.read_scp_response(reader)
+
+    def connection_label(self):
+        return "scp"

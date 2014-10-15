@@ -6,23 +6,23 @@ import logging
 
 from spinnman.connections.listeners._message_callback import _MessageCallback
 from spinnman.messages.sdp.sdp_message import SDPMessage
-from spinnman.connections.abstract_sdp_sender import AbstractSDPSender
+from spinnman.connections.abstract_classes.abstract_sdp_sender import AbstractSDPSender
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanInvalidPacketException
-from spinnman.connections.abstract_sdp_receiver import AbstractSDPReceiver
+from spinnman.connections.abstract_classes.abstract_sdp_receiver import AbstractSDPReceiver
 from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
-from spinnman.connections.abstract_scp_sender import AbstractSCPSender
-from spinnman.connections.abstract_scp_receiver import AbstractSCPReceiver
+from spinnman.connections.abstract_classes.abstract_scp_sender import AbstractSCPSender
+from spinnman.connections.abstract_classes.abstract_scp_receiver import AbstractSCPReceiver
 from spinnman.messages.multicast_message import MulticastMessage
-from spinnman.connections.abstract_multicast_sender \
+from spinnman.connections.abstract_classes.abstract_multicast_sender \
     import AbstractMulticastSender
 from spinnman.connections.abstract_classes.abstract_multicast_receiver \
     import AbstractMulticastReceiver
 from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
     import SpinnakerBootMessage
-from spinnman.connections.abstract_spinnaker_boot_sender \
+from spinnman.connections.abstract_classes.abstract_spinnaker_boot_sender \
     import AbstractSpinnakerBootSender
-from spinnman.connections.abstract_spinnaker_boot_receiver \
+from spinnman.connections.abstract_classes.abstract_spinnaker_boot_receiver \
     import AbstractSpinnakerBootReceiver
 
 

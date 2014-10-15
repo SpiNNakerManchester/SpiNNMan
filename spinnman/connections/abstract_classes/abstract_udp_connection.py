@@ -183,3 +183,28 @@ class AbstractUDPConnection(object):
         """ See :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
         """
         self._socket.close()
+
+    def set_up_recieve(self):
+        """ informs the trnasicever if this connection is able to receive
+
+        :return:
+        """
+        if self._remote_port is not None:
+            return True
+        return False
+
+    def setp_up_sender(self):
+        """ info
+
+        :return:
+        """
+        if self._local_port is not None:
+            return True
+        return False
+
+    @abstractmethod
+    def connection_label(self):
+        """
+        method to help identify the connection
+        :return:
+        """

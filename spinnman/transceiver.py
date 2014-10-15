@@ -3,6 +3,8 @@ from threading import Condition
 from socket import gethostbyname
 from socket import inet_aton
 import logging
+from spinnman.connections.abstract_classes.abstract_udp_connection import \
+    AbstractUDPConnection
 
 from spinnman.connections.udp_packet_connections.udp_scp_connection import UDPSCPConnection
 from spinnman.connections.udp_packet_connections.udp_boot_connection import UDPBootConnection
@@ -198,20 +200,23 @@ class Transceiver(object):
         # Place to keep the known chip information
         self._chip_info = dict()
 
-        # Create a connection list
-        self._connections = None
+        # Create the connection lists
+
         if connections is not None:
             self._connections = list(connections)
         else:
             self._connections = list()
-        self._original_connections = set(self._connections)
+            self._original_connections = set(self._connections)
+
+        self._boot_connection = None
+        self._original_connections = set(connections)
 
         # Update the list of UDP connections
         self._udp_connections = dict()
-        for connection in self._connections:
-            if isinstance(connection, UDPSCPConnection):
-                self._udp_connections[(connection.remote_ip_address,
-                                       connection.remote_port)] = connection
+        self._receiving_udp_connections = dict()
+        self._sending_udp_connections = dict()
+
+        self._sort_out_connections(connections)
 
         # Update the listeners for the given connections
         self._connection_queues = dict()
@@ -240,6 +245,57 @@ class Transceiver(object):
         self._chip_execute_locks = dict()
         self._chip_execute_lock_condition = Condition()
         self._n_chip_execute_locks = 0
+
+    def _sort_out_connections(self, connections):
+        for connection in connections:
+            #validate that we're using udp connections
+            if not isinstance(connection, AbstractUDPConnection):
+                raise SpinnmanInvalidParameterException(
+                    "this connection format is currently not supported in this"
+                    "version of SpinnMan", "", "")
+            else:
+                #locate the only boot connection
+                if isinstance(connection, UDPBootConnection):
+                    if self._boot_connection is not None:
+                        raise SpinnmanInvalidParameterException(
+                            "this version of Spinnman only supports one boot"
+                            "connection", "", "")
+                    else:
+                        self._boot_connection = connection
+                # sort out connections by type
+                elif connection.connection_label() in self._udp_connections:
+                    # if already existing in dict, just add
+                    con_type_label = connection.connection_label()
+                    con_tuple = (connection.remote_ip_address,
+                                 connection.remote_port)
+                    self._udp_connections[con_type_label][con_tuple] = connection
+                else:  # doesnt exist in dict, create dict and add
+                    con_type_label = connection.connection_label()
+                    self._udp_connections[con_type_label] = dict()
+                    con_tuple = (connection.remote_ip_address,
+                                 connection.remote_port)
+                    self._udp_connections[con_type_label][con_tuple] = connection
+                #check if connection is a receive or sender or both connection
+                #check if the connection can recieve and is not using a already
+                # used portno
+                if connection.set_up_recieve():
+                    if connection.remote_port in self._receiving_udp_connections:
+                        raise SpinnmanInvalidParameterException(
+                            "two connections are listening to packets from the "
+                            "same port. This is deemed an error", "", "")
+                    else:
+                        self._receiving_udp_connections[connection.remote_port] \
+                            = connection
+                #check if the connection can send and is not using a already
+                # used portno
+                if connection.setp_up_sender():
+                    if connection.local_port in self._sending_udp_connections:
+                        raise SpinnmanInvalidParameterException(
+                            "two connections are listening to packets from the "
+                            "same port. This is deemed an error", "", "")
+                    else:
+                        self._sending_udp_connections[connection.remote_port] \
+                            = connection
 
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
@@ -2090,4 +2146,4 @@ class Transceiver(object):
                 connection.close()
 
     def register_listener(self, callback, hostname, recieve_port_no):
-
+        pass

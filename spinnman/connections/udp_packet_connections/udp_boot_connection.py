@@ -138,3 +138,6 @@ class UDPBootConnection(AbstractUDPConnection,
         except ValueError:
             raise SpinnmanInvalidParameterException(
                 "opcode", opcode_value, "Unrecognized value")
+
+    def connection_label(self):
+        return "boot"

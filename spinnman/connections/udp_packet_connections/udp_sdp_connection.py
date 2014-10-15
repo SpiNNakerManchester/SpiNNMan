@@ -161,3 +161,6 @@ class UDPSDPConnection(AbstractUDPConnection, AbstractSDPReceiver,
                     " connection".format(self._SDP_SOURCE_CHIP_Y))
         else:
             sdp_header.source_chip_y = self._SDP_SOURCE_CHIP_Y
+
+    def connection_label(self):
+        return "sdp"

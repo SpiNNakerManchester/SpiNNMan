@@ -49,3 +49,6 @@ class UDPEIEIOConnection(AbstractUDPConnection, AbstractEIEIOReceiver,
 
     def receive_eieio_message(self, timeout=None):
         raise NotImplementedError
+
+    def connection_label(self):
+        return "eieio"
