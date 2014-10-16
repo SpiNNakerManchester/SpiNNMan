@@ -1646,7 +1646,7 @@ class Transceiver(object):
                 self,
                 message=SCPIPTagSetRequest(
                     conn.chip_x, conn.chip_y, ip_address, ip_tag.port,
-                    ip_tag.tag),
+                    ip_tag.tag, strip=ip_tag.strip_sdp),
                 connection=conn)
             thread.start()
             callbacks.append(thread)
@@ -1684,16 +1684,12 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            host_string = reverse_ip_tag.address
-            if host_string == "localhost" or host_string == ".":
-                host_string = conn.local_ip_address
-            ip_string = gethostbyname(host_string)
-            ip_address = bytearray(inet_aton(ip_string))
             thread = _SCPMessageThread(
                 self,
                 message=SCPReverseIPTagSetRequest(
+                    conn.chip_x, conn.chip_y,
                     reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
-                    reverse_ip_tag.destination_p, ip_address,
+                    reverse_ip_tag.destination_p,
                     reverse_ip_tag.port, reverse_ip_tag.tag,
                     reverse_ip_tag.port_num),
                 connection=conn)
@@ -1753,7 +1749,8 @@ class Transceiver(object):
         :type connection:\
                     :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :return: An iterable of ip tags
-        :rtype: iterable of :py:class:`spinnman.model.iptag.IPTag`
+        :rtype: iterable of\
+                    :py:class:`spinnman.model.iptag.abstract_iptag.AbstractIPTag`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\

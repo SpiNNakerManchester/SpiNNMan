@@ -9,8 +9,10 @@ from spinnman.data.file_data_reader import FileDataReader
 from os.path import os
 from time import sleep
 from spinnman.messages.scp.scp_signal import SCPSignal
-from spinnman.model.iptag import IPTag
+from spinnman.model.iptag.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
+import sys
+from spinnman.model.iptag.reverse_iptag import ReverseIPTag
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 
@@ -122,9 +124,11 @@ try:
         print cpu_info
     print ""
 
-    print "Create IP Tag"
-    print "============="
+    print "Create IP Tags"
+    print "=============="
     transceiver.set_ip_tag(IPTag(".", 50000, 1))
+    transceiver.set_ip_tag(IPTag(".", 60000, 2, strip_sdp=True))
+    transceiver.set_reverse_ip_tag(ReverseIPTag(40000, 3, 0, 1, 2))
     tags = transceiver.get_ip_tags()
     for tag in tags:
         print tag
@@ -133,6 +137,8 @@ try:
     print "Clear IP Tag"
     print "============"
     transceiver.clear_ip_tag(1)
+    transceiver.clear_ip_tag(2)
+    transceiver.clear_ip_tag(3)
     tags = transceiver.get_ip_tags()
     for tag in tags:
         print tag
@@ -142,8 +148,8 @@ try:
     print "==========="
     routes = [MulticastRoutingEntry(0x10000000, 0xFFFF7000,
             (1, 2, 3, 4, 5), (0, 1, 2), False)]
-    transceiver.load_multicast_routes(0, 0, routes)
-    routes = transceiver.get_multicast_routes(0, 0)
+    transceiver.load_multicast_routes(0, 0, routes, app_id)
+    routes = transceiver.get_multicast_routes(0, 0, app_id)
     for route in routes:
         print "Key={}, Mask={}, processors={}, links={}".format(
                 hex(route.key), hex(route.mask), route.processor_ids,

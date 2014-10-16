@@ -5,7 +5,7 @@ class IPTag(AbstractIPTAG):
     """ Used to hold data that is contained within an IPTag
     """
 
-    def __init__(self, address, port, tag):
+    def __init__(self, address, port, tag, strip_sdp=False):
         """
         :param address: The IP address to which SCP packets with the tag will\
                     be sent
@@ -15,11 +15,14 @@ class IPTag(AbstractIPTAG):
         :type port: int
         :param tag: The tag of the SCP packet
         :type tag: int
+        :param strip_sdp: Indicates whether the SDP header should be removed
+        :type strip_sdp: bool
         :raise None: No known exceptions are raised
         """
         AbstractIPTAG.__init__(self, port)
         self._address = address
         self._tag = tag
+        self._strip_sdp = strip_sdp
 
     @property
     def address(self):
@@ -44,5 +47,12 @@ class IPTag(AbstractIPTAG):
         """
         self._tag = new_tag
 
+    @property
+    def strip_sdp(self):
+        """ Return if the sdp header is to be stripped
+        """
+        return self._strip_sdp
+
     def __str__(self):
-        return "{} {:5} {}".format(self._tag, self._port, self._address)
+        return "IP Tag: tag={} port={} address={}".format(
+                self._tag, self._port, self._address)

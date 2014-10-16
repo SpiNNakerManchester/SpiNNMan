@@ -13,7 +13,7 @@ class SCPIPTagSetRequest(AbstractSCPRequest):
     """ An SCP Request to set an IP Tag
     """
 
-    def __init__(self, x, y, host, port, tag, strip=True):
+    def __init__(self, x, y, host, port, tag, strip):
         """
         :param x: The x-coordinate of a chip, between 0 and 255
         :type x: int
