@@ -193,7 +193,7 @@ class AbstractUDPConnection(object):
         return self._can_send
 
     @abstractmethod
-    def connection_label(self):
+    def connection_type(self):
         """
         method to help identify the connection
         :return:

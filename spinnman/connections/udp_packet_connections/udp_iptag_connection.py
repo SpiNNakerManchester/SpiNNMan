@@ -40,7 +40,7 @@ class UDPIPTagConnection(AbstractUDPConnection, AbstractEIEIOReceiver):
     def receive_eieio_message(self, timeout=None):
         return True
 
-    def connection_label(self):
+    def connection_type(self):
         return constants.CONNECTION_TYPE.UDP_IPTAG
 
     def supports_sends_message(self, message):

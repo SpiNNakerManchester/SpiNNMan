@@ -136,7 +136,7 @@ class UDPBootConnection(AbstractUDPConnection,
             raise SpinnmanInvalidParameterException(
                 "opcode", opcode_value, "Unrecognized value")
 
-    def connection_label(self):
+    def connection_type(self):
         return constants.CONNECTION_TYPE.UDP_BOOT
 
     def supports_sends_message(self, message):

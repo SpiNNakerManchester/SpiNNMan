@@ -44,7 +44,7 @@ class ReverseIPTagConnection(AbstractUDPConnection, AbstractUDPEIEIOReceiver,
     def is_eieio_receiver(self):
         return True
 
-    def connection_label(self):
+    def connection_type(self):
         return constants.CONNECTION_TYPE.REVERSE_IPTAG
 
     def supports_sends_message(self, message):

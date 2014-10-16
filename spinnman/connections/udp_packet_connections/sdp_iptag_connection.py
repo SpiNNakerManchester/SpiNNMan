@@ -46,7 +46,7 @@ class SDPIPTagConnection(AbstractUDPConnection, AbstractUDPSCPReceiver,
     def is_scp_receiver(self):
         return True
 
-    def connection_label(self):
+    def connection_type(self):
         return constants.CONNECTION_TYPE.SDP_IPTAG
 
     def supports_sends_message(self, message):

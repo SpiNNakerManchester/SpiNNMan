@@ -5,6 +5,12 @@ from socket import inet_aton
 import logging
 from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
+from spinnman.connections.udp_packet_connections.reverse_iptag_connection import \
+    ReverseIPTagConnection
+from spinnman.connections.udp_packet_connections.sdp_iptag_connection import \
+    SDPIPTagConnection
+from spinnman.connections.udp_packet_connections.udp_iptag_connection import \
+    UDPIPTagConnection
 
 from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
     import UDPSpinnakerConnection
@@ -2099,5 +2105,29 @@ class Transceiver(object):
                     or connection not in self.connections_to_not_shut_down):
                 connection.close()
 
-    def register_listener(self, callback, recieve_port_no, connection_type):
-        pass
+    def register_listener(self, callback, recieve_port_no, connection_type,
+                          sdp_port=None):
+        if recieve_port_no in self._receiving_connections.keys():
+            connection = self._receiving_connections[recieve_port_no]
+            if connection_type == connection.connection_type():
+                connection.register_callback(callback)
+            else:
+                raise SpinnmanInvalidParameterException(
+                    "There is already a connection on this port number which "
+                    "does not support reception of this message type. Please "
+                    "try again with antoher port number", "", "")
+        else:
+            if connection_type == constants.CONNECTION_TYPE.SDP_IPTAG:
+                connection = SDPIPTagConnection()
+                connection.register_callback(callback)
+            elif connection_type == constants.CONNECTION_TYPE.UDP_IPTAG:
+                connection = UDPIPTagConnection()
+                connection.register_callback(callback)
+            elif connection_type == constants.CONNECTION_TYPE.REVERSE_IPTAG:
+                connection = ReverseIPTagConnection()
+                connection.register_callback(callback)
+            else:
+                raise SpinnmanInvalidParameterException(
+                    "Currently spinnman does not know how to register a "
+                    "callback to a connection of type {}."
+                    .format(connection_type), "", "")

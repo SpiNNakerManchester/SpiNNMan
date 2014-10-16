@@ -45,7 +45,7 @@ class UDPSpinnakerConnection(AbstractUDPConnection, AbstractUDPSDPReceiver,
     def is_udp_scp_sender(self):
         return True
 
-    def connection_label(self):
+    def connection_type(self):
         return constants.CONNECTION_TYPE.UDP_SPINNAKER
 
     def supports_sends_message(self, message):
