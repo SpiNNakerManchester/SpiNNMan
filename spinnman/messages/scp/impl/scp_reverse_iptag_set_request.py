@@ -43,10 +43,10 @@ class SCPReverseIPTagSetRequest(AbstractSCPRequest):
             raise SpinnmanInvalidParameterException(
                 "tag", str(tag), "Must be between 0 and 7")
 
-        stripe_value = 1
+        strip_value = 1
         reverse_value = 1
 
-        arg1 = ((reverse_value << 29) | (stripe_value << 28)
+        arg1 = ((reverse_value << 29) | (strip_value << 28)
                 | (_IPTAG_SET << 16) | (port_num << 13) | (p << 8) | tag)
         arg2 = ((x << 32) | (y << 24) | port)
         arg3 = ((host[3] << 24) | (host[2] << 16) | (host[1] << 8) | host[0])

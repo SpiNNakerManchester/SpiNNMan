@@ -1780,7 +1780,7 @@ class Transceiver(object):
             all_tags.extend(callback.get_iptags())
         return all_tags
 
-    def load_multicast_routes(self, x, y, routes, app_id=0):
+    def load_multicast_routes(self, x, y, routes, app_id):
         """ Load a set of multicast routes on to a chip
 
         :param x: The x-coordinate of the chip onto which to load the routes
@@ -1852,15 +1852,18 @@ class Transceiver(object):
         # Load the entries
         self._send_scp_message(SCPRouterInitRequest(x, y, n_entries,
                                                     table_address,
-                                                    base_address))
+                                                    base_address, app_id))
 
-    def get_multicast_routes(self, x, y):
+    def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
 
         :param x: The x-coordinate of the chip from which to get the routes
         :type x: int
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
+        :param app_id: The id of the application to filter the routes for.  If\
+                    not specified, will return all routes
+        :type app_id: int
         :return: An iterable of multicast routes
         :rtype: iterable of :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1887,7 +1890,7 @@ class Transceiver(object):
         for _ in range(0, 1024):
             reader.read_short()  # next
             reader.read_byte()  # core
-            reader.read_byte()  # app_id
+            route_app_id = reader.read_byte()  # app_id
 
             route = reader.read_int()
             processor_ids = list()
@@ -1901,7 +1904,8 @@ class Transceiver(object):
             key = reader.read_int()
             mask = reader.read_int()
 
-            if route < 0xFF000000:
+            if route < 0xFF000000 and (app_id is None
+                    or app_id == route_app_id):
                 routes.append(MulticastRoutingEntry(key, mask, processor_ids,
                                                     link_ids, False))
 
@@ -1909,6 +1913,7 @@ class Transceiver(object):
 
     def clear_multicast_routes(self, x, y):
         """ Remove all the multicast routes on a chip
+
         :param x: The x-coordinate of the chip on which to clear the routes
         :type x: int
         :param y: The y-coordinate of the chip on which to clear the routes

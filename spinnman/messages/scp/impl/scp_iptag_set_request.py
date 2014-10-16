@@ -13,7 +13,7 @@ class SCPIPTagSetRequest(AbstractSCPRequest):
     """ An SCP Request to set an IP Tag
     """
 
-    def __init__(self, x, y, host, port, tag, stripe=False):
+    def __init__(self, x, y, host, port, tag, strip=True):
         """
         :param x: The x-coordinate of a chip, between 0 and 255
         :type x: int
@@ -25,8 +25,8 @@ class SCPIPTagSetRequest(AbstractSCPRequest):
         :type port: int
         :param tag: The tag, between 0 and 7
         :type tag: int
-        :param stripe: if the SDP header should be striped from the packet.
-        :type stripe: bool
+        :param strip: if the SDP header should be striped from the packet.
+        :type strip: bool
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
                     * The chip-coordinates are out of range
                     * If the host is not 4 bytes
@@ -43,11 +43,9 @@ class SCPIPTagSetRequest(AbstractSCPRequest):
             raise SpinnmanInvalidParameterException(
                 "tag", str(tag), "Must be between 0 and 7")
 
-        stripe_value = 0
-        if stripe:
-            stripe_value = 1
-
-        reverse_value = 0
+        strip_value = 0
+        if strip:
+            strip_value = 1
 
         super(SCPIPTagSetRequest, self).__init__(
             SDPHeader(
@@ -55,8 +53,7 @@ class SCPIPTagSetRequest(AbstractSCPRequest):
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_IPTAG),
-            argument_1=((reverse_value << 28) | (stripe_value << 27)
-                        | (_IPTAG_SET << 16) | tag),
+            argument_1=(strip_value << 28) | (_IPTAG_SET << 16) | tag,
             argument_2=port,
             argument_3=((host[3] << 24) | (host[2] << 16)
                         | (host[1] << 8) | host[0]))
