@@ -1,14 +1,17 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
-
-from spinnman.connections.abstract_classes.abstract_connection import AbstractConnection
-
+from spinnman.connections.abstract_classes.abstract_connection \
+    import AbstractConnection
 
 @add_metaclass(ABCMeta)
 class AbstractEIEIOSender(AbstractConnection):
     """ A receiver of SCP messages
     """
+
+    @abstractmethod
+    def is_eieio_sender(self):
+        pass
 
     @abstractmethod
     def send_eieio_message(self, eieio_message):
@@ -21,4 +24,3 @@ class AbstractEIEIOSender(AbstractConnection):
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     sending the message
         """
-        pass

@@ -2,27 +2,23 @@ from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
 
-from spinnman.connections.abstract_classes.abstract_connection \
-    import AbstractConnection
+from spinnman.connections.abstract_classes.abstract_eieio_receiver import \
+    AbstractEIEIOReceiver
 
 
 @add_metaclass(ABCMeta)
-class AbstractSCPReceiver(AbstractConnection):
+class AbstractUDPEIEIOReceiver(AbstractEIEIOReceiver):
     """ A receiver of SCP messages
     """
 
     @abstractmethod
-    def is_scp_receiver(self):
+    def is_udp_eieio_reciever(self):
         pass
 
-    @abstractmethod
-    def receive_scp_response(self, scp_response, timeout=None):
-        """ Receives an SCP message from this connection.  Blocks\
+    def receive_eieio_message(self, timeout=None):
+        """ Receives an eieio message from this connection.  Blocks\
             until a message has been received, or a timeout occurs.
-        
-        :param scp_response: The response to fill in
-        :rtype scp_response:\
-                    :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
+
         :param timeout: The time in seconds to wait for the message to arrive;\
                     if not specified, will wait forever, or until the\
                     connection is closed
@@ -38,3 +34,4 @@ class AbstractSCPReceiver(AbstractConnection):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
                     of the fields of the SCP message is invalid
         """
+        raise NotImplementedError

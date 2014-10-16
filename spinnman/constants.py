@@ -1,3 +1,4 @@
+from enum import Enum
 # The default port of the connection
 SCP_SCAMP_PORT = 17893
 
@@ -18,3 +19,13 @@ CPU_USER_0_START_ADDRESS = 112
 
 #default udp tag
 DEFAULT_SDP_TAG = 0xFF
+
+#connection types
+CONNECTION_TYPE = Enum(
+    value="CONNECTION_TYPE",
+    names=[("REVERSE_IPTAG", 0),
+           ("SDP_IPTAG", 1),
+           ("UDP_BOOT", 2),
+           ("UDP_IPTAG", 3),
+           ("UDP_SPINNAKER", 4),
+           ("USB", 5)])

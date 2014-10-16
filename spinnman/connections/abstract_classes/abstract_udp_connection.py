@@ -200,7 +200,7 @@ class AbstractUDPConnection(object):
         """
 
     @abstractmethod
-    def supports_message(self, message):
+    def supports_sends_message(self, message):
         """helper method to verify if the connection can deal with this message
         format
 

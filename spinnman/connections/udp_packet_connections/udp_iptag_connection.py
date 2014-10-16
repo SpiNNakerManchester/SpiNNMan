@@ -1,10 +1,11 @@
+from spinnman.connections.abstract_classes.abstract_eieio_receiver import \
+    AbstractEIEIOReceiver
 from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
 from spinnman import constants
-from spinnman.exceptions import SpinnmanIOException
 
 
-class UDPRawConnection(AbstractUDPConnection):
+class UDPIPTagConnection(AbstractUDPConnection, AbstractEIEIOReceiver):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
@@ -30,27 +31,17 @@ class UDPRawConnection(AbstractUDPConnection):
         AbstractUDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
 
-    def send_raw(self, message):
-        """
-        sends a raw udp packet
-        :param message: the message sent in the udp packet
-
-        :return: None
-        """
-        # Send the packet
-        try:
-            self._socket.send(message)
-        except Exception as e:
-            raise SpinnmanIOException(str(e))
-
     def recieve_raw(self, timeout):
         raise NotImplementedError
 
-    def connection_label(self):
-        return "raw"
+    def is_eieio_receiver(self):
+        return True
 
-    def supports_message(self, message):
-        if isinstance(message, bytearray):
-            return True
-        else:
-            return False
+    def receive_eieio_message(self, timeout=None):
+        return True
+
+    def connection_label(self):
+        return constants.CONNECTION_TYPE.UDP_IPTAG
+
+    def supports_sends_message(self, message):
+         return False

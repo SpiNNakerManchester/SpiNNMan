@@ -1,0 +1,54 @@
+from spinnman.connections.abstract_classes.udp_receivers.\
+    abstract_udp_eieio_receiver import AbstractUDPEIEIOReceiver
+from spinnman.connections.abstract_classes.udp_senders.\
+    abstract_udp_eieio_sender import AbstractUDPEIEIOSender
+from spinnman.connections.abstract_classes.abstract_udp_connection import \
+    AbstractUDPConnection
+from spinnman import constants
+from spinnman.exceptions import SpinnmanIOException
+from spinnman.messages.eieio.eieio_message import EIEIOMessage
+
+
+class ReverseIPTagConnection(AbstractUDPConnection, AbstractUDPEIEIOReceiver,
+                             AbstractUDPEIEIOSender):
+
+    def __init__(self, local_host=None, local_port=None, remote_host=None,
+                 remote_port=constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
+        AbstractUDPConnection.__init__(self, local_host, local_port,
+                                       remote_host, remote_port)
+
+    def send_raw(self, message):
+        """
+        sends a raw udp packet
+        :param message: the message sent in the udp packet
+        :return: None
+        """
+        # Send the packet
+        try:
+            self._socket.send(message)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
+    def receive_raw(self):
+        raise NotImplementedError
+
+    def is_eieio_sender(self):
+        return True
+
+    def is_udp_eieio_reciever(self):
+        return True
+
+    def is_udp_eieio_sender(self):
+        return True
+
+    def is_eieio_receiver(self):
+        return True
+
+    def connection_label(self):
+        return constants.CONNECTION_TYPE.REVERSE_IPTAG
+
+    def supports_sends_message(self, message):
+        if isinstance(message, bytearray) or isinstance(message, EIEIOMessage):
+            return True
+        else:
+            return False

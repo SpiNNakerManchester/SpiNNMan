@@ -2,20 +2,25 @@ from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
 
-from spinnman.connections.abstract_classes.abstract_connection \
-    import AbstractConnection
+import select
+import socket
+from spinnman.connections.abstract_classes.abstract_scp_receiver import \
+    AbstractSCPReceiver
+from spinnman.data.little_endian_byte_array_byte_reader import \
+    LittleEndianByteArrayByteReader
+from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException, \
+    SpinnmanInvalidPacketException
 
 
 @add_metaclass(ABCMeta)
-class AbstractSCPReceiver(AbstractConnection):
+class AbstractUDPSCPReceiver(AbstractSCPReceiver):
     """ A receiver of SCP messages
     """
 
     @abstractmethod
-    def is_scp_receiver(self):
+    def is_udp_scp_receiver(self):
         pass
 
-    @abstractmethod
     def receive_scp_response(self, scp_response, timeout=None):
         """ Receives an SCP message from this connection.  Blocks\
             until a message has been received, or a timeout occurs.
@@ -38,3 +43,28 @@ class AbstractSCPReceiver(AbstractConnection):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
                     of the fields of the SCP message is invalid
         """
+        # Receive the data
+        raw_data = None
+        try:
+            ready_read, _, _ = select.select([self._socket], [], [], timeout)
+            if not ready_read:
+                raise socket.timeout()
+            raw_data = self._socket.recv(512)
+        except socket.timeout:
+            raise SpinnmanTimeoutException("receive_scp_message", timeout)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
+        # Set up for reading
+        packet = bytearray(raw_data)
+        reader = LittleEndianByteArrayByteReader(packet)
+
+        # Read the padding
+        try:
+            reader.read_short()
+        except EOFError:
+            raise SpinnmanInvalidPacketException(
+                "SCP", "Not enough bytes to read the pre-packet padding")
+
+        # Read the response
+        scp_response.read_scp_response(reader)

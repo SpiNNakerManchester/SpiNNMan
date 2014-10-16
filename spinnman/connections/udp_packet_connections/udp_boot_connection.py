@@ -1,5 +1,3 @@
-import platform
-import subprocess
 import socket
 
 from spinnman.connections.abstract_classes.abstract_spinnaker_boot_sender \
@@ -90,7 +88,6 @@ class UDPBootConnection(AbstractUDPConnection,
         """
 
         # Receive the data
-        raw_data = None
         try:
             read_ready, _, _ = select.select([self._socket], [], [], timeout)
             if not read_ready:
@@ -140,9 +137,9 @@ class UDPBootConnection(AbstractUDPConnection,
                 "opcode", opcode_value, "Unrecognized value")
 
     def connection_label(self):
-        return "boot"
+        return constants.CONNECTION_TYPE.UDP_BOOT
 
-    def supports_message(self, message):
+    def supports_sends_message(self, message):
         if isinstance(message, SpinnakerBootMessage):
             return True
         else:

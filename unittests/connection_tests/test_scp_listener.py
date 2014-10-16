@@ -1,7 +1,7 @@
 import unittest
 
 from spinnman.connections.listeners.scp_listener import SCPListener
-from spinnman.connections.abstract_classes.abstract_scp_receiver import AbstractSCPReceiver
+from spinnman.connections.abstract_classes.udp_receivers.abstract_udp_scp_receiver import AbstractSCPReceiver
 from spinnman.connections.udp_packet_connections.udp_scp_connection import UDPSCPConnection
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
