@@ -11,7 +11,7 @@ class SCPRouterInitRequest(AbstractSCPRequest):
     """ A request to initialize the router on a chip
     """
 
-    def __init__(self, x, y, n_entries, table_address, base_address):
+    def __init__(self, x, y, n_entries, table_address, base_address, app_id):
         """
 
         :param x: The x-coordinate of the chip, between 0 and 255
@@ -24,6 +24,9 @@ class SCPRouterInitRequest(AbstractSCPRequest):
         :type table_address: int
         :param base_address: The base_address containing the entries
         :type base_address: int
+        :param app_id: The id of the application with which to associate the\
+                    routes.  If not specified, defaults to 0.
+        :type app_id: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
                     * If x is out of range
                     * If y is out of range
@@ -50,7 +53,7 @@ class SCPRouterInitRequest(AbstractSCPRequest):
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_RTR),
-            argument_1=((n_entries << 16) | 2),
+            argument_1=((n_entries << 16) | (app_id << 8) | 2),
             argument_2=table_address, argument_3=base_address)
 
     def get_scp_response(self):

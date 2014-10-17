@@ -8,6 +8,7 @@ from spinnman.model.iptag.iptag import IPTag
 
 import sys
 import logging
+from spinnman.model.iptag.reverse_iptag import ReverseIPTag
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +72,14 @@ class _GetIPTagsThread(Thread):
                     ip_address = response.ip_address
                     host = "{}.{}.{}.{}".format(ip_address[0], ip_address[1],
                             ip_address[2], ip_address[3])
-                    iptags.append(IPTag(host, response.port, tag))
+                    if response.is_reverse:
+                        iptags.append(ReverseIPTag(response.rx_port, tag,
+                                response.spin_chip_x, response.spin_chip_y,
+                                response.spin_cpu, response.spin_port))
+                    else:
+                        iptags.append(IPTag(host, response.port, tag,
+                                strip_sdp=response.strip_sdp))
+
 
             self._condition.acquire()
             self._iptags = iptags

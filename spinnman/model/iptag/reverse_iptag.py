@@ -5,32 +5,30 @@ class ReverseIPTag(AbstractIPTAG):
     """ Used to hold data that is contained within an IPTag
     """
 
-    def __init__(self, address, port, tag, destination_x, destination_y,
+    def __init__(self, port, tag, destination_x, destination_y,
                  destination_p, port_num=1):
         """
-        :param address: The IP address to which SCP packets with the reverse\
-         tag will be sent
-        :type address: str
-        :param port: The port to which the SCP packets with the reverse tag \
-        will be sent
+        :param port: The UDP port on which SpiNNaker will listen for packets
         :type port: int
-        :param tag: The tag of the SCP packet
+        :param tag: The tag of the SDP packet
         :type tag: int
+        :param destination_x: The x-coordinate of the chip to send packets to
+        :type destination_x: int
+        :param destination_y: The y-coordinate of the chip to send packets to
+        :type destination_y: int
+        :param destination_p: The id of the processor to send packets to
+        :type destination_p: int
+        :param port_num: The optional port number to use for SDP packets that\
+                    formed on the machine (default is 1)
+        :type port_num: int
         :raise None: No known exceptions are raised
         """
         AbstractIPTAG.__init__(self, port)
-        self._address = address
         self._tag = tag
         self._destination_x = destination_x
         self._destination_y = destination_y
         self._destination_p = destination_p
         self._port_num = port_num
-
-    @property
-    def address(self):
-        """ Return the IP address of the tag
-        """
-        return self._address
 
     @property
     def port(self):
@@ -75,6 +73,7 @@ class ReverseIPTag(AbstractIPTAG):
         self._tag = new_tag
 
     def __str__(self):
-        return "{} {:5} {} {} {} {}".format(
-            self._tag, self._port, self._address, self._destination_x,
-            self._destination_y, self._destination_p)
+        return "Reverse IP Tag: tag={} port={} x={} y={} p={}, s_pt={}".format(
+            self._tag, self._port, self._destination_x,
+            self._destination_y, self._destination_p,
+            self._port_num)
