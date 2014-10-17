@@ -1886,8 +1886,8 @@ class Transceiver(object):
         routes = list()
         for _ in range(0, 1024):
             reader.read_short()  # next
-            reader.read_byte()  # core
             route_app_id = reader.read_byte()  # app_id
+            reader.read_byte()  # core
 
             route = reader.read_int()
             processor_ids = list()

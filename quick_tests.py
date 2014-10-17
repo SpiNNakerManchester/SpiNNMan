@@ -16,14 +16,14 @@ from spinnman.model.iptag.reverse_iptag import ReverseIPTag
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 
-#machine = "spinn-10.cs.man.ac.uk"
-#version = 2
+machine = "spinn-10.cs.man.ac.uk"
+version = 2
 
 #machine = "spinn-1.cs.man.ac.uk"
 #version = 5
 
-machine = "192.168.240.253"
-version = 3
+#machine = "192.168.240.253"
+#version = 3
 
 n_cores = 20
 core_subsets = CoreSubsets(core_subsets=[CoreSubset(0, 0, range(1, 11)),
