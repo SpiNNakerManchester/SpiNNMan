@@ -1,15 +1,12 @@
 import unittest
-import spinnman.connections.udp_connection as udp_conn
-import spinnman.messages.scp.scp_request_header as scp_msg
+from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
+    import UDPSpinnakerConnection as udp_conn
 import spinnman.exceptions as exc
-import spinnman.messages.sdp.sdp_header as sdp_header
-import spinnman.messages.sdp.sdp_flag as flags
-import spinnman.messages.scp.scp_command as cmds
-from spinnman.messages.scp.impl import scp_read_link_request,scp_read_link_response,scp_read_memory_request,scp_read_memory_response\
-                ,scp_version_request, scp_version_response
+from spinnman.messages.scp.impl import scp_read_link_request,\
+    scp_read_link_response, scp_read_memory_request, scp_read_memory_response,\
+    scp_version_request, scp_version_response
 from spinnman.messages.scp.scp_result import SCPResult
-import time
-import thread
+
 
 class TestUDPConnection(unittest.TestCase):
 
@@ -47,13 +44,11 @@ class TestUDPConnection(unittest.TestCase):
         print scp_response.version_info
         self.assertEqual(scp_response._scp_response_header._result, SCPResult.RC_OK)
 
-
     def test_scp_version_request_and_response_board_invalid_x(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             self.set_up_remote_board()
             connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
             scp_req = scp_version_request.SCPVersionRequest(256,0,0)
-
 
     def test_scp_version_request_and_response_board_invalid_y(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
@@ -61,13 +56,11 @@ class TestUDPConnection(unittest.TestCase):
             connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
             scp_req = scp_version_request.SCPVersionRequest(0,256,0)
 
-
     def test_scp_version_request_and_response_board_invalid_processor(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             self.set_up_remote_board()
             connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
             scp_req = scp_version_request.SCPVersionRequest(0,0,32)
-
 
     def test_scp_read_link_request_and_response_board(self):
         self.set_up_remote_board()
@@ -86,7 +79,6 @@ class TestUDPConnection(unittest.TestCase):
         connection.send_scp_request(scp_link)
         connection.receive_scp_response(scp_link_reader)
         self.assertEqual(scp_link_reader._scp_response_header._result, SCPResult.RC_OK)
-
 
     def test_scp_read_memory_request_and_response_board_more_than_256_bytes(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):

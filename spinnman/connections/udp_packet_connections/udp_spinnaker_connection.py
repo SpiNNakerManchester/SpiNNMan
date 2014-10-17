@@ -1,4 +1,3 @@
-from pacman103.core.spinnman.scp.scp_message import SCPMessage
 from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
 from spinnman import constants
@@ -20,12 +19,14 @@ class UDPSpinnakerConnection(AbstractUDPConnection, AbstractUDPSDPReceiver,
                              AbstractUDPSCPReceiver):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 default_sdp_tag=constants.DEFAULT_SDP_TAG):
+                 default_sdp_tag=constants.DEFAULT_SDP_TAG, chip_x=0, chip_y=0):
         AbstractUDPConnection.__init__(self, local_host, local_port,
                                        remote_host, constants.SCP_SCAMP_PORT)
 
         # Store the default sdp tag
         self._default_sdp_tag = default_sdp_tag
+        self._chip_x = chip_x
+        self._chip_y = chip_y
 
     def is_udp_scp_receiver(self):
         return True
@@ -49,8 +50,16 @@ class UDPSpinnakerConnection(AbstractUDPConnection, AbstractUDPSDPReceiver,
         return constants.CONNECTION_TYPE.UDP_SPINNAKER
 
     def supports_sends_message(self, message):
-        if (isinstance(message, SDPMessage) or isinstance(message, SCPMessage)
+        if (isinstance(message, SDPMessage)
                 or isinstance(message, AbstractSCPRequest)):
             return True
         else:
             return False
+
+    @property
+    def chip_x(self):
+        return self._chip_x
+
+    @property
+    def chip_y(self):
+        return self._chip_y

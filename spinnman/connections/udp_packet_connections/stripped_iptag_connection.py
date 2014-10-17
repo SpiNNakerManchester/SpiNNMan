@@ -38,6 +38,7 @@ class StrippedIPTagConnection(AbstractUDPConnection, AbstractEIEIOReceiver,
         """
         AbstractUDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
+        AbstractCallbackableConnection.__init__(self)
 
     def recieve_raw(self, timeout):
         raise NotImplementedError

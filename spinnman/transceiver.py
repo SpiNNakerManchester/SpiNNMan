@@ -3,11 +3,16 @@ from threading import Condition
 from socket import gethostbyname
 from socket import inet_aton
 import logging
-
-from spinnman.connections.udp_packet_connections.udp_scp_connection import UDPSCPConnection
 from spinnman.connections.udp_packet_connections.udp_boot_connection import UDPBootConnection
 from spinnman import constants
 from spinnman.connections.listeners._connection_queue import _ConnectionQueue
+from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
+    StrippedIPTagConnection
+from spinnman.connections.udp_packet_connections.iptag_connection import \
+    IPTagConnection
+from spinnman.connections.udp_packet_connections.udp_spinnaker_connection import \
+    UDPSpinnakerConnection
+from spinnman.connections.abstract_classes.abstract_udp_connection import AbstractUDPConnection
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -269,7 +274,8 @@ class Transceiver(object):
             self._receiving_connections[connection.local_port] = connection
         #check if the connection can send and is not using a already
         # used portno
-        if connection.can_send:
+        if (connection.can_send and
+                not isinstance(connection, UDPBootConnection)):
             if connection.remote_port in self._sending_connections:
                 raise SpinnmanInvalidParameterException(
                     "two connections are listening to packets from the "
@@ -666,7 +672,9 @@ class Transceiver(object):
             key = (ethernet_connected_chip.ip_address, constants.SCP_SCAMP_PORT)
             if key not in self._sending_connections.keys():
                 new_connection = UDPSpinnakerConnection(
-                    remote_host=ethernet_connected_chip.ip_address)
+                    remote_host=ethernet_connected_chip.ip_address,
+                    chip_x=ethernet_connected_chip.x,
+                    chip_y=ethernet_connected_chip.y)
                 new_connections.append(new_connection)
                 if key in self._sending_connections.keys():
                     raise SpinnmanInvalidParameterException(
