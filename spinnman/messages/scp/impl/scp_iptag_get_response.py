@@ -103,7 +103,12 @@ class SCPIPTagGetResponse(AbstractSCPResponse):
         return (self._flags & 0x4000) > 0
 
     @property
-    def a(self):
+    def is_arp(self):
+        """ True if the tag is in the ARP state (where the MAC address is\
+            being looked up - transient state so unlikely)
+
+        :rtype: bool
+        """
         return (self._flags & 0x2000) > 0
 
     @property
