@@ -696,7 +696,7 @@ class Transceiver(object):
 
         # Update the connection queues after finding new connections
         self._update_connection_queues()
-        logger.debug(self._machine.cores_and_link_output_string())
+        logger.info(self._machine.cores_and_link_output_string())
         return new_connections
 
     def get_connections(self):

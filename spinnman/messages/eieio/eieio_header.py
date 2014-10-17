@@ -17,10 +17,10 @@ class EIEIOHeader(object):
         :param is_time: is the time param set
         :type prefix_param: int or None
         :type payload_base: int or None
-        :type type_param: spinnman.spinnman.messages.eieio.eidio_type_param.EIEIOTypeParam
+        :type type_param: spinnman.spinnman.messages.eieio.eieio_type_param.EIEIOTypeParam
         :type count_param: int
         :type tag_param: int
-        :type prefix_type: spinnman.spinnman.messages.eieio.eidio_prefix_type
+        :type prefix_type: spinnman.spinnman.messages.eieio.eieio_prefix_type
         :type is_time: bool
         :return:
         """
