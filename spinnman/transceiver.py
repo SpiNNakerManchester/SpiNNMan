@@ -3,16 +3,18 @@ from threading import Condition
 from socket import gethostbyname
 from socket import inet_aton
 import logging
-from spinnman.connections.udp_packet_connections.udp_boot_connection import UDPBootConnection
-from spinnman import constants
-from spinnman.connections.listeners._connection_queue import _ConnectionQueue
-from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
-    StrippedIPTagConnection
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
+from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
+    StrippedIPTagConnection
+from spinnman.connections.udp_packet_connections.udp_boot_connection \
+    import UDPBootConnection
+from spinnman import constants
+from spinnman.connections.listeners._connection_queue import _ConnectionQueue
 from spinnman.connections.udp_packet_connections.udp_spinnaker_connection import \
     UDPSpinnakerConnection
-from spinnman.connections.abstract_classes.abstract_udp_connection import AbstractUDPConnection
+from spinnman.connections.abstract_classes.abstract_udp_connection \
+    import AbstractUDPConnection
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -78,8 +80,6 @@ from spinnman.data.little_endian_byte_array_byte_reader \
 from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman._threads._iobuf_thread import _IOBufThread
 from spinnman._threads._get_iptags_thread import _GetIPTagsThread
-
-from spinnman import reports
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -355,6 +355,10 @@ class Transceiver(object):
                 self._connection_queues[connection] = \
                     _ConnectionQueue(connection)
                 self._connection_queues[connection].start()
+        if self._boot_connection not in self._connection_queues:
+            self._connection_queues[self._boot_connection] = \
+                _ConnectionQueue(self._boot_connection)
+            self._connection_queues[self._boot_connection].start()
 
     def _find_best_connection_queue(self, message, connection=None):
         """ Finds the best connection _queue to use to send a message
@@ -386,8 +390,10 @@ class Transceiver(object):
         else:
 
             # Find the least congested way that supports the message type
+            connections = list(self._sending_connections.values())
+            connections.append(self._boot_connection)
             best_connection_queue_size = None
-            for connection in self._sending_connections.values():
+            for connection in connections:
                 if connection.supports_sends_message(message):
                     connection_queue = self._connection_queues[connection]
                     connection_queue_size = connection_queue.queue_length
@@ -2112,8 +2118,8 @@ class Transceiver(object):
                     or connection not in self.connections_to_not_shut_down):
                 connection.close()
 
-    def register_listener(self, callback, recieve_port_no, connection_type,
-                          traffic_type, sdp_port=None):
+    def register_listener(self, callback, recieve_port_no, hostname,
+                          connection_type,  traffic_type, sdp_port=None):
         if recieve_port_no in self._receiving_connections.keys():
             connection = self._receiving_connections[recieve_port_no]
             if connection_type == connection.connection_type():
@@ -2125,10 +2131,10 @@ class Transceiver(object):
                     "try again with antoher port number", "", "")
         else:
             if connection_type == constants.CONNECTION_TYPE.SDP_IPTAG:
-                connection = IPTagConnection()
+                connection = IPTagConnection(hostname, recieve_port_no)
                 connection.register_callback(callback, traffic_type)
             elif connection_type == constants.CONNECTION_TYPE.UDP_IPTAG:
-                connection = StrippedIPTagConnection()
+                connection = StrippedIPTagConnection(hostname, recieve_port_no)
                 connection.register_callback(callback, traffic_type)
             else:
                 raise SpinnmanInvalidParameterException(
