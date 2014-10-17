@@ -1,6 +1,7 @@
 from spinnman import constants
 from spinnman import exceptions
 
+
 class AbstractIPTAG(object):
 
     def __init__(self, port):

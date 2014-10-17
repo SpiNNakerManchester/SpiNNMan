@@ -42,7 +42,9 @@ class SCPIPTagGetResponse(AbstractSCPResponse):
         self._rx_port = byte_reader.read_short()
         self._spin_chip_y = byte_reader.read_byte()
         self._spin_chip_x = byte_reader.read_byte()
-        self._spin_port = byte_reader.read_byte()
+        processor_and_port = byte_reader.read_byte()
+        self._spin_port = (processor_and_port >> 5) & 0x7
+        self._spin_cpu = processor_and_port & 0x1F
 
     @property
     def ip_address(self):
@@ -93,6 +95,39 @@ class SCPIPTagGetResponse(AbstractSCPResponse):
         return (self._flags & 0x8000) > 0
 
     @property
+    def is_temporary(self):
+        """ True if the tag is temporary
+
+        :rtype: bool
+        """
+        return (self._flags & 0x4000) > 0
+
+    @property
+    def is_arp(self):
+        """ True if the tag is in the ARP state (where the MAC address is\
+            being looked up - transient state so unlikely)
+
+        :rtype: bool
+        """
+        return (self._flags & 0x2000) > 0
+
+    @property
+    def is_reverse(self):
+        """ True if the tag is a reverse tag
+
+        :rtype: bool
+        """
+        return (self._flags & 0x0200) > 0
+
+    @property
+    def strip_sdp(self):
+        """ True if the tag is to strip sdp
+
+        :rtype: bool
+        """
+        return (self._flags & 0x0100) > 0
+
+    @property
     def count(self):
         """ The count of the number of packets that have been sent with the tag
 
@@ -131,3 +166,11 @@ class SCPIPTagGetResponse(AbstractSCPResponse):
         :rtype: int
         """
         return self._spin_port
+
+    @property
+    def spin_cpu(self):
+        """ The cpu id of the ip tag
+
+        :rtype: int
+        """
+        return self._spin_cpu

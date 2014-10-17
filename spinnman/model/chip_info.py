@@ -14,6 +14,13 @@ def _get_short_from_bytearray(array, offset):
     return _get_short_from_little_endian_bytearray(array, offset)
 
 
+# The base address of the system variable structure in System ram
+_SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
+
+# The size of the system variable structure in bytes
+_SYSTEM_VARIABLE_BYTES = 256
+
+
 class ChipInfo(object):
     """ Represents the system variables for a chip, received from the chip\
         SDRAM
@@ -49,7 +56,8 @@ class ChipInfo(object):
         self._clock_divisor = system_data[14]
         self._router_phase_timer_scale = system_data[15]
 
-        self._router_time_phase_timer = _get_int_from_bytearray(system_data, 32)
+        self._router_time_phase_timer = _get_int_from_bytearray(
+                system_data, 32)
         self._cpu_clock_mhz = _get_short_from_bytearray(system_data, 36)
         self._memory_clock_mhz = _get_short_from_bytearray(system_data, 38)
         self._nnbc_forward = system_data[40]
@@ -71,7 +79,7 @@ class ChipInfo(object):
         self._probe_timer = _get_int_from_bytearray(system_data, 68)
 
         self._system_ram_heap_address = _get_int_from_bytearray(
-            system_data, 72)
+                system_data, 72)
         self._sdram_heap_address = _get_int_from_bytearray(system_data, 76)
 
         self._iobuf_size = _get_int_from_bytearray(system_data, 80)
@@ -84,9 +92,9 @@ class ChipInfo(object):
         self._board_test_flags = system_data[103]
 
         self._next_free_memory_block_pointer = _get_int_from_bytearray(
-            system_data, 104)
+                system_data, 104)
         self._n_memory_blocks_in_use = _get_short_from_bytearray(
-            system_data, 108)
+                system_data, 108)
         self._maximum_blocks_used = _get_short_from_bytearray(system_data, 110)
 
         self._status_map = system_data[128:148]
@@ -95,9 +103,9 @@ class ChipInfo(object):
 
         self._virtual_core_ids = list()
         for physical_core_id in range(0,
-                                      len(self._physical_to_virtual_core_map)):
-            virtual_core_id =\
-                self._physical_to_virtual_core_map[physical_core_id]
+                len(self._physical_to_virtual_core_map)):
+            virtual_core_id = self._physical_to_virtual_core_map[
+                    physical_core_id]
             if virtual_core_id != 0xFF:
                 self._virtual_core_ids.append(virtual_core_id)
         self._virtual_core_ids.sort()
@@ -108,25 +116,25 @@ class ChipInfo(object):
         self._sdram_base_address = _get_int_from_bytearray(system_data, 192)
         self._sysram_base_address = _get_int_from_bytearray(system_data, 196)
         self._system_sdram_base_address = _get_int_from_bytearray(
-            system_data, 200)
+                system_data, 200)
         self._cpu_information_base_address = _get_int_from_bytearray(
-            system_data, 204)
+                system_data, 204)
         self._system_heap_address = _get_int_from_bytearray(system_data, 208)
         self._router_table_copy_address = _get_int_from_bytearray(
-            system_data, 212)
+                system_data, 212)
         self._peer_to_peer_hop_table_address = _get_int_from_bytearray(
-            system_data, 216)
+                system_data, 216)
         self._alloc_tag_table_address = _get_int_from_bytearray(
-            system_data, 220)
+                system_data, 220)
 
         self._first_free_router_entry = _get_short_from_bytearray(
-            system_data, 224)
+                system_data, 224)
         self._n_active_peer_to_peer_addresses = _get_short_from_bytearray(
-            system_data, 226)
+                system_data, 226)
         self._application_data_address = _get_int_from_bytearray(
-            system_data, 228)
+                system_data, 228)
         self._shared_message_buffers_address = _get_int_from_bytearray(
-            system_data, 232)
+                system_data, 232)
         self._mailbox_flags = _get_int_from_bytearray(system_data, 236)
 
         self._ip_address = None

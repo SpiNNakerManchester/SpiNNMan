@@ -3,19 +3,9 @@ from threading import Condition
 from socket import gethostbyname
 from socket import inet_aton
 import logging
-from spinnman.connections.abstract_classes.abstract_udp_connection import \
-    AbstractUDPConnection
-from spinnman.connections.udp_packet_connections.reverse_iptag_connection import \
-    ReverseIPTagConnection
-from spinnman.connections.udp_packet_connections.iptag_connection import \
-    IPTagConnection
-from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
-    StrippedIPTagConnection
 
-from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
-    import UDPSpinnakerConnection
-from spinnman.connections.udp_packet_connections.udp_boot_connection \
-    import UDPBootConnection
+from spinnman.connections.udp_packet_connections.udp_scp_connection import UDPSCPConnection
+from spinnman.connections.udp_packet_connections.udp_boot_connection import UDPBootConnection
 from spinnman import constants
 from spinnman.connections.listeners._connection_queue import _ConnectionQueue
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
@@ -25,11 +15,13 @@ from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
+
 from spinnman.model.chip_info import ChipInfo
 from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
 from spinnman.model.router_diagnostics import RouterDiagnostics
+
 from spinnman.messages.spinnaker_boot.spinnaker_boot_messages \
     import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_link_request \
@@ -71,14 +63,19 @@ from spinnman.messages.scp.impl.scp_write_memory_words_request \
 from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
 from spinnman.messages.scp.scp_result import SCPResult
+
 from spinnman.data.abstract_data_reader import AbstractDataReader
 from spinnman.data.little_endian_byte_array_byte_writer \
     import LittleEndianByteArrayByteWriter
 from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
+
 from spinnman._threads._scp_message_thread import _SCPMessageThread
 from spinnman._threads._iobuf_thread import _IOBufThread
 from spinnman._threads._get_iptags_thread import _GetIPTagsThread
+
+from spinnman import reports
+
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
@@ -339,7 +336,7 @@ class Transceiver(object):
         self._chip_execute_lock_condition.release()
 
     def _update_connection_queues(self):
-        """ Creates and deletes listeners of connections depending upon what\
+        """ Creates and deletes queues of connections depending upon what\
             connections are now available
 
         :return: Nothing is returned
@@ -689,7 +686,7 @@ class Transceiver(object):
                     self._receiving_connections[new_connection.local_port]\
                         = new_connection
 
-        # Update the connection listeners after finding new connections
+        # Update the connection queues after finding new connections
         self._update_connection_queues()
         logger.debug(self._machine.cores_and_link_output_string())
         return new_connections
@@ -1685,7 +1682,7 @@ class Transceiver(object):
                 self,
                 message=SCPIPTagSetRequest(
                     conn.chip_x, conn.chip_y, ip_address, ip_tag.port,
-                    ip_tag.tag),
+                    ip_tag.tag, strip=ip_tag.strip_sdp),
                 connection=conn)
             thread.start()
             callbacks.append(thread)
@@ -1723,16 +1720,12 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            host_string = reverse_ip_tag.address
-            if host_string == "localhost" or host_string == ".":
-                host_string = conn.local_ip_address
-            ip_string = gethostbyname(host_string)
-            ip_address = bytearray(inet_aton(ip_string))
             thread = _SCPMessageThread(
                 self,
                 message=SCPReverseIPTagSetRequest(
+                    conn.chip_x, conn.chip_y,
                     reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
-                    reverse_ip_tag.destination_p, ip_address,
+                    reverse_ip_tag.destination_p,
                     reverse_ip_tag.port, reverse_ip_tag.tag,
                     reverse_ip_tag.port_num),
                 connection=conn)
@@ -1792,7 +1785,8 @@ class Transceiver(object):
         :type connection:\
                     :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :return: An iterable of ip tags
-        :rtype: iterable of :py:class:`spinnman.model.iptag.IPTag`
+        :rtype: iterable of\
+                    :py:class:`spinnman.model.iptag.abstract_iptag.AbstractIPTag`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -1819,7 +1813,7 @@ class Transceiver(object):
             all_tags.extend(callback.get_iptags())
         return all_tags
 
-    def load_multicast_routes(self, x, y, routes, app_id=0):
+    def load_multicast_routes(self, x, y, routes, app_id):
         """ Load a set of multicast routes on to a chip
 
         :param x: The x-coordinate of the chip onto which to load the routes
@@ -1891,15 +1885,18 @@ class Transceiver(object):
         # Load the entries
         self._send_scp_message(SCPRouterInitRequest(x, y, n_entries,
                                                     table_address,
-                                                    base_address))
+                                                    base_address, app_id))
 
-    def get_multicast_routes(self, x, y):
+    def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
 
         :param x: The x-coordinate of the chip from which to get the routes
         :type x: int
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
+        :param app_id: The id of the application to filter the routes for.  If\
+                    not specified, will return all routes
+        :type app_id: int
         :return: An iterable of multicast routes
         :rtype: iterable of :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1925,8 +1922,8 @@ class Transceiver(object):
         routes = list()
         for _ in range(0, 1024):
             reader.read_short()  # next
+            route_app_id = reader.read_byte()  # app_id
             reader.read_byte()  # core
-            reader.read_byte()  # app_id
 
             route = reader.read_int()
             processor_ids = list()
@@ -1940,7 +1937,8 @@ class Transceiver(object):
             key = reader.read_int()
             mask = reader.read_int()
 
-            if route < 0xFF000000:
+            if route < 0xFF000000 and (app_id is None
+                    or app_id == route_app_id):
                 routes.append(MulticastRoutingEntry(key, mask, processor_ids,
                                                     link_ids, False))
 
@@ -1948,6 +1946,7 @@ class Transceiver(object):
 
     def clear_multicast_routes(self, x, y):
         """ Remove all the multicast routes on a chip
+
         :param x: The x-coordinate of the chip on which to clear the routes
         :type x: int
         :param y: The y-coordinate of the chip on which to clear the routes
