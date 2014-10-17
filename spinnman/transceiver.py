@@ -7,10 +7,10 @@ from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
 from spinnman.connections.udp_packet_connections.reverse_iptag_connection import \
     ReverseIPTagConnection
-from spinnman.connections.udp_packet_connections.sdp_iptag_connection import \
-    SDPIPTagConnection
-from spinnman.connections.udp_packet_connections.udp_iptag_connection import \
-    UDPIPTagConnection
+from spinnman.connections.udp_packet_connections.iptag_connection import \
+    IPTagConnection
+from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
+    StrippedIPTagConnection
 
 from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
     import UDPSpinnakerConnection
@@ -347,14 +347,14 @@ class Transceiver(object):
         :raise None: No known exceptions are raised
         """
         for connection in self._sending_connections.values():
-            # Only add a new queue if there isn't one currently
+            # Only add a new _queue if there isn't one currently
             if connection not in self._connection_queues:
                 self._connection_queues[connection] = \
                     _ConnectionQueue(connection)
                 self._connection_queues[connection].start()
 
     def _find_best_connection_queue(self, message, connection=None):
-        """ Finds the best connection queue to use to send a message
+        """ Finds the best connection _queue to use to send a message
 
         :param message: The message to send
         :type message: One of:
@@ -365,7 +365,7 @@ class Transceiver(object):
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :return: The best connection queue
+        :return: The best connection _queue
         :rtype: :py:class:`spinnman.connections._connection_queue.ConnectionQueue`
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
                     no connection can send the type of message given
@@ -394,7 +394,7 @@ class Transceiver(object):
                         best_connection_queue = connection_queue
                         best_connection_queue_size = connection_queue_size
 
-        # If no supported queue was found, raise an exception
+        # If no supported _queue was found, raise an exception
         if best_connection_queue is None:
             raise SpinnmanUnsupportedOperationException(
                 "Sending and receiving {}".format(message.__class__))
@@ -454,7 +454,7 @@ class Transceiver(object):
                                                                  connection)
         logger.debug("Sending message with {}".format(best_connection_queue))
 
-        # Send the message with the best queue
+        # Send the message with the best _queue
         if get_callback:
             return best_connection_queue.send_message_non_blocking(
                 message, response_required, timeout)
@@ -658,7 +658,7 @@ class Transceiver(object):
         """
 
         # Currently, this only finds other UDP connections given a connection
-        # that supports SCP - this is done via the machine
+        # that supports SCP - this is _done via the machine
         if self._sending_connections is None:
             return list()
         self._update_machine()
@@ -697,7 +697,7 @@ class Transceiver(object):
     def get_connections(self):
         """ Get the currently known connections to the board, made up of those\
             passed in to the transceiver and those that are discovered during\
-            calls to discover_connections.  No further discovery is done here.
+            calls to discover_connections.  No further discovery is _done here.
 
         :return: An iterable of connections known to the transciever
         :rtype: iterable of\
@@ -905,7 +905,7 @@ class Transceiver(object):
                     x, y, base_address, constants.CPU_INFO_BYTES)))
                 callback_coordinates.append((x, y, p))
 
-        # Start all the callbacks (not done before to ensure that no errors
+        # Start all the callbacks (not _done before to ensure that no errors
         # occur first
         for callback in callbacks:
             callback.start()
@@ -2106,7 +2106,7 @@ class Transceiver(object):
                 connection.close()
 
     def register_listener(self, callback, recieve_port_no, connection_type,
-                          sdp_port=None):
+                          traffic_type, sdp_port=None):
         if recieve_port_no in self._receiving_connections.keys():
             connection = self._receiving_connections[recieve_port_no]
             if connection_type == connection.connection_type():
@@ -2118,14 +2118,11 @@ class Transceiver(object):
                     "try again with antoher port number", "", "")
         else:
             if connection_type == constants.CONNECTION_TYPE.SDP_IPTAG:
-                connection = SDPIPTagConnection()
-                connection.register_callback(callback)
+                connection = IPTagConnection()
+                connection.register_callback(callback, traffic_type)
             elif connection_type == constants.CONNECTION_TYPE.UDP_IPTAG:
-                connection = UDPIPTagConnection()
-                connection.register_callback(callback)
-            elif connection_type == constants.CONNECTION_TYPE.REVERSE_IPTAG:
-                connection = ReverseIPTagConnection()
-                connection.register_callback(callback)
+                connection = StrippedIPTagConnection()
+                connection.register_callback(callback, traffic_type)
             else:
                 raise SpinnmanInvalidParameterException(
                     "Currently spinnman does not know how to register a "

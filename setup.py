@@ -13,6 +13,7 @@ setup(
             'spinnman._threads',
             'spinnman.connections',
             'spinnman.connections.listeners',
+            'spinnman.connections.listeners.queuers',
             'spinnman.connections.abstract_classes',
             'spinnman.connections.abstract_classes.udp_senders',
             'spinnman.connections.abstract_classes.udp_receivers'

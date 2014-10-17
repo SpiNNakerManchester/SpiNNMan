@@ -36,7 +36,7 @@ class UDPBootConnection(AbstractUDPConnection,
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
                     unless remote_host is specified, in which case binding is\
-                    done to the ip address that will be used to send packets
+                    _done to the ip address that will be used to send packets
         :type local_host: str
         :param local_port: The local port to bind to, between 1025 and 65535.\
                     If not specified, defaults to a random unused local port

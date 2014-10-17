@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class _ConnectionQueue(Thread):
-    """ A queue of messages to be sent down a connection, and callbacks\
+    """ A _queue of messages to be sent down a connection, and callbacks\
         to be called when a message has been sent and/or received.
     """
 
@@ -33,31 +33,31 @@ class _ConnectionQueue(Thread):
         # Store the calls
         self._connection = connection
 
-        # Set up a queue for the messages
+        # Set up a _queue for the messages
         self._message_queue = deque()
 
-        # Set up a queue for the callbacks
+        # Set up a _queue for the callbacks
         self._callback_queue = deque()
 
-        # Set up a queue which indicates whether a response is expected
+        # Set up a _queue which indicates whether a response is expected
         self._wait_for_response_queue = deque()
 
-        # Set up a queue for the timeout
+        # Set up a _queue for the timeout
         self._timeout_queue = deque()
 
         # Set up a condition for thread control
         self._queue_condition = Condition()
 
-        # Marker to indicate if the queue has been closed
+        # Marker to indicate if the _queue has been closed
         self._done = False
 
         self.setDaemon(True)
 
     @property
     def queue_length(self):
-        """ Get the current length of the queue
+        """ Get the current length of the _queue
 
-        :return: The length of the queue
+        :return: The length of the _queue
         :rtype: int
         """
         return len(self._message_queue)
@@ -148,7 +148,7 @@ class _ConnectionQueue(Thread):
         """
         while not self._done:
 
-            # Wait for a message to appear in the queue
+            # Wait for a message to appear in the _queue
             self._queue_condition.acquire()
             while not self._done and len(self._message_queue) == 0:
                 self._queue_condition.wait()
@@ -164,7 +164,7 @@ class _ConnectionQueue(Thread):
                 wait_for_response = self._wait_for_response_queue.pop()
                 timeout = self._timeout_queue.pop()
 
-            # Release the queue
+            # Release the _queue
             self._queue_condition.release()
 
             if not self._done:
@@ -227,7 +227,7 @@ class _ConnectionQueue(Thread):
                                                    sys.exc_info()[2])
 
     def stop(self):
-        """ Stop the queue thread
+        """ Stop the _queue thread
         """
         self._queue_condition.acquire()
         self._done = True

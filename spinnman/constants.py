@@ -29,3 +29,10 @@ CONNECTION_TYPE = Enum(
            ("UDP_IPTAG", 3),
            ("UDP_SPINNAKER", 4),
            ("USB", 5)])
+
+TRAFFIC_TYPE = Enum(
+    value="TRAFFIC_TYPE",
+    names=[("SCP", 0),
+           ("SDP", 1),
+           ("UDP", 2),
+           ("EIEIO", 3)])
