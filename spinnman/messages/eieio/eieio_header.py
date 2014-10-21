@@ -1,5 +1,6 @@
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman import exceptions
+import struct
 
 class EIEIOHeader(object):
 
@@ -48,20 +49,18 @@ class EIEIOHeader(object):
         # the flag for no prefix
         if self._prefix_param is not None:
             data |= 1 << 7  # the flag for prefix
-        else:
-            data |= 0 << 7  # the flag for prefix
+
         #the flag for packet format
-        data |= 0 << 6
+        if self._prefix_type is not None:
+            data |= self._prefix_type.value << 6
+
         #payload param
         if self._payload_base is not None:
             data |= 1 << 5  # the flag for payload prefix
-        else:
-            data |= 0 << 5  # the flag for payload prefix
+
         #time param
         if self._is_time:
             data |= 1 << 4  # the flag for time
-        else:
-            data |= 0 << 4  # the flag for time
 
         #type param
         data |= self._type_param.value << 2
@@ -69,3 +68,19 @@ class EIEIOHeader(object):
         #tag param
         data |= self._tag_param
         byte_writer.write_byte(data)
+        if self._prefix_param is not None:
+            x = struct.pack("<H", self._prefix_param)
+            y = bytearray(x)
+            byte_writer.write_bytes(y)
+
+        if self._payload_base is not None:
+            if (self._type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT
+                    or self._type_param == EIEIOTypeParam.KEY_16_BIT):
+                x = struct.pack("<H", self._payload_base)
+                y = bytearray(x)
+                byte_writer.write_bytes(y)
+            elif (self._type_param == EIEIOTypeParam.KEY_PAYLOAD_32_BIT
+                    or self._type_param == EIEIOTypeParam.KEY_32_BIT):
+                x = struct.pack("<I", self._payload_base)
+                y = bytearray(x)
+                byte_writer.write_bytes(y)
