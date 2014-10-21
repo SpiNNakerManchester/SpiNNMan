@@ -1823,7 +1823,7 @@ class Transceiver(object):
                         "Link ids must be between 0 and 5")
                 route_entry |= (1 << link_id)
             route_writer.write_int(route_entry)
-            route_writer.write_int(route.key)
+            route_writer.write_int(route.key_combo)
             route_writer.write_int(route.mask)
             n_entries += 1
 
