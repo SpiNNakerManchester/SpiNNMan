@@ -44,7 +44,6 @@ class AbstractUDPEIEIOReceiver(AbstractEIEIOReceiver):
                     of the fields of the SCP message is invalid
         """
         # Receive the data
-        raw_data = None
         try:
             read_ready, _, _ = select.select([self._socket], [], [], timeout)
             if not read_ready:
