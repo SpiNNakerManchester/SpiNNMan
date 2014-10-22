@@ -69,3 +69,53 @@ class EIEIOHeader(object):
         #tag param
         data |= self._tag_param
         byte_writer.write_byte(data)
+
+    @staticmethod
+    def create_header_from_reader(byte_reader):
+        """ Read an SDP header from a byte_reader
+
+        :param byte_reader: The reader to read the data from
+        :type byte_reader:\
+                    :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`
+        :return: a eieio header
+        :rtype: :py:class:`spinnman.data.eieio.eieio_header.EIEIOHeader`
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    reading from the reader
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If there\
+                    are too few bytes to read the header
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
+                    is an error setting any of the values
+        """
+        count = byte_reader.read_byte()
+        header_data = byte_reader.read_byte()
+        p = header_data >> 7
+        f = (header_data >> 6) & 1
+        d = (header_data >> 5) & 1
+        t = (header_data >> 4) & 1
+
+        message_type = (header_data >> 2) & 3
+        tag = header_data & 3
+        prefix = None
+        if p == 1:
+            prefix2 = byte_reader.read_byte()
+            prefix1 = byte_reader.read_byte()
+            prefix = (prefix1 << 8) & prefix2
+
+        if message_type == 0:
+            message_type = EIEIOTypeParam.KEY_16_BIT
+        elif message_type == 1:
+            message_type = EIEIOTypeParam.KEY_PAYLOAD_16_BIT
+        elif message_type == 2:
+            message_type = EIEIOTypeParam.KEY_32_BIT
+        elif message_type == 3:
+            message_type = EIEIOTypeParam.KEY_PAYLOAD_32_BIT
+        else:
+            raise exceptions.SpinnmanInvalidPacketException(
+                "eieio header", "the type param from the received packet is "
+                                "invalid")
+
+        return EIEIOHeader(
+            type_param=message_type, count_param=count, tag_param=tag,
+            prefix_param=prefix, payload_base=d, prefix_type=f, is_time=bool(t))
+
+
