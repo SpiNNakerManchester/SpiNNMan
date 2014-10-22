@@ -102,7 +102,7 @@ class EIEIOHeader(object):
         """
         count = byte_reader.read_byte()
         header_data = byte_reader.read_byte()
-        p = header_data >> 7
+        p = (header_data >> 7) & 1
         f = (header_data >> 6) & 1
         d = (header_data >> 5) & 1
         t = (header_data >> 4) & 1
@@ -113,7 +113,7 @@ class EIEIOHeader(object):
         if p == 1:
             prefix2 = byte_reader.read_byte()
             prefix1 = byte_reader.read_byte()
-            prefix = (prefix1 << 8) & prefix2
+            prefix = (prefix1 << 8) | prefix2
 
         if message_type == 0:
             message_type = EIEIOTypeParam.KEY_16_BIT
