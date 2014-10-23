@@ -73,11 +73,10 @@ from spinnman.data.little_endian_byte_array_byte_writer \
 from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
 
-from spinnman._threads._scp_message_thread import _SCPMessageThread
-from spinnman._threads._iobuf_thread import _IOBufThread
-from spinnman._threads._get_iptags_thread import _GetIPTagsThread
-
-from spinnman import reports
+# noinspection
+from _threads._scp_message_interface import SCPMessageInterface
+from _threads._iobuf_interface import IOBufInterface
+from _threads._get_iptags_interface import GetIPTagsInterface
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -91,6 +90,7 @@ from collections import deque
 from threading import Condition
 from socket import gethostbyname
 from socket import inet_aton
+from multiprocessing.pool import ThreadPool
 
 import logging
 import math
@@ -162,7 +162,7 @@ class Transceiver(object):
     """
 
     def __init__(self, connections=None, discover=True, ignore_chips=None,
-            ignore_cores=None, max_core_id=None):
+            ignore_cores=None, max_core_id=None, thread_pool_no=5):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -226,6 +226,8 @@ class Transceiver(object):
         self._connection_queues = dict()
         self._update_connection_queues()
 
+        self._scp_message_thread_pool = ThreadPool(processes=thread_pool_no)
+
         # Discover any new connections, and update the queues if requested
         if discover:
             self.discover_connections()
@@ -249,6 +251,7 @@ class Transceiver(object):
         self._chip_execute_locks = dict()
         self._chip_execute_lock_condition = Condition()
         self._n_chip_execute_locks = 0
+
 
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
@@ -407,13 +410,13 @@ class Transceiver(object):
         :rtype:
                     * If get_callback is False, and response_required is True,
                       and the message type is AbstractSCPRequest then\
-                      :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
+    :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
                     * If get_callback is False, and response_required is True,
                       then the same type as the message
                     * If get_callback is False, and response_required is False,
                       then None
                     * If get_callback is True, then\
-                      :py:class:`spinnman.connections._message_callback._MessageCallback`
+            :py:class:`spinnman.connections._message_callback._MessageCallback`
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
                     timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
@@ -446,7 +449,7 @@ class Transceiver(object):
 
         :param message: The message to send
         :type message:\
-                    :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
+    :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
         :param retry_codes: The response codes which will result in a\
                     retry if received as a response
         :type retry_codes: iterable of\
@@ -458,9 +461,10 @@ class Transceiver(object):
         :type timeout: int
         :param connection: The connection to use
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :return: The received response, or the callback if get_callback is True
-        :rtype: :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
+        :rtype:
+    :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
                     timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
@@ -475,10 +479,10 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     the response is not one of the expected codes
         """
-        thread = _SCPMessageThread(
+        thread = SCPMessageInterface(
             transceiver=self, message=message, retry_codes=retry_codes,
             n_retries=n_retries, timeout=timeout, connection=connection)
-        thread.start()
+        self._scp_message_thread_pool.apply_async(thread.run())
         return thread.get_response()
 
     def _make_chip(self, chip_details):
@@ -496,16 +500,17 @@ class Transceiver(object):
         processors = list()
         for virtual_core_id in chip_details.virtual_core_ids:
             if (self._ignore_cores is not None
-                    and self._ignore_cores.is_core(chip_details.x,
-                            chip_details.y, virtual_core_id)):
-                logger.debug("Ignoring core {} on chip {}, {}".format(
-                        chip_details.x, chip_details.y, virtual_core_id))
+                    and self._ignore_cores.is_core(
+                        chip_details.x, chip_details.y, virtual_core_id)):
+                logger.debug("Ignoring core {} on chip {}, {}"
+                             .format(chip_details.x, chip_details.y,
+                                     virtual_core_id))
                 continue
             if (self._max_core_id is not None
                     and virtual_core_id > self._max_core_id):
-                logger.debug("Ignoring core {} on chip {}, {} as > {}".format(
-                        chip_details.x, chip_details.y, virtual_core_id,
-                        self._max_core_id))
+                logger.debug("Ignoring core {} on chip {}, {} as > {}"
+                             .format(chip_details.x, chip_details.y,
+                                     virtual_core_id, self._max_core_id))
                 continue
 
             processors.append(Processor(
@@ -559,13 +564,15 @@ class Transceiver(object):
                         base_address=_SYSTEM_VARIABLE_BASE_ADDRESS,
                         size=_SYSTEM_VARIABLE_BYTES))
                     new_chip_details = ChipInfo(response.data)
-                    logger.debug("Found chip {}, {}".format(
-                            new_chip_details.x, new_chip_details.y))
+                    logger.debug("Found chip {}, {}"
+                                 .format(new_chip_details.x,
+                                         new_chip_details.y))
                     if (self._ignore_chips is not None
                             and self._ignore_chips.is_chip(
                                 new_chip_details.x, new_chip_details.y)):
-                        logger.debug("Ignoring chip {}, {}".format(
-                                new_chip_details.x, new_chip_details.y))
+                        logger.debug("Ignoring chip {}, {}"
+                                     .format(new_chip_details.x,
+                                             new_chip_details.y))
                         continue
 
                     # Standard links use the opposite link id (with ids between
@@ -574,8 +581,8 @@ class Transceiver(object):
 
                     # Update the defaults of any existing link
                     if chip.router.is_link(opposite_link_id):
-                        logger.debug("Opposite link {} found".format(
-                                opposite_link_id))
+                        logger.debug("Opposite link {} found"
+                                     .format(opposite_link_id))
                         opposite_link = chip.router.get_link(opposite_link_id)
                         opposite_link.multicast_default_to = link
                         opposite_link.multicast_default_from = link
@@ -643,7 +650,8 @@ class Transceiver(object):
         new_connections = list()
         for ethernet_connected_chip in self._machine.ethernet_connected_chips:
             if (ethernet_connected_chip.ip_address,
-                    constants.UDP_CONNECTION_DEFAULT_PORT) not in self._udp_connections:
+                    constants.UDP_CONNECTION_DEFAULT_PORT) \
+                    not in self._udp_connections:
                 new_connection = UDPConnection(
                     remote_host=ethernet_connected_chip.ip_address,
                     chip_x=ethernet_connected_chip.x,
@@ -691,7 +699,7 @@ class Transceiver(object):
         return MachineDimensions(self._machine.max_chip_x,
                                  self._machine.max_chip_y)
 
-    def get_machine_details(self, skip_chips=None, skip_cores=None):
+    def get_machine_details(self):
         """ Get the details of the machine made up of chips on a board and how\
             they are connected to each other.
 
@@ -722,10 +730,15 @@ class Transceiver(object):
         :rtype: bool
         :raise None: No known exceptions are raised
         """
-        for connection in self._connections:
+        if connection is not None:
             if connection.is_connected():
                 return True
-        return False
+            return False
+        else:
+            for connection in self._connections:
+                if connection.is_connected():
+                    return True
+            return False
 
     def get_scamp_version(self, n_retries=3, timeout=1):
         """ Get the version of scamp which is running on the board
@@ -862,14 +875,14 @@ class Transceiver(object):
                             x, y))
                 base_address = (chip_info.cpu_information_base_address
                                 + (CPU_INFO_BYTES * p))
-                callbacks.append(_SCPMessageThread(self, SCPReadMemoryRequest(
+                callbacks.append(SCPMessageInterface(self, SCPReadMemoryRequest(
                     x, y, base_address, CPU_INFO_BYTES)))
                 callback_coordinates.append((x, y, p))
 
         # Start all the callbacks (not done before to ensure that no errors
         # occur first
         for callback in callbacks:
-            callback.start()
+            self._scp_message_thread_pool.apply_async(callback.run())
 
         # Gather the results
         for callback, (x, y, p) in zip(callbacks, callback_coordinates):
@@ -975,10 +988,11 @@ class Transceiver(object):
             chip_info = self._chip_info[(cpu_info.x, cpu_info.y)]
             iobuf_bytes = chip_info.iobuf_size
 
-            thread = _IOBufThread(
+            thread = IOBufInterface(
                 self, cpu_info.x, cpu_info.y, cpu_info.p,
-                cpu_info.iobuf_address, iobuf_bytes)
-            thread.start()
+                cpu_info.iobuf_address, iobuf_bytes,
+                self._scp_message_thread_pool)
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         # Gather the results
@@ -1047,7 +1061,8 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
-        :type executable: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+        :type executable:
+    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray
         :param app_id: The id of the application with which to associate the\
                     executable
@@ -1106,7 +1121,8 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
-        :type executable: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+        :type executable:
+    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray
         :param app_id: The id of the application with which to associate the\
                     executable
@@ -1147,9 +1163,9 @@ class Transceiver(object):
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
-            thread = _SCPMessageThread(self, SCPApplicationRunRequest(
+            thread = SCPMessageInterface(self, SCPApplicationRunRequest(
                 app_id, x, y, core_subset.processor_ids))
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         # Go through the callbacks and check that the responses are OK
@@ -1276,9 +1292,9 @@ class Transceiver(object):
             data_size = len(data_array)
 
             if data_size != 0:
-                thread = _SCPMessageThread(self, SCPWriteMemoryRequest(
+                thread = SCPMessageInterface(self, SCPWriteMemoryRequest(
                     x, y, address_to_write, data_array))
-                thread.start()
+                self._scp_message_thread_pool.apply_async(thread.run())
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1360,9 +1376,9 @@ class Transceiver(object):
             data_size = len(data_array)
 
             if data_size != 0:
-                thread = _SCPMessageThread(self, SCPWriteLinkRequest(
+                thread = SCPMessageInterface(self, SCPWriteLinkRequest(
                     x, y, cpu, link, address_to_write, data_array))
-                thread.start()
+                self._scp_message_thread_pool.apply_async(thread.run())
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1439,10 +1455,10 @@ class Transceiver(object):
             data_size = len(data_array)
 
             if data_size != 0:
-                thread = _SCPMessageThread(self, SCPFloodFillDataRequest(
+                thread = SCPMessageInterface(self, SCPFloodFillDataRequest(
                     nearest_neighbour_id, block_no, address_to_write,
                     data_array))
-                thread.start()
+                self._scp_message_thread_pool.apply_async(thread.run())
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1495,9 +1511,9 @@ class Transceiver(object):
             data_size = bytes_to_get
             if data_size > 256:
                 data_size = 256
-            thread = _SCPMessageThread(self, SCPReadMemoryRequest(
+            thread = SCPMessageInterface(self, SCPReadMemoryRequest(
                 x, y, address_to_read, data_size))
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
             bytes_to_get -= data_size
             address_to_read += data_size
@@ -1549,9 +1565,9 @@ class Transceiver(object):
             data_size = bytes_to_get
             if data_size > 256:
                 data_size = 256
-            thread = _SCPMessageThread(self, SCPReadLinkRequest(
+            thread = SCPMessageInterface(self, SCPReadLinkRequest(
                 x, y, cpu, link, address_to_read, data_size))
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
             bytes_to_get -= data_size
             address_to_read += data_size
@@ -1642,13 +1658,13 @@ class Transceiver(object):
                 host_string = conn.local_ip_address
             ip_string = gethostbyname(host_string)
             ip_address = bytearray(inet_aton(ip_string))
-            thread = _SCPMessageThread(
+            thread = SCPMessageInterface(
                 self,
                 message=SCPIPTagSetRequest(
                     conn.chip_x, conn.chip_y, ip_address, ip_tag.port,
                     ip_tag.tag, strip=ip_tag.strip_sdp),
                 connection=conn)
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         for callback in callbacks:
@@ -1684,7 +1700,7 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            thread = _SCPMessageThread(
+            thread = SCPMessageInterface(
                 self,
                 message=SCPReverseIPTagSetRequest(
                     conn.chip_x, conn.chip_y,
@@ -1693,7 +1709,7 @@ class Transceiver(object):
                     reverse_ip_tag.port, reverse_ip_tag.tag,
                     reverse_ip_tag.port_num),
                 connection=conn)
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         for callback in callbacks:
@@ -1729,12 +1745,12 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            thread = _SCPMessageThread(
+            thread = SCPMessageInterface(
                 self,
                 message=SCPIPTagClearRequest(
                     conn.chip_x, conn.chip_y, tag),
                 connection=conn)
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         for callback in callbacks:
@@ -1768,8 +1784,10 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            thread = _GetIPTagsThread(self, conn)
-            thread.start()
+            thread = GetIPTagsInterface(self, conn,
+                                        self._scp_message_thread_pool)
+
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         all_tags = list()

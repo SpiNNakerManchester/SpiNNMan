@@ -1,9 +1,10 @@
-from threading import Thread
 from threading import Condition
 from spinnman.model.io_buffer import IOBuffer
-from spinnman.data.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
-from spinnman._threads._scp_message_thread import _SCPMessageThread
-from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
+from spinnman.data.little_endian_byte_array_byte_reader \
+    import LittleEndianByteArrayByteReader
+from _scp_message_interface import SCPMessageInterface
+from spinnman.messages.scp.impl.scp_read_memory_request \
+    import SCPReadMemoryRequest
 
 import sys
 import logging
@@ -11,11 +12,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class _IOBufThread(Thread):
+class IOBufInterface(object):
     """ A thread for reading the IOBUF from a core
     """
 
-    def __init__(self, transceiver, x, y, p, iobuf_address, iobuf_bytes):
+    def __init__(self, transceiver, x, y, p, iobuf_address, iobuf_bytes,
+                 thread_pool):
         """
 
         :param transceiver: The transceiver to use to send the message
@@ -30,7 +32,6 @@ class _IOBufThread(Thread):
         :type iobuf_bytes: int
         :raise None: No known exceptions are thrown
         """
-        super(_IOBufThread, self).__init__()
         self._transceiver = transceiver
         self._x = x
         self._y = y
@@ -42,8 +43,7 @@ class _IOBufThread(Thread):
         self._iobuf = None
         self._exception = None
         self._traceback = None
-
-        self.setDaemon(True)
+        self._thread_pool = thread_pool
 
     def run(self):
         """ Run method of the thread.  Note callers should call start() to\
@@ -56,10 +56,10 @@ class _IOBufThread(Thread):
             while base_address != 0:
 
                 # Read the first packets worth of data
-                first_thread = _SCPMessageThread(
-                        self._transceiver, SCPReadMemoryRequest(
-                                self._x, self._y, base_address, 256))
-                first_thread.start()
+                first_thread = SCPMessageInterface(
+                    self._transceiver, SCPReadMemoryRequest(
+                        self._x, self._y, base_address, 256))
+                self._thread_pool.apply_async(first_thread.run())
                 first_data = first_thread.get_response().data
                 reader = LittleEndianByteArrayByteReader(first_data)
 
@@ -68,9 +68,8 @@ class _IOBufThread(Thread):
                 reader.read_int()  # time
                 reader.read_int()  # milliseconds
                 bytes_to_read = reader.read_int()
-                logger.debug("Reading {} bytes of IOBUF,"
-                        " next buffer at {}".format(
-                                bytes_to_read, next_base_address))
+                logger.debug("Reading {} bytes of IOBUF, next buffer at {}"
+                             .format(bytes_to_read, next_base_address))
 
                 # Read the data out of the packet
                 data = reader.read_bytes()
@@ -83,7 +82,7 @@ class _IOBufThread(Thread):
                 # Read any remaining bytes
                 if bytes_to_read > 0:
                     data = self._transceiver.read_memory(
-                            self._x, self._y, base_address, bytes_to_read)
+                        self._x, self._y, base_address, bytes_to_read)
                     for data_item in data:
                         iobuf += data_item.decode("ascii")
 
@@ -112,5 +111,4 @@ class _IOBufThread(Thread):
         if self._exception is not None:
             raise self._exception, None, self._traceback
 
-        return IOBuffer(
-                self._x, self._y, self._p, self._iobuf)
+        return IOBuffer(self._x, self._y, self._p, self._iobuf)
