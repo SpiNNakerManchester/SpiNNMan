@@ -2114,3 +2114,11 @@ class Transceiver(object):
             if (close_original_connections
                     or connection not in self._original_connections):
                 connection.close()
+
+    def __str__(self):
+        return "transciever object connected to {} with {} connections"\
+            .format(self._connections[0].remote_ip_address,
+                    len(self._udp_connections.keys()))
+
+    def __repr__(self):
+        return self.__str__()
