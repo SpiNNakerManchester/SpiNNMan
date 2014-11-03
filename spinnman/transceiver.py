@@ -1501,7 +1501,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-
+        assert(base_address <= math.pow(2, 32))
         # Set up all the requests and get the callbacks
         logger.debug("Reading {} bytes of memory".format(length))
         bytes_to_get = length
