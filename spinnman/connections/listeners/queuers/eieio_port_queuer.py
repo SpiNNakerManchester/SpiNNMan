@@ -21,8 +21,11 @@ class EIEIOPortQueuer(AbstractPortQueuer):
         logger.info("[port_queuer] starting")
         while not self._done:
             try:
-                data, addr = self._connection.receive_eieio_message()
-                self._queue.append(data)
+                message = self._connection.receive_eieio_message()
+                self._queue.append(message)
+                print "========================="
+                for i in message.data:
+                    print "{0:s} ".format(hex(i)[2:])
             except socket.timeout:
                 pass
         self._queue.append(None)
