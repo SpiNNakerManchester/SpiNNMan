@@ -23,9 +23,6 @@ class EIEIOPortQueuer(AbstractPortQueuer):
             try:
                 message = self._connection.receive_eieio_message()
                 self._queue.append(message)
-#                print "========================="
-#                for i in message.data:
-#                    print "{0:s} ".format(hex(i)[2:])
             except socket.timeout:
                 pass
         self._queue.append(None)

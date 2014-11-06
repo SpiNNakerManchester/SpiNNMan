@@ -21,8 +21,11 @@ class AbstractUDPEIEIOReceiver(AbstractEIEIOReceiver):
     """
 
     @abstractmethod
-    def is_udp_eieio_reciever(self):
+    def is_udp_eieio_receiver(self):
         pass
+
+    def is_eieio_receiver(self):
+        return True
 
     def receive_eieio_message(self, timeout=None):
         """ Receives an eieio message from this connection.  Blocks\
@@ -57,13 +60,6 @@ class AbstractUDPEIEIOReceiver(AbstractEIEIOReceiver):
         # Set up for reading
         packet = bytearray(raw_data)
         reader = LittleEndianByteArrayByteReader(packet)
-
-        # Read the padding
-        try:
-            reader.read_short()
-        except EOFError:
-            raise SpinnmanInvalidPacketException(
-                "SDP", "Not enough bytes to read the pre-packet padding")
 
         eieio_header = EIEIOHeader.create_header_from_reader(reader)
         data = reader.read_bytes()

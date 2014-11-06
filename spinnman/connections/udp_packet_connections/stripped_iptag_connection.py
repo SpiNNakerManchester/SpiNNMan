@@ -1,18 +1,18 @@
 from spinnman import exceptions
 from spinnman.connections.abstract_classes.abstract_callbackable_connection import \
     AbstractCallbackableConnection
-from spinnman.connections.abstract_classes.abstract_eieio_receiver import \
-    AbstractEIEIOReceiver
 from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
 from spinnman import constants
+from spinnman.connections.abstract_classes.udp_receivers.\
+    abstract_udp_eieio_receiver import AbstractUDPEIEIOReceiver
 from spinnman.connections.listeners.port_listener import PortListener
 from spinnman.connections.listeners.queuers.eieio_port_queuer import \
     EIEIOPortQueuer
 from spinnman.connections.listeners.queuers.udp_port_queuer import UDPPortQueuer
 
 
-class StrippedIPTagConnection(AbstractUDPConnection, AbstractEIEIOReceiver,
+class StrippedIPTagConnection(AbstractUDPConnection, AbstractUDPEIEIOReceiver,
                               AbstractCallbackableConnection):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
@@ -43,10 +43,7 @@ class StrippedIPTagConnection(AbstractUDPConnection, AbstractEIEIOReceiver,
     def recieve_raw(self, timeout):
         raise NotImplementedError
 
-    def is_eieio_receiver(self):
-        return True
-
-    def receive_eieio_message(self, timeout=None):
+    def is_udp_eieio_receiver(self):
         return True
 
     def connection_type(self):
@@ -74,6 +71,7 @@ class StrippedIPTagConnection(AbstractUDPConnection, AbstractEIEIOReceiver,
                     "traffic_type", traffic_type.name,
                     "The traffic type is not supported by this connection and "
                     "therefore a callback cannot be set for this connection")
+            self._callback_listener.start()
         elif self._callback_traffic_type == traffic_type:
             self._callback_listener.register_callback(callback)
         else:

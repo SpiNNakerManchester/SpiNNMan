@@ -14,7 +14,6 @@ class AbstractPortQueuer(threading.Thread):
     def __init__(self, connection):
         threading.Thread.__init__(self)
         self._queue = collections.deque()
-        self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._done = False
         self._exited = False
         self._connection = connection
@@ -28,13 +27,6 @@ class AbstractPortQueuer(threading.Thread):
         self._done = True
         while not self._exited:
             pass
-        try:
-            self._sock.shutdown(socket.SHUT_RDWR)
-        except Exception as e:
-            logger.warn("tries to close a non-connected socket, ignoring "
-                        "and continuing")
-            return 0
-        self._sock.close()
 
     @abstractmethod
     def run(self):
