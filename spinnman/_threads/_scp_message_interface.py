@@ -2,22 +2,21 @@ from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
-from threading import Thread
 from threading import Condition
 
 from time import sleep
 import sys
 
 
-class _SCPMessageThread(Thread):
+class SCPMessageInterface(object):
     """ A thread for SCP, that can retry the send a number of times for a\
         given set of error conditions (and also retries on timeouts).
     """
 
     def __init__(self, transceiver, message, retry_codes=(
-                SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_TIMEOUT,
-                SCPResult.RC_LEN),
-            n_retries=10, timeout=1, connection=None):
+                 SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_TIMEOUT,
+                 SCPResult.RC_LEN),
+                 n_retries=10, timeout=1, connection=None):
         """
         :param transceiver: The transceiver that will send the message
         :type transceiver: :py:class:`spinnman.transceiver.Transceiver`
@@ -39,7 +38,6 @@ class _SCPMessageThread(Thread):
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        super(_SCPMessageThread, self).__init__()
         self._transceiver = transceiver
         self._message = message
         self._retry_codes = retry_codes
@@ -50,8 +48,7 @@ class _SCPMessageThread(Thread):
         self._response = None
         self._exception = None
         self._traceback = None
-
-        self.setDaemon(True)
+        self._connection = connection
 
     def run(self):
         """ Run method of the Thread.  Note that start should be called to\
@@ -64,9 +61,9 @@ class _SCPMessageThread(Thread):
             retry = False
             last_exception = None
             try:
-                response = self._transceiver._send_message(
-                        message=self._message, response_required=True,
-                        timeout=self._timeout)
+                response = self._transceiver.send_message(
+                    message=self._message, response_required=True,
+                    timeout=self._timeout, connection=self._connection)
 
                 if response.scp_response_header.result == SCPResult.RC_OK:
                     self._response_condition.acquire()
@@ -110,8 +107,8 @@ class _SCPMessageThread(Thread):
             self._exception = last_exception
         else:
             self._exception = SpinnmanUnexpectedResponseCodeException(
-                    "SCP", self._message.scp_request_header.command.name,
-                    response.scp_response_header.result.name)
+                "SCP", self._message.scp_request_header.command.name,
+                response.scp_response_header.result.name)
         self._response_condition.notify_all()
         self._response_condition.release()
 

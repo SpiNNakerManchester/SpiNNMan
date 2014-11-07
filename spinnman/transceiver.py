@@ -1,8 +1,3 @@
-from collections import deque
-from threading import Condition
-from socket import gethostbyname
-from socket import inet_aton
-import logging
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
@@ -77,9 +72,10 @@ from spinnman.data.little_endian_byte_array_byte_writer \
 from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
 
-from spinnman._threads._scp_message_thread import _SCPMessageThread
-from spinnman._threads._iobuf_thread import _IOBufThread
-from spinnman._threads._get_iptags_thread import _GetIPTagsThread
+# noinspection
+from _threads._scp_message_interface import SCPMessageInterface
+from _threads._iobuf_interface import IOBufInterface
+from _threads._get_iptags_interface import GetIPTagsInterface
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -88,6 +84,14 @@ from spinn_machine.processor import Processor
 from spinn_machine.router import Router
 from spinn_machine.link import Link
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
+
+from collections import deque
+from threading import Condition
+from socket import gethostbyname
+from socket import inet_aton
+from multiprocessing.pool import ThreadPool
+
+import logging
 import math
 
 
@@ -159,9 +163,9 @@ class Transceiver(object):
 
     """
 
-    def __init__(
-            self, connections=None, discover=True, ignore_chips=None,
-            ignore_cores=None, max_core_id=None, shut_down_connections=False):
+    def __init__(self, connections=None, discover=True, ignore_chips=None,
+                 ignore_cores=None, max_core_id=None, shut_down_connections=False,
+                 thread_pool_no=5):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -219,7 +223,9 @@ class Transceiver(object):
         self._connection_queues = dict()
         self._update_connection_queues()
 
-        # Discover any new connections, and update the listeners if requested
+        self._scp_message_thread_pool = ThreadPool(processes=thread_pool_no)
+
+        # Discover any new connections, and update the queues if requested
         if discover:
             self.discover_scamp_connections()
             number_of_connections = len(self._sending_connections.values())
@@ -372,7 +378,7 @@ class Transceiver(object):
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :return: The best connection _queue
+        :return: The best connection queue
         :rtype: :py:class:`spinnman.connections._connection_queue.ConnectionQueue`
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
                     no connection can send the type of message given
@@ -403,10 +409,11 @@ class Transceiver(object):
                         best_connection_queue = connection_queue
                         best_connection_queue_size = connection_queue_size
 
-        # If no supported _queue was found, raise an exception
+        # If no supported queue was found, raise an exception
         if best_connection_queue is None:
             raise SpinnmanUnsupportedOperationException(
                 "Sending and receiving {}".format(message.__class__))
+
         return best_connection_queue
 
     def _send_message(self, message, response_required, connection=None,
@@ -463,7 +470,7 @@ class Transceiver(object):
                                                                  connection)
         logger.debug("Sending message with {}".format(best_connection_queue))
 
-        # Send the message with the best _queue
+        # Send the message with the best queue
         if get_callback:
             return best_connection_queue.send_message_non_blocking(
                 message, response_required, timeout)
@@ -508,10 +515,10 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     the response is not one of the expected codes
         """
-        thread = _SCPMessageThread(
+        thread = SCPMessageInterface(
             transceiver=self, message=message, retry_codes=retry_codes,
             n_retries=n_retries, timeout=timeout, connection=connection)
-        thread.start()
+        self._scp_message_thread_pool.apply_async(thread.run())
         return thread.get_response()
 
     def _make_chip(self, chip_details):
@@ -536,9 +543,9 @@ class Transceiver(object):
                 continue
             if (self._max_core_id is not None
                     and virtual_core_id > self._max_core_id):
-                logger.debug("Ignoring core {} on chip {}, {} as > {}".format(
-                             chip_details.x, chip_details.y, virtual_core_id,
-                             self._max_core_id))
+                logger.debug("Ignoring core {} on chip {}, {} as > {}"
+                             .format(chip_details.x, chip_details.y,
+                                     virtual_core_id, self._max_core_id))
                 continue
 
             processors.append(Processor(
@@ -592,13 +599,15 @@ class Transceiver(object):
                         base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
                         size=constants.SYSTEM_VARIABLE_BYTES))
                     new_chip_details = ChipInfo(response.data)
-                    logger.debug("Found chip {}, {}".format(
-                                 new_chip_details.x, new_chip_details.y))
+                    logger.debug("Found chip {}, {}"
+                                 .format(new_chip_details.x,
+                                         new_chip_details.y))
                     if (self._ignore_chips is not None
                             and self._ignore_chips.is_chip(
                                 new_chip_details.x, new_chip_details.y)):
-                        logger.debug("Ignoring chip {}, {}".format(
-                                     new_chip_details.x, new_chip_details.y))
+                        logger.debug("Ignoring chip {}, {}"
+                                     .format(new_chip_details.x,
+                                             new_chip_details.y))
                         continue
 
                     # Standard links use the opposite link id (with ids between
@@ -607,8 +616,8 @@ class Transceiver(object):
 
                     # Update the defaults of any existing link
                     if chip.router.is_link(opposite_link_id):
-                        logger.debug("Opposite link {} found".format(
-                                     opposite_link_id))
+                        logger.debug("Opposite link {} found"
+                                     .format(opposite_link_id))
                         opposite_link = chip.router.get_link(opposite_link_id)
                         opposite_link.multicast_default_to = link
                         opposite_link.multicast_default_from = link
@@ -708,7 +717,7 @@ class Transceiver(object):
     def get_connections(self):
         """ Get the currently known connections to the board, made up of those\
             passed in to the transceiver and those that are discovered during\
-            calls to discover_connections.  No further discovery is _done here.
+            calls to discover_connections.  No further discovery is done here.
 
         :return: An iterable of connections known to the transciever
         :rtype: iterable of\
@@ -768,14 +777,15 @@ class Transceiver(object):
         :rtype: bool
         :raise None: No known exceptions are raised
         """
-        if connection is None:
+        if connection is not None:
+            if connection.is_connected():
+                return True
+            return False
+        else:
             for connection in self._sending_connections.values():
                 if connection.is_connected():
                     return True
-        else:
-            if connection.is_connected():
-                return True
-        return False
+            return False
 
     def get_scamp_version(self, n_retries=3, timeout=1):
         """ Get the version of scamp which is running on the board
@@ -912,14 +922,14 @@ class Transceiver(object):
                             x, y))
                 base_address = (chip_info.cpu_information_base_address
                                 + (constants.CPU_INFO_BYTES * p))
-                callbacks.append(_SCPMessageThread(self, SCPReadMemoryRequest(
+                callbacks.append(SCPMessageInterface(self, SCPReadMemoryRequest(
                     x, y, base_address, constants.CPU_INFO_BYTES)))
                 callback_coordinates.append((x, y, p))
 
-        # Start all the callbacks (not _done before to ensure that no errors
+        # Start all the callbacks (not done before to ensure that no errors
         # occur first
         for callback in callbacks:
-            callback.start()
+            self._scp_message_thread_pool.apply_async(callback.run())
 
         # Gather the results
         for callback, (x, y, p) in zip(callbacks, callback_coordinates):
@@ -1025,10 +1035,11 @@ class Transceiver(object):
             chip_info = self._chip_info[(cpu_info.x, cpu_info.y)]
             iobuf_bytes = chip_info.iobuf_size
 
-            thread = _IOBufThread(
+            thread = IOBufInterface(
                 self, cpu_info.x, cpu_info.y, cpu_info.p,
-                cpu_info.iobuf_address, iobuf_bytes)
-            thread.start()
+                cpu_info.iobuf_address, iobuf_bytes,
+                self._scp_message_thread_pool)
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         # Gather the results
@@ -1197,9 +1208,9 @@ class Transceiver(object):
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
-            thread = _SCPMessageThread(self, SCPApplicationRunRequest(
+            thread = SCPMessageInterface(self, SCPApplicationRunRequest(
                 app_id, x, y, core_subset.processor_ids))
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         # Go through the callbacks and check that the responses are OK
@@ -1326,9 +1337,9 @@ class Transceiver(object):
             data_size = len(data_array)
 
             if data_size != 0:
-                thread = _SCPMessageThread(self, SCPWriteMemoryRequest(
+                thread = SCPMessageInterface(self, SCPWriteMemoryRequest(
                     x, y, address_to_write, data_array))
-                thread.start()
+                self._scp_message_thread_pool.apply_async(thread.run())
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1410,9 +1421,9 @@ class Transceiver(object):
             data_size = len(data_array)
 
             if data_size != 0:
-                thread = _SCPMessageThread(self, SCPWriteLinkRequest(
+                thread = SCPMessageInterface(self, SCPWriteLinkRequest(
                     x, y, cpu, link, address_to_write, data_array))
-                thread.start()
+                self._scp_message_thread_pool.apply_async(thread.run())
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1489,10 +1500,10 @@ class Transceiver(object):
             data_size = len(data_array)
 
             if data_size != 0:
-                thread = _SCPMessageThread(self, SCPFloodFillDataRequest(
+                thread = SCPMessageInterface(self, SCPFloodFillDataRequest(
                     nearest_neighbour_id, block_no, address_to_write,
                     data_array))
-                thread.start()
+                self._scp_message_thread_pool.apply_async(thread.run())
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1535,7 +1546,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-
+        assert(base_address <= math.pow(2, 32))
         # Set up all the requests and get the callbacks
         logger.debug("Reading {} bytes of memory".format(length))
         bytes_to_get = length
@@ -1545,9 +1556,9 @@ class Transceiver(object):
             data_size = bytes_to_get
             if data_size > 256:
                 data_size = 256
-            thread = _SCPMessageThread(self, SCPReadMemoryRequest(
+            thread = SCPMessageInterface(self, SCPReadMemoryRequest(
                 x, y, address_to_read, data_size))
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
             bytes_to_get -= data_size
             address_to_read += data_size
@@ -1599,9 +1610,9 @@ class Transceiver(object):
             data_size = bytes_to_get
             if data_size > 256:
                 data_size = 256
-            thread = _SCPMessageThread(self, SCPReadLinkRequest(
+            thread = SCPMessageInterface(self, SCPReadLinkRequest(
                 x, y, cpu, link, address_to_read, data_size))
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
             bytes_to_get -= data_size
             address_to_read += data_size
@@ -1692,13 +1703,13 @@ class Transceiver(object):
                 host_string = conn.local_ip_address
             ip_string = gethostbyname(host_string)
             ip_address = bytearray(inet_aton(ip_string))
-            thread = _SCPMessageThread(
+            thread = SCPMessageInterface(
                 self,
                 message=SCPIPTagSetRequest(
                     conn.chip_x, conn.chip_y, ip_address, ip_tag.port,
                     ip_tag.tag, strip=ip_tag.strip_sdp),
                 connection=conn)
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         for callback in callbacks:
@@ -1734,7 +1745,7 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            thread = _SCPMessageThread(
+            thread = SCPMessageInterface(
                 self,
                 message=SCPReverseIPTagSetRequest(
                     conn.chip_x, conn.chip_y,
@@ -1743,7 +1754,7 @@ class Transceiver(object):
                     reverse_ip_tag.port, reverse_ip_tag.tag,
                     reverse_ip_tag.port_num),
                 connection=conn)
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         for callback in callbacks:
@@ -1779,12 +1790,12 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            thread = _SCPMessageThread(
+            thread = SCPMessageInterface(
                 self,
                 message=SCPIPTagClearRequest(
                     conn.chip_x, conn.chip_y, tag),
                 connection=conn)
-            thread.start()
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         for callback in callbacks:
@@ -1818,8 +1829,10 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            thread = _GetIPTagsThread(self, conn)
-            thread.start()
+            thread = GetIPTagsInterface(self, conn,
+                                        self._scp_message_thread_pool)
+
+            self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
 
         all_tags = list()
@@ -2141,3 +2154,11 @@ class Transceiver(object):
                     "Currently spinnman does not know how to register a "
                     "callback to a connection of type {}."
                     .format(connection_type), "", "")
+
+    def __str__(self):
+        return "transciever object connected to {} with {} connections"\
+            .format(self._sending_connections[0].remote_ip_address,
+                    len(self._udp_connections.keys()))
+
+    def __repr__(self):
+        return self.__str__()
