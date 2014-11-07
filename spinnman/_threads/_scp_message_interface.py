@@ -61,7 +61,7 @@ class SCPMessageInterface(object):
             retry = False
             last_exception = None
             try:
-                response = self._transceiver.send_message(
+                response = self._transceiver._send_message(
                     message=self._message, response_required=True,
                     timeout=self._timeout, connection=self._connection)
 

@@ -5,7 +5,6 @@ from spinnman.connections.udp_packet_connections.stripped_iptag_connection impor
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
 from spinnman import constants
-from spinnman.connections.listeners._connection_queue import _ConnectionQueue
 from spinnman.connections.udp_packet_connections.udp_spinnaker_connection import \
     UDPSpinnakerConnection
 from spinnman.connections.abstract_classes.abstract_udp_connection \
@@ -73,6 +72,7 @@ from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
 
 # noinspection
+from spinnman.connections.listeners._connection_queue import _ConnectionQueue
 from _threads._scp_message_interface import SCPMessageInterface
 from _threads._iobuf_interface import IOBufInterface
 from _threads._get_iptags_interface import GetIPTagsInterface
@@ -2158,7 +2158,7 @@ class Transceiver(object):
     def __str__(self):
         return "transciever object connected to {} with {} connections"\
             .format(self._sending_connections[0].remote_ip_address,
-                    len(self._udp_connections.keys()))
+                    len(self._sending_connections.keys()))
 
     def __repr__(self):
         return self.__str__()
