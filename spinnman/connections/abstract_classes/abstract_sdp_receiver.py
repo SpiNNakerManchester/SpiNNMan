@@ -2,14 +2,18 @@ from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
 
-from spinnman.connections.abstract_connection import AbstractConnection
+from spinnman.connections.abstract_classes.abstract_connection \
+    import AbstractConnection
 
 
 @add_metaclass(ABCMeta)
 class AbstractSDPReceiver(AbstractConnection):
     """ A receiver of SDP messages
     """
-    
+    @abstractmethod
+    def is_sdp_reciever(self):
+        pass
+
     @abstractmethod
     def receive_sdp_message(self, timeout=None):
         """ Receives an SDP message from this connection.  Blocks until the\
@@ -30,4 +34,3 @@ class AbstractSDPReceiver(AbstractConnection):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one of\
                     the fields of the SDP message is invalid
         """
-        pass

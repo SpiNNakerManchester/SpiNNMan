@@ -1,9 +1,10 @@
 import unittest
-from spinnman.connections.scp_listener import SCPListener
-from spinnman.connections.abstract_scp_receiver import AbstractSCPReceiver
-from spinnman.connections.udp_connection import UDPConnection
+
+from spinnman.connections.listeners.scp_listener import SCPListener
+from spinnman.connections.abstract_classes.udp_receivers.abstract_udp_scp_receiver import AbstractSCPReceiver
+from spinnman.connections.udp_packet_connections.udp_scp_connection import UDPSCPConnection
 from spinnman.exceptions import SpinnmanInvalidParameterException
-import thread, time
+
 
 def print_message(message):
     return message
@@ -23,7 +24,7 @@ def print_message_varargs(*message):
 def print_errors_varargs(*args):
     raise args[0](args[1])
 
-udp_conn = UDPConnection(remote_host="192.168.240.253")
+udp_conn = UDPSCPConnection(remote_host="192.168.240.253")
 
 class MySCPReceiver(AbstractSCPReceiver):
     def __int__(self):

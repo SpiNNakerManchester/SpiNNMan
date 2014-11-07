@@ -1,17 +1,13 @@
 import unittest
-import spinnman.connections.udp_connection as udp_conn
-from spinnman.connections.udp_boot_connection import UDPBootConnection
+from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
+    import UDPSpinnakerConnection as udp_conn
+from spinnman.connections.udp_packet_connections.udp_boot_connection \
+    import UDPBootConnection
 import spinnman.connections._connection_queue as c_q
 from spinnman.messages.sdp.sdp_message import SDPMessage
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.exceptions import SpinnmanInvalidPacketException
-from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
-from spinnman.messages.multicast_message import MulticastMessage
-from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code import SpinnakerBootOpCode
-from spinnman.messages.spinnaker_boot.spinnaker_boot_message import SpinnakerBootMessage
-from spinnman.connections.udp_boot_connection import UDPBootConnection
-from threading import Condition
 
 class TestConnectionQueue(unittest.TestCase):
     def test_creating_new_connection_queue(self):

@@ -4,7 +4,7 @@ from collections import deque
 
 
 class _CallbackQueue(Thread):
-    """ Consumes items from a queue calling a callback function with each item
+    """ Consumes items from a _queue calling a callback function with each item
     """
 
     def __init__(self, callback):
@@ -20,7 +20,7 @@ class _CallbackQueue(Thread):
         self.setDaemon(True)
 
     def add_item(self, item):
-        """ Adds an item to the queue
+        """ Adds an item to the _queue
 
         :param item: The item to add
         :return: Nothing is returned
@@ -32,7 +32,7 @@ class _CallbackQueue(Thread):
         self._queue_condition.release()
 
     def run(self):
-        """ Overridden method of Thread - consumes the queue.
+        """ Overridden method of Thread - consumes the _queue.
         """
         self._running = True
         while self._running:
@@ -45,7 +45,7 @@ class _CallbackQueue(Thread):
             self._queue_condition.release()
 
     def stop(self):
-        """ Stops the queue from transferring items
+        """ Stops the _queue from transferring items
         """
         self._running = False
         self._queue_condition.acquire()

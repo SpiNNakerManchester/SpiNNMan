@@ -2,12 +2,16 @@ from spinnman.messages.eieio.abstract_eieio_message import AbstractEIEIOMessage
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman import exceptions
 import struct
+import binascii
 
 class EIEIOMessage(AbstractEIEIOMessage):
 
     def __init__(self, eieio_header, data=bytearray()):
         AbstractEIEIOMessage.__init__(self, data)
         self._eieio_header = eieio_header
+
+    def __str__(self):
+        return binascii.hexlify(self._data)
 
     @property
     def eieio_header(self):
@@ -23,9 +27,9 @@ class EIEIOMessage(AbstractEIEIOMessage):
                 "and try again", "", "")
         if (self._eieio_header.type_param == EIEIOTypeParam.KEY_16_BIT
                 or self._eieio_header.type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT):
-            self._data = struct.pack("<H", key)
+            self._data += bytearray(struct.pack("<H", key))
         else:
-            self._data = struct.pack("<I", key)
+            self._data += bytearray(struct.pack("<I", key))
 
     def _write_payload(self, payload):
         if payload is None:
@@ -33,9 +37,9 @@ class EIEIOMessage(AbstractEIEIOMessage):
                 "The payload to be added cannot be None. Please correct the "
                 "payload and try again", "", "")
         if self._eieio_header.type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT:
-            self._data = struct.pack("<H", payload)
+            self._data += bytearray(struct.pack("<H", payload))
         elif self._eieio_header.type_param == EIEIOTypeParam.KEY_PAYLOAD_32_BIT:
-            self._data = struct.pack("<I", payload)
+            self._data += bytearray(struct.pack("<I", payload))
         else:
             raise exceptions.SpinnmanInvalidParameterException(
                 "Cannot add a payload to a message type that does not support "
