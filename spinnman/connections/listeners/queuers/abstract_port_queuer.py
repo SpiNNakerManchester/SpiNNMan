@@ -14,19 +14,26 @@ class AbstractPortQueuer(threading.Thread):
     def __init__(self, connection):
         threading.Thread.__init__(self)
         self._queue = collections.deque()
+        self._queue_condition = threading.Condition()
         self._done = False
         self._exited = False
         self._connection = connection
         self.setDaemon(True)
 
     def stop(self):
-        '''
+        """
         method to kill the thread
-        '''
+        """
         logger.info("[_queuer] Stopping")
+        self._queue_condition.acquire()
         self._done = True
+        self._queue_condition.notify()
+        self._queue_condition.release()
+
+        self._queue_condition.acquire()
         while not self._exited:
-            pass
+            self._queue_condition.wait()
+        self._queue_condition.release()
 
     @abstractmethod
     def run(self):
@@ -37,9 +44,13 @@ class AbstractPortQueuer(threading.Thread):
         allows the port listener to pull a packet from the non-blocking _queue
         '''
         got = False
-        packet = None
         while not got:
-            if len(self._queue) != 0:
-                packet = self._queue.popleft()
-                got = True
-        return packet
+            self._queue_condition.acquire()
+            while len(self._queue) == 0 and not self._done:
+                self._queue_condition.wait()
+            packet = None
+            if not self._done:
+                request = self._queue.popleft()
+            self._queue_condition.release()
+            if packet is not None:
+                return packet

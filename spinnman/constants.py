@@ -35,4 +35,14 @@ TRAFFIC_TYPE = Enum(
     names=[("SCP", 0),
            ("SDP", 1),
            ("UDP", 2),
-           ("EIEIO", 3)])
+           ("EIEIO_DATA", 3),
+           ("EIEIO_COMMAND", 4)])
+
+EIEIO_COMMAND_IDS = Enum(
+    value="EIEIO_COMMAND_IDS",
+    names=[("BUFFER_MANAGEMENT", 0)])
+
+BUFFER_COMMAND_IDS = Enum(
+    value="BUFFER_COMMAND_IDS",
+    names=[("BUFFER_RECIEVE", 0),
+           ("BUFFER_SEND", 1)])

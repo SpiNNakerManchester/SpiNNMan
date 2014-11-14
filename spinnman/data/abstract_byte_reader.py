@@ -13,6 +13,16 @@ class AbstractByteReader(object):
     """
 
     @abstractmethod
+    def is_at_end(self):
+        """ returns true if the reader is currently at the end of the byte
+        reader
+
+        :return: returns true if the reader is currently at the end of the byte
+        reader false otherwise
+        :rtype: bool
+        """
+
+    @abstractmethod
     def read_byte(self):
         """ Reads the next byte
 

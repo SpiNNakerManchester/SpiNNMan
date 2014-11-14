@@ -4,16 +4,21 @@ from spinnman.connections.abstract_classes.abstract_callbackable_connection impo
 from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
 from spinnman import constants
+from spinnman.connections.abstract_classes.udp_receivers.abstract_udp_eieio_command_receiver import \
+    AbstractUDPEIEIOCommandReceiver
 from spinnman.connections.abstract_classes.udp_receivers.\
-    abstract_udp_eieio_receiver import AbstractUDPEIEIOReceiver
+    abstract_udp_eieio_data_receiver import AbstractUDPEIEIODataReceiver
 from spinnman.connections.listeners.port_listener import PortListener
-from spinnman.connections.listeners.queuers.eieio_port_queuer import \
-    EIEIOPortQueuer
+from spinnman.connections.listeners.queuers.eieio_command_port_queuer import \
+    EIEIOCommandPortQueuer
+from spinnman.connections.listeners.queuers.eieio_data_port_queuer import \
+    EIEIODataPortQueuer
 from spinnman.connections.listeners.queuers.udp_port_queuer import UDPPortQueuer
 
 
-class StrippedIPTagConnection(AbstractUDPConnection, AbstractUDPEIEIOReceiver,
-                              AbstractCallbackableConnection):
+class StrippedIPTagConnection(
+        AbstractUDPConnection, AbstractUDPEIEIODataReceiver,
+        AbstractUDPEIEIOCommandReceiver, AbstractCallbackableConnection):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
@@ -39,6 +44,8 @@ class StrippedIPTagConnection(AbstractUDPConnection, AbstractUDPEIEIOReceiver,
         AbstractUDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
         AbstractCallbackableConnection.__init__(self)
+        AbstractUDPEIEIOCommandReceiver.__init__(self)
+        AbstractUDPEIEIODataReceiver.__init__(self)
 
     def recieve_raw(self, timeout):
         raise NotImplementedError
@@ -62,8 +69,12 @@ class StrippedIPTagConnection(AbstractUDPConnection, AbstractUDPEIEIOReceiver,
                 udp_port_queuer = UDPPortQueuer(self)
                 self._callback_listener = PortListener(callback,
                                                        udp_port_queuer)
-            elif traffic_type == constants.TRAFFIC_TYPE.EIEIO:
-                eieio_port_queuer = EIEIOPortQueuer(self)
+            elif traffic_type == constants.TRAFFIC_TYPE.EIEIO_DATA:
+                eieio_port_queuer = EIEIODataPortQueuer(self)
+                self._callback_listener = PortListener(callback,
+                                                       eieio_port_queuer)
+            elif traffic_type == constants.TRAFFIC_TYPE.EIEIO_COMMAND:
+                eieio_port_queuer = EIEIOCommandPortQueuer(self)
                 self._callback_listener = PortListener(callback,
                                                        eieio_port_queuer)
             else:

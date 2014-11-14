@@ -6,7 +6,7 @@ from spinnman.connections.listeners.queuers.abstract_port_queuer import \
 logger = logging.getLogger(__name__)
 
 
-class EIEIOPortQueuer(AbstractPortQueuer):
+class EIEIOCommandPortQueuer(AbstractPortQueuer):
     '''
     thread that holds a _queue to try to stop the loss of packets from the socket
     '''
@@ -21,7 +21,7 @@ class EIEIOPortQueuer(AbstractPortQueuer):
         logger.info("[port_queuer] starting")
         while not self._done:
             try:
-                message = self._connection.receive_eieio_message()
+                message = self._connection.receive_eieio_command_message()
                 self._queue.append(message)
             except socket.timeout:
                 pass

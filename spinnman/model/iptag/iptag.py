@@ -53,6 +53,9 @@ class IPTag(AbstractIPTAG):
         """
         return self._strip_sdp
 
+    def string_representation(self):
+        return self.__str__()
+
     def __str__(self):
         return "IP Tag: tag={} port={} address={}".format(
                 self._tag, self._port, self._address)

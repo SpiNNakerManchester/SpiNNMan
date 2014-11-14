@@ -13,6 +13,13 @@ class LittleEndianByteArrayByteReader(AbstractByteReader):
         """
         self._data = data
         self._read_pointer = 0
+
+    def is_at_end(self):
+        """ee :py:meth:`spinnman.data.abstract_byte_reader.AbstractByteReader.is_at_end`
+        """
+        if self._read_pointer == len(self._data):
+            return True
+        return False
     
     def read_byte(self):
         """ See :py:meth:`spinnman.data.abstract_byte_reader.AbstractByteReader.read_byte`

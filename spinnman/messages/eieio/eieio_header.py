@@ -2,6 +2,7 @@ from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman import exceptions
 import struct
 
+
 class EIEIOHeader(object):
 
     def __init__(self, type_param, count_param, tag_param=0, prefix_param=None,
@@ -39,6 +40,30 @@ class EIEIOHeader(object):
     @property
     def type_param(self):
         return self._type_param
+
+    @property
+    def prefix_param(self):
+        return self._prefix_param
+
+    @property
+    def payload_base(self):
+        return self._payload_base
+
+    @property
+    def count_param(self):
+        return self._count_param
+
+    @property
+    def tag_param(self):
+        return self._tag_param
+
+    @property
+    def prefix_type(self):
+        return self._prefix_type
+
+    @property
+    def is_time(self):
+        return self._is_time
 
     def write_eieio_header(self, byte_writer):
         #writes in little endian form
@@ -84,9 +109,10 @@ class EIEIOHeader(object):
                 x = struct.pack("<I", self._payload_base)
                 y = bytearray(x)
                 byte_writer.write_bytes(y)
+
     @staticmethod
     def create_header_from_reader(byte_reader):
-        """ Read an SDP header from a byte_reader
+        """ Read an eieio data header from a byte_reader
 
         :param byte_reader: The reader to read the data from
         :type byte_reader:\
@@ -115,6 +141,26 @@ class EIEIOHeader(object):
             prefix1 = byte_reader.read_byte()
             prefix = (prefix1 << 8) | prefix2
 
+        if f != 0:
+            raise exceptions.SpinnmanInvalidPacketException(
+                "eieio header", "the format param from the received packet is "
+                                "invalid")
+        if d == 1:
+            if message_type == 0 or message_type == 1:  # 16 bits
+                d2 = byte_reader.read_byte()
+                d1 = byte_reader.read_byte()
+                d = (d1 << 8) | d2
+            elif message_type == 2 or message_type == 3:  # 32 bits
+                d4 = byte_reader.read_byte()
+                d3 = byte_reader.read_byte()
+                d2 = byte_reader.read_byte()
+                d1 = byte_reader.read_byte()
+                d = (d4 << 24) | (d3 << 16) | (d1 << 8) | d2
+            else:
+                raise exceptions.SpinnmanInvalidPacketException(
+                    "eieio header", "the type param from the received packet "
+                                    "is invalid")
+
         if message_type == 0:
             message_type = EIEIOTypeParam.KEY_16_BIT
         elif message_type == 1:
@@ -132,4 +178,12 @@ class EIEIOHeader(object):
             type_param=message_type, count_param=count, tag_param=tag,
             prefix_param=prefix, payload_base=d, prefix_type=f, is_time=bool(t))
 
+    def __str__(self):
+        return "{}.{}.{}.{}.{}.{}.{}".format(
+            self._prefix_param, self._prefix_type, self._payload_base,
+            self._is_time, self._type_param.value, self._tag_param,
+            self._count_param)
+
+    def __repr__(self):
+        return self.__str__()
 

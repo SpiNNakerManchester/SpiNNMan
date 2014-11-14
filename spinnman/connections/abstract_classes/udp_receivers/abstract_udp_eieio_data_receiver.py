@@ -9,14 +9,13 @@ from spinnman.connections.abstract_classes.abstract_eieio_receiver import \
     AbstractEIEIOReceiver
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
-from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException, \
-    SpinnmanInvalidPacketException
+from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.messages.eieio.eieio_header import EIEIOHeader
 from spinnman.messages.eieio.eieio_message import EIEIOMessage
 
 
 @add_metaclass(ABCMeta)
-class AbstractUDPEIEIOReceiver(AbstractEIEIOReceiver):
+class AbstractUDPEIEIODataReceiver(AbstractEIEIOReceiver):
     """ A receiver of SCP messages
     """
 

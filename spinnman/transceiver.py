@@ -287,7 +287,7 @@ class Transceiver(object):
                     "two connections are listening to packets from the "
                     "same port. This is deemed an error", "", "")
             else:
-                key = (connection.remote_port, connection.remote_ip_address)
+                key = (connection.remote_ip_address, connection.remote_port)
                 self._sending_connections[key] = connection
 
     def _get_chip_execute_lock(self, x, y):
@@ -1567,6 +1567,55 @@ class Transceiver(object):
         for callback in callbacks:
             yield callback.get_response().data
 
+    def read_memory_return_byte_array(self, x, y, base_address, length):
+        """ Read some areas of SDRAM from the board
+
+        :param x: The x-coordinate of the chip where the memory is to be\
+                    read from
+        :type x: int
+        :param y: The y-coordinate of the chip where the memory is to be\
+                    read from
+        :type y: int
+        :param base_address: The address in SDRAM where the region of memory\
+                    to be read starts
+        :type base_address: int
+        :param length: The length of the data to be read in bytes
+        :type length: int
+        :return: An full bytearray of data read in order
+        :rtype: bytearray
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If one of x, y, p, base_address or length is invalid
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        assert(base_address <= math.pow(2, 32))
+        # Set up all the requests and get the callbacks
+        logger.debug("Reading {} bytes of memory".format(length))
+        returned_byte_array = bytearray()
+        bytes_to_get = length
+        address_to_read = base_address
+        callbacks = list()
+        while bytes_to_get > 0:
+            data_size = bytes_to_get
+            if data_size > 256:
+                data_size = 256
+            thread = SCPMessageInterface(self, SCPReadMemoryRequest(
+                x, y, address_to_read, data_size))
+            self._scp_message_thread_pool.apply_async(thread.run())
+            callbacks.append(thread)
+            bytes_to_get -= data_size
+            address_to_read += data_size
+
+        # Go through the callbacks and return the responses in order
+        for callback in callbacks:
+            returned_byte_array.extend(callback.get_response().data)
+        return returned_byte_array
+
     def read_neighbour_memory(self, x, y, cpu, link, base_address, length):
         """ Read some areas of memory on a neighbouring chip using a LINK_READ
         SCP command. If sent to a BMP, this command can be used to communicate
@@ -2132,7 +2181,7 @@ class Transceiver(object):
                 connection.close()
 
     def register_listener(self, callback, recieve_port_no, hostname,
-                          connection_type,  traffic_type, sdp_port=None):
+                          connection_type, traffic_type, sdp_port=None):
         if recieve_port_no in self._receiving_connections.keys():
             connection = self._receiving_connections[recieve_port_no]
             if connection_type == connection.connection_type():
