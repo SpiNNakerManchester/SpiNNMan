@@ -6,6 +6,13 @@ class LittleEndianDataReaderByteReader(AbstractByteReader):
         notation
     """
 
+    def is_at_end(self):
+        """ required from abstract byte reader
+
+        :return:
+        """
+        raise NotImplementedError
+
     def __init__(self, data_reader):
         """
 
