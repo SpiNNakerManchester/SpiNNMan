@@ -18,7 +18,7 @@ class EIEIODataPortQueuer(AbstractPortQueuer):
         '''
         runs by just putting packets into a non-blocking _queue for the port listener to read from
         '''
-        logger.info("[port_queuer] starting")
+        logger.debug("[eieio_data_port_queuer] starting")
         while not self._done:
             try:
                 message = self._connection.receive_eieio_message()

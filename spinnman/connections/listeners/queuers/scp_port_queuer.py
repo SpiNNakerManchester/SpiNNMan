@@ -18,7 +18,7 @@ class SCPPortQueuer(AbstractPortQueuer):
         runs by just putting packets into a non-blocking _queue
         for the port listener to read from
         '''
-        logger.info("[port_queuer] starting")
+        logger.debug("[scp_port_queuer] starting")
         while not self._done:
             try:
                 data, addr = self._connection.receive_scp_response()

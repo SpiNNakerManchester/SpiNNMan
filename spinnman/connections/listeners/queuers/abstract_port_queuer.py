@@ -24,7 +24,7 @@ class AbstractPortQueuer(threading.Thread):
         """
         method to kill the thread
         """
-        logger.info("[_queuer] Stopping")
+        logger.debug("[_queuer] Stopping")
         self._queue_condition.acquire()
         self._done = True
         self._queue_condition.notify()
