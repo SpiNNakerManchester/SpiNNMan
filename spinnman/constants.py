@@ -11,6 +11,12 @@ SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 # The size of the system variable structure in bytes
 SYSTEM_VARIABLE_BYTES = 256
 
+# The max size a udp packet can be
+UDP_MESSAGE_MAX_SIZE = 256
+EIEIO_COMMAND_HEADER_SIZE = 3
+EIEIO_DATA_HEADER_SIZE = 2
+
+
 #how many bytes the cpu info data takes up
 CPU_INFO_BYTES = 128
 
@@ -42,7 +48,14 @@ EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
     names=[("BUFFER_MANAGEMENT", 0)])
 
-BUFFER_COMMAND_IDS = Enum(
-    value="BUFFER_COMMAND_IDS",
-    names=[("BUFFER_RECIEVE", 0),
-           ("BUFFER_SEND", 1)])
+RECEIVED_BUFFER_COMMAND_IDS = Enum(
+    value="RECEIVED_BUFFER_COMMAND_IDS",
+    names=[("BUFFER_RECIEVE", 1),
+           ("BUFFER_SEND", 2)])
+
+SENT_BUFFER_COMMAND_IDS = Enum(
+    value="SENT_BUFFER_COMMAND_IDS",
+    names=[("NEW_BUFFERS", 1),
+           ("STOP_SENDING_REQUESTS", 2),
+           ("START_SENDING_REQUESTS", 3),
+           ("READ_DATA", 4)])

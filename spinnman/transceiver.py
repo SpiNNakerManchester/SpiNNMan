@@ -14,8 +14,10 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
+from spinnman.messages.sdp.sdp_message import SDPMessage
 
 from spinnman.model.chip_info import ChipInfo
 from spinnman.model.cpu_info import CPUInfo
@@ -415,6 +417,38 @@ class Transceiver(object):
                 "Sending and receiving {}".format(message.__class__))
 
         return best_connection_queue
+
+    def send_eieio_command_message(self, message, connection=None):
+        """ Sends a EIEIO command message using one of the connections.
+
+        :param message: The message to send
+        :type message: EIEIOCommandMessage
+        :param connection: An optional connection to use
+        :type connection:\
+                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :return: None
+        """
+        if isinstance(message, EIEIOCommandMessage):
+            self._send_message(message, False, connection)
+        else:
+            raise SpinnmanUnsupportedOperationException(
+                "Sending and receiving {}".format(message.__class__))
+
+    def send_sdp_message(self, message, connection=None):
+        """ Sends a EIEIO command message using one of the connections.
+
+        :param message: The message to send
+        :type message: EIEIOCommandMessage
+        :param connection: An optional connection to use
+        :type connection:\
+                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :return: None
+        """
+        if isinstance(message, SDPMessage):
+            self._send_message(message, False, connection)
+        else:
+            raise SpinnmanUnsupportedOperationException(
+                "Sending and receiving {}".format(message.__class__))
 
     def _send_message(self, message, response_required, connection=None,
                       timeout=1, get_callback=False):

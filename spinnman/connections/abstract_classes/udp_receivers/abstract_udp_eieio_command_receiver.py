@@ -12,8 +12,6 @@ from spinnman.data.little_endian_byte_array_byte_reader import \
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
 from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
-from spinnman.messages.eieio.eieio_header import EIEIOHeader
-from spinnman.messages.eieio.eieio_message import EIEIOMessage
 
 
 @add_metaclass(ABCMeta)

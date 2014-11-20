@@ -46,4 +46,12 @@ class EIEIOCommandHeader(object):
 
         return EIEIOCommandHeader(command)
 
+    def write_command_header(self, writer):
+        """ method which converts a python eieio command header into a byte array
 
+        :param writer: the writer for byte arrays
+        :type writer: implementation of spinnman.data.abstract_data_writer.AbstractDataWriter
+        :return: None
+        """
+        header_short = self._key_prefix << 15 + self._format << 14 + self.command
+        writer.write_short(header_short)
