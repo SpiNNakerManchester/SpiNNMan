@@ -11,7 +11,7 @@ class EIEIOCommandHeader(object):
     def write_eieio_header(self, byte_writer):
         byte_writer.write_byte(self._key_prefix)  # the flag for no prefix
         byte_writer.write_byte(self._format)  # the flag for command message
-        byte_writer.write_byte(self._command)
+        byte_writer.write_byte(self._command.value)
 
     @property
     def command(self):

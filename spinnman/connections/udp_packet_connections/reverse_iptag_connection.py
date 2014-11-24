@@ -2,6 +2,8 @@ from spinnman.connections.abstract_classes.udp_receivers.abstract_udp_eieio_comm
     AbstractUDPEIEIOCommandReceiver
 from spinnman.connections.abstract_classes.udp_receivers.\
     abstract_udp_eieio_data_receiver import AbstractUDPEIEIODataReceiver
+from spinnman.connections.abstract_classes.udp_senders.abstract_udp_eieio_command_sender import \
+    AbstractUDPEIEIOCommandSender
 from spinnman.connections.abstract_classes.udp_senders.\
     abstract_udp_eieio_sender import AbstractUDPEIEIOSender
 from spinnman.connections.abstract_classes.abstract_udp_connection import \
@@ -13,7 +15,8 @@ from spinnman.messages.eieio.eieio_message import EIEIOMessage
 
 class ReverseIPTagConnection(
         AbstractUDPConnection, AbstractUDPEIEIODataReceiver,
-        AbstractUDPEIEIOSender, AbstractUDPEIEIOCommandReceiver):
+        AbstractUDPEIEIOSender, AbstractUDPEIEIOCommandReceiver,
+        AbstractUDPEIEIOCommandSender):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
@@ -22,6 +25,7 @@ class ReverseIPTagConnection(
         AbstractUDPEIEIODataReceiver.__init__(self)
         AbstractUDPEIEIOCommandReceiver.__init__(self)
         AbstractUDPEIEIOSender.__init__(self)
+        AbstractUDPEIEIOCommandSender.__init__(self)
 
     def send_raw(self, message):
         """
@@ -41,13 +45,16 @@ class ReverseIPTagConnection(
     def is_eieio_sender(self):
         return True
 
-    def is_udp_eieio_reciever(self):
+    def is_udp_eieio_receiver(self):
         return True
 
     def is_udp_eieio_sender(self):
         return True
 
     def is_eieio_receiver(self):
+        return True
+
+    def is_udp_eieio_comamnd_sender(self):
         return True
 
     def connection_type(self):
