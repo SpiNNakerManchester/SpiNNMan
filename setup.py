@@ -16,7 +16,7 @@ setup(
             'spinnman.connections.listeners.queuers',
             'spinnman.connections.abstract_classes',
             'spinnman.connections.abstract_classes.udp_senders',
-            'spinnman.connections.abstract_classes.udp_receivers'
+            'spinnman.connections.abstract_classes.udp_receivers',
             'spinnman.connections.udp_packet_connections',
             'spinnman.data',
             'spinnman.messages',
