@@ -50,7 +50,7 @@ class AbstractPortQueuer(threading.Thread):
                 self._queue_condition.wait()
             packet = None
             if not self._done:
-                request = self._queue.popleft()
+                packet = self._queue.popleft()
             self._queue_condition.release()
             if packet is not None:
                 return packet
