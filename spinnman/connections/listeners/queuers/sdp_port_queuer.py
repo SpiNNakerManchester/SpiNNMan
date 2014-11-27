@@ -21,10 +21,10 @@ class SDPPortQueuer(AbstractPortQueuer):
         while not self._done:
             try:
                 data, addr = self._connection.receive_sdp_message()
-                self._queue.append(data)
+                self._add_to_queue(data)
             except socket.timeout:
                 pass
-        self._queue.append(None)
+        self._add_to_queue(None)
         self._exited = True
 
 
