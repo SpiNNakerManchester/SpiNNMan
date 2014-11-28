@@ -588,12 +588,14 @@ class Transceiver(object):
                 virtual_core_id == 0))
 
         #create filters
-        filter_data = self._send_scp_message(SCPReadMemoryRequest(
+        message_response = self._send_scp_message(SCPReadMemoryWordsRequest(
             x=chip_details.x, y=chip_details.y,
-            base_address=constants.ROUTER_FILTER_CONTROLS_BASE_ADDRESS,
+            base_address=
+            (constants.ROUTER_REGISTER_BASE_ADDRESS
+                + constants.ROUTER_FILTER_CONTROLS_OFFSET),
             size=(constants.ROUTER_DIAGNOSTIC_FILTER_SIZE
                   * constants.NO_ROUTER_DIAGNOSTIC_FILTERS)))
-        byte_reader = LittleEndianByteArrayByteReader(filter_data)
+        byte_reader = LittleEndianByteArrayByteReader(message_response.data)
         #create the filters based off the read data
         filters = list()
         for _ in range(0, constants.NO_ROUTER_DIAGNOSTIC_FILTERS):
@@ -2154,8 +2156,18 @@ class Transceiver(object):
             raise SpinnmanInvalidParameterException(
                 position, "beyond range", "the range of the position of a "
                                           "router filter is 0 and 16.")
+        if position > constants.ROUTER_DEFAULT_FILTERS_MAX_POSITION:
+            logger.warn(
+                " You are planning to change a filter which is set by default. "
+                "By doing this, other runs occuring on this machine will be "
+                "forced to use this new configuration untill the machine is "
+                "reset. Please also note that these changes will make the"
+                " the report from ybug not correct."
+                ""
+                "This has been executed and is trusted that the end user knows"
+                " what they are doing")
         memory_position = \
-            constants.ROUTER_FILTER_CONTROLS_BASE_ADDRESS \
+            constants.ROUTER_REGISTER_BASE_ADDRESS \
             + (position * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE)
         callbacks = list()
         thread = self._send_scp_message(SCPWriteMemoryRequest(
@@ -2167,7 +2179,7 @@ class Transceiver(object):
         for callback in callbacks:
             callback.get_response()
 
-    def clear_router_diagnostics(self, x, y):
+    def clear_router_diagnostic_counters(self, x, y):
         """ Clear router diagnostic information om a chip
 
         :param x: The x-coordinate of the chip
@@ -2188,6 +2200,31 @@ class Transceiver(object):
         clear_data = [0xFFFFFFFF]
         self._send_scp_message(SCPWriteMemoryWordsRequest(
             x, y, 0xf100002c, clear_data))
+
+    def clear_router_diagnostic_non_default_positioned_filters(self, chip_x,
+                                                               chip_y):
+        """ Clears the router diagnositc filters that reside in positions
+        12 to 15
+
+        :param chip_x: the x id for the router which will have its filters
+        cleared
+        :param chip_y: the y id for the router which will have its filters
+        cleared
+        :type chip_x: int
+        :type chip_y: int
+
+        :return:
+        """
+        clear_data = [0xFFFFFFFF]
+        for filter_position in range(
+                constants.ROUTER_DEFAULT_FILTERS_MAX_POSITION + 1,
+                constants.NO_ROUTER_DIAGNOSTIC_FILTERS):
+            base_address = (constants.ROUTER_REGISTER_BASE_ADDRESS +
+                            constants.ROUTER_FILTER_CONTROLS_OFFSET +
+                            (constants.ROUTER_DIAGNOSTIC_FILTER_SIZE *
+                             filter_position))
+            self._send_scp_message(SCPWriteMemoryWordsRequest(
+                chip_x, chip_y, base_address, clear_data))
 
     def send_multicast(self, x, y, multicast_message, connection=None):
         """ Sends a multicast message to the board
