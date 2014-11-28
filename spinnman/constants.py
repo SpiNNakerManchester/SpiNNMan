@@ -8,6 +8,15 @@ UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
 # The base address of the system variable structure in System ram
 SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 
+# The base address of a routers dianostic filter controls
+ROUTER_FILTER_CONTROLS_BASE_ADDRESS = 0x1000000
+
+#size of a router dianostic
+ROUTER_DIAGNOSTIC_FILTER_SIZE = 4
+
+#number of router dianostic filters
+NO_ROUTER_DIAGNOSTIC_FILTERS = 16
+
 # The size of the system variable structure in bytes
 SYSTEM_VARIABLE_BYTES = 256
 

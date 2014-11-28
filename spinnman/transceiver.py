@@ -1,3 +1,4 @@
+from spinn_machine.diagnostic_filter import DiagnosticFilter
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
@@ -586,13 +587,27 @@ class Transceiver(object):
                 virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
                 virtual_core_id == 0))
 
+        #create filters
+        filter_data = self._send_scp_message(SCPReadMemoryRequest(
+            x=chip_details.x, y=chip_details.y,
+            base_address=constants.ROUTER_FILTER_CONTROLS_BASE_ADDRESS,
+            size=(constants.ROUTER_DIAGNOSTIC_FILTER_SIZE
+                  * constants.NO_ROUTER_DIAGNOSTIC_FILTERS)))
+        byte_reader = LittleEndianByteArrayByteReader(filter_data)
+        #create the filters based off the read data
+        filters = list()
+        for _ in range(0, constants.NO_ROUTER_DIAGNOSTIC_FILTERS):
+            filters.append(DiagnosticFilter.\
+                create_dianostic_filter_from_byte_array_reader(byte_reader))
+
         # Create the router - add the links later during search
         router = Router(
             links=list(), emergency_routing_enabled=False,
             clock_speed=Router.ROUTER_DEFAULT_CLOCK_SPEED,
             n_available_multicast_entries=
             Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES
-            - chip_details.first_free_router_entry)
+            - chip_details.first_free_router_entry,
+            diagnostic_filters=filters)
 
         # Create the chip
         chip = Chip(
@@ -2106,6 +2121,51 @@ class Transceiver(object):
             control_register=reader.read_int(),
             error_status=reader.read_int(),
             register_values=[reader.read_int() for _ in range(0, 16)])
+
+    def set_router_diagnostics(self, x, y, diagnostic_filter, position):
+        """ sets a router diagnostic filter
+
+        :param x: the x address of the router to which this filter is being added
+        :param y: the y address of the router to which this filter is being added
+        :param diagnostic_filter: the daignostic filter being added to the router
+        :param position: the position in the list of filters where this filter
+        is to be added
+        :return: None
+        :raise SpinnmanInvalidParameterException: when the position is
+        beyond the valid range of filters
+        :raise spinnman.exceptions.SpinnmanIOException:
+                    * If there is an error communicating with the board
+                    * If there is an error reading the data
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If x, y does not lead to a valid chip
+                    * If a packet is received that has invalid parameters
+                    * If base_address is not a positive integer
+                    * If data is an AbstractDataReader but n_bytes is not\
+                      specified
+                    * If data is an int and n_bytes is more than 4
+                    * If n_bytes is less than 0
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        data_to_send = diagnostic_filter.create_byte_array_from_filter()
+        if position > constants.NO_ROUTER_DIAGNOSTIC_FILTERS:
+            raise SpinnmanInvalidParameterException(
+                position, "beyond range", "the range of the position of a "
+                                          "router filter is 0 and 16.")
+        memory_position = \
+            constants.ROUTER_FILTER_CONTROLS_BASE_ADDRESS \
+            + (position * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE)
+        callbacks = list()
+        thread = self._send_scp_message(SCPWriteMemoryRequest(
+            x, y, memory_position, data_to_send))
+        self._scp_message_thread_pool.apply_async(thread.run())
+        callbacks.append(thread)
+
+        # Go through the callbacks and check that the responses are OK
+        for callback in callbacks:
+            callback.get_response()
 
     def clear_router_diagnostics(self, x, y):
         """ Clear router diagnostic information om a chip
