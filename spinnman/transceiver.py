@@ -587,21 +587,6 @@ class Transceiver(object):
                 virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
                 virtual_core_id == 0))
 
-        #create filters
-        message_response = self._send_scp_message(SCPReadMemoryWordsRequest(
-            x=chip_details.x, y=chip_details.y,
-            base_address=
-            (constants.ROUTER_REGISTER_BASE_ADDRESS
-                + constants.ROUTER_FILTER_CONTROLS_OFFSET),
-            size=(constants.ROUTER_DIAGNOSTIC_FILTER_SIZE
-                  * constants.NO_ROUTER_DIAGNOSTIC_FILTERS)))
-        byte_reader = LittleEndianByteArrayByteReader(message_response.data)
-        #create the filters based off the read data
-        filters = list()
-        for _ in range(0, constants.NO_ROUTER_DIAGNOSTIC_FILTERS):
-            filters.append(DiagnosticFilter.\
-                create_dianostic_filter_from_byte_array_reader(byte_reader))
-
         # Create the router - add the links later during search
         router = Router(
             links=list(), emergency_routing_enabled=False,
@@ -609,7 +594,7 @@ class Transceiver(object):
             n_available_multicast_entries=
             Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES
             - chip_details.first_free_router_entry,
-            diagnostic_filters=filters)
+            diagnostic_filters=list())
 
         # Create the chip
         chip = Chip(
