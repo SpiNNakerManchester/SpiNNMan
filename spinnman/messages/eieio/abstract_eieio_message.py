@@ -24,11 +24,3 @@ class AbstractEIEIOMessage(object):
 
         :return:
         """
-
-
-    @abstractmethod
-    def eieio_header(self):
-        """
-        method to return the implemntations versions of headers
-        :return:
-        """

@@ -37,7 +37,7 @@ class AbstractUDPEIEIOCommandSender(AbstractEIEIOSender):
         writer = LittleEndianByteArrayByteWriter()
 
         # Write the header
-        eieio_command_message.eieio_header.write_eieio_header(writer)
+        eieio_command_message.eieio_command_header.write_command_header(writer)
 
         # Write any data
         if data_length != 0:

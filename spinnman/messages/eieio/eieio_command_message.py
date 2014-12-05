@@ -19,7 +19,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
                 "the header is not a eieio command header, therefore error has"
                 "been raised")
     @property
-    def eieio_header(self):
+    def eieio_command_header(self):
         return self._eieio_command_header
 
     def is_EIEIO_message(self):
