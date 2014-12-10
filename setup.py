@@ -31,5 +31,5 @@ setup(
             'spinnman.model',
             'spinnman.model.iptag'],
     package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot']},
-    install_requires=['six', 'enum34', 'SpiNNMachine']
+    install_requires=['six', 'enum34', 'SpiNNMachine >= 2014.12-rc-01']
 )
