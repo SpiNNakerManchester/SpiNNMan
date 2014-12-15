@@ -65,4 +65,10 @@ class AbstractUDPEIEIOCommandReceiver(AbstractEIEIOReceiver):
         if len(data) == 0:
             data = None
 
+        print "length:", len(data)
+        print "data:",
+        for i in data:
+            print hex(i),
+
+        print
         return EIEIOCommandMessage(eieio_header, data)

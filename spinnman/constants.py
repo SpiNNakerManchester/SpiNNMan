@@ -46,17 +46,15 @@ TRAFFIC_TYPE = Enum(
 
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
-    names=[("BUFFER_MANAGEMENT", 0),
-           ("DATABASE_CONFIRMATION", 1)])
+    names=[("DATABASE_CONFIRMATION", 1),
+           ("EVENT_PADDING", 2),
+           ("EVENT_STOP", 3),
+           ("NEW_BUFFERS", 4),
+           ("STOP_SENDING_REQUESTS", 5),
+           ("START_SENDING_REQUESTS", 6),
+           ("READ_DATA", 7)])
 
 RECEIVED_BUFFER_COMMAND_IDS = Enum(
     value="RECEIVED_BUFFER_COMMAND_IDS",
-    names=[("BUFFER_RECIEVE", 1),
+    names=[("BUFFER_RECEIVE", 1),
            ("BUFFER_SEND", 2)])
-
-SENT_BUFFER_COMMAND_IDS = Enum(
-    value="SENT_BUFFER_COMMAND_IDS",
-    names=[("NEW_BUFFERS", 1),
-           ("STOP_SENDING_REQUESTS", 2),
-           ("START_SENDING_REQUESTS", 3),
-           ("READ_DATA", 4)])

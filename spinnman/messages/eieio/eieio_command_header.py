@@ -1,17 +1,22 @@
 from spinnman import exceptions
 import math
 
+
 class EIEIOCommandHeader(object):
 
     def __init__(self, command):
+        if command < 0 or command >= 16384:
+            raise exceptions.SpinnmanInvalidParameterException(
+                "command", command,
+                "parameter command is outside the allowed range (0 to 16383)")
         self._command = command
         self._key_prefix = 0
         self._format = 1
 
-    def write_eieio_header(self, byte_writer):
-        byte_writer.write_byte(self._key_prefix)  # the flag for no prefix
-        byte_writer.write_byte(self._format)  # the flag for command message
-        byte_writer.write_byte(self._command.value)
+#    def write_eieio_header(self, byte_writer):
+#        header = (self._key_prefix << 15) | (self._format << 14) |\
+#                self._command
+#        byte_writer.write_short(header)
 
     @property
     def command(self):
@@ -33,15 +38,16 @@ class EIEIOCommandHeader(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
                     is an error setting any of the values
         """
+
         first_part_of_command = byte_reader.read_byte()
         last_byte = byte_reader.read_byte()
 
         if ((last_byte >> 6) & 1) != 1 or ((last_byte >> 7) & 1) != 0:
             raise exceptions.SpinnmanInvalidPacketException(
-                "this cannot be a eieio command header as the format does not"
+                "this cannot be a eieio command header as the format does not "
                 "match the correct format", "")
 
-        last_part_of_command = ((last_byte & (math.pow(2, 6) - 1)) << 8)
+        last_part_of_command = ((last_byte & int(math.pow(2, 6) - 1)) << 8)
         command = first_part_of_command + last_part_of_command
 
         return EIEIOCommandHeader(command)
@@ -53,5 +59,6 @@ class EIEIOCommandHeader(object):
         :type writer: implementation of spinnman.data.abstract_data_writer.AbstractDataWriter
         :return: None
         """
-        header_short = self._key_prefix << 15 + self._format << 14 + self.command
+        header_short = (self._key_prefix << 15 | self._format << 14 |
+                        self.command)
         writer.write_short(header_short)

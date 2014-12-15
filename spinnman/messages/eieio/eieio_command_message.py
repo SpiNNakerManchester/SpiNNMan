@@ -15,7 +15,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
             self._eieio_command_header = eieio_command_header
         else:
             raise exceptions.SpinnmanInvalidParameterException(
-                "eieio_command_header", "invaid",
+                "eieio_command_header", "invalid",
                 "the header is not a eieio command header, therefore error has"
                 "been raised")
     @property
@@ -31,8 +31,9 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         :return:the byte array which represnets the command message
         """
         writer = LittleEndianByteArrayByteWriter()
-        writer.write_short(self._eieio_command_header.write_command_header(writer))
-        writer.write_bytes(self._data)
+        self._eieio_command_header.write_command_header(writer)
+        if self._data is not None:
+            writer.write_bytes(self._data)
         return writer.data
 
     def __str__(self):
