@@ -22,10 +22,10 @@ class EIEIODataPortQueuer(AbstractPortQueuer):
         while not self._done:
             try:
                 message = self._connection.receive_eieio_message()
-                self._queue.append(message)
+                self._add_to_queue(message)
             except socket.timeout:
                 pass
-        self._queue.append(None)
+        self._add_to_queue(None)
         self._exited = True
 
 

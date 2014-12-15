@@ -44,7 +44,7 @@ try:
 
     print "Clear Router Diagnostics"
     print "========================"
-    transceiver.clear_router_diagnostics(0, 0)
+    transceiver.clear_router_diagnostic_counters(0, 0)
     router_diagnostics = transceiver.get_router_diagnostics(0, 0)
     print router_diagnostics.registers
     print ""

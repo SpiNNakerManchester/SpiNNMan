@@ -38,7 +38,6 @@ class EIEIOCommandHeader(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
                     is an error setting any of the values
         """
-
         first_part_of_command = byte_reader.read_byte()
         last_byte = byte_reader.read_byte()
 

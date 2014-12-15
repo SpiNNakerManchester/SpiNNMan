@@ -17,8 +17,7 @@ class PortListener(threading.Thread):
         self._queuer = queuer
         self._callbacks = list()
         self._callbacks.append(callback)
-        self._thread_pool = ThreadPool(processes=no_threads,
-                                       initializer=CallbackWorker)
+        self._thread_pool = ThreadPool(processes=no_threads)
         self.setDaemon(True)
 
     def register_callback(self, callback):
@@ -43,7 +42,7 @@ class PortListener(threading.Thread):
                 packet = self._queuer.get_packet()
                 for callback in self._callbacks:
                     self._thread_pool.apply_async(CallbackWorker.call_callback,
-                                                  callback, packet)
+                                                  args=[callback, packet])
             except socket.timeout:
                 pass
             except Exception as e:

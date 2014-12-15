@@ -8,6 +8,18 @@ UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
 # The base address of the system variable structure in System ram
 SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 
+# The base address of a routers dianostic filter controls
+ROUTER_REGISTER_BASE_ADDRESS = 0xe1000000
+#offset for the router register
+ROUTER_FILTER_CONTROLS_OFFSET = 0x200
+#point where default filters finish and user settable ones are avilable
+ROUTER_DEFAULT_FILTERS_MAX_POSITION = 11
+#size of a router dianostic
+ROUTER_DIAGNOSTIC_FILTER_SIZE = 1 # in words
+
+#number of router dianostic filters
+NO_ROUTER_DIAGNOSTIC_FILTERS = 16
+
 # The size of the system variable structure in bytes
 SYSTEM_VARIABLE_BYTES = 256
 
