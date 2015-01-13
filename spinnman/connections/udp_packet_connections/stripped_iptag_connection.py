@@ -57,7 +57,10 @@ class StrippedIPTagConnection(
         return constants.CONNECTION_TYPE.UDP_IPTAG
 
     def supports_sends_message(self, message):
-         return False
+        return False
+
+    def is_udp_eieio_command_receiver(self):
+        return True
 
     def deregister_callback(self, callback):
         self._callback_listener.deregister_callback(callback)
