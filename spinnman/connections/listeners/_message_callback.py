@@ -121,7 +121,7 @@ class _MessageCallback(object):
         self._message_received_condition.release()
 
         if self._message_receive_exception is not None:
-            raise (self._message_receive_exception, None,
+            raise (self._message_receive_exception, "",
                    self._message_receive_traceback)
 
         return self._message_received

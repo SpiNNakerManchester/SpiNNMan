@@ -1,5 +1,4 @@
 from spinnman import exceptions
-import math
 
 
 class EIEIOCommandHeader(object):
@@ -12,11 +11,6 @@ class EIEIOCommandHeader(object):
         self._command = command
         self._key_prefix = 0
         self._format = 1
-
-#    def write_eieio_header(self, byte_writer):
-#        header = (self._key_prefix << 15) | (self._format << 14) |\
-#                self._command
-#        byte_writer.write_short(header)
 
     @property
     def command(self):
@@ -38,16 +32,14 @@ class EIEIOCommandHeader(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
                     is an error setting any of the values
         """
-        first_part_of_command = byte_reader.read_byte()
-        last_byte = byte_reader.read_byte()
+        command_header = byte_reader.read_short()
 
-        if ((last_byte >> 6) & 1) != 1 or ((last_byte >> 7) & 1) != 0:
+        if (command_header & 0x4000) != 0x4000:
             raise exceptions.SpinnmanInvalidPacketException(
-                "this cannot be a eieio command header as the format does not "
-                "match the correct format", "")
+                "this cannot be a eieio command header as the format does not"
+                " match the correct format", "")
 
-        last_part_of_command = ((last_byte & int(math.pow(2, 6) - 1)) << 8)
-        command = first_part_of_command + last_part_of_command
+        command = command_header & 0x3FFF
 
         return EIEIOCommandHeader(command)
 

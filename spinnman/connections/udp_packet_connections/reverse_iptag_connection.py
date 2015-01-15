@@ -54,7 +54,10 @@ class ReverseIPTagConnection(
     def is_eieio_receiver(self):
         return True
 
-    def is_udp_eieio_comamnd_sender(self):
+    def is_udp_eieio_command_sender(self):
+        return True
+
+    def is_udp_eieio_command_receiver(self):
         return True
 
     def connection_type(self):

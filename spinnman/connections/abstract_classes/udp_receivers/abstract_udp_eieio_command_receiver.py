@@ -5,26 +5,24 @@ from six import add_metaclass
 import select
 import socket
 
-from spinnman.connections.abstract_classes.abstract_eieio_receiver import \
-    AbstractEIEIOReceiver
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
 from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
+from spinnman.connections.abstract_classes.abstract_connection import \
+    AbstractConnection
+import traceback
 
 
 @add_metaclass(ABCMeta)
-class AbstractUDPEIEIOCommandReceiver(AbstractEIEIOReceiver):
+class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
     """ A receiver of SCP messages
     """
 
     @abstractmethod
-    def is_udp_eieio_receiver(self):
+    def is_udp_eieio_command_receiver(self):
         pass
-
-    def is_eieio_receiver(self):
-        return True
 
     def receive_eieio_command_message(self, timeout=None):
         """ Receives an eieio message from this connection.  Blocks\
@@ -54,6 +52,7 @@ class AbstractUDPEIEIOCommandReceiver(AbstractEIEIOReceiver):
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_sdp_message", timeout)
         except Exception as e:
+            traceback.print_exc()
             raise SpinnmanIOException(str(e))
 
         # Set up for reading
