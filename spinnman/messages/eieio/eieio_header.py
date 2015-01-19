@@ -5,7 +5,7 @@ import struct
 
 class EIEIOHeader(object):
 
-    def __init__(self, type_param, count_param, tag_param=0, prefix_param=None,
+    def __init__(self, type_param, tag_param=0, prefix_param=None,
                  payload_base=None, prefix_type=None, is_time=False):
         """the basic eieio header
 
@@ -13,14 +13,12 @@ class EIEIOHeader(object):
         :param payload_base: the data to replace the prefix if not prefix set/
          or None
         :param type_param: the type of message format
-        :param count_param: the count param
         :param tag_param: the tag being used or 0
         :param prefix_type: the position of the prefix (upper or lower)
         :param is_time: is the time param set
         :type prefix_param: int or None
         :type payload_base: int or None
         :type type_param: spinnman.spinnman.messages.eieio.eieio_type_param.EIEIOTypeParam
-        :type count_param: int
         :type tag_param: int
         :type prefix_type: spinnman.spinnman.messages.eieio.eieio_prefix_type
         :type is_time: bool
@@ -32,7 +30,7 @@ class EIEIOHeader(object):
             raise exceptions.SpinnmanInvalidParameterException(
                 "the eieio type_param is not a valid EIEIOTypeParam", "", "")
         self._type_param = type_param
-        self._count_param = count_param
+        self._count_param = 0
         self._tag_param = tag_param
         self._prefix_type = prefix_type
         self._is_time = is_time
@@ -64,6 +62,15 @@ class EIEIOHeader(object):
     @property
     def is_time(self):
         return self._is_time
+
+    def set_count_param(self, count_param):
+        self._count_param = count_param
+
+    def increment_count_param(self):
+        self._count_param += 1
+
+    def reset_count_param(self):
+        self._count_param = 0
 
     def write_eieio_header(self, byte_writer):
         #writes in little endian form
@@ -174,9 +181,13 @@ class EIEIOHeader(object):
                 "eieio header", "the type param from the received packet is "
                                 "invalid")
 
-        return EIEIOHeader(
-            type_param=message_type, count_param=count, tag_param=tag,
+        header = EIEIOHeader(
+            type_param=message_type, tag_param=tag,
             prefix_param=prefix, payload_base=d, prefix_type=f, is_time=bool(t))
+
+        header.set_count_param(count)
+
+        return header
 
     def __str__(self):
         return "{}.{}.{}.{}.{}.{}.{}".format(
@@ -186,4 +197,3 @@ class EIEIOHeader(object):
 
     def __repr__(self):
         return self.__str__()
-
