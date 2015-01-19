@@ -13,11 +13,6 @@ class EIEIOCommandHeader(object):
         self._key_prefix = 0
         self._format = 1
 
-#    def write_eieio_header(self, byte_writer):
-#        header = (self._key_prefix << 15) | (self._format << 14) |\
-#                self._command
-#        byte_writer.write_short(header)
-
     @property
     def command(self):
         return self._command
