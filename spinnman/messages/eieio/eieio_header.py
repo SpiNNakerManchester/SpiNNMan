@@ -155,7 +155,7 @@ class EIEIOHeader(object):
                 d3 = byte_reader.read_byte()
                 d2 = byte_reader.read_byte()
                 d1 = byte_reader.read_byte()
-                d = (d4 << 24) | (d3 << 16) | (d1 << 8) | d2
+                d = (d1 << 24) | (d2 << 16) | (d3 << 8) | d4
             else:
                 raise exceptions.SpinnmanInvalidPacketException(
                     "eieio header", "the type param from the received packet "

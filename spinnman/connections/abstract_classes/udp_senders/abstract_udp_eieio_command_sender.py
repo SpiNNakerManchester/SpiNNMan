@@ -1,20 +1,20 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
-from spinnman.connections.abstract_classes.abstract_eieio_sender import \
-    AbstractEIEIOSender
 from spinnman.data.little_endian_byte_array_byte_writer import \
     LittleEndianByteArrayByteWriter
 from spinnman.exceptions import SpinnmanIOException
+from spinnman.connections.abstract_classes.abstract_connection import \
+    AbstractConnection
 
 
 @add_metaclass(ABCMeta)
-class AbstractUDPEIEIOCommandSender(AbstractEIEIOSender):
+class AbstractUDPEIEIOCommandSender(AbstractConnection):
     """ A receiver of SCP messages
     """
 
     @abstractmethod
-    def is_udp_eieio_comamnd_sender(self):
+    def is_udp_eieio_command_sender(self):
         pass
 
     def send_eieio_command_message(self, eieio_command_message):
@@ -37,7 +37,7 @@ class AbstractUDPEIEIOCommandSender(AbstractEIEIOSender):
         writer = LittleEndianByteArrayByteWriter()
 
         # Write the header
-        eieio_command_message.eieio_header.write_command_header(writer)
+        eieio_command_message.eieio_command_header.write_command_header(writer)
 
         # Write any data
         if data_length != 0:
