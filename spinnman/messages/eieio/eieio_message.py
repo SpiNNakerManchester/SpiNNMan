@@ -8,7 +8,9 @@ import binascii
 
 class EIEIOMessage(AbstractEIEIOMessage):
 
-    def __init__(self, eieio_header, data=bytearray()):
+    def __init__(self, eieio_header, data=None):
+        if data is None:
+            data = bytearray()
         AbstractEIEIOMessage.__init__(self, data)
         if isinstance(eieio_header, EIEIOHeader):
             self._eieio_header = eieio_header

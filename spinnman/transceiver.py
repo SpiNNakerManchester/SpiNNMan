@@ -603,7 +603,7 @@ class Transceiver(object):
             ip_address=chip_details.ip_address)
         return chip
 
-    def _update_machine(self):
+    def _update_machine(self, adjust_so_fpgas_are_virtual_chips):
         """ Get the current machine status and store it
         """
 
@@ -715,7 +715,7 @@ class Transceiver(object):
         # that supports SCP - this is _done via the machine
         if self._sending_connections is None:
             return list()
-        self._update_machine()
+        self._update_machine(adjust_so_fpgas_are_virtual_chips=False)
 
         # Find all the new connections via the machine ethernet-connected chips
         new_connections = list()
@@ -782,10 +782,13 @@ class Transceiver(object):
         return MachineDimensions(self._machine.max_chip_x,
                                  self._machine.max_chip_y)
 
-    def get_machine_details(self):
+    def get_machine_details(self, adjust_so_fpgas_are_virtual_chips=False):
         """ Get the details of the machine made up of chips on a board and how\
             they are connected to each other.
 
+        :param adjust_so_fpgas_are_virtual_chips: a boolean value which tells
+        the machine that it should add support in the machine structure for
+        FPGA's to be interfaced to.
         :return: A machine description
         :rtype: :py:class:`spinn_machine.machine.Machine`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -798,7 +801,7 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         if self._machine is None:
-            self._update_machine()
+            self._update_machine(adjust_so_fpgas_are_virtual_chips)
         return self._machine
 
     def is_connected(self, connection=None):
