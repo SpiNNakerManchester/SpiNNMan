@@ -58,13 +58,14 @@ TRAFFIC_TYPE = Enum(
 
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
-    names=[("DATABASE_CONFIRMATION", 1),
-           ("EVENT_PADDING", 2),
-           ("EVENT_STOP", 3),
-           ("NEW_BUFFERS", 4),
-           ("STOP_SENDING_REQUESTS", 5),
-           ("START_SENDING_REQUESTS", 6),
-           ("READ_DATA", 7)])
+    names=[("DATABASE_CONFIRMATION", 1),   # Database handshake with visualiser
+           ("EVENT_PADDING", 2),           # Fill in buffer area with padding
+           ("EVENT_STOP", 3),              # End of all buffers, stop execution (?)
+           ("NEW_BUFFERS", 4),             # Sequence of buffers to be held in sdram for buffered in vertices
+           ("STOP_SENDING_REQUESTS", 5),   # Stop complaining that there is sdram free space for buffers
+           ("START_SENDING_REQUESTS", 6),  # Start complaining that there is sdram free space for buffers
+           ("READ_DATA", 7),               # Buffers available to be read from a buffered out vertex
+           ("ACK", 8)])                    # Acknowledging last message
 
 RECEIVED_BUFFER_COMMAND_IDS = Enum(
     value="RECEIVED_BUFFER_COMMAND_IDS",
