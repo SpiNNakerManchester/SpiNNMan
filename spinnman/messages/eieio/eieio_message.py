@@ -29,6 +29,9 @@ class EIEIOMessage(AbstractEIEIOMessage):
     def is_EIEIO_message(self):
         return True
 
+    def data(self):
+        return self._data
+
     def write_data(self, key, payload=None):
         if key is None:
             raise exceptions.SpinnmanInvalidParameterException(
