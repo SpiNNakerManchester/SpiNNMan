@@ -29,6 +29,7 @@ class EIEIOMessage(AbstractEIEIOMessage):
     def is_EIEIO_message(self):
         return True
 
+    @property
     def data(self):
         return self._data
 
