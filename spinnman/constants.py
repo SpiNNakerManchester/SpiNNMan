@@ -2,6 +2,9 @@ from enum import Enum
 # The default port of the connection
 SCP_SCAMP_PORT = 17893
 
+# the default app id used by the re_injection cores to avoid overloads
+RE_INJECTION_APP_ID = 17
+
 # The default port of the connection
 UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
 

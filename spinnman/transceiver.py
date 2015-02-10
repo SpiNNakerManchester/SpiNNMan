@@ -10,6 +10,7 @@ from spinnman.connections.udp_packet_connections.udp_spinnaker_connection import
     UDPSpinnakerConnection
 from spinnman.connections.abstract_classes.abstract_udp_connection \
     import AbstractUDPConnection
+from spinnman.data.file_data_reader import FileDataReader
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -21,6 +22,7 @@ from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
 from spinnman.messages.sdp.sdp_message import SDPMessage
 
 from spinnman.model.chip_info import ChipInfo
+from spinnman.model.core_subset import CoreSubset
 from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
@@ -96,6 +98,7 @@ from multiprocessing.pool import ThreadPool
 
 import logging
 import math
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -556,19 +559,23 @@ class Transceiver(object):
         self._scp_message_thread_pool.apply_async(thread.run())
         return thread.get_response()
 
-    def _make_chip(self, chip_details):
+    def _make_chip(self, chip_details, re_injection_core_sets):
         """ Creates a chip from a ChipInfo structure
 
         :param chip_details: The ChipInfo structure to create the chip\
                     from
         :type chip_details: \
                     :py:class:`spinnman.model.chip_info.ChipInfo`
+        :param re_injection_core_sets: a list of core-sets to be used in the
+                                      reinjection flood fill
+        :type re_injection_core_sets: list
         :return: The created chip
         :rtype: :py:class:`spinn_machine.chip.Chip`
         """
 
         # Create the processor list
         processors = list()
+        located_re_injector_processor = False
         for virtual_core_id in chip_details.virtual_core_ids:
             if (self._ignore_cores is not None
                     and self._ignore_cores.is_core(
@@ -583,9 +590,18 @@ class Transceiver(object):
                                      virtual_core_id, self._max_core_id))
                 continue
 
-            processors.append(Processor(
-                virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
-                virtual_core_id == 0))
+            if virtual_core_id != 0 and not located_re_injector_processor:
+                processors.append(Processor(
+                    virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
+                    True))
+                re_injection_core_sets.append(
+                    CoreSubset(chip_details.x, chip_details.y,
+                               [virtual_core_id]))
+                located_re_injector_processor = True
+            else:
+                processors.append(Processor(
+                    virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
+                    virtual_core_id == 0))
 
         # Create the router - add the links later during search
         router = Router(
@@ -603,9 +619,31 @@ class Transceiver(object):
             ip_address=chip_details.ip_address)
         return chip
 
+    def _flood_fill_re_injection_model(self, flood_core_subsets):
+        """ private method to add a reinjector code to a core on a chip
+
+        :param flood_core_subsets: the list of core_subset which defines which cores the re_injection
+        :return: None
+        """
+        #locate re-injection binary
+        file_path_of_spinn_constants = os.path.dirname(constants.__file__)
+        file_path_of_re_injection_binary = \
+            os.path.join(file_path_of_spinn_constants,
+                         "re_injection_binary{}re_injection.aplx"
+                         .format(os.sep))
+        #read in the re-injection binary
+        file_reader = FileDataReader(file_path_of_re_injection_binary)
+        file_to_read_in = open(file_path_of_re_injection_binary, 'rb')
+        buf = file_to_read_in.read()
+        size = (len(buf))
+        core_subsets = CoreSubsets(flood_core_subsets)
+        self.execute_flood(core_subsets, file_reader,
+                           constants.RE_INJECTION_APP_ID, size)
+
     def _update_machine(self):
         """ Get the current machine status and store it
         """
+        re_injection_core_subsets = list()
 
         # Ask the chip at 0, 0 for details
         logger.debug("Getting details of chip 0, 0")
@@ -614,7 +652,7 @@ class Transceiver(object):
             size=constants.SYSTEM_VARIABLE_BYTES))
         chip_0_0_details = ChipInfo(response.data)
         self._chip_info[(0, 0)] = chip_0_0_details
-        chip_0_0 = self._make_chip(chip_0_0_details)
+        chip_0_0 = self._make_chip(chip_0_0_details, re_injection_core_subsets)
 
         # Create a machine with chip 0, 0
         self._machine = Machine([chip_0_0])
@@ -678,7 +716,8 @@ class Transceiver(object):
                             new_chip_details.x, new_chip_details.y):
                         logger.debug("Found new chip {}, {}".format(
                             new_chip_details.x, new_chip_details.y))
-                        new_chip = self._make_chip(new_chip_details)
+                        new_chip = self._make_chip(new_chip_details,
+                                                   re_injection_core_subsets)
                         self._machine.add_chip(new_chip)
                         self._chip_info[(new_chip.x,
                                          new_chip.y)] = new_chip_details
@@ -690,6 +729,8 @@ class Transceiver(object):
                     # If there is an error, assume the link is down
                     logger.debug("Error searching down link {}".format(link))
                     logger.debug(error)
+        #flood fill the re_injection model
+        self._flood_fill_re_injection_model(re_injection_core_subsets)
 
     def discover_scamp_connections(self):
         """ Find connections to the board and store these for future use.\
