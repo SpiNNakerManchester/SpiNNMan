@@ -33,7 +33,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
     def convert_to_byte_array(self):
         """ converts the command message into a byte array in little endian form
 
-        :return:the byte array which represnets the command message
+        :return:the byte array which represents the command message
         """
         writer = LittleEndianByteArrayByteWriter()
         self._eieio_command_header.write_command_header(writer)

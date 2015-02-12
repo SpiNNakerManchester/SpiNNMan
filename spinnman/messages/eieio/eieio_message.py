@@ -1,3 +1,5 @@
+from spinnman.data.little_endian_byte_array_byte_writer import \
+    LittleEndianByteArrayByteWriter
 from spinnman.messages.eieio.abstract_eieio_message import AbstractEIEIOMessage
 from spinnman.messages.eieio.eieio_header import EIEIOHeader
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
@@ -26,6 +28,10 @@ class EIEIOMessage(AbstractEIEIOMessage):
     
     def is_EIEIO_message(self):
         return True
+
+    @property
+    def data(self):
+        return self._data
 
     def write_data(self, key, payload=None):
         if key is None:
@@ -63,6 +69,17 @@ class EIEIOMessage(AbstractEIEIOMessage):
             self._data += bytearray(struct.pack("<H", payload))
         else:
             self._data += bytearray(struct.pack("<I", payload))
+
+    def convert_to_byte_array(self):
+        """ converts the eieio data message into a byte array in little endian
+        form
+
+        :return:the byte array which represents the command message
+        """
+        writer = LittleEndianByteArrayByteWriter()
+        self._eieio_header.write_eieio_header(writer)
+
+        return writer.data + self._data
 
     @staticmethod
     def create_eieio_messages_from(buffer_data):
