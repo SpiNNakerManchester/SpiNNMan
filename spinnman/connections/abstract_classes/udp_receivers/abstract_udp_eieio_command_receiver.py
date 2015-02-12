@@ -63,4 +63,5 @@ class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
         data = reader.read_bytes()
         if len(data) == 0:
             data = None
+
         return EIEIOCommandMessage(eieio_header, data)
