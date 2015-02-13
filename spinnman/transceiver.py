@@ -3,6 +3,7 @@ from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
     StrippedIPTagConnection
+from spinnman.messages.scp.scp_signal import SCPSignal
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
 from spinnman import constants
@@ -622,20 +623,26 @@ class Transceiver(object):
     def _flood_fill_re_injection_model(self, flood_core_subsets):
         """ private method to add a reinjector code to a core on a chip
 
-        :param flood_core_subsets: the list of core_subset which defines which cores the re_injection
+        :param flood_core_subsets: the list of core_subset which defines which\
+                    cores the re_injection
         :return: None
         """
-        #locate re-injection binary
+        # locate re-injection binary
         file_path_of_spinn_constants = os.path.dirname(constants.__file__)
         file_path_of_re_injection_binary = \
             os.path.join(file_path_of_spinn_constants,
                          "re_injection_binary{}re_injection.aplx"
                          .format(os.sep))
-        #read in the re-injection binary
+        # read in the re-injection binary
         file_reader = FileDataReader(file_path_of_re_injection_binary)
         file_to_read_in = open(file_path_of_re_injection_binary, 'rb')
         buf = file_to_read_in.read()
         size = (len(buf))
+
+        # Stop the execution
+        self.send_signal(constants.RE_INJECTION_APP_ID, SCPSignal.STOP)
+
+        # Start it again
         core_subsets = CoreSubsets(flood_core_subsets)
         self.execute_flood(core_subsets, file_reader,
                            constants.RE_INJECTION_APP_ID, size)
@@ -729,7 +736,8 @@ class Transceiver(object):
                     # If there is an error, assume the link is down
                     logger.debug("Error searching down link {}".format(link))
                     logger.debug(error)
-        #flood fill the re_injection model
+
+        # flood fill the re_injection model
         self._flood_fill_re_injection_model(re_injection_core_subsets)
 
     def discover_scamp_connections(self):
