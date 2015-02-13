@@ -1,7 +1,6 @@
 // SARK-based program
 #include <sark.h>
-#include "spin1_api.h"
-#include "../common/common-impl.h"
+
 // ------------------------------------------------------------------------
 // constants
 // ------------------------------------------------------------------------
@@ -74,7 +73,6 @@ uint pkt_ctr2;
 uint pkt_ctr3;
 
 uint max_time;
-static uint32_t time = UINT32_MAX;
 
 pkt_queue_t pkt_queue;  // dumped packet queue
 // ------------------------------------------------------------------------
@@ -83,14 +81,12 @@ pkt_queue_t pkt_queue;  // dumped packet queue
 // ------------------------------------------------------------------------
 // functions
 // ------------------------------------------------------------------------
-
-
 INT_HANDLER timer_int_han (void)
 {
-  //#ifdef DEBUG
-   // // count entries //##
-   // sark.vcpu->user2++;
-  //#endif
+  #ifdef DEBUG
+    // count entries //##
+    sark.vcpu->user2++;
+  #endif
 
   // clear interrupt in timer,
   tc[T1_INT_CLR] = (uint) tc;
@@ -117,33 +113,31 @@ INT_HANDLER timer_int_han (void)
     }
   }
 
- // #ifdef DEBUG
+  #ifdef DEBUG
     // update packet counters,
     //##  sark.vcpu->user0 = pkt_ctr0;
-   // sark.vcpu->user1 = pkt_ctr1;
+    sark.vcpu->user1 = pkt_ctr1;
     //##  sark.vcpu->user2 = pkt_ctr2;
     //##  sark.vcpu->user3 = pkt_ctr3;
-  //#endif
+  #endif
 
   // and tell VIC we're done
   vic[VIC_VADDR] = (uint) vic;
 }
 
-void timer_init (uint period)
-{
-  // set up count-down mode,
-  tc[T1_CONTROL] = 0xe2;
-
-  // load time in microsecs,
-  tc[T1_LOAD] = sark.cpu_clk * period;
-
-  // and configure VIC slot
-  sark_vic_set (TIMER_SLOT, TIMER1_INT, 1, timer_int_han);
-}
-
 
 INT_HANDLER router_int_han (void)
 {
+  #ifdef DEBUG
+    // count entries //##
+    sark.vcpu->user0++;
+  #endif
+
+  #ifdef DEBUG
+    // profiling
+    uint start_time = tc[T2_COUNT];
+  #endif
+
   // clear interrupt in router,
   (void) rtr[RTR_STATUS];
 
@@ -151,6 +145,17 @@ INT_HANDLER router_int_han (void)
   uint hdr = rtr[RTR_DHDR];
   uint pld = rtr[RTR_DDAT];
   uint key = rtr[RTR_DKEY];
+
+  #ifdef DEBUG
+    // profiling -- T2 is a down counter!
+    uint run_time = start_time - tc[T2_COUNT];
+  #endif
+
+  #ifdef DEBUG
+    // check for overflow -- non-recoverable error!,
+    if (rtr[RTR_DSTAT] & RTR_DOVRFLW_MASK)
+      pkt_ctr1++;
+  #endif
 
   // bounce mc packets only
   if ((hdr & PKT_TYPE_MASK) == PKT_TYPE_MC)
@@ -168,8 +173,27 @@ INT_HANDLER router_int_han (void)
 
       // update queue pointer,
       pkt_queue.tail = new_tail;
+
+      #ifdef DEBUG
+        // and count packet
+        //# pkt_ctr0++;
+      #endif
+
     }
+    #ifdef DEBUG
+      else
+      {
+        // full queue -- non-recoverable error!
+        //# pkt_ctr2++;
+      }
+    #endif
   }
+
+  #ifdef DEBUG
+    // profiling -- keep track of maximum
+    if (run_time > max_time)
+      max_time = run_time;
+  #endif
 }
 
 
@@ -237,6 +261,20 @@ INT_HANDLER cc_int_han (void)
   vic[VIC_VADDR] = (uint) vic;
 }
 
+
+void timer_init (uint period)
+{
+  // set up count-down mode,
+  tc[T1_CONTROL] = 0xe2;
+
+  // load time in microsecs,
+  tc[T1_LOAD] = sark.cpu_clk * period;
+
+  // and configure VIC slot
+  sark_vic_set (TIMER_SLOT, TIMER1_INT, 1, timer_int_han);
+}
+
+
 void router_init ()
 {
   // re-configure wait values in router
@@ -272,71 +310,33 @@ void cc_init ()
 }
 
 
-// Callbacks
-void timer_callback (uint unused0, uint unused1)
+void timer2_init ()
 {
-    use(unused0);
-    use(unused1);
-    time++;
-
-    //log_info("Timer tick %d", time);
-    if (time == 1){
-
-         cc_init ();                // setup comms. cont. interrupt when not full
-
-        router_init ();            // setup router to interrupt when dumping
-    }
-
-    if (simulation_ticks != UINT32_MAX &&
-        time == simulation_ticks + timer_period)
-    {
-        log_info("Simulation complete.\n");
-        // and disable comms. cont. interrupts
-        vic[VIC_DISABLE] = 1 << CC_TNF_INT;
-         // enable interrupt,
-        vic[VIC_DISABLE] = 1 << RTR_DUMP_INT;
-        log_info("turned off the inturrupts");
-        spin1_exit(0);
-        return;
-    }
-    //timer_int_han();
+  // configure timer 2 for profiling
+  // enabled, 32 bit, free running, 1x pre-scaler
+  tc[T2_CONTROL] = TIMER2_CONF;
+  tc[T2_LOAD] = TIMER2_LOAD;
 }
-
 // ------------------------------------------------------------------------
 
 
 // ------------------------------------------------------------------------
 // main
 // ------------------------------------------------------------------------
-
-static bool load_dtcm()
-{
-    log_info("load_dtcm: started");
-
-    // Get the address this core's DTCM data starts at from SRAM
-    address_t address = system_load_sram();
-    system_load_params(region_start(0, address));
-    return true;
-}
-
-
 void c_main()
 {
-    log_info("initializing dumped packet bouncer\n");
-    bool ans;
-    // Configure system
-    ans = load_dtcm();
-    if (!ans) return;
+  io_printf (IO_STD, "starting dumped packet bouncer\n");
 
-    //adjust the simulation tic counter to take into accoutn higher burn rate
-    simulation_ticks *= 100;
+  timer_init (TICK_PERIOD);  // setup timer to maybe turn on bouncing
 
-    // Set timer_callback
-    spin1_set_timer_tick(TICK_PERIOD);
-    spin1_callback_on (TIMER_TICK, timer_callback, 2);
+  cc_init ();                // setup comms. cont. interrupt when not full
 
-    log_info("starting dumped packet bouncer\n");
-    system_runs_to_completion();
-    log_info("exited dumped packet bouncer\n");
+  router_init ();            // setup router to interrupt when dumping
+
+  #ifdef DEBUG
+    timer2_init ();          // setup timer2 for profiling
+  #endif
+
+  cpu_sleep ();		     // Send core to sleep
 }
 // ------------------------------------------------------------------------
