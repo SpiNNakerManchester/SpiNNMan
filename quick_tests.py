@@ -1,18 +1,17 @@
-from spinnman.transceiver import create_transceiver_from_hostname
-
 import logging
+from random import randint
+from os.path import os
+
+from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.cpu_state import CPUState
 from spinnman.model.core_subsets import CoreSubsets
 from spinnman.model.core_subset import CoreSubset
-from random import randint
 from spinnman.data.file_data_reader import FileDataReader
-from os.path import os
 from time import sleep
 from spinnman.messages.scp.scp_signal import SCPSignal
-from spinnman.model.iptag.iptag import IPTag
+from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
-import sys
-from spinnman.model.iptag.reverse_iptag import ReverseIPTag
+from spinn_machine.tags.reverse_iptag import ReverseIPTag
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 

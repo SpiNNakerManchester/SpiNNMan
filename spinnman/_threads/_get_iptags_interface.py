@@ -1,13 +1,14 @@
 from threading import Condition
+import sys
+import logging
 
 from _scp_message_interface import SCPMessageInterface
 from spinnman.messages.scp.impl.scp_iptag_info_request import SCPIPTagInfoRequest
 from spinnman.messages.scp.impl.scp_iptag_get_request import SCPIPTagGetRequest
-from spinnman.model.iptag.iptag import IPTag
 
-import sys
-import logging
-from spinnman.model.iptag.reverse_iptag import ReverseIPTag
+
+from spinn_machine.tags.iptag import IPTag
+from spinn_machine.tags.reverse_iptag import ReverseIPTag
 
 logger = logging.getLogger(__name__)
 

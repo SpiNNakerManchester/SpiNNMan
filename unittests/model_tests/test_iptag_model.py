@@ -1,5 +1,7 @@
 import unittest
-from spinnman.model.iptag import IPTag
+
+from spinn_machine.tags import IPTag
+
 
 class TestIptag(unittest.TestCase):
     def test_new_iptag(self):

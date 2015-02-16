@@ -9,7 +9,11 @@ import binascii
 
 class EIEIOCommandMessage(AbstractEIEIOMessage):
 
-    def __init__(self, eieio_command_header, data):
+    def __init__(self, eieio_command_header, data=None):
+
+        if data is None:
+            data = bytearray()
+
         AbstractEIEIOMessage.__init__(self, data)
         if isinstance(eieio_command_header, EIEIOCommandHeader):
             self._eieio_command_header = eieio_command_header
@@ -35,6 +39,16 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         if self._data is not None:
             writer.write_bytes(self._data)
         return writer.data
+
+    def add_data(self, data):
+        """ adds a byte array data onto the command's data
+
+        :param data: the data to add
+        :type data: bytearray
+        :return:
+        """
+        self._data.extend(data)
+
 
     def __str__(self):
         return "{}:{}".format(self._eieio_command_header,

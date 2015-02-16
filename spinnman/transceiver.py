@@ -1797,8 +1797,8 @@ class Transceiver(object):
     def set_ip_tag(self, ip_tag, connection=None):
         """ Set up an ip tag
 
-        :param ip_tag: The iptag to set up
-        :type ip_tag: :py:class:`spinnman.model.iptag.IPTag`
+        :param ip_tag: The tags to set up
+        :type ip_tag: :py:class:`spinnman.model.tags.IPTag`
         :param connection: UDPConnection where the tag should be set up.\
                     If not specified, all UDPConnections will send the message\
                     to set up the tag
@@ -1844,7 +1844,7 @@ class Transceiver(object):
     def set_reverse_ip_tag(self, reverse_ip_tag, connection=None):
         """ Set up an reverse ip tag
 
-        :param reverse_ip_tag: The reverse iptag to set up
+        :param reverse_ip_tag: The reverse tags to set up
         :type reverse_ip_tag: :py:class:`spinnman.model.reverse_iptag.ReverseIPTag`
         :param connection: UDPConnection where the tag should be set up.\
                     If not specified, all UDPConnections will send the message\
@@ -1937,7 +1937,7 @@ class Transceiver(object):
                     :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :return: An iterable of ip tags
         :rtype: iterable of\
-                    :py:class:`spinnman.model.iptag.abstract_iptag.AbstractIPTag`
+                    :py:class:`spinnman.model.tags.abstract_iptag.AbstractIPTag`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
