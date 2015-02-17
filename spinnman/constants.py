@@ -68,7 +68,3 @@ EIEIO_COMMAND_IDS = Enum(
            ("SPINNAKER_REQUEST_READ_DATA", 8),  # Buffers available to be read from a buffered out vertex
            ("HOST_DATA_READ", 9)])              # Host confirming data being read form SpiNNaker memory
 
-RECEIVED_BUFFER_COMMAND_IDS = Enum(
-    value="RECEIVED_BUFFER_COMMAND_IDS",
-    names=[("BUFFER_RECEIVE", 1),
-           ("BUFFER_SEND", 2)])
