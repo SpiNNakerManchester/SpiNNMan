@@ -1,4 +1,3 @@
-from spinn_machine.diagnostic_filter import DiagnosticFilter
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
@@ -616,7 +615,9 @@ class Transceiver(object):
         chip = Chip(
             x=chip_details.x, y=chip_details.y, processors=processors,
             router=router, sdram=SDRAM(SDRAM.DEFAULT_SDRAM_BYTES),
-            ip_address=chip_details.ip_address)
+            ip_address=chip_details.ip_address,
+            nearest_ethernet_x=chip_details.nearest_ethernet_x,
+            nearest_ethernet_y=chip_details.nearest_ethernet_y)
         return chip
 
     def _flood_fill_re_injection_model(self, flood_core_subsets):
@@ -932,6 +933,10 @@ class Transceiver(object):
             except SpinnmanTimeoutException:
                 self.boot_board(board_version)
                 tries_to_go -= 1
+            except SpinnmanIOException:
+                raise SpinnmanUnexpectedResponseCodeException(
+                    "We currently cannot communicate with your board, please "
+                    "rectify this, and try again", "", "")
 
         if version_info is None:
             raise SpinnmanIOException("Could not boot the board")
@@ -1794,7 +1799,20 @@ class Transceiver(object):
         """
         self._send_scp_message(SCPLEDRequest(x, y, cpu, led_states))
 
-    def set_ip_tag(self, ip_tag, connection=None):
+    def locate_spinnaker_connection_for_board_address(self, board_address):
+        """
+
+        :param board_address:
+        :return:
+        """
+        for connection_key in self._sending_connections.keys():
+            connection = self._sending_connections[connection_key]
+            if (isinstance(connection, UDPSpinnakerConnection)
+                    and connection.remote_ip_address == board_address):
+                return connection
+        return None
+
+    def set_ip_tag(self, ip_tag, connection=None, board_address=None):
         """ Set up an ip tag
 
         :param ip_tag: The tags to set up
@@ -1802,8 +1820,13 @@ class Transceiver(object):
         :param connection: UDPConnection where the tag should be set up.\
                     If not specified, all UDPConnections will send the message\
                     to set up the tag
+                    If specified, then you cannot specify a board_address
         :type connection:\
                     :py:class:`spinnman.connections.udp_connetion.UDPConnection`
+        :param board_address: the remote ipaddress of a Spinnaker connection
+                              that you want to pump the iptag to
+                              If specified, then you cannot specify a connection
+        :type board_address: str
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1817,10 +1840,22 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+        if connection is not None and board_address is not None:
+            raise SpinnmanInvalidParameterException(
+                "{}:{}".format(connection, board_address),
+                "Cant have both connection and board_address specified in "
+                "setting a reverse ip tag. Please choose one, and try again",
+                "")
         if connection is not None:
             connections = connection
         else:
             connections = self._sending_connections.values()
+
+        if board_address is not None:
+            connections = list()
+            connection = self.locate_spinnaker_connection_for_board_address(
+                board_address)
+            connections.append(connection)
 
         callbacks = list()
         for conn in connections:
@@ -1841,7 +1876,8 @@ class Transceiver(object):
         for callback in callbacks:
             callback.get_response()
 
-    def set_reverse_ip_tag(self, reverse_ip_tag, connection=None):
+    def set_reverse_ip_tag(self, reverse_ip_tag, connection=None,
+                           board_address=None):
         """ Set up an reverse ip tag
 
         :param reverse_ip_tag: The reverse tags to set up
@@ -1849,8 +1885,13 @@ class Transceiver(object):
         :param connection: UDPConnection where the tag should be set up.\
                     If not specified, all UDPConnections will send the message\
                     to set up the tag
+                    If specified, then you cannot specify a board_address
         :type connection:\
                     :py:class:`spinnman.connections.udp_connetion.UDPConnection`
+        :param board_address: the remote ipaddress of a Spinnaker connection
+                              that you want to pump the iptag to
+                              If specified, then you cannot specify a connection
+        :type board_address: str
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1864,10 +1905,23 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+        if connection is not None and board_address is not None:
+            raise SpinnmanInvalidParameterException(
+                "{}:{}".format(connection, board_address),
+                "Cant have both connection and board_address specified in "
+                "setting a reverse ip tag. Please choose one, and try again",
+                "")
+
         if connection is not None:
             connections = connection
         else:
             connections = self._sending_connections.values()
+
+        if board_address is not None:
+            connections = list()
+            connection = self.locate_spinnaker_connection_for_board_address(
+                board_address)
+            connections.append(connection)
 
         callbacks = list()
         for conn in connections:
