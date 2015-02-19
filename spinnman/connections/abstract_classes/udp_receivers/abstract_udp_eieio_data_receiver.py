@@ -13,6 +13,9 @@ from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.messages.eieio.eieio_header import EIEIOHeader
 from spinnman.messages.eieio.eieio_message import EIEIOMessage
 
+from spynnaker.pyNN.buffer_management.abstract_eieio_packets.\
+    create_eieio_packets import create_data_from_reader
+
 
 @add_metaclass(ABCMeta)
 class AbstractUDPEIEIODataReceiver(AbstractEIEIOReceiver):
@@ -60,8 +63,12 @@ class AbstractUDPEIEIODataReceiver(AbstractEIEIOReceiver):
         packet = bytearray(raw_data)
         reader = LittleEndianByteArrayByteReader(packet)
 
-        eieio_header = EIEIOHeader.create_header_from_reader(reader)
-        data = reader.read_bytes()
-        if len(data) == 0:
-            data = None
-        return EIEIOMessage(eieio_header, data)
+        eieio_packet = create_data_from_reader(reader)
+
+        return eieio_packet
+
+        # eieio_header = EIEIOHeader.create_header_from_reader(reader)
+        # data = reader.read_bytes()
+        # if len(data) == 0:
+        #     data = None
+        # return EIEIOMessage(eieio_header, data)

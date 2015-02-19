@@ -8,12 +8,12 @@ import socket
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
-from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
-from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
 from spinnman.connections.abstract_classes.abstract_connection import \
     AbstractConnection
 import traceback
 
+from spynnaker.pyNN.buffer_management.abstract_eieio_packets.\
+    create_eieio_packets import create_command_from_reader
 
 @add_metaclass(ABCMeta)
 class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
@@ -59,9 +59,13 @@ class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
         packet = bytearray(raw_data)
         reader = LittleEndianByteArrayByteReader(packet)
 
-        eieio_header = EIEIOCommandHeader.create_header_from_reader(reader)
-        data = reader.read_bytes()
-        if len(data) == 0:
-            data = None
+        eieio_packet = create_command_from_reader(reader)
 
-        return EIEIOCommandMessage(eieio_header, data)
+        return eieio_packet
+
+        # eieio_header = EIEIOCommandHeader.create_header_from_reader(reader)
+        # data = reader.read_bytes()
+        # if len(data) == 0:
+        #     data = None
+        #
+        # return EIEIOCommandMessage(eieio_header, data)

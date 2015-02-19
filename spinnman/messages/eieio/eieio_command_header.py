@@ -34,7 +34,7 @@ class EIEIOCommandHeader(object):
         """
         command_header = byte_reader.read_short()
 
-        if (command_header & 0x4000) != 0x4000:
+        if (command_header & 0xC000) != 0x4000:
             raise exceptions.SpinnmanInvalidPacketException(
                 "this cannot be a eieio command header as the format does not"
                 " match the correct format", "")
