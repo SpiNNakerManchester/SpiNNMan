@@ -589,18 +589,9 @@ class Transceiver(object):
                                      virtual_core_id, self._max_core_id))
                 continue
 
-            if virtual_core_id != 0 and not located_re_injector_processor:
-                processors.append(Processor(
-                    virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
-                    True))
-                re_injection_core_sets.append(
-                    CoreSubset(chip_details.x, chip_details.y,
-                               [virtual_core_id]))
-                located_re_injector_processor = True
-            else:
-                processors.append(Processor(
-                    virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
-                    virtual_core_id == 0))
+            processors.append(Processor(
+                virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
+                virtual_core_id == 0))
 
         # Create the router - add the links later during search
         router = Router(
