@@ -48,7 +48,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         if self._data is not None:
             writer.write_bytes(self._data)
         return writer.data
-  
+
     def __str__(self):
         return "{}:{}".format(self._eieio_command_header,
                               binascii.hexlify(self._data))

@@ -3,7 +3,8 @@ import sys
 import logging
 
 from _scp_message_interface import SCPMessageInterface
-from spinnman.messages.scp.impl.scp_iptag_info_request import SCPIPTagInfoRequest
+from spinnman.messages.scp.impl.scp_iptag_info_request \
+    import SCPIPTagInfoRequest
 from spinnman.messages.scp.impl.scp_iptag_get_request import SCPIPTagGetRequest
 
 
