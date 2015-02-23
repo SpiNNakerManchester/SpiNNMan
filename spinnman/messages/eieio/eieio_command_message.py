@@ -9,7 +9,10 @@ import binascii
 
 class EIEIOCommandMessage(AbstractEIEIOMessage):
 
-    def __init__(self, eieio_command_header, data):
+    def __init__(self, eieio_command_header, data=None):
+        if data is None:
+            data = bytearray()
+        
         AbstractEIEIOMessage.__init__(self, data)
         if isinstance(eieio_command_header, EIEIOCommandHeader):
             self._eieio_command_header = eieio_command_header
@@ -24,6 +27,11 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
 
     def is_EIEIO_message(self):
         return True
+
+    def add_data(self, data):
+        writer = LittleEndianByteArrayByteWriter()
+        writer.write_bytes(data)
+        self._data.extend(writer.data)
 
     def convert_to_byte_array(self):
         """ converts the command message into a byte array in little endian form
