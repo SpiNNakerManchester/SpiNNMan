@@ -1935,7 +1935,7 @@ class Transceiver(object):
                     reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
                     reverse_ip_tag.destination_p,
                     reverse_ip_tag.port, reverse_ip_tag.tag,
-                    reverse_ip_tag.port_num),
+                    reverse_ip_tag.sdp_port),
                 connection=conn)
             self._scp_message_thread_pool.apply_async(thread.run())
             callbacks.append(thread)
