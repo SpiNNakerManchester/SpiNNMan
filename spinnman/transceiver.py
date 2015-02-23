@@ -506,7 +506,7 @@ class Transceiver(object):
         logger.debug("Sending message with {}".format(best_connection_queue))
 
         # Send the message with the best queue
-        if get_callback:
+        if get_callback or not response_required:
             return best_connection_queue.send_message_non_blocking(
                 message, response_required, timeout)
         return best_connection_queue.send_message(
