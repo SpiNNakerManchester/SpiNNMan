@@ -11,16 +11,16 @@ UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
 # The base address of the system variable structure in System ram
 SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 
-# The base address of a routers dianostic filter controls
+# The base address of a routers diagnostic filter controls
 ROUTER_REGISTER_BASE_ADDRESS = 0xe1000000
-#offset for the router register
+# offset for the router register
 ROUTER_FILTER_CONTROLS_OFFSET = 0x200
-#point where default filters finish and user settable ones are avilable
+# point where default filters finish and user settable ones are available
 ROUTER_DEFAULT_FILTERS_MAX_POSITION = 11
-#size of a router dianostic
-ROUTER_DIAGNOSTIC_FILTER_SIZE = 1 # in words
+# size of a router diagnostic
+ROUTER_DIAGNOSTIC_FILTER_SIZE = 1  # in words
 
-#number of router dianostic filters
+# number of router diagnostic filters
 NO_ROUTER_DIAGNOSTIC_FILTERS = 16
 
 # The size of the system variable structure in bytes
@@ -32,16 +32,16 @@ EIEIO_COMMAND_HEADER_SIZE = 3
 EIEIO_DATA_HEADER_SIZE = 2
 
 
-#how many bytes the cpu info data takes up
+# how many bytes the cpu info data takes up
 CPU_INFO_BYTES = 128
 
 # the address at which user0 register starts
 CPU_USER_0_START_ADDRESS = 112
 
-#default udp tag
+# default udp tag
 DEFAULT_SDP_TAG = 0xFF
 
-#connection types
+# connection types
 CONNECTION_TYPE = Enum(
     value="CONNECTION_TYPE",
     names=[("REVERSE_IPTAG", 0),
@@ -61,15 +61,13 @@ TRAFFIC_TYPE = Enum(
 
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
-    names=[("DATABASE_CONFIRMATION", 1),
-           ("EVENT_PADDING", 2),
-           ("EVENT_STOP", 3),
-           ("NEW_BUFFERS", 4),
-           ("STOP_SENDING_REQUESTS", 5),
-           ("START_SENDING_REQUESTS", 6),
-           ("READ_DATA", 7)])
+    names=[("DATABASE_CONFIRMATION", 1),        # Database handshake with visualiser
+           ("EVENT_PADDING", 2),                # Fill in buffer area with padding
+           ("EVENT_STOP", 3),                   # End of all buffers, stop execution
+           ("STOP_SENDING_REQUESTS", 4),        # Stop complaining that there is sdram free space for buffers
+           ("START_SENDING_REQUESTS", 5),       # Start complaining that there is sdram free space for buffers
+           ("SPINNAKER_REQUEST_BUFFERS", 6),    # Spinnaker requesting new buffers for spike source population
+           ("HOST_SEND_SEQUENCED_DATA", 7),     # Buffers being sent from host to SpiNNaker
+           ("SPINNAKER_REQUEST_READ_DATA", 8),  # Buffers available to be read from a buffered out vertex
+           ("HOST_DATA_READ", 9)])              # Host confirming data being read form SpiNNaker memory
 
-RECEIVED_BUFFER_COMMAND_IDS = Enum(
-    value="RECEIVED_BUFFER_COMMAND_IDS",
-    names=[("BUFFER_RECEIVE", 1),
-           ("BUFFER_SEND", 2)])
