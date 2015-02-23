@@ -1893,15 +1893,17 @@ class Transceiver(object):
                     * If the ip tag fields are incorrect
                     * If the connection cannot send SDP messages
                     * If a packet is received that has invalid parameters
+                    * If the UDP port is one that is already used by\
+                      spiNNaker for system functions
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
         if connection is not None and board_address is not None:
             raise SpinnmanInvalidParameterException(
-                "{}:{}".format(connection, board_address),
+                "connection and board_address"
+                "{} and {}".format(connection, board_address),
                 "Cant have both connection and board_address specified in "
-                "setting a reverse ip tag. Please choose one, and try again",
-                "")
+                "setting a reverse ip tag. Please choose one, and try again")
 
         if connection is not None:
             connections = connection
@@ -1913,6 +1915,16 @@ class Transceiver(object):
             connection = self.locate_spinnaker_connection_for_board_address(
                 board_address)
             connections.append(connection)
+
+        if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT
+                or reverse_ip_tag.port
+                == constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
+            raise SpinnmanInvalidParameterException(
+                "reverse_ip_tag.port", reverse_ip_tag.port,
+                "The port number for the reverese ip tag conflicts with"
+                " the spiNNaker system ports ({} and {})".format(
+                    constants.SCP_SCAMP_PORT,
+                    constants.UDP_BOOT_CONNECTION_DEFAULT_PORT))
 
         callbacks = list()
         for conn in connections:
