@@ -23,10 +23,16 @@ _ENABLE_INTERRUPT_OFFSET = 30
 
 
 # Uses an enum to set flags in the filter word from a given offset
-def _set_flags_in_word(word, enum_list, offset):
-    if enum_list is not None:
-        for enum_value in enum_list:
-            word |= 1 << (enum_value.value + offset)
+def _set_flags_in_word(word, enum_list, enum_type, offset):
+    enum_values = None
+    if enum_list is None:
+        enum_values = list()
+    else:
+        enum_values = list(enum_list)
+    if len(enum_values) == 0:
+        enum_values = [value for value in enum_type]
+    for enum_value in enum_values:
+        word |= 1 << (enum_value.value + offset)
     return word
 
 
@@ -68,23 +74,27 @@ class DiagnosticFilter(object):
                     :py:class:`spinnman.model.diagnostic_filter_destination.DiagnosticFilterDestination`
 
         :param sources: Increment the counter if one or more of the given\
-                    sources match
+                    sources match (or None or empty list to match all)
         :type sources: iterable of\
                     :py:class:`spinnman.model.diagnostic_filter_source.DiagnosticFilterSource`
         :param payload_statuses: Increment the counter if one or more of the\
-                    given payload statuses match
+                    given payload statuses match  (or None or empty list to \
+                    match all)
         :type payload_statuses: iterable of\
                     :py:class:`spinnman.model.diagnostic_filter_payload_status.DiagnosticFilterPayloadStatus`
         :param default_routing_statuses: Increment the counter if one or more\
-                    of the given default routing statuses match
+                    of the given default routing statuses match  (or None or \
+                    empty list to match all)
         :type default_routing_statuses: iterable of\
                     :py:class:`spinnman.model.diagnostic_filter_default_routing_status.DiagnosticFilterDefaultRoutingStatus`
         :param emergency_routing_statuses: Increment the counter if one or\
-                    more of the given emergency routing statuses match
+                    more of the given emergency routing statuses match  (or \
+                    None or empty list to match all)
         :type emergency_routing_statuses: iterable of\
                     :py:class:`spinnman.model.diagnostic_filter_emergency_routing_status.DiagnosticFilterEmergencyRoutingStatus`
         :param packet_types: Increment the counter if one or more\
-                    of the given packet types match
+                    of the given packet types match  (or None or empty list to\
+                    match all)
         :type packet_types: iterable of\
                     :py:class:`spinnman.model.diagnostic_filter_packet_type.DiagnosticFilterPacketType`
         """
@@ -143,16 +153,22 @@ class DiagnosticFilter(object):
         if not self._match_emergency_routing_status_to_incoming_packet:
             data |= 1 << _EMERGENCY_ROUTE_MODE_OFFSET
         data = _set_flags_in_word(data, self._destinations,
+                                  DiagnosticFilterDestination,
                                   _DESTINATION_OFFSET)
         data = _set_flags_in_word(data, self._sources,
+                                  DiagnosticFilterSource,
                                   _SOURCE_OFFSET)
         data = _set_flags_in_word(data, self._payload_statuses,
+                                  DiagnosticFilterPayloadStatus,
                                   _PAYLOAD_OFFSET)
         data = _set_flags_in_word(data, self._default_routing_statuses,
+                                  DiagnosticFilterDefaultRoutingStatus,
                                   _DEFAULT_ROUTE_OFFSET)
         data = _set_flags_in_word(data, self._emergency_routing_statuses,
+                                  DiagnosticFilterEmergencyRoutingStatus,
                                   _EMERGENCY_ROUTE_OFFSET)
         data = _set_flags_in_word(data, self._packet_types,
+                                  DiagnosticFilterPacketType,
                                   _PACKET_TYPE_OFFSET)
 
         return data
