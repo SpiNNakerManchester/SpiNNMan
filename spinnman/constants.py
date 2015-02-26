@@ -68,3 +68,8 @@ EIEIO_COMMAND_IDS = Enum(
            ("SPINNAKER_REQUEST_READ_DATA", 8),  # Buffers available to be read from a buffered out vertex
            ("HOST_DATA_READ", 9)])              # Host confirming data being read form SpiNNaker memory
 
+# max number of historical buffer packets
+MAX_BUFFER_HISTORY = 16
+
+# number of states of the sequence number for buffer packets
+SEQUENCE_NUMBER_MAX_VALUE = 256
