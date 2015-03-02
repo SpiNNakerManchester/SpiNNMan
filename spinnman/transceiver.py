@@ -605,8 +605,7 @@ class Transceiver(object):
             clock_speed=Router.ROUTER_DEFAULT_CLOCK_SPEED,
             n_available_multicast_entries=(
                 Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES
-                - chip_details.first_free_router_entry),
-            diagnostic_filters=list())
+                - chip_details.first_free_router_entry))
 
         # Create the chip
         chip = Chip(
@@ -1787,7 +1786,7 @@ class Transceiver(object):
         self.send_scp_message(SCPLEDRequest(x, y, cpu, led_states))
 
     def locate_spinnaker_connection_for_board_address(self, board_address):
-        """
+        """ Find a connection that matches the given board IP address
 
         :param board_address: The IP address of the ethernet connection on the\
                     baord
@@ -1804,22 +1803,12 @@ class Transceiver(object):
                 return connection
         return None
 
-    def set_ip_tag(self, ip_tag, connection=None, board_address=None):
+    def set_ip_tag(self, ip_tag):
         """ Set up an ip tag
 
-        :param ip_tag: The tags to set up
-        :type ip_tag: :py:class:`spinnman.model.tags.IPTag`
-        :param connection: UDPConnection where the tag should be set up.\
-                    If not specified, all UDPConnections will send the message\
-                    to set up the tag
-                    If specified, then you cannot specify a board_address
-        :type connection:\
-                    :py:class:`spinnman.connections.udp_connetion.UDPConnection`
-        :param board_address: the remote ipaddress of a Spinnaker connection \
-                              that you want to pump the iptag to.\
-                              If specified, then you cannot specify a\
-                              connection
-        :type board_address: str
+        :param ip_tag: The tag to set up; note board_address can be None, in\
+                    which case, the tag will be assigned to all boards
+        :type ip_tag: :py:class:`spinn_machine.tags.iptag.IPTag`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1828,65 +1817,53 @@ class Transceiver(object):
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
                     * If the ip tag fields are incorrect
-                    * If the connection cannot send SDP messages
                     * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        if connection is not None and board_address is not None:
-            raise SpinnmanInvalidParameterException(
-                "{}:{}".format(connection, board_address),
-                "Cant have both connection and board_address specified in "
-                "setting a reverse ip tag. Please choose one, and try again",
-                "")
-        if connection is not None:
-            connections = connection
+
+        # Get the connections - if the tag specifies a connection, use that,
+        # otherwise apply the tag to all connections
+        connections = list()
+        if ip_tag.board_address is not None:
+            connection = self.locate_spinnaker_connection_for_board_address(
+                ip_tag.board_address)
+            if connection is None:
+                raise SpinnmanInvalidParameterException(
+                    "ip_tag", ip_tag,
+                    "The given board address is not recognized")
+            connections.append(connection)
         else:
             connections = self._sending_connections.values()
 
-        if board_address is not None:
-            connections = list()
-            connection = self.locate_spinnaker_connection_for_board_address(
-                board_address)
-            connections.append(connection)
-
         callbacks = list()
-        for conn in connections:
-            host_string = ip_tag.address
+        for connection in connections:
+
+            # Convert the host string
+            host_string = ip_tag.ip_address
             if host_string == "localhost" or host_string == ".":
-                host_string = conn.local_ip_address
+                host_string = connection.local_ip_address
             ip_string = gethostbyname(host_string)
             ip_address = bytearray(inet_aton(ip_string))
-            thread = SCPMessageInterface(
-                self,
-                message=SCPIPTagSetRequest(
-                    conn.chip_x, conn.chip_y, ip_address, ip_tag.port,
-                    ip_tag.tag, strip=ip_tag.strip_sdp),
-                connection=conn)
+
+            # Send the request
+            thread = SCPMessageInterface(self, SCPIPTagSetRequest(
+                connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
+                ip_tag.tag, strip=ip_tag.strip_sdp))
             self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
-        for callback in callbacks:
-            callback.get_response()
+        for thread in callbacks:
+            thread.get_response()
 
-    def set_reverse_ip_tag(self, reverse_ip_tag, connection=None,
-                           board_address=None):
-        """ Set up an reverse ip tag
+    def set_reverse_ip_tag(self, reverse_ip_tag):
+        """ Set up a reverse ip tag
 
-        :param reverse_ip_tag: The reverse tags to set up
+        :param reverse_ip_tag: The reverse tag to set up; note board_address\
+                    can be None, in which case, the tag will be assigned to\
+                    all boards
         :type reverse_ip_tag:\
-                    :py:class:`spinnman.model.reverse_iptag.ReverseIPTag`
-        :param connection: UDPConnection where the tag should be set up.\
-                    If not specified, all UDPConnections will send the message\
-                    to set up the tag
-                    If specified, then you cannot specify a board_address
-        :type connection:\
-                    :py:class:`spinnman.connections.udp_connetion.UDPConnection`
-        :param board_address: the remote ipaddress of a Spinnaker connection\
-                              that you want to pump the iptag to.\
-                              If specified, then you cannot specify a \
-                              connection
-        :type board_address: str
+                    :py:class:`spinn_machine.tags.reverse_ip_tag.ReverseIPTag`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1894,31 +1871,13 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the ip tag fields are incorrect
-                    * If the connection cannot send SDP messages
+                    * If the reverse ip tag fields are incorrect
                     * If a packet is received that has invalid parameters
                     * If the UDP port is one that is already used by\
                       spiNNaker for system functions
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        if connection is not None and board_address is not None:
-            raise SpinnmanInvalidParameterException(
-                "connection and board_address"
-                "{} and {}".format(connection, board_address),
-                "Cant have both connection and board_address specified in "
-                "setting a reverse ip tag. Please choose one, and try again")
-
-        if connection is not None:
-            connections = connection
-        else:
-            connections = self._sending_connections.values()
-
-        if board_address is not None:
-            connections = list()
-            connection = self.locate_spinnaker_connection_for_board_address(
-                board_address)
-            connections.append(connection)
 
         if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT
                 or reverse_ip_tag.port
@@ -1930,22 +1889,33 @@ class Transceiver(object):
                     constants.SCP_SCAMP_PORT,
                     constants.UDP_BOOT_CONNECTION_DEFAULT_PORT))
 
+        # Get the connections - if the tag specifies a connection, use that,
+        # otherwise apply the tag to all connections
+        connections = list()
+        if reverse_ip_tag.board_address is not None:
+            connection = self.locate_spinnaker_connection_for_board_address(
+                reverse_ip_tag.board_address)
+            if connection is None:
+                raise SpinnmanInvalidParameterException(
+                    "reverse_ip_tag", reverse_ip_tag,
+                    "The given board address is not recognized")
+            connections.append(connection)
+        else:
+            connections = self._sending_connections.values()
+
         callbacks = list()
-        for conn in connections:
-            thread = SCPMessageInterface(
-                self,
-                message=SCPReverseIPTagSetRequest(
-                    conn.chip_x, conn.chip_y,
-                    reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
-                    reverse_ip_tag.destination_p,
-                    reverse_ip_tag.port, reverse_ip_tag.tag,
-                    reverse_ip_tag.sdp_port),
-                connection=conn)
+        for connection in connections:
+            thread = SCPMessageInterface(self, SCPReverseIPTagSetRequest(
+                connection.chip_x, connection.chip_y,
+                reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
+                reverse_ip_tag.destination_p,
+                reverse_ip_tag.port, reverse_ip_tag.tag,
+                reverse_ip_tag.sdp_port))
             self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
-        for callback in callbacks:
-            callback.get_response()
+        for thread in callbacks:
+            thread.get_response()
 
     def clear_ip_tag(self, tag, connection=None):
         """ Clear the setting of an ip tag
@@ -1998,7 +1968,7 @@ class Transceiver(object):
                     :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
         :return: An iterable of ip tags
         :rtype: iterable of\
-                    :py:class:`spinn_machine.tags.abstract_tag.AbstractIPTag`
+                    :py:class:`spinn_machine.tags.abstract_tag.AbstractTag`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\

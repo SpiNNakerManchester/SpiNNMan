@@ -22,14 +22,14 @@ from spinnman.model.diagnostic_filter_packet_type \
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 
-# machine = "spinn-10.cs.man.ac.uk"
-# version = 2
+machine = "spinn-10.cs.man.ac.uk"
+version = 2
 
 # machine = "spinn-1.cs.man.ac.uk"
 # version = 5
 
-machine = "192.168.240.253"
-version = 3
+# machine = "192.168.240.253"
+# version = 3
 
 n_cores = 20
 core_subsets = CoreSubsets(core_subsets=[CoreSubset(0, 0, range(1, 11)),
@@ -199,9 +199,9 @@ try:
 
     print "Create IP Tags"
     print "=============="
-    transceiver.set_ip_tag(IPTag(".", 50000, 1))
-    transceiver.set_ip_tag(IPTag(".", 60000, 2, strip_sdp=True))
-    transceiver.set_reverse_ip_tag(ReverseIPTag(40000, 3, 0, 1, 2))
+    transceiver.set_ip_tag(IPTag(None, 1, ".", 50000))
+    transceiver.set_ip_tag(IPTag(None, 2, ".", 60000, strip_sdp=True))
+    transceiver.set_reverse_ip_tag(ReverseIPTag(None, 3, 40000, 0, 1, 2))
     tags = transceiver.get_ip_tags()
     for tag in tags:
         print tag

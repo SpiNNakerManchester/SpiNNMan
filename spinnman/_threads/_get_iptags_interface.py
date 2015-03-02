@@ -44,9 +44,8 @@ class GetIPTagsInterface(object):
         try:
             get_info_thread = SCPMessageInterface(
                 self._transceiver, SCPIPTagInfoRequest(
-                    self._connection.chip_x, self._connection.chip_y),
-                connection=self._connection)
-            self._thread_pool.apply_async(get_info_thread.run())
+                    self._connection.chip_x, self._connection.chip_y))
+            self._thread_pool.apply_async(get_info_thread.run)
             info = get_info_thread.get_response()
 
             threads = list()
@@ -54,8 +53,7 @@ class GetIPTagsInterface(object):
             for tag in range(0, info.pool_size + info.fixed_size):
                 thread = SCPMessageInterface(
                     self._transceiver, SCPIPTagGetRequest(
-                        self._connection.chip_x, self._connection.chip_y, tag),
-                    connection=self._connection)
+                        self._connection.chip_x, self._connection.chip_y, tag))
                 self._thread_pool.apply_async(thread.run())
                 threads.append(thread)
                 tags[thread] = tag
@@ -71,13 +69,14 @@ class GetIPTagsInterface(object):
                                 ip_address[3])
                     if response.is_reverse:
                         iptags.append(ReverseIPTag(
-                            response.rx_port, tag, response.spin_chip_x,
+                            self._connection.remote_ip_address, tag,
+                            response.rx_port, response.spin_chip_x,
                             response.spin_chip_y, response.spin_cpu,
                             response.spin_port))
                     else:
                         iptags.append(IPTag(
-                            host, response.port, tag,
-                            strip_sdp=response.strip_sdp))
+                            self._connection.remote_ip_address,
+                            tag, host, response.port, response.strip_sdp))
 
             self._condition.acquire()
             self._iptags = iptags
