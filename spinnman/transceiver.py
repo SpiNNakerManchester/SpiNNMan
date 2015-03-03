@@ -66,6 +66,7 @@ from spinnman.messages.scp.impl.scp_write_memory_words_request \
     import SCPWriteMemoryWordsRequest
 from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
+from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
 from spinnman.messages.scp.scp_result import SCPResult
 
 from spinnman.data.abstract_data_reader import AbstractDataReader
@@ -1738,6 +1739,23 @@ class Transceiver(object):
         for callback in callbacks:
             yield callback.get_response().data
 
+    def stop_application(self, app_id):
+        """ Sends a stop request for an app_id
+
+        :param app_id: The id of the application to send to
+        :type app_id: int
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If app_id is not a valid application id
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        self.send_scp_message(SCPAppStopRequest(app_id))
+
     def send_signal(self, app_id, signal):
         """ Send a signal to an application
 
@@ -1917,7 +1935,7 @@ class Transceiver(object):
         for thread in callbacks:
             thread.get_response()
 
-    def clear_ip_tag(self, tag, connection=None):
+    def clear_ip_tag(self, tag, connection=None, board_address=None):
         """ Clear the setting of an ip tag
 
         :param tag: The tag id
@@ -1927,6 +1945,9 @@ class Transceiver(object):
                     to clear the tag
         :type connection:\
                     :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
+        :param board_address: Board address where the tag should be cleared.\
+                    If not specified, all SCPSender connections will send the\
+                    message to clear the tag
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1941,17 +1962,19 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         if connection is not None:
-            connections = connection
+            connections = [connection]
+        elif board_address is not None:
+            connection = self.locate_spinnaker_connection_for_board_address(
+                board_address)
+            connections = [connection]
         else:
             connections = self._sending_connections.values()
 
         callbacks = list()
         for conn in connections:
             thread = SCPMessageInterface(
-                self,
-                message=SCPIPTagClearRequest(
-                    conn.chip_x, conn.chip_y, tag),
-                connection=conn)
+                self, message=SCPIPTagClearRequest(
+                    conn.chip_x, conn.chip_y, tag))
             self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 

@@ -54,7 +54,7 @@ class GetIPTagsInterface(object):
                 thread = SCPMessageInterface(
                     self._transceiver, SCPIPTagGetRequest(
                         self._connection.chip_x, self._connection.chip_y, tag))
-                self._thread_pool.apply_async(thread.run())
+                self._thread_pool.apply_async(thread.run)
                 threads.append(thread)
                 tags[thread] = tag
 
