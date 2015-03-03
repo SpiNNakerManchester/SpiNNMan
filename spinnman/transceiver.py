@@ -169,7 +169,8 @@ class Transceiver(object):
 
     def __init__(self, connections=None, discover=True, ignore_chips=None,
                  ignore_cores=None, max_core_id=None,
-                 shut_down_connections=False, thread_pool_no=5):
+                 shut_down_connections=False, n_scp_threads=16,
+                 n_other_threads=16):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -227,7 +228,8 @@ class Transceiver(object):
         self._connection_queues = dict()
         self._update_connection_queues()
 
-        self._scp_message_thread_pool = ThreadPool(processes=thread_pool_no)
+        self._scp_message_thread_pool = ThreadPool(processes=n_scp_threads)
+        self._other_thread_pool = ThreadPool(processes=n_other_threads)
 
         # Discover any new connections, and update the queues if requested
         if discover:
@@ -1099,7 +1101,7 @@ class Transceiver(object):
                 self, cpu_info.x, cpu_info.y, cpu_info.p,
                 cpu_info.iobuf_address, iobuf_bytes,
                 self._scp_message_thread_pool)
-            self._scp_message_thread_pool.apply_async(thread.run)
+            self._other_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
         # Gather the results
@@ -2012,7 +2014,7 @@ class Transceiver(object):
             thread = GetIPTagsInterface(self, conn,
                                         self._scp_message_thread_pool)
 
-            self._scp_message_thread_pool.apply_async(thread.run)
+            self._other_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
         all_tags = list()
