@@ -72,4 +72,5 @@ EIEIO_COMMAND_IDS = Enum(
 MAX_BUFFER_HISTORY = 16
 
 # number of states of the sequence number for buffer packets
+# currently this is implemented in the code as an 8-bit number
 SEQUENCE_NUMBER_MAX_VALUE = 256
