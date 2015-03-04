@@ -2412,6 +2412,9 @@ class Transceiver(object):
                     or connection not in self.connections_to_not_shut_down):
                 connection.close()
 
+        self._scp_message_thread_pool.close()
+        self._other_thread_pool.close()
+
     def register_listener(self, callback, recieve_port_no, hostname,
                           connection_type, traffic_type, sdp_port=None):
         if recieve_port_no in self._receiving_connections.keys():
