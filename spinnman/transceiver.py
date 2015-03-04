@@ -79,7 +79,7 @@ from spinnman.data.little_endian_byte_array_byte_reader \
 from spinnman.connections.listeners._connection_queue import _ConnectionQueue
 from _threads._scp_message_interface import SCPMessageInterface
 from _threads._iobuf_interface import IOBufInterface
-from _threads._get_iptags_interface import GetIPTagsInterface
+from _threads._get_tags_interface import GetTagsInterface
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -1983,15 +1983,15 @@ class Transceiver(object):
         for callback in callbacks:
             callback.get_response()
 
-    def get_ip_tags(self, connection=None):
-        """ Get the current set of ip tags that have been set on the board
+    def get_tags(self, connection=None):
+        """ Get the current set of tags that have been set on the board
 
         :param connection: Connection from which the tags should be received.\
                     If not specified, all SCPSender connections will be\
                     queried and the response will be combined.
         :type connection:\
                     :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
-        :return: An iterable of ip tags
+        :return: An iterable of tags
         :rtype: iterable of\
                     :py:class:`spinn_machine.tags.abstract_tag.AbstractTag`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2011,15 +2011,15 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            thread = GetIPTagsInterface(self, conn,
-                                        self._scp_message_thread_pool)
+            thread = GetTagsInterface(self, conn,
+                                      self._scp_message_thread_pool)
 
             self._other_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
         all_tags = list()
         for callback in callbacks:
-            all_tags.extend(callback.get_iptags())
+            all_tags.extend(callback.get_tags())
         return all_tags
 
     def load_multicast_routes(self, x, y, routes, app_id):

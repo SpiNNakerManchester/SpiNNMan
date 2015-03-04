@@ -202,7 +202,7 @@ try:
     transceiver.set_ip_tag(IPTag(None, 1, ".", 50000))
     transceiver.set_ip_tag(IPTag(None, 2, ".", 60000, strip_sdp=True))
     transceiver.set_reverse_ip_tag(ReverseIPTag(None, 3, 40000, 0, 1, 2))
-    tags = transceiver.get_ip_tags()
+    tags = transceiver.get_tags()
     for tag in tags:
         print tag
     print ""
@@ -212,7 +212,7 @@ try:
     transceiver.clear_ip_tag(1)
     transceiver.clear_ip_tag(2)
     transceiver.clear_ip_tag(3)
-    tags = transceiver.get_ip_tags()
+    tags = transceiver.get_tags()
     for tag in tags:
         print tag
     print ""
