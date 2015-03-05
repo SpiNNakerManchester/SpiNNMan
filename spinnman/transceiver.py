@@ -754,7 +754,7 @@ class Transceiver(object):
                         = new_connection
 
                 # test receiveing side of connection
-                if (new_connection.local_port in self._receiving_connections):
+                if new_connection.local_port in self._receiving_connections:
                     raise SpinnmanInvalidParameterException(
                         "The new spinnaker connection is using a local port "
                         " that is already in use, please adjust "
@@ -1850,7 +1850,7 @@ class Transceiver(object):
                 ip_tag.board_address)
             if connection is None:
                 raise SpinnmanInvalidParameterException(
-                    "ip_tag", ip_tag,
+                    "ip_tag", str(ip_tag),
                     "The given board address is not recognized")
             connections.append(connection)
         else:
@@ -2326,7 +2326,7 @@ class Transceiver(object):
         self.send_scp_message(SCPWriteMemoryWordsRequest(
             x, y, 0xf100002c, [clear_data]))
 
-    def send_multicast(self, x, y, multicast_message, connection=None):
+    def send_multicast_message(self, x, y, multicast_message, connection=None):
         """ Sends a multicast message to the board
 
         :param x: The x-coordinate of the chip where the message should first\
@@ -2356,7 +2356,7 @@ class Transceiver(object):
         raise SpinnmanUnsupportedOperationException(
             "This operation is currently not supported in spinnman.")
 
-    def receive_multicast(self, x, y, timeout=None, connection=None):
+    def receive_multicast_message(self, x, y, timeout=None, connection=None):
         """ Receives a multicast message from the board
 
         :param x: The x-coordinate of the chip where the message should come\

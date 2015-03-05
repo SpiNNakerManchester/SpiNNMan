@@ -246,14 +246,14 @@ try:
                     DiagnosticFilterDestination.LINK_2,
                     DiagnosticFilterDestination.LINK_5]
     for i in range(len(destinations)):
-        d_filter = DiagnosticFilter(
+        current_filter = DiagnosticFilter(
             enable_interrupt_on_counter_event=False,
             match_emergency_routing_status_to_incoming_packet=True,
             destinations=[destinations[i]], sources=None,
             payload_statuses=None, default_routing_statuses=[],
             emergency_routing_statuses=[],
             packet_types=[DiagnosticFilterPacketType.POINT_TO_POINT])
-        transceiver.set_router_diagnostic_filter(0, 0, i + 12, d_filter)
+        transceiver.set_router_diagnostic_filter(0, 0, i + 12, current_filter)
 
     print "Clear Router Diagnostics"
     print "========================"
@@ -281,8 +281,8 @@ try:
     print "============================="
     for i in range(0, 16):
         print "Filter", i, ":"
-        d_filter = transceiver.get_router_diagnostic_filter(0, 0, i)
-        print_filter(d_filter)
+        current_filter = transceiver.get_router_diagnostic_filter(0, 0, i)
+        print_filter(current_filter)
         print ""
 
 except Exception:

@@ -24,7 +24,6 @@ _ENABLE_INTERRUPT_OFFSET = 30
 
 # Uses an enum to set flags in the filter word from a given offset
 def _set_flags_in_word(word, enum_list, enum_type, offset):
-    enum_values = None
     if enum_list is None:
         enum_values = list()
     else:
@@ -176,9 +175,9 @@ class DiagnosticFilter(object):
     @staticmethod
     def read_from_int(int_value):
         enable_interrupt_on_counter_event = (
-            int_value >> (_ENABLE_INTERRUPT_OFFSET & 0x1)) == 1
+            (int_value >> _ENABLE_INTERRUPT_OFFSET) & 0x1) == 1
         match_emergency_routing_status_to_incoming_packet = (
-            int_value >> (_EMERGENCY_ROUTE_MODE_OFFSET) & 0x1) == 0
+            (int_value >> _EMERGENCY_ROUTE_MODE_OFFSET) & 0x1) == 0
         destinations = _read_flags_from_word(
             int_value, DiagnosticFilterDestination, _DESTINATION_OFFSET)
         sources = _read_flags_from_word(
