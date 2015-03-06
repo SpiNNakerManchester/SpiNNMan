@@ -1,4 +1,5 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages.abstract_scp_request \
+    import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
@@ -14,7 +15,7 @@ class SCPReverseIPTagSetRequest(AbstractSCPRequest):
     """
 
     def __init__(self, x, y, destination_x, destination_y, destination_p, port,
-            tag, port_num):
+                 tag, sdp_port):
         """
         :param x: The x-coordinate of a chip, between 0 and 255
         :type x: int
@@ -62,7 +63,7 @@ class SCPReverseIPTagSetRequest(AbstractSCPRequest):
         reverse_value = 1
 
         arg1 = ((reverse_value << 29) | (strip_value << 28)
-                | (_IPTAG_SET << 16) | (port_num << 13) | (destination_p << 8)
+                | (_IPTAG_SET << 16) | (sdp_port << 13) | (destination_p << 8)
                 | tag)
         arg2 = ((destination_x << 24) | (destination_y << 16) | port)
 

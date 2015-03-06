@@ -1,11 +1,12 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages.abstract_scp_request \
+    import AbstractSCPRequest
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.messages.scp.impl.scp_read_memory_response import \
-    SCPReadMemoryResponse
+from spinnman.messages.scp.impl.scp_read_memory_words_response import \
+    SCPReadMemoryWordsResponse
 
 
 class SCPReadMemoryWordsRequest(AbstractSCPRequest):
@@ -46,6 +47,7 @@ class SCPReadMemoryWordsRequest(AbstractSCPRequest):
             argument_1=base_address, argument_2=size * 4, argument_3=2)
 
     def get_scp_response(self):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
-        return SCPReadMemoryResponse()
+        return SCPReadMemoryWordsResponse()

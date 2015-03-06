@@ -29,6 +29,11 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         return True
 
     def add_data(self, data):
+        """ Adds a byte array data onto the command's data
+
+        :param data: the data to add
+        :type data: bytearray
+        """
         writer = LittleEndianByteArrayByteWriter()
         writer.write_bytes(data)
         self._data.extend(writer.data)
