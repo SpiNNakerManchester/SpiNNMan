@@ -1,20 +1,21 @@
-from spinnman.data.little_endian_byte_array_byte_writer import \
-    LittleEndianByteArrayByteWriter
-from spinnman.messages.eieio.abstract_eieio_message import AbstractEIEIOMessage
-from spinnman.messages.eieio.eieio_header import EIEIOHeader
-from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
-from spinnman import exceptions
 import struct
 import binascii
 
+from spinnman.data.little_endian_byte_array_byte_writer import \
+    LittleEndianByteArrayByteWriter
+from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_message import AbstractEIEIOMessage
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header import EIEIODataHeader
+from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
+from spinnman import exceptions
 
-class EIEIOMessage(AbstractEIEIOMessage):
+
+class EIEIODataMessage(AbstractEIEIOMessage):
 
     def __init__(self, eieio_header, data=None):
         if data is None:
             data = bytearray()
         AbstractEIEIOMessage.__init__(self, data)
-        if isinstance(eieio_header, EIEIOHeader):
+        if isinstance(eieio_header, EIEIODataHeader):
             self._eieio_header = eieio_header
             self._eieio_header.reset_count_param()
         else:
@@ -94,8 +95,8 @@ class EIEIOMessage(AbstractEIEIOMessage):
         """
         messages = list()
         while not buffer_data.is_at_end():
-            eieio_header = EIEIOHeader.create_header_from_reader(buffer_data)
-            message = EIEIOMessage.create_eieio_message_from(eieio_header,
+            eieio_header = EIEIODataHeader.create_header_from_reader(buffer_data)
+            message = EIEIODataMessage.create_eieio_message_from(eieio_header,
                                                              buffer_data)
             messages.append(message)
         return messages
@@ -110,9 +111,9 @@ class EIEIOMessage(AbstractEIEIOMessage):
         :type buffer_data: LittleEndianByteArrayByteReader
         :param eieio_header: the eieio header which informs the method how to
                              interprets the buffer data
-        :type eieio_header: EIEIOHeader
-        :rtype: EIEIOMessage
-        :return: a EIEIOMessage
+        :type eieio_header: EIEIODataHeader
+        :rtype: EIEIODataMessage
+        :return: a EIEIODataMessage
         """
         each_piece_of_data = 0
         if eieio_header.type_param == EIEIOTypeParam.KEY_16_BIT:
@@ -130,7 +131,7 @@ class EIEIOMessage(AbstractEIEIOMessage):
         data_to_read = eieio_header.count_param * each_piece_of_data
 
         data = buffer_data.read_bytes(data_to_read)
-        return EIEIOMessage(eieio_header, data)
+        return EIEIODataMessage(eieio_header, data)
 
     def __str__(self):
         return "{}:{}".format(self._eieio_header, binascii.hexlify(self._data))

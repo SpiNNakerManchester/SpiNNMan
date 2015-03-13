@@ -24,7 +24,7 @@ class EIEIOCommandHeader(object):
         :type byte_reader:\
                     :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`
         :return: a eieio command header
-        :rtype: :py:class:`spinnman.data.eieio.eieio_header.EIEIOHeader`
+        :rtype: :py:class:`spinnman.data.eieio.eieio_header.EIEIODataHeader`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     reading from the reader
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If there\

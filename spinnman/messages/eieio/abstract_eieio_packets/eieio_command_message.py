@@ -1,10 +1,12 @@
-from spinnman.messages.eieio.abstract_eieio_message import AbstractEIEIOMessage
-from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
+import binascii
+
+from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_message \
+    import AbstractEIEIOMessage
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_command_header \
+    import EIEIOCommandHeader
 from spinnman.data.little_endian_byte_array_byte_writer import \
     LittleEndianByteArrayByteWriter
 from spinnman import exceptions
-
-import binascii
 
 
 class EIEIOCommandMessage(AbstractEIEIOMessage):

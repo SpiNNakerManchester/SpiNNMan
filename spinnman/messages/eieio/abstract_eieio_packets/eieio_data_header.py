@@ -3,7 +3,7 @@ from spinnman import exceptions
 import struct
 
 
-class EIEIOHeader(object):
+class EIEIODataHeader(object):
 
     def __init__(self, type_param, tag_param=0, prefix_param=None,
                  payload_base=None, prefix_type=None, is_time=False):
@@ -125,7 +125,7 @@ class EIEIOHeader(object):
         :type byte_reader:\
                     :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`
         :return: a eieio header
-        :rtype: :py:class:`spinnman.data.eieio.eieio_header.EIEIOHeader`
+        :rtype: :py:class:`spinnman.data.eieio.eieio_header.EIEIODataHeader`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     reading from the reader
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If there\
@@ -181,7 +181,7 @@ class EIEIOHeader(object):
                 "eieio header", "the type param from the received packet is "
                                 "invalid")
 
-        header = EIEIOHeader(
+        header = EIEIODataHeader(
             type_param=message_type, tag_param=tag,
             prefix_param=prefix, payload_base=d, prefix_type=f, is_time=bool(t))
 

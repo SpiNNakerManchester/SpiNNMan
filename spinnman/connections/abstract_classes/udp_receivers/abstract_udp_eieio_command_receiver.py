@@ -1,19 +1,17 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
-
 import select
 import socket
+import traceback
 
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.connections.abstract_classes.abstract_connection import \
     AbstractConnection
-import traceback
+from spinnman.messages.eieio.abstract_eieio_packets.create_eieio_packets import create_command_from_reader
 
-from spynnaker.pyNN.buffer_management.abstract_eieio_packets.\
-    create_eieio_packets import create_command_from_reader
 
 @add_metaclass(ABCMeta)
 class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
