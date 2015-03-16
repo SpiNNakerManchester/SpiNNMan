@@ -186,3 +186,19 @@ class SpinnmanUnsupportedOperationException(SpinnmanException):
         """ The unsupported operation requested
         """
         return self._operation
+
+
+class SpinnmanEIEIOPacketParsingException(SpinnmanException):
+    """ Unable to complete the parsing of the EIEIO packet received.
+    The routine used is invalid or the content of the packet is invalid
+    """
+
+    def __init__(self, parsing_format, packet):
+        super(SpinnmanEIEIOPacketParsingException, self).__init__(
+            "The packet received is being parsed as an EIEIO {0:s} packet, "
+            "but the content of the packet is invalid".format(parsing_format))
+        self._packet = packet
+
+    @property
+    def packet(self):
+        return self._packet

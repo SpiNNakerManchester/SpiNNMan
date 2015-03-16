@@ -2,8 +2,10 @@ from spinnman import exceptions as spinnman_exceptions
 from spinnman import constants as spinnman_constants
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header import EIEIODataHeader
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message import EIEIODataMessage
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header import \
+    EIEIODataHeader
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message import \
+    EIEIODataMessage
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 
 from spinnman.messages.eieio.buffer_data_objects import \
@@ -24,7 +26,8 @@ from spinnman.messages.eieio.buffer_data_objects.eieio_16bit import \
     eieio_16bit_timed_payload_prefix_upper_key_prefix_data_packet,\
     eieio_16bit_upper_key_prefix_data_packet
 
-from spinnman.messages.eieio.buffer_data_objects.eieio_16bit_with_payload import eieio_16bit_with_payload_data_packet, \
+from spinnman.messages.eieio.buffer_data_objects.eieio_16bit_with_payload \
+    import eieio_16bit_with_payload_data_packet, \
     eieio_16bit_with_payload_lower_key_prefix_data_packet, \
     eieio_16bit_with_payload_payload_prefix_data_packet, \
     eieio_16bit_with_payload_payload_prefix_lower_key_prefix_data_packet, \
@@ -46,23 +49,28 @@ from spinnman.messages.eieio.buffer_data_objects.eieio_32bit import \
 from spinnman.messages.eieio.buffer_data_objects.eieio_32bit import \
     eieio_32bit_data_packet
 
-from spinnman.messages.eieio.buffer_data_objects.eieio_32bit_with_payload import \
-    eieio_32bit_with_payload_lower_key_prefix_data_packet, \
+from spinnman.messages.eieio.buffer_data_objects.eieio_32bit_with_payload \
+    import eieio_32bit_with_payload_lower_key_prefix_data_packet, \
     eieio_32bit_with_payload_payload_prefix_data_packet, \
     eieio_32bit_with_payload_payload_prefix_upper_key_prefix_data_packet, \
     eieio_32bit_with_payload_timed_data_packet, \
     eieio_32bit_with_payload_timed_lower_key_prefix_data_packet, \
     eieio_32bit_with_payload_upper_key_prefix_data_packet
-from spinnman.messages.eieio.buffer_data_objects.eieio_32bit_with_payload import \
+
+from spinnman.messages.eieio.buffer_data_objects.eieio_32bit_with_payload \
+    import \
     eieio_32bit_with_payload_payload_prefix_lower_key_prefix_data_packet, \
     eieio_32bit_with_payload_data_packet, \
     eieio_32bit_with_payload_timed_upper_key_prefix_data_packet
 
 from spinnman.messages.eieio.command_objects import \
     event_stop_request
-from spinnman.messages.eieio.command_objects import spinnaker_request_read_data, \
-    start_requests, padding_request, stop_requests, host_data_read, \
-    spinnaker_request_buffers, host_send_sequenced_data
+from spinnman.messages.eieio.command_objects import \
+    spinnaker_request_read_data, \
+    start_requests, padding_request, \
+    stop_requests, host_data_read, \
+    spinnaker_request_buffers, \
+    host_send_sequenced_data
 
 
 def create_class_from_reader(reader):
@@ -99,13 +107,20 @@ def create_data_from_reader(reader):
     :rtype: a class inheriting from \
         :py:class:`spynnaker.pyNN.buffer_management.abstract_eieio_packets.\
         abstract_eieio_data_packet.AbstractEIEIODataPacket`
+    :raise spinnman_exceptions.SpinnmanEIEIOPacketParsingException if the \
+        packet to be parsed is not a data packet
     """
     byte1 = reader.read_byte()
     byte2 = reader.read_byte()
     header_value = byte2 << 8 | byte1
 
     if header_value & 0xC000 == 0x4000:
-        raise  # this is a command packet rather than a data packet
+        # this is a command packet rather than a data packet
+        packet = list([byte1, byte2])
+        packet_tail = reader.read_bytes()
+        packet.extend(packet_tail)
+        raise spinnman_exceptions.SpinnmanEIEIOPacketParsingException(
+            "data", packet)
         # Unable to parse here
     else:
         return _create_data_from_reader(header_value, reader)
@@ -122,26 +137,27 @@ def create_command_from_reader(reader):
     :return: The class of the data packet created
     :rtype: a class between the ones available in \
         :py:class:`spynnaker.pyNN.buffer_management.command_objects.*`
+    :raise spinnman_exceptions.SpinnmanEIEIOPacketParsingException if the \
+        packet to be parsed is not a data packet
     """
     byte1 = reader.read_byte()
     byte2 = reader.read_byte()
     header_value = byte2 << 8 | byte1
 
     if header_value & 0xC000 != 0x4000:
-        print hex(header_value)
-        raise  # this is a data packet rather than a command packet
+        # print hex(header_value)
+        # this is a data packet rather than a command packet
+        packet = list([byte1, byte2])
+        packet_tail = reader.read_bytes()
+        packet.extend(packet_tail)
+        raise spinnman_exceptions.SpinnmanEIEIOPacketParsingException(
+            "command", packet)
         # Unable to parse here
     else:
         return _create_command_from_reader(header_value, reader)
 
 
 def _create_data_from_reader(header_value, reader):
-    """
-    creates a packet of a specific class depending on the format \
-    of the incoming data
-    :param reader:
-    :return:
-    """
     parsed_packet_header = create_data_header_from_reader(header_value, reader)
     parsed_packet = create_data_message_from_reader(
         parsed_packet_header, reader)
@@ -459,6 +475,8 @@ def create_data_message_from_reader(eieio_header, buffer_data):
     :type eieio_header: EIEIODataHeader
     :rtype: EIEIODataMessage
     :return: a EIEIODataMessage
+    :raise spinnman_exceptions.SpinnmanInvalidPacketException in case the \
+        type of packet is unrecognised
     """
     each_piece_of_data = 0
     if eieio_header.type_param == EIEIOTypeParam.KEY_16_BIT:
