@@ -1,7 +1,8 @@
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
-from spinnman.connections.udp_packet_connections.stripped_iptag_connection import \
-    StrippedIPTagConnection
+from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
+    import StrippedIPTagConnection
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
 from spinnman import constants
@@ -65,6 +66,7 @@ from spinnman.messages.scp.impl.scp_write_memory_words_request \
     import SCPWriteMemoryWordsRequest
 from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
+from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
 from spinnman.messages.scp.scp_result import SCPResult
 
 from spinnman.data.abstract_data_reader import AbstractDataReader
@@ -77,7 +79,7 @@ from spinnman.data.little_endian_byte_array_byte_reader \
 from spinnman.connections.listeners._connection_queue import _ConnectionQueue
 from _threads._scp_message_interface import SCPMessageInterface
 from _threads._iobuf_interface import IOBufInterface
-from _threads._get_iptags_interface import GetIPTagsInterface
+from _threads._get_tags_interface import GetTagsInterface
 
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
@@ -166,8 +168,9 @@ class Transceiver(object):
     """
 
     def __init__(self, connections=None, discover=True, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None, shut_down_connections=False,
-                 thread_pool_no=5):
+                 ignore_cores=None, max_core_id=None,
+                 shut_down_connections=False, n_scp_threads=16,
+                 n_other_threads=16):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -225,7 +228,8 @@ class Transceiver(object):
         self._connection_queues = dict()
         self._update_connection_queues()
 
-        self._scp_message_thread_pool = ThreadPool(processes=thread_pool_no)
+        self._scp_message_thread_pool = ThreadPool(processes=n_scp_threads)
+        self._other_thread_pool = ThreadPool(processes=n_other_threads)
 
         # Discover any new connections, and update the queues if requested
         if discover:
@@ -254,7 +258,8 @@ class Transceiver(object):
 
     def _sort_out_connections(self, connections):
         for connection in connections:
-            #validate that we're using udp connections
+
+            # validate that we're using udp connections
             if not isinstance(connection, AbstractUDPConnection):
                 raise SpinnmanInvalidParameterException(
                     "this connection format is currently not supported in this"
@@ -263,7 +268,8 @@ class Transceiver(object):
                 self._sort_out_udp_connections(connection)
 
     def _sort_out_udp_connections(self, connection):
-        #locate the only boot connection
+
+        # locate the only boot connection
         if isinstance(connection, UDPBootConnection):
             if self._boot_connection is not None:
                 raise SpinnmanInvalidParameterException(
@@ -271,17 +277,19 @@ class Transceiver(object):
                     "connection", "", "")
             else:
                 self._boot_connection = connection
-        #check if connection is a receive or sender or both connection
-        #check if the connection can recieve and is not using a already
-        # used portno
+
+        # check if connection is a receive or sender or both connection
+        # check if the connection can receive and is not using a already
+        # used port
         if connection.local_port in self._receiving_connections:
             raise SpinnmanInvalidParameterException(
                 "two connections are listening to packets from the "
                 "same port. This is deemed an error", "", "")
         else:
             self._receiving_connections[connection.local_port] = connection
-        #check if the connection can send and is not using a already
-        # used portno
+
+        # check if the connection can send and is not using a already
+        # used port
         if (connection.can_send and
                 not isinstance(connection, UDPBootConnection)):
             if connection.remote_port in self._sending_connections:
@@ -374,14 +382,18 @@ class Transceiver(object):
         :param message: The message to send
         :type message: One of:
                     * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
-                    * :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
-                    * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-                    * :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
+                    * \
+                    :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
+                    * \
+                    :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+                    * \
+                    :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :return: The best connection queue
-        :rtype: :py:class:`spinnman.connections._connection_queue.ConnectionQueue`
+        :rtype:\
+                    :py:class:`spinnman.connections._connection_queue.ConnectionQueue`
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
                     no connection can send the type of message given
         """
@@ -458,9 +470,12 @@ class Transceiver(object):
         :param message: The message to send
         :type message: One of:
                     * :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
-                    * :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
-                    * :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-                    * :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
+                    * \
+                    :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
+                    * \
+                    :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+                    * \
+                    :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_message.SpinnakerBootMessage`
         :param response_required: True if a response is required, False\
                     otherwise
         :type response_required: bool
@@ -511,7 +526,7 @@ class Transceiver(object):
         return best_connection_queue.send_message(
             message, response_required, timeout)
 
-    def _send_scp_message(
+    def send_scp_message(
             self, message, retry_codes=(
                 SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_TIMEOUT,
                 SCPResult.RC_LEN),
@@ -534,7 +549,8 @@ class Transceiver(object):
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :return: The received response, or the callback if get_callback is True
-        :rtype: :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
+        :rtype:\
+                    :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
                     timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
@@ -552,7 +568,7 @@ class Transceiver(object):
         thread = SCPMessageInterface(
             transceiver=self, message=message, retry_codes=retry_codes,
             n_retries=n_retries, timeout=timeout, connection=connection)
-        self._scp_message_thread_pool.apply_async(thread.run())
+        self._scp_message_thread_pool.apply_async(thread.run)
         return thread.get_response()
 
     def _make_chip(self, chip_details):
@@ -590,16 +606,17 @@ class Transceiver(object):
         router = Router(
             links=list(), emergency_routing_enabled=False,
             clock_speed=Router.ROUTER_DEFAULT_CLOCK_SPEED,
-            n_available_multicast_entries=
-            Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES
-            - chip_details.first_free_router_entry,
-            diagnostic_filters=list())
+            n_available_multicast_entries=(
+                Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES
+                - chip_details.first_free_router_entry))
 
         # Create the chip
         chip = Chip(
             x=chip_details.x, y=chip_details.y, processors=processors,
             router=router, sdram=SDRAM(SDRAM.DEFAULT_SDRAM_BYTES),
-            ip_address=chip_details.ip_address)
+            ip_address=chip_details.ip_address,
+            nearest_ethernet_x=chip_details.nearest_ethernet_x,
+            nearest_ethernet_y=chip_details.nearest_ethernet_y)
         return chip
 
     def _update_machine(self):
@@ -608,7 +625,7 @@ class Transceiver(object):
 
         # Ask the chip at 0, 0 for details
         logger.debug("Getting details of chip 0, 0")
-        response = self._send_scp_message(SCPReadMemoryRequest(
+        response = self.send_scp_message(SCPReadMemoryRequest(
             x=0, y=0, base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
             size=constants.SYSTEM_VARIABLE_BYTES))
         chip_0_0_details = ChipInfo(response.data)
@@ -629,7 +646,7 @@ class Transceiver(object):
                     logger.debug(
                         "Searching down link {} from chip {}, {}".format(
                             link, chip.x, chip.y))
-                    response = self._send_scp_message(SCPReadLinkRequest(
+                    response = self.send_scp_message(SCPReadLinkRequest(
                         x=chip.x, y=chip.y, cpu=0, link=link,
                         base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
                         size=constants.SYSTEM_VARIABLE_BYTES))
@@ -719,7 +736,8 @@ class Transceiver(object):
         # Find all the new connections via the machine ethernet-connected chips
         new_connections = list()
         for ethernet_connected_chip in self._machine.ethernet_connected_chips:
-            key = (ethernet_connected_chip.ip_address, constants.SCP_SCAMP_PORT)
+            key = (ethernet_connected_chip.ip_address,
+                   constants.SCP_SCAMP_PORT)
             if key not in self._sending_connections.keys():
                 new_connection = UDPSpinnakerConnection(
                     remote_host=ethernet_connected_chip.ip_address,
@@ -734,15 +752,16 @@ class Transceiver(object):
                 else:
                     self._sending_connections[key]\
                         = new_connection
-                #test receiveing side of connection
-                if new_connection.local_port in self._receiving_connections.keys():
+
+                # test receiveing side of connection
+                if new_connection.local_port in self._receiving_connections:
                     raise SpinnmanInvalidParameterException(
                         "The new spinnaker connection is using a local port "
                         " that is already in use, please adjust "
                         "this and try again ", "", "")
                 else:
-                    self._receiving_connections[new_connection.local_port]\
-                        = new_connection
+                    self._receiving_connections[new_connection.local_port] = \
+                        new_connection
 
         # Update the connection queues after finding new connections
         self._update_connection_queues()
@@ -839,7 +858,7 @@ class Transceiver(object):
                     retries resulted in a response before the timeout\
                     (suggesting that the board is not booted)
         """
-        response = self._send_scp_message(
+        response = self.send_scp_message(
             message=SCPVersionRequest(x=0, y=0, p=0),
             n_retries=n_retries, timeout=timeout)
         return response.version_info
@@ -890,6 +909,10 @@ class Transceiver(object):
             except SpinnmanTimeoutException:
                 self.boot_board(board_version)
                 tries_to_go -= 1
+            except SpinnmanIOException:
+                raise SpinnmanUnexpectedResponseCodeException(
+                    "We currently cannot communicate with your board, please "
+                    "rectify this, and try again", "", "")
 
         if version_info is None:
             raise SpinnmanIOException("Could not boot the board")
@@ -899,8 +922,8 @@ class Transceiver(object):
                 "The board is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
                 "required version is {} {}".format(
-                version_info.name, version_info.version_number,
-                _SCAMP_NAME, _SCAMP_VERSION))
+                    version_info.name, version_info.version_number,
+                    _SCAMP_NAME, _SCAMP_VERSION))
         return version_info
 
     def get_cpu_information(self, core_subsets=None):
@@ -957,14 +980,15 @@ class Transceiver(object):
                             x, y))
                 base_address = (chip_info.cpu_information_base_address
                                 + (constants.CPU_INFO_BYTES * p))
-                callbacks.append(SCPMessageInterface(self, SCPReadMemoryRequest(
-                    x, y, base_address, constants.CPU_INFO_BYTES)))
+                callbacks.append(SCPMessageInterface(
+                    self, SCPReadMemoryRequest(
+                        x, y, base_address, constants.CPU_INFO_BYTES)))
                 callback_coordinates.append((x, y, p))
 
         # Start all the callbacks (not done before to ensure that no errors
         # occur first
         for callback in callbacks:
-            self._scp_message_thread_pool.apply_async(callback.run())
+            self._scp_message_thread_pool.apply_async(callback.run)
 
         # Gather the results
         for callback, (x, y, p) in zip(callbacks, callback_coordinates):
@@ -998,13 +1022,16 @@ class Transceiver(object):
             raise SpinnmanInvalidParameterException(
                 "x, y", "{}, {}".format(x, y),
                 "Not a valid chip on the current machine")
-        #collect the chip info for the associated chip
+
+        # collect the chip info for the associated chip
         chip_info = self._chip_info[(x, y)]
-        #check that p is a valid processor for this chip
+
+        # check that p is a valid processor for this chip
         if p not in chip_info.virtual_core_ids:
             raise SpinnmanInvalidParameterException(
                 "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
-        #locate the base address for this chip info
+
+        # locate the base address for this chip info
         base_address = (chip_info.cpu_information_base_address +
                         (constants.CPU_INFO_BYTES * p))
         base_address += constants.CPU_USER_0_START_ADDRESS
@@ -1074,7 +1101,7 @@ class Transceiver(object):
                 self, cpu_info.x, cpu_info.y, cpu_info.p,
                 cpu_info.iobuf_address, iobuf_bytes,
                 self._scp_message_thread_pool)
-            self._scp_message_thread_pool.apply_async(thread.run())
+            self._other_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
         # Gather the results
@@ -1126,7 +1153,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        response = self._send_scp_message(SCPCountStateRequest(app_id, state))
+        response = self.send_scp_message(SCPCountStateRequest(app_id, state))
         return response.count
 
     def execute(self, x, y, processors, executable, app_id, n_bytes=None):
@@ -1143,7 +1170,8 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
-        :type executable: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+        :type executable:\
+                    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray
         :param app_id: The id of the application with which to associate the\
                     executable
@@ -1177,8 +1205,8 @@ class Transceiver(object):
         self.write_memory(x, y, 0x67800000, executable, n_bytes)
 
         # Request the start of the executable
-        self._send_scp_message(SCPApplicationRunRequest(app_id, x, y,
-                                                        processors))
+        self.send_scp_message(SCPApplicationRunRequest(app_id, x, y,
+                                                       processors))
 
         # Release the lock
         self._release_chip_execute_lock(x, y)
@@ -1202,7 +1230,8 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
-        :type executable: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+        :type executable:\
+                    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray
         :param app_id: The id of the application with which to associate the\
                     executable
@@ -1245,7 +1274,7 @@ class Transceiver(object):
             y = core_subset.y
             thread = SCPMessageInterface(self, SCPApplicationRunRequest(
                 app_id, x, y, core_subset.processor_ids))
-            self._scp_message_thread_pool.apply_async(thread.run())
+            self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
         # Go through the callbacks and check that the responses are OK
@@ -1265,7 +1294,8 @@ class Transceiver(object):
                     * A bytearray
                     * A single integer - will be written using little-endian\
                       byte ordering
-        :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+        :type data:\
+                    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
         :param n_bytes: The amount of data to be written in bytes.  If not\
                     specified:
@@ -1324,7 +1354,8 @@ class Transceiver(object):
                     * A bytearray
                     * A single integer - will be written using little-endian\
                       byte ordering
-        :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+        :type data:\
+                    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
         :param n_bytes: The amount of data to be written in bytes.  If not\
                     specified:
@@ -1374,7 +1405,7 @@ class Transceiver(object):
             if data_size != 0:
                 thread = SCPMessageInterface(self, SCPWriteMemoryRequest(
                     x, y, address_to_write, data_array))
-                self._scp_message_thread_pool.apply_async(thread.run())
+                self._scp_message_thread_pool.apply_async(thread.run)
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1384,7 +1415,8 @@ class Transceiver(object):
         for callback in callbacks:
             callback.get_response()
 
-    def write_neighbour_memory(self, x, y, cpu, link, base_address, data, n_bytes=None):
+    def write_neighbour_memory(self, x, y, cpu, link, base_address, data,
+                               n_bytes=None):
         """ Write to the memory of a neighbouring chip using a LINK_READ SCP
         command. If sent to a BMP, this command can be used to communicate with
         the FPGAs' debug registers.
@@ -1408,7 +1440,8 @@ class Transceiver(object):
                     * A bytearray
                     * A single integer - will be written using little-endian\
                       byte ordering
-        :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+        :type data:\
+                    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
         :param n_bytes: The amount of data to be written in bytes.  If not\
                     specified:
@@ -1440,7 +1473,8 @@ class Transceiver(object):
             self._get_bytes_to_write_and_data_to_write(data, n_bytes)
 
         # Set up all the requests and get the callbacks
-        logger.debug("Writing {} bytes of memory to neighbour {}.".format(bytes_to_write, link))
+        logger.debug("Writing {} bytes of memory to neighbour {}.".format(
+            bytes_to_write, link))
         offset = 0
         address_to_write = base_address
         callbacks = list()
@@ -1458,7 +1492,7 @@ class Transceiver(object):
             if data_size != 0:
                 thread = SCPMessageInterface(self, SCPWriteLinkRequest(
                     x, y, cpu, link, address_to_write, data_array))
-                self._scp_message_thread_pool.apply_async(thread.run())
+                self._scp_message_thread_pool.apply_async(thread.run)
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1479,7 +1513,8 @@ class Transceiver(object):
                     * An instance of AbstractDataReader
                     * A bytearray
                     * A single integer
-        :type data: :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+        :type data:\
+                    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
         :param n_bytes: The amount of data to be written in bytes.  If not\
                     specified:
@@ -1513,8 +1548,8 @@ class Transceiver(object):
         # Start the flood fill
         nearest_neighbour_id = self._get_next_nearest_neighbour_id()
         n_blocks = int(math.ceil(math.ceil(bytes_to_write / 4.0) / 256.0))
-        self._send_scp_message(SCPFloodFillStartRequest(nearest_neighbour_id,
-                                                        n_blocks))
+        self.send_scp_message(SCPFloodFillStartRequest(nearest_neighbour_id,
+                                                       n_blocks))
 
         # Send the data blocks simultaneously
         # Set up all the requests and get the callbacks
@@ -1538,7 +1573,7 @@ class Transceiver(object):
                 thread = SCPMessageInterface(self, SCPFloodFillDataRequest(
                     nearest_neighbour_id, block_no, address_to_write,
                     data_array))
-                self._scp_message_thread_pool.apply_async(thread.run())
+                self._scp_message_thread_pool.apply_async(thread.run)
                 callbacks.append(thread)
                 bytes_to_write -= data_size
                 address_to_write += data_size
@@ -1550,7 +1585,7 @@ class Transceiver(object):
             callback.get_response()
 
         # Send the end packet
-        self._send_scp_message(SCPFloodFillEndRequest(nearest_neighbour_id))
+        self.send_scp_message(SCPFloodFillEndRequest(nearest_neighbour_id))
 
         # Release the lock to allow others to proceed
         self._flood_write_lock.release()
@@ -1593,7 +1628,7 @@ class Transceiver(object):
                 data_size = 256
             thread = SCPMessageInterface(self, SCPReadMemoryRequest(
                 x, y, address_to_read, data_size))
-            self._scp_message_thread_pool.apply_async(thread.run())
+            self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
             bytes_to_get -= data_size
             address_to_read += data_size
@@ -1641,7 +1676,7 @@ class Transceiver(object):
                 data_size = 256
             thread = SCPMessageInterface(self, SCPReadMemoryRequest(
                 x, y, address_to_read, data_size))
-            self._scp_message_thread_pool.apply_async(thread.run())
+            self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
             bytes_to_get -= data_size
             address_to_read += data_size
@@ -1686,7 +1721,8 @@ class Transceiver(object):
         """
 
         # Set up all the requests and get the callbacks
-        logger.debug("Reading {} bytes of neighbour {}'s memory".format(length, link))
+        logger.debug("Reading {} bytes of neighbour {}'s memory".format(length,
+                                                                        link))
         bytes_to_get = length
         address_to_read = base_address
         callbacks = list()
@@ -1696,7 +1732,7 @@ class Transceiver(object):
                 data_size = 256
             thread = SCPMessageInterface(self, SCPReadLinkRequest(
                 x, y, cpu, link, address_to_read, data_size))
-            self._scp_message_thread_pool.apply_async(thread.run())
+            self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
             bytes_to_get -= data_size
             address_to_read += data_size
@@ -1704,6 +1740,23 @@ class Transceiver(object):
         # Go through the callbacks and return the responses in order
         for callback in callbacks:
             yield callback.get_response().data
+
+    def stop_application(self, app_id):
+        """ Sends a stop request for an app_id
+
+        :param app_id: The id of the application to send to
+        :type app_id: int
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If app_id is not a valid application id
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        self.send_scp_message(SCPAppStopRequest(app_id))
 
     def send_signal(self, app_id, signal):
         """ Send a signal to an application
@@ -1726,7 +1779,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        self._send_scp_message(SCPSendSignalRequest(app_id, signal))
+        self.send_scp_message(SCPSendSignalRequest(app_id, signal))
 
     def set_leds(self, x, y, cpu, led_states):
         """ Set LED states.
@@ -1750,18 +1803,32 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        self._send_scp_message(SCPLEDRequest(x, y, cpu, led_states))
+        self.send_scp_message(SCPLEDRequest(x, y, cpu, led_states))
 
-    def set_ip_tag(self, ip_tag, connection=None):
+    def locate_spinnaker_connection_for_board_address(self, board_address):
+        """ Find a connection that matches the given board IP address
+
+        :param board_address: The IP address of the ethernet connection on the\
+                    baord
+        :type board_address: str
+        :return: A connection for the given IP address, or None if no such\
+                    connection exists
+        :rtype:\
+                    :py:class:`spinnman.connections.udp_packet_connections.udp_spinnaker_connection.UDPSpinnakerConnection`
+        """
+        for connection_key in self._sending_connections.keys():
+            connection = self._sending_connections[connection_key]
+            if (isinstance(connection, UDPSpinnakerConnection)
+                    and connection.remote_ip_address == board_address):
+                return connection
+        return None
+
+    def set_ip_tag(self, ip_tag):
         """ Set up an ip tag
 
-        :param ip_tag: The iptag to set up
-        :type ip_tag: :py:class:`spinnman.model.iptag.IPTag`
-        :param connection: UDPConnection where the tag should be set up.\
-                    If not specified, all UDPConnections will send the message\
-                    to set up the tag
-        :type connection:\
-                    :py:class:`spinnman.connections.udp_connetion.UDPConnection`
+        :param ip_tag: The tag to set up; note board_address can be None, in\
+                    which case, the tag will be assigned to all boards
+        :type ip_tag: :py:class:`spinn_machine.tags.iptag.IPTag`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1770,45 +1837,53 @@ class Transceiver(object):
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
                     * If the ip tag fields are incorrect
-                    * If the connection cannot send SDP messages
                     * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        if connection is not None:
-            connections = connection
+
+        # Get the connections - if the tag specifies a connection, use that,
+        # otherwise apply the tag to all connections
+        connections = list()
+        if ip_tag.board_address is not None:
+            connection = self.locate_spinnaker_connection_for_board_address(
+                ip_tag.board_address)
+            if connection is None:
+                raise SpinnmanInvalidParameterException(
+                    "ip_tag", str(ip_tag),
+                    "The given board address is not recognized")
+            connections.append(connection)
         else:
             connections = self._sending_connections.values()
 
         callbacks = list()
-        for conn in connections:
-            host_string = ip_tag.address
+        for connection in connections:
+
+            # Convert the host string
+            host_string = ip_tag.ip_address
             if host_string == "localhost" or host_string == ".":
-                host_string = conn.local_ip_address
+                host_string = connection.local_ip_address
             ip_string = gethostbyname(host_string)
             ip_address = bytearray(inet_aton(ip_string))
-            thread = SCPMessageInterface(
-                self,
-                message=SCPIPTagSetRequest(
-                    conn.chip_x, conn.chip_y, ip_address, ip_tag.port,
-                    ip_tag.tag, strip=ip_tag.strip_sdp),
-                connection=conn)
-            self._scp_message_thread_pool.apply_async(thread.run())
+
+            # Send the request
+            thread = SCPMessageInterface(self, SCPIPTagSetRequest(
+                connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
+                ip_tag.tag, strip=ip_tag.strip_sdp))
+            self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
-        for callback in callbacks:
-            callback.get_response()
+        for thread in callbacks:
+            thread.get_response()
 
-    def set_reverse_ip_tag(self, reverse_ip_tag, connection=None):
-        """ Set up an reverse ip tag
+    def set_reverse_ip_tag(self, reverse_ip_tag):
+        """ Set up a reverse ip tag
 
-        :param reverse_ip_tag: The reverse iptag to set up
-        :type reverse_ip_tag: :py:class:`spinnman.model.reverse_iptag.ReverseIPTag`
-        :param connection: UDPConnection where the tag should be set up.\
-                    If not specified, all UDPConnections will send the message\
-                    to set up the tag
-        :type connection:\
-                    :py:class:`spinnman.connections.udp_connetion.UDPConnection`
+        :param reverse_ip_tag: The reverse tag to set up; note board_address\
+                    can be None, in which case, the tag will be assigned to\
+                    all boards
+        :type reverse_ip_tag:\
+                    :py:class:`spinn_machine.tags.reverse_ip_tag.ReverseIPTag`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1816,35 +1891,53 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the ip tag fields are incorrect
-                    * If the connection cannot send SDP messages
+                    * If the reverse ip tag fields are incorrect
                     * If a packet is received that has invalid parameters
+                    * If the UDP port is one that is already used by\
+                      spiNNaker for system functions
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        if connection is not None:
-            connections = connection
+
+        if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT
+                or reverse_ip_tag.port
+                == constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
+            raise SpinnmanInvalidParameterException(
+                "reverse_ip_tag.port", reverse_ip_tag.port,
+                "The port number for the reverese ip tag conflicts with"
+                " the spiNNaker system ports ({} and {})".format(
+                    constants.SCP_SCAMP_PORT,
+                    constants.UDP_BOOT_CONNECTION_DEFAULT_PORT))
+
+        # Get the connections - if the tag specifies a connection, use that,
+        # otherwise apply the tag to all connections
+        connections = list()
+        if reverse_ip_tag.board_address is not None:
+            connection = self.locate_spinnaker_connection_for_board_address(
+                reverse_ip_tag.board_address)
+            if connection is None:
+                raise SpinnmanInvalidParameterException(
+                    "reverse_ip_tag", reverse_ip_tag,
+                    "The given board address is not recognized")
+            connections.append(connection)
         else:
             connections = self._sending_connections.values()
 
         callbacks = list()
-        for conn in connections:
-            thread = SCPMessageInterface(
-                self,
-                message=SCPReverseIPTagSetRequest(
-                    conn.chip_x, conn.chip_y,
-                    reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
-                    reverse_ip_tag.destination_p,
-                    reverse_ip_tag.port, reverse_ip_tag.tag,
-                    reverse_ip_tag.port_num),
-                connection=conn)
-            self._scp_message_thread_pool.apply_async(thread.run())
+        for connection in connections:
+            thread = SCPMessageInterface(self, SCPReverseIPTagSetRequest(
+                connection.chip_x, connection.chip_y,
+                reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
+                reverse_ip_tag.destination_p,
+                reverse_ip_tag.port, reverse_ip_tag.tag,
+                reverse_ip_tag.sdp_port))
+            self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
-        for callback in callbacks:
-            callback.get_response()
+        for thread in callbacks:
+            thread.get_response()
 
-    def clear_ip_tag(self, tag, connection=None):
+    def clear_ip_tag(self, tag, connection=None, board_address=None):
         """ Clear the setting of an ip tag
 
         :param tag: The tag id
@@ -1854,6 +1947,9 @@ class Transceiver(object):
                     to clear the tag
         :type connection:\
                     :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
+        :param board_address: Board address where the tag should be cleared.\
+                    If not specified, all SCPSender connections will send the\
+                    message to clear the tag
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1868,34 +1964,36 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         if connection is not None:
-            connections = connection
+            connections = [connection]
+        elif board_address is not None:
+            connection = self.locate_spinnaker_connection_for_board_address(
+                board_address)
+            connections = [connection]
         else:
             connections = self._sending_connections.values()
 
         callbacks = list()
         for conn in connections:
             thread = SCPMessageInterface(
-                self,
-                message=SCPIPTagClearRequest(
-                    conn.chip_x, conn.chip_y, tag),
-                connection=conn)
-            self._scp_message_thread_pool.apply_async(thread.run())
+                self, message=SCPIPTagClearRequest(
+                    conn.chip_x, conn.chip_y, tag))
+            self._scp_message_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
         for callback in callbacks:
             callback.get_response()
 
-    def get_ip_tags(self, connection=None):
-        """ Get the current set of ip tags that have been set on the board
+    def get_tags(self, connection=None):
+        """ Get the current set of tags that have been set on the board
 
         :param connection: Connection from which the tags should be received.\
-                    If not specified, all SCPSender connections will be queried\
-                    and the response will be combined.
+                    If not specified, all SCPSender connections will be\
+                    queried and the response will be combined.
         :type connection:\
                     :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
-        :return: An iterable of ip tags
+        :return: An iterable of tags
         :rtype: iterable of\
-                    :py:class:`spinnman.model.iptag.abstract_iptag.AbstractIPTag`
+                    :py:class:`spinn_machine.tags.abstract_tag.AbstractTag`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -1913,15 +2011,15 @@ class Transceiver(object):
 
         callbacks = list()
         for conn in connections:
-            thread = GetIPTagsInterface(self, conn,
-                                        self._scp_message_thread_pool)
+            thread = GetTagsInterface(self, conn,
+                                      self._scp_message_thread_pool)
 
-            self._scp_message_thread_pool.apply_async(thread.run())
+            self._other_thread_pool.apply_async(thread.run)
             callbacks.append(thread)
 
         all_tags = list()
         for callback in callbacks:
-            all_tags.extend(callback.get_iptags())
+            all_tags.extend(callback.get_tags())
         return all_tags
 
     def load_multicast_routes(self, x, y, routes, app_id):
@@ -1985,8 +2083,8 @@ class Transceiver(object):
 
         # Allocate enough space for the entries
         alloc_response = \
-            self._send_scp_message(SCPRouterAllocRequest(x, y, app_id,
-                                                         n_entries))
+            self.send_scp_message(SCPRouterAllocRequest(x, y, app_id,
+                                                        n_entries))
         base_address = alloc_response.base_address
         if base_address == 0:
             raise SpinnmanInvalidParameterException(
@@ -1994,9 +2092,9 @@ class Transceiver(object):
                 "Not enough space to allocate the entries")
 
         # Load the entries
-        self._send_scp_message(SCPRouterInitRequest(x, y, n_entries,
-                                                    table_address,
-                                                    base_address, app_id))
+        self.send_scp_message(SCPRouterInitRequest(x, y, n_entries,
+                                                   table_address,
+                                                   base_address, app_id))
 
     def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
@@ -2009,7 +2107,8 @@ class Transceiver(object):
                     not specified, will return all routes
         :type app_id: int
         :return: An iterable of multicast routes
-        :rtype: iterable of :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
+        :rtype: iterable of\
+                    :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -2049,7 +2148,7 @@ class Transceiver(object):
             mask = reader.read_int()
 
             if route < 0xFF000000 and (app_id is None
-                    or app_id == route_app_id):
+                                       or app_id == route_app_id):
                 routes.append(MulticastRoutingEntry(key, mask, processor_ids,
                                                     link_ids, False))
 
@@ -2073,7 +2172,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        self._send_scp_message(SCPRouterClearRequest(x, y))
+        self.send_scp_message(SCPRouterClearRequest(x, y))
 
     def get_router_diagnostics(self, x, y):
         """ Get router diagnostic information from a chip
@@ -2095,30 +2194,80 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        router_data = bytearray()
-        router_data.extend(self._send_scp_message(
-            SCPReadMemoryWordsRequest(x, y, 0xe1000000, 1)).data)
-        router_data.extend(self._send_scp_message(
-            SCPReadMemoryWordsRequest(x, y, 0xe1000014, 1)).data)
-        router_data.extend(self._send_scp_message(
-            SCPReadMemoryWordsRequest(x, y, 0xe1000300, 16)).data)
-        reader = LittleEndianByteArrayByteReader(router_data)
-        return RouterDiagnostics(
-            control_register=reader.read_int(),
-            error_status=reader.read_int(),
-            register_values=[reader.read_int() for _ in range(0, 16)])
+        control_register = self.send_scp_message(
+            SCPReadMemoryWordsRequest(x, y, 0xe1000000, 1)).data[0]
+        error_status = self.send_scp_message(
+            SCPReadMemoryWordsRequest(x, y, 0xe1000014, 1)).data[0]
+        register_values = [value for value in self.send_scp_message(
+            SCPReadMemoryWordsRequest(x, y, 0xe1000300, 16)).data]
+        return RouterDiagnostics(control_register, error_status,
+                                 register_values)
 
-    def set_router_diagnostics(self, x, y, diagnostic_filter, position):
-        """ sets a router diagnostic filter
+    def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
+        """ Sets a router diagnostic filter in a router
 
-        :param x: the x address of the router to which this filter is being added
-        :param y: the y address of the router to which this filter is being added
-        :param diagnostic_filter: the daignostic filter being added to the router
-        :param position: the position in the list of filters where this filter
-        is to be added
+        :param x: the x address of the router in which this filter is being\
+                    set
+        :type x: int
+        :param y: the y address of the router in which this filter is being\
+                    set
+        :type y: int
+        :param position: the position in the list of filters where this filter\
+                    is to be added
+        :type position: int
+        :param diagnostic_filter: the diagnostic filter being set in the\
+                    placed, between 0 and 15 (note that positions 0 to 11 are\
+                    used by the default filters, and setting these positions\
+                    will result in a warning).
+        :type diagnostic_filter:\
+                    :py:class:`spinnman.model.diagnostic_filter.DiagnosticFilter`
         :return: None
-        :raise SpinnmanInvalidParameterException: when the position is
-        beyond the valid range of filters
+        :raise spinnman.exceptions.SpinnmanIOException:
+                    * If there is an error communicating with the board
+                    * If there is an error reading the data
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If x, y does not lead to a valid chip
+                    * If position is less than 0 or more than 15
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        data_to_send = diagnostic_filter.filter_word
+        if position > constants.NO_ROUTER_DIAGNOSTIC_FILTERS:
+            raise SpinnmanInvalidParameterException(
+                "position", str(position), "the range of the position of a "
+                                           "router filter is 0 and 16.")
+        if position <= constants.ROUTER_DEFAULT_FILTERS_MAX_POSITION:
+            logger.warn(
+                " You are planning to change a filter which is set by default."
+                " By doing this, other runs occuring on this machine will be "
+                "forced to use this new configuration untill the machine is "
+                "reset. Please also note that these changes will make the"
+                " the reports from ybug not correct."
+                "This has been executed and is trusted that the end user knows"
+                " what they are doing")
+        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS
+                           + constants.ROUTER_FILTER_CONTROLS_OFFSET
+                           + (position
+                              * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
+        self.send_scp_message(SCPWriteMemoryWordsRequest(
+            x, y, memory_position, [data_to_send]))
+
+    def get_router_diagnostic_filter(self, x, y, position):
+        """ Gets a router diagnostic filter from a router
+
+        :param x: the x address of the router from which this filter is being\
+                    retrieved
+        :type x: int
+        :param y: the y address of the router from which this filter is being\
+                    retrieved
+        :type y: int
+        :param position: the position in the list of filters where this filter\
+                    is to be added
+        :type position: int
+        :return: The diagnostic filter read
+        :rtype: :py:class:`spinnman.model.diagnostic_filter.DiagnosticFilter`
         :raise spinnman.exceptions.SpinnmanIOException:
                     * If there is an error communicating with the board
                     * If there is an error reading the data
@@ -2127,49 +2276,31 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
                     * If x, y does not lead to a valid chip
                     * If a packet is received that has invalid parameters
-                    * If base_address is not a positive integer
-                    * If data is an AbstractDataReader but n_bytes is not\
-                      specified
-                    * If data is an int and n_bytes is more than 4
-                    * If n_bytes is less than 0
+                    * If position is less than 0 or more than 15
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        data_to_send = diagnostic_filter.create_byte_array_from_filter()
-        if position > constants.NO_ROUTER_DIAGNOSTIC_FILTERS:
-            raise SpinnmanInvalidParameterException(
-                position, "beyond range", "the range of the position of a "
-                                          "router filter is 0 and 16.")
-        if position > constants.ROUTER_DEFAULT_FILTERS_MAX_POSITION:
-            logger.warn(
-                " You are planning to change a filter which is set by default. "
-                "By doing this, other runs occuring on this machine will be "
-                "forced to use this new configuration untill the machine is "
-                "reset. Please also note that these changes will make the"
-                " the report from ybug not correct."
-                ""
-                "This has been executed and is trusted that the end user knows"
-                " what they are doing")
-        memory_position = \
-            constants.ROUTER_REGISTER_BASE_ADDRESS \
-            + (position * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE)
-        callbacks = list()
-        thread = self._send_scp_message(SCPWriteMemoryRequest(
-            x, y, memory_position, data_to_send))
-        self._scp_message_thread_pool.apply_async(thread.run())
-        callbacks.append(thread)
+        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS
+                           + constants.ROUTER_FILTER_CONTROLS_OFFSET
+                           + (position
+                              * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
+        result = self.send_scp_message(SCPReadMemoryWordsRequest(
+            x, y, memory_position, 1))
+        return DiagnosticFilter.read_from_int(result.data[0])
 
-        # Go through the callbacks and check that the responses are OK
-        for callback in callbacks:
-            callback.get_response()
-
-    def clear_router_diagnostic_counters(self, x, y):
+    def clear_router_diagnostic_counters(self, x, y, enable=True,
+                                         counter_ids=range(0, 16)):
         """ Clear router diagnostic information om a chip
 
         :param x: The x-coordinate of the chip
         :type x: int
         :param y: The y-coordinate of the chip
         :type y: int
+        :param enable: True (default) if the counters should be enabled
+        :type enable: bool
+        :param counter_ids: The ids of the counters to reset (all by default)\
+                    and enable if enable is True; each must be between 0 and 15
+        :type counter_ids: array-like of int
         :return: None
         :rtype: Nothing is returned
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2177,40 +2308,25 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-                    packet is received that has invalid parameters
+                    packet is received that has invalid parameters or a\
+                    counter id is out of range
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        clear_data = [0xFFFFFFFF]
-        self._send_scp_message(SCPWriteMemoryWordsRequest(
-            x, y, 0xf100002c, clear_data))
+        clear_data = 0
+        for counter_id in counter_ids:
+            if counter_id < 0 or counter_id > 15:
+                raise SpinnmanInvalidParameterException(
+                    "counter_id", counter_id, "Diagnostic counter ids must be"
+                                              " between 0 and 15")
+            clear_data |= 1 << counter_id
+        if enable:
+            for counter_id in counter_ids:
+                clear_data |= 1 << counter_id + 16
+        self.send_scp_message(SCPWriteMemoryWordsRequest(
+            x, y, 0xf100002c, [clear_data]))
 
-    def clear_router_diagnostic_non_default_positioned_filters(self, chip_x,
-                                                               chip_y):
-        """ Clears the router diagnositc filters that reside in positions
-        12 to 15
-
-        :param chip_x: the x id for the router which will have its filters
-        cleared
-        :param chip_y: the y id for the router which will have its filters
-        cleared
-        :type chip_x: int
-        :type chip_y: int
-
-        :return:
-        """
-        clear_data = [0xFFFFFFFF]
-        for filter_position in range(
-                constants.ROUTER_DEFAULT_FILTERS_MAX_POSITION + 1,
-                constants.NO_ROUTER_DIAGNOSTIC_FILTERS):
-            base_address = (constants.ROUTER_REGISTER_BASE_ADDRESS +
-                            constants.ROUTER_FILTER_CONTROLS_OFFSET +
-                            (constants.ROUTER_DIAGNOSTIC_FILTER_SIZE *
-                             filter_position))
-            self._send_scp_message(SCPWriteMemoryWordsRequest(
-                chip_x, chip_y, base_address, clear_data))
-
-    def send_multicast(self, x, y, multicast_message, connection=None):
+    def send_multicast_message(self, x, y, multicast_message, connection=None):
         """ Sends a multicast message to the board
 
         :param x: The x-coordinate of the chip where the message should first\
@@ -2240,7 +2356,7 @@ class Transceiver(object):
         raise SpinnmanUnsupportedOperationException(
             "This operation is currently not supported in spinnman.")
 
-    def receive_multicast(self, x, y, timeout=None, connection=None):
+    def receive_multicast_message(self, x, y, timeout=None, connection=None):
         """ Receives a multicast message from the board
 
         :param x: The x-coordinate of the chip where the message should come\
@@ -2259,7 +2375,8 @@ class Transceiver(object):
         :type connection:\
                     :py:class:`spinnman.connections.abstract_multicast_receiver.AbstractMulticastReceiver`
         :return: The received message
-        :rtype: :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+        :rtype:\
+                    :py:class:`spinnman.messages.multicast_message.MulticastMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException:
@@ -2290,10 +2407,13 @@ class Transceiver(object):
         for connection_queue in self._connection_queues.itervalues():
             connection_queue.stop()
 
-        for connection in self._sending_connections.keys():
+        for connection in self._sending_connections.itervalues():
             if (close_original_connections
                     or connection not in self.connections_to_not_shut_down):
                 connection.close()
+
+        self._scp_message_thread_pool.close()
+        self._other_thread_pool.close()
 
     def register_listener(self, callback, recieve_port_no, hostname,
                           connection_type, traffic_type, sdp_port=None):

@@ -59,7 +59,7 @@ class IOBufInterface(object):
                 first_thread = SCPMessageInterface(
                     self._transceiver, SCPReadMemoryRequest(
                         self._x, self._y, base_address, 256))
-                self._thread_pool.apply_async(first_thread.run())
+                self._thread_pool.apply_async(first_thread.run)
                 first_data = first_thread.get_response().data
                 reader = LittleEndianByteArrayByteReader(first_data)
 

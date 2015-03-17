@@ -9,7 +9,7 @@ _IPTAG_INFO = 4
 _IPTAG_MAX = 255
 
 
-class SCPIPTagInfoRequest(AbstractSCPRequest):
+class SCPTagInfoRequest(AbstractSCPRequest):
     """ An SCP Request information about IP tags
     """
 
@@ -22,7 +22,7 @@ class SCPIPTagInfoRequest(AbstractSCPRequest):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
                     The chip-coordinates are out of range
         """
-        super(SCPIPTagInfoRequest, self).__init__(
+        super(SCPTagInfoRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,

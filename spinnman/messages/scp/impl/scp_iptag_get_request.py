@@ -8,7 +8,7 @@ from spinnman.messages.scp.impl.scp_iptag_get_response import SCPIPTagGetRespons
 _IPTAG_GET = 2
 
 
-class SCPIPTagGetRequest(AbstractSCPRequest):
+class SCPTagGetRequest(AbstractSCPRequest):
     """ An SCP Request to get an IP tag
     """
 
@@ -26,7 +26,7 @@ class SCPIPTagGetRequest(AbstractSCPRequest):
                     * The chip-coordinates are out of range
                     * If the tag is not between 0 and 7
         """
-        super(SCPIPTagGetRequest, self).__init__(
+        super(SCPTagGetRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,

@@ -27,7 +27,7 @@ class PortListener(threading.Thread):
         self._callbacks.remove(callback)
 
     def stop(self):
-        logger.debug("[port_listener] Stopping")
+        logger.info("[port_listener] Stopping")
         self._queuer.stop()
         self._done = True
 
@@ -35,7 +35,7 @@ class PortListener(threading.Thread):
         self._queuer.set_port(port)
 
     def run(self):
-        logger.debug("[port_listener] starting")
+        logger.info("[port_listener] starting")
         self._queuer.start()
         while not self._done:
             try:
