@@ -1,14 +1,16 @@
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
 from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.data.file_data_reader import FileDataReader
+from spinnman import re_injection_binary
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
 from spinnman.messages.scp.scp_signal import SCPSignal
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
 from spinnman import constants
-from spinnman.connections.udp_packet_connections.udp_spinnaker_connection import \
-    UDPSpinnakerConnection
+from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
+    import UDPSpinnakerConnection
 from spinnman.connections.abstract_classes.abstract_udp_connection \
     import AbstractUDPConnection
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
@@ -98,6 +100,7 @@ from multiprocessing.pool import ThreadPool
 
 import logging
 import math
+import os
 
 
 logger = logging.getLogger(__name__)
@@ -256,6 +259,9 @@ class Transceiver(object):
         self._chip_execute_locks = dict()
         self._chip_execute_lock_condition = Condition()
         self._n_chip_execute_locks = 0
+
+        # The core_subsets of cores that are currently used for reinjection
+        self._reinjection_cores = None
 
     def _sort_out_connections(self, connections):
         for connection in connections:
@@ -418,8 +424,8 @@ class Transceiver(object):
                 if connection.supports_sends_message(message):
                     connection_queue = self._connection_queues[connection]
                     connection_queue_size = connection_queue.queue_length
-                    if (best_connection_queue is None
-                        or connection_queue_size <
+                    if (best_connection_queue is None or
+                        connection_queue_size <
                             best_connection_queue_size):
                         best_connection_queue = connection_queue
                         best_connection_queue_size = connection_queue_size
@@ -586,14 +592,14 @@ class Transceiver(object):
         # Create the processor list
         processors = list()
         for virtual_core_id in chip_details.virtual_core_ids:
-            if (self._ignore_cores is not None
-                    and self._ignore_cores.is_core(
+            if (self._ignore_cores is not None and
+                    self._ignore_cores.is_core(
                         chip_details.x, chip_details.y, virtual_core_id)):
                 logger.debug("Ignoring core {} on chip {}, {}".format(
                              chip_details.x, chip_details.y, virtual_core_id))
                 continue
-            if (self._max_core_id is not None
-                    and virtual_core_id > self._max_core_id):
+            if (self._max_core_id is not None and
+                    virtual_core_id > self._max_core_id):
                 logger.debug("Ignoring core {} on chip {}, {} as > {}"
                              .format(chip_details.x, chip_details.y,
                                      virtual_core_id, self._max_core_id))
@@ -608,8 +614,8 @@ class Transceiver(object):
             links=list(), emergency_routing_enabled=False,
             clock_speed=Router.ROUTER_DEFAULT_CLOCK_SPEED,
             n_available_multicast_entries=(
-                Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES
-                - chip_details.first_free_router_entry))
+                Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES -
+                chip_details.first_free_router_entry))
 
         # Create the chip
         chip = Chip(
@@ -620,32 +626,60 @@ class Transceiver(object):
             nearest_ethernet_y=chip_details.nearest_ethernet_y)
         return chip
 
-    def _flood_fill_re_injection_model(self, flood_core_subsets):
-        """ private method to add a reinjector code to a core on a chip
-
-        :param flood_core_subsets: the list of core_subset which defines which\
-                    cores the re_injection
-        :return: None
+    def enable_dropped_packet_reinjection(self):
+        """ Ensures that dropped packet re-injection is enabled on the system
         """
-        # locate re-injection binary
-        file_path_of_spinn_constants = os.path.dirname(constants.__file__)
-        file_path_of_re_injection_binary = \
-            os.path.join(file_path_of_spinn_constants,
-                         "re_injection_binary{}re_injection.aplx"
-                         .format(os.sep))
-        # read in the re-injection binary
-        file_reader = FileDataReader(file_path_of_re_injection_binary)
-        file_to_read_in = open(file_path_of_re_injection_binary, 'rb')
-        buf = file_to_read_in.read()
-        size = (len(buf))
 
-        # Stop the execution
+        # If there are no re-injection cores, create some
+        if self._reinjection_cores is None:
+
+            self._reinjection_cores = CoreSubsets()
+
+            # Find a free core on each chip
+            self._update_machine()
+            for chip in self._machine.chips:
+
+                # Find a currently non-monitor core
+                free_processor = None
+                for processor in chip.processors:
+                    if not processor.is_monitor:
+                        free_processor = processor
+                        break
+
+                # Add the processor to the core subsets
+                self._reinjection_cores.add_processor(
+                    chip.x, chip.y, free_processor.processor_id)
+
+                # Set the processor to be a monitor
+                free_processor.set_monitor(True)
+
+        # Stop any existing execution
         self.send_signal(constants.RE_INJECTION_APP_ID, SCPSignal.STOP)
 
-        # Start it again
-        core_subsets = CoreSubsets(flood_core_subsets)
-        self.execute_flood(core_subsets, file_reader,
-                           constants.RE_INJECTION_APP_ID, size)
+        # Start the re-injector binary
+        binary_dir = os.path.dirname(re_injection_binary.__file__)
+        file_path_of_re_injection_binary = os.path.join(
+            binary_dir, "re_injection.aplx")
+        file_size = os.stat(file_path_of_re_injection_binary).st_size
+        file_reader = FileDataReader(file_path_of_re_injection_binary)
+        self.execute_flood(self._reinjection_cores, file_reader,
+                           constants.RE_INJECTION_APP_ID, file_size)
+        file_reader.close()
+
+    def disable_dropped_packet_reinjection(self):
+        """ Ensures that dropped packet re-injection is disabled on the system
+        """
+
+        # Stop any existing execution
+        self.send_signal(constants.RE_INJECTION_APP_ID, SCPSignal.STOP)
+
+        # If there are any re-injection cores, turn off the monitor status
+        if self._reinjection_cores is None:
+            for core_subset in self._reinjection_cores.core_subsets:
+                chip = self._machine.get_chip_at(core_subset.x, core_subset.y)
+                for processor_id in core_subset.processor_ids:
+                    processor = chip.get_processor_with_id(processor_id)
+                    processor.set_monitor(False)
 
     def _update_machine(self):
         """ Get the current machine status and store it
@@ -682,8 +716,8 @@ class Transceiver(object):
                     logger.debug("Found chip {}, {}"
                                  .format(new_chip_details.x,
                                          new_chip_details.y))
-                    if (self._ignore_chips is not None
-                            and self._ignore_chips.is_chip(
+                    if (self._ignore_chips is not None and
+                            self._ignore_chips.is_chip(
                                 new_chip_details.x, new_chip_details.y)):
                         logger.debug("Ignoring chip {}, {}"
                                      .format(new_chip_details.x,
@@ -734,9 +768,6 @@ class Transceiver(object):
                     # If there is an error, assume the link is down
                     logger.debug("Error searching down link {}".format(link))
                     logger.debug(error)
-
-        # flood fill the re_injection model
-        self._flood_fill_re_injection_model(re_injection_core_subsets)
 
     def discover_scamp_connections(self):
         """ Find connections to the board and store these for future use.\
@@ -947,8 +978,8 @@ class Transceiver(object):
 
         if version_info is None:
             raise SpinnmanIOException("Could not boot the board")
-        if (version_info.name != _SCAMP_NAME
-                or version_info.version_number != _SCAMP_VERSION):
+        if (version_info.name != _SCAMP_NAME or
+                version_info.version_number != _SCAMP_VERSION):
             raise SpinnmanIOException(
                 "The board is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
@@ -1009,8 +1040,8 @@ class Transceiver(object):
                     raise SpinnmanInvalidParameterException(
                         "p", p, "Not a valid core on chip {}, {}".format(
                             x, y))
-                base_address = (chip_info.cpu_information_base_address
-                                + (constants.CPU_INFO_BYTES * p))
+                base_address = (chip_info.cpu_information_base_address +
+                                (constants.CPU_INFO_BYTES * p))
                 callbacks.append(SCPMessageInterface(
                     self, SCPReadMemoryRequest(
                         x, y, base_address, constants.CPU_INFO_BYTES)))
@@ -1849,8 +1880,8 @@ class Transceiver(object):
         """
         for connection_key in self._sending_connections.keys():
             connection = self._sending_connections[connection_key]
-            if (isinstance(connection, UDPSpinnakerConnection)
-                    and connection.remote_ip_address == board_address):
+            if (isinstance(connection, UDPSpinnakerConnection) and
+                    connection.remote_ip_address == board_address):
                 return connection
         return None
 
@@ -1930,9 +1961,9 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT
-                or reverse_ip_tag.port
-                == constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
+        if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT or
+                reverse_ip_tag.port ==
+                constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
             raise SpinnmanInvalidParameterException(
                 "reverse_ip_tag.port", reverse_ip_tag.port,
                 "The port number for the reverese ip tag conflicts with"
@@ -2178,8 +2209,8 @@ class Transceiver(object):
             key = reader.read_int()
             mask = reader.read_int()
 
-            if route < 0xFF000000 and (app_id is None
-                                       or app_id == route_app_id):
+            if route < 0xFF000000 and (app_id is None or
+                                       app_id == route_app_id):
                 routes.append(MulticastRoutingEntry(key, mask, processor_ids,
                                                     link_ids, False))
 
@@ -2278,10 +2309,10 @@ class Transceiver(object):
                 " the reports from ybug not correct."
                 "This has been executed and is trusted that the end user knows"
                 " what they are doing")
-        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS
-                           + constants.ROUTER_FILTER_CONTROLS_OFFSET
-                           + (position
-                              * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
+        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS +
+                           constants.ROUTER_FILTER_CONTROLS_OFFSET +
+                           (position *
+                            constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
         self.send_scp_message(SCPWriteMemoryWordsRequest(
             x, y, memory_position, [data_to_send]))
 
@@ -2311,10 +2342,10 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS
-                           + constants.ROUTER_FILTER_CONTROLS_OFFSET
-                           + (position
-                              * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
+        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS +
+                           constants.ROUTER_FILTER_CONTROLS_OFFSET +
+                           (position *
+                            constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
         result = self.send_scp_message(SCPReadMemoryWordsRequest(
             x, y, memory_position, 1))
         return DiagnosticFilter.read_from_int(result.data[0])
@@ -2439,8 +2470,8 @@ class Transceiver(object):
             connection_queue.stop()
 
         for connection in self._sending_connections.itervalues():
-            if (close_original_connections
-                    or connection not in self.connections_to_not_shut_down):
+            if (close_original_connections or
+                    connection not in self.connections_to_not_shut_down):
                 connection.close()
 
         self._scp_message_thread_pool.close()
