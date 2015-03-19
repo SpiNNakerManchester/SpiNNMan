@@ -1,29 +1,35 @@
-from spinnman.transceiver import create_transceiver_from_hostname
-
 import logging
+from random import randint
+from os.path import os
+
+from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.cpu_state import CPUState
 from spinnman.model.core_subsets import CoreSubsets
 from spinnman.model.core_subset import CoreSubset
-from random import randint
 from spinnman.data.file_data_reader import FileDataReader
-from os.path import os
 from time import sleep
 from spinnman.messages.scp.scp_signal import SCPSignal
-from spinnman.model.iptag.iptag import IPTag
+from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
-import sys
-from spinnman.model.iptag.reverse_iptag import ReverseIPTag
+from spinn_machine.tags.reverse_iptag import ReverseIPTag
+from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.messages.scp.impl.scp_read_memory_request \
+    import SCPReadMemoryRequest
+from spinnman.model.diagnostic_filter_destination \
+    import DiagnosticFilterDestination
+from spinnman.model.diagnostic_filter_packet_type \
+    import DiagnosticFilterPacketType
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 
 machine = "spinn-10.cs.man.ac.uk"
 version = 2
 
-#machine = "spinn-1.cs.man.ac.uk"
-#version = 5
+# machine = "spinn-1.cs.man.ac.uk"
+# version = 5
 
-#machine = "192.168.240.253"
-#version = 3
+# machine = "192.168.240.253"
+# version = 3
 
 n_cores = 20
 core_subsets = CoreSubsets(core_subsets=[CoreSubset(0, 0, range(1, 11)),
@@ -33,20 +39,87 @@ app_id = 30
 down_cores = CoreSubsets()
 down_cores.add_processor(0, 0, 5)
 down_chips = CoreSubsets(core_subsets=[CoreSubset(0, 1, [])])
-transceiver = create_transceiver_from_hostname(machine, False, ignore_cores=down_cores, ignore_chips=down_chips)
+
+
+def print_enums(name, enum_list):
+    string = ""
+    for enum_value in enum_list:
+        string += enum_value.name + "; "
+    print name, string
+
+
+def print_word_as_binary(name, word, start=0, end=32, fields=None):
+    start_fields = set()
+    end_fields = set()
+    if fields is not None:
+        for field in fields:
+            start_fields.add(field[0])
+        for field in fields:
+            if (field[1] - 1) not in start_fields:
+                end_fields.add(field[1])
+
+    prefix = ""
+    for i in range(len(name)):
+        prefix += " "
+    values = ""
+    for i in reversed(range(start, end)):
+        if i in start_fields:
+            values += "|"
+        if i % 10 == 0:
+            values += str(i / 10)
+        else:
+            values += " "
+        if i in end_fields:
+            values += "|"
+    print prefix, values
+    values = ""
+    for i in reversed(range(start, end)):
+        if i in start_fields:
+            values += "|"
+        values += str(i % 10)
+        if i in end_fields:
+            values += "|"
+    print prefix, values
+    for i in reversed(range(start, end)):
+        if i in start_fields:
+            prefix += "|"
+        prefix += "="
+        if i in end_fields:
+            prefix += "|"
+    print "", prefix
+    string = ""
+    for i in reversed(range(start, end)):
+        if i in start_fields:
+            string += "|"
+        string += str((word >> i) & 0x1)
+        if i in end_fields:
+            string += "|"
+    print name, string
+
+
+def print_filter(d_filter):
+    print_word_as_binary(
+        "Filter word:", d_filter.filter_word,
+        fields=[(31, 31), (30, 30), (29, 29), (28, 25), (24, 16), (15, 14),
+                (13, 12), (11, 10), (9, 9), (8, 8), (7, 4), (3, 0)])
+    print "Enable Interrupt:", d_filter.enable_interrupt_on_counter_event
+    print "Emergency Routing Status on Incoming:",\
+        d_filter.match_emergency_routing_status_to_incoming_packet
+    print_enums("Destinations:", d_filter.destinations)
+    print_enums("Sources:", d_filter.sources)
+    print_enums("Payloads:", d_filter.payload_statuses)
+    print_enums("Default Routing:", d_filter.default_routing_statuses)
+    print_enums("Emergency Routing:", d_filter.emergency_routing_statuses)
+    print_enums("Packet Types:", d_filter.packet_types)
+
+transceiver = create_transceiver_from_hostname(
+    machine, False, ignore_cores=down_cores, ignore_chips=down_chips)
 
 try:
     print "Version Information"
     print "==================="
     version_info = transceiver.ensure_board_is_ready(version)
     print version_info
-    print ""
-
-    print "Clear Router Diagnostics"
-    print "========================"
-    transceiver.clear_router_diagnostic_counters(0, 0)
-    router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-    print router_diagnostics.registers
     print ""
 
     print "Machine Details"
@@ -126,10 +199,10 @@ try:
 
     print "Create IP Tags"
     print "=============="
-    transceiver.set_ip_tag(IPTag(".", 50000, 1))
-    transceiver.set_ip_tag(IPTag(".", 60000, 2, strip_sdp=True))
-    transceiver.set_reverse_ip_tag(ReverseIPTag(40000, 3, 0, 1, 2))
-    tags = transceiver.get_ip_tags()
+    transceiver.set_ip_tag(IPTag(None, 1, ".", 50000))
+    transceiver.set_ip_tag(IPTag(None, 2, ".", 60000, strip_sdp=True))
+    transceiver.set_reverse_ip_tag(ReverseIPTag(None, 3, 40000, 0, 1, 2))
+    tags = transceiver.get_tags()
     for tag in tags:
         print tag
     print ""
@@ -139,7 +212,7 @@ try:
     transceiver.clear_ip_tag(1)
     transceiver.clear_ip_tag(2)
     transceiver.clear_ip_tag(3)
-    tags = transceiver.get_ip_tags()
+    tags = transceiver.get_tags()
     for tag in tags:
         print tag
     print ""
@@ -147,13 +220,13 @@ try:
     print "Load Routes"
     print "==========="
     routes = [MulticastRoutingEntry(0x10000000, 0xFFFF7000,
-            (1, 2, 3, 4, 5), (0, 1, 2), False)]
+              (1, 2, 3, 4, 5), (0, 1, 2), False)]
     transceiver.load_multicast_routes(0, 0, routes, app_id)
     routes = transceiver.get_multicast_routes(0, 0, app_id)
     for route in routes:
         print "Key={}, Mask={}, processors={}, links={}".format(
-                hex(route.key_combo), hex(route.mask), route.processor_ids,
-                route.link_ids)
+            hex(route.key_combo), hex(route.mask), route.processor_ids,
+            route.link_ids)
     print ""
 
     print "Clear Routes"
@@ -162,15 +235,55 @@ try:
     routes = transceiver.get_multicast_routes(0, 0)
     for route in routes:
         print "Key={}, Mask={}, processors={}, links={}".format(
-                hex(route.key_combo), hex(route.mask), route.processor_ids,
-                route.link_ids)
+            hex(route.key_combo), hex(route.mask), route.processor_ids,
+            route.link_ids)
     print ""
+
+    print "Set Router Diagnostic Filter"
+    print "============================="
+    destinations = [DiagnosticFilterDestination.LINK_0,
+                    DiagnosticFilterDestination.LINK_1,
+                    DiagnosticFilterDestination.LINK_2,
+                    DiagnosticFilterDestination.LINK_5]
+    for i in range(len(destinations)):
+        current_filter = DiagnosticFilter(
+            enable_interrupt_on_counter_event=False,
+            match_emergency_routing_status_to_incoming_packet=True,
+            destinations=[destinations[i]], sources=None,
+            payload_statuses=None, default_routing_statuses=[],
+            emergency_routing_statuses=[],
+            packet_types=[DiagnosticFilterPacketType.POINT_TO_POINT])
+        transceiver.set_router_diagnostic_filter(0, 0, i + 12, current_filter)
+
+    print "Clear Router Diagnostics"
+    print "========================"
+    transceiver.clear_router_diagnostic_counters(0, 0)
+    router_diagnostics = transceiver.get_router_diagnostics(0, 0)
+    print router_diagnostics.registers
+    print ""
+
+    print "Send read requests"
+    print "======================"
+    transceiver.send_scp_message(SCPReadMemoryRequest(1, 0, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
 
     print "Get Router Diagnostics"
     print "======================"
     router_diagnostics = transceiver.get_router_diagnostics(0, 0)
     print router_diagnostics.registers
     print ""
+
+    print "Get Router Diagnostic Filters"
+    print "============================="
+    for i in range(0, 16):
+        print "Filter", i, ":"
+        current_filter = transceiver.get_router_diagnostic_filter(0, 0, i)
+        print_filter(current_filter)
+        print ""
 
 except Exception:
     logging.exception("Error!")
