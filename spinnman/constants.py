@@ -63,7 +63,7 @@ TRAFFIC_TYPE = Enum(
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
     names=[
-        # Database handshake with visualiser
+        # Database handshake with external program
         ("DATABASE_CONFIRMATION", 1),
 
         # Fill in buffer area with padding
@@ -88,11 +88,4 @@ EIEIO_COMMAND_IDS = Enum(
         ("SPINNAKER_REQUEST_READ_DATA", 8),
 
         # Host confirming data being read form SpiNNaker memory
-        ("HOST_DATA_READ", 9)])              # Host confirming data being read form SpiNNaker memory
-
-# max number of historical buffer packets
-MAX_BUFFER_HISTORY = 16
-
-# number of states of the sequence number for buffer packets
-# currently this is implemented in the code as an 8-bit number
-SEQUENCE_NUMBER_MAX_VALUE = 256
+        ("HOST_DATA_READ", 9)])

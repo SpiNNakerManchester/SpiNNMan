@@ -1,5 +1,5 @@
-from spinnman.connections.abstract_classes.abstract_callbackable_connection import \
-    AbstractCallbackableConnection
+from spinnman.connections.abstract_classes.abstract_callbackable_connection \
+    import AbstractCallbackableConnection
 from spinnman.connections.abstract_classes.udp_receivers.\
     abstract_udp_eieio_command_receiver import AbstractUDPEIEIOCommandReceiver
 from spinnman.connections.abstract_classes.udp_senders.\

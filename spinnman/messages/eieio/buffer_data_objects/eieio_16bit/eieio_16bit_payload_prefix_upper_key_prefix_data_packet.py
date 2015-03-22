@@ -1,6 +1,7 @@
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
-from spinnman.messages.eieio.buffer_data_objects.eieio_without_payload_data_packet import EIEIOWithoutPayloadDataPacket
+from spinnman.messages.eieio.buffer_data_objects\
+    .eieio_without_payload_data_packet import EIEIOWithoutPayloadDataPacket
 
 
 class EIEIO16BitPayloadPrefixUpperKeyPrefixDataPacket(

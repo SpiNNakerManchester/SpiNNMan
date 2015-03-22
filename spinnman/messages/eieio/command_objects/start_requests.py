@@ -1,4 +1,5 @@
-from spinnman.messages.eieio.command_objects.eieio_command_packet import EIEIOCommandPacket
+from spinnman.messages.eieio.command_objects.eieio_command_packet \
+    import EIEIOCommandPacket
 
 from spinnman import constants as spinnman_constants
 

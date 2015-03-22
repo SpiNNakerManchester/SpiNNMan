@@ -1,7 +1,5 @@
 from spinnman import exceptions as spinnman_exceptions
 from spinnman import constants as spinnman_constants
-from spinnman.data.little_endian_byte_array_byte_reader import \
-    LittleEndianByteArrayByteReader
 from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header import \
     EIEIODataHeader
 from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message import \
@@ -177,192 +175,188 @@ def _create_data_from_reader(header_value, reader):
         packet_type_number += 1
 
     if packet_type_number == 0:
-        packet = eieio_16bit_data_packet.\
-            EIEIO16BitDataPacket(data=parsed_packet.data)
+        packet = (eieio_16bit_data_packet.
+                  EIEIO16BitDataPacket(data=parsed_packet.data))
     elif packet_type_number == 1:
-        packet = eieio_16bit_lower_key_prefix_data_packet.\
-            EIEIO16BitLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_lower_key_prefix_data_packet
+                  .EIEIO16BitLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 3:
-        packet = eieio_16bit_upper_key_prefix_data_packet.\
-            EIEIO16BitLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_upper_key_prefix_data_packet
+                  .EIEIO16BitLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 4:
-        packet = eieio_16bit_payload_prefix_data_packet.\
-            EIEIO16BitPayloadPrefixDataPacket(
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_payload_prefix_data_packet
+                  .EIEIO16BitPayloadPrefixDataPacket(
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 5:
-        packet = eieio_16bit_payload_prefix_lower_key_prefix_data_packet.\
-            EIEIO16BitPayloadPrefixLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_payload_prefix_lower_key_prefix_data_packet
+                  .EIEIO16BitPayloadPrefixLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 7:
-        packet = eieio_16bit_payload_prefix_upper_key_prefix_data_packet.\
-            EIEIO16BitPayloadPrefixUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_payload_prefix_upper_key_prefix_data_packet
+                  .EIEIO16BitPayloadPrefixUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 12:
-        packet = eieio_16bit_timed_payload_prefix_data_packet.\
-            EIEIO16BitTimedPayloadPrefixDataPacket(
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_timed_payload_prefix_data_packet
+                  .EIEIO16BitTimedPayloadPrefixDataPacket(
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 13:
-        packet = eieio_16bit_timed_payload_prefix_lower_key_prefix_data_packet.\
-            EIEIO16BitTimedPayloadPrefixLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_timed_payload_prefix_lower_key_prefix_data_packet
+                  .EIEIO16BitTimedPayloadPrefixLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 15:
-        packet = eieio_16bit_timed_payload_prefix_upper_key_prefix_data_packet.\
-            EIEIO16BitTimedPayloadPrefixUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_timed_payload_prefix_upper_key_prefix_data_packet
+                  .EIEIO16BitTimedPayloadPrefixUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 16:
-        packet = eieio_16bit_with_payload_data_packet.\
-            EIEIO16BitWithPayloadDataPacket(
-                data=parsed_packet.data)
+        packet = (eieio_16bit_with_payload_data_packet
+                  .EIEIO16BitWithPayloadDataPacket(
+                      data=parsed_packet.data))
     elif packet_type_number == 17:
-        packet = eieio_16bit_with_payload_lower_key_prefix_data_packet.\
-            EIEIO16BitWithPayloadLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_with_payload_lower_key_prefix_data_packet
+                  .EIEIO16BitWithPayloadLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 19:
-        packet = eieio_16bit_with_payload_upper_key_prefix_data_packet.\
-            EIEIO16BitWithPayloadUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_with_payload_upper_key_prefix_data_packet
+                  .EIEIO16BitWithPayloadUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 20:
-        packet = eieio_16bit_with_payload_payload_prefix_data_packet.\
-            EIEIO16BitWithPayloadPayloadPrefixDataPacket(
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_with_payload_payload_prefix_data_packet
+                  .EIEIO16BitWithPayloadPayloadPrefixDataPacket(
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 21:
-        packet = (
-            eieio_16bit_with_payload_payload_prefix_lower_key_prefix_data_packet
-            .EIEIO16BitWithPayloadPayloadPrefixLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data))
+        packet = (eieio_16bit_with_payload_payload_prefix_lower_key_prefix_data_packet
+                  .EIEIO16BitWithPayloadPayloadPrefixLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 23:
-        packet = (
-            eieio_16bit_with_payload_payload_prefix_upper_key_prefix_data_packet
-            .EIEIO16BitWithPayloadPayloadPrefixUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data))
+        packet = (eieio_16bit_with_payload_payload_prefix_upper_key_prefix_data_packet
+                  .EIEIO16BitWithPayloadPayloadPrefixUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 24:
-        packet = eieio_16bit_with_payload_timed_data_packet.\
-            EIEIO16BitWithPayloadTimedDataPacket(
-                data=parsed_packet.data)
+        packet = (eieio_16bit_with_payload_timed_data_packet
+                  .EIEIO16BitWithPayloadTimedDataPacket(
+                      data=parsed_packet.data))
     elif packet_type_number == 25:
-        packet = eieio_16bit_with_payload_timed_lower_key_prefix_data_packet.\
-            EIEIO16BitWithPayloadTimedLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_with_payload_timed_lower_key_prefix_data_packet
+                  .EIEIO16BitWithPayloadTimedLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 27:
-        packet = eieio_16bit_with_payload_timed_upper_key_prefix_data_packet.\
-            EIEIO16BitWithPayloadTimedUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_16bit_with_payload_timed_upper_key_prefix_data_packet
+                  .EIEIO16BitWithPayloadTimedUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 32:
-        packet = eieio_32bit_data_packet.\
-            EIEIO32BitDataPacket(data=parsed_packet.data)
+        packet = (eieio_32bit_data_packet
+                  .EIEIO32BitDataPacket(data=parsed_packet.data))
     elif packet_type_number == 33:
-        packet = eieio_32bit_lower_key_prefix_data_packet.\
-            EIEIO32BitLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_lower_key_prefix_data_packet
+                  .EIEIO32BitLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 35:
-        packet = eieio_32bit_upper_key_prefix_data_packet.\
-            EIEIO32BitUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_upper_key_prefix_data_packet
+                  .EIEIO32BitUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 36:
-        packet = eieio_32bit_payload_prefix_data_packet.\
-            EIEIO32BitPayloadPrefixDataPacket(
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_payload_prefix_data_packet
+                  .EIEIO32BitPayloadPrefixDataPacket(
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 37:
-        packet = eieio_32bit_payload_prefix_lower_key_prefix_data_packet.\
-            EIEIO32BitPayloadPrefixLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_payload_prefix_lower_key_prefix_data_packet
+                  .EIEIO32BitPayloadPrefixLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 39:
-        packet = eieio_32bit_payload_prefix_upper_key_prefix_data_packet.\
-            EIEIO32BitPayloadPrefixUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_payload_prefix_upper_key_prefix_data_packet
+                  .EIEIO32BitPayloadPrefixUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 44:
-        packet = eieio_32bit_timed_payload_prefix_data_packet.\
-            EIEIO32BitTimedPayloadPrefixDataPacket(
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_timed_payload_prefix_data_packet
+                  .EIEIO32BitTimedPayloadPrefixDataPacket(
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 45:
-        packet = eieio_32bit_timed_payload_prefix_lower_key_prefix_data_packet.\
-            EIEIO32BitTimedPayloadPrefixLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_timed_payload_prefix_lower_key_prefix_data_packet
+                  .EIEIO32BitTimedPayloadPrefixLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 47:
-        packet = eieio_32bit_timed_payload_prefix_upper_key_prefix_data_packet.\
-            EIEIO32BitTimedPayloadPrefixUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_timed_payload_prefix_upper_key_prefix_data_packet
+                  .EIEIO32BitTimedPayloadPrefixUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 48:
-        packet = eieio_32bit_with_payload_data_packet.\
-            EIEIO32BitWithPayloadDataPacket(data=parsed_packet.data)
+        packet = (eieio_32bit_with_payload_data_packet
+                  .EIEIO32BitWithPayloadDataPacket(data=parsed_packet.data))
     elif packet_type_number == 49:
-        packet = eieio_32bit_with_payload_lower_key_prefix_data_packet.\
-            EIEIO32BitWithPayloadLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_with_payload_lower_key_prefix_data_packet
+                  .EIEIO32BitWithPayloadLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 51:
-        packet = eieio_32bit_with_payload_upper_key_prefix_data_packet.\
-            EIEIO32BitWithPayloadUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_with_payload_upper_key_prefix_data_packet
+                  .EIEIO32BitWithPayloadUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 52:
-        packet = eieio_32bit_with_payload_payload_prefix_data_packet.\
-            EIEIO32BitWithPayloadPayloadPrefixDataPacket(
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_with_payload_payload_prefix_data_packet
+                  .EIEIO32BitWithPayloadPayloadPrefixDataPacket(
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 53:
-        packet = (
-            eieio_32bit_with_payload_payload_prefix_lower_key_prefix_data_packet
-            .EIEIO32BitWithPayloadPayloadPrefixLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data))
+        packet = (eieio_32bit_with_payload_payload_prefix_lower_key_prefix_data_packet
+                  .EIEIO32BitWithPayloadPayloadPrefixLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 55:
-        packet = (
-            eieio_32bit_with_payload_payload_prefix_upper_key_prefix_data_packet
-            .EIEIO32BitWithPayloadPayloadPrefixUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                parsed_packet.eieio_header.payload_base,
-                data=parsed_packet.data))
+        packet = (eieio_32bit_with_payload_payload_prefix_upper_key_prefix_data_packet
+                  .EIEIO32BitWithPayloadPayloadPrefixUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      parsed_packet.eieio_header.payload_base,
+                      data=parsed_packet.data))
     elif packet_type_number == 56:
-        packet = eieio_32bit_with_payload_timed_data_packet.\
-            EIEIO32BitWithPayloadTimedDataPacket(
-                data=parsed_packet.data)
+        packet = (eieio_32bit_with_payload_timed_data_packet
+                  .EIEIO32BitWithPayloadTimedDataPacket(
+                      data=parsed_packet.data))
     elif packet_type_number == 57:
-        packet = eieio_32bit_with_payload_timed_lower_key_prefix_data_packet.\
-            EIEIO32BitWithPayloadTimedLowerKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_with_payload_timed_lower_key_prefix_data_packet
+                  .EIEIO32BitWithPayloadTimedLowerKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     elif packet_type_number == 59:
-        packet = eieio_32bit_with_payload_timed_upper_key_prefix_data_packet.\
-            EIEIO32BitWithPayloadTimedUpperKeyPrefixDataPacket(
-                parsed_packet.eieio_header.prefix_param,
-                data=parsed_packet.data)
+        packet = (eieio_32bit_with_payload_timed_upper_key_prefix_data_packet
+                  .EIEIO32BitWithPayloadTimedUpperKeyPrefixDataPacket(
+                      parsed_packet.eieio_header.prefix_param,
+                      data=parsed_packet.data))
     else:
         if (parsed_packet.eieio_header.type_param ==
                 EIEIOTypeParam.KEY_16_BIT or

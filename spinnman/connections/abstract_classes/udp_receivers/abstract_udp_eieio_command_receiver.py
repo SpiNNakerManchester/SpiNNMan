@@ -10,7 +10,8 @@ from spinnman.data.little_endian_byte_array_byte_reader import \
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.connections.abstract_classes.abstract_connection import \
     AbstractConnection
-from spinnman.messages.eieio.abstract_eieio_packets.create_eieio_packets import create_command_from_reader
+from spinnman.messages.eieio.abstract_eieio_packets.create_eieio_packets \
+    import create_command_from_reader
 
 
 @add_metaclass(ABCMeta)
@@ -60,10 +61,3 @@ class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
         eieio_packet = create_command_from_reader(reader)
 
         return eieio_packet
-
-        # eieio_header = EIEIOCommandHeader.create_header_from_reader(reader)
-        # data = reader.read_bytes()
-        # if len(data) == 0:
-        #     data = None
-        #
-        # return EIEIOCommandMessage(eieio_header, data)

@@ -1,8 +1,8 @@
-from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_packet import AbstractEIEIOPacket
+from spinnman.exceptions import SpinnmanInvalidPacketException
+from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_packet \
+    import AbstractEIEIOPacket
 from spinnman.messages.eieio.command_objects.eieio_command_packet \
     import EIEIOCommandPacket
-from spynnaker.pyNN import exceptions
-
 from spinnman import constants as spinnman_constants
 
 
@@ -10,8 +10,9 @@ class HostSendSequencedData(EIEIOCommandPacket):
 
     def __init__(self, eieio_data_packet, region_id, sequence_no):
         if not isinstance(eieio_data_packet, (bytearray, AbstractEIEIOPacket)):
-            raise exceptions.InvalidParameterType(
-                "Parameter eieio_data_packet is of an unknown type")
+            raise SpinnmanInvalidPacketException(
+                "eieio_data_packet", eieio_data_packet,
+                "Must be a byte array or an AbstraceEIEIOPacket")
         if isinstance(eieio_data_packet, AbstractEIEIOPacket):
             eieio_data_packet = \
                 eieio_data_packet.get_eieio_message_as_byte_array()
@@ -22,7 +23,8 @@ class HostSendSequencedData(EIEIOCommandPacket):
         self._data.append(sequence_no)
         self._data.extend(eieio_data_packet)
         EIEIOCommandPacket.__init__(
-            self, spinnman_constants.EIEIO_COMMAND_IDS.HOST_SEND_SEQUENCED_DATA.value,
+            self, (spinnman_constants.EIEIO_COMMAND_IDS
+                   .HOST_SEND_SEQUENCED_DATA.value),
             self._data)
 
     @property

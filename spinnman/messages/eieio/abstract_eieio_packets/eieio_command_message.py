@@ -14,7 +14,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
     def __init__(self, eieio_command_header, data=None):
         if data is None:
             data = bytearray()
-        
+
         AbstractEIEIOMessage.__init__(self, data)
         if isinstance(eieio_command_header, EIEIOCommandHeader):
             self._eieio_command_header = eieio_command_header
@@ -23,6 +23,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
                 "eieio_command_header", "invalid",
                 "the header is not a eieio command header, therefore error has"
                 "been raised")
+
     @property
     def eieio_command_header(self):
         return self._eieio_command_header

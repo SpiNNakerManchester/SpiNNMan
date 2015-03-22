@@ -3,6 +3,7 @@ from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
 
+
 @add_metaclass(ABCMeta)
 class AbstractEIEIOMessage(object):
 

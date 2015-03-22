@@ -18,8 +18,8 @@ class SpinnmanInvalidPacketException(SpinnmanException):
         :type problem: str
         """
         super(SpinnmanInvalidPacketException, self).__init__(
-                "Invalid packet of type {} received: {}".format(
-                        packet_type, problem))
+            "Invalid packet of type {} received: {}".format(
+                packet_type, problem))
         self._packet_type = packet_type
         self._problem = problem
 
@@ -51,8 +51,8 @@ class SpinnmanInvalidParameterException(SpinnmanException):
         :type problem: str
         """
         super(SpinnmanInvalidParameterException, self).__init__(
-                "Setting parameter {} to value {} is invalid: {}".format(
-                        parameter, value, problem))
+            "Setting parameter {} to value {} is invalid: {}".format(
+                parameter, value, problem))
         self._parameter = parameter
         self._value = value
         self._problem = problem
@@ -86,7 +86,7 @@ class SpinnmanIOException(SpinnmanException):
         :type problem: str
         """
         super(SpinnmanIOException, self).__init__("IO Error: {}".format(
-                problem))
+            problem))
         self._problem = problem
 
     @property
@@ -109,8 +109,8 @@ class SpinnmanTimeoutException(SpinnmanException):
         :type timeout: int
         """
         super(SpinnmanTimeoutException, self).__init__(
-                "Operation {} timed out after {} seconds".format(
-                        operation, timeout))
+            "Operation {} timed out after {} seconds".format(
+                operation, timeout))
 
         self._operation = operation
         self._timeout = timeout
@@ -143,8 +143,8 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         :type response: str
         """
         super(SpinnmanUnexpectedResponseCodeException, self).__init__(
-                "Unexpected response {} while performing operation {} using"
-                " command {}".format(response, operation, command))
+            "Unexpected response {} while performing operation {} using"
+            " command {}".format(response, operation, command))
         self._operation = operation
         self._command = command
         self._response = response
@@ -178,7 +178,7 @@ class SpinnmanUnsupportedOperationException(SpinnmanException):
         :type operation: str
         """
         super(SpinnmanUnsupportedOperationException, self).__init__(
-                "Operation {} is not supported".format(operation))
+            "Operation {} is not supported".format(operation))
         self._operation = operation
 
     @property

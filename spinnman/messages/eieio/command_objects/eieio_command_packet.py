@@ -1,6 +1,9 @@
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_command_header import EIEIOCommandHeader
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_command_message import EIEIOCommandMessage
-from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_packet import AbstractEIEIOPacket
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_command_header \
+    import EIEIOCommandHeader
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_command_message \
+    import EIEIOCommandMessage
+from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_packet \
+    import AbstractEIEIOPacket
 
 
 class EIEIOCommandPacket(AbstractEIEIOPacket):

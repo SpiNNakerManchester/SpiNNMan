@@ -6,7 +6,8 @@ from spinnman import constants as spinnman_constants
 
 class SpinnakerRequestReadData(EIEIOCommandPacket):
 
-    def __init__(self, x, y, p, region_id, sequence_no, start_address, space_available):
+    def __init__(self, x, y, p, region_id, sequence_no, start_address,
+                 space_available):
         self._x = x
         self._y = y
         self._p = p
@@ -32,8 +33,8 @@ class SpinnakerRequestReadData(EIEIOCommandPacket):
         self._data.append(space_byte3)
         self._data.append(space_byte4)
 
-        cmd = spinnman_constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA.\
-            value
+        cmd = (spinnman_constants.EIEIO_COMMAND_IDS
+               .SPINNAKER_REQUEST_READ_DATA.value)
         EIEIOCommandPacket.__init__(self, cmd, self._data)
 
     @property

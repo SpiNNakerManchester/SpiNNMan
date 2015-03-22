@@ -6,12 +6,14 @@ import math
 from spinnman import exceptions as spinnman_exceptions
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header import EIEIODataHeader
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message import EIEIODataMessage
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header \
+    import EIEIODataHeader
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message \
+    import EIEIODataMessage
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman import constants as spinnman_constants
-from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_packet import \
-    AbstractEIEIOPacket
+from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_packet \
+    import AbstractEIEIOPacket
 
 
 @add_metaclass(ABCMeta)
@@ -22,7 +24,8 @@ class AbstractEIEIODataPacket(AbstractEIEIOPacket):
     """
 
     def __init__(self, type_param, tag_param=0, prefix_param=None,
-                 payload_base=None, prefix_type=None, is_time=False, data=None):
+                 payload_base=None, prefix_type=None, is_time=False,
+                 data=None):
         """
 
         :param type_param: type of packet: 16- or 32-bit events with or
@@ -155,10 +158,10 @@ class AbstractEIEIODataPacket(AbstractEIEIOPacket):
 
         element_count = self._header.count_param
         data_reader = LittleEndianByteArrayByteReader(self._message.data)
-        if (self._header.type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT
-                or self._header.type_param ==
+        if (self._header.type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT or
+                self._header.type_param ==
                 EIEIOTypeParam.KEY_PAYLOAD_32_BIT):
-            for i in xrange(element_count):
+            for _ in xrange(element_count):
                 if self._key_size == 2:
                     key = data_reader.read_short()
                     payload = data_reader.read_short()
@@ -172,7 +175,7 @@ class AbstractEIEIODataPacket(AbstractEIEIOPacket):
                 yield key, payload
 
         else:
-            for i in xrange(element_count):
+            for _ in xrange(element_count):
                 if self._key_size == 2:
                     key = data_reader.read_short()
                 else:
@@ -345,7 +348,7 @@ class AbstractEIEIODataPacket(AbstractEIEIOPacket):
         Returns the configuration be which describes if the key prefix has to \
         be applied to the upper or lower part of the multicast routing key
 
-        :return: determines if the prefix_param value has to be applied on the \
+        :return: determines if the prefix_param value has to be applied on the\
                  upper or lower part of the multicast routing key
         :rtype: spinnman.spinnman.messages.eieio.eieio_prefix_type
         """
@@ -477,4 +480,3 @@ class AbstractEIEIODataPacket(AbstractEIEIOPacket):
             return self.prefix_param
         else:
             return None
-

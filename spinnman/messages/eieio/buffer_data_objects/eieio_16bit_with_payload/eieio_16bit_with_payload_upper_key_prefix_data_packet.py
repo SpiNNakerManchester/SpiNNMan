@@ -1,9 +1,11 @@
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman.messages.eieio.eieio_prefix_type import EIEIOPrefixType
-from spinnman.messages.eieio.buffer_data_objects.eieio_with_payload_data_packet import EIEIOWithPayloadDataPacket
+from spinnman.messages.eieio.buffer_data_objects\
+    .eieio_with_payload_data_packet import EIEIOWithPayloadDataPacket
 
 
-class EIEIO16BitWithPayloadUpperKeyPrefixDataPacket(EIEIOWithPayloadDataPacket):
+class EIEIO16BitWithPayloadUpperKeyPrefixDataPacket(
+        EIEIOWithPayloadDataPacket):
 
     def __init__(self, key_prefix, data=None):
         if data is None:

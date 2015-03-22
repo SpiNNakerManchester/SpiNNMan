@@ -1,16 +1,17 @@
-from spinnman.connections.abstract_classes.udp_receivers.abstract_udp_eieio_command_receiver import \
-    AbstractUDPEIEIOCommandReceiver
+from spinnman.connections.abstract_classes.udp_receivers\
+    .abstract_udp_eieio_command_receiver import AbstractUDPEIEIOCommandReceiver
 from spinnman.connections.abstract_classes.udp_receivers.\
     abstract_udp_eieio_data_receiver import AbstractUDPEIEIODataReceiver
-from spinnman.connections.abstract_classes.udp_senders.abstract_udp_eieio_command_sender import \
-    AbstractUDPEIEIOCommandSender
+from spinnman.connections.abstract_classes.udp_senders\
+    .abstract_udp_eieio_command_sender import AbstractUDPEIEIOCommandSender
 from spinnman.connections.abstract_classes.udp_senders.\
     abstract_udp_eieio_sender import AbstractUDPEIEIOSender
 from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
 from spinnman import constants
 from spinnman.exceptions import SpinnmanIOException
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message import EIEIODataMessage
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message \
+    import EIEIODataMessage
 
 
 class ReverseIPTagConnection(
@@ -64,7 +65,8 @@ class ReverseIPTagConnection(
         return constants.CONNECTION_TYPE.REVERSE_IPTAG
 
     def supports_sends_message(self, message):
-        if isinstance(message, bytearray) or isinstance(message, EIEIODataMessage):
+        if isinstance(message, bytearray) or isinstance(message,
+                                                        EIEIODataMessage):
             return True
         else:
             return False

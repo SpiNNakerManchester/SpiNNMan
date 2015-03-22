@@ -1,7 +1,9 @@
 from abc import abstractmethod
 
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
-from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_data_packet import AbstractEIEIODataPacket
+from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_data_packet\
+    import AbstractEIEIODataPacket
+from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class EIEIOWithoutPayloadDataPacket(AbstractEIEIODataPacket):
@@ -13,12 +15,15 @@ class EIEIOWithoutPayloadDataPacket(AbstractEIEIODataPacket):
 
         if (type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT or
                 type_param == EIEIOTypeParam.KEY_PAYLOAD_32_BIT):
-            raise  # wrong type of packet
+            raise SpinnmanInvalidParameterException(
+                "type_param", type_param,
+                "This packet type has no payload, so the type parameter should"
+                " be one that doesn't include a payload")
 
         AbstractEIEIODataPacket.__init__(
             self, type_param, prefix_param=prefix_param,
-            payload_base=payload_base, prefix_type=prefix_type, is_time=is_time,
-            data=data)
+            payload_base=payload_base, prefix_type=prefix_type,
+            is_time=is_time, data=data)
 
     def insert_key(self, key):
         if self.get_available_count() > 0:  # there is space available
@@ -33,10 +38,14 @@ class EIEIOWithoutPayloadDataPacket(AbstractEIEIODataPacket):
                        payload_base=None, prefix_type=None, is_time=False):
         if (type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT or
                 type_param == EIEIOTypeParam.KEY_PAYLOAD_32_BIT):
-            raise  # wrong type of packet
+            raise SpinnmanInvalidParameterException(
+                "type_param", type_param,
+                "This packet type has no payload, so the type parameter should"
+                " be one that doesn't include a payload")
         return AbstractEIEIODataPacket.get_min_length(
             type_param, tag_param=tag_param, prefix_param=prefix_param,
-            payload_base=payload_base, prefix_type=prefix_type, is_time=is_time)
+            payload_base=payload_base, prefix_type=prefix_type,
+            is_time=is_time)
 
     @staticmethod
     @abstractmethod

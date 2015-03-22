@@ -18,7 +18,8 @@ class EIEIODataHeader(object):
         :param is_time: is the time param set
         :type prefix_param: int or None
         :type payload_base: int or None
-        :type type_param: spinnman.spinnman.messages.eieio.eieio_type_param.EIEIOTypeParam
+        :type type_param:\
+                      :py:class:`spinnman.spinnman.messages.eieio.eieio_type_param.EIEIOTypeParam`
         :type tag_param: int
         :type prefix_type: spinnman.spinnman.messages.eieio.eieio_prefix_type
         :type is_time: bool
@@ -73,8 +74,9 @@ class EIEIODataHeader(object):
         self._count_param = 0
 
     def write_eieio_header(self, byte_writer):
-        #writes in little endian form
-        #count param
+
+        # writes in little endian form
+        # count param
         byte_writer.write_byte(self._count_param)
 
         data = 0
@@ -82,22 +84,22 @@ class EIEIODataHeader(object):
         if self._prefix_param is not None:
             data |= 1 << 7  # the flag for prefix
 
-        #the flag for packet format
+        # the flag for packet format
         if self._prefix_type is not None:
             data |= self._prefix_type.value << 6
 
-        #payload param
+        # payload param
         if self._payload_base is not None:
             data |= 1 << 5  # the flag for payload prefix
 
-        #time param
+        # time param
         if self._is_time:
             data |= 1 << 4  # the flag for time
 
-        #type param
+        # type param
         data |= self._type_param.value << 2
 
-        #tag param
+        # tag param
         data |= self._tag_param
         byte_writer.write_byte(data)
         if self._prefix_param is not None:
@@ -106,13 +108,13 @@ class EIEIODataHeader(object):
             byte_writer.write_bytes(y)
 
         if self._payload_base is not None:
-            if (self._type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT
-                    or self._type_param == EIEIOTypeParam.KEY_16_BIT):
+            if (self._type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT or
+                    self._type_param == EIEIOTypeParam.KEY_16_BIT):
                 x = struct.pack("<H", self._payload_base)
                 y = bytearray(x)
                 byte_writer.write_bytes(y)
-            elif (self._type_param == EIEIOTypeParam.KEY_PAYLOAD_32_BIT
-                    or self._type_param == EIEIOTypeParam.KEY_32_BIT):
+            elif (self._type_param == EIEIOTypeParam.KEY_PAYLOAD_32_BIT or
+                    self._type_param == EIEIOTypeParam.KEY_32_BIT):
                 x = struct.pack("<I", self._payload_base)
                 y = bytearray(x)
                 byte_writer.write_bytes(y)
@@ -183,7 +185,8 @@ class EIEIODataHeader(object):
 
         header = EIEIODataHeader(
             type_param=message_type, tag_param=tag,
-            prefix_param=prefix, payload_base=d, prefix_type=f, is_time=bool(t))
+            prefix_param=prefix, payload_base=d, prefix_type=f,
+            is_time=bool(t))
 
         header.set_count_param(count)
 

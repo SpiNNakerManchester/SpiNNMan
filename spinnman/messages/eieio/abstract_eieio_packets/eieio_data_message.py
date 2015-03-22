@@ -3,8 +3,10 @@ import binascii
 
 from spinnman.data.little_endian_byte_array_byte_writer import \
     LittleEndianByteArrayByteWriter
-from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_message import AbstractEIEIOMessage
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header import EIEIODataHeader
+from spinnman.messages.eieio.abstract_eieio_packets.abstract_eieio_message \
+    import AbstractEIEIOMessage
+from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_header \
+    import EIEIODataHeader
 from spinnman.messages.eieio.eieio_type_param import EIEIOTypeParam
 from spinnman import exceptions
 
@@ -26,7 +28,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     @property
     def eieio_header(self):
         return self._eieio_header
-    
+
     def is_EIEIO_message(self):
         return True
 
@@ -39,8 +41,10 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             raise exceptions.SpinnmanInvalidParameterException(
                 "The key to be added cannot be None. Please correct the key "
                 "and try again", "", "")
-        if (self._eieio_header.type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT or
-                self._eieio_header.type_param == EIEIOTypeParam.KEY_PAYLOAD_32_BIT):
+        if (self._eieio_header.type_param ==
+                EIEIOTypeParam.KEY_PAYLOAD_16_BIT or
+                self._eieio_header.type_param ==
+                EIEIOTypeParam.KEY_PAYLOAD_32_BIT):
             if payload is None:
                 raise exceptions.SpinnmanInvalidParameterException(
                     "The payload to be added cannot be None. Please correct "
@@ -59,8 +63,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         self._eieio_header.increment_count_param()
 
     def _write_key(self, key):
-        if (self._eieio_header.type_param == EIEIOTypeParam.KEY_16_BIT
-                or self._eieio_header.type_param == EIEIOTypeParam.KEY_PAYLOAD_16_BIT):
+        if (self._eieio_header.type_param == EIEIOTypeParam.KEY_16_BIT or
+                self._eieio_header.type_param ==
+                EIEIOTypeParam.KEY_PAYLOAD_16_BIT):
             self._data += bytearray(struct.pack("<H", key))
         else:
             self._data += bytearray(struct.pack("<I", key))
@@ -95,17 +100,18 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         messages = list()
         while not buffer_data.is_at_end():
-            eieio_header = EIEIODataHeader.create_header_from_reader(buffer_data)
+            eieio_header = EIEIODataHeader.create_header_from_reader(
+                buffer_data)
             message = EIEIODataMessage.create_eieio_message_from(eieio_header,
-                                                             buffer_data)
+                                                                 buffer_data)
             messages.append(message)
         return messages
 
     @staticmethod
     def create_eieio_message_from(eieio_header, buffer_data):
         """this method takes a collection of buffers in the form of a single
-        byte array, a fully formed eieio header and a position in the byte array
-         and interprets them as a fully formed eieio message
+        byte array, a fully formed eieio header and a position in the byte
+        array and interprets them as a fully formed eieio message
 
         :param buffer_data: the byte array data
         :type buffer_data: LittleEndianByteArrayByteReader
