@@ -9,7 +9,7 @@ from spinnman.connections.abstract_classes.abstract_eieio_receiver import \
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
-from spinnman.messages.eieio.abstract_eieio_packets.create_eieio_packets \
+from spinnman.messages.eieio.abstract_messages.create_eieio_packets \
     import create_data_from_reader
 
 

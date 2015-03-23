@@ -15,7 +15,7 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_command_message \
+from spinnman.messages.eieio.command_messages.eieio_command_message \
     import EIEIOCommandMessage
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest

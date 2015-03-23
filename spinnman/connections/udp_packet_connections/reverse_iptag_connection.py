@@ -10,7 +10,7 @@ from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
 from spinnman import constants
 from spinnman.exceptions import SpinnmanIOException
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_data_message \
+from spinnman.messages.eieio.data_messages.eieio_data_message \
     import EIEIODataMessage
 
 

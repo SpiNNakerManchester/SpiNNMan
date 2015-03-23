@@ -9,7 +9,7 @@ from spinnman.connections.abstract_classes.abstract_udp_connection\
 from spinnman.connections.listeners.port_listener import PortListener
 from spinnman.connections.listeners.queuers.eieio_command_port_queuer import \
     EIEIOCommandPortQueuer
-from spinnman.messages.eieio.abstract_eieio_packets.eieio_command_message \
+from spinnman.messages.eieio.command_messages.eieio_command_message \
     import EIEIOCommandMessage
 from spinnman import constants as spinnman_constants
 
