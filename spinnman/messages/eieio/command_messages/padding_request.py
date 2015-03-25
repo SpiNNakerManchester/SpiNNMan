@@ -19,7 +19,7 @@ class PaddingRequest(EIEIOCommandMessage):
 
     @staticmethod
     def get_min_packet_length():
-        return 3
+        return 2
 
     @staticmethod
     def read_eieio_command_message(command_header, byte_reader):
