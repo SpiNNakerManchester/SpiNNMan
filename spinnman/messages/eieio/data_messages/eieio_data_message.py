@@ -188,6 +188,15 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         return self._eieio_header.count
 
+    @property
+    def size(self):
+        """ The size of the packet with the current contents
+        """
+        return (self._eieio_header.size +
+                ((self._eieio_header.eieio_type.key_bytes +
+                 self._eieio_header.eieio_type.payload_bytes) *
+                 self._eieio_header.count))
+
     def add_element(self, element):
         """ Add an element to the message.  The correct type of element must\
             be added, depending on the header values
