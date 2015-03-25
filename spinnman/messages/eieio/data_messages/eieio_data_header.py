@@ -69,6 +69,12 @@ class EIEIODataHeader(object):
     def count(self, count):
         self._count = count
 
+    @property
+    def size(self):
+        return EIEIODataHeader.get_header_size(
+            self._eieio_type, self._prefix is not None,
+            self._payload_base is not None)
+
     @staticmethod
     def get_header_size(eieio_type, is_prefix=False, is_payload_base=False):
         """ Get the size of a header with the given parameters
