@@ -94,7 +94,7 @@ class EIEIODataHeader(object):
         if is_prefix:
             size += 2
         if is_payload_base:
-            size += eieio_type.payload_bytes
+            size += eieio_type.key_bytes
         return size
 
     def increment_count(self):
@@ -147,11 +147,11 @@ class EIEIODataHeader(object):
 
         # If there is a payload base, write the payload base
         if self._payload_base is not None:
-            if (self._type_param == EIEIOType.KEY_PAYLOAD_16_BIT or
-                    self._type_param == EIEIOType.KEY_16_BIT):
+            if (self._eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT or
+                    self._eieio_type == EIEIOType.KEY_16_BIT):
                 byte_writer.write_short(self._payload_base)
-            elif (self._type_param == EIEIOType.KEY_PAYLOAD_32_BIT or
-                    self._type_param == EIEIOType.KEY_32_BIT):
+            elif (self._eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT or
+                    self._eieio_type == EIEIOType.KEY_32_BIT):
                 byte_writer.write_int(self._payload_base)
 
     @staticmethod
@@ -208,9 +208,9 @@ class EIEIODataHeader(object):
                 payload_prefix = byte_reader.read_int()
 
         header = EIEIODataHeader(
-            type=eieio_type, tag=tag, prefix=prefix, prefix_type=prefix_type,
-            payload_base=payload_prefix, is_time=bool(payload_is_timestamp),
-            count=count)
+            eieio_type=eieio_type, tag=tag, prefix=prefix,
+            prefix_type=prefix_type, payload_base=payload_prefix,
+            is_time=bool(payload_is_timestamp), count=count)
 
         return header
 

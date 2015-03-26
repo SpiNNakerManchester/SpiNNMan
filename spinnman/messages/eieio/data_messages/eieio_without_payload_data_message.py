@@ -28,5 +28,7 @@ class EIEIOWithoutPayloadDataMessage(EIEIODataMessage):
         """
         if key > self._eieio_header.eieio_type.max_value:
             raise SpinnmanInvalidParameterException(
-                "key", key, "The value is too big")
+                "key", key,
+                "Larger than the maximum allowed of {}".format(
+                    self._eieio_header.eieio_type.max_value))
         EIEIODataMessage.add_element(self, EIEIOKeyDataElement(key))

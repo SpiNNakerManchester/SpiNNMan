@@ -19,35 +19,38 @@ from spinnman.messages.eieio.command_messages.eieio_command_header\
 from spinnman import constants
 from spinnman.messages.eieio.command_messages.eieio_command_message\
     import EIEIOCommandMessage
+from spinnman.messages.eieio.command_messages.database_confirmation\
+    import DatabaseConfirmation
 
 
 def read_eieio_command_message(byte_reader):
     command_header = EIEIOCommandHeader.read_eieio_header(byte_reader)
     command_number = command_header.command
 
-    # Fill in buffer area with padding
     if (command_number ==
-            constants.EIEIO_COMMAND_IDS.EVENT_PADDING.value):
-        return PaddingRequest.read_eieio_command_message(
+            constants.EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value):
+        return DatabaseConfirmation.read_eieio_command_message(
             command_header, byte_reader)
+
+    # Fill in buffer area with padding
+    elif (command_number ==
+            constants.EIEIO_COMMAND_IDS.EVENT_PADDING.value):
+        return PaddingRequest()
 
     # End of all buffers, stop execution
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.EVENT_STOP.value):
-        return EventStopRequest.read_eieio_command_message(
-            command_header, byte_reader)
+        return EventStopRequest()
 
     # Stop complaining that there is sdram free space for buffers
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.STOP_SENDING_REQUESTS.value):
-        return StopRequests.read_eieio_command_message(
-            command_header, byte_reader)
+        return StopRequests()
 
     # Start complaining that there is sdram free space for buffers
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.START_SENDING_REQUESTS.value):
-        return StartRequests.read_eieio_command_message(
-            command_header, byte_reader)
+        return StartRequests()
 
     # Spinnaker requesting new buffers for spike source population
     elif (command_number ==

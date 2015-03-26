@@ -1,5 +1,7 @@
 from spinnman.messages.eieio.command_messages.eieio_command_message\
     import EIEIOCommandMessage
+from spinnman.messages.eieio.command_messages.eieio_command_header\
+    import EIEIOCommandHeader
 from spinnman import constants
 
 
@@ -7,7 +9,8 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
 
     def __init__(self, x, y, p, region_id, sequence_no, space_available):
         EIEIOCommandMessage.__init__(
-            self, constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS.value)
+            self, EIEIOCommandHeader(
+                constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS.value))
         self._x = x
         self._y = y
         self._p = p
@@ -44,7 +47,7 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         return 12
 
     @staticmethod
-    def read_eieio_message_message(command_header, byte_reader):
+    def read_eieio_command_message(command_header, byte_reader):
         x = byte_reader.read_byte()
         y = byte_reader.read_byte()
         processor = byte_reader.read_byte()

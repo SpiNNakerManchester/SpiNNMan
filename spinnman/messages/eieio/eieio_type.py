@@ -44,4 +44,4 @@ class EIEIOType(Enum):
 
         :rtype: int
         """
-        return (1 << self._key_bytes) - 1
+        return (1 << (self._key_bytes * 8)) - 1
