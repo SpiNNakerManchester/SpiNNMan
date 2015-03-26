@@ -12,7 +12,7 @@ class EIEIO16BitWithPayloadTimedLowerKeyPrefixDataMessage(
 
         EIEIOWithPayloadDataMessage.__init__(
             self, EIEIOType.KEY_PAYLOAD_16_BIT, prefix=key_prefix,
-            is_time=True, data_reader)
+            is_time=True, data_reader=data_reader)
 
     @staticmethod
     def get_min_packet_length():

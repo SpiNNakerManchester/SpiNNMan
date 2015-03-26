@@ -17,13 +17,3 @@ class AbstractEIEIOMessage(object):
         :type byte_writer:\
                     :py:class:`spinnman.data.abstract_byte_writer.AbstractByteWriter`
         """
-
-    @staticmethod
-    @abstractmethod
-    def read_eieio_message(byte_reader):
-        """ Read a message from a byte reader
-
-        :param byte_reader: The reader to read from
-        :type byte_reader:\
-                    :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`
-        """

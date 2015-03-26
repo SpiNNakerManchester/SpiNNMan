@@ -2,9 +2,8 @@ from spinnman.messages.eieio.command_messages.eieio_command_message\
     import EIEIOCommandMessage
 from spinnman.messages.eieio.command_messages.eieio_command_header\
     import EIEIOCommandHeader
-from spinnman.messages.eieio.data_messages.eieio_data_message\
-    import EIEIODataMessage
 from spinnman import constants
+from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
 
 
 class HostSendSequencedData(EIEIOCommandMessage):
@@ -37,7 +36,7 @@ class HostSendSequencedData(EIEIOCommandMessage):
     def read_eieio_command_message(command_header, byte_reader):
         region_id = byte_reader.read_byte()
         sequence_no = byte_reader.read_byte()
-        eieio_data_message = EIEIODataMessage.read_eieio_message(byte_reader)
+        eieio_data_message = read_eieio_data_message(byte_reader)
         return HostSendSequencedData(region_id, sequence_no,
                                      eieio_data_message)
 
