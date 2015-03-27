@@ -2413,12 +2413,17 @@ class Transceiver(object):
                     connection not in self.connections_to_not_shut_down):
                 connection.close()
 
+        for connection in self._receiving_connections.itervalues():
+            if (close_original_connections or
+                    connection not in self.connections_to_not_shut_down):
+                connection.close()
+
         self._scp_message_thread_pool.close()
         self._other_thread_pool.close()
 
     def register_listener(self, callback, recieve_port_no, hostname,
                           connection_type, traffic_type, sdp_port=None):
-        if recieve_port_no in self._receiving_connections.keys():
+        if recieve_port_no in self._receiving_connections:
             connection = self._receiving_connections[recieve_port_no]
             if connection_type == connection.connection_type():
                 connection.register_callback(callback)
@@ -2431,9 +2436,11 @@ class Transceiver(object):
             if connection_type == constants.CONNECTION_TYPE.SDP_IPTAG:
                 connection = IPTagConnection(hostname, recieve_port_no)
                 connection.register_callback(callback, traffic_type)
+                self._receiving_connections[recieve_port_no] = connection
             elif connection_type == constants.CONNECTION_TYPE.UDP_IPTAG:
                 connection = StrippedIPTagConnection(hostname, recieve_port_no)
                 connection.register_callback(callback, traffic_type)
+                self._receiving_connections[recieve_port_no] = connection
             else:
                 raise SpinnmanInvalidParameterException(
                     "Currently spinnman does not know how to register a "

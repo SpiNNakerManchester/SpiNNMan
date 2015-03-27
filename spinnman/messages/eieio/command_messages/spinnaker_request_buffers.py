@@ -48,8 +48,8 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
 
     @staticmethod
     def read_eieio_command_message(command_header, byte_reader):
-        x = byte_reader.read_byte()
         y = byte_reader.read_byte()
+        x = byte_reader.read_byte()
         processor = byte_reader.read_byte()
         p = (processor >> 3) & 0x1F
         _ = byte_reader.read_byte()
@@ -60,8 +60,8 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
 
     def write_eieio_message(self, writer):
         EIEIOCommandMessage.write_eieio_message(self, writer)
-        writer.write_byte(self._x)
         writer.write_byte(self._y)
+        writer.write_byte(self._x)
         writer.write_byte(self._p << 3)
         writer.write_byte(0)
         writer.write_byte(self._region_id)
