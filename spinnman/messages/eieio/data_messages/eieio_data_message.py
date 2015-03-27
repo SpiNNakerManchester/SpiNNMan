@@ -139,8 +139,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :rtype:\
                     :py:class:`spinnman.messages.eieio.data_messages.abstract_eieio_data_element.AbstractEIEIODataElement`
         """
-        if not self.is_next_element():
+        if not self.is_next_element:
             return None
+        self._elements_read += 1
         key = None
         payload = None
         if self._eieio_header.eieio_type == EIEIOType.KEY_16_BIT:

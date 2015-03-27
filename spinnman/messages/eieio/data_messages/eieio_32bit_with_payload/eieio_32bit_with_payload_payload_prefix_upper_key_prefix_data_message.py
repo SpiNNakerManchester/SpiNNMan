@@ -11,12 +11,12 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 class EIEIO32BitWithPayloadPayloadPrefixUpperKeyPrefixDataMessage(
         EIEIOWithPayloadDataMessage):
 
-    def __init__(self, key_prefix, payload_prefix, data_reader=None):
+    def __init__(self, key_prefix, payload_prefix, count=0, data_reader=None):
         EIEIOWithPayloadDataMessage.__init__(
             self, EIEIODataHeader(EIEIOType.KEY_PAYLOAD_32_BIT,
                                   prefix=key_prefix,
                                   prefix_type=EIEIOPrefix.UPPER_HALF_WORD,
-                                  payload_base=payload_prefix),
+                                  payload_base=payload_prefix, count=count),
             data_reader)
 
     @staticmethod

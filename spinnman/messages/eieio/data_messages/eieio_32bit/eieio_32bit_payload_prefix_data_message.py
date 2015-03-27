@@ -9,10 +9,10 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 
 class EIEIO32BitPayloadPrefixDataMessage(EIEIOWithoutPayloadDataMessage):
 
-    def __init__(self, payload_prefix, data_reader=None):
+    def __init__(self, payload_prefix, count=0, data_reader=None):
         EIEIOWithoutPayloadDataMessage.__init__(
             self, EIEIODataHeader(EIEIOType.KEY_32_BIT,
-                                  payload_base=payload_prefix),
+                                  payload_base=payload_prefix, count=count),
             data_reader)
 
     @staticmethod

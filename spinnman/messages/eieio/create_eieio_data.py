@@ -111,140 +111,148 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 from spinnman.messages.eieio.data_messages.eieio_data_header\
     import EIEIODataHeader
 from spinnman.messages.eieio.eieio_type import EIEIOType
+from spinnman.messages.eieio.data_messages.eieio_without_payload_data_message\
+    import EIEIOWithoutPayloadDataMessage
+from spinnman.messages.eieio.data_messages.eieio_with_payload_data_message\
+    import EIEIOWithPayloadDataMessage
 
 
 def _read_16_bit_message(prefix, payload_base, prefix_type, is_time,
                          byte_reader, eieio_header):
     if payload_base is None:
         if prefix is None:
-            return EIEIO16BitDataMessage(byte_reader)
+            return EIEIO16BitDataMessage(eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO16BitLowerKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO16BitUpperKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
     elif payload_base is not None and not is_time:
         if prefix is None:
             return EIEIO16BitPayloadPrefixDataMessage(
-                payload_base, byte_reader)
+                payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO16BitPayloadPrefixLowerKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO16BitPayloadPrefixUpperKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
     elif payload_base is not None and is_time:
         if prefix is None:
             return EIEIO16BitTimedPayloadPrefixDataMessage(
-                payload_base, byte_reader)
+                payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO16BitTimedPayloadPrefixLowerKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO16BitTimedPayloadPrefixUpperKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
-    return EIEIODataMessage(eieio_header, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
+    return EIEIOWithoutPayloadDataMessage(eieio_header, byte_reader)
 
 
 def _read_16_bit_payload_message(prefix, payload_base, prefix_type,
                                  is_time, byte_reader, eieio_header):
     if payload_base is None and not is_time:
         if prefix is None:
-            return EIEIO16BitWithPayloadDataMessage(byte_reader)
+            return EIEIO16BitWithPayloadDataMessage(
+                eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO16BitWithPayloadLowerKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO16BitWithPayloadUpperKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
     elif payload_base is not None and not is_time:
         if prefix is None:
             return EIEIO16BitWithPayloadPayloadPrefixDataMessage(
-                payload_base, byte_reader)
+                payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO16BitWithPayloadPayloadPrefixLowerKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO16BitWithPayloadPayloadPrefixUpperKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
     elif payload_base is None and is_time:
         if prefix is None:
-            return EIEIO16BitWithPayloadTimedDataMessage(byte_reader)
+            return EIEIO16BitWithPayloadTimedDataMessage(
+                eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO16BitWithPayloadTimedLowerKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO16BitWithPayloadTimedUpperKeyPrefixDataMessage(
-                prefix, byte_reader)
-    return EIEIODataMessage(eieio_header, byte_reader)
+                prefix, eieio_header.count, byte_reader)
+    return EIEIOWithPayloadDataMessage(eieio_header, byte_reader)
 
 
 def _read_32_bit_message(prefix, payload_base, prefix_type, is_time,
                          byte_reader, eieio_header):
     if payload_base is None:
         if prefix is None:
-            return EIEIO32BitDataMessage(byte_reader)
+            return EIEIO32BitDataMessage(eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO32BitLowerKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO32BitUpperKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
     elif payload_base is not None and not is_time:
         if prefix is None:
             return EIEIO32BitPayloadPrefixDataMessage(
-                payload_base, byte_reader)
+                payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO32BitPayloadPrefixLowerKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO32BitPayloadPrefixUpperKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
     elif payload_base is not None and is_time:
         if prefix is None:
             return EIEIO32BitTimedPayloadPrefixDataMessage(
-                payload_base, byte_reader)
+                payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO32BitTimedPayloadPrefixLowerKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO32BitTimedPayloadPrefixUpperKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
-    return EIEIODataMessage(eieio_header, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
+    return EIEIOWithoutPayloadDataMessage(eieio_header, byte_reader)
 
 
 def _read_32_bit_payload_message(prefix, payload_base, prefix_type,
                                  is_time, byte_reader, eieio_header):
     if payload_base is None and not is_time:
         if prefix is None:
-            return EIEIO32BitWithPayloadDataMessage(byte_reader)
+            return EIEIO32BitWithPayloadDataMessage(
+                eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO32BitWithPayloadLowerKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO32BitWithPayloadUpperKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
     elif payload_base is not None and not is_time:
         if prefix is None:
             return EIEIO32BitWithPayloadPayloadPrefixDataMessage(
-                payload_base, byte_reader)
+                payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO32BitWithPayloadPayloadPrefixLowerKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO32BitWithPayloadPayloadPrefixUpperKeyPrefixDataMessage(
-                prefix, payload_base, byte_reader)
+                prefix, payload_base, eieio_header.count, byte_reader)
     elif payload_base is None and is_time:
         if prefix is None:
-            return EIEIO32BitWithPayloadTimedDataMessage(byte_reader)
+            return EIEIO32BitWithPayloadTimedDataMessage(
+                eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.LOWER_HALF_WORD:
             return EIEIO32BitWithPayloadTimedLowerKeyPrefixDataMessage(
-                prefix, byte_reader)
+                prefix, eieio_header.count, byte_reader)
         elif prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
             return EIEIO32BitWithPayloadTimedUpperKeyPrefixDataMessage(
-                prefix, byte_reader)
-    return EIEIODataMessage(eieio_header, byte_reader)
+                prefix, eieio_header.count, byte_reader)
+    return EIEIOWithPayloadDataMessage(eieio_header, byte_reader)
 
 
 def read_eieio_data_message(byte_reader):
