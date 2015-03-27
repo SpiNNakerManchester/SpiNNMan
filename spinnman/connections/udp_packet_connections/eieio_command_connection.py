@@ -48,3 +48,8 @@ class EieioCommandConnection(AbstractUDPConnection,
             self._callback_listener = PortListener(callback,
                                                    eieio_port_queuer)
             self._callback_listener.start()
+
+    def close(self):
+        if self._callback_listener is not None:
+            self._callback_listener.stop()
+        AbstractUDPConnection.close(self)

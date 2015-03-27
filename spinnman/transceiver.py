@@ -2421,8 +2421,19 @@ class Transceiver(object):
         self._scp_message_thread_pool.close()
         self._other_thread_pool.close()
 
-    def register_listener(self, callback, recieve_port_no, hostname,
-                          connection_type, traffic_type, sdp_port=None):
+    def register_listener(self, callback, recieve_port_no,
+                          connection_type, traffic_type, hostname=None):
+        """ Register a callback for a certain type of traffic
+
+        :param callback: Function to be called when a packet is received
+        :type callback: function(packet)
+        :param recieve_port_no: The port number to listen on
+        :type recieve_port_no: int
+        :param connection_type: The type of the connection
+        :param traffic_type: The type of traffic expected on the connection
+        :param hostname: The optional hostname to listen on
+        :type hostname: str
+        """
         if recieve_port_no in self._receiving_connections:
             connection = self._receiving_connections[recieve_port_no]
             if connection_type == connection.connection_type():

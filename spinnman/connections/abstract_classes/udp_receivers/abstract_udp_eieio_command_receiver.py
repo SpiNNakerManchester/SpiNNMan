@@ -51,7 +51,6 @@ class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_sdp_message", timeout)
         except Exception as e:
-            traceback.print_exc()
             raise SpinnmanIOException(str(e))
 
         # Set up for reading
