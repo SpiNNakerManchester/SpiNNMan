@@ -19,6 +19,11 @@ class RunTimeError(Enum):
     EVENT = 12
     SWERR = 13
     IOBUF = 14
+    ENABLE = 15
+    NULL = 16
+    PKT = 17
+    TIMER = 18
+    API = 19
     
     def __new__(cls, value, doc=""):
         obj = object.__new__(cls)
