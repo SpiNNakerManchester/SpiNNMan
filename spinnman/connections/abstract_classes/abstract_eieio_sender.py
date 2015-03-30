@@ -4,6 +4,7 @@ from six import add_metaclass
 from spinnman.connections.abstract_classes.abstract_connection \
     import AbstractConnection
 
+
 @add_metaclass(ABCMeta)
 class AbstractEIEIOSender(AbstractConnection):
     """ A receiver of SCP messages
@@ -18,7 +19,8 @@ class AbstractEIEIOSender(AbstractConnection):
         """ Sends an SDP message down this connection
 
         :param eieio_message: The eieio message to be sent
-        :type eieio_message: spinnman.messages.eieio.eieio_message.EIEIOMessage
+        :type eieio_message: \
+                    :py:class:`spinnman.messages.eieio.eieio_data_message.EIEIODataMessage`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\

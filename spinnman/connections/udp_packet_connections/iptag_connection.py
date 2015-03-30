@@ -1,15 +1,17 @@
-from spinnman.connections.abstract_classes.abstract_callbackable_connection import \
-    AbstractCallbackableConnection
-from spinnman.connections.abstract_classes.abstract_udp_connection import \
-    AbstractUDPConnection
+from spinnman.connections.abstract_classes.abstract_callbackable_connection\
+    import AbstractCallbackableConnection
+from spinnman.connections.abstract_classes.abstract_udp_connection\
+    import AbstractUDPConnection
 from spinnman import constants
 from spinnman.connections.abstract_classes.udp_receivers.\
     abstract_udp_scp_receiver import AbstractUDPSCPReceiver
 from spinnman.connections.abstract_classes.udp_receivers.\
     abstract_udp_sdp_receiver import AbstractUDPSDPReceiver
 from spinnman.connections.listeners.port_listener import PortListener
-from spinnman.connections.listeners.queuers.scp_port_queuer import SCPPortQueuer
-from spinnman.connections.listeners.queuers.sdp_port_queuer import SDPPortQueuer
+from spinnman.connections.listeners.queuers.scp_port_queuer\
+    import SCPPortQueuer
+from spinnman.connections.listeners.queuers.sdp_port_queuer\
+    import SDPPortQueuer
 from spinnman import exceptions
 
 
@@ -87,3 +89,7 @@ class IPTagConnection(AbstractUDPConnection, AbstractUDPSCPReceiver,
                 "callbacks is not the same traffic type you have requested"
                 "therefore this callback cannot be set for this connection")
 
+    def close(self):
+        if self._callback_listener is not None:
+            self._callback_listener.stop()
+        AbstractUDPConnection.close(self)

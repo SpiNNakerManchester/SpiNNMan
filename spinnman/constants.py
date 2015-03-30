@@ -63,7 +63,7 @@ TRAFFIC_TYPE = Enum(
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
     names=[
-        # Database handshake with visualiser
+        # Database handshake with external program
         ("DATABASE_CONFIRMATION", 1),
 
         # Fill in buffer area with padding

@@ -1,19 +1,20 @@
 from spinnman import exceptions
-from spinnman.connections.abstract_classes.abstract_callbackable_connection import \
-    AbstractCallbackableConnection
-from spinnman.connections.abstract_classes.abstract_udp_connection import \
-    AbstractUDPConnection
+from spinnman.connections.abstract_classes.abstract_callbackable_connection\
+    import AbstractCallbackableConnection
+from spinnman.connections.abstract_classes.abstract_udp_connection\
+    import AbstractUDPConnection
 from spinnman import constants
-from spinnman.connections.abstract_classes.udp_receivers.abstract_udp_eieio_command_receiver import \
-    AbstractUDPEIEIOCommandReceiver
+from spinnman.connections.abstract_classes.udp_receivers.\
+    abstract_udp_eieio_command_receiver import AbstractUDPEIEIOCommandReceiver
 from spinnman.connections.abstract_classes.udp_receivers.\
     abstract_udp_eieio_data_receiver import AbstractUDPEIEIODataReceiver
 from spinnman.connections.listeners.port_listener import PortListener
-from spinnman.connections.listeners.queuers.eieio_command_port_queuer import \
-    EIEIOCommandPortQueuer
-from spinnman.connections.listeners.queuers.eieio_data_port_queuer import \
-    EIEIODataPortQueuer
-from spinnman.connections.listeners.queuers.udp_port_queuer import UDPPortQueuer
+from spinnman.connections.listeners.queuers.eieio_command_port_queuer\
+    import EIEIOCommandPortQueuer
+from spinnman.connections.listeners.queuers.eieio_data_port_queuer\
+    import EIEIODataPortQueuer
+from spinnman.connections.listeners.queuers.udp_port_queuer\
+    import UDPPortQueuer
 
 
 class StrippedIPTagConnection(
@@ -94,3 +95,8 @@ class StrippedIPTagConnection(
                 "The traffic type currently supported by this connection for "
                 "callbacks is not the same traffic type you have requested"
                 "therefore this callback cannot be set for this connection")
+
+    def close(self):
+        if self._callback_listener is not None:
+            self._callback_listener.stop()
+        AbstractUDPConnection.close(self)

@@ -6,8 +6,8 @@ from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
 from spinnman import constants
-from spinnman.connections.udp_packet_connections.udp_spinnaker_connection import \
-    UDPSpinnakerConnection
+from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
+    import UDPSpinnakerConnection
 from spinnman.connections.abstract_classes.abstract_udp_connection \
     import AbstractUDPConnection
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
@@ -15,7 +15,8 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
+from spinnman.messages.eieio.command_messages.eieio_command_message \
+    import EIEIOCommandMessage
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
 from spinnman.messages.sdp.sdp_message import SDPMessage
@@ -417,8 +418,8 @@ class Transceiver(object):
                 if connection.supports_sends_message(message):
                     connection_queue = self._connection_queues[connection]
                     connection_queue_size = connection_queue.queue_length
-                    if (best_connection_queue is None
-                        or connection_queue_size <
+                    if (best_connection_queue is None or
+                        connection_queue_size <
                             best_connection_queue_size):
                         best_connection_queue = connection_queue
                         best_connection_queue_size = connection_queue_size
@@ -520,7 +521,7 @@ class Transceiver(object):
         logger.debug("Sending message with {}".format(best_connection_queue))
 
         # Send the message with the best queue
-        if get_callback:
+        if get_callback or not response_required:
             return best_connection_queue.send_message_non_blocking(
                 message, response_required, timeout)
         return best_connection_queue.send_message(
@@ -585,14 +586,14 @@ class Transceiver(object):
         # Create the processor list
         processors = list()
         for virtual_core_id in chip_details.virtual_core_ids:
-            if (self._ignore_cores is not None
-                    and self._ignore_cores.is_core(
+            if (self._ignore_cores is not None and
+                    self._ignore_cores.is_core(
                         chip_details.x, chip_details.y, virtual_core_id)):
                 logger.debug("Ignoring core {} on chip {}, {}".format(
                              chip_details.x, chip_details.y, virtual_core_id))
                 continue
-            if (self._max_core_id is not None
-                    and virtual_core_id > self._max_core_id):
+            if (self._max_core_id is not None and
+                    virtual_core_id > self._max_core_id):
                 logger.debug("Ignoring core {} on chip {}, {} as > {}"
                              .format(chip_details.x, chip_details.y,
                                      virtual_core_id, self._max_core_id))
@@ -607,8 +608,8 @@ class Transceiver(object):
             links=list(), emergency_routing_enabled=False,
             clock_speed=Router.ROUTER_DEFAULT_CLOCK_SPEED,
             n_available_multicast_entries=(
-                Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES
-                - chip_details.first_free_router_entry))
+                Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES -
+                chip_details.first_free_router_entry))
 
         # Create the chip
         chip = Chip(
@@ -654,8 +655,8 @@ class Transceiver(object):
                     logger.debug("Found chip {}, {}"
                                  .format(new_chip_details.x,
                                          new_chip_details.y))
-                    if (self._ignore_chips is not None
-                            and self._ignore_chips.is_chip(
+                    if (self._ignore_chips is not None and
+                            self._ignore_chips.is_chip(
                                 new_chip_details.x, new_chip_details.y)):
                         logger.debug("Ignoring chip {}, {}"
                                      .format(new_chip_details.x,
@@ -916,8 +917,8 @@ class Transceiver(object):
 
         if version_info is None:
             raise SpinnmanIOException("Could not boot the board")
-        if (version_info.name != _SCAMP_NAME
-                or version_info.version_number != _SCAMP_VERSION):
+        if (version_info.name != _SCAMP_NAME or
+                version_info.version_number != _SCAMP_VERSION):
             raise SpinnmanIOException(
                 "The board is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
@@ -978,8 +979,8 @@ class Transceiver(object):
                     raise SpinnmanInvalidParameterException(
                         "p", p, "Not a valid core on chip {}, {}".format(
                             x, y))
-                base_address = (chip_info.cpu_information_base_address
-                                + (constants.CPU_INFO_BYTES * p))
+                base_address = (chip_info.cpu_information_base_address +
+                                (constants.CPU_INFO_BYTES * p))
                 callbacks.append(SCPMessageInterface(
                     self, SCPReadMemoryRequest(
                         x, y, base_address, constants.CPU_INFO_BYTES)))
@@ -1818,8 +1819,8 @@ class Transceiver(object):
         """
         for connection_key in self._sending_connections.keys():
             connection = self._sending_connections[connection_key]
-            if (isinstance(connection, UDPSpinnakerConnection)
-                    and connection.remote_ip_address == board_address):
+            if (isinstance(connection, UDPSpinnakerConnection) and
+                    connection.remote_ip_address == board_address):
                 return connection
         return None
 
@@ -1899,9 +1900,9 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT
-                or reverse_ip_tag.port
-                == constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
+        if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT or
+                reverse_ip_tag.port ==
+                constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
             raise SpinnmanInvalidParameterException(
                 "reverse_ip_tag.port", reverse_ip_tag.port,
                 "The port number for the reverese ip tag conflicts with"
@@ -2147,8 +2148,8 @@ class Transceiver(object):
             key = reader.read_int()
             mask = reader.read_int()
 
-            if route < 0xFF000000 and (app_id is None
-                                       or app_id == route_app_id):
+            if route < 0xFF000000 and (app_id is None or
+                                       app_id == route_app_id):
                 routes.append(MulticastRoutingEntry(key, mask, processor_ids,
                                                     link_ids, False))
 
@@ -2247,10 +2248,10 @@ class Transceiver(object):
                 " the reports from ybug not correct."
                 "This has been executed and is trusted that the end user knows"
                 " what they are doing")
-        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS
-                           + constants.ROUTER_FILTER_CONTROLS_OFFSET
-                           + (position
-                              * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
+        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS +
+                           constants.ROUTER_FILTER_CONTROLS_OFFSET +
+                           (position *
+                            constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
         self.send_scp_message(SCPWriteMemoryWordsRequest(
             x, y, memory_position, [data_to_send]))
 
@@ -2280,10 +2281,10 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS
-                           + constants.ROUTER_FILTER_CONTROLS_OFFSET
-                           + (position
-                              * constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
+        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS +
+                           constants.ROUTER_FILTER_CONTROLS_OFFSET +
+                           (position *
+                            constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
         result = self.send_scp_message(SCPReadMemoryWordsRequest(
             x, y, memory_position, 1))
         return DiagnosticFilter.read_from_int(result.data[0])
@@ -2408,16 +2409,32 @@ class Transceiver(object):
             connection_queue.stop()
 
         for connection in self._sending_connections.itervalues():
-            if (close_original_connections
-                    or connection not in self.connections_to_not_shut_down):
+            if (close_original_connections or
+                    connection not in self.connections_to_not_shut_down):
+                connection.close()
+
+        for connection in self._receiving_connections.itervalues():
+            if (close_original_connections or
+                    connection not in self.connections_to_not_shut_down):
                 connection.close()
 
         self._scp_message_thread_pool.close()
         self._other_thread_pool.close()
 
-    def register_listener(self, callback, recieve_port_no, hostname,
-                          connection_type, traffic_type, sdp_port=None):
-        if recieve_port_no in self._receiving_connections.keys():
+    def register_listener(self, callback, recieve_port_no,
+                          connection_type, traffic_type, hostname=None):
+        """ Register a callback for a certain type of traffic
+
+        :param callback: Function to be called when a packet is received
+        :type callback: function(packet)
+        :param recieve_port_no: The port number to listen on
+        :type recieve_port_no: int
+        :param connection_type: The type of the connection
+        :param traffic_type: The type of traffic expected on the connection
+        :param hostname: The optional hostname to listen on
+        :type hostname: str
+        """
+        if recieve_port_no in self._receiving_connections:
             connection = self._receiving_connections[recieve_port_no]
             if connection_type == connection.connection_type():
                 connection.register_callback(callback)
@@ -2430,9 +2447,11 @@ class Transceiver(object):
             if connection_type == constants.CONNECTION_TYPE.SDP_IPTAG:
                 connection = IPTagConnection(hostname, recieve_port_no)
                 connection.register_callback(callback, traffic_type)
+                self._receiving_connections[recieve_port_no] = connection
             elif connection_type == constants.CONNECTION_TYPE.UDP_IPTAG:
                 connection = StrippedIPTagConnection(hostname, recieve_port_no)
                 connection.register_callback(callback, traffic_type)
+                self._receiving_connections[recieve_port_no] = connection
             else:
                 raise SpinnmanInvalidParameterException(
                     "Currently spinnman does not know how to register a "
