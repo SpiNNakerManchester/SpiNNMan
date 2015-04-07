@@ -20,7 +20,7 @@ class AbstractUDPConnection(object):
                     If not specified defaults to bind to all interfaces,\
                     unless remote_host is specified, in which case binding is\
                     _done to the ip address that will be used to send packets
-        :type local_host: str
+        :type local_host: str or None
         :param local_port: The local port to bind to, between 1025 and 65535.\
                     If not specified, defaults to a random unused local port
         :type local_port: int
@@ -28,7 +28,7 @@ class AbstractUDPConnection(object):
                     to.  If not specified, the socket will be available for\
                     listening only, and will throw and exception if used for\
                     sending
-        :type remote_host: str
+        :type remote_host: str or None
         :param remote_port: The remote port to send packets to.  If\
                     remote_host is None, this is ignored.
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
