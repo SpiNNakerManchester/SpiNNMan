@@ -33,7 +33,7 @@ class GetTagsInterface(object):
         self._connection = connection
         self._exception = None
         self._traceback = None
-        self._tags = None
+        self._iptags = None
         self._condition = Condition()
         self._thread_pool = thread_pool
 
@@ -58,7 +58,7 @@ class GetTagsInterface(object):
                 threads.append(thread)
                 tags[thread] = tag
 
-            tags = list()
+            iptags = list()
             for thread in threads:
                 response = thread.get_response()
                 tag = tags[thread]
@@ -68,18 +68,18 @@ class GetTagsInterface(object):
                         .format(ip_address[0], ip_address[1], ip_address[2],
                                 ip_address[3])
                     if response.is_reverse:
-                        tags.append(ReverseIPTag(
+                        iptags.append(ReverseIPTag(
                             self._connection.remote_ip_address, tag,
                             response.rx_port, response.spin_chip_x,
                             response.spin_chip_y, response.spin_cpu,
                             response.spin_port))
                     else:
-                        tags.append(IPTag(
+                        iptags.append(IPTag(
                             self._connection.remote_ip_address,
                             tag, host, response.port, response.strip_sdp))
 
             self._condition.acquire()
-            self._tags = tags
+            self._iptags = iptags
             self._condition.notify_all()
             self._condition.release()
 
@@ -95,11 +95,11 @@ class GetTagsInterface(object):
             block until the value has been retrieved
         """
         self._condition.acquire()
-        while self._tags is None and self._exception is None:
+        while self._iptags is None and self._exception is None:
             self._condition.wait()
         self._condition.release()
 
         if self._exception is not None:
             raise self._exception, None, self._traceback
 
-        return self._tags
+        return self._iptags
