@@ -437,7 +437,7 @@ class Transceiver(object):
         """ Sends a EIEIO command message using one of the connections.
 
         :param message: The message to send
-        :type message: EIEIOCommandMessage
+        :type message: SDPMessage
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
