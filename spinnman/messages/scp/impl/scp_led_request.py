@@ -32,7 +32,7 @@ class SCPLEDRequest(AbstractSCPRequest):
         """
 
         for led, state in led_states.items():
-            if type(led) is int and 0 < led > 7:
+            if type(led) is int and (led < 0 or led > 7):
                 raise SpinnmanInvalidParameterException(
                     "led_states", str(led),
                     "Keys must be LED indexes between 0 and 7.")

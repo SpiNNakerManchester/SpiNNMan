@@ -76,6 +76,46 @@ class SpinnmanInvalidParameterException(SpinnmanException):
         return self._problem
 
 
+class SpinnmanInvalidParameterTypeException(SpinnmanException):
+    """ An exception that indicates that the type of one of the parameters\
+        passed was invalid
+    """
+
+    def __init__(self, parameter, param_type, problem):
+        """
+        :param parameter: The name of the parameter that is invalid
+        :type parameter: str
+        :param param_type: The type of the parameter that is invalid
+        :type param_type: str
+        :param problem: The problem with the parameter
+        :type problem: str
+        """
+        super(SpinnmanInvalidParameterTypeException, self).__init__(
+            "Parameter {} of type {} is invalid: {}".format(
+                parameter, param_type, problem))
+        self._parameter = parameter
+        self._type = param_type
+        self._problem = problem
+
+    @property
+    def parameter(self):
+        """ The parameter with an invalid value
+        """
+        return self._parameter
+
+    @property
+    def type(self):
+        """ The value that is invalid
+        """
+        return self._type
+
+    @property
+    def problem(self):
+        """ The problem with the parameter value
+        """
+        return self._problem
+
+
 class SpinnmanIOException(SpinnmanException):
     """ An exception that something went wrong with the underlying IO
     """

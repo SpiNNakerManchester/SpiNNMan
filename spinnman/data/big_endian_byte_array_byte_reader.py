@@ -45,8 +45,8 @@ class BigEndianByteArrayByteReader(AbstractByteReader):
         """
         if self._read_pointer + 1 >= len(self._data):
             raise EOFError("Not enough bytes to read a short")
-        value = (self._data[self._read_pointer + 1]
-                 | (self._data[self._read_pointer] << 8))
+        value = (self._data[self._read_pointer + 1] |
+                 (self._data[self._read_pointer] << 8))
         self._read_pointer += 2
         return value
 
@@ -55,10 +55,10 @@ class BigEndianByteArrayByteReader(AbstractByteReader):
         """
         if self._read_pointer + 3 >= len(self._data):
             raise EOFError("Not enough bytes to read an int")
-        value = (self._data[self._read_pointer + 3]
-                 | (self._data[self._read_pointer + 2] << 8)
-                 | (self._data[self._read_pointer + 1] << 16)
-                 | (self._data[self._read_pointer] << 24))
+        value = (self._data[self._read_pointer + 3] |
+                 (self._data[self._read_pointer + 2] << 8) |
+                 (self._data[self._read_pointer + 1] << 16) |
+                 (self._data[self._read_pointer] << 24))
         self._read_pointer += 4
         return value
 
@@ -67,13 +67,18 @@ class BigEndianByteArrayByteReader(AbstractByteReader):
         """
         if self._read_pointer + 7 >= len(self._data):
             raise EOFError("Not enough bytes to read a long")
-        value = (self._data[self._read_pointer + 7]
-                 | (self._data[self._read_pointer + 6] << 8)
-                 | (self._data[self._read_pointer + 5] << 16)
-                 | (self._data[self._read_pointer + 4] << 24)
-                 | (self._data[self._read_pointer + 3] << 32)
-                 | (self._data[self._read_pointer + 2] << 40)
-                 | (self._data[self._read_pointer + 1] << 48)
-                 | (self._data[self._read_pointer] << 56))
+        value = (self._data[self._read_pointer + 7] |
+                 (self._data[self._read_pointer + 6] << 8) |
+                 (self._data[self._read_pointer + 5] << 16) |
+                 (self._data[self._read_pointer + 4] << 24) |
+                 (self._data[self._read_pointer + 3] << 32) |
+                 (self._data[self._read_pointer + 2] << 40) |
+                 (self._data[self._read_pointer + 1] << 48) |
+                 (self._data[self._read_pointer] << 56))
         self._read_pointer += 8
         return value
+
+    def is_at_end(self):
+        if self._read_pointer == len(self._data):
+            return True
+        return False

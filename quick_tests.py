@@ -19,17 +19,14 @@ from spinnman.model.diagnostic_filter_destination \
     import DiagnosticFilterDestination
 from spinnman.model.diagnostic_filter_packet_type \
     import DiagnosticFilterPacketType
+from spinnman.board_test_configuration import BoardTestConfiguration
+
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 
-machine = "spinn-10.cs.man.ac.uk"
-version = 2
 
-# machine = "spinn-1.cs.man.ac.uk"
-# version = 5
-
-# machine = "192.168.240.253"
-# version = 3
+board_config = BoardTestConfiguration()
+board_config.set_up_remote_board()
 
 n_cores = 20
 core_subsets = CoreSubsets(core_subsets=[CoreSubset(0, 0, range(1, 11)),
@@ -113,13 +110,20 @@ def print_filter(d_filter):
     print_enums("Packet Types:", d_filter.packet_types)
 
 transceiver = create_transceiver_from_hostname(
-    machine, False, ignore_cores=down_cores, ignore_chips=down_chips)
+    board_config.remotehost, ignore_cores=down_cores, ignore_chips=down_chips)
+
 
 try:
     print "Version Information"
     print "==================="
-    version_info = transceiver.ensure_board_is_ready(version)
+    version_info = transceiver.ensure_board_is_ready(board_config.board_version)
     print version_info
+    print ""
+
+    print "Discovering other connections to the machine"
+    print "==================="
+    connections = transceiver.discover_scamp_connections()
+    print connections
     print ""
 
     print "Machine Details"

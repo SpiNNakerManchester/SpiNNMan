@@ -5,7 +5,10 @@ from spinnman.connections.abstract_classes.abstract_eieio_sender import \
     AbstractEIEIOSender
 from spinnman.data.little_endian_byte_array_byte_writer import \
     LittleEndianByteArrayByteWriter
-from spinnman.exceptions import SpinnmanIOException
+from spinnman.exceptions import \
+    SpinnmanIOException, SpinnmanInvalidParameterTypeException
+from spinnman.messages.eieio.abstract_messages.abstract_eieio_message import \
+    AbstractEIEIOMessage
 
 
 @add_metaclass(ABCMeta)
@@ -22,27 +25,32 @@ class AbstractUDPEIEIOSender(AbstractEIEIOSender):
 
         :param eieio_message: The eieio message to be sent
         :type eieio_message:\
-                    :py:class:`spinnman.messages.eieio.eieio_data_message.EIEIODataMessage`
+                    :py:class:`spinnman.messages.eieio.abstract_messages.abstract_eieio_message.AbstractEIEIOMessage`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     sending the message
+        :raise spinnman.exceptions.SpinnmanInvalidParameterTypeException: If\
+               the message passed to be sent does not inherit from
+               :py:class:`spinnman.messages.eieio.abstract_messages.abstract_eieio_message.AbstractEIEIOMessage`
         """
         if not self._can_send:
             raise SpinnmanIOException("Not connected to a remote host")
 
-        # Create a writer for the message
-        data_length = 0
-        if eieio_message.data is not None:
-            data_length = len(eieio_message.data)
+        # check that the packet to send is of a class inheriting from
+        # AbstractEIEIOMessage, and therefore has the ability to write
+        # the message using the write_eieio_message function
+        if not isinstance(eieio_message, AbstractEIEIOMessage):
+            raise SpinnmanInvalidParameterTypeException(
+                "eieio_message", eieio_message.__class__,
+                "The message to be sent needs to be inheriting "
+                "from AbstractEIEIOMessage")
+
+        # create the byte writer
         writer = LittleEndianByteArrayByteWriter()
 
-        # Write the header
-        eieio_message.eieio_header.write_eieio_header(writer)
-
-        # Write any data
-        if data_length != 0:
-            writer.write_bytes(eieio_message.data)
+        # write the packet in the byte writer
+        eieio_message.write_eieio_message(writer)
 
         # Send the packet
         try:

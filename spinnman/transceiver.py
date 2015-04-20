@@ -107,8 +107,7 @@ _SCAMP_VERSION = 1.33
 
 
 def create_transceiver_from_hostname(
-        hostname, discover=True, ignore_chips=None, ignore_cores=None,
-        max_core_id=None):
+        hostname, ignore_chips=None, ignore_cores=None, max_core_id=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -118,9 +117,6 @@ def create_transceiver_from_hostname(
 
     :param hostname: The hostname or IP address of the board
     :type hostname: str
-    :param discover: True if further connections should be discovered, False\
-                otherwise
-    :type discover: bool
     :param ignore_chips: An optional set of chips to ignore in the\
                 machine.  Requests for a "machine" will have these chips\
                 excluded, as if they never existed.  The processor_ids of\
@@ -148,7 +144,7 @@ def create_transceiver_from_hostname(
     connection = UDPSpinnakerConnection(remote_host=hostname)
     boot_connection = UDPBootConnection(remote_host=hostname)
     return Transceiver(
-        connections=[connection, boot_connection], discover=discover,
+        connections=[connection, boot_connection],
         shut_down_connections=True, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id)
 
@@ -168,7 +164,7 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, discover=True, ignore_chips=None,
+    def __init__(self, connections=None, ignore_chips=None,
                  ignore_cores=None, max_core_id=None,
                  shut_down_connections=False, n_scp_threads=16,
                  n_other_threads=16):
@@ -179,10 +175,6 @@ class Transceiver(object):
                     connections are found.
         :type connections: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :param discover: Determines if discovery should take place.  If not\
-                    specified, an attempt will be made to discover connections\
-                    to the board.
-        :type discover: bool
         :param ignore_chips: An optional set of chips to ignore in the\
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
@@ -217,6 +209,8 @@ class Transceiver(object):
         self._chip_info = dict()
 
         # Update the lists of connections
+        if connections is None:
+            connections = list()
         self.connections_to_not_shut_down = set()
         if not shut_down_connections:
             self.connections_to_not_shut_down = set(connections)
@@ -231,14 +225,6 @@ class Transceiver(object):
 
         self._scp_message_thread_pool = ThreadPool(processes=n_scp_threads)
         self._other_thread_pool = ThreadPool(processes=n_other_threads)
-
-        # Discover any new connections, and update the queues if requested
-        if discover:
-            self.discover_scamp_connections()
-            number_of_connections = len(self._sending_connections.values())
-            if number_of_connections == 0:
-                raise SpinnmanIOException(
-                    "No connections to the board were found")
 
         # The nearest neighbour start id and lock
         self._next_nearest_neighbour_id = 2
@@ -730,7 +716,7 @@ class Transceiver(object):
 
         # Currently, this only finds other UDP connections given a connection
         # that supports SCP - this is _done via the machine
-        if self._sending_connections is None:
+        if len(self._sending_connections) == 0:
             return list()
         self._update_machine()
 
@@ -754,11 +740,11 @@ class Transceiver(object):
                     self._sending_connections[key]\
                         = new_connection
 
-                # test receiveing side of connection
+                # test receiving side of connection
                 if new_connection.local_port in self._receiving_connections:
                     raise SpinnmanInvalidParameterException(
                         "The new spinnaker connection is using a local port "
-                        " that is already in use, please adjust "
+                        "that is already in use, please adjust "
                         "this and try again ", "", "")
                 else:
                     self._receiving_connections[new_connection.local_port] = \
@@ -769,17 +755,24 @@ class Transceiver(object):
         logger.info(self._machine.cores_and_link_output_string())
         return new_connections
 
-    def get_connections(self):
+    def get_connections(self, include_boot_connection=False):
         """ Get the currently known connections to the board, made up of those\
             passed in to the transceiver and those that are discovered during\
             calls to discover_connections.  No further discovery is done here.
 
-        :return: An iterable of connections known to the transciever
+        :param include_boot_connection: this parameter signals if the returned\
+               list of connections should include also the boot connection to\
+               SpiNNaker
+        :type include_boot_connection: bool
+        :return: An iterable of connections known to the transceiver
         :rtype: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        return self._sending_connections.values()
+        connections = self._sending_connections.values()
+        if include_boot_connection:
+            connections.append(self._boot_connection)
+        return connections
 
     def get_machine_dimensions(self):
         """ Get the maximum chip x-coordinate and maximum chip y-coordinate of\
