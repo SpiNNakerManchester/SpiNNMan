@@ -1,5 +1,5 @@
 import unittest
-from spinnman.board_test_configuration import BoardTestConfiguration
+from board_test_configuration import BoardTestConfiguration
 from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
     import UDPSpinnakerConnection
 import spinnman.exceptions as exc

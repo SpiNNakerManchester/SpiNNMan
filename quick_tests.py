@@ -19,7 +19,7 @@ from spinnman.model.diagnostic_filter_destination \
     import DiagnosticFilterDestination
 from spinnman.model.diagnostic_filter_packet_type \
     import DiagnosticFilterPacketType
-from spinnman.board_test_configuration import BoardTestConfiguration
+from board_test_configuration import BoardTestConfiguration
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)

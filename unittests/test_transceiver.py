@@ -5,7 +5,7 @@ from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
     import UDPSpinnakerConnection
 from spinnman.exceptions import SpinnmanIOException
 import spinnman.transceiver as transceiver
-from spinnman.board_test_configuration import BoardTestConfiguration
+from board_test_configuration import BoardTestConfiguration
 
 board_config = BoardTestConfiguration()
 
@@ -68,10 +68,10 @@ class TestTransceiver(unittest.TestCase):
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(connections)
 
-        if board_config.board_version == 3:
+        if board_config.board_version == 3 or board_config.board_version == 2:
             self.assertEqual(trans.get_machine_dimensions().x_max, 1)
             self.assertEqual(trans.get_machine_dimensions().y_max, 1)
-        elif board_config.board_version == 5:
+        elif board_config.board_version == 5 or board_config.board_version == 4:
             self.assertEqual(trans.get_machine_dimensions().x_max, 7)
             self.assertEqual(trans.get_machine_dimensions().y_max, 7)
         else:
