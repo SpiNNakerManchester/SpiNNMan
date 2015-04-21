@@ -47,24 +47,6 @@ class TestingCallbackQueue(unittest.TestCase):
         queue.stop()
         self.assertEqual(test_queue, [0, 1, 2, 3, 4])
 
-    def test_stop_receiving_items_from_queue(self):
-        global test_queue
-        queue = c_q._CallbackQueue(append_to_list)
-        self.assertEqual(queue._callback, append_to_list)
-        self.assertFalse(queue._running)
-
-        test_against_list = list()
-        for i in range(1000):
-            queue.add_item(i)
-            test_against_list.append(i)
-
-        queue.start()
-        while len(test_queue) < 5:
-            pass
-        queue.stop()
-        self.assertAlmostEqual(len(test_queue), len([0, 1, 2, 3, 4]), delta=2)
-        self.assertNotEqual(test_queue, test_against_list)
-
 
 if __name__ == '__main__':
     unittest.main()
