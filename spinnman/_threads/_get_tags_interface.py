@@ -33,7 +33,7 @@ class GetTagsInterface(object):
         self._connection = connection
         self._exception = None
         self._traceback = None
-        self._iptags = None
+        self._tags = None
         self._condition = Condition()
         self._thread_pool = thread_pool
 
@@ -49,37 +49,37 @@ class GetTagsInterface(object):
             info = get_info_thread.get_response()
 
             threads = list()
-            tags = dict()
+            thread_dict = dict()
             for tag in range(0, info.pool_size + info.fixed_size):
                 thread = SCPMessageInterface(
                     self._transceiver, SCPTagGetRequest(
                         self._connection.chip_x, self._connection.chip_y, tag))
                 self._thread_pool.apply_async(thread.run)
                 threads.append(thread)
-                tags[thread] = tag
+                thread_dict[thread] = tag
 
-            iptags = list()
+            tags = list()
             for thread in threads:
                 response = thread.get_response()
-                tag = tags[thread]
+                tag = thread_dict[thread]
                 if response.in_use:
                     ip_address = response.ip_address
                     host = "{}.{}.{}.{}"\
                         .format(ip_address[0], ip_address[1], ip_address[2],
                                 ip_address[3])
                     if response.is_reverse:
-                        iptags.append(ReverseIPTag(
+                        tags.append(ReverseIPTag(
                             self._connection.remote_ip_address, tag,
                             response.rx_port, response.spin_chip_x,
                             response.spin_chip_y, response.spin_cpu,
                             response.spin_port))
                     else:
-                        iptags.append(IPTag(
+                        tags.append(IPTag(
                             self._connection.remote_ip_address,
                             tag, host, response.port, response.strip_sdp))
 
             self._condition.acquire()
-            self._iptags = iptags
+            self._tags = tags
             self._condition.notify_all()
             self._condition.release()
 
@@ -95,11 +95,11 @@ class GetTagsInterface(object):
             block until the value has been retrieved
         """
         self._condition.acquire()
-        while self._iptags is None and self._exception is None:
+        while self._tags is None and self._exception is None:
             self._condition.wait()
         self._condition.release()
 
         if self._exception is not None:
             raise self._exception, None, self._traceback
 
-        return self._iptags
+        return self._tags
