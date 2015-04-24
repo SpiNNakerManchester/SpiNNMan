@@ -5,4 +5,5 @@ matrix:
       env: TEST_SUITE=suite_2_7
 before_script:
   - python ./setup.py install
+  - pip install spinnaker_proxy
 script: python ./unittests/run_tests.py $TEST_SUITE
