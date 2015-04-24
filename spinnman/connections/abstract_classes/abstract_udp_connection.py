@@ -182,7 +182,12 @@ class AbstractUDPConnection(object):
     def close(self):
         """ See :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
         """
+        try:
+            self._socket.shutdown(0)
+        except:
+            pass
         self._socket.close()
+
 
     @property
     def can_send(self):

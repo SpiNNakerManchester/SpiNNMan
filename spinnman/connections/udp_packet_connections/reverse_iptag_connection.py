@@ -70,3 +70,6 @@ class ReverseIPTagConnection(
             return True
         else:
             return False
+
+    def close(self):
+        AbstractUDPConnection.close(self)
