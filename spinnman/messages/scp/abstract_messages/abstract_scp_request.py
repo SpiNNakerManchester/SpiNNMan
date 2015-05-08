@@ -1,6 +1,7 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
+import struct
 
 
 @add_metaclass(ABCMeta)
@@ -9,7 +10,7 @@ class AbstractSCPRequest(object):
     """
 
     def __init__(self, sdp_header, scp_request_header, argument_1=None,
-            argument_2=None, argument_3=None, data=None):
+                 argument_2=None, argument_3=None, data=None):
         """
 
         :param sdp_header: The SDP header of the request
@@ -47,7 +48,8 @@ class AbstractSCPRequest(object):
     def scp_request_header(self):
         """ The SCP request header of the message
 
-        :rtype: :py:class:`spinnman.messages.scp.scp_request_header.SCPRequestHeader`
+        :rtype:\
+                    :py:class:`spinnman.messages.scp.scp_request_header.SCPRequestHeader`
         """
         return self._scp_request_header
 
@@ -82,6 +84,24 @@ class AbstractSCPRequest(object):
         :rtype: bytearray
         """
         return self._data
+
+    @property
+    def bytestring(self):
+        data = (self._sdp_header.bytestring +
+                self._scp_request_header.bytestring)
+        if self._argument_1 is not None:
+            data += struct.pack("<I", self._argument_1)
+        else:
+            data += struct.pack("<I", 0)
+        if self._argument_2 is not None:
+            data += struct.pack("<I", self._argument_2)
+        else:
+            data += struct.pack("<I", 0)
+        if self._argument_3 is not None:
+            data += struct.pack("<I", self._argument_3)
+        else:
+            data += struct.pack("<I", 0)
+        return data
 
     def write_scp_request(self, byte_writer):
         """ Write the scp request to the given writer

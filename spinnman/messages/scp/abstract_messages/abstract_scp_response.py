@@ -16,6 +16,14 @@ class AbstractSCPResponse(object):
         self._sdp_header = SDPHeader()
         self._scp_response_header = SCPResponseHeader()
 
+    def read_bytestring(self, data):
+        self._sdp_header.read_bytestring(data)
+        self._scp_response_header.read_bytestring(data, 10)
+        self.read_packet_bytestring(data, 14)
+
+    def read_packet_bytestring(self, data, offset):
+        pass
+
     @abstractmethod
     def read_scp_response(self, byte_reader):
         """ Read the scp response from the given reader

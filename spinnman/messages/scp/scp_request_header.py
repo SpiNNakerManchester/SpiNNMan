@@ -1,5 +1,6 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException
+import struct
 
 
 class SCPRequestHeader(object):
@@ -21,9 +22,9 @@ class SCPRequestHeader(object):
                     of the parameters is incorrect
         """
         self._command = command
-        self._sequence = None
+        self._sequence = sequence
 
-        self.sequence = sequence
+        # self.sequence = sequence
 
     @property
     def command(self):
@@ -63,6 +64,10 @@ class SCPRequestHeader(object):
                 "sequence", str(sequence),
                 "The sequence must be between 0 and 65535")
         self._sequence = sequence
+
+    @property
+    def bytestring(self):
+        return struct.pack("<2H", self._command.value, self._sequence)
 
     def write_scp_request_header(self, byte_writer):
         """ Write the SCP header to a byte_writer

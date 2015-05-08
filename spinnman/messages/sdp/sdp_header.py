@@ -3,6 +3,8 @@ from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 
+import struct
+
 
 class SDPHeader(object):
     """ Represents the header of an SDP message.
@@ -48,27 +50,27 @@ class SDPHeader(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
                     ofthe parameters is not valid
         """
-        self._flags = None
-        self._tag = None
-        self._destination_port = None
-        self._destination_cpu = None
-        self._destination_chip_x = None
-        self._destination_chip_y = None
-        self._source_port = None
-        self._source_cpu = None
-        self._source_chip_x = None
-        self._source_chip_y = None
+        self._flags = flags
+        self._tag = tag
+        self._destination_port = destination_port
+        self._destination_cpu = destination_cpu
+        self._destination_chip_x = destination_chip_x
+        self._destination_chip_y = destination_chip_y
+        self._source_port = source_port
+        self._source_cpu = source_cpu
+        self._source_chip_x = source_chip_x
+        self._source_chip_y = source_chip_y
 
-        self.flags = flags
-        self.tag = tag
-        self.destination_port = destination_port
-        self.destination_cpu = destination_cpu
-        self.destination_chip_x = destination_chip_x
-        self.destination_chip_y = destination_chip_y
-        self.source_port = source_port
-        self.source_cpu = source_cpu
-        self.source_chip_x = source_chip_x
-        self.source_chip_y = source_chip_y
+#         self.flags = flags
+#         self.tag = tag
+#         self.destination_port = destination_port
+#         self.destination_cpu = destination_cpu
+#         self.destination_chip_x = destination_chip_x
+#         self.destination_chip_y = destination_chip_y
+#         self.source_port = source_port
+#         self.source_cpu = source_cpu
+#         self.source_chip_x = source_chip_x
+#         self.source_chip_y = source_chip_y
 
     @property
     def flags(self):
@@ -377,6 +379,28 @@ class SDPHeader(object):
                 "Must be between 0 and 255")
 
         self._source_chip_y = source_chip_y
+
+    @property
+    def bytestring(self):
+        dest_port_cpu = (((self._destination_port & 0x7) << 5) |
+                         (self._destination_cpu & 0x1F))
+        source_port_cpu = (((self._source_port & 0x7) << 5) |
+                           (self._source_cpu & 0x1F))
+
+        return struct.pack(
+            "<2x8B", self._flags.value, self._tag, dest_port_cpu,
+            source_port_cpu, self._destination_chip_y,
+            self._destination_chip_x, self._source_chip_y, self._source_chip_y)
+
+    def read_bytestring(self, data):
+        (self._flags, self._tag, dest_port_cpu, source_port_cpu,
+         self._destination_chip_y, self._destination_chip_x,
+         self._source_chip_y, self._source_chip_x) = struct.unpack_from(
+            "<2x8B", data)
+        self._destination_port = dest_port_cpu >> 5
+        self._destination_cpu = dest_port_cpu & 0x1F
+        self._source_port = source_port_cpu >> 5
+        self._source_cpu = source_port_cpu & 0x1F
 
     def write_sdp_header(self, byte_writer):
         """ Write the SDP header to a byte_writer

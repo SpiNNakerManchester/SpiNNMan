@@ -33,7 +33,7 @@ class AbstractUDPSCPSender(AbstractSCPSender):
         constructor will be used.
         sequence in the message is optional - if not set (sequence number\
         last assigned + 1) % 65536 will be used
-        
+
         :param scp_request: message packet to send
         :type scp_request:
                     :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
@@ -54,17 +54,8 @@ class AbstractUDPSCPSender(AbstractSCPSender):
             scp_request.scp_request_header.sequence = self._scp_sequence
             self._scp_sequence = (self._scp_sequence + 1) % 65536
 
-        # Create a writer for the mesage
-        writer = LittleEndianByteArrayByteWriter()
-
-        # Add the UDP padding
-        writer.write_short(0)
-
-        # Write the SCP message
-        scp_request.write_scp_request(writer)
-
         # Send the packet
         try:
-            self._socket.send(writer.data)
+            self._socket.send(scp_request.bytestring)
         except Exception as e:
             raise SpinnmanIOException(str(e))

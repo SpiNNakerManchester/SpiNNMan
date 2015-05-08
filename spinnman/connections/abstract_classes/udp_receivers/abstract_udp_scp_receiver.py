@@ -24,7 +24,7 @@ class AbstractUDPSCPReceiver(AbstractSCPReceiver):
     def receive_scp_response(self, scp_response, timeout=None):
         """ Receives an SCP message from this connection.  Blocks\
             until a message has been received, or a timeout occurs.
-        
+
         :param scp_response: The response to fill in
         :rtype scp_response:\
                     :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
@@ -55,16 +55,18 @@ class AbstractUDPSCPReceiver(AbstractSCPReceiver):
         except Exception as e:
             raise SpinnmanIOException(str(e))
 
-        # Set up for reading
-        packet = bytearray(raw_data)
-        reader = LittleEndianByteArrayByteReader(packet)
+        scp_response.read_bytestring(raw_data)
 
-        # Read the padding
-        try:
-            reader.read_short()
-        except EOFError:
-            raise SpinnmanInvalidPacketException(
-                "SCP", "Not enough bytes to read the pre-packet padding")
-
-        # Read the response
-        scp_response.read_scp_response(reader)
+#         # Set up for reading
+#         packet = bytearray(raw_data)
+#         reader = LittleEndianByteArrayByteReader(packet)
+#
+#         # Read the padding
+#         try:
+#             reader.read_short()
+#         except EOFError:
+#             raise SpinnmanInvalidPacketException(
+#                 "SCP", "Not enough bytes to read the pre-packet padding")
+#
+#         # Read the response
+#         scp_response.read_scp_response(reader)

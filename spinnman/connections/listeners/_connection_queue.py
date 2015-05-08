@@ -6,6 +6,7 @@ import logging
 
 from spinnman.connections.listeners._message_callback import _MessageCallback
 from spinnman.messages.sdp.sdp_message import SDPMessage
+import traceback
 from spinnman.messages.scp.abstract_messages.abstract_scp_request \
     import AbstractSCPRequest
 from spinnman.messages.multicast_message import MulticastMessage
@@ -189,6 +190,7 @@ class _ConnectionQueue(Thread):
                     logger.debug("Message sent - notifying callback")
                     callback.message_sent()
                 except Exception as exception:
+                    traceback.print_exc()
                     callback.send_exception(exception, sys.exc_info()[2])
                     send_error = True
 

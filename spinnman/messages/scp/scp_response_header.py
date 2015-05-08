@@ -2,39 +2,44 @@ from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.scp.scp_result import SCPResult
+import struct
 
 
 class SCPResponseHeader(object):
     """ Represents the header of an SCP Response
     """
-    
+
     def __init__(self):
         """
         """
         self._result = None
         self._sequence = None
-        
+
     @property
     def result(self):
         """ The result of the SCP response
-        
+
         :return: The result
         :rtype: :py:class:`spinnman.messages.scp.scp_result.SCPResult`
         """
         return self._result
-    
+
     @property
     def sequence(self):
         """ The sequence number of the SCP response
-        
+
         :return: The sequence number of the packet, between 0 and 65535
         :rtype: int
         """
         return self._sequence
-        
+
+    def read_bytestring(self, data, offset):
+        result, self._sequence = struct.unpack_from("<2H", data, offset)
+        self._result = SCPResult(result)
+
     def read_scp_response_header(self, byte_reader):
         """ Read an SCP header from a byte_reader
-        
+
         :param byte_reader: The reader to read the data from
         :type byte_reader:\
                     :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`

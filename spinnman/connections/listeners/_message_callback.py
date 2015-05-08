@@ -66,7 +66,7 @@ class _MessageCallback(object):
         self._message_sent_condition.release()
 
         if self._message_send_exception is not None:
-            raise (self._message_send_exception, None,
+            raise (self._message_send_exception, "",
                    self._message_send_traceback)
 
     def message_received(self, message):
