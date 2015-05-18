@@ -1,5 +1,3 @@
-from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.exceptions import SpinnmanIOException
 import struct
 
 
@@ -23,8 +21,6 @@ class SCPRequestHeader(object):
         """
         self._command = command
         self._sequence = sequence
-
-        # self.sequence = sequence
 
     @property
     def command(self):
@@ -55,42 +51,13 @@ class SCPRequestHeader(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     sequence is out of range, or if it has already been set
         """
-        if self._sequence is not None:
-            raise SpinnmanInvalidParameterException(
-                "sequence", str(sequence),
-                "The sequence has already been set")
-        if sequence is not None and (sequence < 0 or sequence > 65535):
-            raise SpinnmanInvalidParameterException(
-                "sequence", str(sequence),
-                "The sequence must be between 0 and 65535")
         self._sequence = sequence
 
     @property
     def bytestring(self):
-        return struct.pack("<2H", self._command.value, self._sequence)
+        """ The header as a bytestring
 
-    def write_scp_request_header(self, byte_writer):
-        """ Write the SCP header to a byte_writer
-
-        :param byte_writer: The writer to write the data to
-        :type byte_writer:\
-                    :py:class:`spinnman.data.abstract_byte_writer.AbstractByteWriter`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    writing to the writer
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If any\
-                    of the parameter values have not been set
+        :return: The header as a bytestring
+        :rtype: bytestring
         """
-        if self._command is None:
-            raise SpinnmanInvalidParameterException(
-                "scp_header.command", str(None), "No value has been assigned")
-        if self._sequence is None:
-            raise SpinnmanInvalidParameterException(
-                "scp_header.sequence", str(None), "No value has been assigned")
-
-        try:
-            byte_writer.write_short(self._command.value)
-            byte_writer.write_short(self._sequence)
-        except IOError as exception:
-            raise SpinnmanIOException(str(exception))
+        return struct.pack("<2H", self._command.value, self._sequence)

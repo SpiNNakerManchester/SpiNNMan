@@ -13,11 +13,10 @@ class SCPReadMemoryResponse(AbstractSCPResponse):
         super(SCPReadMemoryResponse, self).__init__()
         self._data = None
 
-    def read_packet_bytestring(self, data, offset):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
+    def read_data_bytestring(self, data, offset):
+        if self._scp_response_header.result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                "Read", "CMD_READ", result.name)
+                "Read", "CMD_READ", self._scp_response_header.result)
         self._data = data[offset:]
 
     def read_scp_response(self, byte_reader):

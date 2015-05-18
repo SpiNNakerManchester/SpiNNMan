@@ -2,13 +2,13 @@ from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
 
+import struct
+
 from spinnman.connections.abstract_classes.abstract_scp_sender import \
     AbstractSCPSender
-from spinnman.data.little_endian_byte_array_byte_writer import \
-    LittleEndianByteArrayByteWriter
+from spinnman.connections.abstract_classes.udp_senders import udp_utils
 from spinnman.exceptions import SpinnmanIOException
-from spinnman import constants
-from spinnman.messages.udp_utils import udp_utils as utils
+
 
 @add_metaclass(ABCMeta)
 class AbstractUDPSCPSender(AbstractSCPSender):
@@ -22,12 +22,12 @@ class AbstractUDPSCPSender(AbstractSCPSender):
     def send_scp_request(self, scp_request):
         """ Sends an SCP request down this connection
 
-         Messages must have the following properties:
+         The following properties will be overwritten:
 
-            * source_port is None or 7
-            * source_cpu is None or 31
-            * source_chip_x is None or 0
-            * source_chip_y is None or 0
+            * source_port will be set to 7
+            * source_cpu will be set to 31
+            * source_chip_x will be set to 0
+            * source_chip_y will be set to 0
 
         tag in the message is optional - if not set the default set in the\
         constructor will be used.
@@ -46,16 +46,10 @@ class AbstractUDPSCPSender(AbstractSCPSender):
             raise SpinnmanIOException("Not connected to a remote host")
 
         # Update the SDP headers for this connection
-        utils.update_sdp_header(scp_request.sdp_header,
-                                constants.DEFAULT_SDP_TAG)
-
-        # Update the sequence for this connection
-        if scp_request.scp_request_header.sequence is None:
-            scp_request.scp_request_header.sequence = self._scp_sequence
-            self._scp_sequence = (self._scp_sequence + 1) % 65536
+        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header)
 
         # Send the packet
         try:
-            self._socket.send(scp_request.bytestring)
+            self._socket.send(struct.pack("<2x") + scp_request.bytestring)
         except Exception as e:
             raise SpinnmanIOException(str(e))

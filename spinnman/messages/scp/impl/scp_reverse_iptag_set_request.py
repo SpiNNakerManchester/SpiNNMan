@@ -4,7 +4,6 @@ from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 
 _IPTAG_SET = 1
@@ -34,37 +33,13 @@ class SCPReverseIPTagSetRequest(AbstractSCPRequest):
         :type port: int
         :param tag: The tag, between 0 and 7
         :type tag: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * The chip-coordinates are out of range
-                    * If the host is not 4 bytes
-                    * If the port is not between 0 and 65535
-                    * If the tag is not between 0 and 7
         """
-        if port < 0 or port > 65535:
-            raise SpinnmanInvalidParameterException(
-                "port", str(port), "Must be between 0 and 65535")
-        if tag < 0 or tag > 7:
-            raise SpinnmanInvalidParameterException(
-                "tag", str(tag), "Must be between 0 and 7")
-        if destination_x < 0 or destination_x > 255:
-            raise SpinnmanInvalidParameterException(
-                "destination_x", str(destination_x),
-                "Must be between 0 and 255")
-        if destination_y < 0 or destination_y > 255:
-            raise SpinnmanInvalidParameterException(
-                "destination_y", str(destination_y),
-                "Must be between 0 and 255")
-        if destination_p < 0 or destination_p > 17:
-            raise SpinnmanInvalidParameterException(
-                "destination_p", str(destination_p),
-                "Must be between 0 and 17")
-
         strip_value = 1
         reverse_value = 1
 
-        arg1 = ((reverse_value << 29) | (strip_value << 28)
-                | (_IPTAG_SET << 16) | (sdp_port << 13) | (destination_p << 8)
-                | tag)
+        arg1 = ((reverse_value << 29) | (strip_value << 28) |
+                (_IPTAG_SET << 16) | (sdp_port << 13) | (destination_p << 8) |
+                tag)
         arg2 = ((destination_x << 24) | (destination_y << 16) | port)
 
         super(SCPReverseIPTagSetRequest, self).__init__(

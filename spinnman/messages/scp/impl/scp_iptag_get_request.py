@@ -1,4 +1,5 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages.abstract_scp_request\
+    import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
@@ -22,9 +23,6 @@ class SCPTagGetRequest(AbstractSCPRequest):
         :type tag: int
         :param tag: The tag, between 0 and 7
         :type tag: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * The chip-coordinates are out of range
-                    * If the tag is not between 0 and 7
         """
         super(SCPTagGetRequest, self).__init__(
             SDPHeader(

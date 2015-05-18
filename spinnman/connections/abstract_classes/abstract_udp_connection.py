@@ -104,10 +104,10 @@ class AbstractUDPConnection(object):
 
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
-        self._socket.setblocking(0)
 
     def is_connected(self):
-        """ See :py:meth:`spinnman.connections.AbstractConnection.abstract_connection.is_connected`
+        """ See\
+            :py:meth:`spinnman.connections.AbstractConnection.abstract_connection.is_connected`
         """
 
         # If this is not a sending socket, it is not connected
@@ -180,14 +180,14 @@ class AbstractUDPConnection(object):
         return self._remote_port
 
     def close(self):
-        """ See :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
+        """ See\
+            :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
         """
         try:
             self._socket.shutdown(0)
         except:
             pass
         self._socket.close()
-
 
     @property
     def can_send(self):

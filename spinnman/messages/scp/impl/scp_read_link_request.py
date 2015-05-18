@@ -1,5 +1,5 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
-from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinnman.messages.scp.abstract_messages.abstract_scp_request\
+    import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
@@ -28,20 +28,7 @@ class SCPReadLinkRequest(AbstractSCPRequest):
         :type base_address: int
         :param size: The number of bytes to read, between 1 and 256
         :type size: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the chip coordinates are out of range
-                    * If the base address is not a positive number
-                    * If the size is out of range
         """
-        if base_address < 0:
-            raise SpinnmanInvalidParameterException(
-                "base_address", str(base_address),
-                "Must be a positive number")
-
-        if size < 1 or size > 256:
-            raise SpinnmanInvalidParameterException(
-                "size", str(size), "Must be between 1 and 256")
-
         super(SCPReadLinkRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
@@ -51,6 +38,7 @@ class SCPReadLinkRequest(AbstractSCPRequest):
             argument_1=base_address, argument_2=size, argument_3=link)
 
     def get_scp_response(self):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
         return SCPReadLinkResponse()

@@ -1,22 +1,9 @@
 from spinnman.model.cpu_state import CPUState
 from spinnman.model.run_time_error import RunTimeError
 from spinnman.model.mailbox_command import MailboxCommand
-from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman._utils import _get_int_from_little_endian_bytearray
-from spinnman._utils import _get_short_from_little_endian_bytearray
-from spinnman import constants
 
+import struct
 
-def _get_int_from_bytearray(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return _get_int_from_little_endian_bytearray(array, offset)
-
-
-def _get_short_from_bytearray(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return _get_short_from_little_endian_bytearray(array, offset)
 
 CPU_INFO_BYTES = 128
 CPU_USER_0_START_ADDRESS = 112
@@ -34,44 +21,39 @@ class CPUInfo(object):
         :type y: int
         :param p: The id of a core on the chip
         :type p: int
-        :param cpu_data: An array of bytes received from SDRAM on the board
-        :type cpu_data: bytearray
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
-                    array does not contain a cpu data structure
+        :param cpu_data: A bytestring received from SDRAM on the board
+        :type cpu_data: bytestring
         """
-        if len(cpu_data) != constants.CPU_INFO_BYTES:
-            raise SpinnmanInvalidParameterException(
-                    "len(cpu_data)", str(len(cpu_data)),
-                    "Must be 128 bytes of data")
-
         self._x = x
         self._y = y
         self._p = p
 
-        self._registers = [_get_int_from_bytearray(cpu_data, i)
+        (registers,                                                  # 32s 0
+         self._processor_state_register, self._stack_pointer,
+         self._link_register,                                        # 3I  32
+         run_time_error,                                             # B   44
+         # skipped                                                   # x   45
+         state, self._application_id,                                # 2B  46
+         self._application_mailbox_data_address,
+         self._monitor_mailbox_data_address,                         # 2I  48
+         application_mailbox_command, monitor_mailbox_command,       # 2B  56
+         self._software_error_count,                                 # H   58
+         self._software_source_filename_address,
+         self._software_source_line_number, self._time,              # 3I  60
+         self._application_name,                                     # 16s 72
+         self._iobuf_address, user0, user1, user2, user3             # 5I  88
+         ) = struct.unpack_from("< 32s 3I B x 2B 2I 2B H 3I 16s 5I", cpu_data)
+
+        self._registers = [struct.unpack_from("<I", registers, i)
                            for i in range(0, 32, 4)]
-        self._processor_state_register = _get_int_from_bytearray(cpu_data, 32)
-        self._stack_pointer = _get_int_from_bytearray(cpu_data, 36)
-        self._link_register = _get_int_from_bytearray(cpu_data, 40)
-        self._run_time_error = RunTimeError(cpu_data[44])
-        self._state = CPUState(cpu_data[46])
-        self._application_id = cpu_data[47]
-        self._application_mailbox_data_address = \
-            _get_int_from_bytearray(cpu_data, 48)
-        self._monitor_mailbox_data_address = \
-            _get_int_from_bytearray(cpu_data, 52)
-        self._application_mailbox_command = MailboxCommand(cpu_data[56])
-        self._monitor_mailbox_command = MailboxCommand(cpu_data[57])
-        self._software_error_count = _get_short_from_bytearray(cpu_data, 58)
-        self._software_source_filename_address = \
-            _get_int_from_bytearray(cpu_data, 60)
-        self._software_source_line_number = \
-            _get_int_from_bytearray(cpu_data, 64)
-        self._time = _get_int_from_bytearray(cpu_data, 68)
-        self._application_name = cpu_data[72:88].decode("ascii")
-        self._iobuf_address = _get_int_from_bytearray(cpu_data, 88)
-        self._user = [_get_int_from_bytearray(cpu_data, i)
-                      for i in range(constants.CPU_USER_0_START_ADDRESS, 128, 4)]
+        self._run_time_error = RunTimeError(run_time_error)
+        self._state = CPUState(state)
+
+        self._application_mailbox_command = MailboxCommand(
+            application_mailbox_command)
+        self._monitor_mailbox_command = MailboxCommand(
+            monitor_mailbox_command)
+        self._user = [user0, user1, user2, user3]
 
     @property
     def x(self):

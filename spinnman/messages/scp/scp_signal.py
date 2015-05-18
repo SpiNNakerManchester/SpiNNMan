@@ -1,23 +1,31 @@
 from enum import Enum
 
 
+class SignalType(Enum):
+    """ The type of signal, determined by how it is transmitted
+    """
+    MULTICAST = 0,
+    POINT_TO_POINT = 1,
+    NEAREST_NEIGHBOUR = 2
+
+
 class SCPSignal(Enum):
     """ SCP Signals
     """
-    INITIALISE = (0, 2)
-    POWER_DOWN = (1, 2)
-    STOP = (2, 2)
-    START = (3, 2)
-    SYNC0 = (4, 0)
-    SYNC1 = (5, 0)
-    PAUSE = (6, 0)
-    CONTINUE = (7, 0)
-    EXIT = (8, 2)
-    TIMER = (9, 0)
-    USER_0 = (10, 0)
-    USER_1 = (11, 0)
-    USER_2 = (12, 0)
-    USER_3 = (13, 0)
+    INITIALISE = (0, SignalType.NEAREST_NEIGHBOUR)
+    POWER_DOWN = (1, SignalType.NEAREST_NEIGHBOUR)
+    STOP = (2, SignalType.NEAREST_NEIGHBOUR)
+    START = (3, SignalType.NEAREST_NEIGHBOUR)
+    SYNC0 = (4, SignalType.NEAREST_NEIGHBOUR)
+    SYNC1 = (5, SignalType.MULTICAST)
+    PAUSE = (6, SignalType.MULTICAST)
+    CONTINUE = (7, SignalType.MULTICAST)
+    EXIT = (8, SignalType.NEAREST_NEIGHBOUR)
+    TIMER = (9, SignalType.MULTICAST)
+    USER_0 = (10, SignalType.MULTICAST)
+    USER_1 = (11, SignalType.MULTICAST)
+    USER_2 = (12, SignalType.MULTICAST)
+    USER_3 = (13, SignalType.MULTICAST)
 
     def __new__(cls, value, signal_type, doc=""):
         obj = object.__new__(cls)
@@ -29,8 +37,8 @@ class SCPSignal(Enum):
 
         :param value: The value used for the signal
         :type value: int
-        :param signal_type: The "type" of the signal, between 0 and 2
-        :type signal_type: int
+        :param signal_type: The "type" of the signal
+        :type signal_type: :py:class:`.SignalType`
         """
         self._value_ = value
         self._signal_type = signal_type

@@ -3,21 +3,21 @@ from enum import Enum
 
 
 _REGISTERS = Enum(
-        value="Registers",
-        names=[("LOC_MC", 0),
-              ("EXT_MC", 1),
-              ("LOC_PP", 2),
-              ("EXT_PP", 3),
-              ("LOC_NN", 4),
-              ("EXT_NN", 5),
-              ("LOC_FR", 6),
-              ("EXT_FR", 7),
-              ("DUMP_MC", 8),
-              ("DUMP_PP", 9),
-              ("DUMP_NN", 10),
-              ("DUMP_FR", 11),
-              ("USER_START", 12),
-              ("USER_END", 16)])
+    value="Registers",
+    names=[("LOC_MC", 0),
+           ("EXT_MC", 1),
+           ("LOC_PP", 2),
+           ("EXT_PP", 3),
+           ("LOC_NN", 4),
+           ("EXT_NN", 5),
+           ("LOC_FR", 6),
+           ("EXT_FR", 7),
+           ("DUMP_MC", 8),
+           ("DUMP_PP", 9),
+           ("DUMP_NN", 10),
+           ("DUMP_FR", 11),
+           ("USER_START", 12),
+           ("USER_END", 16)])
 
 
 class RouterDiagnostics(object):
@@ -37,8 +37,8 @@ class RouterDiagnostics(object):
         """
         if len(register_values) != 16:
             raise SpinnmanInvalidParameterException(
-                    "len(register_values)", len(register_values),
-                    "There must be exactly 16 register values")
+                "len(register_values)", len(register_values),
+                "There must be exactly 16 register values")
 
         self._mon = (control_register >> 8) & 0x1F
         self._wait_1 = (control_register >> 16) & 0xFF
@@ -201,7 +201,7 @@ class RouterDiagnostics(object):
         :rtype: array of int
         """
         return self._register_values[
-                _REGISTERS.USER_START.value:_REGISTERS.USER_END.value]
+            _REGISTERS.USER_START.value:_REGISTERS.USER_END.value]
 
     @property
     def registers(self):

@@ -1,9 +1,8 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
-import select
+
 import socket
-import traceback
 
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
@@ -44,12 +43,10 @@ class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
         """
         # Receive the data
         try:
-            read_ready, _, _ = select.select([self._socket], [], [], timeout)
-            if not read_ready:
-                raise socket.timeout()
+            self._socket.settimeout(timeout)
             raw_data = self._socket.recv(512)
         except socket.timeout:
-            raise SpinnmanTimeoutException("receive_sdp_message", timeout)
+            raise SpinnmanTimeoutException("receive_eieio_message", timeout)
         except Exception as e:
             raise SpinnmanIOException(str(e))
 

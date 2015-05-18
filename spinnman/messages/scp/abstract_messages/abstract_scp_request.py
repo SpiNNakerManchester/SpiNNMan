@@ -87,6 +87,11 @@ class AbstractSCPRequest(object):
 
     @property
     def bytestring(self):
+        """ The request as a bytestring
+
+        :return: The request as a bytestring
+        :rtype: bytestring
+        """
         data = (self._sdp_header.bytestring +
                 self._scp_request_header.bytestring)
         if self._argument_1 is not None:
@@ -102,37 +107,6 @@ class AbstractSCPRequest(object):
         else:
             data += struct.pack("<I", 0)
         return data
-
-    def write_scp_request(self, byte_writer):
-        """ Write the scp request to the given writer
-
-        :param byte_writer: The writer to write to
-        :type byte_writer:\
-                    :py:class:`spinnman.data.abstract_byte_writer.AbstractByteWriter`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    writing the request
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If any\
-                    required values have not been set
-        """
-        self._sdp_header.write_sdp_header(byte_writer)
-        self._scp_request_header.write_scp_request_header(byte_writer)
-
-        # Current implementation writes the arguments, or 0 if not present
-        # i.e. there are always three arguments.  This could be modified
-        # later to only send the arguments that are provided, but currently
-        # SCAMP assumes that there are 3 arguments as far as I can see
-        arguments = [self._argument_1, self._argument_2, self._argument_3]
-        for argument in arguments:
-            if argument is not None:
-                byte_writer.write_int(argument)
-            else:
-                byte_writer.write_int(0)
-
-        # Write any data
-        if self._data is not None and len(self._data) > 0:
-            byte_writer.write_bytes(self._data)
 
     @abstractmethod
     def get_scp_response(self):

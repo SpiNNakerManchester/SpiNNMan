@@ -1,27 +1,14 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman._utils import _get_int_from_little_endian_bytearray
-from spinnman._utils import _get_short_from_little_endian_bytearray
 from time import localtime
 from time import asctime
-
-
-def _get_int_from_bytearray(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return _get_int_from_little_endian_bytearray(array, offset)
-
-
-def _get_short_from_bytearray(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return _get_short_from_little_endian_bytearray(array, offset)
+import struct
 
 
 class VersionInfo(object):
     """ Decodes SC&MP/SARK version information as returned by the SVER command
     """
 
-    def __init__(self, version_data):
+    def __init__(self, version_data, offset):
         """
         :param version_data: bytes from an SCP packet containing version\
                     information
@@ -31,23 +18,19 @@ class VersionInfo(object):
         """
         if len(version_data) < 13:
             raise SpinnmanInvalidParameterException(
-                    "len(version_data)", len(version_data),
-                    "The length of the version data is too short")
+                "len(version_data)", len(version_data),
+                "The length of the version data is too short")
 
-        self._p = version_data[0]
-        self._y = version_data[2]
-        self._x = version_data[3]
-        self._version_number = (_get_short_from_bytearray(version_data, 6)
-                / 100.0)
-        self._build_date = _get_int_from_bytearray(version_data, 8)
-
+        (self._p, self._y, self._x, version_no, self._build_date) = \
+            struct.unpack_from("<BxBBHI", version_data, offset)
+        self._version_number = version_no / 100.0
         self._version_string = version_data[12:-1].decode("ascii")
         try:
             self._name, self._hardware = self._version_string.split("/")
         except ValueError as exception:
             raise SpinnmanInvalidParameterException(
-                    "version_string", self._version_string,
-                    "Incorrect format: {}".format(exception))
+                "version_string", self._version_string,
+                "Incorrect format: {}".format(exception))
 
     @property
     def name(self):
@@ -123,6 +106,6 @@ class VersionInfo(object):
         return self._version_string
 
     def __str__(self):
-        return "[Version: {} {} at {}:{}:{}:{} (built {})]".format(self._name,
-                self._version_number, self._hardware, self._x, self._y,
-                self._p, asctime(localtime(self._build_date)))
+        return "[Version: {} {} at {}:{}:{}:{} (built {})]".format(
+            self._name, self._version_number, self._hardware, self._x, self._y,
+            self._p, asctime(localtime(self._build_date)))

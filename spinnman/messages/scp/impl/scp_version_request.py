@@ -1,4 +1,5 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages.abstract_scp_request\
+    import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
@@ -32,6 +33,7 @@ class SCPVersionRequest(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_VER))
 
     def get_scp_response(self):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
         return SCPVersionResponse()

@@ -1,5 +1,5 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
-from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinnman.messages.scp.abstract_messages.abstract_scp_request\
+    import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
@@ -26,43 +26,18 @@ class SCPFloodFillDataRequest(AbstractSCPRequest):
         :param data: The data to load, between 4 and 256 bytes and the size\
                     must be divisible by 4
         :type data: bytearray
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the id is out of range
-                    * If the block number is out of range
-                    * If the base_address is not a positive integer
-                    * If the data is too long or too short
-                    * If the length of the data is not divisible by 4
         """
-        if nearest_neighbour_id < 0 or nearest_neighbour_id > 127:
-            raise SpinnmanInvalidParameterException(
-                    "nearest_neighbour_id", nearest_neighbour_id,
-                    "Must be between 0 and 127")
-        if block_no < 0 or block_no > 255:
-            raise SpinnmanInvalidParameterException(
-                    "block_no", block_no, "Must be between 0 and 255")
-        if base_address < 0:
-            raise SpinnmanInvalidParameterException(
-                    "base_address", base_address, "Must be a positive integer")
-        if len(data) < 1:
-            raise SpinnmanInvalidParameterException(
-                    "len(data)", len(data), "Must be at least 1 byte of data")
-        if len(data) > 256:
-            raise SpinnmanInvalidParameterException(
-                    "len(data)", len(data), "Must be less than 256 bytes")
-        if len(data) % 4 != 0:
-            raise SpinnmanInvalidParameterException(
-                    "len(data)", len(data), "Must be divisible by 4")
 
         argument_1 = _NNP_FORWARD_RETRY | nearest_neighbour_id
         argument_2 = (block_no << 16) | (((len(data) / 4) - 1) << 8)
 
         super(SCPFloodFillDataRequest, self).__init__(
-                SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                        destination_cpu=0, destination_chip_x=0,
-                        destination_chip_y=0),
-                SCPRequestHeader(command=SCPCommand.CMD_FFD),
-                argument_1=argument_1, argument_2=argument_2,
-                argument_3=base_address, data=data)
+            SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                      destination_cpu=0, destination_chip_x=0,
+                      destination_chip_y=0),
+            SCPRequestHeader(command=SCPCommand.CMD_FFD),
+            argument_1=argument_1, argument_2=argument_2,
+            argument_3=base_address, data=data)
 
     def get_scp_response(self):
         return SCPCheckOKResponse("Flood Fill", "CMD_NNP:NNP_FFS")
