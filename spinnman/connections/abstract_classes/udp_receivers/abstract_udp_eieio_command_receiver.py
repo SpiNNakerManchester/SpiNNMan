@@ -1,18 +1,17 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
-
 import select
 import socket
+import traceback
 
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
-from spinnman.messages.eieio.eieio_command_header import EIEIOCommandHeader
-from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
 from spinnman.connections.abstract_classes.abstract_connection import \
     AbstractConnection
-import traceback
+from spinnman.messages.eieio.create_eieio_command\
+    import read_eieio_command_message
 
 
 @add_metaclass(ABCMeta)
@@ -52,16 +51,12 @@ class AbstractUDPEIEIOCommandReceiver(AbstractConnection):
         except socket.timeout:
             raise SpinnmanTimeoutException("receive_sdp_message", timeout)
         except Exception as e:
-            traceback.print_exc()
             raise SpinnmanIOException(str(e))
 
         # Set up for reading
         packet = bytearray(raw_data)
         reader = LittleEndianByteArrayByteReader(packet)
 
-        eieio_header = EIEIOCommandHeader.create_header_from_reader(reader)
-        data = reader.read_bytes()
-        if len(data) == 0:
-            data = None
+        eieio_packet = read_eieio_command_message(reader)
 
-        return EIEIOCommandMessage(eieio_header, data)
+        return eieio_packet

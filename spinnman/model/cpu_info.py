@@ -6,6 +6,7 @@ from spinnman._utils import _get_int_from_little_endian_bytearray
 from spinnman._utils import _get_short_from_little_endian_bytearray
 from spinnman import constants
 
+
 def _get_int_from_bytearray(array, offset):
     """ Wrapper function in case the endianness changes
     """
@@ -19,6 +20,7 @@ def _get_short_from_bytearray(array, offset):
 
 CPU_INFO_BYTES = 128
 CPU_USER_0_START_ADDRESS = 112
+
 
 class CPUInfo(object):
     """ Represents information about the state of a CPU
@@ -54,17 +56,17 @@ class CPUInfo(object):
         self._run_time_error = RunTimeError(cpu_data[44])
         self._state = CPUState(cpu_data[46])
         self._application_id = cpu_data[47]
-        self._application_mailbox_data_address =\
-                    _get_int_from_bytearray(cpu_data, 48)
-        self._monitor_mailbox_data_address =\
-                    _get_int_from_bytearray(cpu_data, 52)
+        self._application_mailbox_data_address = \
+            _get_int_from_bytearray(cpu_data, 48)
+        self._monitor_mailbox_data_address = \
+            _get_int_from_bytearray(cpu_data, 52)
         self._application_mailbox_command = MailboxCommand(cpu_data[56])
         self._monitor_mailbox_command = MailboxCommand(cpu_data[57])
         self._software_error_count = _get_short_from_bytearray(cpu_data, 58)
-        self._software_source_filename_address =\
-                    _get_int_from_bytearray(cpu_data, 60)
-        self._software_source_line_number =\
-                    _get_int_from_bytearray(cpu_data, 64)
+        self._software_source_filename_address = \
+            _get_int_from_bytearray(cpu_data, 60)
+        self._software_source_line_number = \
+            _get_int_from_bytearray(cpu_data, 64)
         self._time = _get_int_from_bytearray(cpu_data, 68)
         self._application_name = cpu_data[72:88].decode("ascii")
         self._iobuf_address = _get_int_from_bytearray(cpu_data, 88)

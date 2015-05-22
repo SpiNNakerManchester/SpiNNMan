@@ -6,13 +6,14 @@ from struct import pack
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 
+
 class TestSCPVersionResponse(unittest.TestCase):
     def test_new_scp_version_response(self):
         SCPVersionResponse()
 
     def test_read_scp_response(self):
         response = SCPVersionResponse()
-        y
+        # y
         # SCP Stuff
         rc = SCPResult.RC_OK.value
         seq = 105
@@ -33,15 +34,15 @@ class TestSCPVersionResponse(unittest.TestCase):
         dest_y = 0xab
         srce_x = 0x7
         srce_y = 0x0
-        data = pack('<8BHHHBBHHI15s',flags, tag, dest_port_cpu, srce_port_cpu, dest_y, dest_x, srce_y, srce_x, rc, seq, p2p_addr, phys_cpu, virt_cpu,version, buffer, build_date, ver_string)
+        data = pack(
+            '<8BHHHBBHHI15s', flags, tag, dest_port_cpu, srce_port_cpu, dest_y,
+            dest_x, srce_y, srce_x, rc, seq, p2p_addr, phys_cpu, virt_cpu,
+            version, buffer, build_date, ver_string)
         data = bytearray(data)
         reader = LittleEndianByteArrayByteReader(data)
         self.assertEqual(response.version_info, None)
         response.read_scp_response(reader)
         print response.version_info
-
-
-
 
 if __name__ == '__main__':
     unittest.main()

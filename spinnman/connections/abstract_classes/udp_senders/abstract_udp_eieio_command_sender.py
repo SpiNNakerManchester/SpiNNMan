@@ -31,17 +31,10 @@ class AbstractUDPEIEIOCommandSender(AbstractConnection):
             raise SpinnmanIOException("Not connected to a remote host")
 
         # Create a writer for the message
-        data_length = 0
-        if eieio_command_message.data is not None:
-            data_length = len(eieio_command_message.data)
         writer = LittleEndianByteArrayByteWriter()
 
-        # Write the header
-        eieio_command_message.eieio_command_header.write_command_header(writer)
-
-        # Write any data
-        if data_length != 0:
-            writer.write_bytes(eieio_command_message.data)
+        # Write the message
+        eieio_command_message.write_eieio_message(writer)
 
         # Send the packet
         try:

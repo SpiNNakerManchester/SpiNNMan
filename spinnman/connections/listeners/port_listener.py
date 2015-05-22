@@ -1,4 +1,3 @@
-import socket
 import threading
 import logging
 import traceback
@@ -28,8 +27,8 @@ class PortListener(threading.Thread):
 
     def stop(self):
         logger.info("[port_listener] Stopping")
-        self._queuer.stop()
         self._done = True
+        self._queuer.stop()
 
     def set_port(self, port):
         self._queuer.set_port(port)
@@ -40,12 +39,12 @@ class PortListener(threading.Thread):
         while not self._done:
             try:
                 packet = self._queuer.get_packet()
-                for callback in self._callbacks:
-                    self._thread_pool.apply_async(CallbackWorker.call_callback,
-                                                  args=[callback, packet])
-            except socket.timeout:
-                pass
-            except Exception as e:
+                if packet is not None:
+                    for callback in self._callbacks:
+                        self._thread_pool.apply_async(
+                            CallbackWorker.call_callback,
+                            args=[callback, packet])
+            except Exception:
                 if not self._done:
                     traceback.print_exc()
-                    logger.debug("[port listener] Error receiving data: %s" % e)
+                    logger.debug("[port listener] Error in callback")

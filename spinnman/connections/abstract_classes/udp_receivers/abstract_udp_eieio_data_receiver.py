@@ -1,7 +1,6 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
-
 import select
 import socket
 
@@ -10,8 +9,7 @@ from spinnman.connections.abstract_classes.abstract_eieio_receiver import \
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
-from spinnman.messages.eieio.eieio_header import EIEIOHeader
-from spinnman.messages.eieio.eieio_message import EIEIOMessage
+from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
 
 
 @add_metaclass(ABCMeta)
@@ -60,8 +58,6 @@ class AbstractUDPEIEIODataReceiver(AbstractEIEIOReceiver):
         packet = bytearray(raw_data)
         reader = LittleEndianByteArrayByteReader(packet)
 
-        eieio_header = EIEIOHeader.create_header_from_reader(reader)
-        data = reader.read_bytes()
-        if len(data) == 0:
-            data = None
-        return EIEIOMessage(eieio_header, data)
+        eieio_packet = read_eieio_data_message(reader)
+
+        return eieio_packet

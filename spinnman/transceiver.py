@@ -18,7 +18,8 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.eieio.eieio_command_message import EIEIOCommandMessage
+from spinnman.messages.eieio.command_messages.eieio_command_message \
+    import EIEIOCommandMessage
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
 from spinnman.messages.sdp.sdp_message import SDPMessage
@@ -110,8 +111,7 @@ _SCAMP_VERSION = 1.33
 
 
 def create_transceiver_from_hostname(
-        hostname, discover=True, ignore_chips=None, ignore_cores=None,
-        max_core_id=None):
+        hostname, ignore_chips=None, ignore_cores=None, max_core_id=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -121,9 +121,6 @@ def create_transceiver_from_hostname(
 
     :param hostname: The hostname or IP address of the board
     :type hostname: str
-    :param discover: True if further connections should be discovered, False\
-                otherwise
-    :type discover: bool
     :param ignore_chips: An optional set of chips to ignore in the\
                 machine.  Requests for a "machine" will have these chips\
                 excluded, as if they never existed.  The processor_ids of\
@@ -151,7 +148,7 @@ def create_transceiver_from_hostname(
     connection = UDPSpinnakerConnection(remote_host=hostname)
     boot_connection = UDPBootConnection(remote_host=hostname)
     return Transceiver(
-        connections=[connection, boot_connection], discover=discover,
+        connections=[connection, boot_connection],
         shut_down_connections=True, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id)
 
@@ -171,7 +168,7 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, discover=True, ignore_chips=None,
+    def __init__(self, connections=None, ignore_chips=None,
                  ignore_cores=None, max_core_id=None,
                  shut_down_connections=False, n_scp_threads=16,
                  n_other_threads=16):
@@ -182,10 +179,6 @@ class Transceiver(object):
                     connections are found.
         :type connections: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :param discover: Determines if discovery should take place.  If not\
-                    specified, an attempt will be made to discover connections\
-                    to the board.
-        :type discover: bool
         :param ignore_chips: An optional set of chips to ignore in the\
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
@@ -220,6 +213,8 @@ class Transceiver(object):
         self._chip_info = dict()
 
         # Update the lists of connections
+        if connections is None:
+            connections = list()
         self.connections_to_not_shut_down = set()
         if not shut_down_connections:
             self.connections_to_not_shut_down = set(connections)
@@ -234,14 +229,6 @@ class Transceiver(object):
 
         self._scp_message_thread_pool = ThreadPool(processes=n_scp_threads)
         self._other_thread_pool = ThreadPool(processes=n_other_threads)
-
-        # Discover any new connections, and update the queues if requested
-        if discover:
-            self.discover_scamp_connections()
-            number_of_connections = len(self._sending_connections.values())
-            if number_of_connections == 0:
-                raise SpinnmanIOException(
-                    "No connections to the board were found")
 
         # The nearest neighbour start id and lock
         self._next_nearest_neighbour_id = 2
@@ -457,7 +444,7 @@ class Transceiver(object):
         """ Sends a EIEIO command message using one of the connections.
 
         :param message: The message to send
-        :type message: EIEIOCommandMessage
+        :type message: SDPMessage
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
@@ -527,7 +514,7 @@ class Transceiver(object):
         logger.debug("Sending message with {}".format(best_connection_queue))
 
         # Send the message with the best queue
-        if get_callback:
+        if get_callback or not response_required:
             return best_connection_queue.send_message_non_blocking(
                 message, response_required, timeout)
         return best_connection_queue.send_message(
@@ -791,7 +778,7 @@ class Transceiver(object):
 
         # Currently, this only finds other UDP connections given a connection
         # that supports SCP - this is _done via the machine
-        if self._sending_connections is None:
+        if len(self._sending_connections) == 0:
             return list()
         self._update_machine()
 
@@ -815,11 +802,11 @@ class Transceiver(object):
                     self._sending_connections[key]\
                         = new_connection
 
-                # test receiveing side of connection
+                # test receiving side of connection
                 if new_connection.local_port in self._receiving_connections:
                     raise SpinnmanInvalidParameterException(
                         "The new spinnaker connection is using a local port "
-                        " that is already in use, please adjust "
+                        "that is already in use, please adjust "
                         "this and try again ", "", "")
                 else:
                     self._receiving_connections[new_connection.local_port] = \
@@ -830,17 +817,24 @@ class Transceiver(object):
         logger.info(self._machine.cores_and_link_output_string())
         return new_connections
 
-    def get_connections(self):
+    def get_connections(self, include_boot_connection=False):
         """ Get the currently known connections to the board, made up of those\
             passed in to the transceiver and those that are discovered during\
             calls to discover_connections.  No further discovery is done here.
 
-        :return: An iterable of connections known to the transciever
+        :param include_boot_connection: this parameter signals if the returned\
+               list of connections should include also the boot connection to\
+               SpiNNaker
+        :type include_boot_connection: bool
+        :return: An iterable of connections known to the transceiver
         :rtype: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        return self._sending_connections.values()
+        connections = self._sending_connections.values()
+        if include_boot_connection:
+            connections.append(self._boot_connection)
+        return connections
 
     def get_machine_dimensions(self):
         """ Get the maximum chip x-coordinate and maximum chip y-coordinate of\
@@ -2474,12 +2468,28 @@ class Transceiver(object):
                     connection not in self.connections_to_not_shut_down):
                 connection.close()
 
+        for connection in self._receiving_connections.itervalues():
+            if (close_original_connections or
+                    connection not in self.connections_to_not_shut_down):
+                connection.close()
+
         self._scp_message_thread_pool.close()
         self._other_thread_pool.close()
 
-    def register_listener(self, callback, recieve_port_no, hostname,
-                          connection_type, traffic_type, sdp_port=None):
-        if recieve_port_no in self._receiving_connections.keys():
+    def register_listener(self, callback, recieve_port_no,
+                          connection_type, traffic_type, hostname=None):
+        """ Register a callback for a certain type of traffic
+
+        :param callback: Function to be called when a packet is received
+        :type callback: function(packet)
+        :param recieve_port_no: The port number to listen on
+        :type recieve_port_no: int
+        :param connection_type: The type of the connection
+        :param traffic_type: The type of traffic expected on the connection
+        :param hostname: The optional hostname to listen on
+        :type hostname: str
+        """
+        if recieve_port_no in self._receiving_connections:
             connection = self._receiving_connections[recieve_port_no]
             if connection_type == connection.connection_type():
                 connection.register_callback(callback)
@@ -2492,9 +2502,11 @@ class Transceiver(object):
             if connection_type == constants.CONNECTION_TYPE.SDP_IPTAG:
                 connection = IPTagConnection(hostname, recieve_port_no)
                 connection.register_callback(callback, traffic_type)
+                self._receiving_connections[recieve_port_no] = connection
             elif connection_type == constants.CONNECTION_TYPE.UDP_IPTAG:
                 connection = StrippedIPTagConnection(hostname, recieve_port_no)
                 connection.register_callback(callback, traffic_type)
+                self._receiving_connections[recieve_port_no] = connection
             else:
                 raise SpinnmanInvalidParameterException(
                     "Currently spinnman does not know how to register a "

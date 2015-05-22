@@ -49,19 +49,19 @@ class GetTagsInterface(object):
             info = get_info_thread.get_response()
 
             threads = list()
-            tags = dict()
+            thread_dict = dict()
             for tag in range(0, info.pool_size + info.fixed_size):
                 thread = SCPMessageInterface(
                     self._transceiver, SCPTagGetRequest(
                         self._connection.chip_x, self._connection.chip_y, tag))
                 self._thread_pool.apply_async(thread.run)
                 threads.append(thread)
-                tags[thread] = tag
+                thread_dict[thread] = tag
 
             tags = list()
             for thread in threads:
                 response = thread.get_response()
-                tag = tags[thread]
+                tag = thread_dict[thread]
                 if response.in_use:
                     ip_address = response.ip_address
                     host = "{}.{}.{}.{}"\

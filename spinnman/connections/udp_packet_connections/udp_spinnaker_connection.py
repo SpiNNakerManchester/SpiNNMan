@@ -19,7 +19,8 @@ class UDPSpinnakerConnection(AbstractUDPConnection, AbstractUDPSDPReceiver,
                              AbstractUDPSCPReceiver):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 default_sdp_tag=constants.DEFAULT_SDP_TAG, chip_x=0, chip_y=0):
+                 default_sdp_tag=constants.DEFAULT_SDP_TAG, chip_x=0,
+                 chip_y=0):
         AbstractUDPConnection.__init__(self, local_host, local_port,
                                        remote_host, constants.SCP_SCAMP_PORT)
 
@@ -50,8 +51,8 @@ class UDPSpinnakerConnection(AbstractUDPConnection, AbstractUDPSDPReceiver,
         return constants.CONNECTION_TYPE.UDP_SPINNAKER
 
     def supports_sends_message(self, message):
-        if (isinstance(message, SDPMessage)
-                or isinstance(message, AbstractSCPRequest)):
+        if (isinstance(message, SDPMessage) or
+                isinstance(message, AbstractSCPRequest)):
             return True
         else:
             return False
