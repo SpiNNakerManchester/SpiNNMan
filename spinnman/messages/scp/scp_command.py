@@ -24,11 +24,12 @@ class SCPCommand(Enum):
     CMD_SROM = 27
     CMD_ALLOC = (28, "Router allocation")
     CMD_RTR = (29, "Router initialization")
+    CMD_BMP_INFO = (48, "BMP info structs")
     CMD_FLASH_COPY = 49
     CMD_FLASH_ERASE = 50
     CMD_FLASH_WRITE = 51
     CMD_RESET = 55
-    CMD_POWER = 57
+    CMD_BMP_POWER = (57, "Turns on or off the machine via bmp")
     CMD_TUBE = 64
 
     def __new__(cls, value, doc=""):

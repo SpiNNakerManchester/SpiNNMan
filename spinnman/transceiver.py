@@ -1,5 +1,7 @@
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
+from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
+    UDPBMPConnection
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
@@ -107,7 +109,8 @@ _SCAMP_VERSION = 1.33
 
 
 def create_transceiver_from_hostname(
-        hostname, ignore_chips=None, ignore_cores=None, max_core_id=None):
+        hostname, bmp_ip_addresses, version, ignore_chips=None,
+        ignore_cores=None, max_core_id=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -130,6 +133,12 @@ def create_transceiver_from_hostname(
                 Requests for a "machine" will only have core ids up to\
                 this value.
     :type max_core_id: int
+    :param version: the type of spinnaker board used within the spinnaker
+                    machine being used. If a spinn-5 board, then the version
+                    will be 5, spinn-3 would equal 3 and so on.
+    :param bmp_ip_addresses: the ip-addresses of the bmp connection used to boot
+                           multi-board systems.
+    :type bmp_ip_addresses: iterable of str
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -141,12 +150,20 @@ def create_transceiver_from_hostname(
     :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                 a response indicates an error during the exchange
     """
-    connection = UDPSpinnakerConnection(remote_host=hostname)
-    boot_connection = UDPBootConnection(remote_host=hostname)
+    connections = list()
+    # handle the possible multiple bmp connections
+    for bmp_ip_address in bmp_ip_addresses:
+        connections.append(UDPBMPConnection(remote_host=bmp_ip_address))
+    if len(bmp_ip_addresses)
+    # handle the spinnaker connection
+    connections.append(UDPSpinnakerConnection(remote_host=hostname))
+    # handle the boot connection
+    connections.append(UDPBootConnection(remote_host=hostname))
+
     return Transceiver(
-        connections=[connection, boot_connection],
-        shut_down_connections=True, ignore_chips=ignore_chips,
-        ignore_cores=ignore_cores, max_core_id=max_core_id)
+        connections=connections, shut_down_connections=True,
+        ignore_chips=ignore_chips, ignore_cores=ignore_cores,
+        max_core_id=max_core_id)
 
 
 class Transceiver(object):
@@ -215,6 +232,7 @@ class Transceiver(object):
         if not shut_down_connections:
             self.connections_to_not_shut_down = set(connections)
         self._boot_connection = None
+        self._bmp_connections = dict()
         self._receiving_connections = dict()
         self._sending_connections = dict()
         self._sort_out_connections(connections)
@@ -264,6 +282,10 @@ class Transceiver(object):
                     "connection", "", "")
             else:
                 self._boot_connection = connection
+
+        # locate the bmp connections
+        if isinstance(connection, UDPBMPConnection):
+            self._bmp_connections[connection.local_port] = connection
 
         # check if connection is a receive or sender or both connection
         # check if the connection can receive and is not using a already
@@ -843,7 +865,7 @@ class Transceiver(object):
         :param timeout: The timeout for each retry in seconds
         :type timeout: int
         :return: The version identifier
-        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
+        :rtype: :py:class:`spinnman.model.scamp_version_info.ScampVersionInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
@@ -889,7 +911,7 @@ class Transceiver(object):
         :param n_retries: The number of times to retry booting
         :type n_retries: int
         :return: The version identifier
-        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
+        :rtype: :py:class:`spinnman.model.scamp_version_info.ScampVersionInfo`
         :raise: spinnman.exceptions.SpinnmanIOException:
                     * If there is a problem booting the board
                     * If the version of software on the board is not\

@@ -29,9 +29,12 @@ SYSTEM_VARIABLE_BYTES = 256
 
 # The max size a udp packet can be
 UDP_MESSAGE_MAX_SIZE = 256
-EIEIO_COMMAND_HEADER_SIZE = 3
-EIEIO_DATA_HEADER_SIZE = 2
 
+# the amount of size in bytes that the EIEIO command header is
+EIEIO_COMMAND_HEADER_SIZE = 3
+
+# The amount of size in bytes the EIEIO data header is
+EIEIO_DATA_HEADER_SIZE = 2
 
 # how many bytes the cpu info data takes up
 CPU_INFO_BYTES = 128
@@ -50,8 +53,18 @@ CONNECTION_TYPE = Enum(
            ("UDP_BOOT", 2),
            ("UDP_IPTAG", 3),
            ("UDP_SPINNAKER", 4),
-           ("USB", 5)])
+           ("UDP_BMP", 5),
+           ("USB", 6)])
 
+# types of data that is returned from a bmp_info SCP command.
+BMP_INFO_TYPE = Enum(
+    value="BMP_INFO_TYPE",
+    names=[("SERIAL", 0),
+           ("CAN_STATUS", 2),
+           ("ADC", 3),
+           ("IP_ADDR", 4)])
+
+# the different types of message types which spinnman supports
 TRAFFIC_TYPE = Enum(
     value="TRAFFIC_TYPE",
     names=[("SCP", 0),
@@ -60,6 +73,7 @@ TRAFFIC_TYPE = Enum(
            ("EIEIO_DATA", 3),
            ("EIEIO_COMMAND", 4)])
 
+# a listing of what spinnaker specific EIEIO commands there are.
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
     names=[

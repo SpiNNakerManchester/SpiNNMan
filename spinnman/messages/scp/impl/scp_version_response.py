@@ -1,7 +1,7 @@
 from spinnman.messages.scp.abstract_messages.abstract_scp_response import AbstractSCPResponse
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.model.version_info import VersionInfo
+from spinnman.model.scamp_version_info import ScampVersionInfo
 
 
 class SCPVersionResponse(AbstractSCPResponse):
@@ -23,12 +23,12 @@ class SCPVersionResponse(AbstractSCPResponse):
             raise SpinnmanUnexpectedResponseCodeException(
                 "Version", "CMD_VER", result.name)
         data = byte_reader.read_bytes()
-        self._version_info = VersionInfo(data)
+        self._version_info = ScampVersionInfo(data)
 
     @property
     def version_info(self):
         """ The version information received
 
-        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
+        :rtype: :py:class:`spinnman.model.scamp_version_info.ScampVersionInfo`
         """
         return self._version_info

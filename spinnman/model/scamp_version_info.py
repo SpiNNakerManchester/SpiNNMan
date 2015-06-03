@@ -17,7 +17,7 @@ def _get_short_from_bytearray(array, offset):
     return _get_short_from_little_endian_bytearray(array, offset)
 
 
-class VersionInfo(object):
+class ScampVersionInfo(object):
     """ Decodes SC&MP/SARK version information as returned by the SVER command
     """
 
