@@ -1,7 +1,9 @@
+
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
+from spinnman.messages.scp.impl.scp_power_request import SCPPowerRequest
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
@@ -12,11 +14,7 @@ from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
     import UDPSpinnakerConnection
 from spinnman.connections.abstract_classes.abstract_udp_connection \
     import AbstractUDPConnection
-from spinnman.exceptions import SpinnmanUnsupportedOperationException
-from spinnman.exceptions import SpinnmanTimeoutException
-from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.exceptions import SpinnmanIOException
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman import exceptions
 from spinnman.messages.eieio.command_messages.eieio_command_message \
     import EIEIOCommandMessage
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
@@ -78,6 +76,8 @@ from spinnman.data.little_endian_byte_array_byte_writer \
 from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
 
+from spinnman import _utils
+
 # noinspection
 from spinnman.connections.listeners._connection_queue import _ConnectionQueue
 from _threads._scp_message_interface import SCPMessageInterface
@@ -94,8 +94,7 @@ from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
 from collections import deque
 from threading import Condition
-from socket import gethostbyname
-from socket import inet_aton
+import socket
 from multiprocessing.pool import ThreadPool
 
 import logging
@@ -109,8 +108,8 @@ _SCAMP_VERSION = 1.33
 
 
 def create_transceiver_from_hostname(
-        hostname, bmp_ip_addresses, version, ignore_chips=None,
-        ignore_cores=None, max_core_id=None):
+        hostname, bmp_ip_addresses, version, number_of_boards=1,
+        ignore_chips=None, ignore_cores=None, max_core_id=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -125,6 +124,9 @@ def create_transceiver_from_hostname(
                 excluded, as if they never existed.  The processor_ids of\
                 the specified chips are ignored.
     :type ignore_chips: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+    :param number_of_boards: the number of boards used to build the spinnaker
+                            machine
+    :type number_of_boards: int
     :param ignore_cores: An optional set of cores to ignore in the\
                 machine.  Requests for a "machine" will have these cores\
                 excluded, as if they never existed.
@@ -151,19 +153,35 @@ def create_transceiver_from_hostname(
                 a response indicates an error during the exchange
     """
     connections = list()
+    bmp_to_board_mapping = dict()
     # handle the possible multiple bmp connections
-    for bmp_ip_address in bmp_ip_addresses:
-        connections.append(UDPBMPConnection(remote_host=bmp_ip_address))
-    if len(bmp_ip_addresses)
+    for bmp_string in bmp_ip_addresses:
+        # split the ipadress from the board scope and define the dict
+        # accordingly
+        bmp_ip_address, boards = _utils.sort_out_bmp_string(bmp_string)
+        udp_bmp_connection = UDPBMPConnection(remote_host=bmp_ip_address)
+        bmp_to_board_mapping[udp_bmp_connection] = boards
+        connections.append(udp_bmp_connection)
+
+    # if no bmp has been supplied, but the board is a spinn4 or a spinn5
+    # machine, then an assumption can be made that the bmp is at -1 on the
+    # final value of the ipaddress
+    if len(bmp_ip_addresses) == 0 and version >= 4:
+        bmp_ip_address, boards = \
+            _utils.sort_out_bmp_from_machine(hostname, number_of_boards)
+        udp_bmp_connection = UDPBMPConnection(remote_host=bmp_ip_address)
+        bmp_to_board_mapping[udp_bmp_connection] = boards
+        connections.append(udp_bmp_connection)
+
     # handle the spinnaker connection
     connections.append(UDPSpinnakerConnection(remote_host=hostname))
     # handle the boot connection
     connections.append(UDPBootConnection(remote_host=hostname))
 
     return Transceiver(
-        connections=connections, shut_down_connections=True,
-        ignore_chips=ignore_chips, ignore_cores=ignore_cores,
-        max_core_id=max_core_id)
+        connections=connections, bmp_to_board_mapping=bmp_to_board_mapping,
+        shut_down_connections=True, ignore_chips=ignore_chips,
+        ignore_cores=ignore_cores, max_core_id=max_core_id)
 
 
 class Transceiver(object):
@@ -181,8 +199,8 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None,
+    def __init__(self, connections=None, bmp_to_board_mapping=None,
+                 ignore_chips=None, ignore_cores=None, max_core_id=None,
                  shut_down_connections=False, n_scp_threads=16,
                  n_other_threads=16):
         """
@@ -192,6 +210,10 @@ class Transceiver(object):
                     connections are found.
         :type connections: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+        :param bmp_to_board_mapping: dictonary containing the board mapping
+                    used via each bmp connection
+        :type bmp_to_board_mapping: dictonary with bmp-ipaddress as key and
+                    a int where each bit says if the board is covered in scope
         :param ignore_chips: An optional set of chips to ignore in the\
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
@@ -233,6 +255,7 @@ class Transceiver(object):
             self.connections_to_not_shut_down = set(connections)
         self._boot_connection = None
         self._bmp_connections = dict()
+        self._bmp_connection_to_board_mapping = bmp_to_board_mapping
         self._receiving_connections = dict()
         self._sending_connections = dict()
         self._sort_out_connections(connections)
@@ -266,7 +289,7 @@ class Transceiver(object):
 
             # validate that we're using udp connections
             if not isinstance(connection, AbstractUDPConnection):
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "this connection format is currently not supported in this"
                     "version of SpinnMan", "", "")
             else:
@@ -277,7 +300,7 @@ class Transceiver(object):
         # locate the only boot connection
         if isinstance(connection, UDPBootConnection):
             if self._boot_connection is not None:
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "this version of Spinnman only supports one boot"
                     "connection", "", "")
             else:
@@ -291,7 +314,7 @@ class Transceiver(object):
         # check if the connection can receive and is not using a already
         # used port
         if connection.local_port in self._receiving_connections:
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 "two connections are listening to packets from the "
                 "same port. This is deemed an error", "", "")
         else:
@@ -302,7 +325,7 @@ class Transceiver(object):
         if (connection.can_send and
                 not isinstance(connection, UDPBootConnection)):
             if connection.remote_port in self._sending_connections:
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "two connections are listening to packets from the "
                     "same port. This is deemed an error", "", "")
             else:
@@ -434,7 +457,7 @@ class Transceiver(object):
 
         # If no supported queue was found, raise an exception
         if best_connection_queue is None:
-            raise SpinnmanUnsupportedOperationException(
+            raise exceptions.SpinnmanUnsupportedOperationException(
                 "Sending and receiving {}".format(message.__class__))
 
         return best_connection_queue
@@ -452,7 +475,7 @@ class Transceiver(object):
         if isinstance(message, EIEIOCommandMessage):
             self._send_message(message, False, connection)
         else:
-            raise SpinnmanUnsupportedOperationException(
+            raise exceptions.SpinnmanUnsupportedOperationException(
                 "Sending and receiving {}".format(message.__class__))
 
     def send_sdp_message(self, message, connection=None):
@@ -468,7 +491,7 @@ class Transceiver(object):
         if isinstance(message, SDPMessage):
             self._send_message(message, False, connection)
         else:
-            raise SpinnmanUnsupportedOperationException(
+            raise exceptions.SpinnmanUnsupportedOperationException(
                 "Sending and receiving {}".format(message.__class__))
 
     def _send_message(self, message, response_required, connection=None,
@@ -710,7 +733,8 @@ class Transceiver(object):
                         search.append(
                             (new_chip, new_chip_details.links_available))
 
-                except SpinnmanUnexpectedResponseCodeException as error:
+                except exceptions.SpinnmanUnexpectedResponseCodeException \
+                        as error:
 
                     # If there is an error, assume the link is down
                     logger.debug("Error searching down link {}".format(link))
@@ -754,7 +778,7 @@ class Transceiver(object):
                     chip_y=ethernet_connected_chip.y)
                 new_connections.append(new_connection)
                 if key in self._sending_connections.keys():
-                    raise SpinnmanInvalidParameterException(
+                    raise exceptions.SpinnmanInvalidParameterException(
                         "The new spinnaker connection is using a remote port "
                         "and hostname that is already in use, please adjust "
                         "this and try again ", "", "")
@@ -764,7 +788,7 @@ class Transceiver(object):
 
                 # test receiving side of connection
                 if new_connection.local_port in self._receiving_connections:
-                    raise SpinnmanInvalidParameterException(
+                    raise exceptions.SpinnmanInvalidParameterException(
                         "The new spinnaker connection is using a local port "
                         "that is already in use, please adjust "
                         "this and try again ", "", "")
@@ -879,13 +903,24 @@ class Transceiver(object):
             n_retries=n_retries, timeout=timeout)
         return response.version_info
 
-    def boot_board(self, board_version):
+    def boot_board(
+            self, board_version, number_of_boards, max_machines_x_dimension,
+            max_machines_y_dimension):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
 
         :param board_version: The version of the board e.g. 3 for a SpiNN-3\
                     board or 5 for a SpiNN-5 board.
         :type board_version: int
+        :param number_of_boards: the number of a speific board type that the
+                                spinnaker machine is built from
+        :type number_of_boards: int
+        :param max_machines_x_dimension: the max size dimension this machine
+                when booted should be in the x dimension
+        :type max_machines_x_dimension: int or None
+        :param max_machines_y_dimension: the max size dimension this machine
+                when booted should be in the y dimension
+        :type max_machines_y_dimension: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
@@ -893,13 +928,24 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         """
+        # start by powering up each bmp connection
+        for bmp_connection in self._bmp_connections:
+            boards = self._bmp_connection_to_board_mapping[bmp_connection]
+            self.power_on(boards, bmp_connection)
+
         logger.debug("Attempting to boot version {} board".format(
             board_version))
-        boot_messages = SpinnakerBootMessages(board_version)
+        boot_messages = SpinnakerBootMessages(
+            board_version, number_of_boards=number_of_boards,
+            max_machines_x_dimension=max_machines_x_dimension,
+            max_machines_y_dimension=max_machines_y_dimension)
         for boot_message in boot_messages.messages:
             self._send_message(boot_message, response_required=False)
 
-    def ensure_board_is_ready(self, board_version, n_retries=3):
+    def ensure_board_is_ready(
+            self, board_version, number_of_boards,
+            max_machines_x_dimension=None, max_machines_y_dimension=None,
+            n_retries=3):
         """ Ensure that the board is ready to interact with this version\
             of the transceiver.  Boots the board if not already booted and\
             verifies that the version of SCAMP running is compatible with\
@@ -908,6 +954,15 @@ class Transceiver(object):
         :param board_version: The version of the board e.g. 3 for a SpiNN-3\
                     board or 5 for a SpiNN-5 board.
         :type board_version: int
+        :param max_machines_x_dimension: the max size dimension this machine
+                when booted should be in the x dimension
+        :type max_machines_x_dimension: int or None
+        :param max_machines_y_dimension: the max size dimension this machine
+                when booted should be in the y dimension
+        :type max_machines_y_dimension: int
+        :param number_of_boards: the number of boards that this machine is
+                    constructed out of
+        :type number_of_boards: int
         :param n_retries: The number of times to retry booting
         :type n_retries: int
         :return: The version identifier
@@ -922,19 +977,21 @@ class Transceiver(object):
         while version_info is None and tries_to_go > 0:
             try:
                 version_info = self.get_scamp_version()
-            except SpinnmanTimeoutException:
-                self.boot_board(board_version)
+            except exceptions.SpinnmanTimeoutException:
+                self.boot_board(
+                    board_version, number_of_boards, max_machines_x_dimension,
+                    max_machines_y_dimension)
                 tries_to_go -= 1
-            except SpinnmanIOException:
-                raise SpinnmanUnexpectedResponseCodeException(
+            except exceptions.SpinnmanIOException:
+                raise exceptions.SpinnmanUnexpectedResponseCodeException(
                     "We currently cannot communicate with your board, please "
                     "rectify this, and try again", "", "")
 
         if version_info is None:
-            raise SpinnmanIOException("Could not boot the board")
+            raise exceptions.SpinnmanIOException("Could not boot the board")
         if (version_info.name != _SCAMP_NAME or
                 version_info.version_number != _SCAMP_VERSION):
-            raise SpinnmanIOException(
+            raise exceptions.SpinnmanIOException(
                 "The board is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
                 "required version is {} {}".format(
@@ -984,14 +1041,14 @@ class Transceiver(object):
             y = core_subset.y
 
             if not (x, y) in self._chip_info:
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "x, y", "{}, {}".format(x, y),
                     "Not a valid chip on the current machine")
             chip_info = self._chip_info[(x, y)]
 
             for p in core_subset.processor_ids:
                 if p not in chip_info.virtual_core_ids:
-                    raise SpinnmanInvalidParameterException(
+                    raise exceptions.SpinnmanInvalidParameterException(
                         "p", p, "Not a valid core on chip {}, {}".format(
                             x, y))
                 base_address = (chip_info.cpu_information_base_address +
@@ -1035,7 +1092,7 @@ class Transceiver(object):
 
         # check the chip exists in the infos
         if not (x, y) in self._chip_info:
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 "x, y", "{}, {}".format(x, y),
                 "Not a valid chip on the current machine")
 
@@ -1044,7 +1101,7 @@ class Transceiver(object):
 
         # check that p is a valid processor for this chip
         if p not in chip_info.virtual_core_ids:
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
 
         # locate the base address for this chip info
@@ -1329,13 +1386,13 @@ class Transceiver(object):
                     * If n_bytes is less than 0
         """
         if n_bytes is not None and n_bytes < 0:
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 "n_bytes", str(n_bytes), "Must be a positive integer")
 
         bytes_to_write = n_bytes
         data_to_write = data
         if isinstance(data, AbstractDataReader) and n_bytes is None:
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 "n_bytes", "None",
                 "n_bytes must be specified when data is an"
                 " AbstractDataReader")
@@ -1344,7 +1401,7 @@ class Transceiver(object):
         if isinstance(data, (int, long)) and n_bytes is None:
             bytes_to_write = 4
         if isinstance(data, (int, long)) and n_bytes > 4:
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 str(n_bytes), "n_bytes", "An integer is at most 4 bytes")
         if isinstance(data, (int, long)):
             data_to_write = bytearray(bytes_to_write)
@@ -1352,6 +1409,52 @@ class Transceiver(object):
                 data_to_write[i] = (data >> (8 * i)) & 0xFF
 
         return bytes_to_write, data_to_write
+
+    def power_on(self, boards, bmp_connection=None, bmp_ip_address=None):
+        """
+
+        :param boards:
+        :param bmp_connection:
+        :param bmp_ip_address:
+        :return:
+        """
+        self._power(True, boards, bmp_connection, bmp_ip_address)
+
+    def power_off(self, boards, bmp_connection=None, bmp_ip_address=None):
+        """
+
+        :param boards:
+        :param bmp_connection:
+        :param bmp_ip_address:
+        :return:
+        """
+        self._power(False, boards, bmp_connection, bmp_ip_address)
+
+    def _power(self, state, boards, bmp_connection=None, bmp_ip_address=None):
+        """
+
+        :param state:
+        :param boards:
+        :param bmp_connection:
+        :param bmp_ip_address:
+        :return:
+        """
+        if bmp_connection is None and bmp_ip_address is not None:
+            self.send_scp_message(SCPPowerRequest(
+                state=state, boards=boards, bmp_ip_address=bmp_ip_address))
+        elif bmp_connection is not None and bmp_ip_address is None:
+            self.send_scp_message(SCPPowerRequest(
+                state=state, boards=boards,
+                bmp_ip_address=bmp_connection.remote_host))
+        elif (bmp_connection is not None and bmp_ip_address is not None and
+                bmp_connection.remote_host == bmp_ip_address):
+            self.send_scp_message(SCPPowerRequest(
+                state=state, boards=boards, bmp_ip_address=bmp_ip_address))
+        else:
+            raise exceptions.SpinnmanInvalidParameterException(
+                "bmp_connections/bmp_ip_address", "None",
+                "Either the bmp_connection or the bmp_ip-address needs to"
+                " have a value, but both cnanot be None")
 
     def write_memory(self, x, y, base_address, data, n_bytes=None):
         """ Write to the SDRAM on the board
@@ -1865,7 +1968,7 @@ class Transceiver(object):
             connection = self.locate_spinnaker_connection_for_board_address(
                 ip_tag.board_address)
             if connection is None:
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "ip_tag", str(ip_tag),
                     "The given board address is not recognized")
             connections.append(connection)
@@ -1879,8 +1982,8 @@ class Transceiver(object):
             host_string = ip_tag.ip_address
             if host_string == "localhost" or host_string == ".":
                 host_string = connection.local_ip_address
-            ip_string = gethostbyname(host_string)
-            ip_address = bytearray(inet_aton(ip_string))
+            ip_string = socket.gethostbyname(host_string)
+            ip_address = bytearray(socket.inet_aton(ip_string))
 
             # Send the request
             thread = SCPMessageInterface(self, SCPIPTagSetRequest(
@@ -1918,7 +2021,7 @@ class Transceiver(object):
         if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT or
                 reverse_ip_tag.port ==
                 constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 "reverse_ip_tag.port", reverse_ip_tag.port,
                 "The port number for the reverese ip tag conflicts with"
                 " the spiNNaker system ports ({} and {})".format(
@@ -1932,7 +2035,7 @@ class Transceiver(object):
             connection = self.locate_spinnaker_connection_for_board_address(
                 reverse_ip_tag.board_address)
             if connection is None:
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "reverse_ip_tag", reverse_ip_tag,
                     "The given board address is not recognized")
             connections.append(connection)
@@ -2073,13 +2176,13 @@ class Transceiver(object):
             route_entry = 0
             for processor_id in route.processor_ids:
                 if processor_id > 26 or processor_id < 0:
-                    raise SpinnmanInvalidParameterException(
+                    raise exceptions.SpinnmanInvalidParameterException(
                         "route.processor_ids", str(route.processor_ids),
                         "Processor ids must be between 0 and 26")
                 route_entry |= (1 << (6 + processor_id))
             for link_id in route.link_ids:
                 if link_id > 5 or link_id < 0:
-                    raise SpinnmanInvalidParameterException(
+                    raise exceptions.SpinnmanInvalidParameterException(
                         "route.link_ids", str(route.link_ids),
                         "Link ids must be between 0 and 5")
                 route_entry |= (1 << link_id)
@@ -2103,7 +2206,7 @@ class Transceiver(object):
                                                         n_entries))
         base_address = alloc_response.base_address
         if base_address == 0:
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 "Allocation base address", str(base_address),
                 "Not enough space to allocate the entries")
 
@@ -2251,7 +2354,7 @@ class Transceiver(object):
         """
         data_to_send = diagnostic_filter.filter_word
         if position > constants.NO_ROUTER_DIAGNOSTIC_FILTERS:
-            raise SpinnmanInvalidParameterException(
+            raise exceptions.SpinnmanInvalidParameterException(
                 "position", str(position), "the range of the position of a "
                                            "router filter is 0 and 16.")
         if position <= constants.ROUTER_DEFAULT_FILTERS_MAX_POSITION:
@@ -2332,7 +2435,7 @@ class Transceiver(object):
         clear_data = 0
         for counter_id in counter_ids:
             if counter_id < 0 or counter_id > 15:
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "counter_id", counter_id, "Diagnostic counter ids must be"
                                               " between 0 and 15")
             clear_data |= 1 << counter_id
@@ -2369,7 +2472,7 @@ class Transceiver(object):
                     * If there is no connection that can make the packet\
                       arrive at the selected chip (ignoring routing tables)
         """
-        raise SpinnmanUnsupportedOperationException(
+        raise exceptions.SpinnmanUnsupportedOperationException(
             "This operation is currently not supported in spinnman.")
 
     def receive_multicast_message(self, x, y, timeout=None, connection=None):
@@ -2406,7 +2509,7 @@ class Transceiver(object):
                     * If the timeout value is not valid
                     * If the received packet has an invalid parameter
         """
-        raise SpinnmanUnsupportedOperationException(
+        raise exceptions.SpinnmanUnsupportedOperationException(
             "This operation is currently not supported in spinnman.")
 
     def close(self, close_original_connections=True):
@@ -2454,7 +2557,7 @@ class Transceiver(object):
             if connection_type == connection.connection_type():
                 connection.register_callback(callback)
             else:
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "There is already a connection on this port number which "
                     "does not support reception of this message type. Please "
                     "try again with antoher port number", "", "")
@@ -2468,7 +2571,7 @@ class Transceiver(object):
                 connection.register_callback(callback, traffic_type)
                 self._receiving_connections[recieve_port_no] = connection
             else:
-                raise SpinnmanInvalidParameterException(
+                raise exceptions.SpinnmanInvalidParameterException(
                     "Currently spinnman does not know how to register a "
                     "callback to a connection of type {}."
                     .format(connection_type), "", "")

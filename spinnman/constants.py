@@ -45,6 +45,30 @@ CPU_USER_0_START_ADDRESS = 112
 # default udp tag
 DEFAULT_SDP_TAG = 0xFF
 
+# The range of values the BMP's 12-bit ADCs can measure.
+BMP_ADC_MAX = 1 << 12
+
+# Multiplier to convert from ADC value to volts for lines less than 2.5 V.
+BMP_V_SCALE_2_5 = 2.5 / BMP_ADC_MAX
+
+# Multiplier to convert from ADC value to volts for 3.3 V lines.
+BMP_V_SCALE_3_3 = 3.75 / BMP_ADC_MAX
+
+# Multiplier to convert from ADC value to volts for 12 V lines.
+BMP_V_SCALE_12 = 15.0 / BMP_ADC_MAX
+
+# Multiplier to convert from temperature probe values to degrees Celsius.
+BMP_TEMP_SCALE = 1.0 / 256.0
+
+# Temperature value returned when a probe is not connected.
+BMP_MISSING_TEMP = -0x8000
+
+# Fan speed value returned when a fan is absent.
+BMP_MISSING_FAN = -1
+
+# Additional timeout for BMP power-on commands to reply.
+BMP_POWER_ON_TIMEOUT = 5.0
+
 # connection types
 CONNECTION_TYPE = Enum(
     value="CONNECTION_TYPE",

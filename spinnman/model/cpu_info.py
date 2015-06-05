@@ -2,21 +2,21 @@ from spinnman.model.cpu_state import CPUState
 from spinnman.model.run_time_error import RunTimeError
 from spinnman.model.mailbox_command import MailboxCommand
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman._utils import _get_int_from_little_endian_bytearray
-from spinnman._utils import _get_short_from_little_endian_bytearray
+from spinnman._utils import get_int_from_little_endian_bytearray
+from spinnman._utils import get_short_from_little_endian_bytearray
 from spinnman import constants
 
 
 def _get_int_from_bytearray(array, offset):
     """ Wrapper function in case the endianness changes
     """
-    return _get_int_from_little_endian_bytearray(array, offset)
+    return get_int_from_little_endian_bytearray(array, offset)
 
 
 def _get_short_from_bytearray(array, offset):
     """ Wrapper function in case the endianness changes
     """
-    return _get_short_from_little_endian_bytearray(array, offset)
+    return get_short_from_little_endian_bytearray(array, offset)
 
 CPU_INFO_BYTES = 128
 CPU_USER_0_START_ADDRESS = 112

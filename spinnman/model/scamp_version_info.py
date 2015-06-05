@@ -1,6 +1,6 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman._utils import _get_int_from_little_endian_bytearray
-from spinnman._utils import _get_short_from_little_endian_bytearray
+from spinnman._utils import get_int_from_little_endian_bytearray
+from spinnman._utils import get_short_from_little_endian_bytearray
 from time import localtime
 from time import asctime
 
@@ -8,13 +8,13 @@ from time import asctime
 def _get_int_from_bytearray(array, offset):
     """ Wrapper function in case the endianness changes
     """
-    return _get_int_from_little_endian_bytearray(array, offset)
+    return get_int_from_little_endian_bytearray(array, offset)
 
 
 def _get_short_from_bytearray(array, offset):
     """ Wrapper function in case the endianness changes
     """
-    return _get_short_from_little_endian_bytearray(array, offset)
+    return get_short_from_little_endian_bytearray(array, offset)
 
 
 class ScampVersionInfo(object):

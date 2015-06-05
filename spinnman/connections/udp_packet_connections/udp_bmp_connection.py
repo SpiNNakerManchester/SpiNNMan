@@ -30,6 +30,9 @@ class UDPBMPConnection(
     def __init__(self, local_host=None, local_port=None, remote_host=None):
         AbstractUDPConnection.__init__(
             self, local_host, local_port, remote_host, constants.SCP_SCAMP_PORT)
+        # check that the udp bmp connection is actually connected to a bmp via
+        # the sver command
+
 
     def supports_sends_message(self, message):
         """
@@ -38,8 +41,10 @@ class UDPBMPConnection(
         :param message: message to check if valid to send
         :return: true if valid, false otherwise
         """
-        if (isinstance(message, SDPMessage) or
-                isinstance(message, AbstractSCPBMPRequest)):
+        if (isinstance(message, AbstractSCPBMPRequest) and
+                message.bmp_ip_address == self._remote_ip_address):
+            return True
+        if isinstance(message, SDPMessage):
             return True
         else:
             return False
