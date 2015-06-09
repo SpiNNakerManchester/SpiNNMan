@@ -7,11 +7,13 @@ from spinnman import constants
 from spinnman.connections.abstract_classes.abstract_udp_connection import \
     AbstractUDPConnection
 from spinnman.connections.abstract_classes.udp_receivers.\
-    abstract_udp_scp_receiver import AbstractUDPSCPReceiver
+    abstract_udp_scp_bmp_receiver import \
+    AbstractUDPSCPBMPReceiver
 from spinnman.connections.abstract_classes.udp_receivers.\
     abstract_udp_sdp_receiver import AbstractUDPSDPReceiver
 from spinnman.connections.abstract_classes.udp_senders.\
-    abstract_udp_scp_sender import AbstractUDPSCPSender
+    abstract_udp_scp_bmp_sender import \
+    AbstractUDPSCPBMPSender
 from spinnman.connections.abstract_classes.udp_senders.\
     abstract_udp_sdp_sender import AbstractUDPSDPSender
 from spinnman.messages.scp.abstract_messages.abstract_scp_bmp_request import \
@@ -21,7 +23,7 @@ from spinnman.messages.sdp.sdp_message import SDPMessage
 
 class UDPBMPConnection(
         AbstractUDPConnection, AbstractUDPSDPReceiver, AbstractUDPSDPSender,
-        AbstractUDPSCPSender, AbstractUDPSCPReceiver):
+        AbstractUDPSCPBMPSender, AbstractUDPSCPBMPReceiver):
     """
     the BMP connection which supports queries to the bmp connection of a
     spinnaker machine.
@@ -30,9 +32,6 @@ class UDPBMPConnection(
     def __init__(self, local_host=None, local_port=None, remote_host=None):
         AbstractUDPConnection.__init__(
             self, local_host, local_port, remote_host, constants.SCP_SCAMP_PORT)
-        # check that the udp bmp connection is actually connected to a bmp via
-        # the sver command
-
 
     def supports_sends_message(self, message):
         """
@@ -41,8 +40,7 @@ class UDPBMPConnection(
         :param message: message to check if valid to send
         :return: true if valid, false otherwise
         """
-        if (isinstance(message, AbstractSCPBMPRequest) and
-                message.bmp_ip_address == self._remote_ip_address):
+        if isinstance(message, AbstractSCPBMPRequest):
             return True
         if isinstance(message, SDPMessage):
             return True
@@ -58,13 +56,6 @@ class UDPBMPConnection(
 
 
     def is_sdp_reciever(self):
-        """
-        helper method for isinstance
-        :return:
-        """
-        return True
-
-    def is_udp_scp_sender(self):
         """
         helper method for isinstance
         :return:
@@ -92,7 +83,21 @@ class UDPBMPConnection(
         """
         return True
 
-    def is_udp_scp_receiver(self):
+    def is_udp_scp_sender(self):
+        """
+        helper method for isinstance
+        :return:
+        """
+        return True
+
+    def is_udp_scp_bmp_sender(self):
+        """
+        helper method for isinstance
+        :return:
+        """
+        return True
+
+    def is_udp_scp_bmp_receiver(self):
         """
         helper method for isinstance
         :return:

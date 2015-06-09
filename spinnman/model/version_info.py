@@ -17,7 +17,7 @@ def _get_short_from_bytearray(array, offset):
     return get_short_from_little_endian_bytearray(array, offset)
 
 
-class ScampVersionInfo(object):
+class VersionInfo(object):
     """ Decodes SC&MP/SARK version information as returned by the SVER command
     """
 
@@ -31,14 +31,14 @@ class ScampVersionInfo(object):
         """
         if len(version_data) < 13:
             raise SpinnmanInvalidParameterException(
-                    "len(version_data)", len(version_data),
-                    "The length of the version data is too short")
+                "len(version_data)", str(len(version_data)),
+                "The length of the version data is too short")
 
         self._p = version_data[0]
         self._y = version_data[2]
         self._x = version_data[3]
-        self._version_number = (_get_short_from_bytearray(version_data, 6)
-                / 100.0)
+        self._version_number = \
+            (_get_short_from_bytearray(version_data, 6) / 100.0)
         self._build_date = _get_int_from_bytearray(version_data, 8)
 
         self._version_string = version_data[12:-1].decode("ascii")
@@ -46,8 +46,8 @@ class ScampVersionInfo(object):
             self._name, self._hardware = self._version_string.split("/")
         except ValueError as exception:
             raise SpinnmanInvalidParameterException(
-                    "version_string", self._version_string,
-                    "Incorrect format: {}".format(exception))
+                "version_string", self._version_string,
+                "Incorrect format: {}".format(exception))
 
     @property
     def name(self):
@@ -123,6 +123,6 @@ class ScampVersionInfo(object):
         return self._version_string
 
     def __str__(self):
-        return "[Version: {} {} at {}:{}:{}:{} (built {})]".format(self._name,
-                self._version_number, self._hardware, self._x, self._y,
-                self._p, asctime(localtime(self._build_date)))
+        return "[Version: {} {} at {}:{}:{}:{} (built {})]".format(
+            self._name, self._version_number, self._hardware, self._x, self._y,
+            self._p, asctime(localtime(self._build_date)))

@@ -150,7 +150,11 @@ def get_idead_size(number_of_boards, version):
     :param version: the board version being used
     :return: a dictory with x and y keys.
     """
-    if version == 4 or version == 5:
+
+    if number_of_boards == 1:
+        return _system_variable_boot_values.\
+            spinnaker_standard_board_to_machine_sizes[version]
+    elif version == 4 or version == 5:
         # fixme this could be a call to spinner, but would require spinny to be installed which requires multiple end user installs
         if number_of_boards % 3 != 0:
             raise exceptions.SpinnmanInvalidParameterException(
@@ -165,9 +169,6 @@ def get_idead_size(number_of_boards, version):
                 break
             w = (number_of_boards // 3) // h
             return {'x': w, 'y': h}
-    elif number_of_boards == 1:
-        return _system_variable_boot_values.\
-            spinnaker_standard_board_to_machine_sizes(version)
     else:
         raise exceptions.SpinnmanInvalidParameterException(
             "version", version, "{} is not a understandable board type for "
@@ -183,7 +184,7 @@ def sort_out_bmp_string(bmp_string):
     """
     bmp_string_split = bmp_string.split("/")
     if len(bmp_string_split) == 1:
-        return bmp_string, 1
+        return bmp_string, 0
     else:
         bmp_ip_address = bmp_string_split[0]
         # try splitting by - first
@@ -219,8 +220,8 @@ def sort_out_bmp_from_machine(hostname, number_of_boards):
     ip_string_bits = ipstring.split(".")
     # subtract one off the last bit of the ip address
     ip_string_bits[len(ip_string_bits) - 1] = \
-        int(ip_string_bits[len(ip_string_bits) - 1]) - 1
-    bmp_ip_address = "".join(ip_string_bits)
+        str(int(ip_string_bits[len(ip_string_bits) - 1]) - 1)
+    bmp_ip_address = ".".join(ip_string_bits)
     # add board scope for each split
     board_int = list()
     for board_value in range(number_of_boards):

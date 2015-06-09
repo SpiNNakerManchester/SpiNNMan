@@ -16,14 +16,12 @@ class ScpReadADCRequest(AbstractSCPBMPRequest):
     requests the data from the BMP including voltages and temperature.
     """
 
-    def __init__(self, board, fpga_num, bmp_ip_address):
+    def __init__(self, board, fpga_num):
         """
         request that sends a packet asking to read the adc register of the
         fpga
         :param board: which board to request the fpga's adc register from
         :param fpga_num: the fpga of the board to request the adc register from
-        :param bmp_ip_address: the ip address of the bmp connection this message
-        needs to go down
         :return:
         """
         AbstractSCPBMPRequest.__init__(
@@ -32,7 +30,6 @@ class ScpReadADCRequest(AbstractSCPBMPRequest):
                 destination_cpu=board, destination_chip_x=0,
                 destination_chip_y=0),
             SCPRequestHeader(command=SCPCommand.CMD_BMP_INFO),
-            bmp_ip_address=bmp_ip_address,
             argument_1=constants.BMP_INFO_TYPE.ADC, argument_2=4,
             argument_3=fpga_num)
 

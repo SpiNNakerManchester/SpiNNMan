@@ -5,6 +5,7 @@ from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
+from spinnman import constants
 
 _IPTAG_CLEAR = 3
 
@@ -25,7 +26,7 @@ class SCPIPTagClearRequest(AbstractSCPRequest):
                     * The chip-coordinates are out of range
                     * If the tag is not between 0 and 7
         """
-        if tag < 0 or tag > 7:
+        if tag < 0 or tag > constants.MAX_TAG_ID:
             raise SpinnmanInvalidParameterException(
                 "tag", str(tag), "Must be between 0 and 7")
 

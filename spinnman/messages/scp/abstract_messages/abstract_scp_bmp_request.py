@@ -13,8 +13,7 @@ class AbstractSCPBMPRequest(AbstractSCPRequest):
     """
 
     def __init__(
-            self, sdp_header, scp_request_header, bmp_ip_address,
-            argument_1=None, argument_2=None, argument_3=None, data=None):
+            self, sdp_header, scp_request_header, argument_1=None,
+            argument_2=None, argument_3=None, data=None):
         AbstractSCPRequest.__init__(self, sdp_header, scp_request_header,
                                     argument_1, argument_2, argument_3, data)
-        self._bmp_ip_address = bmp_ip_address

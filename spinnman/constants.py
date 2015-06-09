@@ -45,6 +45,9 @@ CPU_USER_0_START_ADDRESS = 112
 # default udp tag
 DEFAULT_SDP_TAG = 0xFF
 
+# max user requested tag value
+MAX_TAG_ID = 7
+
 # The range of values the BMP's 12-bit ADCs can measure.
 BMP_ADC_MAX = 1 << 12
 
@@ -67,7 +70,7 @@ BMP_MISSING_TEMP = -0x8000
 BMP_MISSING_FAN = -1
 
 # Additional timeout for BMP power-on commands to reply.
-BMP_POWER_ON_TIMEOUT = 5.0
+BMP_POWER_ON_TIMEOUT = 10.0
 
 # connection types
 CONNECTION_TYPE = Enum(
@@ -87,6 +90,13 @@ BMP_INFO_TYPE = Enum(
            ("CAN_STATUS", 2),
            ("ADC", 3),
            ("IP_ADDR", 4)])
+
+# types of actions for the leds from a set led request
+LEDS_ACTIONS = Enum(
+    value="BMP_SET_LED_ACTIONS",
+    names=[("ON", 3),
+           ("OFF", 2),
+           ("TOGGLE", 1)])
 
 # the different types of message types which spinnman supports
 TRAFFIC_TYPE = Enum(
