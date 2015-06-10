@@ -38,7 +38,8 @@ class ScpWriteFPGARegisterRequest(AbstractSCPBMPRequest):
         :return:
         """
 
-        super(ScpWriteFPGARegisterRequest, self).__init__(
+        AbstractSCPBMPRequest.__init__(
+            self,
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=board, destination_chip_x=0,

@@ -11,17 +11,16 @@ from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.sdp.sdp_header import SDPHeader
 
 
-class ScpReadADCRequest(AbstractSCPBMPRequest):
+class SCPReadADCRequest(AbstractSCPBMPRequest):
     """
     requests the data from the BMP including voltages and temperature.
     """
 
-    def __init__(self, board, fpga_num):
+    def __init__(self, board):
         """
         request that sends a packet asking to read the adc register of the
         fpga
         :param board: which board to request the fpga's adc register from
-        :param fpga_num: the fpga of the board to request the adc register from
         :return:
         """
         AbstractSCPBMPRequest.__init__(
@@ -30,8 +29,7 @@ class ScpReadADCRequest(AbstractSCPBMPRequest):
                 destination_cpu=board, destination_chip_x=0,
                 destination_chip_y=0),
             SCPRequestHeader(command=SCPCommand.CMD_BMP_INFO),
-            argument_1=constants.BMP_INFO_TYPE.ADC, argument_2=4,
-            argument_3=fpga_num)
+            argument_1=constants.BMP_INFO_TYPE.ADC)
 
     def get_scp_response(self):
         """

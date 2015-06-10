@@ -5,6 +5,7 @@ as well as boot size calculations
 
 # spinnman imports
 from spinnman import exceptions
+from spinnman.data.bmp_connection_data import BMPConnectionData
 from spinnman.messages.spinnaker_boot._system_variables import \
     _system_variable_boot_values
 
@@ -183,10 +184,14 @@ def sort_out_bmp_string(bmp_string):
     :return: the bmp ipaddress and the boards scope int
     """
     bmp_string_split = bmp_string.split("/")
+    # if there is no split, then assume its one board, located at position 0
     if len(bmp_string_split) == 1:
-        return bmp_string, 0
+        # verify that theres no cabinate and frame defs
+        bmp_string_split = bmp_string.split(";")
+        if len(bmp_string_split) == 1:
+            return BMPConnectionData(0, 0, bmp_string, 0)
     else:
-        bmp_ip_address = bmp_string_split[0]
+        cabinate_frame_ip_address = bmp_string_split[0].split(";")
         # try splitting by - first
         board_scope_split = bmp_string_split[1].split("-")
         if len(board_scope_split) == 1:
@@ -204,7 +209,29 @@ def sort_out_bmp_string(bmp_string):
         for board_value in board_scope_split:
             board_int.append(int(board_value))
 
-    return bmp_ip_address, board_int
+        return BMPConnectionData(
+            cabinate_frame_ip_address[0], cabinate_frame_ip_address[1],
+            cabinate_frame_ip_address[2], board_int)
+
+
+def update_mappers(
+        bmp_to_data_mapping, cabinat_frame_to_connection_mapping,
+        bmp_connection_data, udp_bmp_connection):
+    """
+    helper method for the transciever for updating data struct with connection
+    :param bmp_to_data_mapping: the connection to connection data mapper
+    :param cabinat_frame_to_connection_mapping: the cab frame to connection
+    mapper
+    :param bmp_connection_data: the connection data object
+    :param udp_bmp_connection: the bmp connection
+    :return: None
+    """
+    # update data mapper
+    bmp_to_data_mapping[udp_bmp_connection] = bmp_connection_data
+    # update cab frame mapper
+    cabinat_frame_to_connection_mapping[
+        (bmp_connection_data.cabinate,
+         bmp_connection_data.frame)] = udp_bmp_connection
 
 
 def sort_out_bmp_from_machine(hostname, number_of_boards):

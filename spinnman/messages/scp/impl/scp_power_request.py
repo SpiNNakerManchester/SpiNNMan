@@ -24,7 +24,7 @@ class SCPPowerRequest(AbstractSCPBMPRequest):
         :type state: boolean
         :param board: the position of the boards in the rack that are to be
             powered on or off by this message
-        :type board: list of iterables
+        :type board: list of iterables or int
         :param delay: Number of seconds delay between power state changes of
             different boards.
         :type delay: int
