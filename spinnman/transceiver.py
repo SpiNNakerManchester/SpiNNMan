@@ -403,7 +403,7 @@ class Transceiver(object):
         checks that the discovered scamp connections are acutally usable
         :return:
         """
-        invalid_connection_keys = list()
+        invalid_connections = dict()
         for connection_key in self._sending_connections:
             connection = self._sending_connections[connection_key]
             if isinstance(connection, UDPSpinnakerConnection):
@@ -421,11 +421,12 @@ class Transceiver(object):
                                 "is not recongised!, please fix and try again",
                                 response)
                 except exceptions.SpinnmanTimeoutException:
-                    invalid_connection_keys.append(connection_key)  # drop connection
+                    invalid_connections[connection_key] = connection  # drop connection
                 except exceptions.SpinnmanIOException:
-                    invalid_connection_keys.append(connection_key)  # drop connection
-        for connection_key in invalid_connection_keys:
+                    invalid_connections[connection_key] = connection  # drop connection
+        for connection_key in invalid_connections:
             self._sending_connections.pop(connection_key)
+            self._connection_queues.pop(invalid_connections[connection_key])
 
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
@@ -891,8 +892,8 @@ class Transceiver(object):
                         new_connection
 
         # Update the connection queues after finding new connections
-        self._check_scamp_connections()
         self._update_connection_queues()
+        self._check_scamp_connections()
         logger.info(self._machine.cores_and_link_output_string())
         return new_connections
 

@@ -192,6 +192,16 @@ def sort_out_bmp_string(bmp_string):
             return BMPConnectionData(0, 0, bmp_string, 0)
     else:
         cabinate_frame_ip_address = bmp_string_split[0].split(";")
+        # if no cabinate or frame, assume they are 0 0
+        if len(cabinate_frame_ip_address) == 1:
+            cabinate = 0
+            frame = 0
+            ip_address = cabinate_frame_ip_address[0]
+        else:
+            cabinate = cabinate_frame_ip_address[0]
+            frame = cabinate_frame_ip_address[1]
+            ip_address = cabinate_frame_ip_address[2]
+
         # try splitting by - first
         board_scope_split = bmp_string_split[1].split("-")
         if len(board_scope_split) == 1:
@@ -209,9 +219,7 @@ def sort_out_bmp_string(bmp_string):
         for board_value in board_scope_split:
             board_int.append(int(board_value))
 
-        return BMPConnectionData(
-            cabinate_frame_ip_address[0], cabinate_frame_ip_address[1],
-            cabinate_frame_ip_address[2], board_int)
+        return BMPConnectionData(cabinate, frame, ip_address, board_int)
 
 
 def update_mappers(
