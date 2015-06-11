@@ -36,7 +36,8 @@ setup(
               'spinnman.messages.spinnaker_boot._system_variables',
               'spinnman.messages.udp_utils',
               'spinnman.model',
-              'spinnman.re_injection_binary'],
+              'spinnman.re_injection_binary',
+              'spinnman.re_injection_binary.re_injection'],
     package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot']},
     install_requires=['six', 'enum34', 'SpiNNMachine >= 2015.003-rc-01']
 )
