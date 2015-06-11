@@ -600,9 +600,7 @@ class Transceiver(object):
         # Create the chip
         chip = Chip(
             x=chip_details.x, y=chip_details.y, processors=processors,
-            router=router, sdram=SDRAM(
-                user_base_address=chip_details.sdram_base_address,
-                system_base_address=chip_details.system_sdram_base_address),
+            router=router, sdram=SDRAM(SDRAM.DEFAULT_SDRAM_BYTES),
             ip_address=chip_details.ip_address,
             nearest_ethernet_x=chip_details.nearest_ethernet_x,
             nearest_ethernet_y=chip_details.nearest_ethernet_y)
