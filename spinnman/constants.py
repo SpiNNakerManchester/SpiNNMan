@@ -72,6 +72,9 @@ BMP_MISSING_FAN = -1
 # Additional timeout for BMP power-on commands to reply.
 BMP_POWER_ON_TIMEOUT = 10.0
 
+# number of chips to check are booted fully from the middle
+NO_MIDDLE_CHIPS_TO_CHECK = 8
+
 # connection types
 CONNECTION_TYPE = Enum(
     value="CONNECTION_TYPE",

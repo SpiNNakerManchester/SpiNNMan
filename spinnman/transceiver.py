@@ -103,11 +103,12 @@ from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
 from collections import deque
 from threading import Condition
-import socket
 from multiprocessing.pool import ThreadPool
 
 import logging
 import math
+import time
+import socket
 
 
 logger = logging.getLogger(__name__)
@@ -116,11 +117,11 @@ _SCAMP_NAME = "SC&MP"
 _SCAMP_VERSION = 1.33
 
 _BMP_NAME = "BC&MP"
-_BMP_VERSION = 1.37
+_BMP_VERSIONS = [1.37, 1.36]
 
 
 def create_transceiver_from_hostname(
-        hostname, bmp_ip_addresses, version, number_of_boards=1,
+        hostname, bmp_ip_addresses, version, number_of_boards,
         ignore_chips=None, ignore_cores=None, max_core_id=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
@@ -131,14 +132,13 @@ def create_transceiver_from_hostname(
 
     :param hostname: The hostname or IP address of the board
     :type hostname: str
+    :param number_of_boards: a numebr o boards expected to eb supported, or None
+    :type number_of_boards: int or None
     :param ignore_chips: An optional set of chips to ignore in the\
                 machine.  Requests for a "machine" will have these chips\
                 excluded, as if they never existed.  The processor_ids of\
                 the specified chips are ignored.
     :type ignore_chips: :py:class:`spinnman.model.core_subsets.CoreSubsets`
-    :param number_of_boards: the number of boards used to build the spinnaker
-                            machine
-    :type number_of_boards: int
     :param ignore_cores: An optional set of cores to ignore in the\
                 machine.  Requests for a "machine" will have these cores\
                 excluded, as if they never existed.
@@ -316,6 +316,7 @@ class Transceiver(object):
         self._sort_out_connections(connections)
         self._update_connection_queues()
         self._check_udp_bmp_connections()
+        self.power_off_machine()
 
     def _sort_out_connections(self, connections):
         for connection in connections:
@@ -329,7 +330,12 @@ class Transceiver(object):
                 self._sort_out_udp_connections(connection)
 
     def _sort_out_udp_connections(self, connection):
-
+        """
+        looks though the udp conenctions and sorts them into bmp, scamp and
+        other types of connections
+        :param connection: the connection to check for its type of
+        :return:
+        """
         # locate the only boot connection
         if isinstance(connection, UDPBootConnection):
             if self._boot_connection is not None:
@@ -383,13 +389,16 @@ class Transceiver(object):
                     connection=self._bmp_connections[connection_port])
 
                 if (response.version_info.name != _BMP_NAME or
-                        response.version_info.version_number != _BMP_VERSION):
+                        response.version_info.version_number not in _BMP_VERSIONS):
                     raise exceptions.SpinnmanUnexpectedResponseCodeException(
                         operation="calling bmp connection with sver",
                         command="",
-                        response="got the wrong version information. recieved "
-                                 "{} instead of BC&MP 1.37 at Spin5-BMP:"
-                                 "1,240,0 (built Wed Feb 11 10:39:52 2015) [0]")
+                        response=
+                        "got the wrong version information. recieved "
+                        "{}:{} instead of {}:{}".format(
+                            response.version_info.name,
+                            response.version_info.version_number,
+                            _BMP_NAME, _BMP_VERSIONS),)
             # if it fails to respond due to timeout, maybe that the connection
             # isnt valid
             except exceptions.SpinnmanTimeoutException:
@@ -398,35 +407,51 @@ class Transceiver(object):
                     "please check that its connected and that the cfg file has "
                     "been configured correctly")
 
-    def _check_scamp_connections(self):
+    def _check_scamp_connections(self, retries=3):
         """
         checks that the discovered scamp connections are acutally usable
-        :return:
+        :return: None
         """
         invalid_connections = dict()
         for connection_key in self._sending_connections:
             connection = self._sending_connections[connection_key]
             if isinstance(connection, UDPSpinnakerConnection):
-                try:
-                    response = self.send_scp_message(
-                        message=SCPVersionRequest(x=0, y=0, p=0),
-                        connection=connection)
-                    if (response.version_info.name != _SCAMP_NAME or
-                            response.version_info.version_number !=
-                            _SCAMP_VERSION):
-                        raise exceptions.\
-                            SpinnmanUnexpectedResponseCodeException(
-                                "version",
-                                "The version returned from a scamp connection "
-                                "is not recongised!, please fix and try again",
-                                response)
-                except exceptions.SpinnmanTimeoutException:
-                    invalid_connections[connection_key] = connection  # drop connection
-                except exceptions.SpinnmanIOException:
-                    invalid_connections[connection_key] = connection  # drop connection
+                self._try_sver_though_scamp_connection(
+                    connection, connection_key, retries, invalid_connections)
         for connection_key in invalid_connections:
             self._sending_connections.pop(connection_key)
             self._connection_queues.pop(invalid_connections[connection_key])
+
+    def _try_sver_though_scamp_connection(
+            self, connection, connection_key, retries, invalid_connections):
+        """
+        tryies to query chip 0 0  from whatever chip this connection is conencted
+         to
+        :param connection: the connection to use for querying chip 0 0
+        :param connection_key: the connection key used in invalid_conenctions
+        :param retries: how many attemtps to do before giving up
+        :param invalid_connections: the list of invalid conenctions to remove
+        :return: None
+        """
+        response = None
+        current_retries = retries
+        while response is None and current_retries > 0:
+            try:
+                response = self.send_scp_message(
+                    message=SCPVersionRequest(x=0, y=0, p=0),
+                    connection=connection)
+            except exceptions.SpinnmanTimeoutException:
+                invalid_connections[connection_key] = connection  # drop connection
+            except exceptions.SpinnmanUnexpectedResponseCodeException:
+                current_retries -= 1
+            except exceptions.SpinnmanIOException:
+                invalid_connections[connection_key] = connection  # drop connection
+        if (response is not None and
+                (response.version_info.name != _SCAMP_NAME or
+                 response.version_info.version_number != _SCAMP_VERSION)):
+            raise exceptions.SpinnmanUnexpectedResponseCodeException(
+                "version", "The version returned from a scamp connection is not"
+                           " recongised!, please fix and try again", response)
 
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
@@ -860,7 +885,8 @@ class Transceiver(object):
         # that supports SCP - this is _done via the machine
         if len(self._sending_connections) == 0:
             return list()
-        self._update_machine()
+        if self._machine is None:
+            self._update_machine()
 
         # Find all the new connections via the machine ethernet-connected chips
         new_connections = list()
@@ -977,13 +1003,16 @@ class Transceiver(object):
                     return True
             return False
 
-    def get_scamp_version(self, n_retries=3, timeout=1):
+    def get_scamp_version(self, n_retries=3, timeout=1, chip_x=0, chip_y=0):
         """ Get the version of scamp which is running on the board
 
         :param n_retries: The number of times to retry getting the version
         :type n_retries: int
         :param timeout: The timeout for each retry in seconds
         :type timeout: int
+        :param chip_x: the chip's x coordinate to query for scamp version
+        :type chip_x: int
+        :param chip_y: the chip's y coordinate to query for scamp version
         :return: The version identifier
         :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -995,21 +1024,21 @@ class Transceiver(object):
                     (suggesting that the board is not booted)
         """
         response = self.send_scp_message(
-            message=SCPVersionRequest(x=0, y=0, p=0),
+            message=SCPVersionRequest(x=chip_x, y=chip_y, p=0),
             n_retries=n_retries, timeout=timeout)
         return response.version_info
 
     def boot_board(
-            self, board_version, number_of_boards, max_machines_x_dimension,
-            max_machines_y_dimension):
+            self, board_version, max_machines_x_dimension,
+            max_machines_y_dimension, number_of_boards):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
 
         :param board_version: The version of the board e.g. 3 for a SpiNN-3\
                     board or 5 for a SpiNN-5 board.
         :type board_version: int
-        :param number_of_boards: the number of a speific board type that the
-                                spinnaker machine is built from
+        :param number_of_boards: the number of boards that this machine is made
+        out of
         :type number_of_boards: int
         :param max_machines_x_dimension: the max size dimension this machine
                 when booted should be in the x dimension
@@ -1027,16 +1056,17 @@ class Transceiver(object):
         logger.debug("Attempting to boot version {} board".format(
             board_version))
         boot_messages = SpinnakerBootMessages(
-            board_version, number_of_boards=number_of_boards,
+            board_version,
             max_machines_x_dimension=max_machines_x_dimension,
-            max_machines_y_dimension=max_machines_y_dimension)
+            max_machines_y_dimension=max_machines_y_dimension,
+            number_of_boards=number_of_boards)
         for boot_message in boot_messages.messages:
             self._send_message(boot_message, response_required=False)
 
     def ensure_board_is_ready(
             self, board_version, number_of_boards,
             max_machines_x_dimension=None, max_machines_y_dimension=None,
-            n_retries=3):
+            n_retries=5):
         """ Ensure that the board is ready to interact with this version\
             of the transceiver.  Boots the board if not already booted and\
             verifies that the version of SCAMP running is compatible with\
@@ -1063,24 +1093,31 @@ class Transceiver(object):
                     * If the version of software on the board is not\
                       compatible with this transceiver
         """
-        version_info = None
-        tries_to_go = n_retries + 1
+
+        # if the machine sizes not been given, calculate from assumption
+        if (max_machines_x_dimension is None or
+                max_machines_y_dimension is None):
+            sizes = _utils.get_idead_size(number_of_boards, board_version)
+            max_machines_x_dimension = sizes['x']
+            max_machines_y_dimension = sizes['y']
+
         # try to get a scamp version
         logger.info("going to try to boot the machine with scamp")
         version_info = self._try_to_find_scamp_and_boot(
-            tries_to_go, board_version, number_of_boards,
+            n_retries, board_version, number_of_boards,
             max_machines_x_dimension, max_machines_y_dimension)
-        logger.info(
-            "failed to boot machine with scamp, trying to power on machine")
         if version_info is None:
+            logger.info(
+                "failed to boot machine with scamp, trying to power on machine")
             # start by powering up each bmp connection
             self._try_power_up_machine()
             logger.info("going to try to boot the machine with scamp")
             # retry to get a scamp version
             version_info = self._try_to_find_scamp_and_boot(
-                tries_to_go, board_version, number_of_boards,
+                n_retries, board_version, number_of_boards,
                 max_machines_x_dimension, max_machines_y_dimension)
 
+        # verify that the version is the expected one for this trnasciever
         if version_info is None:
             raise exceptions.SpinnmanIOException("Could not boot the board")
         if (version_info.name != _SCAMP_NAME or
@@ -1091,6 +1128,8 @@ class Transceiver(object):
                 "required version is {} {}".format(
                     version_info.name, version_info.version_number,
                     _SCAMP_NAME, _SCAMP_VERSION))
+        else:
+            logger.info("successfully booted the machine with scamp")
         return version_info
 
     def _try_power_up_machine(self):
@@ -1114,7 +1153,8 @@ class Transceiver(object):
         :param tries_to_go: how many attemtps should be supported
         :param board_version: what version of boards are being used to
         represnet the machine
-        :param number_of_boards: the number of boards used to build the machine
+        :param number_of_boards: the number of boards that this spinnaker
+        machine is built out of
         :param max_machines_x_dimension: the max size in x dimension this
         machine can be
         :param max_machines_y_dimension:the max size in y dimension this
@@ -1124,19 +1164,133 @@ class Transceiver(object):
         strnage response from the machine
         """
         version_info = None
-        while version_info is None and tries_to_go > 0:
+        current_tries_to_go = tries_to_go
+        while version_info is None and current_tries_to_go > 0:
             try:
                 version_info = self.get_scamp_version()
             except exceptions.SpinnmanTimeoutException:
                 self.boot_board(
-                    board_version, number_of_boards, max_machines_x_dimension,
-                    max_machines_y_dimension)
-                tries_to_go -= 1
+                    board_version, max_machines_x_dimension,
+                    max_machines_y_dimension, number_of_boards)
+                current_tries_to_go -= 1
             except exceptions.SpinnmanIOException:
                 raise exceptions.SpinnmanUnexpectedResponseCodeException(
                     "We currently cannot communicate with your board, please "
                     "rectify this, and try again", "", "")
+        # boot has been sent, and 0 0 is up and running, but there will need to
+        # be a delay whilst all the other chips complete boot.
+        if version_info is not None:
+            if self._machine is None:
+                self._update_machine()
+#########################################################################################################
+            # fixme needs removing, but allows test of chips
+            self._test_105()
+#########################################################################################################
+
+            current_tries_to_go = tries_to_go
+            version_info = self._wait_till_important_chips_are_fully_booted(
+                max_machines_x_dimension, max_machines_y_dimension,
+                current_tries_to_go)
         return version_info
+
+    def _test_105(self):
+        print "machine has {} chips, out of 5760 expected chips. " \
+              "Searching for missing chips".format(len(self._machine._chips))
+        for x in range(0, 95):
+            for y in range(0, 60):
+                if not self._machine.is_chip_at(x, y):
+                    print "chip {}:{} does not exist, but should do".format(x,y)
+
+    def _wait_till_important_chips_are_fully_booted(
+            self, max_machines_x_dimension, max_machines_y_dimension,
+            current_tries_to_go):
+        """
+        locate what it decides are important chips and waits till they are
+        booted
+        :param max_machines_x_dimension: the max dimension of the machine in the
+        x axis
+        :param max_machines_y_dimension: the max dimension of the machine in the
+        y axis
+        :return: the version info of the last important chip
+        """
+        version_info = None
+        # check if the machine is wrap arounds
+        chips_to_check = list()
+        if self._check_if_machine_has_wrap_arounds():
+            # locate the set of middle chips that need to be checked
+            # before boot is finished
+            chips_to_check = _utils.locate_middle_chips_to_query(
+                max_machines_x_dimension, max_machines_y_dimension,
+                self._machine, constants.NO_MIDDLE_CHIPS_TO_CHECK)
+        else:
+            # locate the top most corner chip
+            chips_to_check.append(self._machine.get_chip_at(
+                max_machines_x_dimension - 1, max_machines_y_dimension - 1))
+
+        # check each chip required to ensure boot is finished
+        for chip_to_check in chips_to_check:
+            version_info = None
+            while version_info is None and current_tries_to_go > 0:
+                try:
+                    version_info = self.get_scamp_version(
+                        chip_x=chip_to_check.x,
+                        chip_y=chip_to_check.y)
+                except exceptions.SpinnmanTimeoutException:
+                    # back off a little and try again
+                    current_tries_to_go -= 1
+                    time.sleep(0.5)
+                except exceptions.SpinnmanUnexpectedResponseCodeException:
+                    # back off a little and try again
+                    current_tries_to_go -= 1
+                    time.sleep(0.5)
+                except exceptions.SpinnmanIOException:
+                    raise exceptions.SpinnmanUnexpectedResponseCodeException(
+                        "We currently cannot communicate with your board, "
+                        "please rectify this, and try again", "", "")
+            if version_info is None:
+                logger.warn(
+                    "we could not get a sver from chip {}:{}. It may not be "
+                    "operating properly".format(
+                        chip_to_check.x, chip_to_check.y))
+        return version_info
+
+    def _check_if_machine_has_wrap_arounds(self):
+        """
+        queries the machine's 0 0  chip's links to ensure if the machine is
+        acutally a torioid and thus has wrap around links or is a flat fabric
+        :return: true if a wraparound torioud, false otherwise
+         :rtype: bool
+        """
+        left_wrap_around = False
+        try:
+            # try the left and then bottom link
+            self.send_scp_message(SCPReadLinkRequest(
+                x=0, y=0, cpu=0, link=3,
+                base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
+                size=constants.SYSTEM_VARIABLE_BYTES))
+            left = True
+            self.send_scp_message(SCPReadLinkRequest(
+                x=0, y=0, cpu=0, link=4,
+                base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
+                size=constants.SYSTEM_VARIABLE_BYTES))
+            return True
+        except exceptions.SpinnmanUnexpectedResponseCodeException:
+            # if the left wrap around works, but bottom does not, then some
+            # sort of wrapa round exists, better to be save and say it does
+            if left_wrap_around:
+                return True
+            else:
+                # left doesnt exist, but not tested bottom
+                try:
+                    self.send_scp_message(SCPReadLinkRequest(
+                        x=0, y=0, cpu=0, link=4,
+                        base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
+                        size=constants.SYSTEM_VARIABLE_BYTES))
+                    # some sort of wrap around exists, better be save and say
+                    # there is a wrap around
+                    return True
+                except exceptions.SpinnmanUnexpectedResponseCodeException:
+                    return False
 
     def get_cpu_information(self, core_subsets=None):
         """ Get information about the processors on the board
@@ -1613,6 +1767,8 @@ class Transceiver(object):
                 .format(cabinate, frame), "")
         self.send_scp_message(message, timeout=constants.BMP_POWER_ON_TIMEOUT,
                               n_retries=0, connection=bmp_connection)
+        # give a 10 second sleep to ensure all boards are pwoered on properly
+        #time.sleep(10.0)
 
     def set_led(self, led, action, board, cabinate, frame):
         """
@@ -2798,6 +2954,22 @@ class Transceiver(object):
         """
         raise exceptions.SpinnmanUnsupportedOperationException(
             "This operation is currently not supported in spinnman.")
+
+    @property
+    def number_of_boards_located(self):
+        """
+        returns how many boards are currently being supported by the spinnman
+        interface
+        :return:
+        """
+        boards = 0
+        for bmp_connection in self._bmp_connection_to_bmp_data_mapping:
+            bmp_connection_data = \
+                self._bmp_connection_to_bmp_data_mapping[bmp_connection]
+            boards += len(bmp_connection_data.boards)
+        return boards
+
+
 
     def close(self, close_original_connections=True):
         """ Close the transceiver and any threads that are running

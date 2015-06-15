@@ -156,7 +156,6 @@ def get_idead_size(number_of_boards, version):
         return _system_variable_boot_values.\
             spinnaker_standard_board_to_machine_sizes[version]
     elif version == 4 or version == 5:
-        # fixme this could be a call to spinner, but would require spinny to be installed which requires multiple end user installs
         if number_of_boards % 3 != 0:
             raise exceptions.SpinnmanInvalidParameterException(
                 "number_of_boards", number_of_boards,
@@ -165,11 +164,12 @@ def get_idead_size(number_of_boards, version):
         if number_of_boards == 0:
             return {'x': 0, 'y': 0}
         # Find the largest pair of factors to discover the squarest system
+        h = 0
         for h in reversed(range(1, int(math.sqrt(number_of_boards // 3)) + 1)):  # pragma: no branch
             if (number_of_boards // 3) % h == 0:
                 break
-            w = (number_of_boards // 3) // h
-            return {'x': w, 'y': h}
+        w = (number_of_boards // 3) // h
+        return {'x': w * 12, 'y': h * 12}  # convert from triads to chip size
     else:
         raise exceptions.SpinnmanInvalidParameterException(
             "version", version, "{} is not a understandable board type for "
@@ -189,7 +189,7 @@ def sort_out_bmp_string(bmp_string):
         # verify that theres no cabinate and frame defs
         bmp_string_split = bmp_string.split(";")
         if len(bmp_string_split) == 1:
-            return BMPConnectionData(0, 0, bmp_string, 0)
+            return BMPConnectionData(0, 0, bmp_string, [0])
     else:
         cabinate_frame_ip_address = bmp_string_split[0].split(";")
         # if no cabinate or frame, assume they are 0 0
@@ -207,12 +207,17 @@ def sort_out_bmp_string(bmp_string):
         if len(board_scope_split) == 1:
             # assume seperated by , instead
             board_scope_split = bmp_string_split[1].split(",")
+            if len(board_scope_split) == 1:
+                # assume no boards given, so one board at position 0
+                board_scope_split = list()
+                board_scope_split.append(0)
         else:
             # get range into same format as list, for ease later
             new_values = list()
             for value in range(int(board_scope_split[0]),
-                               int(board_scope_split[1])):
+                               int(board_scope_split[1]) + 1):
                 new_values.append(value)
+            board_scope_split = new_values
 
         # add board scope for each split
         board_int = list()
@@ -220,6 +225,25 @@ def sort_out_bmp_string(bmp_string):
             board_int.append(int(board_value))
 
         return BMPConnectionData(cabinate, frame, ip_address, board_int)
+
+
+def locate_middle_chips_to_query(
+        max_x_dimension, max_y_dimension, machine, size_of_search_list):
+    """
+    helper method that deduces what chips to query to ensure the
+    :param max_x_dimension: the max size of the machine in the x dimension
+    :param max_y_dimension: the max size of the machine in the y dimension
+    :param size_of_search_list: how many chips it needs to report back
+    :param machine: the spinnaker machine object
+    :return: a list of chips to query
+    """
+    middle_chip_x = round(max_x_dimension / 2)
+    middle_chip_y = round(max_y_dimension / 2)
+    middle_chip = machine.get_cloest_chip_to(middle_chip_x, middle_chip_y)
+
+    return machine.generate_radial_chips(
+        start_chip_x=middle_chip.x, start_chip_y=middle_chip.y,
+        size_of_list=size_of_search_list)
 
 
 def update_mappers(
@@ -259,6 +283,11 @@ def sort_out_bmp_from_machine(hostname, number_of_boards):
     bmp_ip_address = ".".join(ip_string_bits)
     # add board scope for each split
     board_int = list()
-    for board_value in range(number_of_boards):
-        board_int.append(int(board_value))
+    # if 0, the end user didnt enter anything, so assume one board starting
+    # at position 0
+    if number_of_boards == 0:
+        board_int.append(int(0))
+    else:
+        for board_value in range(number_of_boards):
+            board_int.append(int(board_value))
     return bmp_ip_address, board_int

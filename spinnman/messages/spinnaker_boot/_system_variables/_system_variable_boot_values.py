@@ -24,7 +24,7 @@ class _Definition(namedtuple("_Definition",
             cls, offset, data_type, default, array_size, doc)
 
 
-class _SystemVariableDefinition(Enum):
+class SystemVariableDefinition(Enum):
     """ Defines the system variables available
     """
 
@@ -253,20 +253,20 @@ class SystemVariableBootValues(object):
 
         # Create a dict of variable values
         self._values = dict()
-        for variable in _SystemVariableDefinition:
+        for variable in SystemVariableDefinition:
             self._values[variable] = variable.default
 
-        self._values[_SystemVariableDefinition.hardware_version] =\
+        self._values[SystemVariableDefinition.hardware_version] =\
                 hardware_version
-        self._values[_SystemVariableDefinition.cpu_clock_frequency_mhz] =\
+        self._values[SystemVariableDefinition.cpu_clock_frequency_mhz] =\
                 cpu_clock_frequency_mhz
-        self._values[_SystemVariableDefinition.led_0] = led_0
+        self._values[SystemVariableDefinition.led_0] = led_0
 
     def set_value(self, system_variable_definition, value):
         self._values[system_variable_definition] = value
 
     def write_values(self, byte_writer):
-        for sys_var in _SystemVariableDefinition:
+        for sys_var in SystemVariableDefinition:
             if sys_var.data_type == _DataType.BYTE:
                 byte_writer.write_byte(self._values[sys_var])
             elif sys_var.data_type == _DataType.SHORT:
@@ -294,5 +294,14 @@ spinnaker_standard_board_to_machine_sizes = {
     3: {'x': 2, 'y': 2},
     4: {'x': 8, 'y': 8},
     5: {'x': 8, 'y': 8}}
+
+spinnaker_multi_board_extra_configs = {
+    6: {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
+        SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01100a42},
+    24: {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
+         SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01100a42},
+    120: {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
+          SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01140852,
+          SystemVariableDefinition.probe_timer: 0x010a6401}}
 
 

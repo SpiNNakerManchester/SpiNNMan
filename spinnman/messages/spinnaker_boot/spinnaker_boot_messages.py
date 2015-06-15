@@ -3,11 +3,11 @@ SpinnakerBootMessages
 """
 
 # spinnman imports
+from spinnman.messages.spinnaker_boot._system_variables import \
+    _system_variable_boot_values as variable_boot_values
 from spinnman.messages.spinnaker_boot._system_variables.\
-    _system_variable_boot_values import spinnaker_boot_values, \
-    spinnaker_standard_board_to_machine_sizes
-from spinnman.messages.spinnaker_boot._system_variables.\
-    _system_variable_boot_values import _SystemVariableDefinition
+    _system_variable_boot_values import \
+    SystemVariableDefinition
 from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
     import SpinnakerBootMessage
 from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
@@ -44,9 +44,10 @@ class SpinnakerBootMessages(object):
     """
 
     def __init__(
-            self, board_version, number_of_boards, max_machines_x_dimension,
-            max_machines_y_dimension):
+            self, board_version, max_machines_x_dimension,
+            max_machines_y_dimension, number_of_boards):
         """
+        builds the boot messages needed to boot the spinnaker machine
 
         :param board_version: The version of the board to be booted
         :type board_version: int
@@ -56,35 +57,43 @@ class SpinnakerBootMessages(object):
         :param max_machines_y_dimension: the max size dimension this machine
                 when booted should be in the y dimension
         :type max_machines_y_dimension: int
-        :param number_of_boards: the number of a speific board type that the
-                                spinnaker machine is built from
+        :param number_of_boards: the number of boards that this spinnaker
+            machine is built up from
         :type number_of_boards: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     board version is not supported
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     assembling the packets
         """
-        if board_version not in spinnaker_boot_values:
+        if board_version not in variable_boot_values.spinnaker_boot_values:
             raise SpinnmanInvalidParameterException(
                 "board_version", str(board_version), "Unknown board version")
 
         # Get the boot packet values
-        spinnaker_boot_value = spinnaker_boot_values[board_version]
-
-        # get the x and y dimensions of the machine
-        sizes = _utils.get_idead_size(number_of_boards, board_version)
+        spinnaker_boot_value = \
+            variable_boot_values.spinnaker_boot_values[board_version]
         
         current_time = int(time.time())
         spinnaker_boot_value.set_value(
-            _SystemVariableDefinition.unix_timestamp, current_time)
+            SystemVariableDefinition.unix_timestamp, current_time)
         spinnaker_boot_value.set_value(
-            _SystemVariableDefinition.boot_signature, current_time)
+            SystemVariableDefinition.boot_signature, current_time)
+        spinnaker_boot_value.set_value(SystemVariableDefinition.is_root_chip, 1)
         spinnaker_boot_value.set_value(
-            _SystemVariableDefinition.is_root_chip, 1)
+            SystemVariableDefinition.x_size, int(max_machines_x_dimension))
         spinnaker_boot_value.set_value(
-            _SystemVariableDefinition.x_size, sizes['x'])
-        spinnaker_boot_value.set_value(
-            _SystemVariableDefinition.y_size, sizes['y'])
+            SystemVariableDefinition.y_size, int(max_machines_y_dimension))
+
+        # add any updates for multi-board systems
+        if (number_of_boards in
+                variable_boot_values.spinnaker_multi_board_extra_configs):
+            extra_vairables_to_config = \
+                variable_boot_values.spinnaker_multi_board_extra_configs[
+                    number_of_boards]
+            for extra_vairables_to_config_key in extra_vairables_to_config:
+                spinnaker_boot_value.set_value(
+                    extra_vairables_to_config_key,
+                    extra_vairables_to_config[extra_vairables_to_config_key])
 
         boot_data_writer = LittleEndianByteArrayByteWriter()
         spinnaker_boot_value.write_values(boot_data_writer)
