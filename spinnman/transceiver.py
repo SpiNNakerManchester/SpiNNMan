@@ -316,7 +316,7 @@ class Transceiver(object):
         self._sort_out_connections(connections)
         self._update_connection_queues()
         self._check_udp_bmp_connections()
-        self.power_off_machine()
+        #self.power_off_machine()
 
     def _sort_out_connections(self, connections):
         for connection in connections:
