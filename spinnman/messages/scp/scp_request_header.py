@@ -8,7 +8,7 @@ class SCPRequestHeader(object):
         parameter that is not currently None.
     """
 
-    def __init__(self, command, sequence=None):
+    def __init__(self, command, sequence=0):
         """
 
         :param command: The SCP command

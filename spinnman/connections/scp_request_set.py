@@ -20,8 +20,8 @@ class SCPRequestSet(object):
         for which a reply has not been received can also timeout.
     """
 
-    def __init__(self, connection, n_channels=9,
-                 intermediate_channel_waits=5,
+    def __init__(self, connection, n_channels=4,
+                 intermediate_channel_waits=2,
                  retry_codes=set([SCPResult.RC_TIMEOUT,
                                   SCPResult.RC_P2P_TIMEOUT,
                                   SCPResult.RC_LEN]),
@@ -81,6 +81,7 @@ class SCPRequestSet(object):
 
         # The number of packets that have been resent
         self._n_resent = 0
+        self._n_retry_code_resent = 0
 
         # self._token_bucket = TokenBucket(43750, 4375000)
         # self._token_bucket = TokenBucket(3408, 700000)
@@ -143,6 +144,10 @@ class SCPRequestSet(object):
     def n_resent(self):
         return self._n_resent
 
+    @property
+    def n_retry_code_resent(self):
+        return self._n_retry_code_resent
+
     def _do_retrieve(self, n_packets, timeout):
         """ Receives responses until there are only n_packets responses left
 
@@ -168,6 +173,7 @@ class SCPRequestSet(object):
                     if result in self._retry_codes and self._retries[seq] > 0:
                         self._connection.send_scp_request(request_sent)
                         self._retries[seq] -= 1
+                        self._n_retry_code_resent += 1
                     else:
 
                         # No retry is possible - try constructing the result

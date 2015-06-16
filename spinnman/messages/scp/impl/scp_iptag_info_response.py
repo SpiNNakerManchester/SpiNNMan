@@ -13,6 +13,7 @@ class SCPIPTagInfoResponse(AbstractSCPResponse):
         """
         """
         super(SCPIPTagInfoResponse, self).__init__()
+        self._tto = None
         self._pool_size = None
         self._fixed_size = None
 
@@ -25,8 +26,16 @@ class SCPIPTagInfoResponse(AbstractSCPResponse):
             raise SpinnmanUnexpectedResponseCodeException(
                 "Get IP Tag Info", "CMD_IPTAG", result.name)
 
-        self._pool_size, self._fixed_size = struct.unpack_from(
-            "<2x2B", data, offset)
+        self._tto, self._pool_size, self._fixed_size = struct.unpack_from(
+            "<H2B", data, offset)
+
+    @property
+    def transient_timeout(self):
+        """ The timeout for transient IP tags (i.e. responses to SCP commands)
+
+        :rtype: int
+        """
+        return self._tto
 
     @property
     def pool_size(self):

@@ -8,6 +8,7 @@ from spinnman.connections.abstract_classes.abstract_scp_sender import \
     AbstractSCPSender
 from spinnman.connections.abstract_classes.udp_senders import udp_utils
 from spinnman.exceptions import SpinnmanIOException
+import traceback
 
 
 @add_metaclass(ABCMeta)
@@ -52,4 +53,5 @@ class AbstractUDPSCPSender(AbstractSCPSender):
         try:
             self._socket.send(struct.pack("<2x") + scp_request.bytestring)
         except Exception as e:
+            traceback.print_exc()
             raise SpinnmanIOException(str(e))

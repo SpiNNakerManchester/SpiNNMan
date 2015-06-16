@@ -5,12 +5,14 @@ from spinnman.connections.scp_request_set import SCPRequestSet
 import time
 import traceback
 import sys
+from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
 
-machine = "spinn-10.cs.man.ac.uk"
+machine = "spinn-8.cs.man.ac.uk"
 # machine = "192.168.240.253"
 mbs = 10.0
 
 connection = UDPSpinnakerConnection(remote_host=machine)
+connection.send_scp_request(SCPIPTagTTORequest(0, 0, 5))
 queue = SCPRequestSet(connection)
 
 n_bytes = mbs * 1000.0 * 1000.0
@@ -54,5 +56,6 @@ speed = (mbs * 8) / seconds
 print ("Read {} MB in {} seconds ({} Mb/s)".format(mbs, seconds, speed))
 print queue.n_timeouts, "timeouts"
 print queue.n_channels, "channels"
-print queue.n_resent, "resent"
+print queue.n_resent, "resent because of timeouts"
+print queue.n_retry_code_resent, "resent because of retry codes"
 print total_bytes
