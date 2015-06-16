@@ -542,7 +542,7 @@ class Transceiver(object):
 
         # Currently, this only finds other UDP connections given a connection
         # that supports SCP - this is done via the machine
-        if len(self._scp_connection_queues) == 0:
+        if len(self._udp_scamp_connections) == 0:
             return list()
         self._update_machine()
 

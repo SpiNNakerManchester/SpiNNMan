@@ -127,7 +127,8 @@ class GetMachineProcess(AbstractProcess):
                 new_chip = self._make_chip(new_chip_details)
                 self._machine.add_chip(new_chip)
                 return new_chip
-            return None
+            return self._machine.get_chip_at(new_chip_details.x,
+                                             new_chip_details.y)
         except Exception:
             traceback.print_exc()
 
@@ -214,9 +215,9 @@ class GetMachineProcess(AbstractProcess):
 
         # Go through the chips, link by link
         seen_chips = set()
+        seen_chips.add((0, 0))
         while len(chip_search) > 0:
             chip, links = chip_search.pop()
-            seen_chips.add((chip.x, chip.y))
 
             # Go through the links of the chip
             for link in links:
@@ -243,7 +244,9 @@ class GetMachineProcess(AbstractProcess):
                         if (other_chip.x, other_chip.y) not in seen_chips:
                             other_chip_details = self._chip_info[
                                 (other_chip.x, other_chip.y)]
-                            chip_search.append(
-                                other_chip, other_chip_details.links_available)
+                            chip_search.append((
+                                other_chip,
+                                other_chip_details.links_available))
+                            seen_chips.add((other_chip.x, other_chip.y))
 
         return self._machine
