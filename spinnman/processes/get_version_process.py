@@ -6,6 +6,7 @@ from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
 class GetVersionProcess(AbstractProcess):
 
     def __init__(self, connection):
+        AbstractProcess.__init__(self)
         self._scp_request_set = SCPRequestSet(connection)
         self._version_info = None
 

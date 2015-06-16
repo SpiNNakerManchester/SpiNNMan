@@ -17,7 +17,6 @@ from spinnman.connections.abstract_classes.abstract_scp_receiver\
     import AbstractSCPReceiver
 import random
 from spinnman.processes.get_machine_process import GetMachineProcess
-from _subprocess import GetVersion
 from spinnman.processes.get_version_process import GetVersionProcess
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
@@ -34,7 +33,6 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
 
-from spinnman.model.chip_info import ChipInfo
 from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
@@ -48,8 +46,6 @@ from spinnman.messages.scp.impl.scp_write_link_request \
     import SCPWriteLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
-from spinnman.messages.scp.impl.scp_version_request \
-    import SCPVersionRequest
 from spinnman.messages.scp.impl.scp_count_state_request \
     import SCPCountStateRequest
 from spinnman.messages.scp.impl.scp_write_memory_request \
@@ -89,15 +85,8 @@ from spinnman.data.little_endian_byte_array_byte_reader \
 from _threads._iobuf_interface import IOBufInterface
 from _threads._get_tags_interface import GetTagsInterface
 
-from spinn_machine.machine import Machine
-from spinn_machine.chip import Chip
-from spinn_machine.sdram import SDRAM
-from spinn_machine.processor import Processor
-from spinn_machine.router import Router
-from spinn_machine.link import Link
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
-from collections import deque
 from threading import Condition
 from socket import gethostbyname
 from socket import inet_aton
@@ -243,8 +232,7 @@ class Transceiver(object):
         # A list of all connections that can be used to send Multicast messages
         self._multicast_sender_connections = list()
 
-        # A dict of ip address -> list of connections for UDP-based
-        # SCP connections
+        # A dict of ip address -> SCAMP connection
         # These are those that can be used for setting up IP Tags
         self._udp_scamp_connections = dict()
 
@@ -316,10 +304,7 @@ class Transceiver(object):
                 # If also a UDP connection, add it here (for IP tags)
                 if isinstance(connection, AbstractUDPConnection):
                     board_address = connection.remote_ip_address
-                    if (board_address not in self._udp_scamp_connections):
-                        self._udp_scamp_connections[board_address] = list()
-                    self._udp_scamp_connections[board_address].append(
-                        connection)
+                    self._udp_scamp_connections[board_address] = connection
 
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
@@ -402,7 +387,7 @@ class Transceiver(object):
             return connection
         if len(connections) == 0:
             return None
-        pos = random.randint(0, len(connections))
+        pos = random.randint(0, len(connections) - 1)
         return connections[pos]
 
     def send_scp_message(
@@ -563,36 +548,16 @@ class Transceiver(object):
 
         # Find all the new connections via the machine ethernet-connected chips
         new_connections = list()
-        for ethernet_connected_chip in self._machine.ethernet_connected_chips:
-            key = (ethernet_connected_chip.ip_address,
-                   constants.SCP_SCAMP_PORT)
-            if key not in self._sending_connections.keys():
+        for chip in self._machine.ethernet_connected_chips:
+            if chip.ip_address not in self._udp_scamp_connections:
                 new_connection = UDPSpinnakerConnection(
-                    remote_host=ethernet_connected_chip.ip_address,
-                    chip_x=ethernet_connected_chip.x,
-                    chip_y=ethernet_connected_chip.y)
+                    remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
                 new_connections.append(new_connection)
-                if key in self._sending_connections.keys():
-                    raise SpinnmanInvalidParameterException(
-                        "The new spinnaker connection is using a remote port "
-                        "and hostname that is already in use, please adjust "
-                        "this and try again ", "", "")
-                else:
-                    self._sending_connections[key]\
-                        = new_connection
-
-                # test receiving side of connection
-                if new_connection.local_port in self._receiving_connections:
-                    raise SpinnmanInvalidParameterException(
-                        "The new spinnaker connection is using a local port "
-                        "that is already in use, please adjust "
-                        "this and try again ", "", "")
-                else:
-                    self._receiving_connections[new_connection.local_port] = \
-                        new_connection
+                self._udp_scamp_connections[chip.ip_address] = new_connection
+                self._scamp_connections.append(new_connection)
+                self._scp_sender_connections.append(new_connection)
 
         # Update the connection queues after finding new connections
-        self._update_scp_connection_queues()
         logger.info(self._machine.cores_and_link_output_string())
         return new_connections
 

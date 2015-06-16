@@ -22,9 +22,9 @@ class VersionInfo(object):
                 "The length of the version data is too short")
 
         (self._p, self._y, self._x, version_no, self._build_date) = \
-            struct.unpack_from("<BxBBHI", version_data, offset)
+            struct.unpack_from("<BxBB2xHI", version_data, offset)
         self._version_number = version_no / 100.0
-        self._version_string = version_data[12:-1].decode("ascii")
+        self._version_string = version_data[offset + 12:-1].decode("ascii")
         try:
             self._name, self._hardware = self._version_string.split("/")
         except ValueError as exception:
