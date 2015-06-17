@@ -316,7 +316,7 @@ class Transceiver(object):
         self._sort_out_connections(connections)
         self._update_connection_queues()
         self._check_udp_bmp_connections()
-        #self.power_off_machine()
+        self.power_off_machine()
 
     def _sort_out_connections(self, connections):
         for connection in connections:
@@ -1129,6 +1129,8 @@ class Transceiver(object):
                     version_info.name, version_info.version_number,
                     _SCAMP_NAME, _SCAMP_VERSION))
         else:
+            if self._machine is None:
+                self._update_machine()
             logger.info("successfully booted the machine with scamp")
         return version_info
 
@@ -1180,26 +1182,11 @@ class Transceiver(object):
         # boot has been sent, and 0 0 is up and running, but there will need to
         # be a delay whilst all the other chips complete boot.
         if version_info is not None:
-            if self._machine is None:
-                self._update_machine()
-#########################################################################################################
-            # fixme needs removing, but allows test of chips
-            self._test_105()
-#########################################################################################################
-
             current_tries_to_go = tries_to_go
             version_info = self._wait_till_important_chips_are_fully_booted(
                 max_machines_x_dimension, max_machines_y_dimension,
                 current_tries_to_go)
         return version_info
-
-    def _test_105(self):
-        print "machine has {} chips, out of 5760 expected chips. " \
-              "Searching for missing chips".format(len(self._machine._chips))
-        for x in range(0, 95):
-            for y in range(0, 60):
-                if not self._machine.is_chip_at(x, y):
-                    print "chip {}:{} does not exist, but should do".format(x,y)
 
     def _wait_till_important_chips_are_fully_booted(
             self, max_machines_x_dimension, max_machines_y_dimension,
@@ -1214,6 +1201,7 @@ class Transceiver(object):
         :return: the version info of the last important chip
         """
         version_info = None
+        found_version_info = None
         # check if the machine is wrap arounds
         chips_to_check = list()
         if self._check_if_machine_has_wrap_arounds():
@@ -1221,7 +1209,7 @@ class Transceiver(object):
             # before boot is finished
             chips_to_check = _utils.locate_middle_chips_to_query(
                 max_machines_x_dimension, max_machines_y_dimension,
-                self._machine, constants.NO_MIDDLE_CHIPS_TO_CHECK)
+                self._ignore_chips)
         else:
             # locate the top most corner chip
             chips_to_check.append(self._machine.get_chip_at(
@@ -1233,16 +1221,18 @@ class Transceiver(object):
             while version_info is None and current_tries_to_go > 0:
                 try:
                     version_info = self.get_scamp_version(
-                        chip_x=chip_to_check.x,
-                        chip_y=chip_to_check.y)
+                        chip_x=chip_to_check['x'],
+                        chip_y=chip_to_check['y'])
+                    if version_info is not None:
+                        found_version_info = version_info
                 except exceptions.SpinnmanTimeoutException:
                     # back off a little and try again
                     current_tries_to_go -= 1
-                    time.sleep(0.5)
+                    time.sleep(4.0)
                 except exceptions.SpinnmanUnexpectedResponseCodeException:
                     # back off a little and try again
                     current_tries_to_go -= 1
-                    time.sleep(0.5)
+                    time.sleep(4.0)
                 except exceptions.SpinnmanIOException:
                     raise exceptions.SpinnmanUnexpectedResponseCodeException(
                         "We currently cannot communicate with your board, "
@@ -1251,8 +1241,8 @@ class Transceiver(object):
                 logger.warn(
                     "we could not get a sver from chip {}:{}. It may not be "
                     "operating properly".format(
-                        chip_to_check.x, chip_to_check.y))
-        return version_info
+                        chip_to_check['x'], chip_to_check['y']))
+        return found_version_info
 
     def _check_if_machine_has_wrap_arounds(self):
         """

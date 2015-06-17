@@ -9,6 +9,9 @@ from spinnman.data.bmp_connection_data import BMPConnectionData
 from spinnman.messages.spinnaker_boot._system_variables import \
     _system_variable_boot_values
 
+# spinnmachine imports
+from spinn_machine.utilities import utilities as machine_utils
+
 #general imports
 import math
 import socket
@@ -228,22 +231,19 @@ def sort_out_bmp_string(bmp_string):
 
 
 def locate_middle_chips_to_query(
-        max_x_dimension, max_y_dimension, machine, size_of_search_list):
+        max_x_dimension, max_y_dimension, invalid_chips):
     """
     helper method that deduces what chips to query to ensure the
     :param max_x_dimension: the max size of the machine in the x dimension
     :param max_y_dimension: the max size of the machine in the y dimension
-    :param size_of_search_list: how many chips it needs to report back
-    :param machine: the spinnaker machine object
+    :param invalid_chips: the list of chips that are down
     :return: a list of chips to query
     """
-    middle_chip_x = round(max_x_dimension / 2)
-    middle_chip_y = round(max_y_dimension / 2)
-    middle_chip = machine.get_cloest_chip_to(middle_chip_x, middle_chip_y)
-
-    return machine.generate_radial_chips(
-        start_chip_x=middle_chip.x, start_chip_y=middle_chip.y,
-        size_of_list=size_of_search_list)
+    middle_chip_x = int(round(max_x_dimension / 2))
+    middle_chip_y = int(round(max_y_dimension / 2))
+    return machine_utils.get_cloest_chip_to(
+        middle_chip_x, middle_chip_y, max_x_dimension, max_y_dimension,
+        invalid_chips)
 
 
 def update_mappers(
