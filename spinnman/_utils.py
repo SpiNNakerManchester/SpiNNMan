@@ -155,7 +155,7 @@ def get_idead_size(number_of_boards, version):
     :return: a dictory with x and y keys.
     """
 
-    if number_of_boards == 0:
+    if number_of_boards == 1:
         return _system_variable_boot_values.\
             spinnaker_standard_board_to_machine_sizes[version]
     elif version == 4 or version == 5:
@@ -241,7 +241,7 @@ def locate_middle_chips_to_query(
     """
     middle_chip_x = int(round(max_x_dimension / 2))
     middle_chip_y = int(round(max_y_dimension / 2))
-    return machine_utils.get_cloest_chip_to(
+    return machine_utils.get_cloest_chips_to(
         middle_chip_x, middle_chip_y, max_x_dimension, max_y_dimension,
         invalid_chips)
 

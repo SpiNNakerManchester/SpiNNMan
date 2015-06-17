@@ -316,7 +316,6 @@ class Transceiver(object):
         self._sort_out_connections(connections)
         self._update_connection_queues()
         self._check_udp_bmp_connections()
-        # self.power_off_machine()
 
     def _sort_out_connections(self, connections):
         for connection in connections:
@@ -2957,6 +2956,9 @@ class Transceiver(object):
             bmp_connection_data = \
                 self._bmp_connection_to_bmp_data_mapping[bmp_connection]
             boards += len(bmp_connection_data.boards)
+        # if no bmps are avilable, then theres still at least one board
+        if boards == 0:
+            boards = 1
         return boards
 
 
