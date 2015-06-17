@@ -117,7 +117,7 @@ _SCAMP_NAME = "SC&MP"
 _SCAMP_VERSION = 1.33
 
 _BMP_NAME = "BC&MP"
-_BMP_VERSIONS = [1.37, 1.36]
+_BMP_VERSIONS = [1.3, 1.37, 1.36]
 
 
 def create_transceiver_from_hostname(
@@ -316,7 +316,7 @@ class Transceiver(object):
         self._sort_out_connections(connections)
         self._update_connection_queues()
         self._check_udp_bmp_connections()
-        self.power_off_machine()
+        # self.power_off_machine()
 
     def _sort_out_connections(self, connections):
         for connection in connections:
@@ -1212,8 +1212,8 @@ class Transceiver(object):
                 self._ignore_chips)
         else:
             # locate the top most corner chip
-            chips_to_check.append(self._machine.get_chip_at(
-                max_machines_x_dimension - 1, max_machines_y_dimension - 1))
+            chips_to_check.append({'x': max_machines_x_dimension - 1,
+                                   'y': max_machines_y_dimension - 1})
 
         # check each chip required to ensure boot is finished
         for chip_to_check in chips_to_check:

@@ -155,7 +155,7 @@ def get_idead_size(number_of_boards, version):
     :return: a dictory with x and y keys.
     """
 
-    if number_of_boards == 1:
+    if number_of_boards == 0:
         return _system_variable_boot_values.\
             spinnaker_standard_board_to_machine_sizes[version]
     elif version == 4 or version == 5:
@@ -285,9 +285,10 @@ def sort_out_bmp_from_machine(hostname, number_of_boards):
     board_int = list()
     # if 0, the end user didnt enter anything, so assume one board starting
     # at position 0
-    if number_of_boards == 0:
+    if number_of_boards == 0 or number_of_boards is None:
         board_int.append(int(0))
     else:
         for board_value in range(number_of_boards):
             board_int.append(int(board_value))
-    return bmp_ip_address, board_int
+    return BMPConnectionData(cabinate=0, frame=0, ip_address=bmp_ip_address,
+                             boards=board_int)
