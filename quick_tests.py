@@ -141,13 +141,13 @@ try:
     print "Read:   ", map(hex, read_data)
     print ""
 
-    print "Flood Memory Write"
-    print "=================="
-    transceiver.write_memory_flood(0x70000000, 0x04050607)
-    read_data_packets = transceiver.read_memory(1, 1, 0x70000000, 4)
-    for packet in read_data_packets:
-        print map(hex, packet)
-    print ""
+#     print "Flood Memory Write"
+#     print "=================="
+#     transceiver.write_memory_flood(0x70000000, 0x04050607)
+#     read_data_packets = transceiver.read_memory(1, 1, 0x70000000, 4)
+#     for packet in read_data_packets:
+#         print map(hex, packet)
+#     print ""
 #
 #     print "Execute Flood"
 #     print "============="
@@ -161,14 +161,14 @@ try:
 #         sleep(0.1)
 #     print ""
 #
-#     print "CPU Information"
-#     print "==============="
-#     cpu_infos = transceiver.get_cpu_information(core_subsets)
-#     cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
-#     print "{} CPUs".format(len(cpu_infos))
-#     for cpu_info in cpu_infos:
-#         print cpu_info
-#     print ""
+    print "CPU Information"
+    print "==============="
+    cpu_infos = transceiver.get_cpu_information(core_subsets)
+    cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
+    print "{} CPUs".format(len(cpu_infos))
+    for cpu_info in cpu_infos:
+        print cpu_info
+    print ""
 #
 #     print "Send SYNC0"
 #     print "=========="

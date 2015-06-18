@@ -13,7 +13,7 @@ class CPUInfo(object):
     """ Represents information about the state of a CPU
     """
 
-    def __init__(self, x, y, p, cpu_data):
+    def __init__(self, x, y, p, cpu_data, offset):
         """
         :param x: The x-coordinate of a chip
         :type x: int
@@ -42,7 +42,12 @@ class CPUInfo(object):
          self._software_source_line_number, self._time,              # 3I  60
          self._application_name,                                     # 16s 72
          self._iobuf_address, user0, user1, user2, user3             # 5I  88
-         ) = struct.unpack_from("< 32s 3I B x 2B 2I 2B H 3I 16s 5I", cpu_data)
+         ) = struct.unpack_from("< 32s 3I B x 2B 2I 2B H 3I 16s 5I", cpu_data,
+                                offset)
+
+        index = self._application_name.find('\0')
+        if index != -1:
+            self._application_name = self._application_name[0:index]
 
         self._registers = [struct.unpack_from("<I", registers, i)
                            for i in range(0, 32, 4)]

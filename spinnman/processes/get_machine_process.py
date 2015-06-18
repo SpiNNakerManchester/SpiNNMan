@@ -227,3 +227,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                             seen_chips.add((other_chip.x, other_chip.y))
 
         return self._machine
+
+    def get_chip_info(self):
+        """ Get the chip information for the machine.  Note that\
+            get_machine_details must have been called first
+        """
+        return self._chip_info

@@ -7,13 +7,15 @@ from spinnman.processes.abstract_multi_connection_process_connection_selector \
 class MultiConnectionProcessDefaultConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
 
-    def __init__(self):
-        AbstractMultiConnectionProcessConnectionSelector.__init__(self)
+    def __init__(self, connections):
+        AbstractMultiConnectionProcessConnectionSelector.__init__(
+            self, connections)
+        self._connections = connections
         self._next_connection_index = 0
 
-    def get_next_connection(self, connections):
+    def get_next_connection(self, message):
         index = self._next_connection_index
-        self._next_connection_index = (index + 1) % len(connections)
+        self._next_connection_index = (index + 1) % len(self._connections)
         return index
 
 
@@ -23,7 +25,6 @@ class AbstractMultiConnectionProcess(AbstractProcess):
 
     def __init__(self, connections, next_connection_selector=None):
         AbstractProcess.__init__(self)
-        self._connections = connections
         self._scp_request_sets = list()
         for connection in connections:
             scp_request_set = SCPRequestSet(connection)
@@ -31,14 +32,13 @@ class AbstractMultiConnectionProcess(AbstractProcess):
         self._next_connection_selector = next_connection_selector
         if next_connection_selector is None:
             self._next_connection_selector = \
-                MultiConnectionProcessDefaultConnectionSelector()
+                MultiConnectionProcessDefaultConnectionSelector(connections)
         self._connections_used = set()
 
     def _send_request(self, request, callback=None, error_callback=None):
         if error_callback is None:
             error_callback = self._receive_error
-        index = self._next_connection_selector.get_next_connection(
-            self._connections)
+        index = self._next_connection_selector.get_next_connection(request)
         self._scp_request_sets[index].send_request(
             request, callback, error_callback)
         self._connections_used.add(index)

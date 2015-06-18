@@ -23,6 +23,7 @@ from spinnman.processes.read_memory_process import ReadMemoryProcess
 from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
 from spinnman.connections.scp_request_set import SCPRequestSet
 from spinnman.processes.set_iptag_tto_process import SetIPTagTTOProcess
+from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
@@ -538,6 +539,7 @@ class Transceiver(object):
             self._scamp_connections, self._ignore_chips, self._ignore_cores,
             self._max_core_id)
         self._machine = get_machine_process.get_machine_details()
+        self._chip_info = get_machine_process.get_chip_info()
         logger.info(self._machine.cores_and_link_output_string())
 
     def discover_scamp_connections(self):
@@ -776,40 +778,8 @@ class Transceiver(object):
                 for p in chip_info.virtual_core_ids:
                     core_subsets.add_processor(x, y, p)
 
-        # Go through the requested chips
-        messages = list()
-        message_coordinates = list()
-        for core_subset in core_subsets:
-            x = core_subset.x
-            y = core_subset.y
-
-            if not (x, y) in self._chip_info:
-                raise SpinnmanInvalidParameterException(
-                    "x, y", "{}, {}".format(x, y),
-                    "Not a valid chip on the current machine")
-            chip_info = self._chip_info[(x, y)]
-
-            for p in core_subset.processor_ids:
-                if p not in chip_info.virtual_core_ids:
-                    raise SpinnmanInvalidParameterException(
-                        "p", p, "Not a valid core on chip {}, {}".format(
-                            x, y))
-                base_address = (chip_info.cpu_information_base_address +
-                                (constants.CPU_INFO_BYTES * p))
-                messages.append(SCPReadMemoryRequest(
-                    x, y, base_address, constants.CPU_INFO_BYTES))
-                message_coordinates.append((x, y, p))
-
-        # Get the callbacks for each message
-        message_callbacks = list()
-        for message in messages:
-            callback = self._send_scp_message_with_response(
-                message, get_callback=True)
-            message_callbacks.append(callback)
-
-        # Gather the results
-        for callback, (x, y, p) in zip(message_callbacks, message_coordinates):
-            yield CPUInfo(x, y, p, callback.wait_for_response().data)
+        process = GetCPUInfoProcess(self._machine, self._scamp_connections)
+        return process.get_cpu_info(self._chip_info, core_subsets)
 
     def get_user_0_register_address_from_core(self, x, y, p):
         """Get the address of user 0 for a given processor on the board
