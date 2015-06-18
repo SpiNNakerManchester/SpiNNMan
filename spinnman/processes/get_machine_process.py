@@ -1,10 +1,11 @@
-from spinnman.connections.scp_request_set import SCPRequestSet
 from spinnman.model.chip_info import ChipInfo
 from spinnman.messages.scp.impl.scp_read_memory_request\
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman import constants
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.processes.abstract_multi_connection_process \
+    import AbstractMultiConnectionProcess
 from spinnman.processes.abstract_process import AbstractProcess
 
 from spinn_machine.processor import Processor
@@ -31,7 +32,7 @@ class _ChipInfoReceiver(object):
             scp_read_link_response, self._x, self._y, self._link)
 
 
-class GetMachineProcess(AbstractProcess):
+class GetMachineProcess(AbstractMultiConnectionProcess):
     """ A process for getting the machine details over a set of connections
     """
 
@@ -42,20 +43,11 @@ class GetMachineProcess(AbstractProcess):
         :type scamp_connections: iterable of\
                     :py:class:`spinnman.connections.abstract_classes.abstract_connection.AbstractConnection`
         """
-        AbstractProcess.__init__(self)
-
-        # A list of SCPRequestSet objects for each connection
-        self._scp_request_sets = list()
-        for connection in scamp_connections:
-            scp_request_set = SCPRequestSet(connection)
-            self._scp_request_sets.append(scp_request_set)
+        AbstractMultiConnectionProcess.__init__(self, scamp_connections)
 
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
         self._max_core_id = max_core_id
-
-        # The next connection to use
-        self._next_connection = 0
 
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
@@ -115,7 +107,8 @@ class GetMachineProcess(AbstractProcess):
 
     def _receive_chip_details(self, scp_read_memory_response):
         try:
-            new_chip_details = ChipInfo(scp_read_memory_response.data)
+            new_chip_details = ChipInfo(scp_read_memory_response.data,
+                                        scp_read_memory_response.offset)
             if (self._ignore_chips is not None and
                     self._ignore_chips.is_chip(
                         new_chip_details.x, new_chip_details.y)):
@@ -149,30 +142,19 @@ class GetMachineProcess(AbstractProcess):
             AbstractProcess._receive_error(self, request, exception,
                                            tracebackinfo)
 
-    @property
-    def _next_connection_index(self):
-        conn = self._next_connection
-        self._next_connection = ((self._next_connection + 1) %
-                                 len(self._scp_request_sets))
-        return conn
-
     def get_machine_details(self):
 
         # Get the details of chip 0, 0
-        conn = self._next_connection_index
-        self._scp_request_sets[conn].send_request(
+        self._send_request(
             SCPReadMemoryRequest(
                 x=0, y=0, base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
                 size=constants.SYSTEM_VARIABLE_BYTES),
             self._receive_chip_details,
             self._receive_error)
-        self._scp_request_sets[conn].finish()
+        self._finish()
 
         # Continue until there is nothing to search (and no exception)
         while (not self.is_error() and len(self._search) > 0):
-
-            # Keep a set of connections used so far
-            connections_used = set()
 
             # Set up the next round of searches using everything that
             # needs to search (same loop as above, I know, but wait for it)
@@ -182,15 +164,11 @@ class GetMachineProcess(AbstractProcess):
                 # Examine the links of the chip to find the next chips
                 for link in chip_info.links_available:
 
-                    # Use the connections round-robin
-                    conn = self._next_connection_index
-                    connections_used.add(conn)
-
                     # Add the read_link request - note that this might
                     # add to the search if a response is received
                     receiver = _ChipInfoReceiver(self, chip_info.x,
                                                  chip_info.y, link)
-                    self._scp_request_sets[conn].send_request(
+                    self._send_request(
                         SCPReadLinkRequest(
                             x=chip_info.x, y=chip_info.y, cpu=0, link=link,
                             base_address=(constants
@@ -200,8 +178,7 @@ class GetMachineProcess(AbstractProcess):
                         self._receive_error)
 
             # Ensure all responses up to this point have been received
-            for conn in connections_used:
-                self._scp_request_sets[conn].finish()
+            self._finish()
 
         # If there is an exception, raise it
         self.check_for_error()

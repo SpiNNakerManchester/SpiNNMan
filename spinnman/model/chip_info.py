@@ -12,11 +12,13 @@ class ChipInfo(object):
         SDRAM
     """
 
-    def __init__(self, system_data):
+    def __init__(self, system_data, offset):
         """
 
-        :param system_data: An array of bytes retrieved from SDRAM on the baord
-        :type system_data: bytearray
+        :param system_data: An bytestring retrieved from SDRAM on the board
+        :type system_data: bytestring
+        :param offset: The offset into the bytestring where the actual data\
+                starts
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
                     the data doesn't contain valid system data information
         """
@@ -65,7 +67,7 @@ class ChipInfo(object):
          ) = struct.unpack_from(
             "< 6B ? 4B ? 4B 16x I 2H 4B 5I ? 3B 8I 3x B I 2H 16x 20s 20s 20s"
             " 2B 2x 8I 2H 3I 4B",
-            system_data)
+            system_data, offset)
 
         self._links_available = list()
         for i in range(0, 8):

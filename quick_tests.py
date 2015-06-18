@@ -136,10 +136,7 @@ try:
     print "====================="
     write_data = bytearray(randint(0, 255) for i in range(0, 1000))
     transceiver.write_memory(0, 0, 0x70000000, write_data)
-    read_data_packets = transceiver.read_memory(0, 0, 0x70000000, 1000)
-    read_data = bytearray()
-    for packet in read_data_packets:
-        read_data.extend(packet)
+    read_data = transceiver.read_memory(0, 0, 0x70000000, 1000)
     print "Written:", map(hex, write_data)
     print "Read:   ", map(hex, read_data)
     print ""
@@ -151,143 +148,143 @@ try:
     for packet in read_data_packets:
         print map(hex, packet)
     print ""
-
-    print "Execute Flood"
-    print "============="
-    file_size = os.stat("hello.aplx").st_size
-    executable = FileDataReader("hello.aplx")
-    transceiver.execute_flood(core_subsets, executable, app_id, file_size)
-    count = 0
-    while count < 20:
-        count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)
-        print "Cores in state SYNC0={}".format(count)
-        sleep(0.1)
-    print ""
-
-    print "CPU Information"
-    print "==============="
-    cpu_infos = transceiver.get_cpu_information(core_subsets)
-    cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
-    print "{} CPUs".format(len(cpu_infos))
-    for cpu_info in cpu_infos:
-        print cpu_info
-    print ""
-
-    print "Send SYNC0"
-    print "=========="
-    transceiver.send_signal(app_id, SCPSignal.SYNC0)
-    count = 0
-    while count < 20:
-        count = transceiver.get_core_state_count(app_id, CPUState.FINSHED)
-        print "Cores in state FINISHED={}".format(count)
-        sleep(0.1)
-    print ""
-
-    print "Get IOBufs"
-    print "=========="
-    iobufs = transceiver.get_iobuf(core_subsets)
-    iobufs = sorted(iobufs, key=lambda x: (x.x, x.y, x.p))
-    for iobuf in iobufs:
-        print iobuf
-    print ""
-
-    print "Stop Application"
-    print "================"
-    transceiver.send_signal(app_id, SCPSignal.STOP)
-    cpu_infos = transceiver.get_cpu_information(core_subsets)
-    cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
-    print "{} CPUs".format(len(cpu_infos))
-    for cpu_info in cpu_infos:
-        print cpu_info
-    print ""
-
-    print "Create IP Tags"
-    print "=============="
-    transceiver.set_ip_tag(IPTag(None, 1, ".", 50000))
-    transceiver.set_ip_tag(IPTag(None, 2, ".", 60000, strip_sdp=True))
-    transceiver.set_reverse_ip_tag(ReverseIPTag(None, 3, 40000, 0, 1, 2))
-    tags = transceiver.get_tags()
-    for tag in tags:
-        print tag
-    print ""
-
-    print "Clear IP Tag"
-    print "============"
-    transceiver.clear_ip_tag(1)
-    transceiver.clear_ip_tag(2)
-    transceiver.clear_ip_tag(3)
-    tags = transceiver.get_tags()
-    for tag in tags:
-        print tag
-    print ""
-
-    print "Load Routes"
-    print "==========="
-    routes = [MulticastRoutingEntry(0x10000000, 0xFFFF7000,
-              (1, 2, 3, 4, 5), (0, 1, 2), False)]
-    transceiver.load_multicast_routes(0, 0, routes, app_id)
-    routes = transceiver.get_multicast_routes(0, 0, app_id)
-    for route in routes:
-        print "Key={}, Mask={}, processors={}, links={}".format(
-            hex(route.key_combo), hex(route.mask), route.processor_ids,
-            route.link_ids)
-    print ""
-
-    print "Clear Routes"
-    print "============"
-    transceiver.clear_multicast_routes(0, 0)
-    routes = transceiver.get_multicast_routes(0, 0)
-    for route in routes:
-        print "Key={}, Mask={}, processors={}, links={}".format(
-            hex(route.key_combo), hex(route.mask), route.processor_ids,
-            route.link_ids)
-    print ""
-
-    print "Set Router Diagnostic Filter"
-    print "============================="
-    destinations = [DiagnosticFilterDestination.LINK_0,
-                    DiagnosticFilterDestination.LINK_1,
-                    DiagnosticFilterDestination.LINK_2,
-                    DiagnosticFilterDestination.LINK_5]
-    for i in range(len(destinations)):
-        current_filter = DiagnosticFilter(
-            enable_interrupt_on_counter_event=False,
-            match_emergency_routing_status_to_incoming_packet=True,
-            destinations=[destinations[i]], sources=None,
-            payload_statuses=None, default_routing_statuses=[],
-            emergency_routing_statuses=[],
-            packet_types=[DiagnosticFilterPacketType.POINT_TO_POINT])
-        transceiver.set_router_diagnostic_filter(0, 0, i + 12, current_filter)
-
-    print "Clear Router Diagnostics"
-    print "========================"
-    transceiver.clear_router_diagnostic_counters(0, 0)
-    router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-    print router_diagnostics.registers
-    print ""
-
-    print "Send read requests"
-    print "======================"
-    transceiver.send_scp_message(SCPReadMemoryRequest(1, 0, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
-
-    print "Get Router Diagnostics"
-    print "======================"
-    router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-    print router_diagnostics.registers
-    print ""
-
-    print "Get Router Diagnostic Filters"
-    print "============================="
-    for i in range(0, 16):
-        print "Filter", i, ":"
-        current_filter = transceiver.get_router_diagnostic_filter(0, 0, i)
-        print_filter(current_filter)
-        print ""
+#
+#     print "Execute Flood"
+#     print "============="
+#     file_size = os.stat("hello.aplx").st_size
+#     executable = FileDataReader("hello.aplx")
+#     transceiver.execute_flood(core_subsets, executable, app_id, file_size)
+#     count = 0
+#     while count < 20:
+#         count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)
+#         print "Cores in state SYNC0={}".format(count)
+#         sleep(0.1)
+#     print ""
+#
+#     print "CPU Information"
+#     print "==============="
+#     cpu_infos = transceiver.get_cpu_information(core_subsets)
+#     cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
+#     print "{} CPUs".format(len(cpu_infos))
+#     for cpu_info in cpu_infos:
+#         print cpu_info
+#     print ""
+#
+#     print "Send SYNC0"
+#     print "=========="
+#     transceiver.send_signal(app_id, SCPSignal.SYNC0)
+#     count = 0
+#     while count < 20:
+#         count = transceiver.get_core_state_count(app_id, CPUState.FINSHED)
+#         print "Cores in state FINISHED={}".format(count)
+#         sleep(0.1)
+#     print ""
+#
+#     print "Get IOBufs"
+#     print "=========="
+#     iobufs = transceiver.get_iobuf(core_subsets)
+#     iobufs = sorted(iobufs, key=lambda x: (x.x, x.y, x.p))
+#     for iobuf in iobufs:
+#         print iobuf
+#     print ""
+#
+#     print "Stop Application"
+#     print "================"
+#     transceiver.send_signal(app_id, SCPSignal.STOP)
+#     cpu_infos = transceiver.get_cpu_information(core_subsets)
+#     cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
+#     print "{} CPUs".format(len(cpu_infos))
+#     for cpu_info in cpu_infos:
+#         print cpu_info
+#     print ""
+#
+#     print "Create IP Tags"
+#     print "=============="
+#     transceiver.set_ip_tag(IPTag(None, 1, ".", 50000))
+#     transceiver.set_ip_tag(IPTag(None, 2, ".", 60000, strip_sdp=True))
+#     transceiver.set_reverse_ip_tag(ReverseIPTag(None, 3, 40000, 0, 1, 2))
+#     tags = transceiver.get_tags()
+#     for tag in tags:
+#         print tag
+#     print ""
+#
+#     print "Clear IP Tag"
+#     print "============"
+#     transceiver.clear_ip_tag(1)
+#     transceiver.clear_ip_tag(2)
+#     transceiver.clear_ip_tag(3)
+#     tags = transceiver.get_tags()
+#     for tag in tags:
+#         print tag
+#     print ""
+#
+#     print "Load Routes"
+#     print "==========="
+#     routes = [MulticastRoutingEntry(0x10000000, 0xFFFF7000,
+#               (1, 2, 3, 4, 5), (0, 1, 2), False)]
+#     transceiver.load_multicast_routes(0, 0, routes, app_id)
+#     routes = transceiver.get_multicast_routes(0, 0, app_id)
+#     for route in routes:
+#         print "Key={}, Mask={}, processors={}, links={}".format(
+#             hex(route.key_combo), hex(route.mask), route.processor_ids,
+#             route.link_ids)
+#     print ""
+#
+#     print "Clear Routes"
+#     print "============"
+#     transceiver.clear_multicast_routes(0, 0)
+#     routes = transceiver.get_multicast_routes(0, 0)
+#     for route in routes:
+#         print "Key={}, Mask={}, processors={}, links={}".format(
+#             hex(route.key_combo), hex(route.mask), route.processor_ids,
+#             route.link_ids)
+#     print ""
+#
+#     print "Set Router Diagnostic Filter"
+#     print "============================="
+#     destinations = [DiagnosticFilterDestination.LINK_0,
+#                     DiagnosticFilterDestination.LINK_1,
+#                     DiagnosticFilterDestination.LINK_2,
+#                     DiagnosticFilterDestination.LINK_5]
+#     for i in range(len(destinations)):
+#         current_filter = DiagnosticFilter(
+#             enable_interrupt_on_counter_event=False,
+#             match_emergency_routing_status_to_incoming_packet=True,
+#             destinations=[destinations[i]], sources=None,
+#             payload_statuses=None, default_routing_statuses=[],
+#             emergency_routing_statuses=[],
+#             packet_types=[DiagnosticFilterPacketType.POINT_TO_POINT])
+#         transceiver.set_router_diagnostic_filter(0, 0, i + 12, current_filter)
+#
+#     print "Clear Router Diagnostics"
+#     print "========================"
+#     transceiver.clear_router_diagnostic_counters(0, 0)
+#     router_diagnostics = transceiver.get_router_diagnostics(0, 0)
+#     print router_diagnostics.registers
+#     print ""
+#
+#     print "Send read requests"
+#     print "======================"
+#     transceiver.send_scp_message(SCPReadMemoryRequest(1, 0, 0x70000000, 4))
+#     transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
+#     transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
+#     transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+#     transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+#     transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+#
+#     print "Get Router Diagnostics"
+#     print "======================"
+#     router_diagnostics = transceiver.get_router_diagnostics(0, 0)
+#     print router_diagnostics.registers
+#     print ""
+#
+#     print "Get Router Diagnostic Filters"
+#     print "============================="
+#     for i in range(0, 16):
+#         print "Filter", i, ":"
+#         current_filter = transceiver.get_router_diagnostic_filter(0, 0, i)
+#         print_filter(current_filter)
+#         print ""
 
 except Exception:
     logging.exception("Error!")

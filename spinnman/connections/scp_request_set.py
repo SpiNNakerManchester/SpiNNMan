@@ -91,7 +91,8 @@ class SCPRequestSet(object):
 
         :param request: The SCP request to be sent
         :param callback: A callback function to call when the response has\
-                    been received; takes SCPResponse as a parameter
+                    been received; takes SCPResponse as a parameter, or None\
+                    if the response doesn't need to be processed
         :param error_callback: A callback function to call when an error is
                     found when processing the message; takes original\
                     SCPRequest, exception caught and a list of tuples of\
@@ -180,7 +181,8 @@ class SCPRequestSet(object):
                         try:
                             response = request_sent.get_scp_response()
                             response.read_bytestring(raw_data, offset)
-                            self._callbacks[seq](response)
+                            if self._callbacks[seq] is not None:
+                                self._callbacks[seq](response)
                         except Exception as e:
                             self._error_callbacks[seq](
                                 request_sent, e,

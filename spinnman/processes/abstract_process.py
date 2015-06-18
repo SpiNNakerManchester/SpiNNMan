@@ -3,6 +3,8 @@ import sys
 
 
 class AbstractProcess(object):
+    """ An abstract process for talking to SpiNNaker efficiently
+    """
 
     def __init__(self):
         self._exception = None

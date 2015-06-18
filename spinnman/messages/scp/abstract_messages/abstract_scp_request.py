@@ -106,6 +106,8 @@ class AbstractSCPRequest(object):
             data += struct.pack("<I", self._argument_3)
         else:
             data += struct.pack("<I", 0)
+        if self._data is not None:
+            data += bytes(self._data)
         return data
 
     @abstractmethod

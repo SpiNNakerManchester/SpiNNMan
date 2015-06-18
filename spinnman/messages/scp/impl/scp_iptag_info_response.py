@@ -27,7 +27,7 @@ class SCPIPTagInfoResponse(AbstractSCPResponse):
                 "Get IP Tag Info", "CMD_IPTAG", result.name)
 
         self._tto, self._pool_size, self._fixed_size = struct.unpack_from(
-            "<H2B", data, offset)
+            "<Bx2B", data, offset)
 
     @property
     def transient_timeout(self):

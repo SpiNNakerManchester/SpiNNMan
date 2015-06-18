@@ -14,6 +14,8 @@ class SCPReadLinkResponse(AbstractSCPResponse):
         """
         super(SCPReadLinkResponse, self).__init__()
         self._data = None
+        self._offset = None
+        self._length = None
 
     def read_data_bytestring(self, data, offset):
         """ See\
@@ -23,7 +25,9 @@ class SCPReadLinkResponse(AbstractSCPResponse):
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "ReadLink", "CMD_READ_LINK", result.name)
-        self._data = data[offset:]
+        self._data = data
+        self._offset = offset
+        self._length = len(data) - offset
 
     @property
     def data(self):
@@ -32,3 +36,19 @@ class SCPReadLinkResponse(AbstractSCPResponse):
         :rtype: bytearray
         """
         return self._data
+
+    @property
+    def offset(self):
+        """ The offset where the valid data starts
+
+        :rtype: int
+        """
+        return self._offset
+
+    @property
+    def length(self):
+        """ The length of the valid data
+
+        :rtype: int
+        """
+        return self._length

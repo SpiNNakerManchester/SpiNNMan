@@ -16,11 +16,6 @@ class VersionInfo(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     message does not contain valid version information
         """
-        if len(version_data) < 13:
-            raise SpinnmanInvalidParameterException(
-                "len(version_data)", len(version_data),
-                "The length of the version data is too short")
-
         (self._p, self._y, self._x, version_no, self._build_date) = \
             struct.unpack_from("<BxBB2xHI", version_data, offset)
         self._version_number = version_no / 100.0

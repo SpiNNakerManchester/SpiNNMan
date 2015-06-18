@@ -18,6 +18,11 @@ from spinnman.connections.abstract_classes.abstract_scp_receiver\
 import random
 from spinnman.processes.get_machine_process import GetMachineProcess
 from spinnman.processes.get_version_process import GetVersionProcess
+from spinnman.processes.write_memory_process import WriteMemoryProcess
+from spinnman.processes.read_memory_process import ReadMemoryProcess
+from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
+from spinnman.connections.scp_request_set import SCPRequestSet
+from spinnman.processes.set_iptag_tto_process import SetIPTagTTOProcess
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
@@ -136,6 +141,7 @@ def create_transceiver_from_hostname(
     :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                 a response indicates an error during the exchange
     """
+    logger.info("Creating transceiver for {}".format(hostname))
     connection = UDPSpinnakerConnection(remote_host=hostname)
     boot_connection = UDPBootConnection(remote_host=hostname)
     return Transceiver(
@@ -206,6 +212,11 @@ class Transceiver(object):
         if connections is not None:
             self._original_connections.update(connections)
 
+        # A set of all connection - used for closing
+        self._all_connections = set()
+        if connections is not None:
+            self._all_connections.update(connections)
+
         # A boot send connection - there can only be one in the current system,
         # or otherwise bad things can happen!
         self._boot_send_connection = None
@@ -258,6 +269,14 @@ class Transceiver(object):
         self._chip_execute_locks = dict()
         self._chip_execute_lock_condition = Condition()
         self._n_chip_execute_locks = 0
+
+        # Change the default SCP timeout on the machine, keeping the old one to
+        # revert at close
+        self._original_timeouts = dict()
+        for scamp_connection in self._scamp_connections:
+            process = SetIPTagTTOProcess(scamp_connection)
+            self._original_timeouts[scamp_connection] = process.set_tto(
+                scamp_connection.chip_x, scamp_connection.chip_y, 2)
 
     def _sort_out_connections(self, connections):
 
@@ -519,6 +538,7 @@ class Transceiver(object):
             self._scamp_connections, self._ignore_chips, self._ignore_cores,
             self._max_core_id)
         self._machine = get_machine_process.get_machine_details()
+        logger.info(self._machine.cores_and_link_output_string())
 
     def discover_scamp_connections(self):
         """ Find connections to the board and store these for future use.\
@@ -556,9 +576,9 @@ class Transceiver(object):
                 self._udp_scamp_connections[chip.ip_address] = new_connection
                 self._scamp_connections.append(new_connection)
                 self._scp_sender_connections.append(new_connection)
+                self._all_connections.add(new_connection)
 
         # Update the connection queues after finding new connections
-        logger.info(self._machine.cores_and_link_output_string())
         return new_connections
 
     def get_connections(self, include_boot_connection=False):
@@ -575,10 +595,7 @@ class Transceiver(object):
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
-        connections = self._sending_connections.values()
-        if include_boot_connection:
-            connections.append(self._boot_connection)
-        return connections
+        return self._all_connections
 
     def get_machine_dimensions(self):
         """ Get the maximum chip x-coordinate and maximum chip y-coordinate of\
@@ -1139,7 +1156,7 @@ class Transceiver(object):
 
         return bytes_to_write, data_to_write
 
-    def write_memory(self, x, y, base_address, data, n_bytes=None):
+    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0):
         """ Write to the SDRAM on the board
 
         :param x: The x-coordinate of the chip where the memory is to be\
@@ -1185,37 +1202,22 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        bytes_to_write, data_to_write = \
-            self._get_bytes_to_write_and_data_to_write(data, n_bytes)
-
-        # Set up all the requests and get the callbacks
-        logger.debug("Writing {} bytes of memory".format(bytes_to_write))
-        offset = 0
-        address_to_write = base_address
-        callbacks = list()
-        while bytes_to_write > 0:
-            max_data_size = bytes_to_write
-            if max_data_size > 256:
-                max_data_size = 256
-            data_array = None
-            if isinstance(data_to_write, AbstractDataReader):
-                data_array = data_to_write.read(max_data_size)
-            elif isinstance(data_to_write, bytearray):
-                data_array = data_to_write[offset:(offset + max_data_size)]
-            data_size = len(data_array)
-
-            if data_size != 0:
-                callback = self._send_scp_message_with_response(
-                    SCPWriteMemoryRequest(x, y, address_to_write, data_array),
-                    get_callback=True)
-                callbacks.append(callback)
-                bytes_to_write -= data_size
-                address_to_write += data_size
-                offset += data_size
-
-        # Go through the callbacks and check that the responses are OK
-        for callback in callbacks:
-            callback.wait_for_response()
+#         bytes_to_write, data_to_write = \
+#             self._get_bytes_to_write_and_data_to_write(data, n_bytes)
+        process = WriteMemoryProcess(self._scamp_connections)
+        if isinstance(data, AbstractDataReader):
+            process.write_memory_from_reader(x, y, base_address, data, n_bytes)
+        elif isinstance(data, (int, long)):
+            data_to_write = bytearray(4)
+            for i in range(0, 4):
+                data_to_write[i] = (data >> (8 * i)) & 0xFF
+            process.write_memory_from_bytearray(x, y, base_address,
+                                                data_to_write, 0, 4)
+        else:
+            if n_bytes is None:
+                n_bytes = len(data)
+            process.write_memory_from_bytearray(x, y, base_address, data,
+                                                offset, n_bytes)
 
     def write_neighbour_memory(self, x, y, cpu, link, base_address, data,
                                n_bytes=None):
@@ -1422,24 +1424,8 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        # Set up all the requests and get the callbacks
-        bytes_to_get = length
-        address_to_read = base_address
-        callbacks = list()
-        while bytes_to_get > 0:
-            data_size = bytes_to_get
-            if data_size > 256:
-                data_size = 256
-            callback = self._send_scp_message_with_response(
-                SCPReadMemoryRequest(x, y, address_to_read, data_size),
-                get_callback=True)
-            callbacks.append(callback)
-            bytes_to_get -= data_size
-            address_to_read += data_size
-
-        # Go through the callbacks and return the responses in order
-        for callback in callbacks:
-            yield callback.wait_for_response().data
+        process = ReadMemoryProcess(self._scamp_connections)
+        return process.read_memory(x, y, base_address, length)
 
     def read_memory_return_byte_array(self, x, y, base_address, length):
         """ Read some areas of SDRAM from the board
@@ -2127,21 +2113,11 @@ class Transceiver(object):
         :rtype: None
         :raise None: No known exceptions are raised
         """
-        for connection_queue in self._connection_queues.itervalues():
-            connection_queue.stop()
 
-        for connection in self._sending_connections.itervalues():
+        for connection in self._all_connections:
             if (close_original_connections or
-                    connection not in self.connections_to_not_shut_down):
+                    connection not in self._original_connections):
                 connection.close()
-
-        for connection in self._receiving_connections.itervalues():
-            if (close_original_connections or
-                    connection not in self.connections_to_not_shut_down):
-                connection.close()
-
-        self._scp_message_thread_pool.close()
-        self._other_thread_pool.close()
 
     def register_listener(self, callback, recieve_port_no,
                           connection_type, traffic_type, hostname=None):
