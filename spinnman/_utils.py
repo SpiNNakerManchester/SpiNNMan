@@ -182,63 +182,6 @@ def get_ideal_size(number_of_boards, version):
                                 "default sizes above 1 board".format(version))
 
 
-def sort_out_bmp_string(bmp_string):
-    """ Take a bmp line and split it into ipaddress and a int for board scope\
-        where each bit in the int states if the board is to be used in the \
-        scope
-    :param bmp_string: the bmp string to be converted
-    :return: the bmp ipaddress and the boards scope int
-    """
-    bmp_string_split = bmp_string.split("/")
-
-    # if there is no split, then assume its one board, located at position 0
-    if len(bmp_string_split) == 1:
-
-        # verify that theres no cabinet and frame defs
-        bmp_string_split = bmp_string.split(";")
-        if len(bmp_string_split) == 1:
-            return BMPConnectionData(0, 0, bmp_string, [0])
-    else:
-        cabinate_frame_ip_address = bmp_string_split[0].split(";")
-
-        # if no cabinet or frame, assume they are 0 0
-        if len(cabinate_frame_ip_address) == 1:
-            cabinet = 0
-            frame = 0
-            ip_address = cabinate_frame_ip_address[0]
-        else:
-            cabinet = cabinate_frame_ip_address[0]
-            frame = cabinate_frame_ip_address[1]
-            ip_address = cabinate_frame_ip_address[2]
-
-        # try splitting by - first
-        board_scope_split = bmp_string_split[1].split("-")
-        if len(board_scope_split) == 1:
-
-            # assume seperated by , instead
-            board_scope_split = bmp_string_split[1].split(",")
-            if len(board_scope_split) == 1:
-
-                # assume no boards given, so one board at position 0
-                board_scope_split = list()
-                board_scope_split.append(0)
-        else:
-
-            # get range into same format as list, for ease later
-            new_values = list()
-            for value in range(int(board_scope_split[0]),
-                               int(board_scope_split[1]) + 1):
-                new_values.append(value)
-            board_scope_split = new_values
-
-        # add board scope for each split
-        board_int = list()
-        for board_value in board_scope_split:
-            board_int.append(int(board_value))
-
-        return BMPConnectionData(cabinet, frame, ip_address, board_int)
-
-
 def locate_middle_chips_to_query(
         max_x_dimension, max_y_dimension, invalid_chips):
     """ Locate the middle set of chips on the board, given chips that have\
