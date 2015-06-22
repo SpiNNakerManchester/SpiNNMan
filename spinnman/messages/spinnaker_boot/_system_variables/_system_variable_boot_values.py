@@ -1,5 +1,6 @@
 from enum import Enum
 from collections import namedtuple
+from spinnman.model.machine_dimensions import MachineDimensions
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
 
@@ -338,11 +339,11 @@ spinnaker_boot_values = {
         hardware_version=5, cpu_clock_frequency_mhz=200, led_0=0x00000001)}
 
 spinnaker_standard_board_to_machine_sizes = {
-    1: {'x': 2, 'y': 2},
-    2: {'x': 2, 'y': 2},
-    3: {'x': 2, 'y': 2},
-    4: {'x': 8, 'y': 8},
-    5: {'x': 8, 'y': 8}}
+    1: MachineDimensions(2, 2),
+    2: MachineDimensions(2, 2),
+    3: MachineDimensions(2, 2),
+    4: MachineDimensions(8, 8),
+    5: MachineDimensions(8, 8)}
 
 spinnaker_multi_board_extra_configs = {
     6: {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,

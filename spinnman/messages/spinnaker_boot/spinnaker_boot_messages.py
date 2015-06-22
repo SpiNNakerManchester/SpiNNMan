@@ -44,16 +44,16 @@ class SpinnakerBootMessages(object):
     """
 
     def __init__(
-            self, board_version, max_x, max_y, number_of_boards):
+            self, board_version, width, height, number_of_boards):
         """
         builds the boot messages needed to boot the spinnaker machine
 
         :param board_version: The version of the board to be booted
         :type board_version: int
-        :param max_x: The maximum x coordinate of the chips in the machine
-        :type max_x: int or None
-        :param max_y: The maximum y coordinate of the chips in the machine
-        :type max_y: int
+        :param width: The width of the machine in chips
+        :type width: int or None
+        :param height: The height of the machine in chips
+        :type height: int or None
         :param number_of_boards: the number of boards that this spinnaker
             machine is built up from
         :type number_of_boards: int
@@ -78,9 +78,9 @@ class SpinnakerBootMessages(object):
         spinnaker_boot_value.set_value(
             SystemVariableDefinition.is_root_chip, 1)
         spinnaker_boot_value.set_value(
-            SystemVariableDefinition.x_size, int(max_x))
+            SystemVariableDefinition.x_size, int(width))
         spinnaker_boot_value.set_value(
-            SystemVariableDefinition.y_size, int(max_y))
+            SystemVariableDefinition.y_size, int(height))
 
         # add any updates for multi-board systems
         for multi_board_n_boards, extra_variables in (

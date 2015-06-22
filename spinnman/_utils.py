@@ -15,6 +15,7 @@ from spinn_machine.utilities import utilities
 # general imports
 import math
 import socket
+from spinnman.model.machine_dimensions import MachineDimensions
 
 
 def _get_int_from_big_endian_bytearray(array, offset):
@@ -154,7 +155,8 @@ def get_ideal_size(number_of_boards, version):
 
     :param number_of_boards: the number of boards used within the machine
     :param version: the board version being used
-    :return: a dictionary with x and y keys.
+    :return: The MachineDimensions
+    :rtype: :py:class:`spinnman.model.machine_dimensions.MachineDimensions`
     """
 
     if number_of_boards == 1:
@@ -164,10 +166,11 @@ def get_ideal_size(number_of_boards, version):
         if number_of_boards % 3 != 0:
             raise exceptions.SpinnmanInvalidParameterException(
                 "number_of_boards", number_of_boards,
-                "{} is not a multiple of 3".format(number_of_boards))
+                "Not a multiple of 3")
+
         # Special case to avoid division by 0
         if number_of_boards == 0:
-            return {'x': 0, 'y': 0}
+            return MachineDimensions(0, 0)
 
         # Find the largest pair of factors to discover the squarest system
         h = 0
@@ -175,28 +178,28 @@ def get_ideal_size(number_of_boards, version):
             if (number_of_boards // 3) % h == 0:
                 break
         w = (number_of_boards // 3) // h
-        return {'x': w * 12, 'y': h * 12}  # convert from triads to chip size
+
+        # convert from triads to chip size
+        return MachineDimensions(w * 12, h * 12)
     else:
         raise exceptions.SpinnmanInvalidParameterException(
-            "version", version, "{} is not a understandable board type for "
-                                "default sizes above 1 board".format(version))
+            "version", version, "unrecognized board version for "
+                                "default sizes above 1 board")
 
 
-def locate_middle_chips_to_query(
-        max_x_dimension, max_y_dimension, invalid_chips):
+def locate_middle_chips_to_query(width, height, invalid_chips):
     """ Locate the middle set of chips on the board, given chips that have\
         been manually removed
 
-    :param max_x_dimension: the max size of the machine in the x dimension
-    :param max_y_dimension: the max size of the machine in the y dimension
+    :param width: the width of the machine in chips
+    :param height: the height of the machine in chips
     :param invalid_chips: the list of chips that are down
     :return: a list of chips to query
     """
-    middle_chip_x = int(round(max_x_dimension / 2))
-    middle_chip_y = int(round(max_y_dimension / 2))
+    middle_chip_x = int(round(width / 2))
+    middle_chip_y = int(round(height / 2))
     return utilities.get_closest_chips_to(
-        middle_chip_x, middle_chip_y, max_x_dimension, max_y_dimension,
-        invalid_chips)
+        middle_chip_x, middle_chip_y, width - 1, height - 1, invalid_chips)
 
 
 def work_out_bmp_from_machine_details(hostname, number_of_boards):
