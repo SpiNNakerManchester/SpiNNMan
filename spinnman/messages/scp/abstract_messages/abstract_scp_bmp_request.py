@@ -29,7 +29,7 @@ class AbstractSCPBMPRequest(AbstractSCPRequest):
         sdp_header = SDPHeader(
             flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
             destination_cpu=AbstractSCPBMPRequest.get_first_board(boards),
-            destination_chip_x=0, destination_chip_y=0),
+            destination_chip_x=0, destination_chip_y=0)
         AbstractSCPRequest.__init__(self, sdp_header, scp_request_header,
                                     argument_1, argument_2, argument_3, data)
 
