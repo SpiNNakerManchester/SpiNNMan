@@ -1001,25 +1001,20 @@ class Transceiver(object):
         return response.version_info
 
     def boot_board(
-            self, board_version, max_machines_x_dimension,
-            max_machines_y_dimension, number_of_boards):
+            self, board_version, max_x, max_y, number_of_boards):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
 
         :param board_version: The version of the board e.g. 3 for a SpiNN-3\
                     board or 5 for a SpiNN-5 board.
         :type board_version: int
-        :param number_of_boards: the number of boards that this machine is made
-        out of
+        :param number_of_boards: the number of boards that this machine is \
+                made out of
         :type number_of_boards: int
-        :param max_machines_x_dimension: the max size dimension this machine
-                when booted should be in the x dimension
-        :type max_machines_x_dimension: int or None
-        :param max_machines_y_dimension: the max size dimension this machine
-                when booted should be in the y dimension
-        :type max_machines_y_dimension: int
-        :return: Nothing is returned
-        :rtype: None
+        :param max_x: The maximum x-coordinate of a chip + 1
+        :type max_x: int or None
+        :param max_y: The maximum y-coordinate of a chip + 1
+        :type max_y: int or None
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     board version is not known
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1028,16 +1023,13 @@ class Transceiver(object):
         logger.debug("Attempting to boot version {} board".format(
             board_version))
         boot_messages = SpinnakerBootMessages(
-            board_version,
-            max_machines_x_dimension=max_machines_x_dimension,
-            max_machines_y_dimension=max_machines_y_dimension,
+            board_version, max_x=max_x, max_y=max_y,
             number_of_boards=number_of_boards)
         for boot_message in boot_messages.messages:
             self._send_message(boot_message, response_required=False)
 
     def ensure_board_is_ready(
-            self, board_version, number_of_boards,
-            max_machines_x_dimension=None, max_machines_y_dimension=None,
+            self, board_version, number_of_boards, max_x=None, max_y=None,
             n_retries=5):
         """ Ensure that the board is ready to interact with this version\
             of the transceiver.  Boots the board if not already booted and\
@@ -1047,12 +1039,10 @@ class Transceiver(object):
         :param board_version: The version of the board e.g. 3 for a SpiNN-3\
                     board or 5 for a SpiNN-5 board.
         :type board_version: int
-        :param max_machines_x_dimension: the max size dimension this machine
-                when booted should be in the x dimension
-        :type max_machines_x_dimension: int or None
-        :param max_machines_y_dimension: the max size dimension this machine
-                when booted should be in the y dimension
-        :type max_machines_y_dimension: int
+        :param max_x: The maximum x-coordinate of a chip + 1
+        :type max_x: int or None
+        :param max_y: The maximum y-coordinate of a chip + 1
+        :type max_y: int or None
         :param number_of_boards: the number of boards that this machine is
                     constructed out of
         :type number_of_boards: int
@@ -1067,17 +1057,15 @@ class Transceiver(object):
         """
 
         # if the machine sizes not been given, calculate from assumption
-        if (max_machines_x_dimension is None or
-                max_machines_y_dimension is None):
+        if (max_x is None or max_y is None):
             sizes = _utils.get_ideal_size(number_of_boards, board_version)
-            max_machines_x_dimension = sizes['x']
-            max_machines_y_dimension = sizes['y']
+            max_x = sizes['x']
+            max_y = sizes['y']
 
         # try to get a scamp version
         logger.info("going to try to boot the machine with scamp")
         version_info = self._try_to_find_scamp_and_boot(
-            n_retries, board_version, number_of_boards,
-            max_machines_x_dimension, max_machines_y_dimension)
+            n_retries, board_version, number_of_boards, max_x, max_y)
         if version_info is None:
             logger.info("failed to boot machine with scamp,"
                         " trying to power on machine")
@@ -1088,8 +1076,7 @@ class Transceiver(object):
 
             # retry to get a scamp version
             version_info = self._try_to_find_scamp_and_boot(
-                n_retries, board_version, number_of_boards,
-                max_machines_x_dimension, max_machines_y_dimension)
+                n_retries, board_version, number_of_boards, max_x, max_y)
 
         # verify that the version is the expected one for this trnasciever
         if version_info is None:
@@ -1109,17 +1096,16 @@ class Transceiver(object):
         return version_info
 
     def _try_to_find_scamp_and_boot(
-            self, tries_to_go, board_version, number_of_boards,
-            max_x_dimension, max_y_dimension):
+            self, tries_to_go, board_version, number_of_boards, max_x, max_y):
         """ Try to detect if SCAMP is running, and if not, boot the machine
 
         :param tries_to_go: how many attemtps should be supported
         :param board_version: The version of boards in the machine
         :param number_of_boards: the number of boards that this machine \
                 is built out of
-        :param max_x_dimension: the maximum chip x coordinate in the machine, \
+        :param max_x: the maximum chip x coordinate in the machine, \
                 or None to automatically compute this from the number of boards
-        :param max_y_dimension:the maximum chip y coordinate in the machine, \
+        :param max_y: the maximum chip y coordinate in the machine, \
                 or None to automatically compute this from the number of boards
         :return: version_info
         :raises SpinnmanIOException: If there is a problem communicating with\
@@ -1131,8 +1117,7 @@ class Transceiver(object):
             try:
                 version_info = self.get_scamp_version()
             except exceptions.SpinnmanTimeoutException:
-                self.boot_board(board_version, number_of_boards,
-                                max_x_dimension, max_y_dimension)
+                self.boot_board(board_version, number_of_boards, max_x, max_y)
                 current_tries_to_go -= 1
             except exceptions.SpinnmanIOException:
                 raise exceptions.SpinnmanUnexpectedResponseCodeException(
@@ -1143,16 +1128,15 @@ class Transceiver(object):
         # be a delay whilst all the other chips complete boot.
         if version_info is not None:
             version_info = self._wait_till_chips_are_fully_booted(
-                max_x_dimension, max_y_dimension, tries_to_go)
+                max_x, max_y, tries_to_go)
         return version_info
 
     def _wait_till_chips_are_fully_booted(
-            self, max_x_dimension, max_y_dimension,
-            current_tries_to_go):
+            self, max_x, max_y, current_tries_to_go):
         """ Wait until a central set of chips are booted, and can speak to 0, 0
 
-        :param max_x_dimension: the max dimension of the machine in the x axis
-        :param max_y_dimension: the max dimension of the machine in the y axis
+        :param max_x: the max dimension of the machine in the x axis
+        :param max_y: the max dimension of the machine in the y axis
         :return: the version info of the last important chip
         """
         version_info = None
@@ -1164,12 +1148,11 @@ class Transceiver(object):
 
             # Use the middle of the machine
             chips_to_check = _utils.locate_middle_chips_to_query(
-                max_x_dimension, max_y_dimension, self._ignore_chips)
+                max_x, max_y, self._ignore_chips)
         else:
 
             # Use the top corner
-            chips_to_check.append({'x': max_x_dimension - 1,
-                                   'y': max_y_dimension - 1})
+            chips_to_check.append({'x': max_x - 1, 'y': max_y - 1})
 
         # check each chip required to ensure boot is finished
         for chip_to_check in chips_to_check:

@@ -347,8 +347,4 @@ spinnaker_standard_board_to_machine_sizes = {
 spinnaker_multi_board_extra_configs = {
     6: {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
         SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01100a42},
-    24: {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
-         SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01100a42},
-    120: {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
-          SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01140852,
-          SystemVariableDefinition.probe_timer: 0x010a6401}}
+    120: {SystemVariableDefinition.probe_timer: 0x010a6401}}

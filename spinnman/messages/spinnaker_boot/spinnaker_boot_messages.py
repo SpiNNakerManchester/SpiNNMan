@@ -44,19 +44,16 @@ class SpinnakerBootMessages(object):
     """
 
     def __init__(
-            self, board_version, max_machines_x_dimension,
-            max_machines_y_dimension, number_of_boards):
+            self, board_version, max_x, max_y, number_of_boards):
         """
         builds the boot messages needed to boot the spinnaker machine
 
         :param board_version: The version of the board to be booted
         :type board_version: int
-        :param max_machines_x_dimension: the max size dimension this machine
-                when booted should be in the x dimension
-        :type max_machines_x_dimension: int or None
-        :param max_machines_y_dimension: the max size dimension this machine
-                when booted should be in the y dimension
-        :type max_machines_y_dimension: int
+        :param max_x: The maximum x coordinate of the chips in the machine
+        :type max_x: int or None
+        :param max_y: The maximum y coordinate of the chips in the machine
+        :type max_y: int
         :param number_of_boards: the number of boards that this spinnaker
             machine is built up from
         :type number_of_boards: int
@@ -81,20 +78,17 @@ class SpinnakerBootMessages(object):
         spinnaker_boot_value.set_value(
             SystemVariableDefinition.is_root_chip, 1)
         spinnaker_boot_value.set_value(
-            SystemVariableDefinition.x_size, int(max_machines_x_dimension))
+            SystemVariableDefinition.x_size, int(max_x))
         spinnaker_boot_value.set_value(
-            SystemVariableDefinition.y_size, int(max_machines_y_dimension))
+            SystemVariableDefinition.y_size, int(max_y))
 
         # add any updates for multi-board systems
-        if (number_of_boards in
-                variable_boot_values.spinnaker_multi_board_extra_configs):
-            extra_vairables_to_config = \
-                variable_boot_values.spinnaker_multi_board_extra_configs[
-                    number_of_boards]
-            for extra_vairables_to_config_key in extra_vairables_to_config:
-                spinnaker_boot_value.set_value(
-                    extra_vairables_to_config_key,
-                    extra_vairables_to_config[extra_vairables_to_config_key])
+        for multi_board_n_boards, extra_variables in (
+                variable_boot_values
+                .spinnaker_multi_board_extra_configs.iteritems()):
+            if number_of_boards >= multi_board_n_boards:
+                for extra_variable, extra_value in extra_variables.iteritems():
+                    spinnaker_boot_value.set_value(extra_variable, extra_value)
 
         boot_data_writer = LittleEndianByteArrayByteWriter()
         spinnaker_boot_value.write_values(boot_data_writer)
