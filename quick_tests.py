@@ -229,7 +229,7 @@ try:
     routes = transceiver.get_multicast_routes(0, 0, app_id)
     for route in routes:
         print "Key={}, Mask={}, processors={}, links={}".format(
-            hex(route.key_combo), hex(route.mask), route.processor_ids,
+            hex(route.routing_entry_key), hex(route.mask), route.processor_ids,
             route.link_ids)
     print ""
 
@@ -239,7 +239,7 @@ try:
     routes = transceiver.get_multicast_routes(0, 0)
     for route in routes:
         print "Key={}, Mask={}, processors={}, links={}".format(
-            hex(route.key_combo), hex(route.mask), route.processor_ids,
+            hex(route.routing_entry_key), hex(route.mask), route.processor_ids,
             route.link_ids)
     print ""
 
