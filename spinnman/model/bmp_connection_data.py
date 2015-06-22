@@ -19,7 +19,7 @@ class BMPConnectionData(object):
 
         :rtype: int
         """
-        return self._cabinate
+        return self._cabinet
 
     @property
     def frame(self):
