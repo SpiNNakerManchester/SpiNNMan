@@ -182,7 +182,7 @@ def create_transceiver_from_hostname(
 
         udp_bmp_connection = UDPBMPConnection(
             bmp_connection.cabinet, bmp_connection.frame,
-            bmp_connection.boards, remote_host=bmp_connection_data.ip_address)
+            bmp_connection.boards, remote_host=bmp_connection.ip_address)
         connections.append(udp_bmp_connection)
 
     # handle the spinnaker connection
