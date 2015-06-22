@@ -17,9 +17,10 @@ class SCPBMPSetLedRequest(AbstractSCPBMPRequest):
 
         :param led: Number of the LED or an iterable of LEDs to set the\
                 state of (0-7)
-        :type led: int or iterable
+        :type led: int or iterable of int
         :param action: State to set the LED to, either on, off or toggle
-        :type action: enum of LEDS_ACTIONS
+        :type action:\
+                :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
         :param boards: Specifies the board to control the LEDs of. This may\
                 also be an iterable of multiple boards (in the same frame).
         :type board: int or iterable of int

@@ -1702,10 +1702,12 @@ class Transceiver(object):
                 state of (0-7)
         :type led: int or iterable of int
         :param action:State to set the LED to, either on, off or toggle
-        :type action: enum of LEDS_ACTIONS
-        :param board: Specifies the board to control the LEDs of. This may
-         also be an iterable of multiple boards (in the same frame). The
-         command will actually be sent to the first board in the iterable.
+        :type action:\
+                :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
+        :param board: Specifies the board to control the LEDs of. This may \
+                also be an iterable of multiple boards (in the same frame).\
+                The command will actually be sent to the first board in the\
+                iterable.
         :type board: int or iterable
         :param cabinet: the cabinet this is targetting
         :type cabinet: int

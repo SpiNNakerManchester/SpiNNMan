@@ -86,21 +86,6 @@ CONNECTION_TYPE = Enum(
            ("UDP_BMP", 5),
            ("USB", 6)])
 
-# types of data that is returned from a bmp_info SCP command.
-BMP_INFO_TYPE = Enum(
-    value="BMP_INFO_TYPE",
-    names=[("SERIAL", 0),
-           ("CAN_STATUS", 2),
-           ("ADC", 3),
-           ("IP_ADDR", 4)])
-
-# types of actions for the leds from a set led request
-LEDS_ACTIONS = Enum(
-    value="BMP_SET_LED_ACTIONS",
-    names=[("ON", 3),
-           ("OFF", 2),
-           ("TOGGLE", 1)])
-
 # the different types of message types which spinnman supports
 TRAFFIC_TYPE = Enum(
     value="TRAFFIC_TYPE",
