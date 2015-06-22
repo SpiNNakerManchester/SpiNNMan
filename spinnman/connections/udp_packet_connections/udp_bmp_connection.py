@@ -24,14 +24,42 @@ from spinnman.messages.sdp.sdp_message import SDPMessage
 class UDPBMPConnection(
         AbstractUDPConnection, AbstractUDPSDPReceiver, AbstractUDPSDPSender,
         AbstractUDPSCPBMPSender, AbstractUDPSCPBMPReceiver):
-    """
-    the BMP connection which supports queries to the bmp connection of a
-    spinnaker machine.
+    """ A BMP connection which supports queries to the BMP of a SpiNNaker\
+        machine
     """
 
-    def __init__(self, local_host=None, local_port=None, remote_host=None):
+    def __init__(self, cabinet, frame, boards, local_host=None,
+                 local_port=None, remote_host=None):
         AbstractUDPConnection.__init__(
-            self, local_host, local_port, remote_host, constants.SCP_SCAMP_PORT)
+            self, local_host, local_port, remote_host,
+            constants.SCP_SCAMP_PORT)
+        self._cabinet = cabinet
+        self._frame = frame
+        self._boards = boards
+
+    @property
+    def cabinet(self):
+        """ The cabinet id of the BMP
+
+        :rtype: int
+        """
+        return self._cabinet
+
+    @property
+    def frame(self):
+        """ The frame id of the BMP
+
+        :rtype: int
+        """
+        return self._frame
+
+    @property
+    def boards(self):
+        """ The set of boards supported by the BMP
+
+        :rtype: iterable of int
+        """
+        return self._boards
 
     def supports_sends_message(self, message):
         """
@@ -53,7 +81,6 @@ class UDPBMPConnection(
         :return:
         """
         return constants.CONNECTION_TYPE.UDP_BMP
-
 
     def is_sdp_reciever(self):
         """

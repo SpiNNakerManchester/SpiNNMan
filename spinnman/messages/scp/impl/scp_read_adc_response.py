@@ -6,7 +6,7 @@ from spinnman.model.adc_info import ADCInfo
 
 
 class SCPReadADCResponse(AbstractSCPBMPResponse):
-    """ An SCP response to a request for the version of software running
+    """ An SCP response to a request for ADC information
     """
 
     def __init__(self):
@@ -16,7 +16,8 @@ class SCPReadADCResponse(AbstractSCPBMPResponse):
         self._adc_info = None
 
     def read_scp_response(self, byte_reader):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_scp_response`
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_scp_response`
         """
         AbstractSCPBMPResponse.read_scp_response(self, byte_reader)
         result = self.scp_response_header.result
@@ -28,8 +29,6 @@ class SCPReadADCResponse(AbstractSCPBMPResponse):
 
     @property
     def adc_info(self):
-        """ The version information received
-
-        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
+        """ The ADC information
         """
         return self._adc_info

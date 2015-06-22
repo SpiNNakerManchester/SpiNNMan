@@ -8,8 +8,7 @@ from spinnman.connections.abstract_classes.abstract_scp_receiver import \
     AbstractSCPReceiver
 from spinnman.data.little_endian_byte_array_byte_reader import \
     LittleEndianByteArrayByteReader
-from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException, \
-    SpinnmanInvalidPacketException
+from spinnman import exceptions
 
 
 @add_metaclass(ABCMeta)
@@ -51,9 +50,10 @@ class AbstractUDPSCPBMPReceiver(AbstractSCPReceiver):
                 raise socket.timeout()
             raw_data = self._socket.recv(512)
         except socket.timeout:
-            raise SpinnmanTimeoutException("receive_scp_message", timeout)
+            raise exceptions.SpinnmanTimeoutException(
+                "receive_scp_message", timeout)
         except Exception as e:
-            raise SpinnmanIOException(str(e))
+            raise exceptions.SpinnmanIOException(str(e))
 
         # Set up for reading
         packet = bytearray(raw_data)
@@ -63,9 +63,8 @@ class AbstractUDPSCPBMPReceiver(AbstractSCPReceiver):
         try:
             reader.read_short()
         except EOFError:
-            raise SpinnmanInvalidPacketException(
+            raise exceptions.SpinnmanInvalidPacketException(
                 "SCP", "Not enough bytes to read the pre-packet padding")
 
         # Read the response
         scp_response.read_scp_response(reader)
-

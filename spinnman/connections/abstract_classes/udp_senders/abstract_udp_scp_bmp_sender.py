@@ -10,6 +10,7 @@ from spinnman.exceptions import SpinnmanIOException
 from spinnman import constants
 from spinnman.messages.udp_utils import udp_utils as utils
 
+
 @add_metaclass(ABCMeta)
 class AbstractUDPSCPBMPSender(AbstractSCPSender):
     """ A sender of SCP messages
@@ -71,4 +72,3 @@ class AbstractUDPSCPBMPSender(AbstractSCPSender):
             self._socket.send(writer.data)
         except Exception as e:
             raise SpinnmanIOException(str(e))
-

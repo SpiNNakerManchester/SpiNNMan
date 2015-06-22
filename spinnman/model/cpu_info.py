@@ -41,8 +41,8 @@ class CPUInfo(object):
         """
         if len(cpu_data) != constants.CPU_INFO_BYTES:
             raise SpinnmanInvalidParameterException(
-                    "len(cpu_data)", str(len(cpu_data)),
-                    "Must be 128 bytes of data")
+                "len(cpu_data)", str(len(cpu_data)),
+                "Must be 128 bytes of data")
 
         self._x = x
         self._y = y
@@ -71,7 +71,8 @@ class CPUInfo(object):
         self._application_name = cpu_data[72:88].decode("ascii")
         self._iobuf_address = _get_int_from_bytearray(cpu_data, 88)
         self._user = [_get_int_from_bytearray(cpu_data, i)
-                      for i in range(constants.CPU_USER_0_START_ADDRESS, 128, 4)]
+                      for i in range(constants.CPU_USER_0_START_ADDRESS,
+                                     128, 4)]
 
     @property
     def x(self):

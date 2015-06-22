@@ -72,13 +72,14 @@ class SpinnakerBootMessages(object):
         # Get the boot packet values
         spinnaker_boot_value = \
             variable_boot_values.spinnaker_boot_values[board_version]
-        
+
         current_time = int(time.time())
         spinnaker_boot_value.set_value(
             SystemVariableDefinition.unix_timestamp, current_time)
         spinnaker_boot_value.set_value(
             SystemVariableDefinition.boot_signature, current_time)
-        spinnaker_boot_value.set_value(SystemVariableDefinition.is_root_chip, 1)
+        spinnaker_boot_value.set_value(
+            SystemVariableDefinition.is_root_chip, 1)
         spinnaker_boot_value.set_value(
             SystemVariableDefinition.x_size, int(max_machines_x_dimension))
         spinnaker_boot_value.set_value(

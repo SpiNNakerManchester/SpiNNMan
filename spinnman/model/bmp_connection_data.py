@@ -2,52 +2,52 @@
 BMPConnectionData
 """
 
+
 class BMPConnectionData(object):
-    """
-    data object for whats required from a bmp connection
+    """ Contains the details of a BMP connection
     """
 
-    def __init__(self, cabinate, frame, ip_address, boards):
-        self._cabinate = cabinate
+    def __init__(self, cabinet, frame, ip_address, boards):
+        self._cabinet = cabinet
         self._frame = frame
         self._ip_address = ip_address
         self._boards = boards
 
     @property
-    def cabinate(self):
-        """
-        property method for cabinate
-        :return:
+    def cabinet(self):
+        """ Get the cabinet number
+
+        :rtype: int
         """
         return self._cabinate
 
     @property
     def frame(self):
-        """
-        property method for frame
-        :return:
+        """ Get the frame number
+
+        :rtype: int
         """
         return self._frame
 
     @property
     def ip_address(self):
-        """
-        property method for ip_address
-        :return:
+        """ Get the IP address of the BMP
+
+        :rtype: str
         """
         return self._ip_address
 
     @property
     def boards(self):
-        """
-        property method for boards
-        :return:
+        """ Iterable of integers for the boards to be addressed
+
+        :rtype: iterable of int
         """
         return self._boards
 
     def __str__(self):
         return "{}:{}:{}:{}".format(
-            self._cabinate, self._frame, self._ip_address, self._boards)
+            self._cabinet, self._frame, self._ip_address, self._boards)
 
     def __repr__(self):
         return self.__str__()

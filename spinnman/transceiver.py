@@ -12,8 +12,9 @@ from spinnman.messages.scp.impl.scp_read_adc_request import SCPReadADCRequest
 from spinnman.messages.scp.impl.scp_read_fpga_register_request import \
     SCPReadFPGARegisterRequest
 from spinnman.messages.scp.impl.scp_write_fpga_register_request import \
-    ScpWriteFPGARegisterRequest
+    SCPWriteFPGARegisterRequest
 from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.messages.scp.scp_power_command import SCPPowerCommand
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
@@ -121,7 +122,7 @@ _BMP_VERSIONS = [1.3, 1.37, 1.36]
 
 
 def create_transceiver_from_hostname(
-        hostname, bmp_ip_addresses, version, number_of_boards,
+        hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, max_core_id=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
@@ -132,7 +133,8 @@ def create_transceiver_from_hostname(
 
     :param hostname: The hostname or IP address of the board
     :type hostname: str
-    :param number_of_boards: a numebr o boards expected to eb supported, or None
+    :param number_of_boards: a number of boards expected to be supported, or\
+                None, which defaults to a single board
     :type number_of_boards: int or None
     :param ignore_chips: An optional set of chips to ignore in the\
                 machine.  Requests for a "machine" will have these chips\
@@ -147,12 +149,13 @@ def create_transceiver_from_hostname(
                 Requests for a "machine" will only have core ids up to\
                 this value.
     :type max_core_id: int
-    :param version: the type of spinnaker board used within the spinnaker
-                    machine being used. If a spinn-5 board, then the version
-                    will be 5, spinn-3 would equal 3 and so on.
-    :param bmp_ip_addresses: the ip-addresses of the bmp connection used to boot
-                           multi-board systems.
-    :type bmp_ip_addresses: iterable of str
+    :param version: the type of spinnaker board used within the spinnaker\
+                machine being used. If a spinn-5 board, then the version\
+                will be 5, spinn-3 would equal 3 and so on.
+    :param bmp_connection_data: the details of the bmp connections used to\
+                boot multi-board systems
+    :type bmp_ip_addresses: iterable\
+                :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -165,45 +168,31 @@ def create_transceiver_from_hostname(
                 a response indicates an error during the exchange
     """
     connections = list()
-    bmp_to_data_mapping = dict()
-    cabinat_frame_to_connection_mapping = dict()
 
-    # if no bmp has been supplied, but the board is a spinn4 or a spinn5
-    # machine, then an assumption can be made that the bmp is at -1 on the
-    # final value of the ipaddress
-    if len(bmp_ip_addresses) == 0 and version >= 4:
-        bmp_connection_data = \
-            _utils.sort_out_bmp_from_machine(hostname, number_of_boards)
-        udp_bmp_connection = \
-            UDPBMPConnection(remote_host=bmp_connection_data.ip_address)
-        # update dictonaries
-        _utils.update_mappers(
-            bmp_to_data_mapping, cabinat_frame_to_connection_mapping,
-            bmp_connection_data, udp_bmp_connection)
+    # if no BMP has been supplied, but the board is a spinn4 or a spinn5
+    # machine, then an assumption can be made that the BMP is at -1 on the
+    # final value of the IP address
+    if version == 4 and (bmp_connection_data is None or
+                         len(bmp_connection_data) == 0):
+        bmp_connection_data = [_utils.work_out_bmp_from_machine_details(
+            hostname, number_of_boards)]
+
+    # handle BMP connections
+    for bmp_connection in bmp_connection_data:
+
+        udp_bmp_connection = UDPBMPConnection(
+            bmp_connection.cabinet, bmp_connection.frame,
+            bmp_connection.boards, remote_host=bmp_connection_data.ip_address)
         connections.append(udp_bmp_connection)
-    else:
-        # handle the possible multiple bmp connections
-        for bmp_string in bmp_ip_addresses:
-            # split the ipadress from the board scope and define the dict
-            # accordingly
-            bmp_connection_data = _utils.sort_out_bmp_string(bmp_string)
-            udp_bmp_connection = UDPBMPConnection(
-                remote_host=bmp_connection_data.ip_address)
-            # update dictonaries
-            _utils.update_mappers(
-                bmp_to_data_mapping, cabinat_frame_to_connection_mapping,
-                bmp_connection_data, udp_bmp_connection)
-            # add connection to list of connections
-            connections.append(udp_bmp_connection)
 
     # handle the spinnaker connection
     connections.append(UDPSpinnakerConnection(remote_host=hostname))
+
     # handle the boot connection
     connections.append(UDPBootConnection(remote_host=hostname))
 
     return Transceiver(
-        connections=connections, bmp_to_bmp_data_mapping=bmp_to_data_mapping,
-        cabinat_frame_to_connection_mapping=cabinat_frame_to_connection_mapping,
+        connections=connections,
         shut_down_connections=True, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id)
 
@@ -223,8 +212,7 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, bmp_to_bmp_data_mapping=None,
-                 cabinat_frame_to_connection_mapping=None,
+    def __init__(self, connections=None,
                  ignore_chips=None, ignore_cores=None, max_core_id=None,
                  shut_down_connections=False, n_scp_threads=16,
                  n_other_threads=16):
@@ -235,10 +223,6 @@ class Transceiver(object):
                     connections are found.
         :type connections: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :param bmp_to_bmp_data_mapping: dictonary containing the board mapping
-                    used via each bmp connection
-        :type bmp_to_bmp_data_mapping: dictonary with bmp-ipaddress as key and
-                    a int where each bit says if the board is covered in scope
         :param ignore_chips: An optional set of chips to ignore in the\
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
@@ -284,11 +268,8 @@ class Transceiver(object):
             self.connections_to_not_shut_down = set(connections)
         self._boot_connection = None
 
-        # bmp connectors data structures
-        self._bmp_connections = dict()
-        self._bmp_connection_to_bmp_data_mapping = bmp_to_bmp_data_mapping
-        self._cabinat_frame_to_connection_mapping = \
-            cabinat_frame_to_connection_mapping
+        self._bmp_connections = list()
+        self._bmp_connections_by_location = dict()
         self._receiving_connections = dict()
         self._sending_connections = dict()
 
@@ -329,9 +310,9 @@ class Transceiver(object):
                 self._sort_out_udp_connections(connection)
 
     def _sort_out_udp_connections(self, connection):
-        """
-        looks though the udp conenctions and sorts them into bmp, scamp and
-        other types of connections
+        """ Look though the udp conenctions and sorts them into bmp, scamp and\
+            other types of connections
+
         :param connection: the connection to check for its type of
         :return:
         """
@@ -346,7 +327,9 @@ class Transceiver(object):
 
         # locate the bmp connections
         if isinstance(connection, UDPBMPConnection):
-            self._bmp_connections[connection.local_port] = connection
+            self._bmp_connections.append(connection)
+            self._bmp_connections_by_location[
+                (connection.cabinet, connection.frame)] = connection
 
         # check if connection is a receive or sender or both connection
         # check if the connection can receive and is not using a already
@@ -371,86 +354,75 @@ class Transceiver(object):
                 self._sending_connections[key] = connection
 
     def _check_udp_bmp_connections(self):
-        """
-        helper method that check that the bmp connections are actually connected
-        to bmps
+        """ Check that the BMP connections are actually connected to valid BMPs
+
         :return: None
-        :raises SpinnmanUnexpectedResponseCodeException: when the connection is
-        not linked to a bmp
+        :raises SpinnmanIOException: when the connection is not linked to a BMP
         """
         # check that the udp bmp connection is actually connected to a bmp
         #  via the sver command
-        for connection_port in self._bmp_connections:
+        for connection in self._bmp_connections:
             # try to send a bmp sver to check if it responds as expected
             try:
                 response = self.send_scp_message(
                     SCPBMPVersionRequest(board=0),
-                    connection=self._bmp_connections[connection_port])
+                    connection=connection)
 
                 if (response.version_info.name != _BMP_NAME or
-                        response.version_info.version_number not in _BMP_VERSIONS):
-                    raise exceptions.SpinnmanUnexpectedResponseCodeException(
-                        operation="calling bmp connection with sver",
-                        command="",
-                        response=
-                        "got the wrong version information. recieved "
-                        "{}:{} instead of {}:{}".format(
+                        (response.version_info.version_number not in
+                         _BMP_VERSIONS)):
+                    raise exceptions.SpinnmanIOException(
+                        "The BMP is running {}"
+                        " {} which is incompatible with this transceiver, "
+                        "required version is {} {}".format(
                             response.version_info.name,
                             response.version_info.version_number,
-                            _BMP_NAME, _BMP_VERSIONS),)
-            # if it fails to respond due to timeout, maybe that the connection
-            # isnt valid
+                            _BMP_NAME, _BMP_VERSIONS))
+
+            # If it fails to respond due to timeout, maybe that the connection
+            # isn't valid
             except exceptions.SpinnmanTimeoutException:
                 raise exceptions.SpinnmanException(
-                    "It seems that your bmp connection is not responding, "
-                    "please check that its connected and that the cfg file has "
-                    "been configured correctly")
+                    "BMP connection to {} is not responding, "
+                    "please check that it is connected".format(
+                        connection.remote_ip_address))
 
     def _check_scamp_connections(self, retries=3):
+        """ Check that the discovered SCAMP connections are actually\
+            connected, removing those that are not
         """
-        checks that the discovered scamp connections are acutally usable
-        :return: None
-        """
-        invalid_connections = dict()
+        invalid_connections = list()
         for connection_key in self._sending_connections:
             connection = self._sending_connections[connection_key]
             if isinstance(connection, UDPSpinnakerConnection):
-                self._try_sver_though_scamp_connection(
-                    connection, connection_key, retries, invalid_connections)
+                if not self._try_sver_though_scamp_connection(
+                        connection, retries):
+                    invalid_connections.append(connection_key)
         for connection_key in invalid_connections:
-            self._sending_connections.pop(connection_key)
-            self._connection_queues.pop(invalid_connections[connection_key])
+            connection = self._sending_connections.pop(connection_key)
+            self._connection_queues.pop(connection)
 
-    def _try_sver_though_scamp_connection(
-            self, connection, connection_key, retries, invalid_connections):
-        """
-        tryies to query chip 0 0  from whatever chip this connection is conencted
-         to
+    def _try_sver_though_scamp_connection(self, connection, retries):
+        """ Try to query 0, 0 for SVER through a given connection
+
         :param connection: the connection to use for querying chip 0 0
-        :param connection_key: the connection key used in invalid_conenctions
-        :param retries: how many attemtps to do before giving up
-        :param invalid_connections: the list of invalid conenctions to remove
-        :return: None
+        :param retries: how many attempts to do before giving up
+        :return: True if a valid response is received, False otherwise
         """
-        response = None
         current_retries = retries
-        while response is None and current_retries > 0:
+        while current_retries > 0:
             try:
-                response = self.send_scp_message(
+                self.send_scp_message(
                     message=SCPVersionRequest(x=0, y=0, p=0),
                     connection=connection)
+                return True
             except exceptions.SpinnmanTimeoutException:
-                invalid_connections[connection_key] = connection  # drop connection
+                return False
             except exceptions.SpinnmanUnexpectedResponseCodeException:
                 current_retries -= 1
             except exceptions.SpinnmanIOException:
-                invalid_connections[connection_key] = connection  # drop connection
-        if (response is not None and
-                (response.version_info.name != _SCAMP_NAME or
-                 response.version_info.version_number != _SCAMP_VERSION)):
-            raise exceptions.SpinnmanUnexpectedResponseCodeException(
-                "version", "The version returned from a scamp connection is not"
-                           " recongised!, please fix and try again", response)
+                return False
+        return False
 
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
@@ -518,6 +490,7 @@ class Transceiver(object):
         :raise None: No known exceptions are raised
         """
         for connection in self._sending_connections.values():
+
             # Only add a new _queue if there isn't one currently
             if connection not in self._connection_queues:
                 self._connection_queues[connection] = \
@@ -1096,7 +1069,7 @@ class Transceiver(object):
         # if the machine sizes not been given, calculate from assumption
         if (max_machines_x_dimension is None or
                 max_machines_y_dimension is None):
-            sizes = _utils.get_idead_size(number_of_boards, board_version)
+            sizes = _utils.get_ideal_size(number_of_boards, board_version)
             max_machines_x_dimension = sizes['x']
             max_machines_y_dimension = sizes['y']
 
@@ -1106,11 +1079,13 @@ class Transceiver(object):
             n_retries, board_version, number_of_boards,
             max_machines_x_dimension, max_machines_y_dimension)
         if version_info is None:
-            logger.info(
-                "failed to boot machine with scamp, trying to power on machine")
+            logger.info("failed to boot machine with scamp,"
+                        " trying to power on machine")
+
             # start by powering up each bmp connection
             self._try_power_up_machine()
             logger.info("going to try to boot the machine with scamp")
+
             # retry to get a scamp version
             version_info = self._try_to_find_scamp_and_boot(
                 n_retries, board_version, number_of_boards,
@@ -1133,36 +1108,22 @@ class Transceiver(object):
             logger.info("successfully booted the machine with scamp")
         return version_info
 
-    def _try_power_up_machine(self):
-        """
-        run though the bmp conenctions and power them up one by one
-        :return:
-        """
-        for bmp_connection_port in self._bmp_connections:
-            bmp_connection = self._bmp_connections[bmp_connection_port]
-            bmp_connection_data = \
-                self._bmp_connection_to_bmp_data_mapping[bmp_connection]
-            self.power_on(
-                bmp_connection_data.boards, bmp_connection_data.cabinate,
-                bmp_connection_data.frame)
-
     def _try_to_find_scamp_and_boot(
             self, tries_to_go, board_version, number_of_boards,
-            max_machines_x_dimension, max_machines_y_dimension):
-        """
-        tries to locate a version of scamp by booting scamp
+            max_x_dimension, max_y_dimension):
+        """ Try to detect if SCAMP is running, and if not, boot the machine
+
         :param tries_to_go: how many attemtps should be supported
-        :param board_version: what version of boards are being used to
-        represnet the machine
-        :param number_of_boards: the number of boards that this spinnaker
-        machine is built out of
-        :param max_machines_x_dimension: the max size in x dimension this
-        machine can be
-        :param max_machines_y_dimension:the max size in y dimension this
-        machine can be
+        :param board_version: The version of boards in the machine
+        :param number_of_boards: the number of boards that this machine \
+                is built out of
+        :param max_x_dimension: the maximum chip x coordinate in the machine, \
+                or None to automatically compute this from the number of boards
+        :param max_y_dimension:the maximum chip y coordinate in the machine, \
+                or None to automatically compute this from the number of boards
         :return: version_info
-        :raises SpinnmanUnexpectedResponseCodeException: if there is some
-        strnage response from the machine
+        :raises SpinnmanIOException: If there is a problem communicating with\
+                the machine
         """
         version_info = None
         current_tries_to_go = tries_to_go
@@ -1170,49 +1131,45 @@ class Transceiver(object):
             try:
                 version_info = self.get_scamp_version()
             except exceptions.SpinnmanTimeoutException:
-                self.boot_board(
-                    board_version, max_machines_x_dimension,
-                    max_machines_y_dimension, number_of_boards)
+                self.boot_board(board_version, number_of_boards,
+                                max_x_dimension, max_y_dimension)
                 current_tries_to_go -= 1
             except exceptions.SpinnmanIOException:
                 raise exceptions.SpinnmanUnexpectedResponseCodeException(
                     "We currently cannot communicate with your board, please "
                     "rectify this, and try again", "", "")
+
         # boot has been sent, and 0 0 is up and running, but there will need to
         # be a delay whilst all the other chips complete boot.
         if version_info is not None:
-            current_tries_to_go = tries_to_go
-            version_info = self._wait_till_important_chips_are_fully_booted(
-                max_machines_x_dimension, max_machines_y_dimension,
-                current_tries_to_go)
+            version_info = self._wait_till_chips_are_fully_booted(
+                max_x_dimension, max_y_dimension, tries_to_go)
         return version_info
 
-    def _wait_till_important_chips_are_fully_booted(
-            self, max_machines_x_dimension, max_machines_y_dimension,
+    def _wait_till_chips_are_fully_booted(
+            self, max_x_dimension, max_y_dimension,
             current_tries_to_go):
-        """
-        locate what it decides are important chips and waits till they are
-        booted
-        :param max_machines_x_dimension: the max dimension of the machine in the
-        x axis
-        :param max_machines_y_dimension: the max dimension of the machine in the
-        y axis
+        """ Wait until a central set of chips are booted, and can speak to 0, 0
+
+        :param max_x_dimension: the max dimension of the machine in the x axis
+        :param max_y_dimension: the max dimension of the machine in the y axis
         :return: the version info of the last important chip
         """
         version_info = None
         found_version_info = None
+
         # check if the machine is wrap arounds
         chips_to_check = list()
         if self._check_if_machine_has_wrap_arounds():
-            # locate the set of middle chips that need to be checked
-            # before boot is finished
+
+            # Use the middle of the machine
             chips_to_check = _utils.locate_middle_chips_to_query(
-                max_machines_x_dimension, max_machines_y_dimension,
-                self._ignore_chips)
+                max_x_dimension, max_y_dimension, self._ignore_chips)
         else:
-            # locate the top most corner chip
-            chips_to_check.append({'x': max_machines_x_dimension - 1,
-                                   'y': max_machines_y_dimension - 1})
+
+            # Use the top corner
+            chips_to_check.append({'x': max_x_dimension - 1,
+                                   'y': max_y_dimension - 1})
 
         # check each chip required to ensure boot is finished
         for chip_to_check in chips_to_check:
@@ -1224,62 +1181,49 @@ class Transceiver(object):
                         chip_y=chip_to_check['y'])
                     if version_info is not None:
                         found_version_info = version_info
-                except exceptions.SpinnmanTimeoutException:
+                except (exceptions.SpinnmanTimeoutException,
+                        exceptions.SpinnmanUnexpectedResponseCodeException):
+
                     # back off a little and try again
                     current_tries_to_go -= 1
                     time.sleep(4.0)
-                except exceptions.SpinnmanUnexpectedResponseCodeException:
-                    # back off a little and try again
-                    current_tries_to_go -= 1
-                    time.sleep(4.0)
-                except exceptions.SpinnmanIOException:
-                    raise exceptions.SpinnmanUnexpectedResponseCodeException(
-                        "We currently cannot communicate with your board, "
-                        "please rectify this, and try again", "", "")
             if version_info is None:
-                logger.warn(
-                    "we could not get a sver from chip {}:{}. It may not be "
-                    "operating properly".format(
-                        chip_to_check['x'], chip_to_check['y']))
+                logger.warn("Could not get version from chip {}, {}".format(
+                            chip_to_check['x'], chip_to_check['y']))
         return found_version_info
 
     def _check_if_machine_has_wrap_arounds(self):
-        """
-        queries the machine's 0 0  chip's links to ensure if the machine is
-        acutally a torioid and thus has wrap around links or is a flat fabric
+        """ Determine if the machine has wrap-arounds, by querying the links\
+            from 0, 0
         :return: true if a wraparound torioud, false otherwise
          :rtype: bool
         """
-        left_wrap_around = False
         try:
-            # try the left and then bottom link
+            # Try the left link
             self.send_scp_message(SCPReadLinkRequest(
                 x=0, y=0, cpu=0, link=3,
                 base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
                 size=constants.SYSTEM_VARIABLE_BYTES))
-            left = True
+            return True
+        except exceptions.SpinnmanUnexpectedResponseCodeException:
+
+            # Do Nothing - check the bottom link for wrap around
+            pass
+
+        try:
+
+            # Try the bottom link
             self.send_scp_message(SCPReadLinkRequest(
                 x=0, y=0, cpu=0, link=4,
                 base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
                 size=constants.SYSTEM_VARIABLE_BYTES))
             return True
         except exceptions.SpinnmanUnexpectedResponseCodeException:
-            # if the left wrap around works, but bottom does not, then some
-            # sort of wrapa round exists, better to be save and say it does
-            if left_wrap_around:
-                return True
-            else:
-                # left doesnt exist, but not tested bottom
-                try:
-                    self.send_scp_message(SCPReadLinkRequest(
-                        x=0, y=0, cpu=0, link=4,
-                        base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
-                        size=constants.SYSTEM_VARIABLE_BYTES))
-                    # some sort of wrap around exists, better be save and say
-                    # there is a wrap around
-                    return True
-                except exceptions.SpinnmanUnexpectedResponseCodeException:
-                    return False
+
+            # Do Nothing
+            pass
+
+        return False
 
     def get_cpu_information(self, core_subsets=None):
         """ Get information about the processors on the board
@@ -1692,103 +1636,94 @@ class Transceiver(object):
 
         return bytes_to_write, data_to_write
 
-    def power_on(self, boards=0, cabinate=0, frame=0):
+    def power_on_machine(self):
+        """ Power on the whole machine
         """
-        powers ona  collection of boards of a machine
-        :param boards: the boards that are requested to be powered on
-        :param cabinate: the cabinate id for which this request is being sent
-        this is otpimal if using a bmp_connection. If being used, a frame must
-        also be provided
-        :param frame: the frame id for which this request is being sent.
-        This is optimal if used a bmp_connection. If being used, a cabinate must
-        also be provided
-        :return: None
+        for bmp_connection in self._bmp_connections:
+            self.power_on(bmp_connection.boards, bmp_connection.cabinet,
+                          bmp_connection.frame)
+
+    def power_on(self, boards=0, cabinet=0, frame=0):
+        """ Power on a set of boards in the machine
+
+        :param boards: The board or boards to power on
+        :param cabinet: the id of the cabinet containing the frame, or 0 \
+                if the frame is not in a cabinet
+        :param frame: the id of the frame in the cabinet containing the\
+                board(s), or 0 if the board is not in a frame
         """
-        self._power(True, boards, cabinate, frame)
+        self._power(SCPPowerCommand.POWER_ON, boards, cabinet, frame)
 
     def power_off_machine(self):
+        """ Power off the whole machine
         """
-        turns off the entire machine
-        :return:
-        """
-        for bmp_connection_port in self._bmp_connections:
-            bmp_connection_data = self._bmp_connection_to_bmp_data_mapping[
-                self._bmp_connections[bmp_connection_port]]
-            self.power_off(
-                bmp_connection_data.boards, bmp_connection_data.cabinate,
-                bmp_connection_data.frame)
+        for bmp_connection in self._bmp_connections:
+            self.power_off(bmp_connection.boards, bmp_connection.cabinet,
+                           bmp_connection.frame)
 
-    def power_off(self, boards=0, cabinate=0, frame=0):
-        """
-        powers off a  collection of boards of a machine
-        :param boards: the boards that are requested to be powered on
-        :param cabinate: the cabinate id for which this request is being sent
-        this is otpimal if using a bmp_connection. If being used, a frame must
-        also be provided
-        :param frame: the frame id for which this request is being sent.
-        This is optimal if used a bmp_connection. If being used, a cabinate must
-        also be provided
-        :return: None
+    def power_off(self, boards=0, cabinet=0, frame=0):
+        """ Power off a set of boards in the machine
 
+        :param boards: The board or boards to power off
+        :param cabinet: the id of the cabinet containing the frame, or 0 \
+                if the frame is not in a cabinet
+        :param frame: the id of the frame in the cabinet containing the\
+                board(s), or 0 if the board is not in a frame
         """
-        self._power(False, boards, cabinate, frame)
+        self._power(SCPPowerCommand.POWER_OFF, boards, cabinet, frame)
 
-    def _power(self, state, boards=0, cabinate=0, frame=0):
-        """
-        :param state: what vlaue to send down to pwoer (on or off)
-        :param boards: the boards that are requested to be powered on
-        :param cabinate: the cabinate id for which this request is being sent
-        this is otpimal if using a bmp_connection. If being used, a frame must
-        also be provided
-        :param frame: the frame id for which this request is being sent.
-        This is optimal if used a bmp_connection. If being used, a cabinate must
-        also be provided
+    def _power(self, power_command, boards=0, cabinet=0, frame=0):
+        """ Send a power request to the machine
+
+        :param power_command: The power command to send
+        :param boards: The board or boards to send the command to
+        :param cabinet: the id of the cabinet containing the frame, or 0 \
+                if the frame is not in a cabinet
+        :param frame: the id of the frame in the cabinet containing the\
+                board(s), or 0 if the board is not in a frame
         :return: None
         """
-        message = SCPPowerRequest(state=state, board=boards)
-        if (cabinate, frame) in self._cabinat_frame_to_connection_mapping:
-            bmp_connection = self._cabinat_frame_to_connection_mapping[
-                (cabinate, frame)]
+        if (cabinet, frame) in self._bmp_connections_by_location:
+            bmp_connection = self._bmp_connections_by_location[
+                (cabinet, frame)]
+            self.send_scp_message(
+                SCPPowerRequest(power_command, boards),
+                timeout=constants.BMP_POWER_ON_TIMEOUT,
+                n_retries=0, connection=bmp_connection)
         else:
             raise exceptions.SpinnmanInvalidParameterException(
-                "{}:{}".format(cabinate, frame),
-                "SpinnMan cant talk to frame {} in cabinate {}"
-                .format(cabinate, frame), "")
-        self.send_scp_message(message, timeout=constants.BMP_POWER_ON_TIMEOUT,
-                              n_retries=0, connection=bmp_connection)
-        # give a 10 second sleep to ensure all boards are pwoered on properly
-        #time.sleep(10.0)
+                "cabinet and frame", "{} and {}".format(cabinet, frame),
+                "Unknown combination")
 
-    def set_led(self, led, action, board, cabinate, frame):
-        """
+    def set_led(self, led, action, board, cabinet, frame):
+        """ Set the LED state of a board in the machine
 
-        :param led:  Number of the LED or an iterable of LEDs to set the
-        state of (0-7)
-        :type led: int or iterable
+        :param led:  Number of the LED or an iterable of LEDs to set the\
+                state of (0-7)
+        :type led: int or iterable of int
         :param action:State to set the LED to, either on, off or toggle
         :type action: enum of LEDS_ACTIONS
-        :param board:Specifies the board to control the LEDs of. This may
+        :param board: Specifies the board to control the LEDs of. This may
          also be an iterable of multiple boards (in the same frame). The
          command will actually be sent to the first board in the iterable.
         :type board: int or iterable
-        :param cabinate: the cabinate this is targetting
-        :type cabinate: int
+        :param cabinet: the cabinet this is targetting
+        :type cabinet: int
         :param frame: the frame this is targetting
         :type frame: int
         :return: None
         """
-        message = SCPBMPSetLedRequest(led, action, board)
-        if (cabinate, frame) in self._cabinat_frame_to_connection_mapping:
-            bmp_connection = self._cabinat_frame_to_connection_mapping[
-                (cabinate, frame)]
+        if (cabinet, frame) in self._bmp_connections_by_location:
+            bmp_connection = self._bmp_connections_by_location[
+                (cabinet, frame)]
+            self.send_scp_message(SCPBMPSetLedRequest(led, action, board),
+                                  connection=bmp_connection)
         else:
             raise exceptions.SpinnmanInvalidParameterException(
-                "{}:{}".format(cabinate, frame),
-                "SpinnMan cant talk to frame {} in cabinate {}"
-                .format(cabinate, frame), "")
-        self.send_scp_message(message, connection=bmp_connection)
+                "cabinet and frame", "{} and {}".format(cabinet, frame),
+                "Unknown combination")
 
-    def read_fpga_register(self, fpga_num, register, cabinate, frame, board):
+    def read_fpga_register(self, fpga_num, register, cabinet, frame, board):
         """
 
         :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
@@ -1796,26 +1731,26 @@ class Transceiver(object):
         :param register: Register address to read to (will be rounded down to
                 the nearest 32-bit word boundary).
         :type register: int
-        :param cabinate: cabinate: the cabinate this is targetting
-        :type cabinate: int
+        :param cabinet: cabinet: the cabinet this is targetting
+        :type cabinet: int
         :param frame: the frame this is targetting
         :type frame: int
         :param board: which board to request the fpga register from
         :return: the register data
         """
-        message = SCPReadFPGARegisterRequest(fpga_num, register, board)
-        if (cabinate, frame) in self._cabinat_frame_to_connection_mapping:
-            bmp_connection = self._cabinat_frame_to_connection_mapping[
-                (cabinate, frame)]
+        if (cabinet, frame) in self._bmp_connections_by_location:
+            bmp_connection = self._bmp_connections_by_location[
+                (cabinet, frame)]
+            response = self.send_scp_request(
+                SCPReadFPGARegisterRequest(fpga_num, register, board),
+                connection=bmp_connection)
+            return response.fpga_register
         else:
             raise exceptions.SpinnmanInvalidParameterException(
-                "{}:{}".format(cabinate, frame),
-                "SpinnMan cant talk to frame {} in cabinate {}"
-                .format(cabinate, frame), "")
-        response = self.send_scp_message(message, connection=bmp_connection)
-        return response.fpga_register
+                "cabinet and frame", "{} and {}".format(cabinet, frame),
+                "Unknown combination")
 
-    def write_fpga_register(self, fpga_num, register, value, cabinate, frame,
+    def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
                             board):
         """
 
@@ -1826,67 +1761,68 @@ class Transceiver(object):
         :type register: int
         :param value: the value to write into the fpga regsiter
         :type value: int
-        :param cabinate: cabinate: the cabinate this is targetting
-        :type cabinate: int
+        :param cabinet: cabinet: the cabinet this is targetting
+        :type cabinet: int
         :param frame: the frame this is targetting
         :type frame: int
         :param board: which board to request the fpga register from
         :return: None
         """
-        message = ScpWriteFPGARegisterRequest(fpga_num, register, value, board)
-        if (cabinate, frame) in self._cabinat_frame_to_connection_mapping:
-            bmp_connection = self._cabinat_frame_to_connection_mapping[
-                (cabinate, frame)]
+        if (cabinet, frame) in self._bmp_connections_by_location:
+            bmp_connection = self._bmp_connections_by_location[
+                (cabinet, frame)]
+            response = self.send_scp_request(
+                SCPWriteFPGARegisterRequest(fpga_num, register, value, board),
+                connection=bmp_connection)
+            return response.fpga_register
         else:
             raise exceptions.SpinnmanInvalidParameterException(
-                "{}:{}".format(cabinate, frame),
-                "SpinnMan cant talk to frame {} in cabinate {}"
-                .format(cabinate, frame), "")
-        self.send_scp_message(message, connection=bmp_connection)
+                "cabinet and frame", "{} and {}".format(cabinet, frame),
+                "Unknown combination")
 
-    def read_fpga_adc_data(self, board, cabinate, frame):
-        """
-        reads the bmp's adc data
-        :param cabinate: cabinate: the cabinate this is targetting
-        :type cabinate: int
+    def read_adc_data(self, board, cabinet, frame):
+        """ Read the BMP ADC data
+
+        :param cabinet: cabinet: the cabinet this is targetting
+        :type cabinet: int
         :param frame: the frame this is targetting
         :type frame: int
         :param board: which board to request the fpga register from
         :return: the fpga's adc data object
         """
-        message = SCPReadADCRequest(board)
-        if (cabinate, frame) in self._cabinat_frame_to_connection_mapping:
-            bmp_connection = self._cabinat_frame_to_connection_mapping[
-                (cabinate, frame)]
+        if (cabinet, frame) in self._bmp_connections_by_location:
+            bmp_connection = self._bmp_connections_by_location[
+                (cabinet, frame)]
+            response = self.send_scp_request(
+                SCPReadADCRequest(board),
+                connection=bmp_connection)
+            return response.adc_info
         else:
             raise exceptions.SpinnmanInvalidParameterException(
-                "{}:{}".format(cabinate, frame),
-                "SpinnMan cant talk to frame {} in cabinate {}"
-                .format(cabinate, frame), "")
-        response = self.send_scp_message(message, connection=bmp_connection)
-        return response.adc_info
+                "cabinet and frame", "{} and {}".format(cabinet, frame),
+                "Unknown combination")
 
-    def read_bmp_version(self, board, cabinate, frame):
-        """
-        reads the bmp's sver data
-        :param cabinate: cabinate: the cabinate this is targetting
-        :type cabinate: int
+    def read_bmp_version(self, board, cabinet, frame):
+        """ Read the BMP version
+
+        :param cabinet: cabinet: the cabinet this is targetting
+        :type cabinet: int
         :param frame: the frame this is targetting
         :type frame: int
         :param board: which board to request the fpga register from
         :return: the sver from the bmp
         """
-        message = SCPBMPVersionRequest(board)
-        if (cabinate, frame) in self._cabinat_frame_to_connection_mapping:
-            bmp_connection = self._cabinat_frame_to_connection_mapping[
-                (cabinate, frame)]
+        if (cabinet, frame) in self._bmp_connections_by_location:
+            bmp_connection = self._bmp_connections_by_location[
+                (cabinet, frame)]
+            response = self.send_scp_request(
+                SCPBMPVersionRequest(board),
+                connection=bmp_connection)
+            return response.version_info
         else:
             raise exceptions.SpinnmanInvalidParameterException(
-                "{}:{}".format(cabinate, frame),
-                "SpinnMan cant talk to frame {} in cabinate {}"
-                .format(cabinate, frame), "")
-        reponse = self.send_scp_message(message, connection=bmp_connection)
-        return reponse.version_info
+                "cabinet and frame", "{} and {}".format(cabinet, frame),
+                "Unknown combination")
 
     def write_memory(self, x, y, base_address, data, n_bytes=None):
         """ Write to the SDRAM on the board
@@ -2956,12 +2892,11 @@ class Transceiver(object):
             bmp_connection_data = \
                 self._bmp_connection_to_bmp_data_mapping[bmp_connection]
             boards += len(bmp_connection_data.boards)
+
         # if no bmps are avilable, then theres still at least one board
         if boards == 0:
             boards = 1
         return boards
-
-
 
     def close(self, close_original_connections=True):
         """ Close the transceiver and any threads that are running

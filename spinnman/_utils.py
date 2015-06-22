@@ -1,18 +1,18 @@
 """
-utility file which contains a lot of byte array reading and writing with offsets
-as well as boot size calculations
+utility file which contains a lot of byte array reading and writing with
+offsets as well as boot size calculations
 """
 
 # spinnman imports
 from spinnman import exceptions
-from spinnman.data.bmp_connection_data import BMPConnectionData
+from spinnman.model.bmp_connection_data import BMPConnectionData
 from spinnman.messages.spinnaker_boot._system_variables import \
     _system_variable_boot_values
 
 # spinnmachine imports
-from spinn_machine.utilities import utilities as machine_utils
+from spinn_machine.utilities import utilities
 
-#general imports
+# general imports
 import math
 import socket
 
@@ -20,7 +20,7 @@ import socket
 def _get_int_from_big_endian_bytearray(array, offset):
     """ Get an int from a byte array, using big-endian representation,\
         starting at the given offset
-    
+
     :param array: The byte array to get the int from
     :type array: bytearray
     :param offset: The offset at which to start looking
@@ -35,7 +35,7 @@ def _get_int_from_big_endian_bytearray(array, offset):
 def _get_short_from_big_endian_bytearray(array, offset):
     """ Get a short from a byte array, using big-endian representation,
         starting at the given offset
-    
+
     :param array: The byte array to get the short from
     :type array: bytearray
     :param offset: The offset at which to start looking
@@ -49,7 +49,7 @@ def _get_short_from_big_endian_bytearray(array, offset):
 def put_int_in_big_endian_byte_array(array, offset, value):
     """ Put an int in to a byte array, using big-endian representation,\
         starting at the given offset
-    
+
     :param array: The byte array to put the int into
     :type array: bytearray
     :param offset: The offset in to the byte array at which to start the int
@@ -68,7 +68,7 @@ def put_int_in_big_endian_byte_array(array, offset, value):
 def _put_short_in_big_endian_byte_array(array, offset, value):
     """ Put an int in to a byte array using big-endian representation,\
         starting at the given offset
-    
+
     :param array: The byte array to put the int into
     :type array: bytearray
     :param offset: The offset in to the byte array at which to start the int
@@ -85,7 +85,7 @@ def _put_short_in_big_endian_byte_array(array, offset, value):
 def get_int_from_little_endian_bytearray(array, offset):
     """ Get an int from a byte array, using little-endian representation,\
         starting at the given offset
-    
+
     :param array: The byte array to get the int from
     :type array: bytearray
     :param offset: The offset at which to start looking
@@ -100,7 +100,7 @@ def get_int_from_little_endian_bytearray(array, offset):
 def get_short_from_little_endian_bytearray(array, offset):
     """ Get a short from a byte array, using little-endian representation,
         starting at the given offset
-    
+
     :param array: The byte array to get the short from
     :type array: bytearray
     :param offset: The offset at which to start looking
@@ -114,7 +114,7 @@ def get_short_from_little_endian_bytearray(array, offset):
 def _put_int_in_little_endian_byte_array(array, offset, value):
     """ Put an int in to a byte array, using little-endian representation,\
         starting at the given offset
-    
+
     :param array: The byte array to put the int into
     :type array: bytearray
     :param offset: The offset in to the byte array at which to start the int
@@ -133,7 +133,7 @@ def _put_int_in_little_endian_byte_array(array, offset, value):
 def _put_short_in_little_endian_byte_array(array, offset, value):
     """ Put an int in to a byte array using big-endian representation,\
         starting at the given offset
-    
+
     :param array: The byte array to put the int into
     :type array: bytearray
     :param offset: The offset in to the byte array at which to start the int
@@ -147,12 +147,14 @@ def _put_short_in_little_endian_byte_array(array, offset, value):
     array[offset] = value & 0xFF
 
 
-def get_idead_size(number_of_boards, version):
-    """
-    returns the width and height of the machine when no dimensions are used
+def get_ideal_size(number_of_boards, version):
+    """ Get the ideal width and height of the machine when no dimensions are\
+        given - assumes the machine is square, otherwise it is wider than it\
+        is tall
+
     :param number_of_boards: the number of boards used within the machine
     :param version: the board version being used
-    :return: a dictory with x and y keys.
+    :return: a dictionary with x and y keys.
     """
 
     if number_of_boards == 1:
@@ -166,9 +168,10 @@ def get_idead_size(number_of_boards, version):
         # Special case to avoid division by 0
         if number_of_boards == 0:
             return {'x': 0, 'y': 0}
+
         # Find the largest pair of factors to discover the squarest system
         h = 0
-        for h in reversed(range(1, int(math.sqrt(number_of_boards // 3)) + 1)):  # pragma: no branch
+        for h in reversed(range(1, int(math.sqrt(number_of_boards // 3)) + 1)):
             if (number_of_boards // 3) % h == 0:
                 break
         w = (number_of_boards // 3) // h
@@ -180,41 +183,47 @@ def get_idead_size(number_of_boards, version):
 
 
 def sort_out_bmp_string(bmp_string):
-    """
-    takes a bmp line and splits it into ipaddress and a int for board scope
-    where each bit in the int states if the board is to be used in the scope
+    """ Take a bmp line and split it into ipaddress and a int for board scope\
+        where each bit in the int states if the board is to be used in the \
+        scope
     :param bmp_string: the bmp string to be converted
     :return: the bmp ipaddress and the boards scope int
     """
     bmp_string_split = bmp_string.split("/")
+
     # if there is no split, then assume its one board, located at position 0
     if len(bmp_string_split) == 1:
-        # verify that theres no cabinate and frame defs
+
+        # verify that theres no cabinet and frame defs
         bmp_string_split = bmp_string.split(";")
         if len(bmp_string_split) == 1:
             return BMPConnectionData(0, 0, bmp_string, [0])
     else:
         cabinate_frame_ip_address = bmp_string_split[0].split(";")
-        # if no cabinate or frame, assume they are 0 0
+
+        # if no cabinet or frame, assume they are 0 0
         if len(cabinate_frame_ip_address) == 1:
-            cabinate = 0
+            cabinet = 0
             frame = 0
             ip_address = cabinate_frame_ip_address[0]
         else:
-            cabinate = cabinate_frame_ip_address[0]
+            cabinet = cabinate_frame_ip_address[0]
             frame = cabinate_frame_ip_address[1]
             ip_address = cabinate_frame_ip_address[2]
 
         # try splitting by - first
         board_scope_split = bmp_string_split[1].split("-")
         if len(board_scope_split) == 1:
+
             # assume seperated by , instead
             board_scope_split = bmp_string_split[1].split(",")
             if len(board_scope_split) == 1:
+
                 # assume no boards given, so one board at position 0
                 board_scope_split = list()
                 board_scope_split.append(0)
         else:
+
             # get range into same format as list, for ease later
             new_values = list()
             for value in range(int(board_scope_split[0]),
@@ -227,13 +236,14 @@ def sort_out_bmp_string(bmp_string):
         for board_value in board_scope_split:
             board_int.append(int(board_value))
 
-        return BMPConnectionData(cabinate, frame, ip_address, board_int)
+        return BMPConnectionData(cabinet, frame, ip_address, board_int)
 
 
 def locate_middle_chips_to_query(
         max_x_dimension, max_y_dimension, invalid_chips):
-    """
-    helper method that deduces what chips to query to ensure the
+    """ Locate the middle set of chips on the board, given chips that have\
+        been manually removed
+
     :param max_x_dimension: the max size of the machine in the x dimension
     :param max_y_dimension: the max size of the machine in the y dimension
     :param invalid_chips: the list of chips that are down
@@ -241,54 +251,38 @@ def locate_middle_chips_to_query(
     """
     middle_chip_x = int(round(max_x_dimension / 2))
     middle_chip_y = int(round(max_y_dimension / 2))
-    return machine_utils.get_cloest_chips_to(
+    return utilities.get_closest_chips_to(
         middle_chip_x, middle_chip_y, max_x_dimension, max_y_dimension,
         invalid_chips)
 
 
-def update_mappers(
-        bmp_to_data_mapping, cabinat_frame_to_connection_mapping,
-        bmp_connection_data, udp_bmp_connection):
-    """
-    helper method for the transciever for updating data struct with connection
-    :param bmp_to_data_mapping: the connection to connection data mapper
-    :param cabinat_frame_to_connection_mapping: the cab frame to connection
-    mapper
-    :param bmp_connection_data: the connection data object
-    :param udp_bmp_connection: the bmp connection
-    :return: None
-    """
-    # update data mapper
-    bmp_to_data_mapping[udp_bmp_connection] = bmp_connection_data
-    # update cab frame mapper
-    cabinat_frame_to_connection_mapping[
-        (bmp_connection_data.cabinate,
-         bmp_connection_data.frame)] = udp_bmp_connection
+def work_out_bmp_from_machine_details(hostname, number_of_boards):
+    """ Work out the BMP connection ip address given the machine details.\
+        This is assumed to be the IP address of the machine, with 1 subtracted\
+        from the final part e.g. if the machine IP address is 192.168.0.1, the\
+        BMP IP address is assumed to be 192.168.0.0
 
-
-def sort_out_bmp_from_machine(hostname, number_of_boards):
-    """
-
-    :param hostname: the spinnaker machines ipaddress
-    :param number_of_boards: the number of boards this machine is expected to
-    be built out of
-    :return:the bmp ipaddress and the boards scope as a iterable of ints
+    :param hostname: the spinnaker machine main hostname or IP address
+    :param number_of_boards: the number of boards in the machine
+    :return: The BMP connection data
     """
     # take the ipaddress, split by dots, and subtract 1 off last bit
     ipstring = socket.gethostbyname(hostname)
     ip_string_bits = ipstring.split(".")
-    # subtract one off the last bit of the ip address
-    ip_string_bits[len(ip_string_bits) - 1] = \
-        str(int(ip_string_bits[len(ip_string_bits) - 1]) - 1)
+    ip_string_bits[len(ip_string_bits) - 1] = str(int(
+        ip_string_bits[len(ip_string_bits) - 1]) - 1)
     bmp_ip_address = ".".join(ip_string_bits)
+
     # add board scope for each split
-    board_int = list()
-    # if 0, the end user didnt enter anything, so assume one board starting
-    # at position 0
+    # if None, the end user didnt enter anything, so assume one board
+    # starting at position 0
+    board_range = list()
     if number_of_boards == 0 or number_of_boards is None:
-        board_int.append(int(0))
+        board_range.append(int(0))
     else:
         for board_value in range(number_of_boards):
-            board_int.append(int(board_value))
-    return BMPConnectionData(cabinate=0, frame=0, ip_address=bmp_ip_address,
-                             boards=board_int)
+            board_range.append(int(board_value))
+
+    # Assume a single board with no cabinet or frame specified
+    return BMPConnectionData(cabinet=0, frame=0, ip_address=bmp_ip_address,
+                             boards=board_range)
