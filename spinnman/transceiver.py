@@ -1023,8 +1023,9 @@ class Transceiver(object):
         logger.debug("Attempting to boot version {} board".format(
             board_version))
         if (width is None or height is None):
-            width, height = _utils.get_ideal_size(number_of_boards,
-                                                  board_version)
+            dims = _utils.get_ideal_size(number_of_boards, board_version)
+            width = dims.width
+            height = dims.height
         boot_messages = SpinnakerBootMessages(
             board_version, number_of_boards=number_of_boards,
             width=width, height=height)
@@ -1061,8 +1062,9 @@ class Transceiver(object):
 
         # if the machine sizes not been given, calculate from assumption
         if (width is None or width is None):
-            width, height = _utils.get_ideal_size(number_of_boards,
-                                                  board_version)
+            dims = _utils.get_ideal_size(number_of_boards, board_version)
+            width = dims.width
+            height = dims.height
 
         # try to get a scamp version
         logger.info("going to try to boot the machine with scamp")
@@ -1073,7 +1075,7 @@ class Transceiver(object):
                         " trying to power on machine")
 
             # start by powering up each bmp connection
-            self._try_power_up_machine()
+            self.power_on_machine()
             logger.info("going to try to boot the machine with scamp")
 
             # retry to get a scamp version
@@ -2867,16 +2869,11 @@ class Transceiver(object):
 
     @property
     def number_of_boards_located(self):
-        """
-        returns how many boards are currently being supported by the spinnman
-        interface
-        :return:
+        """ Get the number of boards currently configured
         """
         boards = 0
-        for bmp_connection in self._bmp_connection_to_bmp_data_mapping:
-            bmp_connection_data = \
-                self._bmp_connection_to_bmp_data_mapping[bmp_connection]
-            boards += len(bmp_connection_data.boards)
+        for bmp_connection in self._bmp_connections:
+            boards += len(bmp_connection.boards)
 
         # if no bmps are avilable, then theres still at least one board
         if boards == 0:
