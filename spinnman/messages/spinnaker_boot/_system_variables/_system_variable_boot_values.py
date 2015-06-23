@@ -30,22 +30,22 @@ class SystemVariableDefinition(Enum):
     """ Defines the system variables available
     """
 
-    x = _Definition(
-        _DataType.BYTE, offset=0, doc="The x-coordinate of the chip")
     y = _Definition(
-        _DataType.BYTE, offset=0x01, doc="The y-coordinate of the chip")
-    x_size = _Definition(
-        _DataType.BYTE, offset=0x02,
-        doc="The number of chips in the x-dimension")
+        _DataType.BYTE, offset=0, doc="The y-coordinate of the chip")
+    x = _Definition(
+        _DataType.BYTE, offset=0x01, doc="The x-coordinate of the chip")
     y_size = _Definition(
-        _DataType.BYTE, offset=0x03,
+        _DataType.BYTE, offset=0x02,
         doc="The number of chips in the y-dimension")
-    debug_x = _Definition(
-        _DataType.BYTE, offset=0x04,
-        doc="The x-coordinate of the chip to send debug messages to")
+    x_size = _Definition(
+        _DataType.BYTE, offset=0x03,
+        doc="The number of chips in the x-dimension")
     debug_y = _Definition(
-        _DataType.BYTE, offset=0x05,
+        _DataType.BYTE, offset=0x04,
         doc="The y-coordinate of the chip to send debug messages to")
+    debug_x = _Definition(
+        _DataType.BYTE, offset=0x05,
+        doc="The x-coordinate of the chip to send debug messages to")
     is_peer_to_peer_available = _Definition(
         _DataType.BYTE, offset=0x06,
         doc="Indicates if peer-to-peer is working on the chip")

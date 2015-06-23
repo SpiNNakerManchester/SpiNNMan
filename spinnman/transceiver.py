@@ -417,7 +417,7 @@ class Transceiver(object):
                     connection=connection)
                 return True
             except exceptions.SpinnmanTimeoutException:
-                return False
+                current_retries -= 1
             except exceptions.SpinnmanUnexpectedResponseCodeException:
                 current_retries -= 1
             except exceptions.SpinnmanIOException:
