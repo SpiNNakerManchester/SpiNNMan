@@ -790,7 +790,7 @@ class Transceiver(object):
         :type x: int
         :type y: int
         :type p: int
-        :return:The address for user 0 register for this processor
+        :return: The address for user 0 register for this processor
         :rtype: int
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
