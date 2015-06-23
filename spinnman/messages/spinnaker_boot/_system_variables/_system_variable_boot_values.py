@@ -1,5 +1,6 @@
 from enum import Enum
 from collections import namedtuple
+from collections import OrderedDict
 from spinnman.model.machine_dimensions import MachineDimensions
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
@@ -345,7 +346,10 @@ spinnaker_standard_board_to_machine_sizes = {
     4: MachineDimensions(8, 8),
     5: MachineDimensions(8, 8)}
 
-spinnaker_multi_board_extra_configs = {
-    6: {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
-        SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01100a42},
-    120: {SystemVariableDefinition.probe_timer: 0x010a6401}}
+spinnaker_multi_board_extra_configs = OrderedDict()
+spinnaker_multi_board_extra_configs[6] = \
+    {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
+     SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01100a42}
+spinnaker_multi_board_extra_configs[120] = \
+    {SystemVariableDefinition.probe_timer: 0x010a6401,
+     SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01140852}
