@@ -1,17 +1,17 @@
-from spinnman._utils import _get_short_from_little_endian_bytearray
-from spinnman._utils import _get_int_from_little_endian_bytearray
+from spinnman._utils import get_short_from_little_endian_bytearray
+from spinnman._utils import get_int_from_little_endian_bytearray
 
 
 def _get_int_from_bytearray(array, offset):
     """ Wrapped functionality in case the endianness changes
     """
-    return _get_int_from_little_endian_bytearray(array, offset)
+    return get_int_from_little_endian_bytearray(array, offset)
 
 
 def _get_short_from_bytearray(array, offset):
     """ Wrapped functionality in case the endianness changes
     """
-    return _get_short_from_little_endian_bytearray(array, offset)
+    return get_short_from_little_endian_bytearray(array, offset)
 
 
 # The base address of the system variable structure in System ram
