@@ -11,7 +11,7 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
     """ A request to write memory on a chip
     """
 
-    def __init__(self, x, y, base_address, data):
+    def __init__(self, x, y, base_address, data, core_id=0):
         """
 
         :param x: The x-coordinate of the chip, between 0 and 255
@@ -22,9 +22,14 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
         :type base_address: int
         :param data: Up to 256 bytes of data to write
         :type data: bytearray
+        :param core_id: The processor id where the memory is to be written to\
+                        (used mainly for writes to DTCM). Defaults to 0 if none
+                        specified.
+        :type core_id: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
                     * If x is out of range
                     * If y is out of range
+                    * If core_id is out of range
                     * If base_address is not positive
                     * If the length of data is 0 or more than 256
         """
@@ -44,7 +49,7 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
         super(SCPWriteMemoryRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=x,
+                destination_cpu=core_id, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_WRITE),
             argument_1=base_address, argument_2=len(data), argument_3=0,

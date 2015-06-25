@@ -1331,8 +1331,8 @@ class Transceiver(object):
 
         return bytes_to_write, data_to_write
 
-    def write_memory(self, x, y, base_address, data, n_bytes=None):
-        """ Write to the SDRAM on the board
+    def write_memory(self, x, y, base_address, data, n_bytes=None, core_id=0):
+        """ Write to the SDRAM on the board or to DTCM of a specific core
 
         :param x: The x-coordinate of the chip where the memory is to be\
                     written to
@@ -1351,6 +1351,10 @@ class Transceiver(object):
         :type data:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
+        :param core_id: The id of the processor where the memory is to be\
+                        written to (used mainly for writes to DTCM). Defaults
+                        to 0 if none specified.
+        :type core_id: int
         :param n_bytes: The amount of data to be written in bytes.  If not\
                     specified:
                         * If data is an AbstractDataReader, an error is raised
@@ -1367,6 +1371,8 @@ class Transceiver(object):
                     is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
                     * If x, y does not lead to a valid chip
+                    * If core_id does not lead to a valid processor within\
+                                 the chip x, y
                     * If a packet is received that has invalid parameters
                     * If base_address is not a positive integer
                     * If data is an AbstractDataReader but n_bytes is not\
@@ -1398,7 +1404,7 @@ class Transceiver(object):
 
             if data_size != 0:
                 thread = SCPMessageInterface(self, SCPWriteMemoryRequest(
-                    x, y, address_to_write, data_array))
+                    x, y, address_to_write, data_array, core_id))
                 self._scp_message_thread_pool.apply_async(thread.run)
                 callbacks.append(thread)
                 bytes_to_write -= data_size
