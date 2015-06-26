@@ -1,5 +1,6 @@
 from __future__ import print_function
 import sys
+import traceback
 
 
 class AbstractProcess(object):
@@ -20,6 +21,9 @@ class AbstractProcess(object):
     def check_for_error(self, print_exception=True):
         if self._exception is not None:
             if print_exception:
-                print(self._exception, file=sys.stderr)
-                print(self._traceback_info, file=sys.stderr)
+                for line in traceback.format_exception_only(
+                        self._exception.__class__, self._exception):
+                    print(line, end="", file=sys.stderr)
+                for line in traceback.format_list(self._traceback_info):
+                    print(line, end="", file=sys.stderr)
             raise self._exception

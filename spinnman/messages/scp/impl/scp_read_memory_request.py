@@ -13,7 +13,7 @@ class SCPReadMemoryRequest(AbstractSCPRequest):
     """ An SCP request to read a region of memory on a chip
     """
 
-    def __init__(self, x, y, base_address, size):
+    def __init__(self, x, y, base_address, size, cpu=0):
         """
 
         :param x: The x-coordinate of the chip to read from, between 0 and 255
@@ -32,7 +32,7 @@ class SCPReadMemoryRequest(AbstractSCPRequest):
         super(SCPReadMemoryRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=x,
+                destination_cpu=cpu, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_READ),
             argument_1=base_address, argument_2=size,

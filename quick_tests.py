@@ -1,6 +1,8 @@
 import logging
 from random import randint
 from os.path import os
+import struct
+import time
 
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.cpu_state import CPUState
@@ -13,7 +15,8 @@ from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinn_machine.tags.reverse_iptag import ReverseIPTag
 from spinnman.model.diagnostic_filter import DiagnosticFilter
-import struct
+from spinnman.model.router_diagnostics import RouterDiagnostics
+from spinnman.model import router_diagnostics
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.model.diagnostic_filter_destination \
@@ -171,76 +174,76 @@ try:
         print cpu_info
     print ""
 
-#     print "Send SYNC0"
-#     print "=========="
-#     transceiver.send_signal(app_id, SCPSignal.SYNC0)
-#     count = 0
-#     while count < 20:
-#         count = transceiver.get_core_state_count(app_id, CPUState.FINSHED)
-#         print "Cores in state FINISHED={}".format(count)
-#         sleep(0.1)
-#     print ""
-#
-#     print "Get IOBufs"
-#     print "=========="
-#     iobufs = transceiver.get_iobuf(core_subsets)
-#     iobufs = sorted(iobufs, key=lambda x: (x.x, x.y, x.p))
-#     for iobuf in iobufs:
-#         print iobuf
-#     print ""
-#
-#     print "Stop Application"
-#     print "================"
-#     transceiver.send_signal(app_id, SCPSignal.STOP)
-#     cpu_infos = transceiver.get_cpu_information(core_subsets)
-#     cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
-#     print "{} CPUs".format(len(cpu_infos))
-#     for cpu_info in cpu_infos:
-#         print cpu_info
-#     print ""
-#
-#     print "Create IP Tags"
-#     print "=============="
-#     transceiver.set_ip_tag(IPTag(None, 1, ".", 50000))
-#     transceiver.set_ip_tag(IPTag(None, 2, ".", 60000, strip_sdp=True))
-#     transceiver.set_reverse_ip_tag(ReverseIPTag(None, 3, 40000, 0, 1, 2))
-#     tags = transceiver.get_tags()
-#     for tag in tags:
-#         print tag
-#     print ""
-#
-#     print "Clear IP Tag"
-#     print "============"
-#     transceiver.clear_ip_tag(1)
-#     transceiver.clear_ip_tag(2)
-#     transceiver.clear_ip_tag(3)
-#     tags = transceiver.get_tags()
-#     for tag in tags:
-#         print tag
-#     print ""
-#
-#     print "Load Routes"
-#     print "==========="
-#     routes = [MulticastRoutingEntry(0x10000000, 0xFFFF7000,
-#               (1, 2, 3, 4, 5), (0, 1, 2), False)]
-#     transceiver.load_multicast_routes(0, 0, routes, app_id)
-#     routes = transceiver.get_multicast_routes(0, 0, app_id)
-#     for route in routes:
-#         print "Key={}, Mask={}, processors={}, links={}".format(
-#             hex(route.key_combo), hex(route.mask), route.processor_ids,
-#             route.link_ids)
-#     print ""
-#
-#     print "Clear Routes"
-#     print "============"
-#     transceiver.clear_multicast_routes(0, 0)
-#     routes = transceiver.get_multicast_routes(0, 0)
-#     for route in routes:
-#         print "Key={}, Mask={}, processors={}, links={}".format(
-#             hex(route.key_combo), hex(route.mask), route.processor_ids,
-#             route.link_ids)
-#     print ""
-#
+    print "Send SYNC0"
+    print "=========="
+    transceiver.send_signal(app_id, SCPSignal.SYNC0)
+    count = 0
+    while count < 20:
+        count = transceiver.get_core_state_count(app_id, CPUState.FINSHED)
+        print "Cores in state FINISHED={}".format(count)
+        sleep(0.1)
+    print ""
+
+    print "Get IOBufs"
+    print "=========="
+    iobufs = transceiver.get_iobuf(core_subsets)
+    for iobuf in iobufs:
+        print iobuf
+    print ""
+
+    print "Stop Application"
+    print "================"
+    transceiver.send_signal(app_id, SCPSignal.STOP)
+    time.sleep(0.5)
+    cpu_infos = transceiver.get_cpu_information(core_subsets)
+    cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
+    print "{} CPUs".format(len(cpu_infos))
+    for cpu_info in cpu_infos:
+        print cpu_info
+    print ""
+
+    print "Create IP Tags"
+    print "=============="
+    transceiver.set_ip_tag(IPTag(None, 1, ".", 50000))
+    transceiver.set_ip_tag(IPTag(None, 2, ".", 60000, strip_sdp=True))
+    transceiver.set_reverse_ip_tag(ReverseIPTag(None, 3, 40000, 0, 1, 2))
+    tags = transceiver.get_tags()
+    for tag in tags:
+        print tag
+    print ""
+
+    print "Clear IP Tag"
+    print "============"
+    transceiver.clear_ip_tag(1)
+    transceiver.clear_ip_tag(2)
+    transceiver.clear_ip_tag(3)
+    tags = transceiver.get_tags()
+    for tag in tags:
+        print tag
+    print ""
+
+    print "Load Routes"
+    print "==========="
+    routes = [MulticastRoutingEntry(0x10000000, 0xFFFF7000,
+              (1, 2, 3, 4, 5), (0, 1, 2), False)]
+    transceiver.load_multicast_routes(0, 0, routes, app_id)
+    routes = transceiver.get_multicast_routes(0, 0, app_id)
+    for route in routes:
+        print "Key={}, Mask={}, processors={}, links={}".format(
+            hex(route.key_combo), hex(route.mask), route.processor_ids,
+            route.link_ids)
+    print ""
+
+    print "Clear Routes"
+    print "============"
+    transceiver.clear_multicast_routes(0, 0)
+    routes = transceiver.get_multicast_routes(0, 0)
+    for route in routes:
+        print "Key={}, Mask={}, processors={}, links={}".format(
+            hex(route.key_combo), hex(route.mask), route.processor_ids,
+            route.link_ids)
+    print ""
+
 #     print "Set Router Diagnostic Filter"
 #     print "============================="
 #     destinations = [DiagnosticFilterDestination.LINK_0,
@@ -257,27 +260,30 @@ try:
 #             packet_types=[DiagnosticFilterPacketType.POINT_TO_POINT])
 #         transceiver.set_router_diagnostic_filter(0, 0, i + 12, current_filter)
 #
-#     print "Clear Router Diagnostics"
-#     print "========================"
-#     transceiver.clear_router_diagnostic_counters(0, 0)
-#     router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-#     print router_diagnostics.registers
-#     print ""
-#
-#     print "Send read requests"
-#     print "======================"
-#     transceiver.send_scp_message(SCPReadMemoryRequest(1, 0, 0x70000000, 4))
-#     transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
-#     transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
-#     transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
-#     transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
-#     transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
-#
-#     print "Get Router Diagnostics"
-#     print "======================"
-#     router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-#     print router_diagnostics.registers
-#     print ""
+    print "Clear Router Diagnostics"
+    print "========================"
+    transceiver.clear_router_diagnostic_counters(0, 0)
+    diagnostics = transceiver.get_router_diagnostics(0, 0)
+    for register in router_diagnostics._REGISTERS:
+        print "{}: {}".format(
+            register.name, diagnostics.registers[register.value])
+
+    print "Send read requests"
+    print "======================"
+    transceiver.send_scp_message(SCPReadMemoryRequest(1, 0, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+
+    print "Get Router Diagnostics"
+    print "======================"
+    diagnostics = transceiver.get_router_diagnostics(0, 0)
+    for register in router_diagnostics._REGISTERS:
+        print "{}: {}".format(
+            register.name, diagnostics.registers[register.value])
+    print ""
 #
 #     print "Get Router Diagnostic Filters"
 #     print "============================="

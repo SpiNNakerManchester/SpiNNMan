@@ -12,7 +12,7 @@ class SCPReadLinkRequest(AbstractSCPRequest):
     """ An SCP request to read a region of memory via a link on a chip
     """
 
-    def __init__(self, x, y, cpu, link, base_address, size):
+    def __init__(self, x, y, link, base_address, size, cpu=0):
         """
 
         :param x: The x-coordinate of the chip to read from, between 0 and 255

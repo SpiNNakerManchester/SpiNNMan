@@ -16,8 +16,10 @@ _REGISTERS = Enum(
            ("DUMP_PP", 9),
            ("DUMP_NN", 10),
            ("DUMP_FR", 11),
-           ("USER_START", 12),
-           ("USER_END", 16)])
+           ("USER_0", 12),
+           ("USER_1", 13),
+           ("USER_2", 14),
+           ("USER_3", 15)])
 
 
 class RouterDiagnostics(object):
@@ -201,7 +203,7 @@ class RouterDiagnostics(object):
         :rtype: array of int
         """
         return self._register_values[
-            _REGISTERS.USER_START.value:_REGISTERS.USER_END.value]
+            _REGISTERS.USER_0.value:_REGISTERS.USER_3.value + 1]
 
     @property
     def registers(self):

@@ -1,5 +1,6 @@
 from abc import ABCMeta
 from abc import abstractmethod
+from abc import abstractproperty
 from six import add_metaclass
 
 import struct
@@ -20,6 +21,14 @@ class AbstractUDPSCPSender(AbstractSCPSender):
     def is_udp_scp_sender(self):
         pass
 
+    @abstractproperty
+    def chip_x(self):
+        pass
+
+    @abstractproperty
+    def chip_y(self):
+        pass
+
     def send_scp_request(self, scp_request):
         """ Sends an SCP request down this connection
 
@@ -27,8 +36,8 @@ class AbstractUDPSCPSender(AbstractSCPSender):
 
             * source_port will be set to 7
             * source_cpu will be set to 31
-            * source_chip_x will be set to 0
-            * source_chip_y will be set to 0
+            * source_chip_x will be set to the chip_x of this sender
+            * source_chip_y will be set to the chip_y of this sender
 
         tag in the message is optional - if not set the default set in the\
         constructor will be used.
@@ -47,7 +56,8 @@ class AbstractUDPSCPSender(AbstractSCPSender):
             raise SpinnmanIOException("Not connected to a remote host")
 
         # Update the SDP headers for this connection
-        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header)
+        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header,
+                                                 self.chip_x, self._chip_y)
 
         # Send the packet
         try:
