@@ -14,8 +14,8 @@ class GetVersionProcess(AbstractSingleConnectionProcess):
     def _get_response(self, version_response):
         self._version_info = version_response.version_info
 
-    def get_version(self):
-        self._send_request(SCPVersionRequest(x=0, y=0, p=0),
+    def get_version(self, x, y, p):
+        self._send_request(SCPVersionRequest(x=x, y=y, p=p),
                            self._get_response)
         self._finish()
 

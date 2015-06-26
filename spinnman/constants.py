@@ -29,9 +29,12 @@ SYSTEM_VARIABLE_BYTES = 256
 
 # The max size a udp packet can be
 UDP_MESSAGE_MAX_SIZE = 256
-EIEIO_COMMAND_HEADER_SIZE = 3
-EIEIO_DATA_HEADER_SIZE = 2
 
+# the amount of size in bytes that the EIEIO command header is
+EIEIO_COMMAND_HEADER_SIZE = 3
+
+# The amount of size in bytes the EIEIO data header is
+EIEIO_DATA_HEADER_SIZE = 2
 
 # how many bytes the cpu info data takes up
 CPU_INFO_BYTES = 128
@@ -42,6 +45,36 @@ CPU_USER_0_START_ADDRESS = 112
 # default udp tag
 DEFAULT_SDP_TAG = 0xFF
 
+# max user requested tag value
+MAX_TAG_ID = 7
+
+# The range of values the BMP's 12-bit ADCs can measure.
+BMP_ADC_MAX = 1 << 12
+
+# Multiplier to convert from ADC value to volts for lines less than 2.5 V.
+BMP_V_SCALE_2_5 = 2.5 / BMP_ADC_MAX
+
+# Multiplier to convert from ADC value to volts for 3.3 V lines.
+BMP_V_SCALE_3_3 = 3.75 / BMP_ADC_MAX
+
+# Multiplier to convert from ADC value to volts for 12 V lines.
+BMP_V_SCALE_12 = 15.0 / BMP_ADC_MAX
+
+# Multiplier to convert from temperature probe values to degrees Celsius.
+BMP_TEMP_SCALE = 1.0 / 256.0
+
+# Temperature value returned when a probe is not connected.
+BMP_MISSING_TEMP = -0x8000
+
+# Fan speed value returned when a fan is absent.
+BMP_MISSING_FAN = -1
+
+# Additional timeout for BMP power-on commands to reply.
+BMP_POWER_ON_TIMEOUT = 10.0
+
+# number of chips to check are booted fully from the middle
+NO_MIDDLE_CHIPS_TO_CHECK = 8
+
 # connection types
 CONNECTION_TYPE = Enum(
     value="CONNECTION_TYPE",
@@ -50,8 +83,10 @@ CONNECTION_TYPE = Enum(
            ("UDP_BOOT", 2),
            ("UDP_IPTAG", 3),
            ("UDP_SPINNAKER", 4),
-           ("USB", 5)])
+           ("UDP_BMP", 5),
+           ("USB", 6)])
 
+# the different types of message types which spinnman supports
 TRAFFIC_TYPE = Enum(
     value="TRAFFIC_TYPE",
     names=[("SCP", 0),
@@ -60,6 +95,7 @@ TRAFFIC_TYPE = Enum(
            ("EIEIO_DATA", 3),
            ("EIEIO_COMMAND", 4)])
 
+# a listing of what spinnaker specific EIEIO commands there are.
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
     names=[

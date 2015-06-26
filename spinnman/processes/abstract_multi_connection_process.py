@@ -23,11 +23,13 @@ class AbstractMultiConnectionProcess(AbstractProcess):
     """ A process that uses multiple connections in communication
     """
 
-    def __init__(self, connections, next_connection_selector=None):
+    def __init__(self, connections, next_connection_selector=None,
+                 n_retries=3, timeout=0.5):
         AbstractProcess.__init__(self)
         self._scp_request_sets = list()
         for connection in connections:
-            scp_request_set = SCPRequestSet(connection)
+            scp_request_set = SCPRequestSet(connection, n_retries=n_retries,
+                                            packet_timeout=timeout)
             self._scp_request_sets.append(scp_request_set)
         self._next_connection_selector = next_connection_selector
         if next_connection_selector is None:

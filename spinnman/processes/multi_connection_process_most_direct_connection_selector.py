@@ -22,7 +22,7 @@ class MultiConnectionProcessMostDirectConnectionSelector(
             self._first_connection_index = 0
 
     def get_next_connection(self, message):
-        if self._machine is None:
+        if self._machine is None or len(self._connections) == 1:
             return self._first_connection_index
         chip = self._machine.get_chip_at(message.sdp_header.destination_chip_x,
                                          message.sdp_header.destination_chip_y)

@@ -15,7 +15,6 @@ from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinn_machine.tags.reverse_iptag import ReverseIPTag
 from spinnman.model.diagnostic_filter import DiagnosticFilter
-from spinnman.model.router_diagnostics import RouterDiagnostics
 from spinnman.model import router_diagnostics
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest

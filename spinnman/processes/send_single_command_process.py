@@ -7,13 +7,15 @@ from spinnman.processes\
 
 class SendSingleCommandProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, machine, connections, connection_selector=None):
+    def __init__(self, machine, connections, connection_selector=None,
+                 n_retries=3, timeout=0.5):
         if connection_selector is None:
             connection_selector = \
                 MultiConnectionProcessMostDirectConnectionSelector(
                     machine, connections)
         AbstractMultiConnectionProcess.__init__(
-            self, connections, connection_selector)
+            self, connections, connection_selector, n_retries=n_retries,
+            timeout=timeout)
         self._response = None
 
     def handle_response(self, response):
