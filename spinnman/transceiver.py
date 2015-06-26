@@ -14,12 +14,9 @@ from spinnman.messages.scp.impl.scp_read_fpga_register_request import \
 from spinnman.messages.scp.impl.scp_write_fpga_register_request import \
     SCPWriteFPGARegisterRequest
 from spinnman.model.diagnostic_filter import DiagnosticFilter
-from spinnman.data.file_data_reader import FileDataReader
-from spinnman import re_injection_binary
 from spinnman.messages.scp.scp_power_command import SCPPowerCommand
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
-from spinnman.messages.scp.scp_signal import SCPSignal
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
 from spinnman import constants
@@ -113,7 +110,6 @@ import logging
 import math
 import time
 import socket
-import os
 
 
 logger = logging.getLogger(__name__)
@@ -301,9 +297,6 @@ class Transceiver(object):
         self._sort_out_connections(connections)
         self._update_connection_queues()
         self._check_udp_bmp_connections()
-
-        # The core_subsets of cores that are currently used for reinjection
-        self._reinjection_cores = None
 
     def _sort_out_connections(self, connections):
         for connection in connections:
@@ -750,61 +743,6 @@ class Transceiver(object):
             nearest_ethernet_x=chip_details.nearest_ethernet_x,
             nearest_ethernet_y=chip_details.nearest_ethernet_y)
         return chip
-
-    def enable_dropped_packet_reinjection(self):
-        """ Ensures that dropped packet re-injection is enabled on the system
-        """
-
-        # If there are no re-injection cores, create some
-        if self._reinjection_cores is None:
-
-            self._reinjection_cores = CoreSubsets()
-
-            # Find a free core on each chip
-            self._update_machine()
-            for chip in self._machine.chips:
-
-                # Find a currently non-monitor core
-                free_processor = None
-                for processor in chip.processors:
-                    if not processor.is_monitor:
-                        free_processor = processor
-                        break
-
-                # Add the processor to the core subsets
-                self._reinjection_cores.add_processor(
-                    chip.x, chip.y, free_processor.processor_id)
-
-                # Set the processor to be a monitor
-                free_processor.set_monitor(True)
-
-        # Stop any existing execution
-        self.send_signal(constants.RE_INJECTION_APP_ID, SCPSignal.STOP)
-
-        # Start the re-injector binary
-        binary_dir = os.path.dirname(re_injection_binary.__file__)
-        file_path_of_re_injection_binary = os.path.join(
-            binary_dir, "re_injection.aplx")
-        file_size = os.stat(file_path_of_re_injection_binary).st_size
-        file_reader = FileDataReader(file_path_of_re_injection_binary)
-        self.execute_flood(self._reinjection_cores, file_reader,
-                           constants.RE_INJECTION_APP_ID, file_size)
-        file_reader.close()
-
-    def disable_dropped_packet_reinjection(self):
-        """ Ensures that dropped packet re-injection is disabled on the system
-        """
-
-        # Stop any existing execution
-        self.send_signal(constants.RE_INJECTION_APP_ID, SCPSignal.STOP)
-
-        # If there are any re-injection cores, turn off the monitor status
-        if self._reinjection_cores is None:
-            for core_subset in self._reinjection_cores.core_subsets:
-                chip = self._machine.get_chip_at(core_subset.x, core_subset.y)
-                for processor_id in core_subset.processor_ids:
-                    processor = chip.get_processor_with_id(processor_id)
-                    processor.set_monitor(False)
 
     def _update_machine(self):
         """ Get the current machine status and store it
