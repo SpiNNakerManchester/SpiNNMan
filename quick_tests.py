@@ -244,25 +244,27 @@ try:
             route.link_ids)
     print ""
 
-#     print "Set Router Diagnostic Filter"
-#     print "============================="
-#     destinations = [DiagnosticFilterDestination.LINK_0,
-#                     DiagnosticFilterDestination.LINK_1,
-#                     DiagnosticFilterDestination.LINK_2,
-#                     DiagnosticFilterDestination.LINK_5]
-#     for i in range(len(destinations)):
-#         current_filter = DiagnosticFilter(
-#             enable_interrupt_on_counter_event=False,
-#             match_emergency_routing_status_to_incoming_packet=True,
-#             destinations=[destinations[i]], sources=None,
-#             payload_statuses=None, default_routing_statuses=[],
-#             emergency_routing_statuses=[],
-#             packet_types=[DiagnosticFilterPacketType.POINT_TO_POINT])
-#         transceiver.set_router_diagnostic_filter(0, 0, i + 12, current_filter)
-#
+    print "Set Router Diagnostic Filter"
+    print "============================="
+    destinations = [DiagnosticFilterDestination.LINK_0,
+                    DiagnosticFilterDestination.LINK_1,
+                    DiagnosticFilterDestination.LINK_2,
+                    DiagnosticFilterDestination.LINK_5]
+    for i in range(len(destinations)):
+        current_filter = DiagnosticFilter(
+            enable_interrupt_on_counter_event=False,
+            match_emergency_routing_status_to_incoming_packet=True,
+            destinations=[destinations[i]], sources=None,
+            payload_statuses=None, default_routing_statuses=[],
+            emergency_routing_statuses=[],
+            packet_types=[DiagnosticFilterPacketType.POINT_TO_POINT])
+        transceiver.set_router_diagnostic_filter(0, 0, i + 12, current_filter)
+
     print "Clear Router Diagnostics"
     print "========================"
-    transceiver.clear_router_diagnostic_counters(0, 0)
+    transceiver.clear_router_diagnostic_counters(
+        0, 0, counter_ids=[router_diagnostics._REGISTERS.LOC_PP.value,
+                           router_diagnostics._REGISTERS.EXT_PP.value])
     diagnostics = transceiver.get_router_diagnostics(0, 0)
     for register in router_diagnostics._REGISTERS:
         print "{}: {}".format(
@@ -284,14 +286,14 @@ try:
         print "{}: {}".format(
             register.name, diagnostics.registers[register.value])
     print ""
-#
-#     print "Get Router Diagnostic Filters"
-#     print "============================="
-#     for i in range(0, 16):
-#         print "Filter", i, ":"
-#         current_filter = transceiver.get_router_diagnostic_filter(0, 0, i)
-#         print_filter(current_filter)
-#         print ""
+
+    print "Get Router Diagnostic Filters"
+    print "============================="
+    for i in range(0, 16):
+        print "Filter", i, ":"
+        current_filter = transceiver.get_router_diagnostic_filter(0, 0, i)
+        print_filter(current_filter)
+        print ""
 
 except Exception:
     logging.exception("Error!")

@@ -1687,8 +1687,11 @@ class Transceiver(object):
                            constants.ROUTER_FILTER_CONTROLS_OFFSET +
                            (position *
                             constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
-        self._send_scp_message_with_response(SCPWriteMemoryRequest(
-            x, y, memory_position, [data_to_send]))
+
+        process = SendSingleCommandProcess(
+            self._machine, self._scamp_connections)
+        process.execute(SCPWriteMemoryRequest(
+            x, y, memory_position, struct.pack("<I", data_to_send)))
 
     def get_router_diagnostic_filter(self, x, y, position):
         """ Gets a router diagnostic filter from a router
@@ -1720,9 +1723,12 @@ class Transceiver(object):
                            constants.ROUTER_FILTER_CONTROLS_OFFSET +
                            (position *
                             constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
-        result = self._send_scp_message_with_response(
+        process = SendSingleCommandProcess(
+            self._machine, self._scamp_connections)
+        response = process.execute(
             SCPReadMemoryRequest(x, y, memory_position, 4))
-        return DiagnosticFilter.read_from_int(result.data[0])
+        return DiagnosticFilter.read_from_int(struct.unpack_from(
+            "<I", response.data, response.offset)[0])
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
                                          counter_ids=range(0, 16)):
