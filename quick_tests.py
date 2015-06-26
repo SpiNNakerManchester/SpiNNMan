@@ -13,6 +13,7 @@ from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinn_machine.tags.reverse_iptag import ReverseIPTag
 from spinnman.model.diagnostic_filter import DiagnosticFilter
+import struct
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.model.diagnostic_filter_destination \
@@ -116,7 +117,8 @@ transceiver = create_transceiver_from_hostname(
 try:
     print "Version Information"
     print "==================="
-    version_info = transceiver.ensure_board_is_ready(board_config.board_version)
+    version_info = transceiver.ensure_board_is_ready(
+        board_config.board_version)
     print version_info
     print ""
 
@@ -141,26 +143,25 @@ try:
     print "Read:   ", map(hex, read_data)
     print ""
 
-#     print "Flood Memory Write"
-#     print "=================="
-#     transceiver.write_memory_flood(0x70000000, 0x04050607)
-#     read_data_packets = transceiver.read_memory(1, 1, 0x70000000, 4)
-#     for packet in read_data_packets:
-#         print map(hex, packet)
-#     print ""
-#
-#     print "Execute Flood"
-#     print "============="
-#     file_size = os.stat("hello.aplx").st_size
-#     executable = FileDataReader("hello.aplx")
-#     transceiver.execute_flood(core_subsets, executable, app_id, file_size)
-#     count = 0
-#     while count < 20:
-#         count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)
-#         print "Cores in state SYNC0={}".format(count)
-#         sleep(0.1)
-#     print ""
-#
+    print "Flood Memory Write"
+    print "=================="
+    transceiver.write_memory_flood(0x70000000, 0x04050607)
+    read_data = transceiver.read_memory(1, 1, 0x70000000, 4)
+    print hex(struct.unpack("<I", read_data)[0])
+    print ""
+
+    print "Execute Flood"
+    print "============="
+    file_size = os.stat("hello.aplx").st_size
+    executable = FileDataReader("hello.aplx")
+    transceiver.execute_flood(core_subsets, executable, app_id, file_size)
+    count = 0
+    while count < 20:
+        count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)
+        print "Cores in state SYNC0={}".format(count)
+        sleep(0.1)
+    print ""
+
     print "CPU Information"
     print "==============="
     cpu_infos = transceiver.get_cpu_information(core_subsets)
@@ -169,7 +170,7 @@ try:
     for cpu_info in cpu_infos:
         print cpu_info
     print ""
-#
+
 #     print "Send SYNC0"
 #     print "=========="
 #     transceiver.send_signal(app_id, SCPSignal.SYNC0)

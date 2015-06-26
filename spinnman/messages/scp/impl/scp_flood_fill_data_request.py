@@ -14,7 +14,8 @@ class SCPFloodFillDataRequest(AbstractSCPRequest):
     """ A request to start a flood fill of data
     """
 
-    def __init__(self, nearest_neighbour_id, block_no, base_address, data):
+    def __init__(self, nearest_neighbour_id, block_no, base_address, data,
+                 offset=0, length=None):
         """
 
         :param nearest_neighbour_id: The id of the packet, between 0 and 127
@@ -27,9 +28,14 @@ class SCPFloodFillDataRequest(AbstractSCPRequest):
                     must be divisible by 4
         :type data: bytearray
         """
+        self._size = length
+        self._offset = offset
+        self._data_to_write = data
+        if length is None:
+            self._size = len(data)
 
         argument_1 = _NNP_FORWARD_RETRY | nearest_neighbour_id
-        argument_2 = (block_no << 16) | (((len(data) / 4) - 1) << 8)
+        argument_2 = (block_no << 16) | (((self._size / 4) - 1) << 8)
 
         super(SCPFloodFillDataRequest, self).__init__(
             SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
@@ -37,7 +43,13 @@ class SCPFloodFillDataRequest(AbstractSCPRequest):
                       destination_chip_y=0),
             SCPRequestHeader(command=SCPCommand.CMD_FFD),
             argument_1=argument_1, argument_2=argument_2,
-            argument_3=base_address, data=data)
+            argument_3=base_address, data=None)
+
+    @property
+    def bytestring(self):
+        datastring = super(SCPFloodFillDataRequest, self).bytestring
+        data = self._data_to_write[self._offset:self._offset + self._size]
+        return datastring + bytes(data)
 
     def get_scp_response(self):
         return SCPCheckOKResponse("Flood Fill", "CMD_NNP:NNP_FFS")

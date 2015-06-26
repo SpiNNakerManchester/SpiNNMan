@@ -21,9 +21,12 @@ from spinnman.processes.get_version_process import GetVersionProcess
 from spinnman.processes.write_memory_process import WriteMemoryProcess
 from spinnman.processes.read_memory_process import ReadMemoryProcess
 from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
-from spinnman.connections.scp_request_set import SCPRequestSet
-from spinnman.processes.set_iptag_tto_process import SetIPTagTTOProcess
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
+from spinnman.processes.read_iobuf_process import ReadIOBufProcess
+from spinnman.processes.application_run_process import ApplicationRunProcess
+from spinnman.processes.write_memory_flood_process import WriteMemoryFloodProcess
+from spinnman.processes.send_single_command_process \
+    import SendSingleCommandProcess
 from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
     import StrippedIPTagConnection
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
@@ -39,7 +42,6 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
 
-from spinnman.model.cpu_info import CPUInfo
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
 from spinnman.model.router_diagnostics import RouterDiagnostics
@@ -48,8 +50,6 @@ from spinnman.messages.spinnaker_boot.spinnaker_boot_messages \
     import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_link_request \
     import SCPReadLinkRequest
-from spinnman.messages.scp.impl.scp_write_link_request \
-    import SCPWriteLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_count_state_request \
@@ -88,7 +88,6 @@ from spinnman.data.little_endian_byte_array_byte_reader \
     import LittleEndianByteArrayByteReader
 
 # noinspection
-from _threads._iobuf_interface import IOBufInterface
 from _threads._get_tags_interface import GetTagsInterface
 
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
@@ -275,9 +274,10 @@ class Transceiver(object):
         # revert at close
         self._original_timeouts = dict()
         for scamp_connection in self._scamp_connections:
-            process = SetIPTagTTOProcess(scamp_connection)
-            self._original_timeouts[scamp_connection] = process.set_tto(
-                scamp_connection.chip_x, scamp_connection.chip_y, 2)
+            process = SendSingleCommandProcess(
+                self._machine, [scamp_connection])
+            process.execute(SCPIPTagTTORequest(
+                scamp_connection.chip_x, scamp_connection.chip_y, 2))
 
     def _sort_out_connections(self, connections):
 
@@ -484,51 +484,6 @@ class Transceiver(object):
         """
         raise SpinnmanUnsupportedOperationException(
             "This operation is currently not supported in spinnman.")
-
-    def _send_scp_message_with_response(
-            self, message, n_retries=10, timeout=1, connection=None,
-            get_callback=False, retry_codes=(
-                SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_TIMEOUT,
-                SCPResult.RC_LEN)):
-        """ Sends a message using one of the connections, and gets a response
-
-        :param message: The message to send
-        :type message: \
-                    :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
-        :param connection: An optional connection to use
-        :type connection:\
-                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :param timeout: Timeout to use when waiting for a response
-        :type timeout: int
-        :param get_callback: Determines if the function should return the\
-                    callback which can be used to send messages asynchronously
-        :type get_callback: bool
-        :return:
-                    * If get_callback is False, the response
-                    * If get_callback is True, the callback class
-        :rtype: \
-                :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`\
-                 or\
-                :py:class:`spinnman.connections.listeners._scp_connection_queue._SCPRequestInfo`
-        :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
-                    timeout before a message is received
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
-                    of the fields of the received message is invalid
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException:
-                    * If a packet is received is not a valid response
-        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
-                    no connection can send the type of message given
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    sending the message or receiving the response
-        """
-        best_connection_queue = self._scp_connection_queues.itervalues().next()
-
-        # Send the message with the best queue
-        if get_callback:
-            return best_connection_queue.send_message_non_blocking(
-                message, timeout, n_retries, retry_codes)
-        return best_connection_queue.send_message(
-            message, timeout, n_retries, retry_codes)
 
     def _update_machine(self):
         """ Get the current machine status and store it
@@ -875,25 +830,8 @@ class Transceiver(object):
         if self._machine is None:
             self._update_machine()
 
-        # Get CPU Information for the requested chips
-        cpu_information = self.get_cpu_information(core_subsets)
-
-        # Go through the requested chips
-        callbacks = list()
-        for cpu_info in cpu_information:
-            chip_info = self._chip_info[(cpu_info.x, cpu_info.y)]
-            iobuf_bytes = chip_info.iobuf_size
-
-            thread = IOBufInterface(
-                self, cpu_info.x, cpu_info.y, cpu_info.p,
-                cpu_info.iobuf_address, iobuf_bytes,
-                self._scp_message_thread_pool)
-            self._other_thread_pool.apply_async(thread.run)
-            callbacks.append(thread)
-
-        # Gather the results
-        for callback in callbacks:
-            yield callback.get_iobuf()
+        process = ReadIOBufProcess(self._machine, self._scamp_connections)
+        return process.read_iobuf(self._chip_info, core_subsets)
 
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
@@ -940,8 +878,9 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        response = self._send_scp_message_with_response(
-            SCPCountStateRequest(app_id, state))
+        process = SendSingleCommandProcess(
+            self._machine, self._scamp_connections)
+        response = process.execute(SCPCountStateRequest(app_id, state))
         return response.count
 
     def execute(self, x, y, processors, executable, app_id, n_bytes=None):
@@ -993,7 +932,9 @@ class Transceiver(object):
         self.write_memory(x, y, 0x67800000, executable, n_bytes)
 
         # Request the start of the executable
-        self._send_scp_message_with_response(
+        process = SendSingleCommandProcess(
+            self._machine, self._scamp_connections)
+        process.execute(
             SCPApplicationRunRequest(app_id, x, y, processors))
 
         # Release the lock
@@ -1056,77 +997,14 @@ class Transceiver(object):
         self.write_memory_flood(0x67800000, executable, n_bytes)
 
         # Execute the binary on the cores on the chips where required
-        callbacks = list()
-        for core_subset in core_subsets:
-            x = core_subset.x
-            y = core_subset.y
-            callback = self._send_scp_message_with_response(
-                SCPApplicationRunRequest(app_id, x, y,
-                                         core_subset.processor_ids),
-                get_callback=True)
-            callbacks.append(callback)
-
-        # Go through the callbacks and check that the responses are OK
-        for callback in callbacks:
-            callback.wait_for_response()
+        process = ApplicationRunProcess(self._machine, self._scamp_connections)
+        process.run(app_id, core_subsets)
 
         # Release the lock
         self._release_flood_execute_lock()
 
-    @staticmethod
-    def _get_bytes_to_write_and_data_to_write(data, n_bytes):
-        """ Converts a given data item an a number of bytes into the data\
-            and the amount of data to write
-
-        :param data: The data to write.  Should be one of the following:
-                    * An instance of AbstractDataReader
-                    * A bytearray
-                    * A single integer - will be written using little-endian\
-                      byte ordering
-        :type data:\
-                    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
-                    or bytearray or int
-        :param n_bytes: The amount of data to be written in bytes.  If not\
-                    specified:
-                        * If data is an AbstractDataReader, an error is raised
-                        * If data is a bytearray, the length of the bytearray\
-                          will be used
-                        * If data is an int, 4 will be used
-        :type n_bytes: int
-        :return: The number of bytes and the data to write
-        :rtype: (int, int)
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If data is an AbstractDataReader but n_bytes is not\
-                      specified
-                    * If data is an int and n_bytes is more than 4
-                    * If n_bytes is less than 0
-        """
-        if n_bytes is not None and n_bytes < 0:
-            raise SpinnmanInvalidParameterException(
-                "n_bytes", str(n_bytes), "Must be a positive integer")
-
-        bytes_to_write = n_bytes
-        data_to_write = data
-        if isinstance(data, AbstractDataReader) and n_bytes is None:
-            raise SpinnmanInvalidParameterException(
-                "n_bytes", "None",
-                "n_bytes must be specified when data is an"
-                " AbstractDataReader")
-        if isinstance(data, bytearray) and n_bytes is None:
-            bytes_to_write = len(data)
-        if isinstance(data, (int, long)) and n_bytes is None:
-            bytes_to_write = 4
-        if isinstance(data, (int, long)) and n_bytes > 4:
-            raise SpinnmanInvalidParameterException(
-                str(n_bytes), "n_bytes", "An integer is at most 4 bytes")
-        if isinstance(data, (int, long)):
-            data_to_write = bytearray(bytes_to_write)
-            for i in range(0, bytes_to_write):
-                data_to_write[i] = (data >> (8 * i)) & 0xFF
-
-        return bytes_to_write, data_to_write
-
-    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0):
+    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
+                     cpu=0):
         """ Write to the SDRAM on the board
 
         :param x: The x-coordinate of the chip where the memory is to be\
@@ -1153,6 +1031,10 @@ class Transceiver(object):
                           will be used
                         * If data is an int, 4 will be used
         :type n_bytes: int
+        :param offset: The offset from which the valid data begins
+        :type offset: int
+        :param cpu: The optional cpu to write to
+        :type cpu: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1171,29 +1053,27 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-
-#         bytes_to_write, data_to_write = \
-#             self._get_bytes_to_write_and_data_to_write(data, n_bytes)
         process = WriteMemoryProcess(self._scamp_connections)
         if isinstance(data, AbstractDataReader):
-            process.write_memory_from_reader(x, y, base_address, data, n_bytes)
+            process.write_memory_from_reader(x, y, cpu, base_address, data,
+                                             n_bytes)
         elif isinstance(data, (int, long)):
             data_to_write = bytearray(4)
             for i in range(0, 4):
                 data_to_write[i] = (data >> (8 * i)) & 0xFF
-            process.write_memory_from_bytearray(x, y, base_address,
+            process.write_memory_from_bytearray(x, y, cpu, base_address,
                                                 data_to_write, 0, 4)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
-            process.write_memory_from_bytearray(x, y, base_address, data,
+            process.write_memory_from_bytearray(x, y, cpu, base_address, data,
                                                 offset, n_bytes)
 
-    def write_neighbour_memory(self, x, y, cpu, link, base_address, data,
-                               n_bytes=None):
-        """ Write to the memory of a neighbouring chip using a LINK_READ SCP
-        command. If sent to a BMP, this command can be used to communicate with
-        the FPGAs' debug registers.
+    def write_neighbour_memory(self, x, y, link, base_address, data,
+                               n_bytes=None, offset=0, cpu=0):
+        """ Write to the memory of a neighbouring chip using a LINK_READ SCP\
+            command. If sent to a BMP, this command can be used to communicate\
+            with the FPGAs' debug registers.
 
         :param x: The x-coordinate of the chip whose neighbour is to be\
                     written to
@@ -1201,10 +1081,8 @@ class Transceiver(object):
         :param y: The y-coordinate of the chip whose neighbour is to be\
                     written to
         :type y: int
-        :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
-        :type cpu: int
-        :param link: The link index to send the request to (or if BMP, the FPGA
-        number)
+        :param link: The link index to send the request to (or if BMP, the\
+                    FPGA number)
         :type link: int
         :param base_address: The address in SDRAM where the region of memory\
                     is to be written
@@ -1224,6 +1102,10 @@ class Transceiver(object):
                           will be used
                         * If data is an int, 4 will be used
         :type n_bytes: int
+        :param offset: The offset where the valid data starts
+        :type offset: int
+        :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
+        :type cpu: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1243,41 +1125,23 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        bytes_to_write, data_to_write = \
-            self._get_bytes_to_write_and_data_to_write(data, n_bytes)
+        process = WriteMemoryProcess(self._scamp_connections)
+        if isinstance(data, AbstractDataReader):
+            process.write_link_memory_from_reader(x, y, cpu, base_address,
+                                                  data, n_bytes)
+        elif isinstance(data, (int, long)):
+            data_to_write = bytearray(4)
+            for i in range(0, 4):
+                data_to_write[i] = (data >> (8 * i)) & 0xFF
+            process.write_link_memory_from_bytearray(x, y, cpu, base_address,
+                                                     data_to_write, 0, 4)
+        else:
+            if n_bytes is None:
+                n_bytes = len(data)
+            process.write_link_memory_from_bytearray(x, y, cpu, base_address,
+                                                     data, offset, n_bytes)
 
-        # Set up all the requests and get the callbacks
-        logger.debug("Writing {} bytes of memory to neighbour {}.".format(
-            bytes_to_write, link))
-        offset = 0
-        address_to_write = base_address
-        callbacks = list()
-        while bytes_to_write > 0:
-            max_data_size = bytes_to_write
-            if max_data_size > 256:
-                max_data_size = 256
-            data_array = None
-            if isinstance(data_to_write, AbstractDataReader):
-                data_array = data_to_write.read(max_data_size)
-            elif isinstance(data_to_write, bytearray):
-                data_array = data_to_write[offset:(offset + max_data_size)]
-            data_size = len(data_array)
-
-            if data_size != 0:
-                callback = self._send_scp_message_with_response(
-                    SCPWriteLinkRequest(x, y, cpu, link, address_to_write,
-                                        data_array),
-                    get_callback=True)
-                callbacks.append(callback)
-                bytes_to_write -= data_size
-                address_to_write += data_size
-                offset += data_size
-
-        # Go through the callbacks and check that the responses are OK
-        for callback in callbacks:
-            callback.wait_for_response()
-
-    def write_memory_flood(self, base_address, data, n_bytes=None):
+    def write_memory_flood(self, base_address, data, n_bytes=None, offset=0):
         """ Write to the SDRAM of all chips.
 
         :param base_address: The address in SDRAM where the region of memory\
@@ -1299,6 +1163,8 @@ class Transceiver(object):
                         * If data is an int, 4 will be used
                         * If n_bytes is less than 0
         :type n_bytes: int
+        :param offset: The offset where the valid data starts
+        :type offset: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1317,52 +1183,23 @@ class Transceiver(object):
         # Ensure only one flood fill occurs at any one time
         self._flood_write_lock.acquire()
 
-        bytes_to_write, data_to_write = \
-            self._get_bytes_to_write_and_data_to_write(data, n_bytes)
-
         # Start the flood fill
         nearest_neighbour_id = self._get_next_nearest_neighbour_id()
-        n_blocks = int(math.ceil(math.ceil(bytes_to_write / 4.0) / 256.0))
-        self._send_scp_message_with_response(
-            SCPFloodFillStartRequest(nearest_neighbour_id, n_blocks))
-
-        # Send the data blocks simultaneously
-        # Set up all the requests and get the callbacks
-        logger.debug("Writing {} bytes of memory".format(bytes_to_write))
-        offset = 0
-        address_to_write = base_address
-        callbacks = list()
-        block_no = 0
-        while bytes_to_write > 0:
-            max_data_size = bytes_to_write
-            if max_data_size > 256:
-                max_data_size = 256
-            data_array = None
-            if isinstance(data_to_write, AbstractDataReader):
-                data_array = data_to_write.read(max_data_size)
-            elif isinstance(data_to_write, bytearray):
-                data_array = data_to_write[offset:(offset + max_data_size)]
-            data_size = len(data_array)
-
-            if data_size != 0:
-                callback = self._send_scp_message_with_response(
-                    SCPFloodFillDataRequest(
-                        nearest_neighbour_id, block_no, address_to_write,
-                        data_array),
-                    get_callback=True)
-                callbacks.append(callback)
-                bytes_to_write -= data_size
-                address_to_write += data_size
-                offset += data_size
-                block_no += 1
-
-        # Go through the callbacks and check that the responses are OK
-        for callback in callbacks:
-            callback.wait_for_response()
-
-        # Send the end packet
-        self._send_scp_message_with_response(
-            SCPFloodFillEndRequest(nearest_neighbour_id))
+        process = WriteMemoryFloodProcess(self._scamp_connections)
+        if isinstance(data, AbstractDataReader):
+            process.write_memory_from_reader(
+                nearest_neighbour_id, base_address, data, n_bytes)
+        elif isinstance(data, (int, long)):
+            data_to_write = bytearray(4)
+            for i in range(0, 4):
+                data_to_write[i] = (data >> (8 * i)) & 0xFF
+            process.write_memory_from_bytearray(
+                nearest_neighbour_id, base_address, data_to_write, 0, 4)
+        else:
+            if n_bytes is None:
+                n_bytes = len(data)
+            process.write_memory_from_bytearray(
+                nearest_neighbour_id, base_address, data, offset, n_bytes)
 
         # Release the lock to allow others to proceed
         self._flood_write_lock.release()
@@ -1381,8 +1218,8 @@ class Transceiver(object):
         :type base_address: int
         :param length: The length of the data to be read in bytes
         :type length: int
-        :return: An iterable of chunks of data read in order
-        :rtype: iterable of bytearray
+        :return: A bytearray of data read
+        :rtype: bytearray
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -1396,39 +1233,6 @@ class Transceiver(object):
 
         process = ReadMemoryProcess(self._scamp_connections)
         return process.read_memory(x, y, base_address, length)
-
-    def read_memory_return_byte_array(self, x, y, base_address, length):
-        """ Read some areas of SDRAM from the board
-
-        :param x: The x-coordinate of the chip where the memory is to be\
-                    read from
-        :type x: int
-        :param y: The y-coordinate of the chip where the memory is to be\
-                    read from
-        :type y: int
-        :param base_address: The address in SDRAM where the region of memory\
-                    to be read starts
-        :type base_address: int
-        :param length: The length of the data to be read in bytes
-        :type length: int
-        :return: An full bytearray of data read in order
-        :rtype: bytearray
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If one of x, y, p, base_address or length is invalid
-                    * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
-        """
-
-        # Go through the callbacks and return the responses in order
-        returned_byte_array = bytearray()
-        for data in self.read_memory(x, y, base_address, length):
-            returned_byte_array.extend(data)
-        return returned_byte_array
 
     def read_neighbour_memory(self, x, y, cpu, link, base_address, length):
         """ Read some areas of memory on a neighbouring chip using a LINK_READ

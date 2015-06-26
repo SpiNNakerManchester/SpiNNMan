@@ -12,7 +12,7 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
     """ A request to write memory on a chip
     """
 
-    def __init__(self, x, y, base_address, data, offset=0, length=None):
+    def __init__(self, x, y, base_address, data, offset=0, length=None, cpu=0):
         """
 
         :param x: The x-coordinate of the chip, between 0 and 255
@@ -32,7 +32,7 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
         super(SCPWriteMemoryRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=x,
+                destination_cpu=cpu, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_WRITE),
             argument_1=base_address, argument_2=self._size,
