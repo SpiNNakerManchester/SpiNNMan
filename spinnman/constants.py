@@ -125,5 +125,3 @@ EIEIO_COMMAND_IDS = Enum(
 
         # Host confirming data being read form SpiNNaker memory
         ("HOST_DATA_READ", 9)])
-
-RE_INJECTION_APP_ID = 17
