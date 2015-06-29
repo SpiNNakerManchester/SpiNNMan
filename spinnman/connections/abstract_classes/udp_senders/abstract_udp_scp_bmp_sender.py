@@ -4,10 +4,10 @@ from six import add_metaclass
 
 from spinnman.connections.abstract_classes.abstract_scp_sender import \
     AbstractSCPSender
-from spinnman.data.little_endian_byte_array_byte_writer import \
-    LittleEndianByteArrayByteWriter
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.connections.abstract_classes.udp_senders import udp_utils
+import struct
+import traceback
 
 
 @add_metaclass(ABCMeta)
@@ -49,25 +49,12 @@ class AbstractUDPSCPBMPSender(AbstractSCPSender):
             raise SpinnmanIOException("Not connected to a remote host")
 
         # Update the SDP headers for this connection
-        udp_utils.update_sdp_header_for_udp_send(
-            scp_request.sdp_header, 0, 0)
-
-        # Update the sequence for this connection
-        if scp_request.scp_request_header.sequence is None:
-            scp_request.scp_request_header.sequence = self._scp_sequence
-            self._scp_sequence = (self._scp_sequence + 1) % 65536
-
-        # Create a writer for the mesage
-        writer = LittleEndianByteArrayByteWriter()
-
-        # Add the UDP padding
-        writer.write_short(0)
-
-        # Write the SCP message
-        scp_request.write_scp_request(writer)
+        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header,
+                                                 self.chip_x, self.chip_y)
 
         # Send the packet
         try:
-            self._socket.send(writer.data)
+            self._socket.send(struct.pack("<2x") + scp_request.bytestring)
         except Exception as e:
+            traceback.print_exc()
             raise SpinnmanIOException(str(e))

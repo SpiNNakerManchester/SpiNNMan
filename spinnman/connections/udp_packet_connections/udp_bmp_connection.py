@@ -38,6 +38,14 @@ class UDPBMPConnection(
         self._boards = boards
 
     @property
+    def chip_x(self):
+        return 0
+
+    @property
+    def chip_y(self):
+        return 0
+
+    @property
     def cabinet(self):
         """ The cabinet id of the BMP
 

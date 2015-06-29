@@ -113,7 +113,8 @@ def print_filter(d_filter):
     print_enums("Packet Types:", d_filter.packet_types)
 
 transceiver = create_transceiver_from_hostname(
-    board_config.remotehost, ignore_cores=down_cores, ignore_chips=down_chips)
+    board_config.remotehost, board_config.board_version,
+    ignore_cores=down_cores, ignore_chips=down_chips)
 
 
 try:

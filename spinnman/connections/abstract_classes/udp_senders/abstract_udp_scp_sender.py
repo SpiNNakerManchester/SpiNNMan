@@ -57,7 +57,7 @@ class AbstractUDPSCPSender(AbstractSCPSender):
 
         # Update the SDP headers for this connection
         udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header,
-                                                 self.chip_x, self._chip_y)
+                                                 self.chip_x, self.chip_y)
 
         # Send the packet
         try:

@@ -163,12 +163,13 @@ def create_transceiver_from_hostname(
             hostname, number_of_boards)]
 
     # handle BMP connections
-    for bmp_connection in bmp_connection_data:
+    if bmp_connection_data is not None:
+        for bmp_connection in bmp_connection_data:
 
-        udp_bmp_connection = UDPBMPConnection(
-            bmp_connection.cabinet, bmp_connection.frame,
-            bmp_connection.boards, remote_host=bmp_connection.ip_address)
-        connections.append(udp_bmp_connection)
+            udp_bmp_connection = UDPBMPConnection(
+                bmp_connection.cabinet, bmp_connection.frame,
+                bmp_connection.boards, remote_host=bmp_connection.ip_address)
+            connections.append(udp_bmp_connection)
 
     # handle the spinnaker connection
     connections.append(UDPSpinnakerConnection(remote_host=hostname))
@@ -379,19 +380,17 @@ class Transceiver(object):
 
             # try to send a bmp sver to check if it responds as expected
             try:
-                response = self.send_scp_message(
-                    SCPBMPVersionRequest(board=0),
-                    connection=connection)
+                version_info = self.get_scamp_version(connection=connection)
 
-                if (response.version_info.name != _BMP_NAME or
-                        (response.version_info.version_number not in
+                if (version_info.name != _BMP_NAME or
+                        (version_info.version_number not in
                          _BMP_VERSIONS)):
                     raise exceptions.SpinnmanIOException(
                         "The BMP is running {}"
                         " {} which is incompatible with this transceiver, "
                         "required version is {} {}".format(
-                            response.version_info.name,
-                            response.version_info.version_number,
+                            version_info.name,
+                            version_info.version_number,
                             _BMP_NAME, _BMP_VERSIONS))
 
             # If it fails to respond due to timeout, maybe that the connection
@@ -919,7 +918,7 @@ class Transceiver(object):
             self.read_neighbour_memory(
                 x=0, y=0, link=3,
                 base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
-                size=constants.SYSTEM_VARIABLE_BYTES)
+                length=constants.SYSTEM_VARIABLE_BYTES)
             return True
         except exceptions.SpinnmanUnexpectedResponseCodeException:
 
@@ -932,7 +931,7 @@ class Transceiver(object):
             self.read_neighbour_memory(
                 x=0, y=0, link=4,
                 base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
-                size=constants.SYSTEM_VARIABLE_BYTES)
+                length=constants.SYSTEM_VARIABLE_BYTES)
             return True
         except exceptions.SpinnmanUnexpectedResponseCodeException:
 
