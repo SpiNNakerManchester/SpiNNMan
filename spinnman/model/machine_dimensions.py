@@ -1,32 +1,32 @@
 class MachineDimensions(object):
-    """ Represents the dimensions of a machine
+    """ Represents the size of a machine in chips
     """
-    
-    def __init__(self, x_max, y_max):
+
+    def __init__(self, width, height):
         """
-        :param x_max: The maximum x-coordinate of the chips in the machine
-        :type x_max: int
-        :param y_max: The maximum y-coordinate of the chips in the machine
-        :type y_max: int
+        :param width: The width of the machine in chips
+        :type width: int
+        :param height: The height of the machine in chips
+        :type height: int
         :raise None: No known exceptions are raised
         """
-        self._x_max = x_max
-        self._y_max = y_max
-    
+        self._width = width
+        self._height = height
+
     @property
-    def x_max(self):
-        """ The maximum x-coordinate of the chips in the machine
-        
-        :return: The x-coordinate
+    def width(self):
+        """ The width of the machine in chips
+
+        :return: The width
         :rtype: int
         """
-        return self._x_max
-    
+        return self._width
+
     @property
-    def y_max(self):
-        """ The maximum y-coordinate of the chips in the machine
-        
-        :return: The y-coordinate
+    def height(self):
+        """ The height of the machine in chips
+
+        :return: The height
         :rtype: int
         """
-        return self._y_max
+        return self._height

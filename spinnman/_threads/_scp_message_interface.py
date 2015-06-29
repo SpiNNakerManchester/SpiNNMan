@@ -5,7 +5,11 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from threading import Condition
 
 from time import sleep
+import logging
 import sys
+
+
+logger = logging.getLogger(__name__)
 
 
 class SCPMessageInterface(object):
@@ -77,7 +81,7 @@ class SCPMessageInterface(object):
             except SpinnmanUnexpectedResponseCodeException as exception:
                 response_code = SCPResult[exception.response]
                 if response_code in self._retry_codes:
-                    print "Retry due to", response_code
+                    logger.debug("Retry due to", response_code)
                     retry = True
                     last_exception = exception
                 else:

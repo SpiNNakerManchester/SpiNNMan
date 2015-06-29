@@ -115,8 +115,8 @@ class _MessageCallback(object):
                     before the message has been received
         """
         self._message_received_condition.acquire()
-        while (self._message_received is None
-                and self._message_receive_exception is None):
+        while (self._message_received is None and
+                self._message_receive_exception is None):
             self._message_received_condition.wait()
         self._message_received_condition.release()
 
