@@ -1,4 +1,8 @@
+"""
+Transceiver
+"""
 
+# spinnman imports
 from spinnman.connections.udp_packet_connections.iptag_connection import \
     IPTagConnection
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
@@ -94,6 +98,7 @@ from _threads._scp_message_interface import SCPMessageInterface
 from _threads._iobuf_interface import IOBufInterface
 from _threads._get_tags_interface import GetTagsInterface
 
+# spinnmachine imports
 from spinn_machine.machine import Machine
 from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
@@ -154,7 +159,7 @@ def create_transceiver_from_hostname(
                 will be 5, spinn-3 would equal 3 and so on.
     :param bmp_connection_data: the details of the bmp connections used to\
                 boot multi-board systems
-    :type bmp_ip_addresses: iterable\
+    :type bmp_connection_data: iterable\
                 :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
@@ -1024,7 +1029,7 @@ class Transceiver(object):
         """
         logger.debug("Attempting to boot version {} board".format(
             board_version))
-        if (width is None or height is None):
+        if width is None or height is None:
             dims = _utils.get_ideal_size(number_of_boards, board_version)
             width = dims.width
             height = dims.height
@@ -1063,7 +1068,7 @@ class Transceiver(object):
         """
 
         # if the machine sizes not been given, calculate from assumption
-        if (width is None or width is None):
+        if width is None or width is None:
             dims = _utils.get_ideal_size(number_of_boards, board_version)
             width = dims.width
             height = dims.height
@@ -1143,7 +1148,6 @@ class Transceiver(object):
         :param height: The height of the machine in chips
         :return: the version info of the last important chip
         """
-        version_info = None
         found_version_info = None
 
         # check if the machine is wrap arounds
