@@ -23,14 +23,14 @@ from spinnman.messages.eieio.command_messages.database_confirmation\
     import DatabaseConfirmation
 
 
-def read_eieio_command_message(byte_reader):
-    command_header = EIEIOCommandHeader.read_eieio_header(byte_reader)
+def read_eieio_command_message(data, offset):
+    command_header = EIEIOCommandHeader.from_bytestring(data, offset)
     command_number = command_header.command
 
     if (command_number ==
             constants.EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value):
-        return DatabaseConfirmation.read_eieio_command_message(
-            command_header, byte_reader)
+        return DatabaseConfirmation.from_bytestring(
+            command_header, data, offset)
 
     # Fill in buffer area with padding
     elif (command_number ==
@@ -55,24 +55,24 @@ def read_eieio_command_message(byte_reader):
     # Spinnaker requesting new buffers for spike source population
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS.value):
-        return SpinnakerRequestBuffers.read_eieio_command_message(
-            command_header, byte_reader)
+        return SpinnakerRequestBuffers.from_bytestring(
+            command_header, data, offset)
 
     # Buffers being sent from host to SpiNNaker
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.HOST_SEND_SEQUENCED_DATA.value):
-        return HostSendSequencedData.read_eieio_command_message(
-            command_header, byte_reader)
+        return HostSendSequencedData.from_bytestring(
+            command_header, data, offset)
 
     # Buffers available to be read from a buffered out vertex
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA.value):
-        return SpinnakerRequestReadData.read_eieio_command_message(
-            command_header, byte_reader)
+        return SpinnakerRequestReadData.from_bytestring(
+            command_header, data, offset)
 
     # Host confirming data being read form SpiNNaker memory
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.HOST_DATA_READ.value):
-        return HostDataRead.read_eieio_command_message(
-            command_header, byte_reader)
-    return EIEIOCommandMessage(command_header, byte_reader)
+        return HostDataRead.from_bytestring(
+            command_header, data, offset)
+    return EIEIOCommandMessage(command_header, data, offset)

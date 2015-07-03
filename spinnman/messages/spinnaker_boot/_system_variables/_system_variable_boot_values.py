@@ -2,6 +2,7 @@ from enum import Enum
 from collections import namedtuple
 from collections import OrderedDict
 from spinnman.model.machine_dimensions import MachineDimensions
+import struct
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
 
@@ -9,10 +10,25 @@ _SYSTEM_VARIABLES_BOOT_SIZE = 128
 class _DataType(Enum):
     """ Enum for data types
     """
-    BYTE = 1
-    SHORT = 2
-    INT = 4
-    LONG = 8
+    BYTE = (1, "<B")
+    SHORT = (2, "<H")
+    INT = (4, "<I")
+    LONG = (8, "<Q")
+
+    def __new__(cls, value, struct_code, doc=""):
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj._struct_code = struct_code
+        return obj
+
+    def __init__(self, value, struct_code, doc=""):
+        self._value_ = value
+        self._struct_code = struct_code
+        self.__doc__ = doc
+
+    @property
+    def struct_code(self):
+        return self._struct_code
 
 
 class _Definition(namedtuple("_Definition",
@@ -316,16 +332,13 @@ class SystemVariableBootValues(object):
     def set_value(self, system_variable_definition, value):
         self._values[system_variable_definition] = value
 
-    def write_values(self, byte_writer):
+    @property
+    def bytestring(self):
+        data = b""
         for sys_var in SystemVariableDefinition:
-            if sys_var.data_type == _DataType.BYTE:
-                byte_writer.write_byte(self._values[sys_var])
-            elif sys_var.data_type == _DataType.SHORT:
-                byte_writer.write_short(self._values[sys_var])
-            elif sys_var.data_type == _DataType.INT:
-                byte_writer.write_int(self._values[sys_var])
-            elif sys_var.data_type == _DataType.LONG:
-                byte_writer.write_long(self._values[sys_var])
+            data += struct.pack(sys_var.data_type.struct_code,
+                                self._values[sys_var])
+        return data
 
 spinnaker_boot_values = {
     1: SystemVariableBootValues(

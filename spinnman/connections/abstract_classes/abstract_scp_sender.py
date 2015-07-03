@@ -12,10 +12,6 @@ class AbstractSCPSender(AbstractConnection):
     """
 
     @abstractmethod
-    def is_udp_scp_sender(self):
-        pass
-
-    @abstractmethod
     def send_scp_request(self, scp_request):
         """ Sends an SCP request down this connection
 
@@ -30,7 +26,7 @@ class AbstractSCPSender(AbstractConnection):
         constructor will be used.
         sequence in the message is optional - if not set (sequence number\
         last assigned + 1) % 65536 will be used
-        
+
         :param scp_request: message packet to send
         :type scp_request:
                     :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`

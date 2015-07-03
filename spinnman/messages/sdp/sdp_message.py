@@ -1,23 +1,25 @@
 from spinnman.messages.sdp.sdp_header import SDPHeader
-from spinnman.messages.sdp import sdp_header
 
 
 class SDPMessage(object):
     """ Wraps up an SDP message with a header and optional data.
     """
 
-    def __init__(self, sdp_header=None, data=None):
+    def __init__(self, sdp_header, data=None, offset=0):
         """
         :param sdp_header: The header of the message
         :type sdp_header:\
                     :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
         :param data: The data of the SDP packet, or None if no data
-        :type data: bytearray
+        :type data: bytestring
+        :param offset: The offset where the valid data starts
+        :type offset: int
         :raise None: No known exceptions are thrown
         """
 
         self._sdp_header = sdp_header
         self._data = data
+        self._offset = offset
 
     @property
     def bytestring(self):
@@ -27,14 +29,14 @@ class SDPMessage(object):
         :rtype: bytestring
         """
         if self._data is not None:
-            return self._sdp_header.bytestring + self._data
+            return self._sdp_header.bytestring + self._data[self._offset:]
         return self._sdp_header.bytestring
 
-    def read_bytestring(self, data, offset):
-        if self._sdp_header is None:
-            self._sdp_header = SDPHeader()
-        self._sdp_header.read_bytestring(data, offset)
-        self._data = data[offset + sdp_header.N_BYTES:]
+    @staticmethod
+    def from_bytestring(data, offset):
+        sdp_header = SDPHeader()
+        sdp_header.read_bytestring(data, offset)
+        return SDPMessage(sdp_header, data, offset + 8)
 
     @property
     def sdp_header(self):
@@ -49,7 +51,14 @@ class SDPMessage(object):
     def data(self):
         """ The data in the packet
 
-        :return: The data
-        :rtype: bytearray
+        :rtype: bytestring
         """
         return self._data
+
+    @property
+    def offset(self):
+        """ The offset where the valid data starts
+
+        :rtype: int
+        """
+        return self._offset

@@ -1,5 +1,3 @@
-from spinnman.connections.udp_packet_connections.iptag_connection\
-    import IPTagConnection
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
@@ -17,8 +15,8 @@ from spinnman.connections.abstract_classes.abstract_spinnaker_boot_receiver\
     import AbstractSpinnakerBootReceiver
 from spinnman.connections.abstract_classes.abstract_spinnaker_boot_sender\
     import AbstractSpinnakerBootSender
-from spinnman.connections.abstract_classes.abstract_udp_connection\
-    import AbstractUDPConnection
+from spinnman.connections.udp_packet_connections.udp_connection\
+    import UDPConnection
 from spinnman.connections.abstract_classes.abstract_scp_sender\
     import AbstractSCPSender
 from spinnman.connections.abstract_classes.abstract_sdp_sender\
@@ -36,8 +34,9 @@ from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
-from spinnman.connections.abstract_classes.udp_senders\
-    .abstract_udp_scp_bmp_sender import AbstractUDPSCPBMPSender
+from spinnman.connections.abstract_classes.abstract_listenable \
+    import AbstractListenable
+from spinnman.connections.connection_listener import ConnectionListener
 from spinnman.processes.write_memory_flood_process \
     import WriteMemoryFloodProcess
 from spinnman.processes.get_tags_process import GetTagsProcess
@@ -49,13 +48,11 @@ from spinnman.processes.send_single_command_process \
 from spinnman.processes.read_router_diagnostics_process \
     import ReadRouterDiagnosticsProcess
 from spinnman.messages.scp.scp_power_command import SCPPowerCommand
-from spinnman.connections.udp_packet_connections.stripped_iptag_connection \
-    import StrippedIPTagConnection
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
 from spinnman import constants
-from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
-    import UDPSpinnakerConnection
+from spinnman.connections.udp_packet_connections.udp_scamp_connection \
+    import UDPSCAMPConnection
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
 
@@ -90,6 +87,7 @@ from spinnman import _utils
 from spinnman import exceptions
 
 from threading import Condition
+from collections import defaultdict
 
 import logging
 import time
@@ -157,7 +155,7 @@ def create_transceiver_from_hostname(
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
     # machine, then an assumption can be made that the BMP is at -1 on the
     # final value of the IP address
-    if version == 4 and (bmp_connection_data is None or
+    if version >= 4 and (bmp_connection_data is None or
                          len(bmp_connection_data) == 0):
         bmp_connection_data = [_utils.work_out_bmp_from_machine_details(
             hostname, number_of_boards)]
@@ -172,7 +170,7 @@ def create_transceiver_from_hostname(
             connections.append(udp_bmp_connection)
 
     # handle the spinnaker connection
-    connections.append(UDPSpinnakerConnection(remote_host=hostname))
+    connections.append(UDPSCAMPConnection(remote_host=hostname))
 
     # handle the boot connection
     connections.append(UDPBootConnection(remote_host=hostname))
@@ -260,11 +258,18 @@ class Transceiver(object):
         # listen for the pre-boot board identifiers
         self._boot_receive_connections = list()
 
-        # A dict of (ip address, port) -> connection for udp connections
+        # A dict of port -> dict of ip address -> (connection, listener)
+        # for udp connections.  Note listener might be None if the connection
+        # has not been listened to before.
         # Used to keep track of what connection is listening on what port
         # to ensure only one type of traffic is received on any port for any
         # interface
-        self._udp_receive_connections = dict()
+        self._udp_receive_connections_by_port = defaultdict(dict)
+
+        # A dict of class -> list of (connection, listener) for udp connections
+        # that are listenable.  Note that listener might be None if the
+        # connection has not be listened to before.
+        self._udp_listenable_connections_by_class = defaultdict(list)
 
         # A list of all connections that can be used to send SCP messages
         # Note that some of these might not be able to receive SCP; this
@@ -331,15 +336,17 @@ class Transceiver(object):
                 self._boot_receive_connections.append(connection)
 
             # Locate any connections listening on a UDP port
-            if isinstance(connection, AbstractUDPConnection):
-                self._udp_receive_connections[
-                    (connection.local_ip_address,
-                     connection.local_port)] = connection
+            if isinstance(connection, UDPConnection):
+                self._udp_receive_connections_by_port[connection.local_port][
+                    connection.local_ip_address] = (connection, None)
+                if isinstance(connection, AbstractListenable):
+                    self._udp_listenable_connections_by_class[
+                        connection.__class__].append((connection, None))
 
             # Locate any connections that can send SCP
             # (that are not BMP connections)
             if (isinstance(connection, AbstractSCPSender) and
-                    not isinstance(connection, AbstractUDPSCPBMPSender)):
+                    not isinstance(connection, UDPBMPConnection)):
                 self._scp_sender_connections.append(connection)
 
             # Locate any connections that can send SDP
@@ -364,7 +371,7 @@ class Transceiver(object):
                     self._scamp_connections.append(connection)
 
                     # If also a UDP connection, add it here (for IP tags)
-                    if isinstance(connection, AbstractUDPConnection):
+                    if isinstance(connection, UDPConnection):
                         board_address = connection.remote_ip_address
                         self._udp_scamp_connections[board_address] = connection
 
@@ -605,7 +612,7 @@ class Transceiver(object):
         new_connections = list()
         for chip in self._machine.ethernet_connected_chips:
             if chip.ip_address not in self._udp_scamp_connections:
-                new_connection = UDPSpinnakerConnection(
+                new_connection = UDPSCAMPConnection(
                     remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
                 if self._try_sver_though_scamp_connection(new_connection, 3):
                     new_connections.append(new_connection)
@@ -1780,7 +1787,7 @@ class Transceiver(object):
         :return: A connection for the given IP address, or None if no such\
                     connection exists
         :rtype:\
-                    :py:class:`spinnman.connections.udp_packet_connections.udp_spinnaker_connection.UDPSpinnakerConnection`
+                    :py:class:`spinnman.connections.udp_packet_connections.udp_scamp_connection.UDPSCAMPConnection`
         """
         if board_address in self._udp_scamp_connections:
             return self._udp_scamp_connections[board_address]
@@ -2226,47 +2233,123 @@ class Transceiver(object):
                     connection not in self._original_connections):
                 connection.close()
 
-    def register_listener(self, callback, recieve_port_no,
-                          connection_type, traffic_type, hostname=None):
-        """ Register a callback for a certain type of traffic
+    def register_udp_listener(self, callback, connection_class,
+                              local_port=None, local_host=None):
+        """ Register a callback for a certain type of traffic to be received\
+            via UDP.  Note that the connection class must extend\
+            :py:class:`spinnman.connections.abstract_classes.abstract_listenable.AbstractListenable`
+            to avoid clashing with the SCAMP and BMP functionality
 
         :param callback: Function to be called when a packet is received
         :type callback: function(packet)
-        :param recieve_port_no: The port number to listen on
-        :type recieve_port_no: int
-        :param connection_type: The type of the connection
-        :param traffic_type: The type of traffic expected on the connection
-        :param hostname: The optional hostname to listen on
-        :type hostname: str
+        :param connection_class: The class of connection to receive using
+        :param local_port: The optional port number to listen on; if not\
+                specified, an existing connection will be used if possible,\
+                otherwise a random free port number will be used
+        :type: local_port: int
+        :param local_host: The optional hostname or IP address to listen on;\
+                if not specified, all interfaces will be used for listening
+        :type local_host: str
+        :return: The port number that the connection is listening on
+        :rtype: int
         """
-        if recieve_port_no in self._receiving_connections:
-            connection = self._receiving_connections[recieve_port_no]
-            if connection_type == connection.connection_type():
-                connection.register_callback(callback)
-            else:
-                raise exceptions.SpinnmanInvalidParameterException(
-                    "There is already a connection on this port number which "
-                    "does not support reception of this message type. Please "
-                    "try again with antoher port number", "", "")
-        else:
-            if connection_type == constants.CONNECTION_TYPE.SDP_IPTAG:
-                connection = IPTagConnection(hostname, recieve_port_no)
-                connection.register_callback(callback, traffic_type)
-                self._receiving_connections[recieve_port_no] = connection
-            elif connection_type == constants.CONNECTION_TYPE.UDP_IPTAG:
-                connection = StrippedIPTagConnection(hostname, recieve_port_no)
-                connection.register_callback(callback, traffic_type)
-                self._receiving_connections[recieve_port_no] = connection
-            else:
-                raise exceptions.SpinnmanInvalidParameterException(
-                    "Currently spinnman does not know how to register a "
-                    "callback to a connection of type {}."
-                    .format(connection_type), "", "")
+
+        # If the connection class is not an AbstractListenable, this is an
+        # error
+        if not issubclass(connection_class, AbstractListenable):
+            raise exceptions.SpinnmanInvalidParameterException(
+                "connection_class", connection_class,
+                "The connection class must be AbstractListenable")
+
+        connections_of_class = self._udp_listenable_connections_by_class[
+            connection_class]
+        connection = None
+        listener = None
+
+        # If the local port was specified
+        if local_port is not None:
+            receiving_connections = self._udp_receive_connections_by_port[
+                local_port]
+
+            # If something is already listening on this port
+            if len(receiving_connections) > 0:
+
+                if local_host is None or local_host == "0.0.0.0":
+
+                    # If we are to listen on all interfaces and the listener
+                    # is not on all interfaces, this is an error
+                    if "0.0.0.0" not in receiving_connections:
+                        raise exceptions.SpinnmanInvalidParameterException(
+                            "local_port", local_port,
+                            "Another connection is already listening on this"
+                            " port")
+
+                    # Normalise the local host
+                    local_host = "0.0.0.0"
+                else:
+
+                    # If we are to listen to a specific interface, and the
+                    # listener is on all interfaces, this is an error
+                    if "0.0.0.0" in receiving_connections:
+                        raise exceptions.SpinnmanInvalidPacketException(
+                            "local_port and local_host",
+                            "{} and {}".format(local_port, local_host),
+                            "Another connection is already listening on this"
+                            " port on all interfaces")
+
+                # If the type of an existing connection is wrong, this is an
+                # error
+                if local_host in receiving_connections:
+                    (connection, listener) = receiving_connections[local_host]
+                    if not isinstance(connection, connection_class):
+                        raise exceptions.SpinnmanInvalidParameterException(
+                            "connection_class", connection_class,
+                            "A connection of class {} is already listening on"
+                            "this port on all interfaces".format(
+                                connection.__class__))
+
+            # If we are here, nothing is listening on this port, so create
+            # a connection if there isn't already one, and a listener
+            if connection is None:
+                connection = connection_class(local_port=local_port,
+                                              local_host=local_host)
+            listener = ConnectionListener(connection.get_receive_method())
+            listener.start()
+            receiving_connections[local_host] = (connection, listener)
+            connections_of_class.append((connection, listener))
+            listener.add_callback(callback)
+            return connection.local_port
+
+        # If we are here, the local port wasn't specified to try to use an
+        # existing connection of the correct class
+        if len(connections_of_class) > 0:
+
+            # If local_host is not specified, normalize it
+            if local_host is None:
+                local_host = "0.0.0.0"
+
+            for (a_connection, a_listener) in connections_of_class:
+
+                # Find a connection that matches the local host
+                if a_connection.local_ip_address == local_host:
+                    (connection, listener) = (a_connection, a_listener)
+                    break
+
+        # Create a connection if there isn't already one, and a listener
+        if connection is None:
+            connection = connection_class(local_host=local_host)
+        listener = ConnectionListener(connection.get_receive_method())
+        listener.start()
+        self._udp_receive_connections_by_port[connection.local_port][
+            local_host] = (connection, listener)
+        connections_of_class.append((connection, listener))
+        listener.add_callback(callback)
+        return connection.local_port
 
     def __str__(self):
         return "transciever object connected to {} with {} connections"\
-            .format(self._sending_connections[0].remote_ip_address,
-                    len(self._sending_connections.keys()))
+            .format(self._scamp_connections[0].remote_ip_address,
+                    len(self._all_connections))
 
     def __repr__(self):
         return self.__str__()

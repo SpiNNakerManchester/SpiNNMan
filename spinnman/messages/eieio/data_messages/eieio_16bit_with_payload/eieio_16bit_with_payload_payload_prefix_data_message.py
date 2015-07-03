@@ -10,11 +10,11 @@ from spinnman.messages.eieio.data_messages.eieio_data_header\
 class EIEIO16BitWithPayloadPayloadPrefixDataMessage(
         EIEIOWithPayloadDataMessage):
 
-    def __init__(self, payload_prefix, count=0, data_reader=None):
+    def __init__(self, payload_prefix, count=0, data=None, offset=0):
         EIEIOWithPayloadDataMessage.__init__(
             self, EIEIODataHeader(EIEIOType.KEY_PAYLOAD_16_BIT,
                                   payload_base=payload_prefix, count=count),
-            data_reader)
+            data, offset)
 
     @staticmethod
     def get_min_packet_length():

@@ -41,9 +41,11 @@ class CPUInfo(object):
          self._software_source_filename_address,
          self._software_source_line_number, self._time,              # 3I  60
          self._application_name,                                     # 16s 72
-         self._iobuf_address, user0, user1, user2, user3             # 5I  88
-         ) = struct.unpack_from("< 32s 3I B x 2B 2I 2B H 3I 16s 5I", cpu_data,
-                                offset)
+         self._iobuf_address,                                        # I   88
+         # skipped                                                   # 20x 92
+         user0, user1, user2, user3                                  # 4I  112
+         ) = struct.unpack_from("< 32s 3I B x 2B 2I 2B H 3I 16s I 20x 4I",
+                                cpu_data, offset)
 
         index = self._application_name.find('\0')
         if index != -1:

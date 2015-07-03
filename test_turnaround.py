@@ -1,8 +1,8 @@
 import time
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException
-from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
-    import UDPSpinnakerConnection
+from spinnman.connections.udp_packet_connections.udp_scamp_connection \
+    import UDPSCAMPConnection
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 
@@ -11,7 +11,7 @@ machine = "192.168.240.253"
 mbs = 10.0
 
 start = float(time.time())
-connections = [UDPSpinnakerConnection(remote_host=machine) for _ in range(1)]
+connections = [UDPSCAMPConnection(remote_host=machine) for _ in range(1)]
 requests = dict()
 times_sent = dict()
 

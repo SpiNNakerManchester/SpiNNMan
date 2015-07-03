@@ -1,6 +1,7 @@
 from spinnman.messages.eieio.eieio_type import EIEIOType
 from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
 from spinnman.exceptions import SpinnmanInvalidPacketException
+import struct
 
 
 class EIEIODataHeader(object):
@@ -103,18 +104,15 @@ class EIEIODataHeader(object):
     def reset_count(self):
         self._count = 0
 
-    def write_eieio_header(self, byte_writer):
-        """ Writes the header to a writer
+    @property
+    def bytestring(self):
+        """ Get a bytestring of the header
 
-        :param byte_writer: The writer to write the header to
-        :type byte_writer:\
-                    :py:class:`spinnman.data.abstract_byte_writer.AbstractByteWriter`
+        :return: The header as a bytestring
+        :rtype: bytestring
         """
 
-        # write the count (header is little endian short so out of order)
-        byte_writer.write_byte(self._count)
-
-        # Write the flags into an int
+        # Convert the flags to an int
         data = 0
 
         # the flag for prefix or not
@@ -138,45 +136,43 @@ class EIEIODataHeader(object):
         # The tag of the packet
         data |= self._tag
 
-        # Write the flags
-        byte_writer.write_byte(data)
-
-        # If there is a prefix, write the prefix
-        if self._prefix is not None:
-            byte_writer.write_short(self._prefix)
-
-        # If there is a payload base, write the payload base
+        # Convert the remaining data, depending on the various options
         if self._payload_base is not None:
             if (self._eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT or
                     self._eieio_type == EIEIOType.KEY_16_BIT):
-                byte_writer.write_short(self._payload_base)
+                if self._prefix is not None:
+                    return struct.pack(
+                        "<BBHH", self._count, data, self._prefix,
+                        self._payload_base)
+                else:
+                    return struct.pack(
+                        "<BBH", self._count, data, self._payload_base)
             elif (self._eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT or
                     self._eieio_type == EIEIOType.KEY_32_BIT):
-                byte_writer.write_int(self._payload_base)
+                if self._prefix is not None:
+                    return struct.pack(
+                        "<BBHI", self._count, data, self._prefix,
+                        self._payload_base)
+                else:
+                    return struct.pack(
+                        "<BBI", self._count, data, self._payload_base)
 
     @staticmethod
-    def read_eieio_header(byte_reader):
-        """ Read an eieio data header from a byte_reader
+    def from_bytestring(data, offset):
+        """ Read an eieio data header from a bytestring
 
-        :param byte_reader: The reader to read the data from
-        :type byte_reader:\
-                    :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`
-        :return: an eieio header
+        :param data: The data to be read
+        :type data: bytestring
+        :param offset: The offset at which the data starts
+        :type offset: int
+        :return: an EIEIO header
         :rtype:\
                     :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    reading from the reader
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If there\
-                    are too few bytes to read the header
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
-                    is an error setting any of the values
         """
 
-        # Read the count of the header (little endian short so out of order)
-        count = byte_reader.read_byte()
+        (count, header_data) = struct.unpack_from("<BB", data, offset)
 
         # Read the flags in the header
-        header_data = byte_reader.read_byte()
         prefix_flag = (header_data >> 7) & 1
         format_flag = (header_data >> 6) & 1
         payload_prefix_flag = (header_data >> 5) & 1
@@ -195,24 +191,29 @@ class EIEIODataHeader(object):
         prefix_type = EIEIOPrefix(format_flag)
 
         prefix = None
-        if prefix_flag == 1:
-            prefix = byte_reader.read_short()
-
         payload_prefix = None
         if payload_prefix_flag == 1:
             if (eieio_type == EIEIOType.KEY_16_BIT or
                     eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT):
-                payload_prefix = byte_reader.read_short()
+                if prefix_flag == 1:
+                    (prefix, payload_prefix) = struct.unpack_from(
+                        "<HH", data, offset + 2)
+                else:
+                    payload_prefix = struct.unpack_from(
+                        "<H", data, offset + 2)[0]
             elif (eieio_type == EIEIOType.KEY_32_BIT or
                     eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT):
-                payload_prefix = byte_reader.read_int()
+                if prefix_flag == 1:
+                    (prefix, payload_prefix) = struct.unpack_from(
+                        "<HI", data, offset + 2)
+                else:
+                    payload_prefix = struct.unpack_from(
+                        "<I", data, offset + 2)[0]
 
-        header = EIEIODataHeader(
+        return EIEIODataHeader(
             eieio_type=eieio_type, tag=tag, prefix=prefix,
             prefix_type=prefix_type, payload_base=payload_prefix,
             is_time=bool(payload_is_timestamp), count=count)
-
-        return header
 
     def __str__(self):
         return ("EIEIODataHeader:prefix={}:prefix_type={}:payload_base={}:"

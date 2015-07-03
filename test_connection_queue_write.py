@@ -1,4 +1,4 @@
-from spinnman.connections.udp_packet_connections.udp_spinnaker_connection import UDPSpinnakerConnection
+from spinnman.connections.udp_packet_connections.udp_scamp_connection import UDPSCAMPConnection
 from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
 from spinnman.connections.scp_request_set import SCPRequestSet
 
@@ -13,7 +13,7 @@ machine = "spinn-10.cs.man.ac.uk"
 # machine = "192.168.240.253"
 mbs = 10.0
 
-connection = UDPSpinnakerConnection(remote_host=machine)
+connection = UDPSCAMPConnection(remote_host=machine)
 queue = SCPRequestSet(connection)
 
 n_bytes = mbs * 1000.0 * 1000.0

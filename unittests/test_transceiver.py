@@ -1,8 +1,8 @@
 import unittest
 from spinnman.connections.udp_packet_connections.udp_boot_connection import \
     UDPBootConnection
-from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
-    import UDPSpinnakerConnection
+from spinnman.connections.udp_packet_connections.udp_scamp_connection \
+    import UDPSCAMPConnection
 from spinnman.exceptions import SpinnmanIOException
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
@@ -21,7 +21,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_to_board(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSpinnakerConnection(
+        connections.append(UDPSCAMPConnection(
             board_config.localhost, board_config.localport,
             board_config.remotehost))
         trans = transceiver.Transceiver(connections)
@@ -30,7 +30,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_one_connection(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSpinnakerConnection(
+        connections.append(UDPSCAMPConnection(
             board_config.localhost, board_config.localport,
             board_config.remotehost))
         trans = transceiver.Transceiver(connections)
@@ -41,7 +41,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_from_list_connections(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSpinnakerConnection(
+        connections.append(UDPSCAMPConnection(
             local_host=board_config.localhost,
             remote_host=board_config.remotehost))
         board_config.set_up_local_virtual_board()
@@ -59,7 +59,7 @@ class TestTransceiver(unittest.TestCase):
     def test_retrieving_machine_details(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSpinnakerConnection(
+        connections.append(UDPSCAMPConnection(
             local_host=board_config.localhost,
             remote_host=board_config.remotehost))
         board_config.set_up_local_virtual_board()

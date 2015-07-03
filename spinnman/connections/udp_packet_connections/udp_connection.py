@@ -1,20 +1,18 @@
-from spinnman import constants
 from spinnman.exceptions import SpinnmanIOException
-
-from abc import ABCMeta
-from abc import abstractmethod
-from six import add_metaclass
+from spinnman.exceptions import SpinnmanTimeoutException
+from spinnman.connections.abstract_classes.abstract_connection \
+    import AbstractConnection
 
 import platform
 import subprocess
 import socket
+import select
 
 
-@add_metaclass(ABCMeta)
-class AbstractUDPConnection(object):
+class UDPConnection(AbstractConnection):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=constants.SCP_SCAMP_PORT):
+                 remote_port=None):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
@@ -30,13 +28,12 @@ class AbstractUDPConnection(object):
                     sending
         :type remote_host: str or None
         :param remote_port: The remote port to send packets to.  If\
-                    remote_host is None, this is ignored.
+                    remote_host is None, this is ignored.  If remote_host is\
+                    specified, this must also be specified for the connection\
+                    to allow sending
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     setting up the communication channel
         """
-
-        # Keep track of the current scp sequence number
-        self._scp_sequence = 0
 
         self._socket = None
         try:
@@ -74,7 +71,7 @@ class AbstractUDPConnection(object):
         self._remote_port = None
 
         # Get the host to connect to remotely
-        if remote_host is not None:
+        if remote_host is not None and remote_port is not None:
             self._can_send = True
             self._remote_port = remote_port
 
@@ -98,6 +95,11 @@ class AbstractUDPConnection(object):
         try:
             self._local_ip_address, self._local_port =\
                 self._socket.getsockname()
+
+            # Ensure that a standard address is used for the INADDR_ANY
+            # hostname
+            if self._local_ip_address is None or self._local_ip_address == "":
+                self._local_ip_address = "0.0.0.0"
         except Exception as exception:
             raise SpinnmanIOException("Error querying socket: {}".format(
                 exception))
@@ -179,6 +181,41 @@ class AbstractUDPConnection(object):
         """
         return self._remote_port
 
+    def receive(self, timeout=None):
+        """ Receive data from the connection
+
+        :param timeout: The timeout, or None to wait forever
+        :type timeout: None
+        :return: The data received
+        :rtype: bytestring
+        :raise SpinnmanTimeoutException: If a timeout occurs before any data\
+                    is received
+        :raise SpinnmanIOException: If an error occurs receiving the data
+        """
+        try:
+            self._socket.settimeout(timeout)
+            return self._socket.recv(300)
+        except socket.timeout:
+            raise SpinnmanTimeoutException("receive", timeout)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
+    def send(self, data):
+        """ Send data down this connection
+
+        :param data: The data to be sent
+        :type data: bytestring
+        :raise SpinnmanIOException: If there is an error sending the data
+        """
+        if not self._can_send:
+            raise SpinnmanIOException(
+                "Remote host and/or port not set - data cannot be sent with"
+                " this connection")
+        try:
+            self._socket.send(data)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
     def close(self):
         """ See\
             :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
@@ -189,26 +226,5 @@ class AbstractUDPConnection(object):
             pass
         self._socket.close()
 
-    @property
-    def can_send(self):
-        """a helper property method to check if this connection can send
-
-        :return:
-        """
-        return self._can_send
-
-    @abstractmethod
-    def connection_type(self):
-        """
-        method to help identify the connection
-        :return:
-        """
-
-    @abstractmethod
-    def supports_sends_message(self, message):
-        """helper method to verify if the connection can deal with this message
-        format
-
-        :param message:
-        :return:
-        """
+    def is_ready_to_receive(self):
+        return len(select.select([self._socket], [], [], 0)[0]) == 1

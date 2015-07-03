@@ -1,34 +1,30 @@
-
-# spinnman imports
-from spinnman import constants
 from spinnman.connections.udp_packet_connections.udp_connection import \
     UDPConnection
+from spinnman import constants
 import struct
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.connections.udp_packet_connections import udp_utils
-from spinnman.connections.abstract_classes.abstract_scp_receiver \
-    import AbstractSCPReceiver
 from spinnman.connections.abstract_classes.abstract_scp_sender \
     import AbstractSCPSender
+from spinnman.connections.abstract_classes.abstract_scp_receiver \
+    import AbstractSCPReceiver
 
 
-class UDPBMPConnection(
-        UDPConnection, AbstractSCPReceiver, AbstractSCPSender):
-    """ A BMP connection which supports queries to the BMP of a SpiNNaker\
-        machine
+class UDPSCAMPConnection(UDPConnection, AbstractSCPSender,
+                         AbstractSCPReceiver):
+    """ A UDP connection to SCAMP on the board
     """
 
-    def __init__(self, cabinet, frame, boards, local_host=None,
-                 local_port=None, remote_host=None,
-                 remote_port=constants.SCP_SCAMP_PORT):
+    def __init__(self, chip_x=0, chip_y=0, local_host=None, local_port=None,
+                 remote_host=None, remote_port=constants.SCP_SCAMP_PORT):
         """
-        :param cabinet: The cabinet number of the connection
-        :type cabinet: int
-        :param frame: The frame number of the connection
-        :type frame: int
-        :param boards: The boards that the connection can control on the same\
-                backplane
-        :type boards: iterable of int
+
+        :param chip_x: The x-coordinate of the chip on the board with this\
+                remote_host
+        :type chip_x: int
+        :param chip_y: The y-coordinate of the chip on the board with this\
+                remote_host
+        :type chip_y: int
         :param local_host: The optional ip address or host name of the local\
                 interface to listen on
         :type local_host: str
@@ -41,38 +37,23 @@ class UDPBMPConnection(
         :param remote_port: The optional remote port number to send messages\
                 to.  If not specified, sending will not be possible using this\
                 connection
+        :type remote_port: int
         """
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
         AbstractSCPReceiver.__init__(self)
         AbstractSCPSender.__init__(self)
-        self._cabinet = cabinet
-        self._frame = frame
-        self._boards = boards
+
+        self._chip_x = chip_x
+        self._chip_y = chip_y
 
     @property
-    def cabinet(self):
-        """ The cabinet id of the BMP
-
-        :rtype: int
-        """
-        return self._cabinet
+    def chip_x(self):
+        return self._chip_x
 
     @property
-    def frame(self):
-        """ The frame id of the BMP
-
-        :rtype: int
-        """
-        return self._frame
-
-    @property
-    def boards(self):
-        """ The set of boards supported by the BMP
-
-        :rtype: iterable of int
-        """
-        return self._boards
+    def chip_y(self):
+        return self._chip_y
 
     def receive_scp_response(self, timeout=1.0):
         data = self.receive(timeout)

@@ -17,14 +17,15 @@ class DatabaseConfirmation(EIEIOCommandMessage):
     def database_path(self):
         return self._database_path
 
-    def write_eieio_message(self, writer):
-        EIEIOCommandMessage.write_eieio_message(self, writer)
+    @property
+    def bytestring(self, writer):
+        data = super(DatabaseConfirmation, self).bytestring
         if self._database_path is not None:
-            writer.write_bytes(bytearray(self._database_path))
+            data += self._database_path
 
     @staticmethod
-    def read_eieio_command_message(command_header, byte_reader):
-        database_path = str(byte_reader.read_bytes())
-        if len(database_path) == 0:
-            database_path = None
+    def from_bytestring(command_header, data, offset):
+        database_path = None
+        if len(data) - offset > 0:
+            database_path = data[offset:]
         return DatabaseConfirmation(database_path)

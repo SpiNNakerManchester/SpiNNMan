@@ -1,7 +1,7 @@
 import unittest
 from board_test_configuration import BoardTestConfiguration
-from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
-    import UDPSpinnakerConnection
+from spinnman.connections.udp_packet_connections.udp_scamp_connection \
+    import UDPSCAMPConnection
 import spinnman.exceptions as exc
 from spinnman.messages.scp.impl import scp_read_link_request,\
     scp_read_link_response, scp_read_memory_request, scp_read_memory_response,\
@@ -16,7 +16,7 @@ class TestUDPConnection(unittest.TestCase):
 
     def test_setup_new_local_udp_connection(self):
         board_config.set_up_local_virtual_board()
-        connection = UDPSpinnakerConnection(
+        connection = UDPSCAMPConnection(
             board_config.localhost, board_config.localport,
             board_config.remotehost)
         self.assertEqual(connection.local_ip_address, board_config.localhost)
@@ -24,7 +24,7 @@ class TestUDPConnection(unittest.TestCase):
 
     def test_setup_new_remote_udp_connection(self):
         board_config.set_up_remote_board()
-        connection = UDPSpinnakerConnection(
+        connection = UDPSCAMPConnection(
             board_config.localhost, board_config.localport,
             board_config.remotehost)
         print connection
@@ -33,7 +33,7 @@ class TestUDPConnection(unittest.TestCase):
 
     def test_scp_version_request_and_response_board(self):
         board_config.set_up_remote_board()
-        connection = UDPSpinnakerConnection(
+        connection = UDPSCAMPConnection(
             board_config.localhost, board_config.localport,
             board_config.remotehost)
         scp_req = scp_version_request.SCPVersionRequest(0, 0, 0)
@@ -47,7 +47,7 @@ class TestUDPConnection(unittest.TestCase):
     def test_scp_version_request_and_response_board_invalid_x(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             board_config.set_up_remote_board()
-            connection = UDPSpinnakerConnection(
+            connection = UDPSCAMPConnection(
                 board_config.localhost, board_config.localport,
                 board_config.remotehost)
             scp_req = scp_version_request.SCPVersionRequest(256, 0, 0)
@@ -55,7 +55,7 @@ class TestUDPConnection(unittest.TestCase):
     def test_scp_version_request_and_response_board_invalid_y(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             board_config.set_up_remote_board()
-            connection = UDPSpinnakerConnection(
+            connection = UDPSCAMPConnection(
                 board_config.localhost, board_config.localport,
                 board_config.remotehost)
             scp_req = scp_version_request.SCPVersionRequest(0, 256, 0)
@@ -63,14 +63,14 @@ class TestUDPConnection(unittest.TestCase):
     def test_scp_version_request_and_response_board_invalid_processor(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             board_config.set_up_remote_board()
-            connection = UDPSpinnakerConnection(
+            connection = UDPSCAMPConnection(
                 board_config.localhost, board_config.localport,
                 board_config.remotehost)
             scp_req = scp_version_request.SCPVersionRequest(0, 0, 32)
 
     def test_scp_read_link_request_and_response_board(self):
         board_config.set_up_remote_board()
-        connection = UDPSpinnakerConnection(
+        connection = UDPSCAMPConnection(
             board_config.localhost, board_config.localport,
             board_config.remotehost)
         scp_link = scp_read_link_request.SCPReadLinkRequest(0, 0, 0, 0, 0, 250)
@@ -82,7 +82,7 @@ class TestUDPConnection(unittest.TestCase):
 
     def test_scp_read_memory_request_and_response_board(self):
         board_config.set_up_remote_board()
-        connection = UDPSpinnakerConnection(
+        connection = UDPSCAMPConnection(
             board_config.localhost, board_config.localport,
             board_config.remotehost)
         scp_link = scp_read_memory_request.SCPReadMemoryRequest(0, 0, 0, 256)
@@ -96,7 +96,7 @@ class TestUDPConnection(unittest.TestCase):
             self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             board_config.set_up_remote_board()
-            connection = UDPSpinnakerConnection(
+            connection = UDPSCAMPConnection(
                 board_config.localhost, board_config.localport,
                 board_config.remotehost)
             scp_link = scp_read_memory_request.SCPReadMemoryRequest(
@@ -105,7 +105,7 @@ class TestUDPConnection(unittest.TestCase):
     def test_scp_read_memory_request_and_response_board_0_bytes(self):
         with self.assertRaises(exc.SpinnmanInvalidParameterException):
             board_config.set_up_remote_board()
-            connection = UDPSpinnakerConnection(
+            connection = UDPSCAMPConnection(
                 board_config.localhost, board_config.localport,
                 board_config.remotehost)
             scp_link = scp_read_memory_request.SCPReadMemoryRequest(0, 0, 0, 0)
@@ -113,7 +113,7 @@ class TestUDPConnection(unittest.TestCase):
     def test_send_scp_request_to_nonexistent_host(self):
         with self.assertRaises(exc.SpinnmanTimeoutException):
             board_config.set_up_nonexistent_board()
-            connection = UDPSpinnakerConnection(
+            connection = UDPSCAMPConnection(
                 board_config.localhost, board_config.localport,
                 board_config.remotehost)
             scp = scp_read_memory_request.SCPReadMemoryRequest(0, 0, 0, 256)

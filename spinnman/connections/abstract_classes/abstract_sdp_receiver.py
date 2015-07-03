@@ -10,15 +10,12 @@ from spinnman.connections.abstract_classes.abstract_connection \
 class AbstractSDPReceiver(AbstractConnection):
     """ A receiver of SDP messages
     """
-    @abstractmethod
-    def is_sdp_reciever(self):
-        pass
 
     @abstractmethod
     def receive_sdp_message(self, timeout=None):
         """ Receives an SDP message from this connection.  Blocks until the\
             message has been received, or a timeout occurs.
-            
+
         :param timeout: The time in seconds to wait for the message to arrive;\
                     if not specified, will wait forever, or until the\
                     connection is closed
@@ -31,6 +28,6 @@ class AbstractSDPReceiver(AbstractConnection):
                     timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If the\
                     received packet is not a valid SDP message
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one of\
-                    the fields of the SDP message is invalid
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one \
+                    of the fields of the SDP message is invalid
         """

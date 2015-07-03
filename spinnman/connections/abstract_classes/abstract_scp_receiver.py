@@ -12,10 +12,6 @@ class AbstractSCPReceiver(AbstractConnection):
     """
 
     @abstractmethod
-    def is_scp_receiver(self):
-        pass
-
-    @abstractmethod
     def is_ready_to_receive(self):
         """ Determines if there is an SCP packet to be read without blocking
 
@@ -33,7 +29,7 @@ class AbstractSCPReceiver(AbstractConnection):
                     connection is closed
         :type timeout: int
         :return: The SCP result, the sequence number, the data of the response\
-                    and the offset at which the result starts (i.e. where the
+                    and the offset at which the data starts (i.e. where the
                     SDP header starts)
         :rtype: (:py:class:`spinnman.messages.scp.scp_result.SCPResult`,\
                     int, bytestring, int)

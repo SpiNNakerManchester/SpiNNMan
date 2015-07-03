@@ -8,6 +8,7 @@ from spinnman.messages.spinnaker_boot._system_variables import \
 from spinnman.messages.spinnaker_boot._system_variables.\
     _system_variable_boot_values import \
     SystemVariableDefinition
+import array
 from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
     import SpinnakerBootMessage
 from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
@@ -16,26 +17,17 @@ from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException
 
-from spinnman.data.file_data_reader import FileDataReader
-from spinnman.data.big_endian_byte_array_byte_writer \
-    import BigEndianByteArrayByteWriter
-from spinnman.data.little_endian_byte_array_byte_writer \
-    import LittleEndianByteArrayByteWriter
-from spinnman.data.little_endian_data_reader_byte_reader \
-    import LittleEndianDataReaderByteReader
-
-from spinnman import _utils
-
 # general imports
 import os
 import math
 import time
 
-_BOOT_MESSAGE_DATA_BYTES = 1024
+_BOOT_MESSAGE_DATA_WORDS = 256
+_BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4
 _BOOT_IMAGE_MAX_BYTES = 32 * 1024
 _BOOT_DATA_FILE_NAME = "scamp-133.boot"
-_BOOT_STRUCT_REPLACE_OFFSET = 0x180
-_BOOT_STRUCT_REPLACE_LENGTH = 0x80
+_BOOT_STRUCT_REPLACE_OFFSET = 384 / 4
+_BOOT_STRUCT_REPLACE_LENGTH = 128 / 4
 _BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES / 4) - 1) << 8
 
 
@@ -90,23 +82,15 @@ class SpinnakerBootMessages(object):
                 for extra_variable, extra_value in extra_variables.iteritems():
                     spinnaker_boot_value.set_value(extra_variable, extra_value)
 
-        boot_data_writer = LittleEndianByteArrayByteWriter()
-        spinnaker_boot_value.write_values(boot_data_writer)
-        self._spinnaker_boot_data = boot_data_writer.data
-
-        # endian-swap the boot data word by word
-        for offset in range(0, len(self._spinnaker_boot_data), 4):
-            word = _utils.get_int_from_little_endian_bytearray(
-                self._spinnaker_boot_data, offset)
-            _utils.put_int_in_big_endian_byte_array(
-                self._spinnaker_boot_data, offset, word)
+        # Get the data as an array, to be used later
+        self._spinnaker_boot_data = array.array(
+            "L", spinnaker_boot_value.bytestring)
 
         # Find the data file and size
         this_dir, _ = os.path.split(__file__)
         boot_data_file_name = os.path.join(
             this_dir, "boot_data", _BOOT_DATA_FILE_NAME)
-        boot_data_file_status = os.stat(boot_data_file_name)
-        boot_data_file_size = boot_data_file_status.st_size
+        boot_data_file_size = os.stat(boot_data_file_name).st_size
         if boot_data_file_size > _BOOT_IMAGE_MAX_BYTES:
             raise SpinnmanIOException(
                 "The boot file is too big at {} bytes ("
@@ -117,27 +101,27 @@ class SpinnakerBootMessages(object):
                 "The boot file size of {} bytes must"
                 " be divisible by 4".format(boot_data_file_size))
 
-        # Try to open the file
-        self._boot_data_reader = FileDataReader(boot_data_file_name)
-        self._boot_data_byte_reader = LittleEndianDataReaderByteReader(
-            self._boot_data_reader)
-
         # Compute how many packets to send
+        self._boot_data_file = open(boot_data_file_name, "rb")
         self._no_data_packets = int(math.ceil(
             float(boot_data_file_size) / float(_BOOT_MESSAGE_DATA_BYTES)))
-        self._no_bytes_to_read = boot_data_file_size
+        self._n_words_to_read = boot_data_file_size / 4
 
-    def _get_packet_data(self):
-        writer = BigEndianByteArrayByteWriter()
-        while (self._no_bytes_to_read > 0 and
-                writer.get_n_bytes_written() < _BOOT_MESSAGE_DATA_BYTES):
-            writer.write_int(self._boot_data_byte_reader.read_int())
-            self._no_bytes_to_read -= 4
+    def _get_packet_data(self, replace_data=None, offset=None, length=None):
 
-        # Pad the packet
-        while writer.get_n_bytes_written() < _BOOT_MESSAGE_DATA_BYTES:
-            writer.write_int(0)
-        return writer.data
+        # Read the next bit of data
+        data = array.array("L")
+        n_words = min((self._n_words_to_read, _BOOT_MESSAGE_DATA_WORDS))
+        self._n_words_to_read -= n_words
+        data.fromfile(self._boot_data_file, n_words)
+
+        # If there is any replace_data, replace it now
+        if replace_data is not None:
+            data[offset:offset + length] = replace_data[0:length]
+
+        # Byte-swap the data to make it big-endian and return
+        data.byteswap()
+        return data.tostring()
 
     @property
     def messages(self):
@@ -147,19 +131,16 @@ class SpinnakerBootMessages(object):
         # Construct and yield the start packet
         yield SpinnakerBootMessage(
             opcode=SpinnakerBootOpCode.FLOOD_FILL_START,
-            operand_1=0, operand_2=0, operand_3=self._no_data_packets - 1,
-            data=bytearray())
+            operand_1=0, operand_2=0, operand_3=self._no_data_packets - 1)
 
         # Construct and yield the first data packet replacing the appropriate
         # part with the boot data values
-        data = self._get_packet_data()
-        data[_BOOT_STRUCT_REPLACE_OFFSET:(
-            _BOOT_STRUCT_REPLACE_OFFSET + _BOOT_STRUCT_REPLACE_LENGTH)] = \
-            self._spinnaker_boot_data[0:_BOOT_STRUCT_REPLACE_LENGTH]
-        operand_1 = _BOOT_DATA_OPERAND_1 | 0
         yield SpinnakerBootMessage(
             opcode=SpinnakerBootOpCode.FLOOD_FILL_BLOCK,
-            operand_1=operand_1, operand_2=0, operand_3=0, data=data)
+            operand_1=_BOOT_DATA_OPERAND_1 | 0, operand_2=0, operand_3=0,
+            data=self._get_packet_data(
+                self._spinnaker_boot_data, _BOOT_STRUCT_REPLACE_OFFSET,
+                _BOOT_STRUCT_REPLACE_LENGTH))
 
         # Construct an yield the remaining packets
         for block_id in range(1, self._no_data_packets):
