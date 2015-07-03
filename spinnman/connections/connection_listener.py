@@ -23,7 +23,6 @@ class ConnectionListener(Thread):
         self.setDaemon(True)
 
     def run(self):
-        self._connection_message_queue.start()
         while not self._done:
             try:
                 message = self._get_message_call()
