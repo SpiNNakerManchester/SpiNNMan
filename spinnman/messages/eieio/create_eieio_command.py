@@ -30,7 +30,7 @@ def read_eieio_command_message(data, offset):
     if (command_number ==
             constants.EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value):
         return DatabaseConfirmation.from_bytestring(
-            command_header, data, offset)
+            command_header, data, offset + 2)
 
     # Fill in buffer area with padding
     elif (command_number ==
@@ -56,23 +56,23 @@ def read_eieio_command_message(data, offset):
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS.value):
         return SpinnakerRequestBuffers.from_bytestring(
-            command_header, data, offset)
+            command_header, data, offset + 2)
 
     # Buffers being sent from host to SpiNNaker
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.HOST_SEND_SEQUENCED_DATA.value):
         return HostSendSequencedData.from_bytestring(
-            command_header, data, offset)
+            command_header, data, offset + 2)
 
     # Buffers available to be read from a buffered out vertex
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA.value):
         return SpinnakerRequestReadData.from_bytestring(
-            command_header, data, offset)
+            command_header, data, offset + 2)
 
     # Host confirming data being read form SpiNNaker memory
     elif (command_number ==
             constants.EIEIO_COMMAND_IDS.HOST_DATA_READ.value):
         return HostDataRead.from_bytestring(
-            command_header, data, offset)
-    return EIEIOCommandMessage(command_header, data, offset)
+            command_header, data, offset + 2)
+    return EIEIOCommandMessage(command_header, data, offset + 2)

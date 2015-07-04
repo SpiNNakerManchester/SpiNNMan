@@ -34,8 +34,7 @@ class SDPMessage(object):
 
     @staticmethod
     def from_bytestring(data, offset):
-        sdp_header = SDPHeader()
-        sdp_header.read_bytestring(data, offset)
+        sdp_header = SDPHeader.from_bytestring(data, offset)
         return SDPMessage(sdp_header, data, offset + 8)
 
     @property

@@ -2,7 +2,6 @@ from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException
 
 import sys
-import traceback
 import time
 
 MAX_SEQUENCE = 65536
@@ -185,8 +184,7 @@ class SCPRequestSet(object):
                                 self._callbacks[seq](response)
                         except Exception as e:
                             self._error_callbacks[seq](
-                                request_sent, e,
-                                traceback.extract_tb(sys.exc_info()[2]))
+                                request_sent, e, sys.exc_info()[2])
 
                         # Remove the sequence from the outstanding responses
                         del self._send_time[seq]
@@ -229,8 +227,7 @@ class SCPRequestSet(object):
                         self._packet_timeout)
                 except Exception as e:
                     self._error_callbacks[seq](
-                        request_sent, e,
-                        traceback.extract_tb(sys.exc_info()[2]))
+                        request_sent, e, sys.exc_info()[2])
                     del self._send_time[seq]
                     del self._retries[seq]
                     del self._callbacks[seq]

@@ -221,10 +221,10 @@ class UDPConnection(AbstractConnection):
             :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
         """
         try:
-            self._socket.shutdown(0)
+            self._socket.shutdown(socket.SHUT_WR)
         except:
             pass
         self._socket.close()
 
-    def is_ready_to_receive(self):
-        return len(select.select([self._socket], [], [], 0)[0]) == 1
+    def is_ready_to_receive(self, timeout=0):
+        return len(select.select([self._socket], [], [], timeout)[0]) == 1

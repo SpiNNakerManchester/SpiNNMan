@@ -2228,6 +2228,12 @@ class Transceiver(object):
         :raise None: No known exceptions are raised
         """
 
+        for receiving_connections in \
+                self._udp_receive_connections_by_port.values():
+            for (_, listener) in receiving_connections.values():
+                if listener is not None:
+                    listener.close()
+
         for connection in self._all_connections:
             if (close_original_connections or
                     connection not in self._original_connections):
@@ -2313,7 +2319,8 @@ class Transceiver(object):
             if connection is None:
                 connection = connection_class(local_port=local_port,
                                               local_host=local_host)
-            listener = ConnectionListener(connection.get_receive_method())
+                self._all_connections.add(connection)
+            listener = ConnectionListener(connection)
             listener.start()
             receiving_connections[local_host] = (connection, listener)
             connections_of_class.append((connection, listener))
@@ -2338,7 +2345,8 @@ class Transceiver(object):
         # Create a connection if there isn't already one, and a listener
         if connection is None:
             connection = connection_class(local_host=local_host)
-        listener = ConnectionListener(connection.get_receive_method())
+            self._all_connections.add(connection)
+        listener = ConnectionListener(connection)
         listener.start()
         self._udp_receive_connections_by_port[connection.local_port][
             local_host] = (connection, listener)

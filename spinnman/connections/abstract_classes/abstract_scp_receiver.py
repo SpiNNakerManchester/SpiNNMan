@@ -12,9 +12,12 @@ class AbstractSCPReceiver(AbstractConnection):
     """
 
     @abstractmethod
-    def is_ready_to_receive(self):
+    def is_ready_to_receive(self, timeout=0):
         """ Determines if there is an SCP packet to be read without blocking
 
+        :param timeout: The time to wait before returning if the connection\
+                is not ready
+        :type timeout: int
         :return: True if there is an SCP packet to be read
         :rtype: bool
         """

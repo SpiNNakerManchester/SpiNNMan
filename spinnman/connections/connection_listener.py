@@ -8,15 +8,16 @@ class ConnectionListener(Thread):
         they arrive
     """
 
-    def __init__(self, get_message_call, n_processes=4):
+    def __init__(self, connection, n_processes=4):
         """
 
-        :param get_message_call: A callable which returns the next message
+        :param connection: An AbstractListenable connection to listen to
         :param n_processes: The number of threads to use when calling\
                 callbacks
         """
         Thread.__init__(self)
-        self._get_message_call = get_message_call
+        self._connection = connection
+        self._get_message_call = connection.get_receive_method()
         self._callback_pool = ThreadPool(processes=n_processes)
         self._done = False
         self._callbacks = set()
@@ -25,14 +26,15 @@ class ConnectionListener(Thread):
     def run(self):
         while not self._done:
             try:
-                message = self._get_message_call()
-                for callback in self._callbacks:
-                    self._callback_pool.apply(callback, args=(message))
+                if self._connection.is_ready_to_receive(timeout=10):
+                    message = self._get_message_call()
+                    for callback in self._callbacks:
+                        self._callback_pool.apply_async(callback, [message])
             except:
                 if not self._done:
                     traceback.print_exc()
-        self._callback_pool.join()
         self._callback_pool.close()
+        self._callback_pool.join()
 
     def add_callback(self, callback):
         """ Add a callback to be called when a message is received

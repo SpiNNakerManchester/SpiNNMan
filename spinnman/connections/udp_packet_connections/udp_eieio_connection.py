@@ -44,7 +44,7 @@ class UDPEIEIOConnection(UDPConnection, AbstractEIEIOReceiver,
     def receive_eieio_message(self, timeout=None):
         data = self.receive(timeout)
         header = struct.unpack_from("<H", data)[0]
-        if header & 0x4000 == header:
+        if header & 0xC000 == 0x4000:
             eieio_message = read_eieio_command_message(data, 0)
         else:
             eieio_message = read_eieio_data_message(data, 0)

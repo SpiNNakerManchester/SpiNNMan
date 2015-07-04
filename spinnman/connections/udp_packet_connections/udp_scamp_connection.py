@@ -1,16 +1,17 @@
-from spinnman.connections.udp_packet_connections.udp_connection import \
-    UDPConnection
 from spinnman import constants
-import struct
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.connections.udp_packet_connections import udp_utils
+from spinnman.connections.udp_packet_connections.udp_sdp_connection \
+    import UDPSDPConnection
 from spinnman.connections.abstract_classes.abstract_scp_sender \
     import AbstractSCPSender
 from spinnman.connections.abstract_classes.abstract_scp_receiver \
     import AbstractSCPReceiver
 
+import struct
 
-class UDPSCAMPConnection(UDPConnection, AbstractSCPSender,
+
+class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
                          AbstractSCPReceiver):
     """ A UDP connection to SCAMP on the board
     """
@@ -39,13 +40,11 @@ class UDPSCAMPConnection(UDPConnection, AbstractSCPSender,
                 connection
         :type remote_port: int
         """
-        UDPConnection.__init__(
-            self, local_host, local_port, remote_host, remote_port)
+        UDPSDPConnection.__init__(
+            self, chip_x, chip_y, local_host, local_port, remote_host,
+            remote_port)
         AbstractSCPReceiver.__init__(self)
         AbstractSCPSender.__init__(self)
-
-        self._chip_x = chip_x
-        self._chip_y = chip_y
 
     @property
     def chip_x(self):
