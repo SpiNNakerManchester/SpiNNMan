@@ -24,6 +24,7 @@ from spinnman.connections.udp_packet_connections.udp_spinnaker_connection \
     import UDPSpinnakerConnection
 from spinnman.connections.abstract_classes.abstract_udp_connection \
     import AbstractUDPConnection
+import spinnman.exceptions as exceptions
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpinnmanInvalidParameterException
