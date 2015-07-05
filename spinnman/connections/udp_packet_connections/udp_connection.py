@@ -200,6 +200,27 @@ class UDPConnection(AbstractConnection):
         except Exception as e:
             raise SpinnmanIOException(str(e))
 
+    def receive_with_address(self, timeout=None):
+        """ Receive data from the connection along with the address where the\
+            data was received from
+
+        :param timeout: The timeout, or None to wait forever
+        :type timeout: None
+        :return: A tuple of the data received and a tuple of the\
+                (address, port) received from
+        :rtype: (bytestring, (str, int))
+        :raise SpinnmanTimeoutException: If a timeout occurs before any data\
+                    is received
+        :raise SpinnmanIOException: If an error occurs receiving the data
+        """
+        try:
+            self._socket.settimeout(timeout)
+            return self._socket.recvfrom(300)
+        except socket.timeout:
+            raise SpinnmanTimeoutException("receive", timeout)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
     def send(self, data):
         """ Send data down this connection
 
@@ -213,6 +234,20 @@ class UDPConnection(AbstractConnection):
                 " this connection")
         try:
             self._socket.send(data)
+        except Exception as e:
+            raise SpinnmanIOException(str(e))
+
+    def send_to(self, data, address):
+        """ Send data down this connection
+
+        :param data: The data to be sent
+        :type data: bytestring
+        :param address: A tuple of (address, port) to send the data to
+        :type address: (str, int)
+        :raise SpinnmanIOException: If there is an error sending the data
+        """
+        try:
+            self._socket.sendto(data, address)
         except Exception as e:
             raise SpinnmanIOException(str(e))
 

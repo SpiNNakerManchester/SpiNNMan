@@ -75,26 +75,6 @@ BMP_POWER_ON_TIMEOUT = 10.0
 # number of chips to check are booted fully from the middle
 NO_MIDDLE_CHIPS_TO_CHECK = 8
 
-# connection types
-CONNECTION_TYPE = Enum(
-    value="CONNECTION_TYPE",
-    names=[("REVERSE_IPTAG", 0),
-           ("SDP_IPTAG", 1),
-           ("UDP_BOOT", 2),
-           ("UDP_IPTAG", 3),
-           ("UDP_SPINNAKER", 4),
-           ("UDP_BMP", 5),
-           ("USB", 6)])
-
-# the different types of message types which spinnman supports
-TRAFFIC_TYPE = Enum(
-    value="TRAFFIC_TYPE",
-    names=[("SCP", 0),
-           ("SDP", 1),
-           ("UDP", 2),
-           ("EIEIO_DATA", 3),
-           ("EIEIO_COMMAND", 4)])
-
 # a listing of what spinnaker specific EIEIO commands there are.
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",

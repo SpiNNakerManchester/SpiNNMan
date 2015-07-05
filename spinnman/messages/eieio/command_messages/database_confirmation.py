@@ -18,10 +18,11 @@ class DatabaseConfirmation(EIEIOCommandMessage):
         return self._database_path
 
     @property
-    def bytestring(self, writer):
+    def bytestring(self):
         data = super(DatabaseConfirmation, self).bytestring
         if self._database_path is not None:
             data += self._database_path
+        return data
 
     @staticmethod
     def from_bytestring(command_header, data, offset):

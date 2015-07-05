@@ -156,6 +156,13 @@ class EIEIODataHeader(object):
                 else:
                     return struct.pack(
                         "<BBI", self._count, data, self._payload_base)
+        else:
+            if self._prefix is not None:
+                return struct.pack(
+                    "<BBH", self._count, data, self._prefix)
+            else:
+                return struct.pack(
+                    "<BB", self._count, data)
 
     @staticmethod
     def from_bytestring(data, offset):

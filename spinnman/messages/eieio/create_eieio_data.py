@@ -257,6 +257,7 @@ def _read_32_bit_payload_message(prefix, payload_base, prefix_type,
 
 def read_eieio_data_message(data, offset):
     eieio_header = EIEIODataHeader.from_bytestring(data, offset)
+    offset += eieio_header.size
     eieio_type = eieio_header.eieio_type
     prefix = eieio_header.prefix
     payload_base = eieio_header.payload_base
