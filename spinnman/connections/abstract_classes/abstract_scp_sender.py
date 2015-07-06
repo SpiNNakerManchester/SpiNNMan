@@ -1,6 +1,7 @@
 from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
+from abc import abstractproperty
 
 from spinnman.connections.abstract_classes.abstract_connection \
     import AbstractConnection
@@ -34,4 +35,20 @@ class AbstractSCPSender(AbstractConnection):
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     sending the message
+        """
+
+    @abstractproperty
+    def chip_x(self):
+        """ The x-coordinate of the chip at which messages sent down this\
+            connection will arrive at first
+
+        :rtype: int
+        """
+
+    @abstractproperty
+    def chip_y(self):
+        """ The y-coordinate of the chip at which messages sent down this\
+            connection will arrive at first
+
+        :rtype: int
         """

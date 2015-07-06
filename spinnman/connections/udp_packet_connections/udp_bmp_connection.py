@@ -74,6 +74,18 @@ class UDPBMPConnection(
         """
         return self._boards
 
+    @property
+    def chip_x(self):
+        """ Defined to satisfy the AbstractSCPSender - always 0 for a BMP
+        """
+        return 0
+
+    @property
+    def chip_y(self):
+        """ Defined to satisfy the AbstractSCPSender - always 0 for a BMP
+        """
+        return 0
+
     def receive_scp_response(self, timeout=1.0):
         data = self.receive(timeout)
         result, sequence = struct.unpack_from("<2H", data, 10)
