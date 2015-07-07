@@ -14,17 +14,5 @@ class TestSCPVersionRequest(unittest.TestCase):
         self.assertEqual(ver_request.sdp_header.destination_chip_y, 1)
         self.assertEqual(ver_request.sdp_header.destination_cpu, 2)
 
-    def test_new_version_request_invalid_x(self):
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            ver_request = SCPVersionRequest(256,1,2)
-
-    def test_new_version_request_invalid_y(self):
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            ver_request = SCPVersionRequest(0,256,2)
-
-    def test_new_version_request_invalid_p(self):
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            ver_request = SCPVersionRequest(0,1,32)
-
 if __name__ == '__main__':
     unittest.main()

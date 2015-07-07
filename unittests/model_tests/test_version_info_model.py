@@ -18,7 +18,7 @@ class TestVersionInfo(unittest.TestCase):
 
         version_data = struct.pack('<III13s',arg1,arg2,arg3,data)
         version_data = bytearray(version_data)
-        vi = VersionInfo(version_data)
+        vi = VersionInfo(version_data, 0)
         self.assertEqual(vi.name,'my')
         self.assertEqual(vi.version_number,ver_number/100.0)
         self.assertEqual(vi.hardware,'spinnaker')
@@ -43,7 +43,7 @@ class TestVersionInfo(unittest.TestCase):
 
             version_data = struct.pack('<III13s',arg1,arg2,arg3,data)
             version_data = bytearray(version_data)
-            vi = VersionInfo(version_data)
+            vi = VersionInfo(version_data, 0)
 
     def test_retrieving_bits_from_invalid_sized_version_data(self):
         with self.assertRaises(SpinnmanInvalidParameterException):
@@ -60,7 +60,7 @@ class TestVersionInfo(unittest.TestCase):
 
             version_data = struct.pack('<II13s',arg1,arg2,data)
             version_data = bytearray(version_data)
-            vi = VersionInfo(version_data)
+            vi = VersionInfo(version_data, 0)
 
 
 if __name__ == '__main__':

@@ -241,14 +241,14 @@ class Transceiver(object):
 
         # A set of the original connections - used to determine what can
         # be closed
+        if connections is None:
+            connections = list()
         self._original_connections = set()
-        if connections is not None:
-            self._original_connections.update(connections)
+        self._original_connections.update(connections)
 
         # A set of all connection - used for closing
         self._all_connections = set()
-        if connections is not None:
-            self._all_connections.update(connections)
+        self._all_connections.update(connections)
 
         # A boot send connection - there can only be one in the current system,
         # or otherwise bad things can happen!
@@ -697,7 +697,7 @@ class Transceiver(object):
                 return True
             return False
         else:
-            for connection in self._scamp_connections.values():
+            for connection in self._scamp_connections:
                 if connection.is_connected():
                     return True
             return False

@@ -1,10 +1,11 @@
-from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
-import struct
+from spinnman.messages.scp.impl.scp_read_memory_request \
+    import SCPReadMemoryRequest
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 
 import functools
+import struct
 
 # There are 1024 entries in a routing table
 _N_ENTRIES = 1024

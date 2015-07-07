@@ -4,7 +4,8 @@ from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.messages.scp.impl.scp_iptag_get_response import SCPIPTagGetResponse
+from spinnman.messages.scp.impl.scp_iptag_get_response \
+    import SCPIPTagGetResponse
 
 _IPTAG_GET = 2
 

@@ -26,9 +26,7 @@ class TestCPUStateResponse(unittest.TestCase):
         srce_x = 0x7
         srce_y = 0x0
         data = pack('<8BHHI',flags, tag, dest_port_cpu, srce_port_cpu, dest_y, dest_x, srce_y, srce_x, rc, seq, argument_count)
-        data = bytearray(data)
-        reader = LittleEndianByteArrayByteReader(data)
-        response.read_scp_response(reader)
+        response.read_bytestring(data, 0)
         self.assertEqual(response.count, 5)
 
     def test_new_count_state_response_response_not_ok(self):
@@ -55,10 +53,7 @@ class TestCPUStateResponse(unittest.TestCase):
             srce_x = 0x7
             srce_y = 0x0
             data = pack('<8BHHHBBHHI15s',flags, tag, dest_port_cpu, srce_port_cpu, dest_y, dest_x, srce_y, srce_x, rc, seq, p2p_addr, phys_cpu, virt_cpu,version, buffer, build_date, ver_string)
-            data = bytearray(data)
-            reader = LittleEndianByteArrayByteReader(data)
-
-            response.read_scp_response(reader)
+            response.read_bytestring(data, 0)
 
 
 if __name__ == '__main__':
