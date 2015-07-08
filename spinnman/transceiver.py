@@ -793,19 +793,24 @@ class Transceiver(object):
             width = dims.width
             height = dims.height
 
-        # try to get a scamp version
+        # try to get a scamp version once
         logger.info("going to try to boot the machine with scamp")
         version_info = self._try_to_find_scamp_and_boot(
-            n_retries, board_version, number_of_boards, width, height)
+            1, board_version, number_of_boards, width, height)
+
+        # If we fail to get a SCAMP version this time, try other things
         if version_info is None:
             logger.info("failed to boot machine with scamp,"
                         " trying to power on machine")
 
             # start by powering up each bmp connection
             self.power_on_machine()
+
+            # Sleep a bit to let things get going
+            time.sleep(2.0)
             logger.info("going to try to boot the machine with scamp")
 
-            # retry to get a scamp version
+            # retry to get a scamp version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
                 n_retries, board_version, number_of_boards, width, height)
 
@@ -862,6 +867,16 @@ class Transceiver(object):
                 raise exceptions.SpinnmanUnexpectedResponseCodeException(
                     "We currently cannot communicate with your board, please "
                     "rectify this, and try again", "", "")
+
+        # The last thing we tried was booting, so try again to get the version
+        try:
+            version_info = self.get_scamp_version()
+        except exceptions.SpinnmanTimeoutException:
+            pass
+        except exceptions.SpinnmanIOException:
+            raise exceptions.SpinnmanUnexpectedResponseCodeException(
+                "We currently cannot communicate with your board, please "
+                "rectify this, and try again", "", "")
 
         # boot has been sent, and 0 0 is up and running, but there will need to
         # be a delay whilst all the other chips complete boot.
