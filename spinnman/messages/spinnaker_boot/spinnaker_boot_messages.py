@@ -84,7 +84,7 @@ class SpinnakerBootMessages(object):
 
         # Get the data as an array, to be used later
         self._spinnaker_boot_data = array.array(
-            "L", spinnaker_boot_value.bytestring)
+            "I", spinnaker_boot_value.bytestring)
 
         # Find the data file and size
         this_dir, _ = os.path.split(__file__)
@@ -110,7 +110,7 @@ class SpinnakerBootMessages(object):
     def _get_packet_data(self, replace_data=None, offset=None, length=None):
 
         # Read the next bit of data
-        data = array.array("L")
+        data = array.array("I")
         n_words = min((self._n_words_to_read, _BOOT_MESSAGE_DATA_WORDS))
         self._n_words_to_read -= n_words
         data.fromfile(self._boot_data_file, n_words)
