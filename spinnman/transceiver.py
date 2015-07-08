@@ -100,7 +100,7 @@ _SCAMP_NAME = "SC&MP"
 _SCAMP_VERSION = 1.33
 
 _BMP_NAME = "BC&MP"
-_BMP_VERSIONS = [1.3, 1.37, 1.36]
+_BMP_VERSIONS = [1.3, 1.33, 1.37, 1.36]
 
 
 def create_transceiver_from_hostname(
