@@ -169,11 +169,15 @@ class SCPRequestSet(object):
                 if seq in self._requests:
                     request_sent = self._requests[seq]
 
-                    # If the response can be retried, retry it
-                    if result in self._retry_codes and self._retries[seq] > 0:
+                    # If the response can be retried, retry it, as long as the
+                    # timeout hasn't expired
+
+                    if (result in self._retry_codes and
+                            (time.time() - self._send_time[seq] <
+                                self._packet_timeout)):
                         self._connection.send_scp_request(request_sent)
-                        self._retries[seq] -= 1
                         self._n_retry_code_resent += 1
+                        print "Retry due to", result
                     else:
 
                         # No retry is possible - try constructing the result
