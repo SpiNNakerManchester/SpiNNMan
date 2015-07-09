@@ -177,7 +177,6 @@ class SCPRequestSet(object):
                                 self._packet_timeout)):
                         self._connection.send_scp_request(request_sent)
                         self._n_retry_code_resent += 1
-                        print "Retry due to", result
                     else:
 
                         # No retry is possible - try constructing the result
