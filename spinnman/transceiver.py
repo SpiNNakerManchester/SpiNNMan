@@ -758,6 +758,7 @@ class Transceiver(object):
             width=width, height=height)
         for boot_message in boot_messages.messages:
             self._boot_send_connection.send_boot_message(boot_message)
+        time.sleep(2.0)
 
     def ensure_board_is_ready(
             self, board_version, number_of_boards=1, width=None, height=None,
