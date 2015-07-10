@@ -941,7 +941,8 @@ class Transceiver(object):
                 base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
                 length=constants.SYSTEM_VARIABLE_BYTES)
             return True
-        except exceptions.SpinnmanUnexpectedResponseCodeException:
+        except (exceptions.SpinnmanUnexpectedResponseCodeException,
+                exceptions.SpinnmanTimeoutException):
 
             # Do Nothing - check the bottom link for wrap around
             pass
@@ -954,7 +955,8 @@ class Transceiver(object):
                 base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
                 length=constants.SYSTEM_VARIABLE_BYTES)
             return True
-        except exceptions.SpinnmanUnexpectedResponseCodeException:
+        except (exceptions.SpinnmanUnexpectedResponseCodeException,
+                exceptions.SpinnmanTimeoutException):
 
             # Do Nothing
             pass
