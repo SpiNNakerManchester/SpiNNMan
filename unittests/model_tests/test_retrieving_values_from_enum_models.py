@@ -27,7 +27,7 @@ class TestingEnums(unittest.TestCase):
         self.assertEqual(CPUState.SYNC1.value,9)
 
         self.assertEqual(CPUState.PAUSED.value,10)
-        self.assertEqual(CPUState.FINSHED.value,11)
+        self.assertEqual(CPUState.FINISHED.value,11)
         self.assertEqual(CPUState.IDLE.value,15)
 
     def test_run_time_error_enum(self):

@@ -179,7 +179,7 @@ try:
     transceiver.send_signal(app_id, SCPSignal.SYNC0)
     count = 0
     while count < 20:
-        count = transceiver.get_core_state_count(app_id, CPUState.FINSHED)
+        count = transceiver.get_core_state_count(app_id, CPUState.FINISHED)
         print "Cores in state FINISHED={}".format(count)
         sleep(0.1)
     print ""
