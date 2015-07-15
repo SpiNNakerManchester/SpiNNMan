@@ -236,11 +236,19 @@ class ChipInfo(object):
 
     @property
     def sdram_base_address(self):
-        """ The base address of SDRAM on the chip
+        """ The base address of the user region of SDRAM on the chip
 
         :rtype: int
         """
         return self._sdram_base_address
+
+    @property
+    def system_sdram_base_address(self):
+        """ The base address of the System SDRAM region on the chip
+
+        :rtype: int
+        """
+        return self._system_sdram_base_address
 
     @property
     def cpu_information_base_address(self):
