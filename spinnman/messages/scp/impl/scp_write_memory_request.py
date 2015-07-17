@@ -26,7 +26,7 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
         """
         self._size = length
         self._offset = offset
-        self._data_to_write = data
+        self._data_to_write = memoryview(data)
         if length is None:
             self._size = len(data)
         super(SCPWriteMemoryRequest, self).__init__(
@@ -44,7 +44,7 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
     def bytestring(self):
         datastring = super(SCPWriteMemoryRequest, self).bytestring
         data = self._data_to_write[self._offset:self._offset + self._size]
-        return datastring + bytes(data)
+        return datastring + data.tobytes()
 
     def get_scp_response(self):
         return SCPCheckOKResponse("WriteMemory", "CMD_WRITE")

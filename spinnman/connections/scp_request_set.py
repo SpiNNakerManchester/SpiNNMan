@@ -6,6 +6,9 @@ import time
 
 MAX_SEQUENCE = 65536
 
+# Keep a global track of the sequence numbers used
+_next_sequence = 0
+
 
 class SCPRequestSet(object):
     """ Allows a set of SCP requests to be grouped together in a communication\
@@ -72,9 +75,6 @@ class SCPRequestSet(object):
         # The number of responses outstanding
         self._in_progress = 0
 
-        # The next sequence number
-        self._sequence = 0
-
         # The number of timeouts that occured
         self._n_timeouts = 0
 
@@ -99,13 +99,14 @@ class SCPRequestSet(object):
         """
 
         # Update the packet and store required details
-        request.scp_request_header.sequence = self._sequence
-        self._requests[self._sequence] = request
-        self._retries[self._sequence] = self._n_retries
-        self._callbacks[self._sequence] = callback
-        self._error_callbacks[self._sequence] = error_callback
-        self._send_time[self._sequence] = time.time()
-        self._sequence = (self._sequence + 1) % MAX_SEQUENCE
+        global _next_sequence
+        request.scp_request_header.sequence = _next_sequence
+        self._requests[_next_sequence] = request
+        self._retries[_next_sequence] = self._n_retries
+        self._callbacks[_next_sequence] = callback
+        self._error_callbacks[_next_sequence] = error_callback
+        self._send_time[_next_sequence] = time.time()
+        _next_sequence = (_next_sequence + 1) % MAX_SEQUENCE
 
         # Send the request, keeping track of how many are sent
         # self._token_bucket.consume(284)
