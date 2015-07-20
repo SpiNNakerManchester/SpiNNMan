@@ -45,7 +45,6 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         data_offset = offset
         offset = base_address
         n_bytes_to_write = int(n_bytes)
-        n_bytes_written = 0
         while n_bytes_to_write > 0:
 
             bytes_to_send = n_bytes_to_write
@@ -53,16 +52,13 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
                 bytes_to_send = 256
 
             request = packet_class(
-                base_address=offset, 
+                base_address=offset,
                 data=data[data_offset:data_offset + bytes_to_send])
             self._send_request(request)
 
             n_bytes_to_write -= bytes_to_send
             offset += bytes_to_send
             data_offset += bytes_to_send
-            n_bytes_written += bytes_to_send
-            if n_bytes_written > 1000000:
-                self._finish()
         self._finish()
         self.check_for_error()
 
@@ -70,7 +66,6 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
                                   packet_class):
         offset = base_address
         n_bytes_to_write = int(n_bytes)
-        n_bytes_written = 0
         while n_bytes_to_write > 0:
 
             bytes_to_send = n_bytes_to_write
@@ -82,10 +77,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             request = packet_class(base_address=offset, data=data_array)
             self._send_request(request)
 
-            n_bytes_to_write -= bytes_to_send
-            offset += bytes_to_send
-            n_bytes_written += bytes_to_send
-            if n_bytes_written > 1000000:
-                self._finish()
+            n_bytes_to_write -= data_length
+            offset += data_length
         self._finish()
         self.check_for_error()
