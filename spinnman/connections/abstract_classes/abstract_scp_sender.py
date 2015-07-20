@@ -13,6 +13,12 @@ class AbstractSCPSender(AbstractConnection):
     """
 
     @abstractmethod
+    def get_scp_data(self, scp_request):
+        """ Returns the data of an SCP request as it would be sent down this\
+            connection
+        """
+
+    @abstractmethod
     def send_scp_request(self, scp_request):
         """ Sends an SCP request down this connection
 

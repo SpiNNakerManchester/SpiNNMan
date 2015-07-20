@@ -31,7 +31,7 @@ class AbstractMultiConnectionProcess(AbstractProcess):
         for connection in connections:
             scp_request_set = SCPRequestSet(
                 connection, n_retries=n_retries, packet_timeout=timeout,
-                n_channels=n_channels, 
+                n_channels=n_channels,
                 intermediate_channel_waits=intermediate_channel_waits)
             self._scp_request_sets.append(scp_request_set)
         self._next_connection_selector = next_connection_selector

@@ -22,8 +22,8 @@ class SCPRequestSet(object):
         for which a reply has not been received can also timeout.
     """
 
-    def __init__(self, connection, n_channels=4,
-                 intermediate_channel_waits=2,
+    def __init__(self, connection, n_channels=1,
+                 intermediate_channel_waits=0,
                  retry_codes=set([SCPResult.RC_TIMEOUT,
                                   SCPResult.RC_P2P_TIMEOUT,
                                   SCPResult.RC_LEN]),
@@ -57,6 +57,7 @@ class SCPRequestSet(object):
 
         # A dictionary of sequence number -> requests in progress
         self._requests = dict()
+        self._request_data = dict()
 
         # A dictionary of sequence number -> time at which sequence was sent
         self._times_sent = dict()
@@ -101,7 +102,9 @@ class SCPRequestSet(object):
         # Update the packet and store required details
         global _next_sequence
         request.scp_request_header.sequence = _next_sequence
+        request_data = self._connection.get_scp_data(request)
         self._requests[_next_sequence] = request
+        self._request_data[_next_sequence] = request_data
         self._retries[_next_sequence] = self._n_retries
         self._callbacks[_next_sequence] = callback
         self._error_callbacks[_next_sequence] = error_callback
@@ -110,7 +113,7 @@ class SCPRequestSet(object):
 
         # Send the request, keeping track of how many are sent
         # self._token_bucket.consume(284)
-        self._connection.send_scp_request(request)
+        self._connection.send(request_data)
         self._in_progress += 1
 
         # If the connection has not been measured
@@ -131,7 +134,10 @@ class SCPRequestSet(object):
             to ensure that all responses are received and handled.
         """
         while self._in_progress > 0:
-            self._do_retrieve(0, 1.0)
+            self._do_retrieve(0, self._packet_timeout)
+        print self._n_timeouts, "Timeouts"
+        print self._n_retry_code_resent, "Retry code retries"
+        print self._n_resent, "Resends"
 
     @property
     def n_timeouts(self):
@@ -176,7 +182,7 @@ class SCPRequestSet(object):
                     if (result in self._retry_codes and
                             (time.time() - self._send_time[seq] <
                                 self._packet_timeout)):
-                        self._connection.send_scp_request(request_sent)
+                        self._connection.send(self._request_data[seq])
                         self._n_retry_code_resent += 1
                     else:
 
@@ -193,6 +199,7 @@ class SCPRequestSet(object):
                         # Remove the sequence from the outstanding responses
                         del self._send_time[seq]
                         del self._requests[seq]
+                        del self._request_data[seq]
                         del self._retries[seq]
                         del self._callbacks[seq]
                         del self._error_callbacks[seq]
@@ -220,7 +227,7 @@ class SCPRequestSet(object):
                 self._in_progress += 1
                 self._requests[seq] = request_sent
                 self._send_time[seq] = time.time()
-                self._connection.send_scp_request(request_sent)
+                self._connection.send(self._request_data[seq])
                 self._n_resent += 1
             else:
 
@@ -232,6 +239,7 @@ class SCPRequestSet(object):
                 except Exception as e:
                     self._error_callbacks[seq](
                         request_sent, e, sys.exc_info()[2])
+                    del self._request_data[seq]
                     del self._send_time[seq]
                     del self._retries[seq]
                     del self._callbacks[seq]

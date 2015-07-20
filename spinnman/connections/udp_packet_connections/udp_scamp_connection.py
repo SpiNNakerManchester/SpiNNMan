@@ -54,11 +54,15 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
     def chip_y(self):
         return self._chip_y
 
+    def get_scp_data(self, scp_request):
+        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header,
+                                                 self._chip_x, self._chip_y)
+        return struct.pack("<2x") + scp_request.bytestring
+
     def receive_scp_response(self, timeout=1.0):
         data = self.receive(timeout)
         result, sequence = struct.unpack_from("<2H", data, 10)
         return SCPResult(result), sequence, data, 2
 
     def send_scp_request(self, scp_request):
-        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header, 0, 0)
-        self.send(struct.pack("<2x") + scp_request.bytestring)
+        self.send(self.get_scp_data(scp_request))
