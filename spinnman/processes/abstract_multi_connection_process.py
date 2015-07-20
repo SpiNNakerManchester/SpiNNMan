@@ -24,12 +24,15 @@ class AbstractMultiConnectionProcess(AbstractProcess):
     """
 
     def __init__(self, connections, next_connection_selector=None,
-                 n_retries=3, timeout=0.5):
+                 n_retries=3, timeout=0.5, n_channels=4,
+                 intermediate_channel_waits=2):
         AbstractProcess.__init__(self)
         self._scp_request_sets = list()
         for connection in connections:
-            scp_request_set = SCPRequestSet(connection, n_retries=n_retries,
-                                            packet_timeout=timeout)
+            scp_request_set = SCPRequestSet(
+                connection, n_retries=n_retries, packet_timeout=timeout,
+                n_channels=n_channels, 
+                intermediate_channel_waits=intermediate_channel_waits)
             self._scp_request_sets.append(scp_request_set)
         self._next_connection_selector = next_connection_selector
         if next_connection_selector is None:

@@ -11,8 +11,7 @@ class SCPWriteLinkRequest(AbstractSCPRequest):
     """ A request to write memory on a neighbouring chip
     """
 
-    def __init__(self, x, y, link, base_address, data, offset=0,
-                 length=None, cpu=0):
+    def __init__(self, x, y, link, base_address, data, cpu=0):
         """
 
         :param x: The x-coordinate of the chip whose neighbour will be written\
@@ -32,11 +31,6 @@ class SCPWriteLinkRequest(AbstractSCPRequest):
         :param data: Up to 256 bytes of data to write
         :type data: bytearray
         """
-        self._size = length
-        self._offset = offset
-        self._data_to_write = data
-        if length is None:
-            self._size = len(data)
         super(SCPWriteLinkRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
@@ -45,12 +39,12 @@ class SCPWriteLinkRequest(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_LINK_WRITE),
             argument_1=base_address, argument_2=len(data), argument_3=link,
             data=None)
+        datastring = super(SCPWriteLinkRequest, self).bytestring
+        self._bytestring = datastring + data
 
     @property
     def bytestring(self):
-        datastring = super(SCPWriteLinkRequest, self).bytestring
-        data = self._data_to_write[self._offset:self._offset + self._size]
-        return datastring + bytes(data)
+        return self._bytestring
 
     def get_scp_response(self):
         return SCPCheckOKResponse("WriteMemory", "CMD_WRITE")

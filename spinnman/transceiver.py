@@ -838,7 +838,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(
                 self._machine, [scamp_connection])
             process.execute(SCPIPTagTTORequest(
-                scamp_connection.chip_x, scamp_connection.chip_y, 2))
+                scamp_connection.chip_x, scamp_connection.chip_y, 5))
 
         return version_info
 

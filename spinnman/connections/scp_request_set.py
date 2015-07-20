@@ -122,7 +122,7 @@ class SCPRequestSet(object):
                 self._intermediate_channel_waits = self._n_channels - 8
 
         # If all the channels are used, start to receive packets
-        if (self._n_channels is not None and
+        while (self._n_channels is not None and
                 self._in_progress >= self._n_channels):
             self._do_retrieve(self._intermediate_channel_waits, 0.1)
 
