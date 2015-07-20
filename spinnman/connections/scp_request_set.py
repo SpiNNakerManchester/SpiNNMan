@@ -135,9 +135,6 @@ class SCPRequestSet(object):
         """
         while self._in_progress > 0:
             self._do_retrieve(0, self._packet_timeout)
-        print self._n_timeouts, "Timeouts"
-        print self._n_retry_code_resent, "Retry code retries"
-        print self._n_resent, "Resends"
 
     @property
     def n_timeouts(self):
