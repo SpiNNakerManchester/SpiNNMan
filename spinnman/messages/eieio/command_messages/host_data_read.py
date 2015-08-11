@@ -3,6 +3,7 @@ from spinnman.messages.eieio.command_messages.eieio_command_message\
 from spinnman.messages.eieio.command_messages.eieio_command_header\
     import EIEIOCommandHeader
 from spinnman import constants
+import struct
 
 
 class HostDataRead(EIEIOCommandMessage):
@@ -32,14 +33,12 @@ class HostDataRead(EIEIOCommandMessage):
         return 8
 
     @staticmethod
-    def read_eieio_command_message(command_header, byte_reader):
-        region_id = byte_reader.read_byte()
-        sequence_no = byte_reader.read_byte()
-        space = byte_reader.read_int()
+    def from_bytestring(command_header, data, offset):
+        region_id, sequence_no, space = struct.unpack_from(
+            "<BBI", data, offset)
         return HostDataRead(region_id, sequence_no, space)
 
-    def write_eieio_message(self, writer):
-        EIEIOCommandMessage.write_eieio_message(self, writer)
-        writer.write_byte(self._region_id)
-        writer.write_byte(self._sequence_no)
-        writer.write_int(self._space_read)
+    @property
+    def bytestring(self):
+        return super(HostDataRead, self).bytestring + struct.pack(
+            "<BBI", self._region_id, self._sequence_no, self._space_read)

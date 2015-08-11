@@ -1,13 +1,14 @@
 import logging
 from random import randint
 from os.path import os
+import struct
+import time
 
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.cpu_state import CPUState
 from spinnman.model.core_subsets import CoreSubsets
 from spinnman.model.core_subset import CoreSubset
 from spinnman.data.file_data_reader import FileDataReader
-from time import sleep
 from spinnman.messages.scp.scp_signal import SCPSignal
 from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
@@ -20,6 +21,7 @@ from spinnman.model.diagnostic_filter_destination \
 from spinnman.model.diagnostic_filter_packet_type \
     import DiagnosticFilterPacketType
 from board_test_configuration import BoardTestConfiguration
+from spinnman import constants
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
@@ -110,13 +112,15 @@ def print_filter(d_filter):
     print_enums("Packet Types:", d_filter.packet_types)
 
 transceiver = create_transceiver_from_hostname(
-    board_config.remotehost, ignore_cores=down_cores, ignore_chips=down_chips)
+    board_config.remotehost, board_config.board_version,
+    ignore_cores=down_cores, ignore_chips=down_chips)
 
 
 try:
     print "Version Information"
     print "==================="
-    version_info = transceiver.ensure_board_is_ready(board_config.board_version)
+    version_info = transceiver.ensure_board_is_ready(
+        board_config.board_version)
     print version_info
     print ""
 
@@ -136,10 +140,7 @@ try:
     print "====================="
     write_data = bytearray(randint(0, 255) for i in range(0, 1000))
     transceiver.write_memory(0, 0, 0x70000000, write_data)
-    read_data_packets = transceiver.read_memory(0, 0, 0x70000000, 1000)
-    read_data = bytearray()
-    for packet in read_data_packets:
-        read_data.extend(packet)
+    read_data = transceiver.read_memory(0, 0, 0x70000000, 1000)
     print "Written:", map(hex, write_data)
     print "Read:   ", map(hex, read_data)
     print ""
@@ -147,9 +148,8 @@ try:
     print "Flood Memory Write"
     print "=================="
     transceiver.write_memory_flood(0x70000000, 0x04050607)
-    read_data_packets = transceiver.read_memory(1, 1, 0x70000000, 4)
-    for packet in read_data_packets:
-        print map(hex, packet)
+    read_data = transceiver.read_memory(1, 1, 0x70000000, 4)
+    print hex(struct.unpack("<I", str(read_data))[0])
     print ""
 
     print "Execute Flood"
@@ -161,7 +161,7 @@ try:
     while count < 20:
         count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)
         print "Cores in state SYNC0={}".format(count)
-        sleep(0.1)
+        time.sleep(0.1)
     print ""
 
     print "CPU Information"
@@ -178,15 +178,14 @@ try:
     transceiver.send_signal(app_id, SCPSignal.SYNC0)
     count = 0
     while count < 20:
-        count = transceiver.get_core_state_count(app_id, CPUState.FINSHED)
+        count = transceiver.get_core_state_count(app_id, CPUState.FINISHED)
         print "Cores in state FINISHED={}".format(count)
-        sleep(0.1)
+        time.sleep(0.1)
     print ""
 
     print "Get IOBufs"
     print "=========="
     iobufs = transceiver.get_iobuf(core_subsets)
-    iobufs = sorted(iobufs, key=lambda x: (x.x, x.y, x.p))
     for iobuf in iobufs:
         print iobuf
     print ""
@@ -194,6 +193,7 @@ try:
     print "Stop Application"
     print "================"
     transceiver.send_signal(app_id, SCPSignal.STOP)
+    time.sleep(0.5)
     cpu_infos = transceiver.get_cpu_information(core_subsets)
     cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
     print "{} CPUs".format(len(cpu_infos))
@@ -261,10 +261,13 @@ try:
 
     print "Clear Router Diagnostics"
     print "========================"
-    transceiver.clear_router_diagnostic_counters(0, 0)
-    router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-    print router_diagnostics.registers
-    print ""
+    transceiver.clear_router_diagnostic_counters(
+        0, 0, counter_ids=[constants.ROUTER_REGISTER_REGISTERS.LOC_PP.value,
+                           constants.ROUTER_REGISTER_REGISTERS.EXT_PP.value])
+    diagnostics = transceiver.get_router_diagnostics(0, 0)
+    for register in constants.ROUTER_REGISTER_REGISTERS:
+        print "{}: {}".format(
+            register.name, diagnostics.registers[register.value])
 
     print "Send read requests"
     print "======================"
@@ -277,8 +280,10 @@ try:
 
     print "Get Router Diagnostics"
     print "======================"
-    router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-    print router_diagnostics.registers
+    diagnostics = transceiver.get_router_diagnostics(0, 0)
+    for register in constants.ROUTER_REGISTER_REGISTERS:
+        print "{}: {}".format(
+            register.name, diagnostics.registers[register.value])
     print ""
 
     print "Get Router Diagnostic Filters"

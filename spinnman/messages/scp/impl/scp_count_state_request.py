@@ -6,7 +6,6 @@ from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
 from spinnman.messages.scp.impl.scp_count_state_response import \
     SCPCountStateResponse
-from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _ALL_CORE_MASK = 0xFFFF
 _COUNT_OPERATION = 1
@@ -33,14 +32,7 @@ class SCPCountStateRequest(AbstractSCPRequest):
         :type app_id: int
         :param state: The state to count
         :type state: :py:class:`spinnman.model.cpu_state.CPUState`
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
-            app_id is out of range
         """
-
-        if app_id < 0 or app_id > 255:
-            raise SpinnmanInvalidParameterException(
-                "app_id", str(app_id), "Must be between 0 and 255")
-
         super(SCPCountStateRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

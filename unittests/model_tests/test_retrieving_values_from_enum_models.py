@@ -27,7 +27,7 @@ class TestingEnums(unittest.TestCase):
         self.assertEqual(CPUState.SYNC1.value,9)
 
         self.assertEqual(CPUState.PAUSED.value,10)
-        self.assertEqual(CPUState.FINSHED.value,11)
+        self.assertEqual(CPUState.FINISHED.value,11)
         self.assertEqual(CPUState.IDLE.value,15)
 
     def test_run_time_error_enum(self):
@@ -64,8 +64,8 @@ class TestingEnums(unittest.TestCase):
 
         self.assertEqual(router_diagnostics._REGISTERS.DUMP_NN.value,10)
         self.assertEqual(router_diagnostics._REGISTERS.DUMP_FR.value,11)
-        self.assertEqual(router_diagnostics._REGISTERS.USER_START.value,12)
-        self.assertEqual(router_diagnostics._REGISTERS.USER_END.value,16)
+        self.assertEqual(router_diagnostics._REGISTERS.USER_0.value,12)
+        self.assertEqual(router_diagnostics._REGISTERS.USER_3.value,15)
 
 
 if __name__ == '__main__':

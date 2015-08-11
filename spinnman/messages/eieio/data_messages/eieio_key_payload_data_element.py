@@ -3,6 +3,8 @@ from spinnman.messages.eieio.eieio_type import EIEIOType
 from spinnman.messages.eieio.data_messages.abstract_eieio_data_element \
     import AbstractEIEIODataElement
 
+import struct
+
 
 class EIEIOKeyPayloadDataElement(AbstractEIEIODataElement):
     """ A data element that contains a key and a payload
@@ -25,18 +27,16 @@ class EIEIOKeyPayloadDataElement(AbstractEIEIODataElement):
     def payload_is_timestamp(self):
         return self._payload_is_timestamp
 
-    def write_element(self, eieio_type, byte_writer):
+    def get_bytestring(self, eieio_type):
         if eieio_type.payload_bytes == 0:
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type,
                 "The type specifies no payload, but this element has a"
                 " payload")
         if eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
-            byte_writer.write_short(self._key)
-            byte_writer.write_short(self._payload)
+            return struct.pack("<HH", self._key, self._payload)
         elif eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:
-            byte_writer.write_int(self._key)
-            byte_writer.write_int(self._payload)
+            return struct.pack("<II", self._key, self._payload)
         else:
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type, "Unknown type")

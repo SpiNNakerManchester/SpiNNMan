@@ -42,7 +42,7 @@ class SCPSendSignalRequest(AbstractSCPRequest):
                 destination_cpu=0, destination_chip_x=0,
                 destination_chip_y=0),
             SCPRequestHeader(command=SCPCommand.CMD_SIG),
-            argument_1=signal.signal_type,
+            argument_1=signal.signal_type.value,
             argument_2=_get_data(app_id, signal),
             argument_3=_ALL_CORE_MASK)
 

@@ -4,6 +4,7 @@ from spinnman.messages.eieio.command_messages.eieio_command_header\
     import EIEIOCommandHeader
 from spinnman import constants
 from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
+import struct
 
 
 class HostSendSequencedData(EIEIOCommandMessage):
@@ -33,15 +34,14 @@ class HostSendSequencedData(EIEIOCommandMessage):
         return 4
 
     @staticmethod
-    def read_eieio_command_message(command_header, byte_reader):
-        region_id = byte_reader.read_byte()
-        sequence_no = byte_reader.read_byte()
-        eieio_data_message = read_eieio_data_message(byte_reader)
+    def from_bytestring(command_header, data, offset):
+        region_id, sequence_no = struct.unpack_from("<BB", data, offset)
+        eieio_data_message = read_eieio_data_message(data, offset)
         return HostSendSequencedData(region_id, sequence_no,
                                      eieio_data_message)
 
-    def write_eieio_message(self, writer):
-        EIEIOCommandMessage.write_eieio_message(self, writer)
-        writer.write_byte(self._region_id)
-        writer.write_byte(self._sequence_no)
-        self._eieio_data_message.write_eieio_message(writer)
+    @property
+    def bytestring(self):
+        return (super(HostSendSequencedData, self).bytestring + struct.pack(
+            "<BB", self._region_id, self._sequence_no) +
+            self._eieio_data_message.bytestring)

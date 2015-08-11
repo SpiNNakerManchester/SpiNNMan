@@ -33,8 +33,7 @@ class TestOkResponse(unittest.TestCase):
 
         seq = 103
         byte_stream = struct.pack('<HHHHHH',flag_tag_short,dest_source_short,dest_x_y_short, srce_x_y_short, result,seq)
-        byte_stream = LittleEndianByteArrayByteReader(bytearray(byte_stream))
-        scp.read_scp_response(byte_stream)
+        scp.read_bytestring(byte_stream, 0)
 
     def test_not_ok_response(self):
         with self.assertRaises(SpinnmanUnexpectedResponseCodeException):
@@ -61,8 +60,7 @@ class TestOkResponse(unittest.TestCase):
 
             seq = 103
             byte_stream = struct.pack('<HHHHHH',flag_tag_short,dest_source_short,dest_x_y_short, srce_x_y_short, result,seq)
-            byte_stream = LittleEndianByteArrayByteReader(bytearray(byte_stream))
-            scp.read_scp_response(byte_stream)
+            scp.read_bytestring(byte_stream, 0)
 
 if __name__ == '__main__':
     unittest.main()

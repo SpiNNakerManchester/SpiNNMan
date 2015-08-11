@@ -4,6 +4,14 @@ from six import add_metaclass
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_response_header import SCPResponseHeader
 
+# The offset of the header from the start of a received packet
+# (8 bytes of SDP header)
+_SCP_HEADER_OFFSET = 8
+
+# The offset of the data from the start of a received packet
+# (8 bytes of SDP header + 4 bytes of SCP header)
+_SCP_DATA_OFFSET = 12
+
 
 @add_metaclass(ABCMeta)
 class AbstractSCPResponse(object):
@@ -13,29 +21,33 @@ class AbstractSCPResponse(object):
     def __init__(self):
         """
         """
-        self._sdp_header = SDPHeader()
-        self._scp_response_header = SCPResponseHeader()
+        self._sdp_header = None
+        self._scp_response_header = None
+
+    def read_bytestring(self, data, offset):
+        """ Reads a packet from a bytestring of data
+
+        :param data: The data to be read
+        :type data: bytestring
+        :param offset: The offset in the data from which the response should\
+                    be read
+        :type offset: int
+        """
+        self._sdp_header = SDPHeader.from_bytestring(data, offset)
+        self._scp_response_header = SCPResponseHeader.from_bytestring(
+            data, _SCP_HEADER_OFFSET + offset)
+        self.read_data_bytestring(data, _SCP_DATA_OFFSET + offset)
 
     @abstractmethod
-    def read_scp_response(self, byte_reader):
-        """ Read the scp response from the given reader
+    def read_data_bytestring(self, data, offset):
+        """ Reads the remainder of the data following the header
 
-        :param byte_reader: The reader to read from
-        :type byte_reader:\
-                    :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    reading from the reader
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If there\
-                    are not enough bytes to read the header
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
-                    is an error setting any of the values
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    the response code indicates an error
+        :param data: The data to read from
+        :type data: bytestring
+        :param offset: The offset into the data after the headers
+        :type offset: int
         """
-        self._sdp_header.read_sdp_header(byte_reader)
-        self._scp_response_header.read_scp_response_header(byte_reader)
+        pass
 
     @property
     def sdp_header(self):
@@ -52,7 +64,8 @@ class AbstractSCPResponse(object):
         """ The SCP header from the response
 
         :return: The SCP header
-        :rtype: :py:class:`spinnman.messages.scp.scp_response_header.SCPResponseHeader`
+        :rtype:\
+                    :py:class:`spinnman.messages.scp.scp_response_header.SCPResponseHeader`
         :raise None: No known exceptions are raised
         """
         return self._scp_response_header

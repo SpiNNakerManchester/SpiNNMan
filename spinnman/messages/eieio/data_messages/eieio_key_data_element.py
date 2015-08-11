@@ -3,6 +3,8 @@ from spinnman.messages.eieio.eieio_type import EIEIOType
 from spinnman.messages.eieio.data_messages.abstract_eieio_data_element \
     import AbstractEIEIODataElement
 
+import struct
+
 
 class EIEIOKeyDataElement(AbstractEIEIODataElement):
     """ A data element that contains just a key
@@ -15,16 +17,16 @@ class EIEIOKeyDataElement(AbstractEIEIODataElement):
     def key(self):
         return self._key
 
-    def write_element(self, eieio_type, byte_writer):
+    def get_bytestring(self, eieio_type):
         if eieio_type.payload_bytes != 0:
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type,
                 "The type specifies a payload, but this element has no"
                 " payload")
         if eieio_type == EIEIOType.KEY_16_BIT:
-            byte_writer.write_short(self._key)
+            return struct.pack("<H", self._key)
         elif eieio_type == EIEIOType.KEY_32_BIT:
-            byte_writer.write_int(self._key)
+            return struct.pack("<I", self._key)
         else:
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type, "Unknown type")

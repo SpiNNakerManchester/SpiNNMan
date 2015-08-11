@@ -38,10 +38,8 @@ class TestSCPVersionResponse(unittest.TestCase):
             '<8BHHHBBHHI15s', flags, tag, dest_port_cpu, srce_port_cpu, dest_y,
             dest_x, srce_y, srce_x, rc, seq, p2p_addr, phys_cpu, virt_cpu,
             version, buffer, build_date, ver_string)
-        data = bytearray(data)
-        reader = LittleEndianByteArrayByteReader(data)
         self.assertEqual(response.version_info, None)
-        response.read_scp_response(reader)
+        response.read_bytestring(data, 0)
         print response.version_info
 
 if __name__ == '__main__':

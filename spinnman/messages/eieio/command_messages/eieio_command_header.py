@@ -1,4 +1,5 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
+import struct
 
 
 class EIEIOCommandHeader(object):
@@ -17,13 +18,14 @@ class EIEIOCommandHeader(object):
         return self._command
 
     @staticmethod
-    def read_eieio_header(byte_reader):
-        """ Read an eieio command header from a byte_reader
+    def from_bytestring(data, offset):
+        """ Read an eieio command header from a bytestring
 
-        :param byte_reader: The reader to read the data from
-        :type byte_reader:\
-                    :py:class:`spinnman.data.abstract_byte_reader.AbstractByteReader`
-        :return: an eieio command header
+        :param data: The bytestring to read the data from
+        :type data: bytestring
+        :param offset: The offset where the valid data starts
+        :type offset: int
+        :return: an EIEIO command header
         :rtype:\
                     :py:class:`spinnman.messages.eieio.command_messages.eieio_command_header.EIEIOCommandHeader`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -31,17 +33,15 @@ class EIEIOCommandHeader(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
                     is an error setting any of the values
         """
-        command_header = byte_reader.read_short()
+        command_header = struct.unpack_from("<H", data, offset)[0]
         command = command_header & 0x3FFF
 
         return EIEIOCommandHeader(command)
 
-    def write_eieio_header(self, writer):
-        """ Write the command header to a writer
+    @property
+    def bytestring(self):
+        """ Get a bytestring of the header
 
-        :param writer: the writer to write the header to
-        :type writer:\
-                    :py:class:`spinnman.data.abstract_byte_writer.AbstractByteWriter`
-        :return: None
+        :rtype: bytestring
         """
-        writer.write_short(0 << 15 | 1 << 14 | self._command)
+        return struct.pack("<H", 0 << 15 | 1 << 14 | self._command)

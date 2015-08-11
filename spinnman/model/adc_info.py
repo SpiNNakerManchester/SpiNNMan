@@ -3,7 +3,6 @@ ADCInfo
 """
 
 # spinnman imports
-from spinnman import exceptions
 from spinnman import constants
 
 # general imports
@@ -15,28 +14,23 @@ class ADCInfo(object):
     container for the ADC data thats been retrieved from a fpga
     """
 
-    def __init__(self, adc_data):
+    def __init__(self, adc_data, offset):
         """
         :param adc_data: bytes from an SCP packet containing adc\
                     information
-        :type adc_data: bytearray
+        :type adc_data: bytestring
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     message does not contain valid adc information
         """
-
-        if len(adc_data) != 48:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "len(adc_data)", str(len(adc_data)),
-                "The length of the version data is too short")
-
-        data = struct.unpack("<"   # Little-endian
-                             "8H"  # uint16_t adc[8]
-                             "4h"  # int16_t t_int[4]
-                             "4h"  # int16_t t_ext[4]
-                             "4h"  # int16_t fan[4]
-                             "I"   # uint32_t warning
-                             "I",  # uint32_t shutdown
-                             str(adc_data))
+        data = struct.unpack_from(
+            "<"   # Little-endian
+            "8H"  # uint16_t adc[8]
+            "4h"  # int16_t t_int[4]
+            "4h"  # int16_t t_ext[4]
+            "4h"  # int16_t fan[4]
+            "I"   # uint32_t warning
+            "I",  # uint32_t shutdown
+            adc_data, offset)
 
         self._voltage_1_2c = data[1] * constants.BMP_V_SCALE_2_5
         self._voltage_1_2b = data[2] * constants.BMP_V_SCALE_2_5

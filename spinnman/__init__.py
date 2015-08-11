@@ -124,12 +124,4 @@
         * :py:meth:`~spinnman.transceiver.Transceiver.read_memory` is used\
           to read some statistics recorded in SDRAM after a simulation
 
-        * :py:meth:`~spinnman.transceiver.Transceiver.set_ip_tag` and\
-          :py:class:`~spinnman.connections.scp_listener.SCPListener` are used\
-          to set up an IP Tag on the machine and receive transmitted SCP\
-          packets from the machine
-
-        * :py:meth:`~spinnman.transceiver.Transceiver.send_multicast` and\
-          :py:meth:`~spinnman.transceiver.Transceiver.send_scp_message` are\
-          used to inject packets in to the machine from the host
 """

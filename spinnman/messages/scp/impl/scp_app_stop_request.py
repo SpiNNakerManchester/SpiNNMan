@@ -5,7 +5,6 @@ from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 
 _APP_MASK = 0xFF
@@ -28,14 +27,7 @@ class SCPAppStopRequest(AbstractSCPRequest):
         :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
-            app_id is out of range
         """
-
-        if app_id < 0 or app_id > 255:
-            raise SpinnmanInvalidParameterException(
-                "app_id", str(app_id), "Must be between 0 and 255")
-
         super(SCPAppStopRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
