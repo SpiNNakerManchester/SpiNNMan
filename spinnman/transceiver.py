@@ -1,3 +1,8 @@
+"""
+Transceiver
+"""
+
+# local imports
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
@@ -25,7 +30,6 @@ from spinnman.connections.abstract_classes.abstract_multicast_sender\
     import AbstractMulticastSender
 from spinnman.connections.abstract_classes.abstract_scp_receiver\
     import AbstractSCPReceiver
-import random
 from spinnman.processes.get_machine_process import GetMachineProcess
 from spinnman.processes.get_version_process import GetVersionProcess
 from spinnman.processes.write_memory_process import WriteMemoryProcess
@@ -40,9 +44,8 @@ from spinnman.connections.connection_listener import ConnectionListener
 from spinnman.processes.write_memory_flood_process \
     import WriteMemoryFloodProcess
 from spinnman.processes.get_tags_process import GetTagsProcess
-from spinnman.processes.load_routes_process import LoadRoutesProcess
-from spinnman.processes.get_routes_process import GetRoutesProcess
-import struct
+from spinnman.processes.load_routes_process import LoadMultiCastRoutesProcess
+from spinnman.processes.get_routes_process import GetMultiCastRoutesProcess
 from spinnman.processes.send_single_command_process \
     import SendSingleCommandProcess
 from spinnman.processes.read_router_diagnostics_process \
@@ -55,10 +58,8 @@ from spinnman.connections.udp_packet_connections.udp_scamp_connection \
     import UDPSCAMPConnection
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
-
 from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.model.core_subsets import CoreSubsets
-
 from spinnman.messages.spinnaker_boot.spinnaker_boot_messages \
     import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_memory_request \
@@ -80,19 +81,18 @@ from spinnman.messages.scp.impl.scp_router_clear_request \
 from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
 from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
-
 from spinnman.data.abstract_data_reader import AbstractDataReader
-
-from spinnman import _utils
+from spinnman.utilities import utiltiy_functions
 from spinnman import exceptions
 
+#general imports
+import random
+import struct
 from threading import Condition
 from collections import defaultdict
-
 import logging
-import time
 import socket
-
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +101,9 @@ _SCAMP_VERSION = 1.33
 
 _BMP_NAME = "BC&MP"
 _BMP_VERSIONS = [1.3, 1.33, 1.37, 1.36]
+
+_STANDARD_RETIRES_NO = 3
+INITIAL_FIND_SCAMP_RETRIES_COUNT = 1
 
 
 def create_transceiver_from_hostname(
@@ -157,7 +160,8 @@ def create_transceiver_from_hostname(
     # final value of the IP address
     if version >= 4 and (bmp_connection_data is None or
                          len(bmp_connection_data) == 0):
-        bmp_connection_data = [_utils.work_out_bmp_from_machine_details(
+        bmp_connection_data = [
+            utiltiy_functions.work_out_bmp_from_machine_details(
             hostname, number_of_boards)]
 
     # handle BMP connections
@@ -485,11 +489,13 @@ class Transceiver(object):
         # Release the execute lock
         self._chip_execute_lock_condition.release()
 
-    def _get_random_connection(self, connections, connection=None):
-        """ Returns the given connection, or else picks one at random
+    def _get_random_connection(self, connections):
         """
-        if connection is not None:
-            return connection
+        Returns the given connection, or else picks one at random
+        :param connections: the list of connections to locate a random one from
+        :type connections: a iterable of Abstract connection
+        :return: a connection object
+        """
         if len(connections) == 0:
             return None
         pos = random.randint(0, len(connections) - 1)
@@ -522,8 +528,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     the response is not one of the expected codes
         """
-        connection_to_use = self._get_random_connection(
-            self._scp_sender_connections, connection)
+        if connection is None:
+            connection_to_use = self._get_random_connection(
+                self._scp_sender_connections)
+        else:
+            connection_to_use = connection
         connection_to_use.send_scp_request(message)
 
     def send_sdp_message(self, message, connection=None):
@@ -536,8 +545,11 @@ class Transceiver(object):
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
         :return: None
         """
-        connection_to_use = self._get_random_connection(
-            self._sdp_sender_connections, connection)
+        if connection is None:
+            connection_to_use = self._get_random_connection(
+                self._sdp_sender_connections)
+        else:
+            connection_to_use = connection
         connection_to_use.send_sdp_message(message)
 
     def send_multicast_message(self, x, y, multicast_message, connection=None):
@@ -580,7 +592,9 @@ class Transceiver(object):
             self._max_core_id)
         self._machine = get_machine_process.get_machine_details()
         self._chip_info = get_machine_process.get_chip_info()
-        logger.info(self._machine.cores_and_link_output_string())
+        logger.info("Detected a machine on ip address {} which has {}"
+                    .format(self._boot_send_connection.remote_ip_address,
+                            self._machine.cores_and_link_output_string()))
 
     def discover_scamp_connections(self):
         """ Find connections to the board and store these for future use.\
@@ -606,7 +620,9 @@ class Transceiver(object):
         # that supports SCP - this is done via the machine
         if len(self._udp_scamp_connections) == 0:
             return list()
-        self._update_machine()
+        # if the machine hasnt been created, create it
+        if self._machine is None:
+            self._update_machine()
 
         # Find all the new connections via the machine ethernet-connected chips
         new_connections = list()
@@ -614,7 +630,8 @@ class Transceiver(object):
             if chip.ip_address not in self._udp_scamp_connections:
                 new_connection = UDPSCAMPConnection(
                     remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
-                if self._try_sver_though_scamp_connection(new_connection, 3):
+                if self._try_sver_though_scamp_connection(new_connection,
+                                                          _STANDARD_RETIRES_NO):
                     new_connections.append(new_connection)
                     self._udp_scamp_connections[chip.ip_address] = \
                         new_connection
@@ -625,15 +642,10 @@ class Transceiver(object):
         # Update the connection queues after finding new connections
         return new_connections
 
-    def get_connections(self, include_boot_connection=False):
+    def get_connections(self):
         """ Get the currently known connections to the board, made up of those\
             passed in to the transceiver and those that are discovered during\
             calls to discover_connections.  No further discovery is done here.
-
-        :param include_boot_connection: this parameter signals if the returned\
-               list of connections should include also the boot connection to\
-               SpiNNaker
-        :type include_boot_connection: bool
         :return: An iterable of connections known to the transceiver
         :rtype: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
@@ -705,10 +717,9 @@ class Transceiver(object):
     def get_scamp_version(self, chip_x=0, chip_y=0, connection=None):
         """ Get the version of scamp which is running on the board
 
-        :param n_retries: The number of times to retry getting the version
-        :type n_retries: int
-        :param timeout: The timeout for each retry in seconds
-        :type timeout: int
+        :param connection: the connection to send the scamp version or none (if
+            none then a random scamp connection is used)
+        :type connection: a instance of a SCPConnection
         :param chip_x: the chip's x coordinate to query for scamp version
         :type chip_x: int
         :param chip_y: the chip's y coordinate to query for scamp version
@@ -750,7 +761,7 @@ class Transceiver(object):
         logger.debug("Attempting to boot version {} board".format(
             board_version))
         if width is None or height is None:
-            dims = _utils.get_ideal_size(number_of_boards, board_version)
+            dims = utiltiy_functions.get_ideal_size(number_of_boards, board_version)
             width = dims.width
             height = dims.height
         boot_messages = SpinnakerBootMessages(
@@ -790,17 +801,18 @@ class Transceiver(object):
 
         # if the machine sizes not been given, calculate from assumption
         if width is None or width is None:
-            dims = _utils.get_ideal_size(number_of_boards, board_version)
+            dims = utiltiy_functions.get_ideal_size(number_of_boards, board_version)
             width = dims.width
             height = dims.height
 
         # try to get a scamp version once
         logger.info("going to try to boot the machine with scamp")
         version_info = self._try_to_find_scamp_and_boot(
-            1, board_version, number_of_boards, width, height)
+            INITIAL_FIND_SCAMP_RETRIES_COUNT, board_version,
+            number_of_boards, width, height)
 
         # If we fail to get a SCAMP version this time, try other things
-        if version_info is None:
+        if version_info is None and board_version >= 4:
             logger.info("failed to boot machine with scamp,"
                         " trying to power on machine")
 
@@ -817,7 +829,9 @@ class Transceiver(object):
 
         # verify that the version is the expected one for this trnasciever
         if version_info is None:
-            raise exceptions.SpinnmanIOException("Could not boot the board")
+            raise exceptions.SpinnmanIOException(
+                "We currently cannot communicate with your board, please "
+                "rectify this, and try again")
         if (version_info.name != _SCAMP_NAME or
                 version_info.version_number != _SCAMP_VERSION):
             raise exceptions.SpinnmanIOException(
@@ -838,7 +852,8 @@ class Transceiver(object):
             process = SendSingleCommandProcess(
                 self._machine, [scamp_connection])
             process.execute(SCPIPTagTTORequest(
-                scamp_connection.chip_x, scamp_connection.chip_y, 5))
+                scamp_connection.chip_x, scamp_connection.chip_y,
+                constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_160_ms.value))
 
         return version_info
 
@@ -865,19 +880,16 @@ class Transceiver(object):
                 self.boot_board(board_version, number_of_boards, width, height)
                 current_tries_to_go -= 1
             except exceptions.SpinnmanIOException:
-                raise exceptions.SpinnmanUnexpectedResponseCodeException(
+                raise exceptions.SpinnmanIOException(
                     "We currently cannot communicate with your board, please "
-                    "rectify this, and try again", "", "")
+                    "rectify this, and try again")
 
         # The last thing we tried was booting, so try again to get the version
-        try:
-            version_info = self.get_scamp_version()
-        except exceptions.SpinnmanTimeoutException:
-            pass
-        except exceptions.SpinnmanIOException:
-            raise exceptions.SpinnmanUnexpectedResponseCodeException(
-                "We currently cannot communicate with your board, please "
-                "rectify this, and try again", "", "")
+        if version_info is None:
+            try:
+                version_info = self.get_scamp_version()
+            except exceptions.SpinnmanException:
+                pass
 
         # boot has been sent, and 0 0 is up and running, but there will need to
         # be a delay whilst all the other chips complete boot.
@@ -901,7 +913,7 @@ class Transceiver(object):
         if self._check_if_machine_has_wrap_arounds():
 
             # Use the middle of the machine
-            chips_to_check = _utils.locate_middle_chips_to_query(
+            chips_to_check = utiltiy_functions.locate_middle_chips_to_query(
                 width, height, self._ignore_chips)
         else:
 
@@ -1321,8 +1333,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(
                 self._machine, [bmp_connection],
                 timeout=constants.BMP_POWER_ON_TIMEOUT, n_retries=0)
-            process.execute(
-                SCPPowerRequest(power_command, boards))
+            process.execute(SCPPowerRequest(power_command, boards))
         else:
             raise exceptions.SpinnmanInvalidParameterException(
                 "cabinet and frame", "{} and {}".format(cabinet, frame),
@@ -1511,10 +1522,12 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(x, y, cpu, base_address, data,
                                              n_bytes)
-        elif isinstance(data, (int, long)):
-            data_to_write = bytearray(4)
-            for i in range(0, 4):
-                data_to_write[i] = (data >> (8 * i)) & 0xFF
+        elif isinstance(data, int):
+            data_to_write = struct.pack('I', data)
+            process.write_memory_from_bytearray(x, y, cpu, base_address,
+                                                data_to_write, 0, 4)
+        elif isinstance(data, long):
+            data_to_write = struct.pack('L', data)
             process.write_memory_from_bytearray(x, y, cpu, base_address,
                                                 data_to_write, 0, 4)
         else:
@@ -1556,7 +1569,8 @@ class Transceiver(object):
                           will be used
                         * If data is an int, 4 will be used
         :type n_bytes: int
-        :param offset: The offset where the valid data starts
+        :param offset: The offset where the valid data starts (if the data is a \
+                        int then offset will be ignored and used 0
         :type offset: int
         :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
         :type cpu: int
@@ -1581,19 +1595,21 @@ class Transceiver(object):
 
         process = WriteMemoryProcess(self._scamp_connections)
         if isinstance(data, AbstractDataReader):
-            process.write_link_memory_from_reader(x, y, cpu, base_address,
-                                                  data, n_bytes)
-        elif isinstance(data, (int, long)):
-            data_to_write = bytearray(4)
-            for i in range(0, 4):
-                data_to_write[i] = (data >> (8 * i)) & 0xFF
-            process.write_link_memory_from_bytearray(x, y, cpu, base_address,
-                                                     data_to_write, 0, 4)
+            process.write_link_memory_from_reader(
+                x, y, cpu, link, base_address, data, n_bytes)
+        elif isinstance(data, int):
+            data_to_write = struct.pack("I")
+            process.write_link_memory_from_bytearray(
+                x, y, cpu, link, base_address, data_to_write, 0, 4)
+        elif isinstance(data, long):
+            data_to_write = struct.pack("L")
+            process.write_link_memory_from_bytearray(
+                x, y, cpu, link, base_address, data_to_write, 0, 4)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
-            process.write_link_memory_from_bytearray(x, y, cpu, base_address,
-                                                     data, offset, n_bytes)
+            process.write_link_memory_from_bytearray(
+                x, y, cpu, link, base_address, data, offset, n_bytes)
 
     def write_memory_flood(self, base_address, data, n_bytes=None, offset=0):
         """ Write to the SDRAM of all chips.
@@ -1617,7 +1633,8 @@ class Transceiver(object):
                         * If data is an int, 4 will be used
                         * If n_bytes is less than 0
         :type n_bytes: int
-        :param offset: The offset where the valid data starts
+        :param offset: The offset where the valid data starts, if the data is \
+                        a int, then the offset will be ignored and 0 is used.
         :type offset: int
         :return: Nothing is returned
         :rtype: None
@@ -1643,10 +1660,12 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)
-        elif isinstance(data, (int, long)):
-            data_to_write = bytearray(4)
-            for i in range(0, 4):
-                data_to_write[i] = (data >> (8 * i)) & 0xFF
+        elif isinstance(data, int):
+            data_to_write = struct.pack("I")
+            process.write_memory_from_bytearray(
+                nearest_neighbour_id, base_address, data_to_write, 0, 4)
+        elif isinstance(data, long):
+            data_to_write = struct.pack("L")
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 4)
         else:
@@ -1672,6 +1691,8 @@ class Transceiver(object):
         :type base_address: int
         :param length: The length of the data to be read in bytes
         :type length: int
+        :param cpu: the core id used to read the memory of
+        :type cpu: int
         :return: A bytearray of data read
         :rtype: bytearray
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2011,7 +2032,8 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        process = LoadRoutesProcess(self._machine, self._scamp_connections)
+        process = LoadMultiCastRoutesProcess(self._machine,
+                                             self._scamp_connections)
         process.load_routes(x, y, routes, app_id)
 
     def get_multicast_routes(self, x, y, app_id=None):
@@ -2040,7 +2062,7 @@ class Transceiver(object):
             self._update_machine()
         chip_info = self._chip_info[(x, y)]
         base_address = chip_info.router_table_copy_address()
-        process = GetRoutesProcess(self._scamp_connections, app_id)
+        process = GetMultiCastRoutesProcess(self._scamp_connections, app_id)
         return process.get_routes(x, y, base_address)
 
     def clear_multicast_routes(self, x, y):
@@ -2316,9 +2338,9 @@ class Transceiver(object):
                     if "0.0.0.0" in receiving_connections:
                         raise exceptions.SpinnmanInvalidPacketException(
                             "local_port and local_host",
-                            "{} and {}".format(local_port, local_host),
-                            "Another connection is already listening on this"
-                            " port on all interfaces")
+                            "{} and {} Another connection is already listening "
+                            "on this port on all interfaces"
+                            .format(local_port, local_host))
 
                 # If the type of an existing connection is wrong, this is an
                 # error

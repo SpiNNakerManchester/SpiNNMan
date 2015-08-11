@@ -13,7 +13,7 @@ from spinnman.processes.abstract_multi_connection_process \
 import struct
 
 
-class LoadRoutesProcess(AbstractMultiConnectionProcess):
+class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, machine, connections):
         AbstractMultiConnectionProcess.__init__(

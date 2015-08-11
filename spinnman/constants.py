@@ -104,4 +104,72 @@ EIEIO_COMMAND_IDS = Enum(
         ("SPINNAKER_REQUEST_READ_DATA", 8),
 
         # Host confirming data being read form SpiNNaker memory
-        ("HOST_DATA_READ", 9)])
+        ("HOST_DATA_READ", 9)]
+)
+
+# the values used by the SCP iptag time outs. These control how long to wait
+# for any message request which requires a response, before raising an error.
+# The value is calcualted via the following formulae
+# 10ms * 2^(tag_timeout_value - 1)
+IPTAG_TIME_OUT_WAIT_TIMES = Enum(
+    value="IPTAG_TIME_OUT_WAIT_TIMES",
+    names=[
+        ("TIMEOUT_10_ms", 1),
+        ("TIMEOUT_20_ms", 2),
+        ("TIMEOUT_40_ms", 3),
+        ("TIMEOUT_80_ms", 4),
+        ("TIMEOUT_160_ms", 5),
+        ("TIMEOUT_320_ms", 6),
+        ("TIMEOUT_640_ms", 7),
+        ("TIMEOUT_1280_ms", 8),
+        ("TIMEOUT_2560_ms", 9)]
+)
+
+ROUTER_REGISTER_REGISTERS = Enum(
+    value="Registers",
+    names=[("LOC_MC", 0),
+           ("EXT_MC", 1),
+           ("LOC_PP", 2),
+           ("EXT_PP", 3),
+           ("LOC_NN", 4),
+           ("EXT_NN", 5),
+           ("LOC_FR", 6),
+           ("EXT_FR", 7),
+           ("DUMP_MC", 8),
+           ("DUMP_PP", 9),
+           ("DUMP_NN", 10),
+           ("DUMP_FR", 11),
+           ("USER_0", 12),
+           ("USER_1", 13),
+           ("USER_2", 14),
+           ("USER_3", 15)]
+)
+# the types of read avilable from SARK. These values are used to tell sark how
+# to read the data in a time efficent manner.
+READ_TYPES = Enum(
+    value="Read_types",
+    names=[("BYTE", 0),
+           ("HALF_WORD", 1),
+           ("WORD", 2)]
+)
+
+# This is a mapping between read address in the mapping between word byte
+# position, the number of bytes you wish to read, and the type of time
+# efficent way to read said amount of bytes via sark
+address_length_dtype = {
+    (0, 0): READ_TYPES.WORD,
+    (0, 1): READ_TYPES.BYTE,
+    (0, 2): READ_TYPES.HALF_WORD,
+    (0, 3): READ_TYPES.BYTE,
+    (1, 0): READ_TYPES.BYTE,
+    (1, 1): READ_TYPES.BYTE,
+    (1, 2): READ_TYPES.BYTE,
+    (1, 3): READ_TYPES.BYTE,
+    (2, 0): READ_TYPES.HALF_WORD,
+    (2, 1): READ_TYPES.BYTE,
+    (2, 2): READ_TYPES.HALF_WORD,
+    (2, 3): READ_TYPES.BYTE,
+    (3, 0): READ_TYPES.BYTE,
+    (3, 1): READ_TYPES.BYTE,
+    (3, 2): READ_TYPES.BYTE,
+    (3, 3): READ_TYPES.BYTE}

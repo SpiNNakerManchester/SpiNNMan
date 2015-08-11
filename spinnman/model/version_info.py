@@ -8,10 +8,12 @@ class VersionInfo(object):
     """ Decodes SC&MP/SARK version information as returned by the SVER command
     """
 
-    def __init__(self, version_data, offset):
+    def __init__(self, version_data, offset=0):
         """
         :param version_data: bytes from an SCP packet containing version\
                     information
+        :param offset: the offset in the bytes from an SCP packet containing
+                       version information
         :type version_data: bytearray
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     message does not contain valid version information

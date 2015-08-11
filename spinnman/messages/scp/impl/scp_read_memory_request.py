@@ -6,7 +6,7 @@ from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
 from spinnman.messages.scp.impl.scp_read_memory_response import \
     SCPReadMemoryResponse
-from spinnman.messages.scp.impl.scp_utils import address_length_dtype
+from spinnman import constants
 
 
 class SCPReadMemoryRequest(AbstractSCPRequest):
@@ -36,7 +36,8 @@ class SCPReadMemoryRequest(AbstractSCPRequest):
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_READ),
             argument_1=base_address, argument_2=size,
-            argument_3=address_length_dtype[(base_address % 4, size % 4)])
+            argument_3=constants.address_length_dtype[
+                (base_address % 4, size % 4)].value)
 
     def get_scp_response(self):
         """ See\

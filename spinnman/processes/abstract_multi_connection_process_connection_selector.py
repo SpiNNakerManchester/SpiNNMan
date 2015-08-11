@@ -19,7 +19,6 @@ class AbstractMultiConnectionProcessConnectionSelector(object):
         """ Get the index of the  next connection for the process from a list\
             of connections
 
-        :param connections: a list of connections to choose from
         :param message: The SCP message to be sent
         :rtype: int
         """

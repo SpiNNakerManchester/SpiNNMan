@@ -9,6 +9,7 @@ from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
+from spinnman import constants
 
 
 class ReadIOBufProcess(AbstractMultiConnectionProcess):
@@ -65,7 +66,8 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         while bytes_to_read > 0:
 
             # Read the next bit of memory making up the buffer
-            next_bytes_to_read = min((bytes_to_read, 256))
+            next_bytes_to_read = min((bytes_to_read,
+                                      constants.UDP_MESSAGE_MAX_SIZE))
             self._extra_reads.append((x, y, p, n, base_address,
                                       next_bytes_to_read, read_offset))
             base_address += next_bytes_to_read
@@ -91,7 +93,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         for cpu_info in cpu_information:
             this_chip_info = chip_info[(cpu_info.x, cpu_info.y)]
             iobuf_size = this_chip_info.iobuf_size + 16
-            first_read_size = min((iobuf_size, 256))
+            first_read_size = min((iobuf_size, constants.UDP_MESSAGE_MAX_SIZE))
 
             self._next_reads.append((cpu_info.x, cpu_info.y, cpu_info.p, 0,
                                      cpu_info.iobuf_address, first_read_size))

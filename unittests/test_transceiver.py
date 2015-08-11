@@ -44,7 +44,7 @@ class TestTransceiver(unittest.TestCase):
         connections.append(UDPBootConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(connections)
-        instantiated_connections = trans.get_connections(True)
+        instantiated_connections = trans.get_connections()
 
         for connection in connections:
             self.assertTrue(connection in instantiated_connections)

@@ -4,6 +4,7 @@ from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
+from spinnman import constants
 
 
 class ReadMemoryProcess(AbstractMultiConnectionProcess):
@@ -37,8 +38,8 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
         while n_bytes > 0:
 
             bytes_to_get = n_bytes
-            if bytes_to_get > 256:
-                bytes_to_get = 256
+            if bytes_to_get > constants.UDP_MESSAGE_MAX_SIZE:
+                bytes_to_get = constants.UDP_MESSAGE_MAX_SIZE
 
             response_handler = functools.partial(self.handle_response, offset)
             self._send_request(

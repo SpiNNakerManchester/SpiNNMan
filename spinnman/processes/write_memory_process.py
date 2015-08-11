@@ -4,6 +4,7 @@ from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman.messages.scp.impl.scp_write_memory_request \
     import SCPWriteMemoryRequest
+from spinnman import constants
 
 import functools
 
@@ -17,8 +18,19 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             self, connections, next_connection_selector,
             n_channels=1, intermediate_channel_waits=0)
 
-    def write_memory_from_bytearray(self, x, y, p, base_address, data, offset,
-                                    n_bytes):
+    def write_memory_from_bytearray(
+            self, x, y, p, base_address, data, offset, n_bytes):
+        """
+        writes memory onto a spinnaker chip from a bytearray
+        :param x: the x coord of the chip in question
+        :param y: the y coord of the chip in question
+        :param p: the p coord of the chip in question
+        :param base_address: the address in sdram to start writing
+        :param data: the data to write
+        :param offset: where in the data to start writing from
+        :param n_bytes: hwo much data to write
+        :return:
+        """
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
             functools.partial(SCPWriteMemoryRequest, x=x, y=y, cpu=p))
@@ -48,8 +60,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         while n_bytes_to_write > 0:
 
             bytes_to_send = n_bytes_to_write
-            if bytes_to_send > 256:
-                bytes_to_send = 256
+            if bytes_to_send > constants.UDP_MESSAGE_MAX_SIZE:
+                bytes_to_send = constants.UDP_MESSAGE_MAX_SIZE
 
             request = packet_class(
                 base_address=offset,
@@ -69,8 +81,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         while n_bytes_to_write > 0:
 
             bytes_to_send = n_bytes_to_write
-            if bytes_to_send > 256:
-                bytes_to_send = 256
+            if bytes_to_send > constants.UDP_MESSAGE_MAX_SIZE:
+                bytes_to_send = constants.UDP_MESSAGE_MAX_SIZE
             data_array = data.read(bytes_to_send)
             data_length = len(data_array)
 

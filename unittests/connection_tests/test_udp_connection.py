@@ -4,8 +4,7 @@ from spinnman.connections.udp_packet_connections.udp_scamp_connection \
     import UDPSCAMPConnection
 import spinnman.exceptions as exc
 from spinnman.messages.scp.impl import scp_read_link_request,\
-    scp_read_link_response, scp_read_memory_request, scp_read_memory_response,\
-    scp_version_request, scp_version_response
+    scp_read_memory_request, scp_version_request, scp_version_response
 from spinnman.messages.scp.scp_result import SCPResult
 
 
@@ -55,18 +54,6 @@ class TestUDPConnection(unittest.TestCase):
             scp = scp_read_memory_request.SCPReadMemoryRequest(0, 0, 0, 256)
             connection.send_scp_request(scp)
             _, _, _, _ = connection.receive_scp_response(2)
-
-    # def test_send_boot_message(self):
-    #     self.set_up_remote_board()
-    #     connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
-
-    # def test_scp_read_link_request_and_response_virtual_board(self):
-    #     self.set_up_local_virtual_board()
-    #     connection = udp_conn.UDPConnection(self.localhost,self.localport,self.remotehost,self.remoteport)
-    #     scp_link = scp_read_link_request.SCPReadLinkRequest(0,0,0,0,250)
-    #     scp_link_reader = scp_read_memory_response.SCPReadMemoryResponse()
-    #     connection.send_scp_request(scp_link)
-    #     print connection.receive_scp_response(scp_link_reader)
 
 if __name__ == '__main__':
     unittest.main()

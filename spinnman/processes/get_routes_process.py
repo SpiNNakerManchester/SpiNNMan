@@ -3,6 +3,7 @@ from spinnman.messages.scp.impl.scp_read_memory_request \
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
+from spinnman import constants
 
 import functools
 import struct
@@ -17,7 +18,7 @@ _ENTRIES_PER_READ = 16
 _N_READS = 64
 
 
-class GetRoutesProcess(AbstractMultiConnectionProcess):
+class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connections, app_id=None,
                  next_connection_selector=None):
@@ -51,7 +52,8 @@ class GetRoutesProcess(AbstractMultiConnectionProcess):
         offset = 0
         for _ in range(_N_READS):
             self._send_request(
-                SCPReadMemoryRequest(x, y, base_address + (offset * 16), 256),
+                SCPReadMemoryRequest(x, y, base_address + (offset * 16),
+                                     constants.UDP_MESSAGE_MAX_SIZE),
                 functools.partial(self.handle_read_response, offset))
             offset += _ENTRIES_PER_READ
         self._finish()

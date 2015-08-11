@@ -156,11 +156,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._finish()
 
         # Continue until there is nothing to search (and no exception)
-        while (not self.is_error() and len(self._search) > 0):
+        while not self.is_error() and len(self._search) > 0:
 
             # Set up the next round of searches using everything that
             # needs to search (same loop as above, I know, but wait for it)
-            while (not self.is_error() and len(self._search) > 0):
+            while not self.is_error() and len(self._search) > 0:
                 chip_info = self._search.pop()
 
                 # Examine the links of the chip to find the next chips

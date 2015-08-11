@@ -21,10 +21,8 @@ class SCPIPTagTTORequest(AbstractSCPRequest):
         :type x: int
         :param y: The y-coordinate of the chip to run on, between 0 and 255
         :type y: int
-        :param tag_timeout: The timeout value, between 1 and 16.  The actual \
-                timeout is 10ms * 2^(tag_timeout - 1) i.e. \
-                1=10ms, 2=20ms, 3=40ms, 4=80ms, 5=160ms, 6=320ms, 7=640ms,
-                8=1280ms, 9=2560ms
+        :param tag_timeout: The timeout value, via the IPTAG_TIME_OUT_WAIT_TIMES\
+            enum located in spinnman.constants
         """
 
         super(SCPIPTagTTORequest, self).__init__(
