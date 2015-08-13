@@ -85,7 +85,7 @@ from spinnman.data.abstract_data_reader import AbstractDataReader
 from spinnman.utilities import utiltiy_functions
 from spinnman import exceptions
 
-#general imports
+# general imports
 import random
 import struct
 from threading import Condition
@@ -631,8 +631,8 @@ class Transceiver(object):
             if chip.ip_address not in self._udp_scamp_connections:
                 new_connection = UDPSCAMPConnection(
                     remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
-                if self._try_sver_though_scamp_connection(new_connection,
-                                                          _STANDARD_RETIRES_NO):
+                if self._try_sver_though_scamp_connection(
+                        new_connection, _STANDARD_RETIRES_NO):
                     new_connections.append(new_connection)
                     self._udp_scamp_connections[chip.ip_address] = \
                         new_connection
@@ -762,7 +762,8 @@ class Transceiver(object):
         logger.debug("Attempting to boot version {} board".format(
             board_version))
         if width is None or height is None:
-            dims = utiltiy_functions.get_ideal_size(number_of_boards, board_version)
+            dims = utiltiy_functions.get_ideal_size(number_of_boards,
+                                                    board_version)
             width = dims.width
             height = dims.height
         boot_messages = SpinnakerBootMessages(
@@ -802,7 +803,8 @@ class Transceiver(object):
 
         # if the machine sizes not been given, calculate from assumption
         if width is None or width is None:
-            dims = utiltiy_functions.get_ideal_size(number_of_boards, board_version)
+            dims = utiltiy_functions.get_ideal_size(number_of_boards,
+                                                    board_version)
             width = dims.width
             height = dims.height
 
@@ -1570,8 +1572,8 @@ class Transceiver(object):
                           will be used
                         * If data is an int, 4 will be used
         :type n_bytes: int
-        :param offset: The offset where the valid data starts (if the data is a \
-                        int then offset will be ignored and used 0
+        :param offset: The offset where the valid data starts (if the data is \
+                        an int then offset will be ignored and used 0
         :type offset: int
         :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
         :type cpu: int
@@ -2339,8 +2341,8 @@ class Transceiver(object):
                     if "0.0.0.0" in receiving_connections:
                         raise exceptions.SpinnmanInvalidPacketException(
                             "local_port and local_host",
-                            "{} and {} Another connection is already listening "
-                            "on this port on all interfaces"
+                            "{} and {} Another connection is already "
+                            "listening on this port on all interfaces"
                             .format(local_port, local_host))
 
                 # If the type of an existing connection is wrong, this is an
