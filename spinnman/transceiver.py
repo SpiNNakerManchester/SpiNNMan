@@ -85,7 +85,7 @@ from spinnman.data.abstract_data_reader import AbstractDataReader
 from spinnman.utilities import utiltiy_functions
 from spinnman import exceptions
 
-#general imports
+# general imports
 import random
 import struct
 from threading import Condition
@@ -108,7 +108,8 @@ INITIAL_FIND_SCAMP_RETRIES_COUNT = 1
 
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
-        ignore_chips=None, ignore_cores=None, max_core_id=None):
+        ignore_chips=None, ignore_cores=None, max_core_id=None,
+        auto_detect_bmp=True):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -158,11 +159,11 @@ def create_transceiver_from_hostname(
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
     # machine, then an assumption can be made that the BMP is at -1 on the
     # final value of the IP address
-    if version >= 4 and (bmp_connection_data is None or
-                         len(bmp_connection_data) == 0):
+    if (version >= 4 and auto_detect_bmp is True and
+            (bmp_connection_data is None or len(bmp_connection_data) == 0)):
         bmp_connection_data = [
             utiltiy_functions.work_out_bmp_from_machine_details(
-            hostname, number_of_boards)]
+                hostname, number_of_boards)]
 
     # handle BMP connections
     if bmp_connection_data is not None:
@@ -630,8 +631,8 @@ class Transceiver(object):
             if chip.ip_address not in self._udp_scamp_connections:
                 new_connection = UDPSCAMPConnection(
                     remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
-                if self._try_sver_though_scamp_connection(new_connection,
-                                                          _STANDARD_RETIRES_NO):
+                if self._try_sver_though_scamp_connection(
+                        new_connection, _STANDARD_RETIRES_NO):
                     new_connections.append(new_connection)
                     self._udp_scamp_connections[chip.ip_address] = \
                         new_connection
@@ -761,7 +762,8 @@ class Transceiver(object):
         logger.debug("Attempting to boot version {} board".format(
             board_version))
         if width is None or height is None:
-            dims = utiltiy_functions.get_ideal_size(number_of_boards, board_version)
+            dims = utiltiy_functions.get_ideal_size(number_of_boards,
+                                                    board_version)
             width = dims.width
             height = dims.height
         boot_messages = SpinnakerBootMessages(
@@ -801,7 +803,8 @@ class Transceiver(object):
 
         # if the machine sizes not been given, calculate from assumption
         if width is None or width is None:
-            dims = utiltiy_functions.get_ideal_size(number_of_boards, board_version)
+            dims = utiltiy_functions.get_ideal_size(number_of_boards,
+                                                    board_version)
             width = dims.width
             height = dims.height
 
@@ -1569,8 +1572,8 @@ class Transceiver(object):
                           will be used
                         * If data is an int, 4 will be used
         :type n_bytes: int
-        :param offset: The offset where the valid data starts (if the data is a \
-                        int then offset will be ignored and used 0
+        :param offset: The offset where the valid data starts (if the data is \
+                        an int then offset will be ignored and used 0
         :type offset: int
         :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
         :type cpu: int
@@ -2338,8 +2341,8 @@ class Transceiver(object):
                     if "0.0.0.0" in receiving_connections:
                         raise exceptions.SpinnmanInvalidPacketException(
                             "local_port and local_host",
-                            "{} and {} Another connection is already listening "
-                            "on this port on all interfaces"
+                            "{} and {} Another connection is already "
+                            "listening on this port on all interfaces"
                             .format(local_port, local_host))
 
                 # If the type of an existing connection is wrong, this is an
