@@ -38,6 +38,14 @@ from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
+from spinnman.data.file_data_reader import FileDataReader
+from spinnman import model_binaries
+from spinnman.processes.set_dpri_packet_types_process import SetDPRIPacketTypesProcess
+from spinnman.messages.scp.scp_dpri_packet_type_flags import SCPDPRIPacketTypeFlags
+from spinnman.processes.set_dpri_router_timeout_process import SetDPRIRouterTimeoutProcess
+from spinnman.processes.set_dpri_router_emergency_timeout_process import SetDPRIRouterEmergencyTimeoutProcess
+from spinnman.processes.reset_dpri_counters_process import ResetDPRICountersProcess
+from spinnman.processes.read_dpri_status_process import ReadDPRIStatusProcess
 from spinnman.connections.abstract_classes.abstract_listenable \
     import AbstractListenable
 from spinnman.connections.connection_listener import ConnectionListener
@@ -82,7 +90,7 @@ from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
 from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
 from spinnman.data.abstract_data_reader import AbstractDataReader
-from spinnman.utilities import utiltiy_functions
+from spinnman.utilities import utility_functions
 from spinnman import exceptions
 
 # general imports
@@ -93,6 +101,7 @@ from collections import defaultdict
 import logging
 import socket
 import time
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -104,6 +113,7 @@ _BMP_VERSIONS = [1.3, 1.33, 1.37, 1.36]
 
 _STANDARD_RETIRES_NO = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 1
+_REINJECTOR_APP_ID = 17
 
 
 def create_transceiver_from_hostname(
@@ -142,6 +152,9 @@ def create_transceiver_from_hostname(
                 boot multi-board systems
     :type bmp_connection_data: iterable\
                 :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
+    :param auto_detect_bmp: True if the BMP of version 4 or 5 boards should be\
+                automatically determined from the board IP address
+    :type auto_detect_bmp: bool
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -162,7 +175,7 @@ def create_transceiver_from_hostname(
     if (version >= 4 and auto_detect_bmp is True and
             (bmp_connection_data is None or len(bmp_connection_data) == 0)):
         bmp_connection_data = [
-            utiltiy_functions.work_out_bmp_from_machine_details(
+            utility_functions.work_out_bmp_from_machine_details(
                 hostname, number_of_boards)]
 
     # handle BMP connections
@@ -181,8 +194,7 @@ def create_transceiver_from_hostname(
     connections.append(UDPBootConnection(remote_host=hostname))
 
     return Transceiver(
-        connections=connections,
-        shut_down_connections=True, ignore_chips=ignore_chips,
+        connections=connections, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id)
 
 
@@ -202,8 +214,7 @@ class Transceiver(object):
     """
 
     def __init__(self, connections=None, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None,
-                 shut_down_connections=False):
+                 ignore_cores=None, max_core_id=None):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -243,6 +254,11 @@ class Transceiver(object):
 
         # Place to keep the known chip information
         self._chip_info = dict()
+
+        # Place to keep the identity of the re-injector core on each chip,
+        # indexed by chip x and y coordinates
+        self._reinjector_cores = CoreSubsets()
+        self._reinjection_running = False
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -762,7 +778,7 @@ class Transceiver(object):
         logger.debug("Attempting to boot version {} board".format(
             board_version))
         if width is None or height is None:
-            dims = utiltiy_functions.get_ideal_size(number_of_boards,
+            dims = utility_functions.get_ideal_size(number_of_boards,
                                                     board_version)
             width = dims.width
             height = dims.height
@@ -775,7 +791,7 @@ class Transceiver(object):
 
     def ensure_board_is_ready(
             self, board_version, number_of_boards=1, width=None, height=None,
-            n_retries=5):
+            n_retries=5, enable_reinjector=True):
         """ Ensure that the board is ready to interact with this version\
             of the transceiver.  Boots the board if not already booted and\
             verifies that the version of SCAMP running is compatible with\
@@ -803,7 +819,7 @@ class Transceiver(object):
 
         # if the machine sizes not been given, calculate from assumption
         if width is None or width is None:
-            dims = utiltiy_functions.get_ideal_size(number_of_boards,
+            dims = utility_functions.get_ideal_size(number_of_boards,
                                                     board_version)
             width = dims.width
             height = dims.height
@@ -857,6 +873,10 @@ class Transceiver(object):
             process.execute(SCPIPTagTTORequest(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_160_ms.value))
+
+        # If reinjection is enabled, load the reinjector
+        if enable_reinjector:
+            self._load_reinjector()
 
         return version_info
 
@@ -916,7 +936,7 @@ class Transceiver(object):
         if self._check_if_machine_has_wrap_arounds():
 
             # Use the middle of the machine
-            chips_to_check = utiltiy_functions.locate_middle_chips_to_query(
+            chips_to_check = utility_functions.locate_middle_chips_to_query(
                 width, height, self._ignore_chips)
         else:
 
@@ -2395,6 +2415,131 @@ class Transceiver(object):
         connections_of_class.append((connection, listener))
         listener.add_callback(callback)
         return connection.local_port
+
+    def enable_reinjection(self, multicast=True, point_to_point=False,
+                           nearest_neighbour=False, fixed_route=False):
+        """ Enables or disables dropped packet reinjection - if all parameters\
+            are false, dropped packet reinjection will be disabled
+
+        :param multicast: If True, multicast dropped packet reinjection is\
+                enabled
+        :type multicast: bool
+        :param point_to_point: If True, point to point dropped packet\
+                reinjection is enabled
+        :type point_to_point: bool
+        :param nearest_neighbour: If True, nearest_neighbour dropped packet\
+                reinjection is enabled
+        :type nearest_neighbour: bool
+        :param fixed_route: If True, fixed route dropped packet reinjection is\
+                enabled
+        :type fixed_route: bool
+        """
+
+        if not self._reinjection_running:
+
+            # Stop any running reinjector
+            self.stop_application(_REINJECTOR_APP_ID)
+
+            # Get the machine
+            if self._machine is None:
+                self._update_machine()
+
+            # Find a free core on each chip to use
+            for chip in self._machine.chips:
+                try:
+                    first_processor = next(chip.processors())
+                    first_processor.monitor = True
+                    self._reinjector_cores.add_processor(
+                        chip.x, chip.y, first_processor.processor_id)
+                except StopIteration:
+                    pass
+
+            # Load the reinjector on each free core
+            reinjector_binary = os.path.join(
+                os.path.dirname(model_binaries.__file__), "reinjector.aplx")
+            reinjector_size = os.stat(reinjector_binary).st_size
+            reinjector = FileDataReader(reinjector_binary)
+            self.execute_flood(self._reinjector_cores, reinjector,
+                               _REINJECTOR_APP_ID, reinjector_size)
+
+        # Set the types to be reinjected
+        process = SetDPRIPacketTypesProcess(
+            self._machine, self._scamp_connections)
+        packet_types = list()
+        values_to_check = [multicast, point_to_point,
+                           nearest_neighbour, fixed_route]
+        flags_to_set = [SCPDPRIPacketTypeFlags.MULTICAST,
+                        SCPDPRIPacketTypeFlags.POINT_TO_POINT,
+                        SCPDPRIPacketTypeFlags.NEAREST_NEIGHBOUR,
+                        SCPDPRIPacketTypeFlags.FIXED_ROUTE]
+        for value, flag in zip(values_to_check, flags_to_set):
+            if value:
+                packet_types.add(flag)
+        process.set_packet_types(packet_types, self._reinjector_cores)
+
+    def set_reinjection_router_timeout(self, timeout_mantissa,
+                                       timeout_exponent):
+        """ Sets the timeout of the routers
+
+        :param timeout_mantissa: The mantissa of the timeout value, between 0\
+                and 15
+        :type timeout_mantissa: int
+        :param timeout_exponent: The exponent of the timeout value, between 0\
+                and 15
+        :type timeout_exponent: int
+        """
+        if not self._reinjection_running:
+            self.enable_reinjection()
+        process = SetDPRIRouterTimeoutProcess(
+            self._machine, self._scamp_connections)
+        process.set_timeout(timeout_mantissa, timeout_exponent,
+                            self._reinjector_cores)
+
+    def set_reinjection_router_emergency_timeout(self, timeout_mantissa,
+                                                 timeout_exponent):
+        """ Sets the timeout of the routers
+
+        :param timeout_mantissa: The mantissa of the timeout value, between 0\
+                and 15
+        :type timeout_mantissa: int
+        :param timeout_exponent: The exponent of the timeout value, between 0\
+                and 15
+        :type timeout_exponent: int
+        """
+        if not self._reinjection_running:
+            self.enable_reinjection()
+        process = SetDPRIRouterEmergencyTimeoutProcess(
+            self._machine, self._scamp_connections)
+        process.set_timeout(timeout_mantissa, timeout_exponent,
+                            self._reinjector_cores)
+
+    def reset_reinjection_counters(self):
+        """ Resets the counters for reinjection
+        """
+        if not self._reinjection_running:
+            self.enable_reinjection()
+        process = ResetDPRICountersProcess(
+            self._machine, self._scamp_connections)
+        process.reset_counters(self._reinjector_cores)
+
+    def get_reinjection_status(self, x, y):
+        """ Get the status of the reinjection on a given chip
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :return: The reinjection status of the chip, or None if reinjection is\
+                not enabled
+        :rtype: None or :py:class:`spinnman.model.dpri_status.DPRIStatus`
+        """
+        if not self._reinjection_running:
+            return None
+        process = ReadDPRIStatusProcess(self._machine, self._scamp_connections)
+        reinjector_core = next(
+            self._reinjector_cores.get_core_subset_for_chip(x, y)
+            .processor_ids)
+        return process.get_dpri_status(x, y, reinjector_core)
 
     def __str__(self):
         return "transciever object connected to {} with {} connections"\

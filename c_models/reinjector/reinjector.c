@@ -58,6 +58,7 @@ extern INT_HANDLER sark_int_han(void);
 #define CMD_DPRI_SET_ROUTER_EMERGENCY_TIMEOUT 1
 #define CMD_DPRI_SET_PACKET_TYPES             2
 #define CMD_DPRI_GET_STATUS                   3
+#define CMD_DPRI_RESET_COUNTERS               4
 
 // Dropped packet re-injection packet type flags (arg2 of SCP message)
 #define DPRI_PACKET_TYPE_MC 1
@@ -301,7 +302,31 @@ static uint sark_cmd_dpri(sdp_msg_t *msg) {
         data[3] = n_missed_dropped_packets;
         data[4] = n_dropped_packet_overflows;
         data[5] = n_reinjected_packets;
-        return 6 * 4;
+
+        // Put the current services enabled in the packet
+        data[6] = 0;
+        bool values_to_check[] = {reinject_mc, reinject_pp,
+                                  reinject_nn, reinject_fr};
+        int flags[] = {DPRI_PACKET_TYPE_MC, DPRI_PACKET_TYPE_PP,
+                       DPRI_PACKET_TYPE_NN, DPRI_PACKET_TYPE_FR};
+        for (int i = 0; i < 4; i++) {
+            if (values_to_check[i]) {
+                data[6] |= flags[i];
+            }
+        }
+
+        // Return the number of bytes in the packet
+        return 7 * 4;
+
+    } else if (msg->arg1 == CMD_DPRI_RESET_COUNTERS) {
+
+        // Reset the counters
+        n_dropped_packets = 0;
+        n_missed_dropped_packets = 0;
+        n_dropped_packet_overflows = 0;
+        n_reinjected_packets = 0;
+
+        return 0;
     }
 
     // If we are here, the command was not recognised, so fail (ARG as the
@@ -446,7 +471,7 @@ void c_main() {
 
     // Run forever
     while (true) {
-       spin1_wfi();
+        spin1_wfi();
     }
 }
 // ------------------------------------------------------------------------

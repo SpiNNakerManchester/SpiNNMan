@@ -34,8 +34,8 @@ class CoreSubset(object):
         """
         if processor_id in self._processor_ids:
             raise SpinnmanInvalidParameterException(
-                    "processor_ids", processor_id,
-                    "Each processor id must only occur once")
+                "processor_ids", processor_id,
+                "Each processor id must only occur once")
 
         self._processor_ids.add(processor_id)
 
