@@ -40,11 +40,16 @@ from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
 from spinnman.data.file_data_reader import FileDataReader
 from spinnman import model_binaries
-from spinnman.processes.set_dpri_packet_types_process import SetDPRIPacketTypesProcess
-from spinnman.messages.scp.scp_dpri_packet_type_flags import SCPDPRIPacketTypeFlags
-from spinnman.processes.set_dpri_router_timeout_process import SetDPRIRouterTimeoutProcess
-from spinnman.processes.set_dpri_router_emergency_timeout_process import SetDPRIRouterEmergencyTimeoutProcess
-from spinnman.processes.reset_dpri_counters_process import ResetDPRICountersProcess
+from spinnman.processes.set_dpri_packet_types_process \
+    import SetDPRIPacketTypesProcess
+from spinnman.messages.scp.scp_dpri_packet_type_flags \
+    import SCPDPRIPacketTypeFlags
+from spinnman.processes.set_dpri_router_timeout_process \
+    import SetDPRIRouterTimeoutProcess
+from spinnman.processes.set_dpri_router_emergency_timeout_process \
+    import SetDPRIRouterEmergencyTimeoutProcess
+from spinnman.processes.reset_dpri_counters_process \
+    import ResetDPRICountersProcess
 from spinnman.processes.read_dpri_status_process import ReadDPRIStatusProcess
 from spinnman.connections.abstract_classes.abstract_listenable \
     import AbstractListenable
