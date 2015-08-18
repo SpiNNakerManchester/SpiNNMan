@@ -26,12 +26,13 @@ class SCPDPRIResetCountersRequest(AbstractSCPRequest):
         :type p: int
         """
         AbstractSCPRequest.__init__(
+            self,
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=p, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_DPRI),
-            argument_1=SCPDPRICommand.RESET_COUNTERS)
+            argument_1=SCPDPRICommand.RESET_COUNTERS.value)
 
     def get_scp_response(self):
         return SCPCheckOKResponse("Reset dropped packet reinjection counters",

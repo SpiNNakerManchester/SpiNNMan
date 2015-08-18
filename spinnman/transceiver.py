@@ -881,7 +881,7 @@ class Transceiver(object):
 
         # If reinjection is enabled, load the reinjector
         if enable_reinjector:
-            self._load_reinjector()
+            self.enable_reinjection()
 
         return version_info
 
@@ -1550,12 +1550,8 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(x, y, cpu, base_address, data,
                                              n_bytes)
-        elif isinstance(data, int):
-            data_to_write = struct.pack('I', data)
-            process.write_memory_from_bytearray(x, y, cpu, base_address,
-                                                data_to_write, 0, 4)
-        elif isinstance(data, long):
-            data_to_write = struct.pack('L', data)
+        elif isinstance(data, (int, long)):
+            data_to_write = struct.pack("<I", data)
             process.write_memory_from_bytearray(x, y, cpu, base_address,
                                                 data_to_write, 0, 4)
         else:
@@ -1625,12 +1621,8 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
-        elif isinstance(data, int):
-            data_to_write = struct.pack("I")
-            process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 4)
-        elif isinstance(data, long):
-            data_to_write = struct.pack("L")
+        elif isinstance(data, (int, long)):
+            data_to_write = struct.pack("<I", data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 4)
         else:
@@ -1689,11 +1681,11 @@ class Transceiver(object):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)
         elif isinstance(data, int):
-            data_to_write = struct.pack("I")
+            data_to_write = struct.pack("I", data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("L")
+            data_to_write = struct.pack("L", data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 4)
         else:
@@ -2452,7 +2444,10 @@ class Transceiver(object):
             # Find a free core on each chip to use
             for chip in self._machine.chips:
                 try:
-                    first_processor = next(chip.processors())
+                    first_processor = None
+                    for processor in chip.processors:
+                        if not processor.is_monitor:
+                            first_processor = processor
                     first_processor.monitor = True
                     self._reinjector_cores.add_processor(
                         chip.x, chip.y, first_processor.processor_id)
@@ -2466,6 +2461,8 @@ class Transceiver(object):
             reinjector = FileDataReader(reinjector_binary)
             self.execute_flood(self._reinjector_cores, reinjector,
                                _REINJECTOR_APP_ID, reinjector_size)
+            reinjector.close()
+            self._reinjection_running = True
 
         # Set the types to be reinjected
         process = SetDPRIPacketTypesProcess(
@@ -2479,7 +2476,7 @@ class Transceiver(object):
                         SCPDPRIPacketTypeFlags.FIXED_ROUTE]
         for value, flag in zip(values_to_check, flags_to_set):
             if value:
-                packet_types.add(flag)
+                packet_types.append(flag)
         process.set_packet_types(packet_types, self._reinjector_cores)
 
     def set_reinjection_router_timeout(self, timeout_mantissa,

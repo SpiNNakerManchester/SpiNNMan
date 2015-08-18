@@ -67,4 +67,4 @@ class CoreSubset(object):
         :return: An iterable of processor ids
         :rtype: iterable of int
         """
-        return self._processor_ids
+        return iter(self._processor_ids)

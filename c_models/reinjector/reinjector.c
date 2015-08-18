@@ -255,6 +255,7 @@ INT_HANDLER dropped_packet_callback() {
 }
 
 static uint sark_cmd_dpri(sdp_msg_t *msg) {
+    io_printf(IO_BUF, "Received command %u, seq %u\n", msg->arg1, msg->seq);
 
     if (msg->arg1 == CMD_DPRI_SET_ROUTER_TIMEOUT) {
 
@@ -279,6 +280,7 @@ static uint sark_cmd_dpri(sdp_msg_t *msg) {
         return 0;
 
     } else if (msg->arg1 == CMD_DPRI_SET_PACKET_TYPES) {
+        io_printf(IO_BUF, "Setting packet types to 0x%.8x\n", msg->arg2);
 
         // Set the re-injection options
         reinject_mc = (msg->arg2 & DPRI_PACKET_TYPE_MC) != 0;
@@ -360,6 +362,8 @@ void __wrap_sark_int(void *pc) {
     // Check for extra messages added by this core
     uint cmd = sark.vcpu->mbox_ap_cmd;
     if (cmd == SHM_MSG) {
+
+        sc[SC_CLR_IRQ] = SC_CODE + (1 << sark.phys_cpu);
         sdp_msg_t *shm_msg = (sdp_msg_t *) sark.vcpu->mbox_ap_msg;
         sdp_msg_t *msg = sark_msg_get();
 
@@ -382,7 +386,12 @@ void __wrap_sark_int(void *pc) {
 
                 sark_msg_send(msg, 10);
                 sark_msg_free(msg);
+            } else {
+                sark_msg_free(msg);
             }
+        } else {
+            sark_shmsg_free(shm_msg);
+            sark_msg_free(msg);
         }
     } else {
 

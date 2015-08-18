@@ -14,7 +14,7 @@ BUILD_DIR = build/
 # A space-separated list of object files to be built into the executable. These
 # .o files will be created from corresponding .c files (e.g. example.c in this
 # case).
-OBJECTS = reinjector.o
+OBJECTS = $(BUILD_DIR)reinjector.o
 
 CFLAGS += -Ofast
 LFLAGS += -Ofast -Wl,--wrap=sark_int

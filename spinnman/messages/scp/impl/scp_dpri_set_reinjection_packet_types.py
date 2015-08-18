@@ -34,12 +34,13 @@ class SCPDPRISetReinjectionPacketTypesRequest(AbstractSCPRequest):
                 flags |= packet_type.value
 
         AbstractSCPRequest.__init__(
+            self,
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=p, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_DPRI),
-            argument_1=SCPDPRICommand.SET_PACKET_TYPES,
+            argument_1=SCPDPRICommand.SET_PACKET_TYPES.value,
             argument_2=flags)
 
     def get_scp_response(self):

@@ -22,7 +22,8 @@ class ReadDPRIStatusProcess(AbstractMultiConnectionProcess):
         self._dpri_status = response.dpri_status
 
     def get_dpri_status(self, x, y, p):
-        self._send_request(SCPDPRIGetStatusRequest(x, y, p))
+        self._send_request(SCPDPRIGetStatusRequest(x, y, p),
+                           callback=self.handle_dpri_status_response)
         self._finish()
         self.check_for_error()
         return self._dpri_status

@@ -30,12 +30,13 @@ class SCPDPRISetRouterTimeoutRequest(AbstractSCPRequest):
                 between 0 and 15
         """
         AbstractSCPRequest.__init__(
+            self,
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=p, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_DPRI),
-            argument_1=SCPDPRICommand.SET_ROUTER_TIMEOUT,
+            argument_1=SCPDPRICommand.SET_ROUTER_TIMEOUT.value,
             argument_2=(timeout_mantissa & 0xF) |
                        ((timeout_exponent & 0xF) << 4))
 
