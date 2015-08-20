@@ -54,5 +54,8 @@ class UDPEIEIOConnection(UDPConnection, AbstractEIEIOReceiver,
     def send_eieio_message(self, eieio_message):
         self.send(eieio_message.bytestring)
 
+    def send_eieio_message_to(self, eieio_message, ip_address, port):
+        self.send_to(eieio_message.bytestring, (ip_address, port))
+
     def get_receive_method(self):
         return self.receive_eieio_message
