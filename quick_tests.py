@@ -14,6 +14,7 @@ from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinn_machine.tags.reverse_iptag import ReverseIPTag
 from spinnman.model.diagnostic_filter import DiagnosticFilter
+import sys
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.model.diagnostic_filter_destination \
@@ -111,9 +112,26 @@ def print_filter(d_filter):
     print_enums("Emergency Routing:", d_filter.emergency_routing_statuses)
     print_enums("Packet Types:", d_filter.packet_types)
 
+
+def print_reinjection_status(status):
+    print "Dropped Packets captured:", status.n_dropped_packets
+    print "Missed drop packets:", status.n_missed_dropped_packets
+    print "Dropped Packet overflows:", status.n_dropped_packet_overflows
+    print "Reinjected packets:", status.n_reinjected_packets
+    print "Router timeout: {}  emergency timeout {}".format(
+        status.router_timeout, status.router_emergency_timeout)
+    print ("Reinjecting multicast: {}  point_to_point: {}  nearest_neighbour:"
+           " {}  fixed_route: {}").format(
+               status.is_reinjecting_multicast,
+               status.is_reinjecting_point_to_point,
+               status.is_reinjecting_nearest_neighbour,
+               status.is_reinjecting_fixed_route)
+
 transceiver = create_transceiver_from_hostname(
     board_config.remotehost, board_config.board_version,
-    ignore_cores=down_cores, ignore_chips=down_chips)
+    ignore_cores=down_cores, ignore_chips=down_chips,
+    bmp_connection_data=board_config.bmp_names,
+    auto_detect_bmp=board_config.auto_detect_bmp)
 
 
 try:
@@ -294,7 +312,74 @@ try:
         print_filter(current_filter)
         print ""
 
-except Exception:
-    logging.exception("Error!")
+    print "Setup Dropped Packet Reinjection"
+    print "================================"
+    transceiver.enable_reinjection(True, False, False, False)
+    print_reinjection_status(transceiver.get_reinjection_status(0, 0))
 
-transceiver.close()
+    print "Set Router Timeouts"
+    print "==================="
+    transceiver.set_reinjection_router_timeout(2, 0)
+    transceiver.set_reinjection_router_emergency_timeout(3, 4)
+    print_reinjection_status(transceiver.get_reinjection_status(1, 1))
+
+    print "Reset Reinjection Counters"
+    print "=========================="
+    transceiver.reset_reinjection_counters()
+    print_reinjection_status(transceiver.get_reinjection_status(1, 0))
+
+    print "Test writing longs and ints to write memory and extracting them"
+    print "========================="
+    transceiver.write_memory(0, 0, 0x70000000, data=long(123456789123456789))
+    data = struct.unpack("<Q", str(buffer(transceiver.
+                                          read_memory(0, 0, 0x70000000, 8))))[0]
+    if data != long(123456789123456789):
+        raise Exception("values are not identical")
+    transceiver.write_memory(0, 0, 0x70000000, data=int(123456789))
+    data = struct.unpack("<I", str(buffer(transceiver.
+                                          read_memory(0, 0, 0x70000000, 4))))[0]
+    if data != 123456789:
+        raise Exception("values are not identical")
+
+    print "Test writing longs and ints to write_neighbour_memory and " \
+          "extracting them"
+    print("==========================")
+    transceiver.write_neighbour_memory(0, 0, 0, 0x70000000,
+                                       data=long(123456789123456789))
+    data = struct.unpack(
+        "<Q", str(buffer(transceiver.read_neighbour_memory(
+            0, 0, 0, 0x70000000, 8))))[0]
+    if data != long(123456789123456789):
+        raise Exception("values are not identical")
+
+    transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=int(123456789))
+    data = struct.unpack(
+        "<I", str(buffer(transceiver.read_neighbour_memory(
+            0, 0, 0, 0x70000000, 4))))[0]
+    if data != 123456789:
+        raise Exception("values are not identical")
+
+    print "Test writing longs and ints to write_memory_flood and extracting " \
+          "them"
+    print("==========================")
+    transceiver.write_memory_flood(0x70000000, data=long(123456789123456789))
+    data = struct.unpack(
+        "<Q", str(buffer(transceiver. read_memory(0, 0, 0x70000000, 8))))[0]
+    data2 = struct.unpack(
+        "<Q", str(buffer(transceiver.read_memory(1, 1, 0x70000000, 8))))[0]
+    if data != long(123456789123456789) or data2 != long(123456789123456789):
+        raise Exception("values are not identical")
+
+    transceiver.write_memory_flood(0x70000000, data=long(123456789))
+    data = struct.unpack(
+        "<I", str(buffer(transceiver. read_memory(0, 0, 0x70000000, 4))))[0]
+    data2 = struct.unpack(
+        "<I", str(buffer(transceiver.read_memory(1, 1, 0x70000000, 4))))[0]
+    if data != long(123456789) or data2 != long(123456789):
+        raise Exception("values are not identical")
+    transceiver.close()
+
+except Exception as e:
+    transceiver.close()
+    exc_class, exc, tb = sys.exc_info()
+    raise exc_class, exc, tb

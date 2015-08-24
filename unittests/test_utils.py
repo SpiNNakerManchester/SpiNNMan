@@ -1,6 +1,6 @@
 import unittest
 
-import spinnman.utilities.utiltiy_functions as utils
+import spinnman.utilities.utility_functions as utils
 
 
 class Testing_utils(unittest.TestCase):
