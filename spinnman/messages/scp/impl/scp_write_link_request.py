@@ -39,12 +39,12 @@ class SCPWriteLinkRequest(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_LINK_WRITE),
             argument_1=base_address, argument_2=len(data), argument_3=link,
             data=None)
-        datastring = super(SCPWriteLinkRequest, self).bytestring
-        self._bytestring = datastring + data
+        self._data_to_write = data
 
     @property
     def bytestring(self):
-        return self._bytestring
+        datastring = super(SCPWriteLinkRequest, self).bytestring
+        return datastring + bytes(self._data_to_write)
 
     def get_scp_response(self):
         return SCPCheckOKResponse("WriteMemory", "CMD_WRITE")

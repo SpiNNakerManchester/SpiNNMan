@@ -1554,10 +1554,14 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(x, y, cpu, base_address, data,
                                              n_bytes)
-        elif isinstance(data, (int, long)):
+        elif isinstance(data, int):
             data_to_write = struct.pack("<I", data)
             process.write_memory_from_bytearray(x, y, cpu, base_address,
                                                 data_to_write, 0, 4)
+        elif isinstance(data, long):
+            data_to_write = struct.pack("<Q", data)
+            process.write_memory_from_bytearray(x, y, cpu, base_address,
+                                                data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
@@ -1625,10 +1629,14 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
-        elif isinstance(data, (int, long)):
+        elif isinstance(data, int):
             data_to_write = struct.pack("<I", data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 4)
+        elif isinstance(data, long):
+            data_to_write = struct.pack("<Q", data)
+            process.write_link_memory_from_bytearray(
+                x, y, cpu, link, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
@@ -1689,7 +1697,7 @@ class Transceiver(object):
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("<L", data)
+            data_to_write = struct.pack("<Q", data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 8)
         else:

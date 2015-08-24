@@ -129,7 +129,9 @@ def print_reinjection_status(status):
 
 transceiver = create_transceiver_from_hostname(
     board_config.remotehost, board_config.board_version,
-    ignore_cores=down_cores, ignore_chips=down_chips)
+    ignore_cores=down_cores, ignore_chips=down_chips,
+    bmp_connection_data=board_config.bmp_names,
+    auto_detect_bmp=board_config.auto_detect_bmp)
 
 
 try:
@@ -326,6 +328,55 @@ try:
     transceiver.reset_reinjection_counters()
     print_reinjection_status(transceiver.get_reinjection_status(1, 0))
 
+    print "Test writing longs and ints to write memory and extracting them"
+    print "========================="
+    transceiver.write_memory(0, 0, 0x70000000, data=long(123456789123456789))
+    data = struct.unpack("<Q", str(buffer(transceiver.
+                                          read_memory(0, 0, 0x70000000, 8))))[0]
+    if data != long(123456789123456789):
+        raise Exception("values are not identical")
+    transceiver.write_memory(0, 0, 0x70000000, data=int(123456789))
+    data = struct.unpack("<I", str(buffer(transceiver.
+                                          read_memory(0, 0, 0x70000000, 4))))[0]
+    if data != 123456789:
+        raise Exception("values are not identical")
+
+    print "Test writing longs and ints to write_neighbour_memory and " \
+          "extracting them"
+    print("==========================")
+    transceiver.write_neighbour_memory(0, 0, 0, 0x70000000,
+                                       data=long(123456789123456789))
+    data = struct.unpack(
+        "<Q", str(buffer(transceiver.read_neighbour_memory(
+            0, 0, 0, 0x70000000, 8))))[0]
+    if data != long(123456789123456789):
+        raise Exception("values are not identical")
+
+    transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=int(123456789))
+    data = struct.unpack(
+        "<I", str(buffer(transceiver.read_neighbour_memory(
+            0, 0, 0, 0x70000000, 4))))[0]
+    if data != 123456789:
+        raise Exception("values are not identical")
+
+    print "Test writing longs and ints to write_memory_flood and extracting " \
+          "them"
+    print("==========================")
+    transceiver.write_memory_flood(0x70000000, data=long(123456789123456789))
+    data = struct.unpack(
+        "<Q", str(buffer(transceiver. read_memory(0, 0, 0x70000000, 8))))[0]
+    data2 = struct.unpack(
+        "<Q", str(buffer(transceiver.read_memory(1, 1, 0x70000000, 8))))[0]
+    if data != long(123456789123456789) or data2 != long(123456789123456789):
+        raise Exception("values are not identical")
+
+    transceiver.write_memory_flood(0x70000000, data=long(123456789))
+    data = struct.unpack(
+        "<I", str(buffer(transceiver. read_memory(0, 0, 0x70000000, 4))))[0]
+    data2 = struct.unpack(
+        "<I", str(buffer(transceiver.read_memory(1, 1, 0x70000000, 4))))[0]
+    if data != long(123456789) or data2 != long(123456789):
+        raise Exception("values are not identical")
     transceiver.close()
 
 except Exception as e:

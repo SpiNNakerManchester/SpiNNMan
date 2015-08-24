@@ -11,3 +11,4 @@ build/
 dist/
 SpiNNMan.egg-info
 *build/
+-hello.aplx
