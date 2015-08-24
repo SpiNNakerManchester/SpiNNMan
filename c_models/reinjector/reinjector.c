@@ -59,6 +59,7 @@ extern INT_HANDLER sark_int_han(void);
 #define CMD_DPRI_SET_PACKET_TYPES             2
 #define CMD_DPRI_GET_STATUS                   3
 #define CMD_DPRI_RESET_COUNTERS               4
+#define CMD_DPRI_EXIT                         5
 
 // Dropped packet re-injection packet type flags (arg2 of SCP message)
 #define DPRI_PACKET_TYPE_MC 1
@@ -110,6 +111,8 @@ static bool reinject_mc;
 static bool reinject_pp;
 static bool reinject_nn;
 static bool reinject_fr;
+
+static bool run = true;
 
 // VIC
 typedef void (*isr_t) ();
@@ -329,6 +332,14 @@ static uint sark_cmd_dpri(sdp_msg_t *msg) {
         n_reinjected_packets = 0;
 
         return 0;
+    } else if (msg->arg1 == CMD_DPRI_EXIT) {
+        uint int_select = (1 << TIMER1_INT) | (1 << RTR_DUMP_INT);
+        vic[VIC_DISABLE] = int_select;
+        vic[VIC_DISABLE] = (1 << CC_TNF_INT);
+        vic[VIC_SELECT] = 0;
+        run = false;
+
+        return 0;
     }
 
     // If we are here, the command was not recognised, so fail (ARG as the
@@ -478,8 +489,8 @@ void c_main() {
     vic[VIC_ENABLE] = int_select;
     tc[T1_CONTROL] = 0xe2;
 
-    // Run forever
-    while (true) {
+    // Run until told to exit
+    while (run) {
         spin1_wfi();
     }
 }

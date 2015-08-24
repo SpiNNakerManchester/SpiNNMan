@@ -9,6 +9,7 @@ class SCPDPRICommand(Enum):
     SET_PACKET_TYPES = (2, "Set the packet types to reinject")
     GET_STATUS = (3, "Get the status of the reinjector")
     RESET_COUNTERS = (4, "Reset the statistics counters")
+    EXIT = (5, "Exit the processs")
 
     def __new__(cls, value, doc=""):
         obj = object.__new__(cls)

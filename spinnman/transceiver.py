@@ -40,6 +40,7 @@ from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
 from spinnman.data.file_data_reader import FileDataReader
 from spinnman import model_binaries
+from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -2287,6 +2288,11 @@ class Transceiver(object):
         :raise None: No known exceptions are raised
         """
 
+        if self._reinjection_running:
+            process = ExitDPRIProcess(self._machine, self._scamp_connections)
+            process.exit(self._reinjector_cores)
+            self._reinjection_running = False
+
         for receiving_connections in \
                 self._udp_receive_connections_by_port.values():
             for (_, listener) in receiving_connections.values():
@@ -2434,9 +2440,6 @@ class Transceiver(object):
 
         if not self._reinjection_running:
 
-            # Stop any running reinjector
-            self.stop_application(_REINJECTOR_APP_ID)
-
             # Get the machine
             if self._machine is None:
                 self._update_machine()
@@ -2448,7 +2451,7 @@ class Transceiver(object):
                     for processor in chip.processors:
                         if not processor.is_monitor:
                             first_processor = processor
-                    first_processor.monitor = True
+                    first_processor.is_monitor = True
                     self._reinjector_cores.add_processor(
                         chip.x, chip.y, first_processor.processor_id)
                 except StopIteration:
