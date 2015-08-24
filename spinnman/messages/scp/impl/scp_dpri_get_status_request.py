@@ -8,8 +8,6 @@ from spinnman.messages.scp.scp_dpri_command import SCPDPRICommand
 from spinnman.messages.scp.impl.scp_dpri_get_status_response \
     import SCPDPRIGetStatusResponse
 
-_IPTAG_GET = 2
-
 
 class SCPDPRIGetStatusRequest(AbstractSCPRequest):
     """ An SCP Request to get the status of the dropped packet reinjection

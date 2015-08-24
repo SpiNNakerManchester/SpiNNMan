@@ -815,6 +815,9 @@ class Transceiver(object):
         :type height: int or None
         :param n_retries: The number of times to retry booting
         :type n_retries: int
+        :param enable_reinjector: a boolean that allows the reinjector to be
+        added to the system
+        :type enable_reinjector: bool
         :return: The version identifier
         :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
         :raise: spinnman.exceptions.SpinnmanIOException:
@@ -1682,13 +1685,13 @@ class Transceiver(object):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)
         elif isinstance(data, int):
-            data_to_write = struct.pack("I", data)
+            data_to_write = struct.pack("<I", data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("L", data)
+            data_to_write = struct.pack("<L", data)
             process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data_to_write, 0, 4)
+                nearest_neighbour_id, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)

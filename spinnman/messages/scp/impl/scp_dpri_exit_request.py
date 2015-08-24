@@ -7,8 +7,6 @@ from spinnman.messages.scp.scp_command import SCPCommand
 from spinnman.messages.scp.scp_dpri_command import SCPDPRICommand
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 
-_IPTAG_GET = 2
-
 
 class SCPDPRIExitRequest(AbstractSCPRequest):
     """ An SCP Request to exit the dropped packet reinjection
