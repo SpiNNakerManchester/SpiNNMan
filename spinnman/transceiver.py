@@ -2287,13 +2287,16 @@ class Transceiver(object):
             boards = 1
         return boards
 
-    def close(self, close_original_connections=True):
+    def close(self, close_original_connections=True, turn_off_machine=True):
         """ Close the transceiver and any threads that are running
 
         :param close_original_connections: If True, the original connections\
                     passed to the transceiver in the constructor are also\
                     closed.  If False, only newly discovered connections are\
                     closed.
+        :param turn_off_machine: if true, the machine is sent a power down
+        command via its bmp (if it has one)
+        :type turn_off_machine: bool
         :return: Nothing is returned
         :rtype: None
         :raise None: No known exceptions are raised
@@ -2303,6 +2306,8 @@ class Transceiver(object):
             process = ExitDPRIProcess(self._machine, self._scamp_connections)
             process.exit(self._reinjector_cores)
             self._reinjection_running = False
+        if turn_off_machine:
+            self.power_off_machine()
 
         for receiving_connections in \
                 self._udp_receive_connections_by_port.values():
