@@ -219,8 +219,9 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None):
+    def __init__(
+            self, connections=None, ignore_chips=None, ignore_cores=None,
+            max_core_id=None):
         """
 
         :param connections: An iterable of connections to the board.  If not\
