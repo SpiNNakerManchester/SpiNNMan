@@ -216,6 +216,9 @@ class EIEIODataHeader(object):
                 else:
                     payload_prefix = struct.unpack_from(
                         "<I", data, offset + 2)[0]
+        else:
+            if prefix_flag == 1:
+                prefix = struct.unpack_from("<H", data, offset + 2)[0]
 
         return EIEIODataHeader(
             eieio_type=eieio_type, tag=tag, prefix=prefix,
