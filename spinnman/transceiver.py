@@ -219,9 +219,8 @@ class Transceiver(object):
 
     """
 
-    def __init__(
-            self, connections=None, ignore_chips=None, ignore_cores=None,
-            max_core_id=None):
+    def __init__(self, connections=None, ignore_chips=None,
+                 ignore_cores=None, max_core_id=None):
         """
 
         :param connections: An iterable of connections to the board.  If not\
@@ -2288,7 +2287,7 @@ class Transceiver(object):
             boards = 1
         return boards
 
-    def close(self, close_original_connections=True, turn_off_machine=True):
+    def close(self, close_original_connections=True, power_off_machine=False):
         """ Close the transceiver and any threads that are running
 
         :param close_original_connections: If True, the original connections\
@@ -2307,7 +2306,8 @@ class Transceiver(object):
             process = ExitDPRIProcess(self._machine, self._scamp_connections)
             process.exit(self._reinjector_cores)
             self._reinjection_running = False
-        if turn_off_machine:
+
+        if power_off_machine:
             self.power_off_machine()
 
         for receiving_connections in \
