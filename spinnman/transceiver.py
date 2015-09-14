@@ -41,6 +41,7 @@ from spinnman.processes.application_run_process import ApplicationRunProcess
 from spinnman.data.file_data_reader import FileDataReader
 from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
+from spinn_machine.utilities import utilities
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -200,7 +201,7 @@ def create_transceiver_from_hostname(
     connections.append(UDPBootConnection(remote_host=hostname))
 
     return Transceiver(
-        connections=connections, ignore_chips=ignore_chips,
+        version, connections=connections, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id)
 
 
@@ -219,10 +220,12 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, connections=None, ignore_chips=None,
+    def __init__(self, version, connections=None, ignore_chips=None,
                  ignore_cores=None, max_core_id=None):
         """
 
+        :param version: The version of the board being connected to
+        :type version: int
         :param connections: An iterable of connections to the board.  If not\
                     specified, no communication will be possible until\
                     connections are found.
@@ -253,6 +256,7 @@ class Transceiver(object):
         """
 
         # Place to keep the current machine
+        self._version = version
         self._machine = None
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
@@ -615,6 +619,13 @@ class Transceiver(object):
             self._max_core_id)
         self._machine = get_machine_process.get_machine_details()
         self._chip_info = get_machine_process.get_chip_info()
+
+        # Work out and add the spinnaker links
+        spinnaker_links = utilities.locate_spinnaker_links(
+            self._version, self._machine)
+        for spinnaker_link in spinnaker_links:
+            self._machine.add_spinnaker_link(spinnaker_link)
+
         logger.info("Detected a machine on ip address {} which has {}"
                     .format(self._boot_send_connection.remote_ip_address,
                             self._machine.cores_and_link_output_string()))
@@ -762,13 +773,10 @@ class Transceiver(object):
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
     def boot_board(
-            self, board_version, number_of_boards=1, width=None, height=None):
+            self, number_of_boards=1, width=None, height=None):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
 
-        :param board_version: The version of the board e.g. 3 for a SpiNN-3\
-                    board or 5 for a SpiNN-5 board.
-        :type board_version: int
         :param number_of_boards: the number of boards that this machine is \
                 made out of, 1 by default
         :type number_of_boards: int
@@ -782,30 +790,27 @@ class Transceiver(object):
                     communicating with the board
         """
         logger.debug("Attempting to boot version {} board".format(
-            board_version))
+            self._version))
         if width is None or height is None:
             dims = utility_functions.get_ideal_size(number_of_boards,
-                                                    board_version)
+                                                    self._version)
             width = dims.width
             height = dims.height
         boot_messages = SpinnakerBootMessages(
-            board_version, number_of_boards=number_of_boards,
+            self._version, number_of_boards=number_of_boards,
             width=width, height=height)
         for boot_message in boot_messages.messages:
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
     def ensure_board_is_ready(
-            self, board_version, number_of_boards=1, width=None, height=None,
+            self, number_of_boards=1, width=None, height=None,
             n_retries=5, enable_reinjector=True):
         """ Ensure that the board is ready to interact with this version\
             of the transceiver.  Boots the board if not already booted and\
             verifies that the version of SCAMP running is compatible with\
             this transceiver.
 
-        :param board_version: The version of the board e.g. 3 for a SpiNN-3\
-                    board or 5 for a SpiNN-5 board.
-        :type board_version: int
         :param number_of_boards: the number of boards that this machine is
                     constructed out of, 1 by default
         :type number_of_boards: int
@@ -815,8 +820,8 @@ class Transceiver(object):
         :type height: int or None
         :param n_retries: The number of times to retry booting
         :type n_retries: int
-        :param enable_reinjector: a boolean that allows the reinjector to be
-        added to the system
+        :param enable_reinjector: a boolean that allows the reinjector to be\
+                    added to the system
         :type enable_reinjector: bool
         :return: The version identifier
         :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
@@ -829,18 +834,18 @@ class Transceiver(object):
         # if the machine sizes not been given, calculate from assumption
         if width is None or width is None:
             dims = utility_functions.get_ideal_size(number_of_boards,
-                                                    board_version)
+                                                    self._version)
             width = dims.width
             height = dims.height
 
         # try to get a scamp version once
         logger.info("going to try to boot the machine with scamp")
         version_info = self._try_to_find_scamp_and_boot(
-            INITIAL_FIND_SCAMP_RETRIES_COUNT, board_version,
+            INITIAL_FIND_SCAMP_RETRIES_COUNT,
             number_of_boards, width, height)
 
         # If we fail to get a SCAMP version this time, try other things
-        if version_info is None and board_version >= 4:
+        if version_info is None and self._version >= 4:
             logger.info("failed to boot machine with scamp,"
                         " trying to power on machine")
 
@@ -853,7 +858,7 @@ class Transceiver(object):
 
             # retry to get a scamp version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
-                n_retries, board_version, number_of_boards, width, height)
+                n_retries, number_of_boards, width, height)
 
         # verify that the version is the expected one for this trnasciever
         if version_info is None:
@@ -890,11 +895,10 @@ class Transceiver(object):
         return version_info
 
     def _try_to_find_scamp_and_boot(
-            self, tries_to_go, board_version, number_of_boards, width, height):
+            self, tries_to_go, number_of_boards, width, height):
         """ Try to detect if SCAMP is running, and if not, boot the machine
 
         :param tries_to_go: how many attemtps should be supported
-        :param board_version: The version of boards in the machine
         :param number_of_boards: the number of boards that this machine \
                 is built out of
         :param width: The width of the machine in chips
@@ -909,7 +913,7 @@ class Transceiver(object):
             try:
                 version_info = self.get_scamp_version()
             except exceptions.SpinnmanTimeoutException:
-                self.boot_board(board_version, number_of_boards, width, height)
+                self.boot_board(number_of_boards, width, height)
                 current_tries_to_go -= 1
             except exceptions.SpinnmanIOException:
                 raise exceptions.SpinnmanIOException(
