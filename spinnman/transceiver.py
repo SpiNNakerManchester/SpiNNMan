@@ -841,8 +841,7 @@ class Transceiver(object):
         # try to get a scamp version once
         logger.info("going to try to boot the machine with scamp")
         version_info = self._try_to_find_scamp_and_boot(
-            INITIAL_FIND_SCAMP_RETRIES_COUNT,
-            number_of_boards, width, height)
+            INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
 
         # If we fail to get a SCAMP version this time, try other things
         if version_info is None and self._version >= 4:
