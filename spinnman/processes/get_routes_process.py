@@ -42,7 +42,6 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
                 for link_id in range(0, 6):
                     if (route & (1 << link_id)) != 0:
                         link_ids.append(link_id)
-                print route_no + offset
                 self._entries[route_no + offset] = MulticastRoutingEntry(
                     key, mask, processor_ids, link_ids, False)
 

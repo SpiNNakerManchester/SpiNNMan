@@ -232,3 +232,27 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
     # Assume a single board with no cabinet or frame specified
     return BMPConnectionData(cabinet=0, frame=0, ip_address=bmp_ip_address,
                              boards=board_range)
+
+
+def get_router_timeout_value(mantissa, exponent):
+    """ Get the timeout value of a router in ticks, given the mantissa and\
+        exponent of the value
+
+    :param mantissa: The mantissa of the value, between 0 and 15
+    :type mantissa: int
+    :param exponent: The exponent of the value, between 0 and 15
+    :type exponent: int
+    """
+    if exponent <= 4:
+        return ((mantissa + 16) - (2 ** (4 - exponent))) * (2 ** exponent)
+    return (mantissa + 16) * (2 ** exponent)
+
+
+def get_router_timeout_value_from_byte(value):
+    """ Get the timeout value of a router in ticks, given an 8-bit floating\
+        point value stored in an int(!)
+
+    :param value: The value to convert
+    :type value: int
+    """
+    return get_router_timeout_value(value & 0xF, (value >> 4) & 0XF)

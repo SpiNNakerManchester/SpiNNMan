@@ -34,9 +34,9 @@ class CoreSubsets(object):
         """
         if (core_subset.x, core_subset.y) in self._core_subsets:
             raise SpinnmanInvalidParameterException(
-                    "core_subset.(x, y)",
-                    "{}, {}".format(core_subset.x, core_subset.y),
-                    "There can be only one set of cores for each chip")
+                "core_subset.(x, y)",
+                "{}, {}".format(core_subset.x, core_subset.y),
+                "There can be only one set of cores for each chip")
         self._core_subsets[(core_subset.x, core_subset.y)] = core_subset
 
     def add_processor(self, x, y, processor_id):
@@ -94,6 +94,20 @@ class CoreSubsets(object):
         :rtype: iterable of :py:class:`spinnman.model.core_subset.CoreSubset`
         """
         return self._core_subsets.itervalues()
+
+    def get_core_subset_for_chip(self, x, y):
+        """ Get the core subset for a chip
+
+        :param x: The x-coordinate of a chip
+        :type x: int
+        :param y: The y-coordinate of a chip
+        :type y: int
+        :return: The core subset of a chip, which will be empty if not added
+        :rtype: :py:class:`spinnman.model.core_subset.CoreSubset`
+        """
+        if (x, y) not in self._core_subsets:
+            return CoreSubset()
+        return self._core_subsets[(x, y)]
 
     def __iter__(self):
         """ Iterable of core_subsets
