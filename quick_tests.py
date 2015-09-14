@@ -137,8 +137,7 @@ transceiver = create_transceiver_from_hostname(
 try:
     print "Version Information"
     print "==================="
-    version_info = transceiver.ensure_board_is_ready(
-        board_config.board_version)
+    version_info = transceiver.ensure_board_is_ready()
     print version_info
     print ""
 
