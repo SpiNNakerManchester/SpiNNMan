@@ -82,7 +82,7 @@ class TestTransceiver(unittest.TestCase):
         trans = transceiver.create_transceiver_from_hostname(
             board_config.remotehost, board_config.board_version)
         # self.assertFalse(trans.is_connected())
-        trans.boot_board(board_config.board_version)
+        trans.boot_board()
         trans.close()
 
 
