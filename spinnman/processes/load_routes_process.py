@@ -60,8 +60,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
         # Upload the data
         table_address = 0x67800000
-        process = WriteMemoryProcess(self._machine, self._connections,
-                                     self._next_connection_selector)
+        process = WriteMemoryProcess(self._machine, self._connections)
         process.write_memory_from_bytearray(
             x, y, 0, table_address, routing_data, 0, len(routing_data))
 
