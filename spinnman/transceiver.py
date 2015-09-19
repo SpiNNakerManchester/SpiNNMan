@@ -1695,9 +1695,7 @@ class Transceiver(object):
         # Start the flood fill
         nearest_neighbour_id = self._get_next_nearest_neighbour_id()
         process = WriteMemoryFloodProcess(
-            self._machine, self._scamp_connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                self._machine, self._scamp_connections))
+            self._machine, self._scamp_connections)
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)
