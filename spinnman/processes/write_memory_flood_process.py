@@ -1,3 +1,4 @@
+from spinnman.processes.multi_connection_process_most_direct_connection_selector import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_flood_fill_end_request \
     import SCPFloodFillEndRequest
 from spinnman.messages.scp.impl.scp_flood_fill_start_request \
@@ -10,13 +11,16 @@ from spinnman import constants
 
 import math
 
+
 class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
     """ A process for writing memory
     """
 
-    def __init__(self, connections, next_connection_selector=None):
+    def __init__(self, machine, connections):
         AbstractMultiConnectionProcess.__init__(
-            self, connections, next_connection_selector)
+            self, connections,
+            MultiConnectionProcessMostDirectConnectionSelector(
+                machine, connections))
 
     def _start_flood_fill(self, n_bytes, nearest_neighbour_id):
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /

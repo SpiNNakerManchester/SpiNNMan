@@ -1,7 +1,7 @@
+from spinnman.messages.scp.impl.scp_dpri_exit_request import SCPDPRIExitRequest
 from spinnman.processes\
     .multi_connection_process_most_direct_connection_selector \
     import MultiConnectionProcessMostDirectConnectionSelector
-from spinnman.messages.scp.impl.scp_dpri_exit_request import SCPDPRIExitRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 

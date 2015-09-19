@@ -1,8 +1,8 @@
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector\
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_application_run_request\
     import SCPApplicationRunRequest
+from spinnman.processes\
+    .multi_connection_process_most_direct_connection_selector \
+    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 

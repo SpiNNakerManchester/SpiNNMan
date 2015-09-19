@@ -1556,7 +1556,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        process = WriteMemoryProcess(self._scamp_connections)
+        process = WriteMemoryProcess(self._machine, self._scamp_connections)
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(x, y, cpu, base_address, data,
                                              n_bytes)
@@ -1631,7 +1631,7 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        process = WriteMemoryProcess(self._scamp_connections)
+        process = WriteMemoryProcess(self._machine, self._scamp_connections)
         if isinstance(data, AbstractDataReader):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
@@ -1695,7 +1695,7 @@ class Transceiver(object):
         # Start the flood fill
         nearest_neighbour_id = self._get_next_nearest_neighbour_id()
         process = WriteMemoryFloodProcess(
-            self._scamp_connections,
+            self._machine, self._scamp_connections,
             MultiConnectionProcessMostDirectConnectionSelector(
                 self._machine, self._scamp_connections))
         if isinstance(data, AbstractDataReader):
@@ -1747,7 +1747,7 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        process = ReadMemoryProcess(self._scamp_connections)
+        process = ReadMemoryProcess(self._machine, self._scamp_connections)
         return process.read_memory(x, y, cpu, base_address, length)
 
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
@@ -1784,7 +1784,7 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
-        process = ReadMemoryProcess(self._scamp_connections)
+        process = ReadMemoryProcess(self._machine, self._scamp_connections)
         return process.read_link_memory(x, y, cpu, link, base_address, length)
 
     def stop_application(self, app_id):
@@ -2103,7 +2103,8 @@ class Transceiver(object):
             self._update_machine()
         chip_info = self._chip_info[(x, y)]
         base_address = chip_info.router_table_copy_address()
-        process = GetMultiCastRoutesProcess(self._scamp_connections, app_id)
+        process = GetMultiCastRoutesProcess(
+            self._machine, self._scamp_connections, app_id)
         return process.get_routes(x, y, base_address)
 
     def clear_multicast_routes(self, x, y):

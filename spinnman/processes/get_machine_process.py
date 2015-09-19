@@ -4,6 +4,9 @@ from spinnman.messages.scp.impl.scp_read_memory_request\
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman import constants
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.processes\
+    .multi_connection_process_round_robin_connection_selector\
+    import MultiConnectionProcessRoundRobinConnectionSelector
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman.processes.abstract_process import AbstractProcess
@@ -43,7 +46,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :type scamp_connections: iterable of\
                     :py:class:`spinnman.connections.abstract_classes.abstract_connection.AbstractConnection`
         """
-        AbstractMultiConnectionProcess.__init__(self, scamp_connections)
+        AbstractMultiConnectionProcess.__init__(
+            self, scamp_connections,
+            MultiConnectionProcessRoundRobinConnectionSelector(
+                scamp_connections))
 
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores

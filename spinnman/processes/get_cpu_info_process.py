@@ -1,14 +1,15 @@
-from spinnman.processes.\
-    multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.model.cpu_info import CPUInfo
 from spinnman import constants
 from spinnman.exceptions import SpinnmanInvalidParameterException
-import functools
+from spinnman.processes\
+    .multi_connection_process_most_direct_connection_selector \
+    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
+
+import functools
 
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess):
