@@ -1,23 +1,5 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from enum import Enum
-
-
-_REGISTERS = Enum(
-        value="Registers",
-        names=[("LOC_MC", 0),
-              ("EXT_MC", 1),
-              ("LOC_PP", 2),
-              ("EXT_PP", 3),
-              ("LOC_NN", 4),
-              ("EXT_NN", 5),
-              ("LOC_FR", 6),
-              ("EXT_FR", 7),
-              ("DUMP_MC", 8),
-              ("DUMP_PP", 9),
-              ("DUMP_NN", 10),
-              ("DUMP_FR", 11),
-              ("USER_START", 12),
-              ("USER_END", 16)])
+from spinnman import constants
 
 
 class RouterDiagnostics(object):
@@ -37,8 +19,9 @@ class RouterDiagnostics(object):
         """
         if len(register_values) != 16:
             raise SpinnmanInvalidParameterException(
-                    "len(register_values)", len(register_values),
-                    "There must be exactly 16 register values")
+                "len(register_values)",
+                str(len(constants.ROUTER_REGISTER_REGISTERS)),
+                "There must be exactly 16 register values")
 
         self._mon = (control_register >> 8) & 0x1F
         self._wait_1 = (control_register >> 16) & 0xFF
@@ -91,7 +74,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.LOC_MC.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.LOC_MC.value]
 
     @property
     def n_external_multicast_packets(self):
@@ -100,7 +84,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.EXT_MC.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.EXT_MC.value]
 
     @property
     def n_dropped_multicast_packets(self):
@@ -109,7 +94,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.DUMP_MC.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.DUMP_MC.value]
 
     @property
     def n_local_peer_to_peer_packets(self):
@@ -118,7 +104,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.LOC_PP.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.LOC_PP.value]
 
     @property
     def n_external_peer_to_peer_packets(self):
@@ -127,7 +114,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.EXT_PP.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.EXT_PP.value]
 
     @property
     def n_dropped_peer_to_peer_packets(self):
@@ -136,7 +124,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.DUMP_PP.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.DUMP_PP.value]
 
     @property
     def n_local_nearest_neighbour_packets(self):
@@ -145,7 +134,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.LOC_NN.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.LOC_NN.value]
 
     @property
     def n_external_nearest_neighbour_packets(self):
@@ -155,7 +145,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.EXT_NN.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.EXT_NN.value]
 
     @property
     def n_dropped_nearest_neighbour_packets(self):
@@ -164,7 +155,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.DUMP_NN.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.DUMP_NN.value]
 
     @property
     def n_local_fixed_route_packets(self):
@@ -173,7 +165,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.LOC_FR.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.LOC_FR.value]
 
     @property
     def n_external_fixed_route_packets(self):
@@ -182,7 +175,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.EXT_FR.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.EXT_FR.value]
 
     @property
     def n_dropped_fixed_route_packets(self):
@@ -191,7 +185,8 @@ class RouterDiagnostics(object):
         :return: The number of packets
         :rtype: int
         """
-        return self._register_values[_REGISTERS.DUMP_FR.value]
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.DUMP_FR.value]
 
     @property
     def user_registers(self):
@@ -201,7 +196,8 @@ class RouterDiagnostics(object):
         :rtype: array of int
         """
         return self._register_values[
-                _REGISTERS.USER_START.value:_REGISTERS.USER_END.value]
+            constants.ROUTER_REGISTER_REGISTERS.USER_0.value:
+            constants.ROUTER_REGISTER_REGISTERS.USER_3.value + 1]
 
     @property
     def registers(self):

@@ -19,22 +19,21 @@ class SCPReadFPGARegisterResponse(AbstractSCPBMPResponse):
         AbstractSCPBMPResponse.__init__(self)
         self._fpga_register = None
 
-    def read_scp_response(self, byte_reader):
+    def read_data_bytestring(self, data, offset):
         """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_scp_response`
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
         """
-        AbstractSCPBMPResponse.read_scp_response(self, byte_reader)
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                "Read fpga register", "CMD_LINK_READ", result.name)
-        data = byte_reader.read_bytes()
-        self._fpga_register = struct.unpack("<I", data)[0]
+                "Read FPGA register", "CMD_LINK_READ", result.name)
+
+        self._fpga_register = struct.unpack_from("<I", data, offset)[0]
 
     @property
     def fpga_register(self):
         """ The register information received
 
-        :rtype: bytearray
+        :rtype: int
         """
         return self._fpga_register

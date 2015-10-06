@@ -1,18 +1,20 @@
 import logging
 from random import randint
 from os.path import os
+import struct
+import time
 
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.cpu_state import CPUState
 from spinnman.model.core_subsets import CoreSubsets
 from spinnman.model.core_subset import CoreSubset
 from spinnman.data.file_data_reader import FileDataReader
-from time import sleep
 from spinnman.messages.scp.scp_signal import SCPSignal
 from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinn_machine.tags.reverse_iptag import ReverseIPTag
 from spinnman.model.diagnostic_filter import DiagnosticFilter
+import sys
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.model.diagnostic_filter_destination \
@@ -20,6 +22,7 @@ from spinnman.model.diagnostic_filter_destination \
 from spinnman.model.diagnostic_filter_packet_type \
     import DiagnosticFilterPacketType
 from board_test_configuration import BoardTestConfiguration
+from spinnman import constants
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
@@ -109,14 +112,32 @@ def print_filter(d_filter):
     print_enums("Emergency Routing:", d_filter.emergency_routing_statuses)
     print_enums("Packet Types:", d_filter.packet_types)
 
+
+def print_reinjection_status(status):
+    print "Dropped Packets captured:", status.n_dropped_packets
+    print "Missed drop packets:", status.n_missed_dropped_packets
+    print "Dropped Packet overflows:", status.n_dropped_packet_overflows
+    print "Reinjected packets:", status.n_reinjected_packets
+    print "Router timeout: {}  emergency timeout {}".format(
+        status.router_timeout, status.router_emergency_timeout)
+    print ("Reinjecting multicast: {}  point_to_point: {}  nearest_neighbour:"
+           " {}  fixed_route: {}").format(
+               status.is_reinjecting_multicast,
+               status.is_reinjecting_point_to_point,
+               status.is_reinjecting_nearest_neighbour,
+               status.is_reinjecting_fixed_route)
+
 transceiver = create_transceiver_from_hostname(
-    board_config.remotehost, ignore_cores=down_cores, ignore_chips=down_chips)
+    board_config.remotehost, board_config.board_version,
+    ignore_cores=down_cores, ignore_chips=down_chips,
+    bmp_connection_data=board_config.bmp_names,
+    auto_detect_bmp=board_config.auto_detect_bmp)
 
 
 try:
     print "Version Information"
     print "==================="
-    version_info = transceiver.ensure_board_is_ready(board_config.board_version)
+    version_info = transceiver.ensure_board_is_ready()
     print version_info
     print ""
 
@@ -136,10 +157,7 @@ try:
     print "====================="
     write_data = bytearray(randint(0, 255) for i in range(0, 1000))
     transceiver.write_memory(0, 0, 0x70000000, write_data)
-    read_data_packets = transceiver.read_memory(0, 0, 0x70000000, 1000)
-    read_data = bytearray()
-    for packet in read_data_packets:
-        read_data.extend(packet)
+    read_data = transceiver.read_memory(0, 0, 0x70000000, 1000)
     print "Written:", map(hex, write_data)
     print "Read:   ", map(hex, read_data)
     print ""
@@ -147,9 +165,8 @@ try:
     print "Flood Memory Write"
     print "=================="
     transceiver.write_memory_flood(0x70000000, 0x04050607)
-    read_data_packets = transceiver.read_memory(1, 1, 0x70000000, 4)
-    for packet in read_data_packets:
-        print map(hex, packet)
+    read_data = transceiver.read_memory(1, 1, 0x70000000, 4)
+    print hex(struct.unpack("<I", str(read_data))[0])
     print ""
 
     print "Execute Flood"
@@ -161,7 +178,7 @@ try:
     while count < 20:
         count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)
         print "Cores in state SYNC0={}".format(count)
-        sleep(0.1)
+        time.sleep(0.1)
     print ""
 
     print "CPU Information"
@@ -178,15 +195,14 @@ try:
     transceiver.send_signal(app_id, SCPSignal.SYNC0)
     count = 0
     while count < 20:
-        count = transceiver.get_core_state_count(app_id, CPUState.FINSHED)
+        count = transceiver.get_core_state_count(app_id, CPUState.FINISHED)
         print "Cores in state FINISHED={}".format(count)
-        sleep(0.1)
+        time.sleep(0.1)
     print ""
 
     print "Get IOBufs"
     print "=========="
     iobufs = transceiver.get_iobuf(core_subsets)
-    iobufs = sorted(iobufs, key=lambda x: (x.x, x.y, x.p))
     for iobuf in iobufs:
         print iobuf
     print ""
@@ -194,6 +210,7 @@ try:
     print "Stop Application"
     print "================"
     transceiver.send_signal(app_id, SCPSignal.STOP)
+    time.sleep(0.5)
     cpu_infos = transceiver.get_cpu_information(core_subsets)
     cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
     print "{} CPUs".format(len(cpu_infos))
@@ -261,10 +278,13 @@ try:
 
     print "Clear Router Diagnostics"
     print "========================"
-    transceiver.clear_router_diagnostic_counters(0, 0)
-    router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-    print router_diagnostics.registers
-    print ""
+    transceiver.clear_router_diagnostic_counters(
+        0, 0, counter_ids=[constants.ROUTER_REGISTER_REGISTERS.LOC_PP.value,
+                           constants.ROUTER_REGISTER_REGISTERS.EXT_PP.value])
+    diagnostics = transceiver.get_router_diagnostics(0, 0)
+    for register in constants.ROUTER_REGISTER_REGISTERS:
+        print "{}: {}".format(
+            register.name, diagnostics.registers[register.value])
 
     print "Send read requests"
     print "======================"
@@ -277,8 +297,10 @@ try:
 
     print "Get Router Diagnostics"
     print "======================"
-    router_diagnostics = transceiver.get_router_diagnostics(0, 0)
-    print router_diagnostics.registers
+    diagnostics = transceiver.get_router_diagnostics(0, 0)
+    for register in constants.ROUTER_REGISTER_REGISTERS:
+        print "{}: {}".format(
+            register.name, diagnostics.registers[register.value])
     print ""
 
     print "Get Router Diagnostic Filters"
@@ -289,7 +311,74 @@ try:
         print_filter(current_filter)
         print ""
 
-except Exception:
-    logging.exception("Error!")
+    print "Setup Dropped Packet Reinjection"
+    print "================================"
+    transceiver.enable_reinjection(True, False, False, False)
+    print_reinjection_status(transceiver.get_reinjection_status(0, 0))
 
-transceiver.close()
+    print "Set Router Timeouts"
+    print "==================="
+    transceiver.set_reinjection_router_timeout(2, 0)
+    transceiver.set_reinjection_router_emergency_timeout(3, 4)
+    print_reinjection_status(transceiver.get_reinjection_status(1, 1))
+
+    print "Reset Reinjection Counters"
+    print "=========================="
+    transceiver.reset_reinjection_counters()
+    print_reinjection_status(transceiver.get_reinjection_status(1, 0))
+
+    print "Test writing longs and ints to write memory and extracting them"
+    print "========================="
+    transceiver.write_memory(0, 0, 0x70000000, data=long(123456789123456789))
+    data = struct.unpack("<Q", str(buffer(transceiver.
+                                          read_memory(0, 0, 0x70000000, 8))))[0]
+    if data != long(123456789123456789):
+        raise Exception("values are not identical")
+    transceiver.write_memory(0, 0, 0x70000000, data=int(123456789))
+    data = struct.unpack("<I", str(buffer(transceiver.
+                                          read_memory(0, 0, 0x70000000, 4))))[0]
+    if data != 123456789:
+        raise Exception("values are not identical")
+
+    print "Test writing longs and ints to write_neighbour_memory and " \
+          "extracting them"
+    print("==========================")
+    transceiver.write_neighbour_memory(0, 0, 0, 0x70000000,
+                                       data=long(123456789123456789))
+    data = struct.unpack(
+        "<Q", str(buffer(transceiver.read_neighbour_memory(
+            0, 0, 0, 0x70000000, 8))))[0]
+    if data != long(123456789123456789):
+        raise Exception("values are not identical")
+
+    transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=int(123456789))
+    data = struct.unpack(
+        "<I", str(buffer(transceiver.read_neighbour_memory(
+            0, 0, 0, 0x70000000, 4))))[0]
+    if data != 123456789:
+        raise Exception("values are not identical")
+
+    print "Test writing longs and ints to write_memory_flood and extracting " \
+          "them"
+    print("==========================")
+    transceiver.write_memory_flood(0x70000000, data=long(123456789123456789))
+    data = struct.unpack(
+        "<Q", str(buffer(transceiver. read_memory(0, 0, 0x70000000, 8))))[0]
+    data2 = struct.unpack(
+        "<Q", str(buffer(transceiver.read_memory(1, 1, 0x70000000, 8))))[0]
+    if data != long(123456789123456789) or data2 != long(123456789123456789):
+        raise Exception("values are not identical")
+
+    transceiver.write_memory_flood(0x70000000, data=long(123456789))
+    data = struct.unpack(
+        "<I", str(buffer(transceiver. read_memory(0, 0, 0x70000000, 4))))[0]
+    data2 = struct.unpack(
+        "<I", str(buffer(transceiver.read_memory(1, 1, 0x70000000, 4))))[0]
+    if data != long(123456789) or data2 != long(123456789):
+        raise Exception("values are not identical")
+    transceiver.close()
+
+except Exception as e:
+    transceiver.close()
+    exc_class, exc, tb = sys.exc_info()
+    raise exc_class, exc, tb

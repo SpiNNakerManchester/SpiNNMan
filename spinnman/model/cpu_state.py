@@ -15,7 +15,7 @@ class CPUState(Enum):
     SYNC0 = 8
     SYNC1 = 9
     PAUSED = 10
-    FINSHED = 11
+    FINISHED = 11
     IDLE = 15
     
     def __new__(cls, value, doc=""):

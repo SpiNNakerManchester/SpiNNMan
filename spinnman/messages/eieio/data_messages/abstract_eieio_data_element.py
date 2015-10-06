@@ -9,15 +9,14 @@ class AbstractEIEIODataElement(object):
     """
 
     @abstractmethod
-    def write_element(self, eieio_type, byte_writer):
-        """ Write the element to the writer given the type
+    def get_bytestring(self, eieio_type):
+        """ Get a bytestring for the given type
 
         :param eieio_type: The type of the message being written
         :type eieio_type:\
                     :py:class:`spinnman.messages.eieio.eieio_type.EIEIOType`
-        :param byte_writer: The writer to write to
-        :type byte_writer:\
-                    :py:class:`spinnman.data.abstract_byte_writer.AbstractByteWriter`
+        :return: A bytestring for the element
+        :rtype: bytestring
         :raise SpinnmanInvalidParameterException: If the type is incompatible\
                     with the element
         """

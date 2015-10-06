@@ -20,10 +20,10 @@ class SCPCheckOKResponse(AbstractSCPResponse):
         self._operation = operation
         self._command = command
 
-    def read_scp_response(self, byte_reader):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_scp_response`
+    def read_data_bytestring(self, data, offset):
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
         """
-        super(SCPCheckOKResponse, self).read_scp_response(byte_reader)
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

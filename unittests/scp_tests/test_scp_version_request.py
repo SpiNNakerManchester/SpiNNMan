@@ -1,10 +1,7 @@
 import unittest
-from spinnman.messages.scp.impl.scp_version_response import SCPVersionResponse
 from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
 from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.data.little_endian_byte_array_byte_writer import LittleEndianByteArrayByteWriter
-from struct import pack, unpack
-from spinnman.exceptions import SpinnmanInvalidParameterException
+
 
 class TestSCPVersionRequest(unittest.TestCase):
     def test_new_version_request(self):
@@ -13,18 +10,6 @@ class TestSCPVersionRequest(unittest.TestCase):
         self.assertEqual(ver_request.sdp_header.destination_chip_x, 0)
         self.assertEqual(ver_request.sdp_header.destination_chip_y, 1)
         self.assertEqual(ver_request.sdp_header.destination_cpu, 2)
-
-    def test_new_version_request_invalid_x(self):
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            ver_request = SCPVersionRequest(256,1,2)
-
-    def test_new_version_request_invalid_y(self):
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            ver_request = SCPVersionRequest(0,256,2)
-
-    def test_new_version_request_invalid_p(self):
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            ver_request = SCPVersionRequest(0,1,32)
 
 if __name__ == '__main__':
     unittest.main()

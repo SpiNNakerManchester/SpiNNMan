@@ -9,8 +9,8 @@ class EIEIOWithoutPayloadDataMessage(EIEIODataMessage):
     """ An EIEIO message without a payload
     """
 
-    def __init__(self, eieio_header, data_reader=None):
-        EIEIODataMessage.__init__(self, eieio_header, data_reader=data_reader)
+    def __init__(self, eieio_header, data=None, offset=0):
+        EIEIODataMessage.__init__(self, eieio_header, data, offset)
 
         if eieio_header.eieio_type.payload_bytes != 0:
             raise SpinnmanInvalidParameterException(

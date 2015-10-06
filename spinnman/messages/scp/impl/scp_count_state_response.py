@@ -1,3 +1,4 @@
+import struct
 from spinnman.messages.scp.abstract_messages.abstract_scp_response \
     import AbstractSCPResponse
 from spinnman.messages.scp.scp_result import SCPResult
@@ -14,15 +15,15 @@ class SCPCountStateResponse(AbstractSCPResponse):
         super(SCPCountStateResponse, self).__init__()
         self._count = None
 
-    def read_scp_response(self, byte_reader):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_scp_response`
+    def read_data_bytestring(self, data, offset):
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
         """
-        super(SCPCountStateResponse, self).read_scp_response(byte_reader)
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "CountState", "CMD_SIGNAL", result.name)
-        self._count = byte_reader.read_int()
+        self._count = struct.unpack_from("<I", data, offset)[0]
 
     @property
     def count(self):

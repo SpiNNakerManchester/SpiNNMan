@@ -1,18 +1,4 @@
-from spinnman._utils import get_short_from_little_endian_bytearray
-from spinnman._utils import get_int_from_little_endian_bytearray
-
-
-def _get_int_from_bytearray(array, offset):
-    """ Wrapped functionality in case the endianness changes
-    """
-    return get_int_from_little_endian_bytearray(array, offset)
-
-
-def _get_short_from_bytearray(array, offset):
-    """ Wrapped functionality in case the endianness changes
-    """
-    return get_short_from_little_endian_bytearray(array, offset)
-
+import struct
 
 # The base address of the system variable structure in System ram
 _SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
@@ -26,80 +12,75 @@ class ChipInfo(object):
         SDRAM
     """
 
-    def __init__(self, system_data):
+    def __init__(self, system_data, offset):
         """
 
-        :param system_data: An array of bytes retrieved from SDRAM on the baord
-        :type system_data: bytearray
+        :param system_data: An bytestring retrieved from SDRAM on the board
+        :type system_data: bytestring
+        :param offset: The offset into the bytestring where the actual data\
+                starts
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
                     the data doesn't contain valid system data information
         """
-        self._y = system_data[0]
-        self._x = system_data[1]
-        self._y_size = system_data[2]
-        self._x_size = system_data[3]
-        self._debug_y = system_data[4]
-        self._debug_x = system_data[5]
-        self._is_peer_to_peer_available = system_data[6] != 0
-        self._nnbc_last_id = system_data[7]
-        self._nearest_ethernet_y = system_data[8]
-        self._nearest_ethernet_x = system_data[9]
-        self._hardware_version = system_data[10]
-        self._is_ethernet_available = system_data[11] != 0
+        (self._y, self._x, self._y_size, self._x_size, self._debug_y,
+         self._debug_x,                                              # 6B  0
+         self._is_peer_to_peer_available,                            # ?   6
+         self._nnbc_last_id, self._nearest_ethernet_y,
+         self._nearest_ethernet_x, self._hardware_version,           # 4B  7
+         self._is_ethernet_available,                                # ?   11
+         links_available, self._peer_to_peer_sequence_length,
+         self._clock_divisor, _router_phase_timer_scale,             # 4B  12
+         # skipped                                                   # 16x 16
+         self._router_time_phase_timer,                              # I   32
+         self._cpu_clock_mhz, self._memory_clock_mhz,                # 2H  36
+         self._nnbc_forward, self._nnbc_retry,
+         self._link_timeout_us, led_flash_period_100us,              # 4B  40
+         self._peer_to_peer_c_timer, led0, led1,
+         self._peer_to_peer_b_timer, self._random_seed,              # 5I  44
+         self._is_root_chip,                                         # ?   64
+         self._n_shared_message_buffers, self._boot_delay,
+         self._soft_watchdog,                                        # 3B  65
+         self._probe_timer, self._system_ram_heap_address,
+         self._sdram_heap_address, self._iobuf_size,
+         self._sdram_buffers_address, self._system_buffers_size,
+         self._boot_signature, self._nnbc_memory_pointer,            # 8I  68
+         # skipped                                                   # 3x  100
+         self._board_test_flags,                                     # B   103
+         self._next_free_memory_block_pointer,                       # I   104
+         self._n_memory_blocks_in_use, self._maximum_blocks_used,    # 2H  108
+         # skipped                                                   # 16x 112
+         status_map,                                                 # 20s 128
+         physical_to_virtual_core_map,                               # 20s 148
+         virtual_to_physical_core_map,                               # 20s 168
+         self._n_working_cores, self._n_scamp_working_cores,         # 2B  188
+         # skipped                                                   # 2x  190
+         self._sdram_base_address, self._sysram_base_address,
+         self._system_sdram_base_address, self._cpu_information_base_address,
+         self._system_heap_address, self._router_table_copy_address,
+         self._peer_to_peer_hop_table_address,
+         self._alloc_tag_table_address,                              # 8I  192
+         self._first_free_router_entry,
+         self._n_active_peer_to_peer_addresses,                      # 2H  224
+         self._application_data_address, self._shared_message_buffers_address,
+         self._mailbox_flags,                                        # 3I  228
+         ip0, ip1, ip2, ip3                                          # 4B  240
+         ) = struct.unpack_from(
+            "< 6B ? 4B ? 4B 16x I 2H 4B 5I ? 3B 8I 3x B I 2H 16x 20s 20s 20s"
+            " 2B 2x 8I 2H 3I 4B",
+            system_data, offset)
 
         self._links_available = list()
         for i in range(0, 8):
-            if ((system_data[12] >> i) & 0x1) != 0:
+            if ((links_available >> i) & 0x1) != 0:
                 self._links_available.append(i)
 
-        self._peer_to_peer_sequence_length = system_data[13]
-        self._clock_divisor = system_data[14]
-        self._router_phase_timer_scale = system_data[15]
-
-        self._router_time_phase_timer = _get_int_from_bytearray(
-            system_data, 32)
-        self._cpu_clock_mhz = _get_short_from_bytearray(system_data, 36)
-        self._memory_clock_mhz = _get_short_from_bytearray(system_data, 38)
-        self._nnbc_forward = system_data[40]
-        self._nnbc_retry = system_data[41]
-        self._link_timeout_us = system_data[42]
-        self._led_flash_period_ms = system_data[43] * 10
-
-        self._peer_to_peer_c_timer = _get_int_from_bytearray(system_data, 44)
-        self._leds = [_get_int_from_bytearray(system_data, 48),
-                      _get_int_from_bytearray(system_data, 52)]
-        self._peer_to_peer_b_timer = _get_int_from_bytearray(system_data, 56)
-        self._random_seed = _get_int_from_bytearray(system_data, 60)
-
-        self._is_root_chip = system_data[64] != 0
-        self._n_shared_message_buffers = system_data[65]
-        self._boot_delay = system_data[66]
-        self._soft_watchdog = system_data[67]
-
-        self._probe_timer = _get_int_from_bytearray(system_data, 68)
-
-        self._system_ram_heap_address = _get_int_from_bytearray(
-            system_data, 72)
-        self._sdram_heap_address = _get_int_from_bytearray(system_data, 76)
-
-        self._iobuf_size = _get_int_from_bytearray(system_data, 80)
-        self._sdram_buffers_address = _get_int_from_bytearray(system_data, 84)
-        self._system_buffers_size = _get_int_from_bytearray(system_data, 88)
-        self._boot_signature = _get_int_from_bytearray(system_data, 92)
-
-        self._nnbc_memory_pointer = _get_int_from_bytearray(system_data, 96)
-
-        self._board_test_flags = system_data[103]
-
-        self._next_free_memory_block_pointer = _get_int_from_bytearray(
-            system_data, 104)
-        self._n_memory_blocks_in_use = _get_short_from_bytearray(
-            system_data, 108)
-        self._maximum_blocks_used = _get_short_from_bytearray(system_data, 110)
-
-        self._status_map = system_data[128:148]
-        self._physical_to_virtual_core_map = system_data[148:168]
-        self._virtual_to_physical_core_map = system_data[168:188]
+        self._led_flash_period_ms = led_flash_period_100us * 10
+        self._leds = [led0, led1]
+        self._status_map = bytearray(status_map)
+        self._physical_to_virtual_core_map = bytearray(
+            physical_to_virtual_core_map)
+        self._virtual_to_physical_core_map = bytearray(
+            virtual_to_physical_core_map)
 
         self._virtual_core_ids = list()
         for physical_core_id in range(
@@ -110,37 +91,7 @@ class ChipInfo(object):
                 self._virtual_core_ids.append(virtual_core_id)
         self._virtual_core_ids.sort()
 
-        self._n_working_cores = system_data[188]
-        self._n_scamp_working_cores = system_data[189]
-
-        self._sdram_base_address = _get_int_from_bytearray(system_data, 192)
-        self._sysram_base_address = _get_int_from_bytearray(system_data, 196)
-        self._system_sdram_base_address = _get_int_from_bytearray(
-            system_data, 200)
-        self._cpu_information_base_address = _get_int_from_bytearray(
-            system_data, 204)
-        self._system_heap_address = _get_int_from_bytearray(system_data, 208)
-        self._router_table_copy_address = _get_int_from_bytearray(
-            system_data, 212)
-        self._peer_to_peer_hop_table_address = _get_int_from_bytearray(
-            system_data, 216)
-        self._alloc_tag_table_address = _get_int_from_bytearray(
-            system_data, 220)
-
-        self._first_free_router_entry = _get_short_from_bytearray(
-            system_data, 224)
-        self._n_active_peer_to_peer_addresses = _get_short_from_bytearray(
-            system_data, 226)
-        self._application_data_address = _get_int_from_bytearray(
-            system_data, 228)
-        self._shared_message_buffers_address = _get_int_from_bytearray(
-            system_data, 232)
-        self._mailbox_flags = _get_int_from_bytearray(system_data, 236)
-
-        self._ip_address = None
-        self._ip_address = "{}.{}.{}.{}".format(
-            system_data[240], system_data[241], system_data[242],
-            system_data[243])
+        self._ip_address = "{}.{}.{}.{}".format(ip0, ip1, ip2, ip3)
         if self._ip_address == "0.0.0.0":
             self._ip_address = None
 
@@ -236,11 +187,19 @@ class ChipInfo(object):
 
     @property
     def sdram_base_address(self):
-        """ The base address of SDRAM on the chip
+        """ The base address of the user region of SDRAM on the chip
 
         :rtype: int
         """
         return self._sdram_base_address
+
+    @property
+    def system_sdram_base_address(self):
+        """ The base address of the System SDRAM region on the chip
+
+        :rtype: int
+        """
+        return self._system_sdram_base_address
 
     @property
     def cpu_information_base_address(self):

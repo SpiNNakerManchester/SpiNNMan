@@ -1,38 +1,51 @@
-"""
-UDPBMPConnection
-"""
 
 # spinnman imports
 from spinnman import constants
-from spinnman.connections.abstract_classes.abstract_udp_connection import \
-    AbstractUDPConnection
-from spinnman.connections.abstract_classes.udp_receivers.\
-    abstract_udp_scp_bmp_receiver import \
-    AbstractUDPSCPBMPReceiver
-from spinnman.connections.abstract_classes.udp_receivers.\
-    abstract_udp_sdp_receiver import AbstractUDPSDPReceiver
-from spinnman.connections.abstract_classes.udp_senders.\
-    abstract_udp_scp_bmp_sender import \
-    AbstractUDPSCPBMPSender
-from spinnman.connections.abstract_classes.udp_senders.\
-    abstract_udp_sdp_sender import AbstractUDPSDPSender
-from spinnman.messages.scp.abstract_messages.abstract_scp_bmp_request import \
-    AbstractSCPBMPRequest
-from spinnman.messages.sdp.sdp_message import SDPMessage
+from spinnman.connections.udp_packet_connections.udp_connection import \
+    UDPConnection
+import struct
+from spinnman.messages.scp.scp_result import SCPResult
+from spinnman.connections.udp_packet_connections import udp_utils
+from spinnman.connections.abstract_classes.abstract_scp_receiver \
+    import AbstractSCPReceiver
+from spinnman.connections.abstract_classes.abstract_scp_sender \
+    import AbstractSCPSender
 
 
 class UDPBMPConnection(
-        AbstractUDPConnection, AbstractUDPSDPReceiver, AbstractUDPSDPSender,
-        AbstractUDPSCPBMPSender, AbstractUDPSCPBMPReceiver):
+        UDPConnection, AbstractSCPReceiver, AbstractSCPSender):
     """ A BMP connection which supports queries to the BMP of a SpiNNaker\
         machine
     """
 
     def __init__(self, cabinet, frame, boards, local_host=None,
-                 local_port=None, remote_host=None):
-        AbstractUDPConnection.__init__(
-            self, local_host, local_port, remote_host,
-            constants.SCP_SCAMP_PORT)
+                 local_port=None, remote_host=None,
+                 remote_port=constants.SCP_SCAMP_PORT):
+        """
+        :param cabinet: The cabinet number of the connection
+        :type cabinet: int
+        :param frame: The frame number of the connection
+        :type frame: int
+        :param boards: The boards that the connection can control on the same\
+                backplane
+        :type boards: iterable of int
+        :param local_host: The optional ip address or host name of the local\
+                interface to listen on
+        :type local_host: str
+        :param local_port: The optional local port to listen on
+        :type local_port: int
+        :param remote_host: The optional remote host name or ip address to\
+                send messages to.  If not specified, sending will not be\
+                possible using this connection
+        :type remote_host: str
+        :param remote_port: The optional remote port number to send messages\
+                to.  If not specified, sending will not be possible using this\
+                connection
+        """
+        UDPConnection.__init__(
+            self, local_host, local_port, remote_host, remote_port)
+        AbstractSCPReceiver.__init__(self)
+        AbstractSCPSender.__init__(self)
         self._cabinet = cabinet
         self._frame = frame
         self._boards = boards
@@ -61,72 +74,26 @@ class UDPBMPConnection(
         """
         return self._boards
 
-    def supports_sends_message(self, message):
+    @property
+    def chip_x(self):
+        """ Defined to satisfy the AbstractSCPSender - always 0 for a BMP
         """
-        helper method for spinnman to deduce if this connection is valid for
-        this message type
-        :param message: message to check if valid to send
-        :return: true if valid, false otherwise
-        """
-        if isinstance(message, AbstractSCPBMPRequest):
-            return True
-        if isinstance(message, SDPMessage):
-            return True
-        else:
-            return False
+        return 0
 
-    def connection_type(self):
+    @property
+    def chip_y(self):
+        """ Defined to satisfy the AbstractSCPSender - always 0 for a BMP
         """
-        returns the type of the connection type
-        :return:
-        """
-        return constants.CONNECTION_TYPE.UDP_BMP
+        return 0
 
-    def is_sdp_reciever(self):
-        """
-        helper method for isinstance
-        :return:
-        """
-        return True
+    def get_scp_data(self, scp_request):
+        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header, 0, 0)
+        return struct.pack("<2x") + scp_request.bytestring
 
-    def is_udp_sdp_reciever(self):
-        """
-        helper method for isinstance
-        :return:
-        """
-        return True
+    def receive_scp_response(self, timeout=1.0):
+        data = self.receive(timeout)
+        result, sequence = struct.unpack_from("<2H", data, 10)
+        return SCPResult(result), sequence, data, 2
 
-    def is_scp_receiver(self):
-        """
-        helper method for isinstance
-        :return:
-        """
-        return True
-
-    def is_udp_sdp_sender(self):
-        """
-        helper method for isinstance
-        :return:
-        """
-        return True
-
-    def is_udp_scp_sender(self):
-        """
-        helper method for isinstance
-        :return:
-        """
-        return True
-
-    def is_udp_scp_bmp_sender(self):
-        """
-        helper method for isinstance
-        :return:
-        """
-        return True
-
-    def is_udp_scp_bmp_receiver(self):
-        """
-        helper method for isinstance
-        :return:
-        """
-        return True
+    def send_scp_request(self, scp_request):
+        self.send(self.get_scp_data(scp_request))

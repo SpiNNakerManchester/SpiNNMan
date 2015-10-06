@@ -1,4 +1,5 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages.abstract_scp_request\
+    import AbstractSCPRequest
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
@@ -14,9 +15,11 @@ class SCPRouterInitRequest(AbstractSCPRequest):
     def __init__(self, x, y, n_entries, table_address, base_address, app_id):
         """
 
-        :param x: The x-coordinate of the chip, between 0 and 255
+        :param x: The x-coordinate of the chip, between 0 and 255, \
+        this is not checked due to speed restrictions
         :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255
+        :param y: The y-coordinate of the chip, between 0 and 255\
+        this is not checked due to speed restrictions
         :type y: int
         :param n_entries: The number of entries in the table, more than 0
         :type n_entries: int

@@ -15,17 +15,15 @@ class SCPReadADCResponse(AbstractSCPBMPResponse):
         AbstractSCPBMPResponse.__init__(self)
         self._adc_info = None
 
-    def read_scp_response(self, byte_reader):
+    def read_data_bytestring(self, data, offset):
         """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_scp_response`
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
         """
-        AbstractSCPBMPResponse.read_scp_response(self, byte_reader)
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                "Version", "CMD_VER", result.name)
-        data = byte_reader.read_bytes()
-        self._adc_info = ADCInfo(data)
+                "ADC", "CMD_ADC", result.name)
+        self._adc_info = ADCInfo(data, offset)
 
     @property
     def adc_info(self):

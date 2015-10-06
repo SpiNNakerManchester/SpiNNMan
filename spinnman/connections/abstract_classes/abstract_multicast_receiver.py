@@ -2,7 +2,8 @@ from abc import ABCMeta
 from abc import abstractmethod
 from six import add_metaclass
 
-from spinnman.connections.abstract_classes.abstract_connection import AbstractConnection
+from spinnman.connections.abstract_classes.abstract_connection \
+    import AbstractConnection
 
 
 @add_metaclass(ABCMeta)
@@ -32,7 +33,8 @@ class AbstractMulticastReceiver(AbstractConnection):
                     connection is closed
         :type timeout: int
         :return: a multicast message
-        :rtype: :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+        :rtype:\
+                    :py:class:`spinnman.messages.multicast_message.MulticastMessage`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     receiving the message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\

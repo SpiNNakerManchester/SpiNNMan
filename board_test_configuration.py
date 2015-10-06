@@ -9,6 +9,8 @@ class BoardTestConfiguration(object):
         self.localport = None
         self.remotehost = None
         self.board_version = None
+        self.bmp_names = None
+        self.auto_detect_bmp = None
 
         self._config = ConfigParser.RawConfigParser()
         config_file = os.path.join(os.path.dirname(__file__), "test.cfg")
@@ -24,6 +26,11 @@ class BoardTestConfiguration(object):
 
         self.remotehost = self._config.get("Machine", "machineName")
         self.board_version = self._config.getint("Machine", "version")
+        self.bmp_names = self._config.get("Machine", "bmp_names")
+        if self.bmp_names == "None":
+            self.bmp_names = None
+        self.auto_detect_bmp = \
+            self._config.getboolean("Machine", "auto_detect_bmp")
         self.localport = 54321
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect((self.remotehost, 0))

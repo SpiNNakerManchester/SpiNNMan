@@ -1,4 +1,3 @@
-from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.eieio.data_messages.eieio_key_payload_data_element\
     import EIEIOKeyPayloadDataElement
@@ -13,32 +12,34 @@ from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
 from spinnman import constants
 
 import math
+import struct
 
 
 class EIEIODataMessage(AbstractEIEIOMessage):
     """ An EIEIO Data message
     """
 
-    def __init__(self, eieio_header, data_reader=None):
+    def __init__(self, eieio_header, data=None, offset=0):
         """
 
         :param eieio_header: The header of the message
         :type eieio_header:\
                     :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
-        :param data_reader: Optional reader of data contained within the\
-                            packet, or None if this packet is being written
-        :type data_reader:\
-                    :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`
+        :param data: Optional data contained within the packet
+        :type data: bytestring
+        :param offset: Optional offset where the valid data starts
+        :type offset: int
         """
 
         # The header
         self._eieio_header = eieio_header
 
         # Elements to be written
-        self._elements = list()
+        self._elements = b""
 
         # Keeping track of the reading of the data
-        self._data_reader = data_reader
+        self._data = data
+        self._offset = offset
         self._elements_read = 0
 
     @property
@@ -100,24 +101,13 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :raise SpinnmanInvalidParameterException: If the element is not\
                     compatible with the header
         :raise SpinnmanInvalidPacketException: If the message was created to\
-                    read data from a reader
+                    read data
         """
-        if self._data_reader is not None:
+        if self._data is not None:
             raise SpinnmanInvalidPacketException(
                 "EIEIODataMessage", "This packet is read-only")
 
-        if (self._eieio_header.eieio_type.payload_bytes == 0 and
-                isinstance(element, EIEIOKeyPayloadDataElement)):
-            raise SpinnmanInvalidParameterException(
-                "element", element,
-                "The element has a payload, but the header says no payload")
-        if (self._eieio_header.eieio_type.payload_bytes != 0 and
-                isinstance(element, EIEIOKeyDataElement)):
-            raise SpinnmanInvalidParameterException(
-                "element", element,
-                "The element has nopayload, but the header says payload")
-
-        self._elements.append(element)
+        self._elements += element.get_bytestring(self._eieio_header.eieio_type)
         self._eieio_header.increment_count()
 
     @property
@@ -128,7 +118,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                     elements to be read
         :rtype: bool
         """
-        return (self._data_reader is not None and
+        return (self._data is not None and
                 self._elements_read < self._eieio_header.count)
 
     @property
@@ -145,15 +135,17 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         key = None
         payload = None
         if self._eieio_header.eieio_type == EIEIOType.KEY_16_BIT:
-            key = self._data_reader.read_short()
+            key = struct.unpack_from("<H", self._data, self._offset)[0]
+            self._offset += 2
         if self._eieio_header.eieio_type == EIEIOType.KEY_32_BIT:
-            key = self._data_reader.read_int()
+            key = struct.unpack_from("<I", self._data, self._offset)[0]
+            self._offset += 4
         if self._eieio_header.eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
-            key = self._data_reader.read_short()
-            payload = self._data_reader.read_short()
+            key, payload = struct.unpack_from("<HH", self._data, self._offset)
+            self._offset += 4
         if self._eieio_header.eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:
-            key = self._data_reader.read_int()
-            payload = self._data_reader.read_int()
+            key, payload = struct.unpack_from("<II", self._data, self._offset)
+            self._offset += 8
 
         if self._eieio_header.prefix is not None:
             if self._eieio_header.prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
@@ -173,13 +165,12 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             return EIEIOKeyPayloadDataElement(key, payload,
                                               self._eieio_header.is_time)
 
-    def write_eieio_message(self, byte_writer):
-        self._eieio_header.write_eieio_header(byte_writer)
-        for element in self._elements:
-            element.write_element(self._eieio_header.eieio_type, byte_writer)
+    @property
+    def bytestring(self):
+        return self._eieio_header.bytestring + self._elements
 
     def __str__(self):
-        if self._data_reader is not None:
+        if self._data is not None:
             return "EIEIODataMessage:{}:{}".format(
                 self._eieio_header, self._eieio_header.count)
         return "EIEIODataMessage:{}:{}".format(

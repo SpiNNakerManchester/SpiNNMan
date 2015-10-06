@@ -1,6 +1,8 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_response import AbstractSCPResponse
+from spinnman.messages.scp.abstract_messages.abstract_scp_response\
+    import AbstractSCPResponse
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+import struct
 
 
 class SCPRouterAllocResponse(AbstractSCPResponse):
@@ -13,15 +15,15 @@ class SCPRouterAllocResponse(AbstractSCPResponse):
         super(SCPRouterAllocResponse, self).__init__()
         self._base_address = None
 
-    def read_scp_response(self, byte_reader):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_scp_response`
+    def read_data_bytestring(self, data, offset):
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
         """
-        super(SCPRouterAllocResponse, self).read_scp_response(byte_reader)
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "Router Allocation", "CMD_ALLOC", result.name)
-        self._base_address = byte_reader.read_int()
+        self._base_address = struct.unpack_from("<I", data, offset)[0]
 
     @property
     def base_address(self):

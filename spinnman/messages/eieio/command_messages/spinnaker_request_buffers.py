@@ -3,6 +3,7 @@ from spinnman.messages.eieio.command_messages.eieio_command_message\
 from spinnman.messages.eieio.command_messages.eieio_command_header\
     import EIEIOCommandHeader
 from spinnman import constants
+import struct
 
 
 class SpinnakerRequestBuffers(EIEIOCommandMessage):
@@ -47,23 +48,15 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         return 12
 
     @staticmethod
-    def read_eieio_command_message(command_header, byte_reader):
-        y = byte_reader.read_byte()
-        x = byte_reader.read_byte()
-        processor = byte_reader.read_byte()
+    def from_bytestring(command_header, data, offset):
+        y, x, processor, region_id, sequence_no, space = struct.unpack_from(
+            "<BBBxBBI", data, offset)
         p = (processor >> 3) & 0x1F
-        _ = byte_reader.read_byte()
-        region_id = byte_reader.read_byte() & 0xF
-        sequence_no = byte_reader.read_byte()
-        space = byte_reader.read_int()
-        return SpinnakerRequestBuffers(x, y, p, region_id, sequence_no, space)
+        return SpinnakerRequestBuffers(x, y, p, region_id & 0xF, sequence_no,
+                                       space)
 
-    def write_eieio_message(self, writer):
-        EIEIOCommandMessage.write_eieio_message(self, writer)
-        writer.write_byte(self._y)
-        writer.write_byte(self._x)
-        writer.write_byte(self._p << 3)
-        writer.write_byte(0)
-        writer.write_byte(self._region_id)
-        writer.write_byte(self._sequence_no)
-        writer.write_byte(self._space_available)
+    @property
+    def bytestring(self):
+        return (super(SpinnakerRequestBuffers, self).bytestring + struct.pack(
+            "<BBBxBBI", self._y, self._x, self._p << 3, self._region_id,
+            self._sequence_no, self._space_available))

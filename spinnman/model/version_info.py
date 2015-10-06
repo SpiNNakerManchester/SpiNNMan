@@ -1,47 +1,27 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman._utils import get_int_from_little_endian_bytearray
-from spinnman._utils import get_short_from_little_endian_bytearray
 from time import localtime
 from time import asctime
-
-
-def _get_int_from_bytearray(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return get_int_from_little_endian_bytearray(array, offset)
-
-
-def _get_short_from_bytearray(array, offset):
-    """ Wrapper function in case the endianness changes
-    """
-    return get_short_from_little_endian_bytearray(array, offset)
+import struct
 
 
 class VersionInfo(object):
     """ Decodes SC&MP/SARK version information as returned by the SVER command
     """
 
-    def __init__(self, version_data):
+    def __init__(self, version_data, offset=0):
         """
         :param version_data: bytes from an SCP packet containing version\
                     information
+        :param offset: the offset in the bytes from an SCP packet containing
+                       version information
         :type version_data: bytearray
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     message does not contain valid version information
         """
-        if len(version_data) < 13:
-            raise SpinnmanInvalidParameterException(
-                "len(version_data)", str(len(version_data)),
-                "The length of the version data is too short")
-
-        self._p = version_data[0]
-        self._y = version_data[2]
-        self._x = version_data[3]
-        self._version_number = \
-            (_get_short_from_bytearray(version_data, 6) / 100.0)
-        self._build_date = _get_int_from_bytearray(version_data, 8)
-
-        self._version_string = version_data[12:-1].decode("ascii")
+        (self._p, self._y, self._x, version_no, self._build_date) = \
+            struct.unpack_from("<BxBB2xHI", version_data, offset)
+        self._version_number = version_no / 100.0
+        self._version_string = version_data[offset + 12:-1].decode("ascii")
         try:
             self._name, self._hardware = self._version_string.split("/")
         except ValueError as exception:

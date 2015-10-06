@@ -1,5 +1,7 @@
 import unittest
-import spinnman._utils as utils
+
+import spinnman.utilities.utility_functions as utils
+
 
 class Testing_utils(unittest.TestCase):
     def test_big_endian_to_int(self):

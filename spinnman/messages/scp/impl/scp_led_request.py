@@ -1,5 +1,5 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
-from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinnman.messages.scp.abstract_messages.abstract_scp_request\
+    import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
@@ -23,27 +23,10 @@ class SCPLEDRequest(AbstractSCPRequest):
         :param led_states: A dictionary mapping LED index to state with 0 being
                            off, 1 on and 2 inverted.
         :type led_states: dict
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
-                    * If x is out of range
-                    * If y is out of range
-                    * If cpu is out of range
-                    * If LEDs are not in the range 0 to 7
-                    * If LED states are not 0, 1 or 2.
         """
-
-        for led, state in led_states.items():
-            if type(led) is int and (led < 0 or led > 7):
-                raise SpinnmanInvalidParameterException(
-                    "led_states", str(led),
-                    "Keys must be LED indexes between 0 and 7.")
-            if state not in (0,1,2):
-                raise SpinnmanInvalidParameterException(
-                    "led_states", str(state),
-                    "LED states must be 0, 1 or 2.")
-
         encoded_led_states = 0
         for led, state in led_states.items():
-            encoded_led_states |= {0:2, 1:3, 2:1}[state] << (2*led)
+            encoded_led_states |= {0: 2, 1: 3, 2: 1}[state] << (2 * led)
 
         super(SCPLEDRequest, self).__init__(
             SDPHeader(
@@ -54,6 +37,7 @@ class SCPLEDRequest(AbstractSCPRequest):
             argument_1=encoded_led_states)
 
     def get_scp_response(self):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
         return SCPCheckOKResponse("Set LED", "CMD_LED")

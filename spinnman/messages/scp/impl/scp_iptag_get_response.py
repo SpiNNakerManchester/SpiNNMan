@@ -1,6 +1,8 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_response import AbstractSCPResponse
+from spinnman.messages.scp.abstract_messages.abstract_scp_response\
+    import AbstractSCPResponse
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+import struct
 
 
 class SCPIPTagGetResponse(AbstractSCPResponse):
@@ -22,27 +24,20 @@ class SCPIPTagGetResponse(AbstractSCPResponse):
         self._spin_chip_x = None
         self._spin_port = None
 
-    def read_scp_response(self, byte_reader):
-        """ See :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_scp_response`
+    def read_data_bytestring(self, data, offset):
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
         """
-        super(SCPIPTagGetResponse, self).read_scp_response(byte_reader)
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "Get IP Tag Info", "CMD_IPTAG", result.name)
-
-        self._ip_address = bytearray([byte_reader.read_byte()
-                for _ in range(0, 4)])
-        self._mac_address = bytearray([byte_reader.read_byte()
-                for _ in range(0, 6)])
-        self._port = byte_reader.read_short()
-        self._timeout = byte_reader.read_short()
-        self._flags = byte_reader.read_short()
-        self._count = byte_reader.read_int()
-        self._rx_port = byte_reader.read_short()
-        self._spin_chip_y = byte_reader.read_byte()
-        self._spin_chip_x = byte_reader.read_byte()
-        processor_and_port = byte_reader.read_byte()
+        (ip_address, mac_address, self._port, self._timeout,
+         self._flags, self._count, self._rx_port, self._spin_chip_y,
+         self._spin_chip_x, processor_and_port) = struct.unpack_from(
+            "<4s6s3HIH3B", data, offset)
+        self._ip_address = bytearray(ip_address)
+        self._mac_address = bytearray(mac_address)
         self._spin_port = (processor_and_port >> 5) & 0x7
         self._spin_cpu = processor_and_port & 0x1F
 

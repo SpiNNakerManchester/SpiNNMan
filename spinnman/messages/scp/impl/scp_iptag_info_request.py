@@ -1,9 +1,11 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages.abstract_scp_request\
+    import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.messages.scp.impl.scp_iptag_info_response import SCPIPTagInfoResponse
+from spinnman.messages.scp.impl.scp_iptag_info_response\
+    import SCPIPTagInfoResponse
 
 _IPTAG_INFO = 4
 _IPTAG_MAX = 255
@@ -19,8 +21,6 @@ class SCPTagInfoRequest(AbstractSCPRequest):
         :type x: int
         :param y: The y-coordinate of a chip, between 0 and 255
         :type y: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
-                    The chip-coordinates are out of range
         """
         super(SCPTagInfoRequest, self).__init__(
             SDPHeader(
