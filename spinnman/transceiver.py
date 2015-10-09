@@ -129,7 +129,7 @@ _REINJECTOR_APP_ID = 17
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, max_core_id=None,
-        auto_detect_bmp=True):
+        auto_detect_bmp=True, scamp_connections=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -205,7 +205,8 @@ def create_transceiver_from_hostname(
 
     return Transceiver(
         version, connections=connections, ignore_chips=ignore_chips,
-        ignore_cores=ignore_cores, max_core_id=max_core_id)
+        ignore_cores=ignore_cores, max_core_id=max_core_id,
+        scamp_connections=scamp_connections)
 
 
 class Transceiver(object):
@@ -224,7 +225,7 @@ class Transceiver(object):
     """
 
     def __init__(self, version, connections=None, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None):
+                 ignore_cores=None, max_core_id=None, scamp_connections=None):
         """
 
         :param version: The version of the board being connected to
@@ -247,6 +248,10 @@ class Transceiver(object):
                     Requests for a "machine" will only have core ids up to and\
                     including this value.
         :type max_core_id: int
+        :param scamp_connections: a list of scamp connection data or None
+        :type scamp_connections: list of \
+                :py:class:`spinnman.connections.scoket_address_with_chip.SocketAddress_With_Chip`
+                 or None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board, or if no connections to the\
                     board can be found (if connections is None)
@@ -324,6 +329,27 @@ class Transceiver(object):
         # A list of all connections that can be used to send and receive SCP
         # messages for SCAMP interaction
         self._scamp_connections = list()
+
+        # if there has been scamp connections given, build them
+        if scamp_connections is not None:
+            for socket_address in scamp_connections:
+                new_connection = UDPSCAMPConnection(
+                    remote_host=socket_address.hostname,
+                    remote_port=socket_address.port_num,
+                    chip_x=socket_address.chip_x,
+                    chip_y=socket_address.chip_y)
+                # test that the connection actually works
+                if self._try_sver_though_scamp_connection(
+                        new_connection, _STANDARD_RETIRES_NO):
+                    self._udp_scamp_connections[socket_address.hostname] = \
+                        new_connection
+                    self._scamp_connections.append(new_connection)
+                    self._scp_sender_connections.append(new_connection)
+                    self._all_connections.add(new_connection)
+                else:
+                    raise exceptions.SpinnmanInvalidParameterException(
+                        parameter=socket_address, value=socket_address,
+                        problem="cant get a sver from this connection data")
 
         # The BMP connections
         self._bmp_connections = list()
