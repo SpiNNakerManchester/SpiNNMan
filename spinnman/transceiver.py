@@ -675,7 +675,7 @@ class Transceiver(object):
 
         # Currently, this only finds other UDP connections given a connection
         # that supports SCP - this is done via the machine
-        if len(self._udp_scamp_connections) == 0:
+        if len(self._scamp_connections) == 0:
             return list()
         # if the machine hasnt been created, create it
         if self._machine is None:
@@ -685,19 +685,39 @@ class Transceiver(object):
         new_connections = list()
         for chip in self._machine.ethernet_connected_chips:
             if chip.ip_address not in self._udp_scamp_connections:
-                new_connection = UDPSCAMPConnection(
-                    remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
-                if self._try_sver_though_scamp_connection(
-                        new_connection, _STANDARD_RETIRES_NO):
+                new_connection = self._search_for_proxies(chip)
+                # if no data, no proxy
+                if new_connection is None:
+                    new_connection = UDPSCAMPConnection(
+                        remote_host=chip.ip_address, chip_x=chip.x,
+                        chip_y=chip.y)
                     new_connections.append(new_connection)
                     self._udp_scamp_connections[chip.ip_address] = \
                         new_connection
                     self._scamp_connections.append(new_connection)
+                else:  # proxy, needs an adjustment
+                    self._udp_scamp_connections[chip.ip_address] = \
+                        new_connection
+                # check if it works
+                if self._try_sver_though_scamp_connection(
+                        new_connection, _STANDARD_RETIRES_NO):
                     self._scp_sender_connections.append(new_connection)
                     self._all_connections.add(new_connection)
 
         # Update the connection queues after finding new connections
         return new_connections
+
+    def _search_for_proxies(self, chip):
+        """
+        looks for an entry within the udp scamp connections which is linked
+        to a given chip
+        :param chip: the chip to locate
+        :return:
+        """
+        for connection in self._scamp_connections:
+            if connection.chip_x == chip.x and connection.chip_y == chip.y:
+                return connection
+        return None
 
     def get_connections(self):
         """ Get the currently known connections to the board, made up of those\
