@@ -217,7 +217,14 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
     ip_string_bits = ipstring.split(".")
     ip_string_bits[len(ip_string_bits) - 1] = str(int(
         ip_string_bits[len(ip_string_bits) - 1]) - 1)
-    bmp_ip_address = ".".join(ip_string_bits)
+    bmp_ip_address_and_port = ".".join(ip_string_bits)
+    bmp_bits = bmp_ip_address_and_port.split(",")
+    if len(bmp_bits) == 1:
+        bmp_ip_address = bmp_bits[0]
+        bmp_port = None
+    else:
+        bmp_ip_address = bmp_bits[0]
+        bmp_port = bmp_bits[1]
 
     # add board scope for each split
     # if None, the end user didnt enter anything, so assume one board
@@ -231,7 +238,7 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
 
     # Assume a single board with no cabinet or frame specified
     return BMPConnectionData(cabinet=0, frame=0, ip_address=bmp_ip_address,
-                             boards=board_range)
+                             boards=board_range, port_num=int(bmp_port))
 
 
 def get_router_timeout_value(mantissa, exponent):

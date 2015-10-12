@@ -20,7 +20,7 @@ class UDPBMPConnection(
 
     def __init__(self, cabinet, frame, boards, local_host=None,
                  local_port=None, remote_host=None,
-                 remote_port=constants.SCP_SCAMP_PORT):
+                 remote_port=None):
         """
         :param cabinet: The cabinet number of the connection
         :type cabinet: int
@@ -42,6 +42,8 @@ class UDPBMPConnection(
                 to.  If not specified, sending will not be possible using this\
                 connection
         """
+        if remote_port is None:
+            remote_port=constants.SCP_SCAMP_PORT
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
         AbstractSCPReceiver.__init__(self)

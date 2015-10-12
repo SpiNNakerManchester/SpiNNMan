@@ -47,3 +47,7 @@ class SocketAddressWithChip(object):
         """
         return self._chip_y
 
+    def __str__(self):
+        return "{}:{}:{}:{}".format(self._hostname, self._port_num,
+                                    self._chip_x, self._chip_y)
+
