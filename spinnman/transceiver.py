@@ -42,6 +42,9 @@ from spinnman.data.file_data_reader import FileDataReader
 from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinn_machine.utilities import utilities
+from spinnman.processes\
+    .multi_connection_process_most_direct_connection_selector \
+    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -1691,7 +1694,10 @@ class Transceiver(object):
 
         # Start the flood fill
         nearest_neighbour_id = self._get_next_nearest_neighbour_id()
-        process = WriteMemoryFloodProcess(self._scamp_connections)
+        process = WriteMemoryFloodProcess(
+            self._scamp_connections,
+            MultiConnectionProcessMostDirectConnectionSelector(
+                self._machine, self._scamp_connections))
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)

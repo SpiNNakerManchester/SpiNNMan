@@ -10,7 +10,7 @@ extern INT_HANDLER sark_int_han(void);
 // ------------------------------------------------------------------------
 
 // The initial timeout of the router
-#define ROUTER_INITIAL_TIMEOUT 0x00040000
+#define ROUTER_INITIAL_TIMEOUT 0x004f0000
 
 // Amount to call the timer callback
 #define TICK_PERIOD        10
@@ -475,7 +475,7 @@ void c_main() {
 
     // Setup the comms controller interrupt
     vic_vectors[CC_SLOT]  = ready_to_send_callback;
-    vic_controls[CC_SLOT] = CC_TNF_INT;
+    vic_controls[CC_SLOT] = 0x20 | CC_TNF_INT;
 
     // Setup the timer interrupt
     vic_vectors[TIMER_SLOT]  = timer_callback;
