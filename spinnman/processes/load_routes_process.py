@@ -50,7 +50,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
             struct.pack_into(
                 "<H2xIII", routing_data, n_entries * 16, n_entries,
-                route_entry, route.routing_entry_key, route.mask)
+                route_entry, route.key_combo, route.mask)
             n_entries += 1
 
         # Add an entry to mark the end
