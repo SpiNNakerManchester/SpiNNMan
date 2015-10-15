@@ -343,7 +343,7 @@ class Transceiver(object):
                     remote_port=socket_address.port_num,
                     chip_x=socket_address.chip_x,
                     chip_y=socket_address.chip_y)
-                self._scamp_connections.append(new_connection)
+                connections.append(new_connection)
 
         # The BMP connections
         self._bmp_connections = list()
@@ -696,6 +696,10 @@ class Transceiver(object):
                         new_connection
                     self._scamp_connections.append(new_connection)
                 else:  # proxy, needs an adjustment
+                    if (new_connection.remote_ip_address in
+                            self._udp_scamp_connections):
+                        del self._udp_scamp_connections[
+                            new_connection.remote_ip_address]
                     self._udp_scamp_connections[chip.ip_address] = \
                         new_connection
                 # check if it works
