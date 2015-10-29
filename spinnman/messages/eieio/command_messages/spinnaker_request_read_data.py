@@ -183,7 +183,7 @@ class _SpinnakerRequestReadDataRequest(object):
             self._space_to_be_read = space_to_be_read
 
     def channel(self, request_id):
-        if len(self._channel) < request_id:
+        if len(self._channel) > request_id:
             return self._channel[request_id]
         else:
             SpinnmanInvalidParameterTypeException(
@@ -192,7 +192,7 @@ class _SpinnakerRequestReadDataRequest(object):
                 "{1:d}".format(len(self._channel)-1, request_id))
 
     def region_id(self, request_id):
-        if len(self._region_id) < request_id:
+        if len(self._region_id) > request_id:
             return self._region_id[request_id]
         else:
             SpinnmanInvalidParameterTypeException(
@@ -201,7 +201,7 @@ class _SpinnakerRequestReadDataRequest(object):
                 "{1:d}".format(len(self._region_id)-1, request_id))
 
     def start_address(self, request_id):
-        if len(self._start_address) < request_id:
+        if len(self._start_address) > request_id:
             return self._start_address[request_id]
         else:
             SpinnmanInvalidParameterTypeException(
@@ -210,7 +210,7 @@ class _SpinnakerRequestReadDataRequest(object):
                 "{1:d}".format(len(self._start_address)-1, request_id))
 
     def space_to_be_read(self, request_id):
-        if len(self._space_to_be_read) < request_id:
+        if len(self._space_to_be_read) > request_id:
             return self._space_to_be_read[request_id]
         else:
             SpinnmanInvalidParameterTypeException(

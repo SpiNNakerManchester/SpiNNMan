@@ -31,9 +31,9 @@ class HostDataRead(EIEIOCommandMessage):
                 "defined".format(
                     n_requests, len(space_read),
                     len(region_id), len(channel)))
-        EIEIOCommandMessage.__init__(
-            self, EIEIOCommandHeader(
-                constants.EIEIO_COMMAND_IDS.NEW_BUFFERS.value))
+        cmd_header = EIEIOCommandHeader(
+            constants.EIEIO_COMMAND_IDS.HOST_DATA_READ.value)
+        EIEIOCommandMessage.__init__(self, cmd_header)
         self._header = _HostDataReadHeader(n_requests, sequence_no)
         self._acks = _HostDataReadAck(channel, region_id, space_read)
 
@@ -75,6 +75,7 @@ class HostDataRead(EIEIOCommandMessage):
             channel.append(channel_ack)
             region_id.append(region_id_ack)
             space_read.append(space_read_ack)
+            offset += 8
         return HostDataRead(
             n_requests, sequence_no, channel, region_id, space_read)
 
@@ -122,7 +123,7 @@ class _HostDataReadAck(object):
             self._space_read = space_read
 
     def channel(self, ack_id):
-        if len(self._channel) < ack_id:
+        if len(self._channel) > ack_id:
             return self._channel[ack_id]
         else:
             SpinnmanInvalidParameterTypeException(
@@ -131,7 +132,7 @@ class _HostDataReadAck(object):
                 "{1:d}".format(len(self._channel)-1, ack_id))
 
     def region_id(self, ack_id):
-        if len(self._region_id) < ack_id:
+        if len(self._region_id) > ack_id:
             return self._region_id[ack_id]
         else:
             SpinnmanInvalidParameterTypeException(
@@ -140,7 +141,7 @@ class _HostDataReadAck(object):
                 "{1:d}".format(len(self._region_id)-1, ack_id))
 
     def space_read(self, ack_id):
-        if len(self._space_read) < ack_id:
+        if len(self._space_read) > ack_id:
             return self._space_read[ack_id]
         else:
             SpinnmanInvalidParameterTypeException(
