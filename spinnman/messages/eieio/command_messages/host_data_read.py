@@ -26,7 +26,7 @@ class HostDataRead(EIEIOCommandMessage):
             raise SpinnmanInvalidPacketException(
                 "SpinnakerRequestReadData",
                 "The format for a SpinnakerRequestReadData packet is "
-                "invalid: {0:d} number of request(s), {1:d} space(s) read "
+                "invalid: {0:d} request(s), {1:d} space(s) read "
                 "defined, {2:d} region(s) defined, {3:d} channel(s) "
                 "defined".format(
                     n_requests, len(space_read),

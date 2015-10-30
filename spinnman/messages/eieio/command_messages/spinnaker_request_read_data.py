@@ -31,7 +31,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
             raise SpinnmanInvalidPacketException(
                 "SpinnakerRequestReadData",
                 "The format for a SpinnakerRequestReadData packet is "
-                "invalid: {0:d} number of request(s), {1:d} start address(es) "
+                "invalid: {0:d} request(s), {1:d} start address(es) "
                 "defined, {2:d} space(s) to be read defined, {3:d} region(s) "
                 "defined, {4:d} channel(s) defined".format(
                     n_requests, len(start_address), len(space_to_be_read),
