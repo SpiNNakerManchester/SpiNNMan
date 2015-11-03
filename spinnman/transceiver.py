@@ -888,7 +888,7 @@ class Transceiver(object):
                 self._machine, [scamp_connection])
             process.execute(SCPIPTagTTORequest(
                 scamp_connection.chip_x, scamp_connection.chip_y,
-                constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_160_ms.value))
+                constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_640_ms.value))
 
         # If reinjection is enabled, load the reinjector
         if enable_reinjector:

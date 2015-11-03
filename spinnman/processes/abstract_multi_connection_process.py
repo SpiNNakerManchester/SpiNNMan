@@ -7,8 +7,8 @@ class AbstractMultiConnectionProcess(AbstractProcess):
     """
 
     def __init__(self, connections, next_connection_selector,
-                 n_retries=3, timeout=0.5, n_channels=4,
-                 intermediate_channel_waits=2):
+                 n_retries=3, timeout=0.5, n_channels=1,
+                 intermediate_channel_waits=0):
         AbstractProcess.__init__(self)
         self._scp_request_sets = list()
         for connection in connections:
