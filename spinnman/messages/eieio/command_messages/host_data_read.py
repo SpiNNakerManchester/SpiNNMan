@@ -9,7 +9,12 @@ import struct
 
 
 class HostDataRead(EIEIOCommandMessage):
-
+    """
+    Packet sent by the host computer to the SpiNNaker system in the context
+    of the buffering output technique to signal that the host has completed
+    reading data from the output buffer, and that such space can be
+    considered free to use again
+    """
     def __init__(self, n_requests, sequence_no, channel, region_id, space_read):
         if not isinstance(channel, list):
             channel = [channel]

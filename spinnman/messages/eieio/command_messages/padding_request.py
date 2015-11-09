@@ -6,7 +6,9 @@ from spinnman.messages.eieio.command_messages.eieio_command_header\
 
 
 class PaddingRequest(EIEIOCommandMessage):
-
+    """
+    Packet used to pad space in the buffering area, if needed
+    """
     def __init__(self):
         EIEIOCommandMessage.__init__(
             self, EIEIOCommandHeader(

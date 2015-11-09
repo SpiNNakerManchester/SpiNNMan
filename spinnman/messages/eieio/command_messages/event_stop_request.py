@@ -6,7 +6,10 @@ from spinnman.messages.eieio.command_messages.eieio_command_header\
 
 
 class EventStopRequest(EIEIOCommandMessage):
-
+    """
+    Packet used for the buffering input technique which causes the parser of
+    the input packet to terminate its execution
+    """
     def __init__(self):
         EIEIOCommandMessage.__init__(
             self, EIEIOCommandHeader(

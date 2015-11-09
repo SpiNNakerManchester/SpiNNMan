@@ -7,7 +7,11 @@ import struct
 
 
 class SpinnakerRequestBuffers(EIEIOCommandMessage):
-
+    """
+    Message used in the context of the buffering input mechanism which is sent
+    by the SpiNNaker system to the host computer to ask for more data to
+    inject during the simulation
+    """
     def __init__(self, x, y, p, region_id, sequence_no, space_available):
         EIEIOCommandMessage.__init__(
             self, EIEIOCommandHeader(

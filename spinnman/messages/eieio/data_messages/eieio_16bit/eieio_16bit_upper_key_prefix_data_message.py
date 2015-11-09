@@ -9,7 +9,10 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 
 
 class EIEIO16BitUpperKeyPrefixDataMessage(EIEIOWithoutPayloadDataMessage):
-
+    """
+    Class representing an EIEIO packet containing 16 bit events and a key
+    prefix to be applied to the upper end of the key
+    """
     def __init__(self, key_prefix, count=0, data=None, offset=0):
 
         EIEIOWithoutPayloadDataMessage.__init__(

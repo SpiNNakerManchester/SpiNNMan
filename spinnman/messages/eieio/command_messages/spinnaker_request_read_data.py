@@ -9,7 +9,11 @@ import struct
 
 
 class SpinnakerRequestReadData(EIEIOCommandMessage):
-
+    """
+    Message used in the context of the buffering output mechanism which is
+    sent from the SpiNNaker system to the host computer to signal that some
+    data is available to be read
+    """
     def __init__(self, x, y, p, region_id, sequence_no, n_requests,
                  channel, start_address, space_to_be_read):
         if not isinstance(channel, list):
