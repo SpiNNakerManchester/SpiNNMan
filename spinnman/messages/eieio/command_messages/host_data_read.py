@@ -97,6 +97,10 @@ class HostDataRead(EIEIOCommandMessage):
 
 
 class _HostDataReadHeader(object):
+    """
+    The HostDataRead contains itself on header with the number of requests
+    and a sequence number
+    """
     def __init__(self, n_requests, sequence_no):
         self._n_requests = n_requests
         self._sequence_no = sequence_no
@@ -111,6 +115,10 @@ class _HostDataReadHeader(object):
 
 
 class _HostDataReadAck(object):
+    """
+    The HostDataRead contains a set of acks which refer to each of the
+    channels read
+    """
     def __init__(self, channel, region_id, space_read):
         if not isinstance(channel, list):
             self._channel = [channel]

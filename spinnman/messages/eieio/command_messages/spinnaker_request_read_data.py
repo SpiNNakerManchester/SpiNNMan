@@ -136,6 +136,11 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
 
 
 class _SpinnakerRequestReadDataHeader(object):
+    """
+    The SpinnakerRequestReadData contains itself on header with the position
+    of the core in the machine (x, y, p), the number of requests and a
+    sequence number
+    """
     def __init__(self, x, y, p, n_requests, sequence_no):
         self._x = x
         self._y = y
@@ -165,6 +170,10 @@ class _SpinnakerRequestReadDataHeader(object):
 
 
 class _SpinnakerRequestReadDataRequest(object):
+    """
+    The SpinnakerRequestReadData contains a set of requests which refer to
+    the channels used
+    """
     def __init__(self, channel, region_id, start_address, space_to_be_read):
         if not isinstance(channel, list):
             self._channel = [channel]
