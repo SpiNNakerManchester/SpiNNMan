@@ -92,11 +92,14 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         # Kick-start the reading of the IOBufs
         for cpu_info in cpu_information:
             this_chip_info = chip_info[(cpu_info.x, cpu_info.y)]
-            iobuf_size = this_chip_info.iobuf_size + 16
-            first_read_size = min((iobuf_size, constants.UDP_MESSAGE_MAX_SIZE))
+            if cpu_info.iobuf_address != 0:
+                iobuf_size = this_chip_info.iobuf_size + 16
+                first_read_size = min(
+                    (iobuf_size, constants.UDP_MESSAGE_MAX_SIZE))
 
-            self._next_reads.append((cpu_info.x, cpu_info.y, cpu_info.p, 0,
-                                     cpu_info.iobuf_address, first_read_size))
+                self._next_reads.append((
+                    cpu_info.x, cpu_info.y, cpu_info.p, 0,
+                    cpu_info.iobuf_address, first_read_size))
 
         # Run rounds of the process until reading is complete
         while len(self._extra_reads) > 0 or len(self._next_reads) > 0:
