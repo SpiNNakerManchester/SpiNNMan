@@ -1365,6 +1365,10 @@ class Transceiver(object):
     def power_on_machine(self):
         """ Power on the whole machine
         """
+        if len(self._bmp_connections) == 0:
+            logger.warn("SpinnMan has no bmp connections for this SpiNNaker"
+                        "Machine, therefore it is not currently possible to"
+                        "power off this SpiNNaker machine")
         for bmp_connection in self._bmp_connections:
             self.power_on(bmp_connection.boards, bmp_connection.cabinet,
                           bmp_connection.frame)
@@ -1383,6 +1387,10 @@ class Transceiver(object):
     def power_off_machine(self):
         """ Power off the whole machine
         """
+        if len(self._bmp_connections) == 0:
+            logger.warn("SpinnMan has no bmp connections for this SpiNNaker"
+                        "Machine, therefore it is not currently possible to"
+                        "power off this SpiNNaker machine")
         for bmp_connection in self._bmp_connections:
             self.power_off(bmp_connection.boards, bmp_connection.cabinet,
                            bmp_connection.frame)
