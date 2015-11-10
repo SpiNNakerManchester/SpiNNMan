@@ -43,7 +43,7 @@ class UDPBMPConnection(
                 connection
         """
         if remote_port is None:
-            remote_port=constants.SCP_SCAMP_PORT
+            remote_port = constants.SCP_SCAMP_PORT
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
         AbstractSCPReceiver.__init__(self)

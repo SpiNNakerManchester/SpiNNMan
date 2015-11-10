@@ -330,13 +330,13 @@ try:
     print "Test writing longs and ints to write memory and extracting them"
     print "========================="
     transceiver.write_memory(0, 0, 0x70000000, data=long(123456789123456789))
-    data = struct.unpack("<Q", str(buffer(transceiver.
-                                          read_memory(0, 0, 0x70000000, 8))))[0]
+    data = struct.unpack("<Q", str(buffer(transceiver.read_memory(
+        0, 0, 0x70000000, 8))))[0]
     if data != long(123456789123456789):
         raise Exception("values are not identical")
     transceiver.write_memory(0, 0, 0x70000000, data=int(123456789))
-    data = struct.unpack("<I", str(buffer(transceiver.
-                                          read_memory(0, 0, 0x70000000, 4))))[0]
+    data = struct.unpack("<I", str(buffer(transceiver.read_memory(
+        0, 0, 0x70000000, 4))))[0]
     if data != 123456789:
         raise Exception("values are not identical")
 
@@ -351,7 +351,8 @@ try:
     if data != long(123456789123456789):
         raise Exception("values are not identical")
 
-    transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=int(123456789))
+    transceiver.write_neighbour_memory(
+        0, 0, 0, 0x70000000, data=int(123456789))
     data = struct.unpack(
         "<I", str(buffer(transceiver.read_neighbour_memory(
             0, 0, 0, 0x70000000, 4))))[0]

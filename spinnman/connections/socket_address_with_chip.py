@@ -1,11 +1,8 @@
-"""
-SocketAddress
-"""
 from spinnman import constants
 
+
 class SocketAddressWithChip(object):
-    """
-    a data holder for a socket interface for notification protocol.
+    """ The address of a socket and an associated chip
     """
 
     def __init__(self, hostname, chip_x, chip_y,
@@ -17,37 +14,32 @@ class SocketAddressWithChip(object):
 
     @property
     def hostname(self):
-        """
-        getter for the hostname of the socket
+        """ The hostname of the socket
         :return: the hostname
         """
         return self._hostname
 
     @property
     def port_num(self):
-        """
-        the portnum for the socket
-        :return: portnum
+        """ The port number of the socket
+        :return: the port
         """
         return self._port_num
 
     @property
     def chip_x(self):
-        """
-        the chip coord for the scamp connection x axis
-        :return: the x axis value for the chip with the scamp connection
+        """ The x-coordinate of the chip
+        :return: the x-coordinate
         """
         return self._chip_x
 
     @property
     def chip_y(self):
-        """
-        the chip coord for the scamp connection y axis
-        :return: the y axis value for the chip with the scamp connection
+        """ The y-coordinate of the chip
+        :return: the y-coordinate
         """
         return self._chip_y
 
     def __str__(self):
         return "{}:{}:{}:{}".format(self._hostname, self._port_num,
                                     self._chip_x, self._chip_y)
-
