@@ -48,9 +48,8 @@ class BMPConnectionData(object):
 
     @property
     def port_num(self):
-        """
-        return the portnum associated with this bmp connection
-        :return:
+        """ The port number associated with this bmp connection
+        :return: The port number
         """
         return self._port_num
 
