@@ -458,8 +458,7 @@ class Transceiver(object):
             # isn't valid
             except exceptions.SpinnmanTimeoutException:
                 raise exceptions.SpinnmanException(
-                    "BMP connection to {} is not responding, "
-                    "please check that it is connected".format(
+                    "BMP connection to {} is not responding".format(
                         connection.remote_ip_address))
 
     def _try_sver_though_scamp_connection(self, connection, retries):
@@ -886,21 +885,21 @@ class Transceiver(object):
             height = dims.height
 
         # try to get a scamp version once
-        logger.info("going to try to boot the machine with scamp")
+        logger.info("Attempting to boot machine")
         version_info = self._try_to_find_scamp_and_boot(
             INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
 
         # If we fail to get a SCAMP version this time, try other things
-        if version_info is None and self._version >= 4:
-            logger.info("failed to boot machine with scamp,"
-                        " trying to power on machine")
+        if (version_info is None and self._version >= 4 and
+                len(self._bmp_connections) > 0):
 
             # start by powering up each bmp connection
+            logger.info("Failed to boot, attempting to power on machine")
             self.power_on_machine()
 
             # Sleep a bit to let things get going
             time.sleep(2.0)
-            logger.info("going to try to boot the machine with scamp")
+            logger.info("Attempting to boot machine")
 
             # retry to get a scamp version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
@@ -909,12 +908,11 @@ class Transceiver(object):
         # verify that the version is the expected one for this trnasciever
         if version_info is None:
             raise exceptions.SpinnmanIOException(
-                "We currently cannot communicate with your board, please "
-                "rectify this, and try again")
+                "Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
                 version_info.version_number != _SCAMP_VERSION):
             raise exceptions.SpinnmanIOException(
-                "The board is currently booted with {}"
+                "The machine is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
                 "required version is {} {}".format(
                     version_info.name, version_info.version_number,
@@ -923,7 +921,7 @@ class Transceiver(object):
         else:
             if self._machine is None:
                 self._update_machine()
-            logger.info("successfully booted the machine with scamp")
+            logger.info("Booted machine")
 
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
@@ -963,8 +961,7 @@ class Transceiver(object):
                 current_tries_to_go -= 1
             except exceptions.SpinnmanIOException:
                 raise exceptions.SpinnmanIOException(
-                    "We currently cannot communicate with your board, please "
-                    "rectify this, and try again")
+                    "Failed to communicate with the machine")
 
         # The last thing we tried was booting, so try again to get the version
         if version_info is None:
@@ -1366,9 +1363,7 @@ class Transceiver(object):
         """ Power on the whole machine
         """
         if len(self._bmp_connections) == 0:
-            logger.warn("SpinnMan has no bmp connections for this SpiNNaker"
-                        "Machine, therefore it is not currently possible to"
-                        "power off this SpiNNaker machine")
+            logger.warn("No BMP connections, so can't power on")
         for bmp_connection in self._bmp_connections:
             self.power_on(bmp_connection.boards, bmp_connection.cabinet,
                           bmp_connection.frame)
@@ -1388,9 +1383,7 @@ class Transceiver(object):
         """ Power off the whole machine
         """
         if len(self._bmp_connections) == 0:
-            logger.warn("SpinnMan has no bmp connections for this SpiNNaker"
-                        "Machine, therefore it is not currently possible to"
-                        "power off this SpiNNaker machine")
+            logger.warn("No BMP connections, so can't power off")
         for bmp_connection in self._bmp_connections:
             self.power_off(bmp_connection.boards, bmp_connection.cabinet,
                            bmp_connection.frame)
@@ -2365,7 +2358,7 @@ class Transceiver(object):
             process.exit(self._reinjector_cores)
             self._reinjection_running = False
 
-        if power_off_machine:
+        if power_off_machine and len(self._bmp_connections) > 0:
             self.power_off_machine()
 
         for receiving_connections in \
@@ -2439,9 +2432,9 @@ class Transceiver(object):
                     if "0.0.0.0" in receiving_connections:
                         raise exceptions.SpinnmanInvalidPacketException(
                             "local_port and local_host",
-                            "{} and {} Another connection is already "
-                            "listening on this port on all interfaces"
-                            .format(local_port, local_host))
+                            "{} and {}".format(local_port, local_host),
+                            "Another connection is already "
+                            "listening on this port on all interfaces")
 
                 # If the type of an existing connection is wrong, this is an
                 # error
