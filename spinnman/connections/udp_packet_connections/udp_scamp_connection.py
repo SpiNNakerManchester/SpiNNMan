@@ -17,7 +17,7 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
     """
 
     def __init__(self, chip_x=0, chip_y=0, local_host=None, local_port=None,
-                 remote_host=None, remote_port=constants.SCP_SCAMP_PORT):
+                 remote_host=None, remote_port=None):
         """
 
         :param chip_x: The x-coordinate of the chip on the board with this\
@@ -40,6 +40,8 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
                 connection
         :type remote_port: int
         """
+        if remote_port is None:
+            remote_port = constants.SCP_SCAMP_PORT
         UDPSDPConnection.__init__(
             self, chip_x, chip_y, local_host, local_port, remote_host,
             remote_port)
