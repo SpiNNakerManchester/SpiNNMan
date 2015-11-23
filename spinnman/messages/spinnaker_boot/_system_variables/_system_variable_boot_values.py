@@ -158,7 +158,7 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0x48, default=1024,
         doc="The size of the user system RAM heap in bytes")
     user_sdram_heap_words = _Definition(
-        _DataType.INT, offset=0x4c, default=1048576,
+        _DataType.INT, offset=0x4c, default=125829120,
         doc="The size of the user SDRAM heap in bytes")
     iobuf_bytes = _Definition(
         _DataType.INT, offset=0x50, default=16384,

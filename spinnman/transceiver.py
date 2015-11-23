@@ -30,8 +30,10 @@ from spinnman.connections.abstract_classes.abstract_multicast_sender\
     import AbstractMulticastSender
 from spinnman.connections.abstract_classes.abstract_scp_receiver\
     import AbstractSCPReceiver
+from spinnman.processes.de_alloc_sdram_process import DeAllocSDRAMProcess
 from spinnman.processes.get_machine_process import GetMachineProcess
 from spinnman.processes.get_version_process import GetVersionProcess
+from spinnman.processes.malloc_sdram_process import MallocSDRAMProcess
 from spinnman.processes.write_memory_process import WriteMemoryProcess
 from spinnman.processes.read_memory_process import ReadMemoryProcess
 from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
@@ -2091,6 +2093,53 @@ class Transceiver(object):
             process = GetTagsProcess(self._machine, connections)
             all_tags.extend(process.get_tags(connection))
         return all_tags
+
+    def malloc_sdram(self, x, y, size, app_id, tag=None):
+        """
+        calls a malloc to the spinnaker machine to alloc a chunk of memory
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :type x: int
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :type y: int
+        :param size: the amount of memory to allocate in bytes
+        :type size: int
+        :param app_id: The id of the application with which to associate the\
+                    routes.  If not specified, defaults to 0.
+        :type app_id: int
+        :param tag: the tag for the sdram, a 8-bit (chip-wide) tag that can be
+        looked up by a SpiNNaker application to discover the address of the
+        allocated block. If `0` then no tag is applied.
+        :type tag: int
+        :return: the base address to which this malloc occured
+        """
+        process = MallocSDRAMProcess(self._machine, self._scamp_connections)
+        process.malloc_sdram(x, y, size, app_id, tag)
+        return process.base_address
+
+    def free_sdram(self, x, y, base_address, app_id):
+        """
+
+        :param x:
+        :param y:
+        :param base_address:
+        :param app_id:
+        :return:
+        """
+        process =  DeAllocSDRAMProcess(self._machine, self._scamp_connections)
+        process.de_alloc_sdram(x, y, app_id, base_address)
+
+    def free_sdram_by_app_id(self, x, y, app_id):
+        """
+
+        :param x:
+        :param y:
+        :param app_id:
+        :return:
+        """
+        process =  DeAllocSDRAMProcess(self._machine, self._scamp_connections)
+        process.de_alloc_sdram(x, y, app_id)
+        return process.no_blocks_freed
+
 
     def load_multicast_routes(self, x, y, routes, app_id):
         """ Load a set of multicast routes on to a chip

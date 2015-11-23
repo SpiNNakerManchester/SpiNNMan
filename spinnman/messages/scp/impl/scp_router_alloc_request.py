@@ -6,6 +6,7 @@ from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.scp_command import SCPCommand
 from spinnman.messages.scp.impl.scp_router_alloc_response\
     import SCPRouterAllocResponse
+from spinnman.messages.scp.scp_alloc_free_type import SCPAllocFreeType
 
 
 class SCPRouterAllocRequest(AbstractSCPRequest):
@@ -32,7 +33,7 @@ class SCPRouterAllocRequest(AbstractSCPRequest):
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
-            argument_1=(app_id << 8) | 3,
+            argument_1=(app_id << 8) | SCPAllocFreeType.ALLOC_ROUTING.value,
             argument_2=n_entries)
 
     def get_scp_response(self):
