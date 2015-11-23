@@ -16,7 +16,7 @@ class UDPBootConnection(UDPConnection,
     """
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
+                 remote_port=None):
         """
         :param local_host: The local host name or ip address to bind to.\
                     If not specified defaults to bind to all interfaces,\
@@ -36,6 +36,10 @@ class UDPBootConnection(UDPConnection,
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     setting up the communication channel
         """
+
+        if remote_port is None:
+            remote_port = constants.UDP_BOOT_CONNECTION_DEFAULT_PORT
+
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
         AbstractSpinnakerBootReceiver.__init__(self)
