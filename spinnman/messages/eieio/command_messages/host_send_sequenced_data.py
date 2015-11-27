@@ -8,10 +8,9 @@ import struct
 
 
 class HostSendSequencedData(EIEIOCommandMessage):
-    """
-    Packet sent from the host to the SpiNNaker system in teh context of
-    buffering input mechanism to identify packet which needs to be stored
-    in memory for future use
+    """ Packet sent from the host to the SpiNNaker system in the context of\
+        buffering input mechanism to identify packet which needs to be stored\
+        in memory for future use
     """
     def __init__(self, region_id, sequence_no, eieio_data_message):
         EIEIOCommandMessage.__init__(

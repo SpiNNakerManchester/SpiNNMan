@@ -9,13 +9,13 @@ import struct
 
 
 class HostDataRead(EIEIOCommandMessage):
+    """ Packet sent by the host computer to the SpiNNaker system in the\
+        context of the buffering output technique to signal that the host has\
+        completed reading data from the output buffer, and that such space can\
+        be considered free to use again
     """
-    Packet sent by the host computer to the SpiNNaker system in the context
-    of the buffering output technique to signal that the host has completed
-    reading data from the output buffer, and that such space can be
-    considered free to use again
-    """
-    def __init__(self, n_requests, sequence_no, channel, region_id, space_read):
+    def __init__(
+            self, n_requests, sequence_no, channel, region_id, space_read):
         if not isinstance(channel, list):
             channel = [channel]
 
@@ -34,8 +34,7 @@ class HostDataRead(EIEIOCommandMessage):
                 "invalid: {0:d} request(s), {1:d} space(s) read "
                 "defined, {2:d} region(s) defined, {3:d} channel(s) "
                 "defined".format(
-                    n_requests, len(space_read),
-                    len(region_id), len(channel)))
+                    n_requests, len(space_read), len(region_id), len(channel)))
         cmd_header = EIEIOCommandHeader(
             constants.EIEIO_COMMAND_IDS.HOST_DATA_READ.value)
         EIEIOCommandMessage.__init__(self, cmd_header)
@@ -74,7 +73,7 @@ class HostDataRead(EIEIOCommandMessage):
         region_id = list()
         space_read = list()
 
-        for i in xrange(n_requests):
+        for _ in xrange(n_requests):
             channel_ack, region_id_ack, space_read_ack = \
                 struct.unpack_from("<xxBBI", data, offset)
             channel.append(channel_ack)
@@ -115,9 +114,7 @@ class _HostDataReadHeader(object):
 
 
 class _HostDataReadAck(object):
-    """
-    The HostDataRead contains a set of acks which refer to each of the
-    channels read
+    """ Contains a set of acks which refer to each of the channels read
     """
     def __init__(self, channel, region_id, space_read):
         if not isinstance(channel, list):
@@ -142,7 +139,7 @@ class _HostDataReadAck(object):
             SpinnmanInvalidParameterTypeException(
                 "request_id", "integer", "channel ack_id needs to be"
                 "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._channel)-1, ack_id))
+                "{1:d}".format(len(self._channel) - 1, ack_id))
 
     def region_id(self, ack_id):
         if len(self._region_id) > ack_id:
@@ -151,7 +148,7 @@ class _HostDataReadAck(object):
             SpinnmanInvalidParameterTypeException(
                 "request_id", "integer", "region id ack_id needs to be"
                 "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._region_id)-1, ack_id))
+                "{1:d}".format(len(self._region_id) - 1, ack_id))
 
     def space_read(self, ack_id):
         if len(self._space_read) > ack_id:
@@ -160,4 +157,4 @@ class _HostDataReadAck(object):
             SpinnmanInvalidParameterTypeException(
                 "request_id", "integer", "start address ack_id needs to be"
                 "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._space_read)-1, ack_id))
+                "{1:d}".format(len(self._space_read) - 1, ack_id))

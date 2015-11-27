@@ -8,9 +8,8 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 
 
 class EIEIO16BitLowerKeyPrefixDataMessage(EIEIOWithoutPayloadDataMessage):
-    """
-    Class representing an EIEIO packet containing 16 bit events and a key
-    prefix to be applied to the lower end of the key
+    """ An EIEIO packet containing 16 bit events and a key prefix to be\
+        applied to the lower end of the key
     """
     def __init__(self, key_prefix, count=0, data=None, offset=0):
         EIEIOWithoutPayloadDataMessage.__init__(

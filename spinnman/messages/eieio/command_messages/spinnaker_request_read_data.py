@@ -9,10 +9,9 @@ import struct
 
 
 class SpinnakerRequestReadData(EIEIOCommandMessage):
-    """
-    Message used in the context of the buffering output mechanism which is
-    sent from the SpiNNaker system to the host computer to signal that some
-    data is available to be read
+    """ Message used in the context of the buffering output mechanism which is\
+        sent from the SpiNNaker system to the host computer to signal that\
+        some data is available to be read
     """
     def __init__(self, x, y, p, region_id, sequence_no, n_requests,
                  channel, start_address, space_to_be_read):
@@ -136,10 +135,8 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
 
 
 class _SpinnakerRequestReadDataHeader(object):
-    """
-    The SpinnakerRequestReadData contains itself on header with the position
-    of the core in the machine (x, y, p), the number of requests and a
-    sequence number
+    """ Contains the position of the core in the machine (x, y, p), the number\
+        of requests and a sequence number
     """
     def __init__(self, x, y, p, n_requests, sequence_no):
         self._x = x
@@ -170,9 +167,7 @@ class _SpinnakerRequestReadDataHeader(object):
 
 
 class _SpinnakerRequestReadDataRequest(object):
-    """
-    The SpinnakerRequestReadData contains a set of requests which refer to
-    the channels used
+    """ Contains a set of requests which refer to the channels used
     """
     def __init__(self, channel, region_id, start_address, space_to_be_read):
         if not isinstance(channel, list):
@@ -202,7 +197,7 @@ class _SpinnakerRequestReadDataRequest(object):
             SpinnmanInvalidParameterTypeException(
                 "request_id", "integer", "channel request needs to be"
                 "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._channel)-1, request_id))
+                "{1:d}".format(len(self._channel) - 1, request_id))
 
     def region_id(self, request_id):
         if len(self._region_id) > request_id:
@@ -211,7 +206,7 @@ class _SpinnakerRequestReadDataRequest(object):
             SpinnmanInvalidParameterTypeException(
                 "request_id", "integer", "region id request needs to be"
                 "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._region_id)-1, request_id))
+                "{1:d}".format(len(self._region_id) - 1, request_id))
 
     def start_address(self, request_id):
         if len(self._start_address) > request_id:
@@ -220,7 +215,7 @@ class _SpinnakerRequestReadDataRequest(object):
             SpinnmanInvalidParameterTypeException(
                 "request_id", "integer", "start address request needs to be"
                 "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._start_address)-1, request_id))
+                "{1:d}".format(len(self._start_address) - 1, request_id))
 
     def space_to_be_read(self, request_id):
         if len(self._space_to_be_read) > request_id:
@@ -229,5 +224,4 @@ class _SpinnakerRequestReadDataRequest(object):
             SpinnmanInvalidParameterTypeException(
                 "request_id", "integer", "space to be read request needs to be"
                 "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._space_to_be_read)-1, request_id))
-
+                "{1:d}".format(len(self._space_to_be_read) - 1, request_id))

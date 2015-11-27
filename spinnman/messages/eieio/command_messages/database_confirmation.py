@@ -6,9 +6,9 @@ from spinnman import constants
 
 
 class DatabaseConfirmation(EIEIOCommandMessage):
-    """
-    Packet which contains the path to the database created by the toolchain
-    which is to be used by any software which interfaces with SpiNNaker
+    """ Packet which contains the path to the database created by the\
+        toolchain which is to be used by any software which interfaces with\
+        SpiNNaker
     """
     def __init__(self, database_path=None):
         EIEIOCommandMessage.__init__(

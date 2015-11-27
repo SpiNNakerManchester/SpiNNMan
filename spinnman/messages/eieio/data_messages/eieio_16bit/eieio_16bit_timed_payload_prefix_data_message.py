@@ -8,9 +8,8 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 
 
 class EIEIO16BitTimedPayloadPrefixDataMessage(EIEIOWithoutPayloadDataMessage):
-    """
-    Class representing an EIEIO packet containing 16 bit events with
-    a timestamp for the events
+    """ An EIEIO packet containing 16 bit events with a timestamp for the\
+        events
     """
     def __init__(self, timestamp, count=0, data=None, offset=0):
 
