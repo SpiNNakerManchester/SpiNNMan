@@ -8,7 +8,9 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 
 
 class EIEIO16BitWithPayloadTimedDataMessage(EIEIOWithPayloadDataMessage):
-
+    """ An EIEIO packet containing 16 bit events and payload where the\
+       payloads represent a timestamp for the events
+    """
     def __init__(self, count=0, data=None, offset=0):
 
         EIEIOWithPayloadDataMessage.__init__(
