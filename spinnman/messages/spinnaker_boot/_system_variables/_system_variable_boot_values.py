@@ -154,11 +154,11 @@ class SystemVariableDefinition(Enum):
     probe_timer = _Definition(
         _DataType.INT, offset=0x44, default=0x010a0001,
         doc="The probe timer")
-    user_system_ram_heap_words = _Definition(
+    user_system_ram_size_words = _Definition(
         _DataType.INT, offset=0x48, default=1024,
         doc="The size of the user system RAM heap in bytes")
-    user_sdram_heap_words = _Definition(
-        _DataType.INT, offset=0x4c, default=1048576,
+    user_sdram_size_words = _Definition(
+        _DataType.INT, offset=0x4c, default=0,
         doc="The size of the user SDRAM heap in bytes")
     iobuf_bytes = _Definition(
         _DataType.INT, offset=0x50, default=16384,
