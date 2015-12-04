@@ -108,7 +108,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._chip_y = chip_details.y
         sdram_heap_address = chip_details.sdram_heap_address
         self._send_request(SCPReadMemoryRequest(
-                chip_details.x, chip_details.y, sdram_heap_address, 1),
+                chip_details.x, chip_details.y, sdram_heap_address, 4),
             self._start_search_for_heap_data,
             self._receive_error)
         self._finish()
@@ -138,7 +138,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             "<I", scp_read_memory_response.data)[0]
         if self._heap_address != 0:
             self._send_request(SCPReadMemoryRequest(
-                    self._chip_x, self._chip_y, heap_free_position, 2),
+                    self._chip_x, self._chip_y, heap_free_position, 8),
                 self._search_heap_free_space,
                 self._receive_error)
             self._finish()
@@ -159,7 +159,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 self._heap_size = size
 
             self._send_request(SCPReadMemoryRequest(
-                            self._chip_x, self._chip_y, next_free, 2),
+                            self._chip_x, self._chip_y, next_free, 8),
                         self._search_heap_free_space, self._receive_error)
             self._finish()
             self.check_for_error()
