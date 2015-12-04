@@ -239,3 +239,11 @@ class ChipInfo(object):
         :rtype: int
         """
         return self._router_table_copy_address
+
+    @property
+    def system_ram_heap_address(self):
+        return self._system_ram_heap_address
+
+    @property
+    def sdram_heap_address(self):
+        return self._sdram_heap_address
