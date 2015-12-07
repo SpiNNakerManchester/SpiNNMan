@@ -103,6 +103,9 @@ from spinnman.data.abstract_data_reader import AbstractDataReader
 from spinnman.utilities import utility_functions
 from spinnman import exceptions
 
+# data spec generator import
+import data_specification.utility_calls as dsg_utilities
+
 # general imports
 import random
 import struct
@@ -1142,6 +1145,27 @@ class Transceiver(object):
                         (constants.CPU_INFO_BYTES * p))
         base_address += constants.CPU_USER_0_START_ADDRESS
         return base_address
+
+    def locate_memory_region_on_core(self, x, y, p, region):
+            regions_base_address = self.get_app_data_base_address(x, y, p)
+
+            # Get the position of the region in the pointer table
+            region_offset_in_pointer_table = \
+                dsg_utilities.get_region_base_address_offset(
+                    regions_base_address, region)
+            region_address = buffer(self.read_memory(
+                x, y, region_offset_in_pointer_table, 4))
+            region_address_decoded = struct.unpack_from("<I", region_address)[0]
+            return region_address_decoded
+
+    def get_app_data_base_address(self, x, y, p):
+        app_data_base_address = self.get_user_0_register_address_from_core(
+            x, y, p)
+        regions_base_address_encoded = buffer(self.read_memory(
+            x, y, app_data_base_address, 4))
+        regions_base_address = struct.unpack_from(
+            "<I", regions_base_address_encoded)[0]
+        return regions_base_address
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
