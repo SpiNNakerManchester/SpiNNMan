@@ -17,7 +17,6 @@ from spinn_machine.link import Link
 
 from collections import deque
 import traceback
-import struct
 
 
 class _ChipInfoReceiver(object):
@@ -49,12 +48,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
         self._max_core_id = max_core_id
-
-        # helper variables for response moving
-        self._heap_address = None
-        self._heap_size = None
-        self._chip_x = None
-        self._chip_y = None
 
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
@@ -103,23 +96,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES -
                 chip_details.first_free_router_entry))
 
-        # handles finding out the heap positions
-        self._chip_x = chip_details.x
-        self._chip_y = chip_details.y
-        sdram_heap_address = chip_details.sdram_heap_address
-        self._send_request(SCPReadMemoryRequest(
-                chip_details.x, chip_details.y, sdram_heap_address, 4),
-            self._start_search_for_heap_data,
-            self._receive_error)
-        self._finish()
-        self.check_for_error()
-
         # Create the chip
         chip = Chip(
             x=chip_details.x, y=chip_details.y, processors=processors,
             router=router, sdram=SDRAM(
-                user_base_address=self._heap_address,
-                system_base_address=self._heap_address + self._heap_size),
+                user_base_address=chip_details.sdram_heap_address,
+                system_base_address=chip_details.system_sdram_base_address),
             ip_address=chip_details.ip_address,
             nearest_ethernet_x=chip_details.nearest_ethernet_x,
             nearest_ethernet_y=chip_details.nearest_ethernet_y)
@@ -130,39 +112,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._heap_address = None
         self._heap_size = None
         return chip
-
-    def _start_search_for_heap_data(self, scp_read_memory_response):
-        # the first poisiton of data is the address for the
-        # free'd blocks, second is for allocated blocks,
-        heap_free_position = struct.unpack_from(
-            "<I", scp_read_memory_response.data)[0]
-        if self._heap_address != 0:
-            self._send_request(SCPReadMemoryRequest(
-                    self._chip_x, self._chip_y, heap_free_position, 8),
-                self._search_heap_free_space,
-                self._receive_error)
-            self._finish()
-            self.check_for_error()
-        else:  # first is zero, so no free spaces
-            self._heap_address = 0
-            self._heap_size = 0
-
-    def _search_heap_free_space(self, scp_read_memory_response):
-        (free_blocks_next_address, next_free) = struct.unpack_from(
-                "<II", scp_read_memory_response.data)
-        if free_blocks_next_address != 0:
-            size = free_blocks_next_address - self._heap_address - 8
-
-            # update free tracker
-            if size > self._heap_size:
-                self._heap_address = free_blocks_next_address
-                self._heap_size = size
-
-            self._send_request(SCPReadMemoryRequest(
-                            self._chip_x, self._chip_y, next_free, 8),
-                        self._search_heap_free_space, self._receive_error)
-            self._finish()
-            self.check_for_error()
 
     def _receive_chip_details(self, scp_read_memory_response):
         try:
