@@ -9,7 +9,7 @@ from spinnman.model.bmp_connection_data import BMPConnectionData
 from spinnman.messages.spinnaker_boot._system_variables import \
     _system_variable_boot_values
 
-# spinnmachine imports
+# spinn_machine imports
 from spinn_machine.utilities import utilities
 
 # general imports
@@ -183,7 +183,7 @@ def get_ideal_size(number_of_boards, version):
         return MachineDimensions(w * 12, h * 12)
     else:
         raise exceptions.SpinnmanInvalidParameterException(
-            "version", version, "unrecognized board version for "
+            "version", version, "unrecognised board version for "
                                 "default sizes above 1 board")
 
 
@@ -212,7 +212,7 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
     :param number_of_boards: the number of boards in the machine
     :return: The BMP connection data
     """
-    # take the ipaddress, split by dots, and subtract 1 off last bit
+    # take the ip address, split by dots, and subtract 1 off last bit
     ipstring = socket.gethostbyname(hostname)
     ip_string_bits = ipstring.split(".")
     ip_string_bits[len(ip_string_bits) - 1] = str(int(
@@ -227,7 +227,7 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
         bmp_port = bmp_bits[1]
 
     # add board scope for each split
-    # if None, the end user didnt enter anything, so assume one board
+    # if None, the end user didn't enter anything, so assume one board
     # starting at position 0
     board_range = list()
     if number_of_boards == 0 or number_of_boards is None:
