@@ -252,7 +252,7 @@ class SDPHeader(object):
         return struct.pack(
             "<8B", self._flags.value, self._tag, dest_port_cpu,
             source_port_cpu, self._destination_chip_y,
-            self._destination_chip_x, self._source_chip_y, self._source_chip_y)
+            self._destination_chip_x, self._source_chip_y, self._source_chip_x)
 
     @staticmethod
     def from_bytestring(data, offset):
