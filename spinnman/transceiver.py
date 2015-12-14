@@ -1143,7 +1143,7 @@ class Transceiver(object):
         return base_address
 
     def get_user_1_register_address_from_core(self, x, y, p):
-        """Get the address of user 0 for a given processor on the board
+        """Get the address of user 1 for a given processor on the board
 
         :param x: the x-coordinate of the chip containing the processor
         :param y: the y-coordinate of the chip containing the processor
@@ -1186,7 +1186,7 @@ class Transceiver(object):
         return base_address
 
     def get_user_2_register_address_from_core(self, x, y, p):
-        """Get the address of user 0 for a given processor on the board
+        """Get the address of user 2 for a given processor on the board
 
         :param x: the x-coordinate of the chip containing the processor
         :param y: the y-coordinate of the chip containing the processor
