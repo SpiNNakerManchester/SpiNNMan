@@ -42,6 +42,12 @@ CPU_INFO_BYTES = 128
 # the address at which user0 register starts
 CPU_USER_0_START_ADDRESS = 112
 
+# the address at which user0 register starts
+CPU_USER_1_START_ADDRESS = 116
+
+# the address at which user0 register starts
+CPU_USER_2_START_ADDRESS = 120
+
 # default udp tag
 DEFAULT_SDP_TAG = 0xFF
 
