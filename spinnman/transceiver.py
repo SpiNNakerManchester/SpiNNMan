@@ -160,7 +160,7 @@ def create_transceiver_from_hostname(
     :param version: the type of spinnaker board used within the spinnaker\
                 machine being used. If a spinn-5 board, then the version\
                 will be 5, spinn-3 would equal 3 and so on.
-    :param bmp_connection_data: the details of the bmp connections used to\
+    :param bmp_connection_data: the details of the BMP connections used to\
                 boot multi-board systems
     :type bmp_connection_data: iterable\
                 :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
@@ -571,7 +571,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
                     of the fields of the received message is invalid
         :raise spinnman.exceptions.SpinnmanInvalidPacketException:
-                    * If the message is not a recognized packet type
+                    * If the message is not a recognised packet type
                     * If a packet is received that is not a valid response
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
                     no connection can send the type of message given
@@ -892,7 +892,7 @@ class Transceiver(object):
             height = dims.height
 
         # try to get a scamp version once
-        logger.info("Attempting to boot machine")
+        logger.info("Working out if machine is booted")
         version_info = self._try_to_find_scamp_and_boot(
             INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
 
@@ -901,7 +901,7 @@ class Transceiver(object):
                 len(self._bmp_connections) > 0):
 
             # start by powering up each bmp connection
-            logger.info("Failed to boot, attempting to power on machine")
+            logger.info("Attempting to power on machine")
             self.power_on_machine()
 
             # Sleep a bit to let things get going
@@ -928,7 +928,7 @@ class Transceiver(object):
         else:
             if self._machine is None:
                 self._update_machine()
-            logger.info("Booted machine")
+            logger.info("Machine communication sucessful")
 
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
@@ -2101,8 +2101,8 @@ class Transceiver(object):
         return all_tags
 
     def malloc_sdram(self, x, y, size, app_id, tag=None):
-        """
-        calls a malloc to the spinnaker machine to alloc a chunk of memory
+        """ Allocates a chunk of SDRAM on a chip on the machine
+
         :param x: The x-coordinate of the chip onto which to ask for memory
         :type x: int
         :param y: The y-coordinate of the chip onto which to ask for memory
@@ -2112,40 +2112,48 @@ class Transceiver(object):
         :param app_id: The id of the application with which to associate the\
                     routes.  If not specified, defaults to 0.
         :type app_id: int
-        :param tag: the tag for the sdram, a 8-bit (chip-wide) tag that can be
-        looked up by a SpiNNaker application to discover the address of the
-        allocated block. If `0` then no tag is applied.
+        :param tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can be\
+                    looked up by a SpiNNaker application to discover the\
+                    address of the allocated block. If `0` then no tag is\
+                    applied.
         :type tag: int
-        :return: the base address to which this malloc occured
+        :return: the base address of the allocated memory
+        :rtype: int
         """
         process = MallocSDRAMProcess(self._machine, self._scamp_connections)
         process.malloc_sdram(x, y, size, app_id, tag)
         return process.base_address
 
     def free_sdram(self, x, y, base_address, app_id):
-        """
+        """ Free allocated SDRAM
 
-        :param x:
-        :param y:
-        :param base_address:
-        :param app_id:
-        :return:
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :type x: int
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :type y: int
+        :param base_address: The base address of the allocated memory
+        :type base_address: int
+        :param app_id: The app id of the allocated memory
+        :type app_id: int
         """
-        process =  DeAllocSDRAMProcess(self._machine, self._scamp_connections)
+        process = DeAllocSDRAMProcess(self._machine, self._scamp_connections)
         process.de_alloc_sdram(x, y, app_id, base_address)
 
     def free_sdram_by_app_id(self, x, y, app_id):
-        """
+        """ Free all SDRAM allocated to a given app id
 
-        :param x:
-        :param y:
-        :param app_id:
-        :return:
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :type x: int
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :type y: int
+        :param app_id: The app id of the allocated memory
+        :type app_id: int
+        :return: The number of blocks freed
+        :rtype: int
         """
-        process =  DeAllocSDRAMProcess(self._machine, self._scamp_connections)
+        process = DeAllocSDRAMProcess(self._machine, self._scamp_connections)
         process.de_alloc_sdram(x, y, app_id)
         return process.no_blocks_freed
-
 
     def load_multicast_routes(self, x, y, routes, app_id):
         """ Load a set of multicast routes on to a chip
@@ -2391,7 +2399,7 @@ class Transceiver(object):
         for bmp_connection in self._bmp_connections:
             boards += len(bmp_connection.boards)
 
-        # if no bmps are avilable, then theres still at least one board
+        # if no BMPs are available, then there's still at least one board
         if boards == 0:
             boards = 1
         return boards

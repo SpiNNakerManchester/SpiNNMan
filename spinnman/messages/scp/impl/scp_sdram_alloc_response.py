@@ -26,7 +26,7 @@ class SCPSDRAMAllocResponse(AbstractSCPResponse):
         self._base_address = struct.unpack_from("<I", data, offset)[0]
 
         # check that the base address is not null (0 in python case) as
-        # this reflects a issue in malloc on spinnaker side
+        # this reflects a issue in the command on spinnaker side
         if self._base_address == 0:
             raise SpinnmanUnexpectedResponseCodeException(
                 "SDRAM Allocation response base address", "CMD_ALLOC",

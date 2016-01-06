@@ -129,7 +129,7 @@ class ChipInfo(object):
 
     @property
     def nearest_ethernet_x(self):
-        """ The x-coordinate of the nearest chip with ethernet
+        """ The x-coordinate of the nearest chip with Ethernet
 
         :rtype: int
         """
@@ -137,7 +137,7 @@ class ChipInfo(object):
 
     @property
     def nearest_ethernet_y(self):
-        """ The y-coordinate of the nearest chip with ethernet
+        """ The y-coordinate of the nearest chip with Ethernet
 
         :rtype: int
         """
@@ -219,7 +219,7 @@ class ChipInfo(object):
 
     @property
     def ip_address(self):
-        """ The ip address of the chip, or None if no ethernet
+        """ The ip address of the chip, or None if no Ethernet
 
         :rtype: str
         """
@@ -242,8 +242,16 @@ class ChipInfo(object):
 
     @property
     def system_ram_heap_address(self):
+        """ The address of the base of the heap in system RAM
+
+        :rtype: int
+        """
         return self._system_ram_heap_address
 
     @property
     def sdram_heap_address(self):
+        """ The address of the base of the heap in SDRAM
+
+        :rtype: int
+        """
         return self._sdram_heap_address

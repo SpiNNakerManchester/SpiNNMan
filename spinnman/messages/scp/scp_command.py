@@ -22,10 +22,10 @@ class SCPCommand(Enum):
     CMD_LED = (25, "Control the LEDs")
     CMD_IPTAG = (26, "Set an IPTAG")
     CMD_SROM = 27
-    CMD_ALLOC = (28, "allocation/freeing of memory (SDRAM and Routing entries)")
-    CMD_RTR = (29, "Router initialization")
+    CMD_ALLOC = (28, "Allocate or Free SDRAM or Routing entries")
+    CMD_RTR = (29, "Initialise the router")
     CMD_DPRI = (30, "Dropped Packet Reinjection setup")
-    CMD_BMP_INFO = (48, "BMP info structs")
+    CMD_BMP_INFO = (48, "Get BMP info structures")
     CMD_FLASH_COPY = 49
     CMD_FLASH_ERASE = 50
     CMD_FLASH_WRITE = 51

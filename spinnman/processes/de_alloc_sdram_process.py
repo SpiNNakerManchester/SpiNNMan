@@ -19,7 +19,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
     def de_alloc_sdram(self, x, y, app_id, base_address=None):
 
-        # deallocate space in the sdram
+        # deallocate space in the SDRAM
         if base_address is not None:
             self._send_request(
                 SCPSDRAMDeAllocRequest(x, y, app_id, base_address))
