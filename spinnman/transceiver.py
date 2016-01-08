@@ -30,8 +30,10 @@ from spinnman.connections.abstract_classes.abstract_multicast_sender\
     import AbstractMulticastSender
 from spinnman.connections.abstract_classes.abstract_scp_receiver\
     import AbstractSCPReceiver
+from spinnman.processes.de_alloc_sdram_process import DeAllocSDRAMProcess
 from spinnman.processes.get_machine_process import GetMachineProcess
 from spinnman.processes.get_version_process import GetVersionProcess
+from spinnman.processes.malloc_sdram_process import MallocSDRAMProcess
 from spinnman.processes.write_memory_process import WriteMemoryProcess
 from spinnman.processes.read_memory_process import ReadMemoryProcess
 from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
@@ -158,7 +160,7 @@ def create_transceiver_from_hostname(
     :param version: the type of spinnaker board used within the spinnaker\
                 machine being used. If a spinn-5 board, then the version\
                 will be 5, spinn-3 would equal 3 and so on.
-    :param bmp_connection_data: the details of the bmp connections used to\
+    :param bmp_connection_data: the details of the BMP connections used to\
                 boot multi-board systems
     :type bmp_connection_data: iterable\
                 :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
@@ -459,8 +461,7 @@ class Transceiver(object):
             # isn't valid
             except exceptions.SpinnmanTimeoutException:
                 raise exceptions.SpinnmanException(
-                    "BMP connection to {} is not responding, "
-                    "please check that it is connected".format(
+                    "BMP connection to {} is not responding".format(
                         connection.remote_ip_address))
 
     def _try_sver_though_scamp_connection(self, connection, retries):
@@ -570,7 +571,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
                     of the fields of the received message is invalid
         :raise spinnman.exceptions.SpinnmanInvalidPacketException:
-                    * If the message is not a recognized packet type
+                    * If the message is not a recognised packet type
                     * If a packet is received that is not a valid response
         :raise spinnman.exceptions.SpinnmanUnsupportedOperationException: If\
                     no connection can send the type of message given
@@ -891,21 +892,21 @@ class Transceiver(object):
             height = dims.height
 
         # try to get a scamp version once
-        logger.info("going to try to boot the machine with scamp")
+        logger.info("Working out if machine is booted")
         version_info = self._try_to_find_scamp_and_boot(
             INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
 
         # If we fail to get a SCAMP version this time, try other things
-        if version_info is None and self._version >= 4:
-            logger.info("failed to boot machine with scamp,"
-                        " trying to power on machine")
+        if (version_info is None and self._version >= 4 and
+                len(self._bmp_connections) > 0):
 
             # start by powering up each bmp connection
+            logger.info("Attempting to power on machine")
             self.power_on_machine()
 
             # Sleep a bit to let things get going
             time.sleep(2.0)
-            logger.info("going to try to boot the machine with scamp")
+            logger.info("Attempting to boot machine")
 
             # retry to get a scamp version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
@@ -914,12 +915,11 @@ class Transceiver(object):
         # verify that the version is the expected one for this transceiver
         if version_info is None:
             raise exceptions.SpinnmanIOException(
-                "We currently cannot communicate with your board, please "
-                "rectify this, and try again")
+                "Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
                 version_info.version_number != _SCAMP_VERSION):
             raise exceptions.SpinnmanIOException(
-                "The board is currently booted with {}"
+                "The machine is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
                 "required version is {} {}".format(
                     version_info.name, version_info.version_number,
@@ -928,7 +928,7 @@ class Transceiver(object):
         else:
             if self._machine is None:
                 self._update_machine()
-            logger.info("successfully booted the machine with scamp")
+            logger.info("Machine communication sucessful")
 
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
@@ -968,8 +968,7 @@ class Transceiver(object):
                 current_tries_to_go -= 1
             except exceptions.SpinnmanIOException:
                 raise exceptions.SpinnmanIOException(
-                    "We currently cannot communicate with your board, please "
-                    "rectify this, and try again")
+                    "Failed to communicate with the machine")
 
         # The last thing we tried was booting, so try again to get the version
         if version_info is None:
@@ -1370,6 +1369,8 @@ class Transceiver(object):
     def power_on_machine(self):
         """ Power on the whole machine
         """
+        if len(self._bmp_connections) == 0:
+            logger.warn("No BMP connections, so can't power on")
         for bmp_connection in self._bmp_connections:
             self.power_on(bmp_connection.boards, bmp_connection.cabinet,
                           bmp_connection.frame)
@@ -1388,6 +1389,8 @@ class Transceiver(object):
     def power_off_machine(self):
         """ Power off the whole machine
         """
+        if len(self._bmp_connections) == 0:
+            logger.warn("No BMP connections, so can't power off")
         for bmp_connection in self._bmp_connections:
             self.power_off(bmp_connection.boards, bmp_connection.cabinet,
                            bmp_connection.frame)
@@ -2097,6 +2100,61 @@ class Transceiver(object):
             all_tags.extend(process.get_tags(connection))
         return all_tags
 
+    def malloc_sdram(self, x, y, size, app_id, tag=None):
+        """ Allocates a chunk of SDRAM on a chip on the machine
+
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :type x: int
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :type y: int
+        :param size: the amount of memory to allocate in bytes
+        :type size: int
+        :param app_id: The id of the application with which to associate the\
+                    routes.  If not specified, defaults to 0.
+        :type app_id: int
+        :param tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can be\
+                    looked up by a SpiNNaker application to discover the\
+                    address of the allocated block. If `0` then no tag is\
+                    applied.
+        :type tag: int
+        :return: the base address of the allocated memory
+        :rtype: int
+        """
+        process = MallocSDRAMProcess(self._machine, self._scamp_connections)
+        process.malloc_sdram(x, y, size, app_id, tag)
+        return process.base_address
+
+    def free_sdram(self, x, y, base_address, app_id):
+        """ Free allocated SDRAM
+
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :type x: int
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :type y: int
+        :param base_address: The base address of the allocated memory
+        :type base_address: int
+        :param app_id: The app id of the allocated memory
+        :type app_id: int
+        """
+        process = DeAllocSDRAMProcess(self._machine, self._scamp_connections)
+        process.de_alloc_sdram(x, y, app_id, base_address)
+
+    def free_sdram_by_app_id(self, x, y, app_id):
+        """ Free all SDRAM allocated to a given app id
+
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :type x: int
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :type y: int
+        :param app_id: The app id of the allocated memory
+        :type app_id: int
+        :return: The number of blocks freed
+        :rtype: int
+        """
+        process = DeAllocSDRAMProcess(self._machine, self._scamp_connections)
+        process.de_alloc_sdram(x, y, app_id)
+        return process.no_blocks_freed
+
     def load_multicast_routes(self, x, y, routes, app_id):
         """ Load a set of multicast routes on to a chip
 
@@ -2341,7 +2399,7 @@ class Transceiver(object):
         for bmp_connection in self._bmp_connections:
             boards += len(bmp_connection.boards)
 
-        # if no bmps are avilable, then theres still at least one board
+        # if no BMPs are available, then there's still at least one board
         if boards == 0:
             boards = 1
         return boards
@@ -2363,7 +2421,7 @@ class Transceiver(object):
             process.exit(self._reinjector_cores)
             self._reinjection_running = False
 
-        if power_off_machine:
+        if power_off_machine and len(self._bmp_connections) > 0:
             self.power_off_machine()
 
         for receiving_connections in \
@@ -2437,9 +2495,9 @@ class Transceiver(object):
                     if "0.0.0.0" in receiving_connections:
                         raise exceptions.SpinnmanInvalidPacketException(
                             "local_port and local_host",
-                            "{} and {} Another connection is already "
-                            "listening on this port on all interfaces"
-                            .format(local_port, local_host))
+                            "{} and {}".format(local_port, local_host),
+                            "Another connection is already "
+                            "listening on this port on all interfaces")
 
                 # If the type of an existing connection is wrong, this is an
                 # error

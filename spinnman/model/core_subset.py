@@ -68,3 +68,27 @@ class CoreSubset(object):
         :rtype: iterable of int
         """
         return iter(self._processor_ids)
+
+    def __repr__(self):
+        return "{}:{}:{}".format(self._x, self._y, self._processor_ids)
+
+    def __eq__(self, other):
+        """ Determine if two core subsets are equal to each other
+        :param other: the other CoreSubset to compare against
+        :return: True if the core subset is the same, False otherwise
+        :rtype: bool
+        """
+        if isinstance(other, CoreSubset):
+            if (self.x != other.x or self._y != other.y or
+                    self._processor_ids != other.processor_ids):
+                return False
+            else:
+                return True
+        else:
+            return False
+
+    def __hash__(self):
+        """ Get a hash for the core_subset
+        """
+        processors = frozenset(self._processor_ids)
+        return (self._x, self._y, processors).__hash__()
