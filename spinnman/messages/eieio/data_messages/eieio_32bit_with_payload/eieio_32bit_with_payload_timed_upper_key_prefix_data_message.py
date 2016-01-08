@@ -10,7 +10,10 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 
 class EIEIO32BitWithPayloadTimedUpperKeyPrefixDataMessage(
         EIEIOWithPayloadDataMessage):
-
+    """ An EIEIO packet containing 32 bit events and payloads, where the\
+        payloads represent the timestamp of the events, and a key prefix to be\
+        applied to the upper end of the key
+    """
     def __init__(self, key_prefix, count=0, data=None, offset=0):
         EIEIOWithPayloadDataMessage.__init__(
             self, EIEIODataHeader(EIEIOType.KEY_PAYLOAD_32_BIT,

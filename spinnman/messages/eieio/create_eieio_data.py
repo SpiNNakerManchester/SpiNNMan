@@ -119,6 +119,8 @@ from spinnman.messages.eieio.data_messages.eieio_with_payload_data_message\
 
 def _read_16_bit_message(prefix, payload_base, prefix_type, is_time,
                          data, offset, eieio_header):
+    """ Return a packet containing 16 bit elements
+    """
     if payload_base is None:
         if prefix is None:
             return EIEIO16BitDataMessage(eieio_header.count, data, offset)
@@ -153,6 +155,8 @@ def _read_16_bit_message(prefix, payload_base, prefix_type, is_time,
 
 def _read_16_bit_payload_message(prefix, payload_base, prefix_type,
                                  is_time, data, offset, eieio_header):
+    """ Return a packet containing 16 bit elements and payload
+    """
     if payload_base is None and not is_time:
         if prefix is None:
             return EIEIO16BitWithPayloadDataMessage(
@@ -188,6 +192,8 @@ def _read_16_bit_payload_message(prefix, payload_base, prefix_type,
 
 def _read_32_bit_message(prefix, payload_base, prefix_type, is_time,
                          data, offset, eieio_header):
+    """ Return a packet containing 32 bit elements
+    """
     if payload_base is None:
         if prefix is None:
             return EIEIO32BitDataMessage(eieio_header.count, data, offset)
@@ -222,6 +228,8 @@ def _read_32_bit_message(prefix, payload_base, prefix_type, is_time,
 
 def _read_32_bit_payload_message(prefix, payload_base, prefix_type,
                                  is_time, data, offset, eieio_header):
+    """ Return a packet containing 32 bit elements and payload
+    """
     if payload_base is None and not is_time:
         if prefix is None:
             return EIEIO32BitWithPayloadDataMessage(
@@ -256,6 +264,18 @@ def _read_32_bit_payload_message(prefix, payload_base, prefix_type,
 
 
 def read_eieio_data_message(data, offset):
+    """ Reads the content of an EIEIO data message and returns an object\
+        identifying the data which was contained in the packet
+
+    :param data: data received from the network
+    :type data: bytestring
+    :param offset: offset at which the parsing operation should start
+    :type offset: int
+    :return: an object which inherits from EIEIODataMessage which contains\
+            parsed data received from the network
+    :rtype:\
+            :py:class:`spinnman.messages.eieio.data_messages.eieio_data_message.EIEIODataMessage`
+    """
     eieio_header = EIEIODataHeader.from_bytestring(data, offset)
     offset += eieio_header.size
     eieio_type = eieio_header.eieio_type

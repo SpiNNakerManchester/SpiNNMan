@@ -26,7 +26,7 @@ class ConnectionListener(Thread):
     def run(self):
         while not self._done:
             try:
-                if self._connection.is_ready_to_receive(timeout=10):
+                if self._connection.is_ready_to_receive(timeout=1):
                     message = self._get_message_call()
                     for callback in self._callbacks:
                         self._callback_pool.apply_async(callback, [message])
@@ -50,3 +50,4 @@ class ConnectionListener(Thread):
             listener will not truly stop until the get message call returns.
         """
         self._done = True
+        self.join()
