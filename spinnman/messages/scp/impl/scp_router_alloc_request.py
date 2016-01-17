@@ -33,7 +33,9 @@ class SCPRouterAllocRequest(AbstractSCPRequest):
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
-            argument_1=(app_id << 8) | SCPAllocFreeType.ALLOC_ROUTING.value,
+            argument_1=(
+                (app_id << 8) |
+                SCPAllocFreeType.ALLOC_ROUTING.value),  # @UndefinedVariable
             argument_2=n_entries)
 
     def get_scp_response(self):
