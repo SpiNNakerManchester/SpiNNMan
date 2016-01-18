@@ -8,7 +8,8 @@ from spinnman.messages.eieio.data_messages.eieio_data_message\
 
 
 class EIEIO32BitDataMessage(EIEIOWithoutPayloadDataMessage):
-
+    """ An EIEIO packet containing 32 bit events
+    """
     def __init__(self, count=0, data=None, offset=0):
         EIEIOWithoutPayloadDataMessage.__init__(
             self, EIEIODataHeader(EIEIOType.KEY_32_BIT, count=count),

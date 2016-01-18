@@ -3,7 +3,7 @@ from spinnman.messages.scp.impl.scp_read_memory_request\
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman import constants
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman import exceptions
 from spinnman.processes\
     .multi_connection_process_round_robin_connection_selector\
     import MultiConnectionProcessRoundRobinConnectionSelector
@@ -106,11 +106,17 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         chip = Chip(
             x=chip_details.x, y=chip_details.y, processors=processors,
             router=router, sdram=SDRAM(
-                user_base_address=chip_details.sdram_base_address,
+                user_base_address=chip_details.sdram_heap_address,
                 system_base_address=chip_details.system_sdram_base_address),
             ip_address=chip_details.ip_address,
             nearest_ethernet_x=chip_details.nearest_ethernet_x,
             nearest_ethernet_y=chip_details.nearest_ethernet_y)
+
+        # reset params for next iteration
+        self._chip_x = None
+        self._chip_y = None
+        self._heap_address = None
+        self._heap_size = None
         return chip
 
     def _receive_chip_details(self, scp_read_memory_response):
@@ -145,8 +151,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # SpinnmanUnexpectedResponseCodeException, this is a failed link
         # and so can be ignored
         if (not isinstance(request, SCPReadLinkRequest) or
-                not isinstance(exception,
-                               SpinnmanUnexpectedResponseCodeException)):
+                not isinstance(
+                    exception,
+                    exceptions.SpinnmanUnexpectedResponseCodeException)):
             AbstractProcess._receive_error(self, request, exception,
                                            tracebackinfo)
 

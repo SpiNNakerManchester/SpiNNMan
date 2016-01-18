@@ -79,7 +79,7 @@ class SystemVariableDefinition(Enum):
         doc="The version of the hardware in use")
     is_ethernet_available = _Definition(
         _DataType.BYTE, offset=0x0b,
-        doc="Indicates if ethernet is available on this chip")
+        doc="Indicates if Ethernet is available on this chip")
     links_available = _Definition(
         _DataType.BYTE, offset=0x0c,
         doc="A bit-mask indicating which links are available")
@@ -114,10 +114,10 @@ class SystemVariableDefinition(Enum):
         doc="The SDRAM clock frequency in MHz")
     nearest_neighbour_forward = _Definition(
         _DataType.BYTE, offset=0x28, default=0x3F,
-        doc="Nearest-Neighbor forward parameter")
+        doc="Nearest-Neighbour forward parameter")
     nearest_neighbour_retry = _Definition(
         _DataType.BYTE, offset=0x29,
-        doc="Nearest-Neighbor retry parameter")
+        doc="Nearest-Neighbour retry parameter")
     link_peek_timeout_microseconds = _Definition(
         _DataType.BYTE, offset=0x2a, default=100,
         doc="The link peek/poke timeout in microseconds")
@@ -147,18 +147,18 @@ class SystemVariableDefinition(Enum):
         doc="The number of shared message buffers")
     nearest_neighbour_delay_us = _Definition(
         _DataType.BYTE, offset=0x42, default=10,
-        doc="The delay between nearest-neighbor packets in microseconds")
+        doc="The delay between nearest-neighbour packets in microseconds")
     software_watchdog_count = _Definition(
         _DataType.BYTE, offset=0x43, default=3,
-        doc="The number of watchdog timeouts before an error is raised")
+        doc="The number of watch dog timeouts before an error is raised")
     probe_timer = _Definition(
         _DataType.INT, offset=0x44, default=0x010a0001,
         doc="The probe timer")
-    user_system_ram_heap_words = _Definition(
+    user_system_ram_size_words = _Definition(
         _DataType.INT, offset=0x48, default=1024,
         doc="The size of the user system RAM heap in bytes")
-    user_sdram_heap_words = _Definition(
-        _DataType.INT, offset=0x4c, default=1048576,
+    user_sdram_size_words = _Definition(
+        _DataType.INT, offset=0x4c, default=0,
         doc="The size of the user SDRAM heap in bytes")
     iobuf_bytes = _Definition(
         _DataType.INT, offset=0x50, default=16384,
@@ -174,7 +174,7 @@ class SystemVariableDefinition(Enum):
         doc="The boot signature")
     nearest_neighbour_memory_pointer = _Definition(
         _DataType.INT, offset=0x60,
-        doc="The memory pointer for nearest neighbor global operations")
+        doc="The memory pointer for nearest neighbour global operations")
     lock_0 = _Definition(
         _DataType.BYTE, offset=0x64,
         doc="The first lock")

@@ -17,7 +17,7 @@ class SCPSignal(Enum):
     STOP = (2, SignalType.NEAREST_NEIGHBOUR)
     START = (3, SignalType.NEAREST_NEIGHBOUR)
     SYNC0 = (4, SignalType.NEAREST_NEIGHBOUR)
-    SYNC1 = (5, SignalType.MULTICAST)
+    SYNC1 = (5, SignalType.NEAREST_NEIGHBOUR)
     PAUSE = (6, SignalType.MULTICAST)
     CONTINUE = (7, SignalType.MULTICAST)
     EXIT = (8, SignalType.NEAREST_NEIGHBOUR)
