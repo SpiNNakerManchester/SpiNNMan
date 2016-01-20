@@ -1,5 +1,6 @@
 import unittest
-from spinnman.data.little_endian_byte_array_byte_writer import \
+
+from spinn_storage_handlers.little_endian_byte_array_byte_writer import \
     LittleEndianByteArrayByteWriter
 
 

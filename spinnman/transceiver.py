@@ -40,7 +40,6 @@ from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
-from spinnman.data.file_data_reader import FileDataReader
 from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinn_machine.utilities import utilities
@@ -101,9 +100,12 @@ from spinnman.messages.scp.impl.scp_router_clear_request \
 from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
 from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
-from spinnman.data.abstract_data_reader import AbstractDataReader
 from spinnman.utilities import utility_functions
 from spinnman import exceptions
+
+from spinn_storage_handlers.abstract_classes.abstract_data_reader \
+    import AbstractDataReader
+from spinn_storage_handlers.file_data_reader import FileDataReader
 
 # general imports
 import random

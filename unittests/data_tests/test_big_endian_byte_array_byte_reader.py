@@ -1,6 +1,7 @@
 import unittest
-from spinnman.data.big_endian_byte_array_byte_reader import BigEndianByteArrayByteReader
 from struct import pack
+
+from spinn_storage_handlers.big_endian_byte_array_byte_reader import BigEndianByteArrayByteReader
 
 
 class TestBigEndianByteArrayByteReader(unittest.TestCase):
