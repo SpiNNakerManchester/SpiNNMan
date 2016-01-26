@@ -87,6 +87,14 @@ class CoreSubset(object):
         else:
             return False
 
+    def __ne__(self, other):
+        """
+        comparison  method for comparing core subsets
+        :param other: instance of CoreSubset
+        :return:
+        """
+        return not self.__eq__(other)
+
     def __hash__(self):
         """ Get a hash for the core_subset
         """
