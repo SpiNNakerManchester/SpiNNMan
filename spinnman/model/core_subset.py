@@ -100,3 +100,10 @@ class CoreSubset(object):
         """
         processors = frozenset(self._processor_ids)
         return (self._x, self._y, processors).__hash__()
+
+    def __len__(self):
+        """
+        gives the number of processors in this core subset
+        :return: length
+        """
+        return len(self._processor_ids)

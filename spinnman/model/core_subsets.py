@@ -47,7 +47,7 @@ class CoreSubsets(object):
         :param y: The y-coordinate of the chip
         :type y: int
         :param processor_id: A processor id
-        :type processor_ids: int
+        :type processor_id: int
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
@@ -106,10 +106,20 @@ class CoreSubsets(object):
         :rtype: :py:class:`spinnman.model.core_subset.CoreSubset`
         """
         if (x, y) not in self._core_subsets:
-            return CoreSubset()
+            return CoreSubset(x, y, [])
         return self._core_subsets[(x, y)]
 
     def __iter__(self):
         """ Iterable of core_subsets
         """
         return self._core_subsets.itervalues()
+
+    def __len__(self):
+        """
+        returns the total number of processors that are in these core subsets
+        :return:
+        """
+        counter = 0
+        for (x, y) in self._core_subsets:
+            counter += len(self._core_subsets[(x, y)])
+        return counter
