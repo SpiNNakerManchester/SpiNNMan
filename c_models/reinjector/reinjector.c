@@ -375,6 +375,8 @@ void __wrap_sark_int(void *pc) {
     if (cmd == SHM_MSG) {
 
         sc[SC_CLR_IRQ] = SC_CODE + (1 << sark.phys_cpu);
+        sark.vcpu->mbox_ap_cmd = SHM_IDLE;
+
         sdp_msg_t *shm_msg = (sdp_msg_t *) sark.vcpu->mbox_ap_msg;
         sdp_msg_t *msg = sark_msg_get();
 
@@ -402,7 +404,6 @@ void __wrap_sark_int(void *pc) {
             }
         } else {
             sark_shmsg_free(shm_msg);
-            sark_msg_free(msg);
         }
     } else {
 
