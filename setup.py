@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
     name="SpiNNMan",
-    version="2015.004.01",
+    version="2016.001.01",
     description="Interaction with a SpiNNaker Machine",
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
     license="GNU GPLv3.0",
@@ -13,7 +13,6 @@ setup(
               'spinnman.connections',
               'spinnman.connections.abstract_classes',
               'spinnman.connections.udp_packet_connections',
-              'spinnman.data',
               'spinnman.messages',
               'spinnman.messages.eieio',
               'spinnman.messages.eieio.abstract_messages',
@@ -35,5 +34,5 @@ setup(
               'spinnman.utilities'],
     package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot'],
                   'spinnman.model_binaries': ['*.aplx']},
-    install_requires=['six', 'enum34', 'SpiNNMachine == 2015.004.01']
+    install_requires=['six', 'enum34', 'SpiNNMachine == 2016.001.01']
 )
