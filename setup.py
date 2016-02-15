@@ -34,5 +34,5 @@ setup(
               'spinnman.utilities'],
     package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot'],
                   'spinnman.model_binaries': ['*.aplx']},
-    install_requires=['six', 'enum34', 'SpiNNMachine == 2016.001.01']
+    install_requires=['six', 'enum34', 'SpiNNMachine == 2015.004.01']
 )
