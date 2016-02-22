@@ -16,7 +16,7 @@ extern INT_HANDLER sark_int_han(void);
 #define TICK_PERIOD        10
 
 // dumped packet queue length
-#define PKT_QUEUE_SIZE     2048
+#define PKT_QUEUE_SIZE     4096
 
 // CPU VIC slot (watchdog and SDP)
 #define CPU_SLOT           SLOT_0
