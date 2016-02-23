@@ -121,7 +121,7 @@ def print_reinjection_status(status):
     print "Reinjected packets:", status.n_reinjected_packets
     print "Router timeout: {}  emergency timeout {}".format(
         status.router_timeout, status.router_emergency_timeout)
-    print ("Reinjecting multicast: {}  point_to_point: {}  nearest_neighbour:"
+    print ("Re-injecting multicast: {}  point_to_point: {}  nearest_neighbour:"
            " {}  fixed_route: {}").format(
                status.is_reinjecting_multicast,
                status.is_reinjecting_point_to_point,

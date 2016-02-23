@@ -902,7 +902,7 @@ class Transceiver(object):
         if (version_info is None and self._version >= 4 and
                 len(self._bmp_connections) > 0):
 
-            # start by powering up each bmp connection
+            # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
             self.power_on_machine()
 
@@ -930,7 +930,7 @@ class Transceiver(object):
         else:
             if self._machine is None:
                 self._update_machine()
-            logger.info("Machine communication sucessful")
+            logger.info("Machine communication successful")
 
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
