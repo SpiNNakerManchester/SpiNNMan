@@ -1,7 +1,10 @@
 import unittest
-from spinnman.data.abstract_data_reader import AbstractDataReader
-from spinnman.data.little_endian_data_reader_byte_reader import \
+
+from spinn_storage_handlers.abstract_classes.abstract_data_reader \
+    import AbstractDataReader
+from spinn_storage_handlers.little_endian_data_reader_byte_reader import \
     LittleEndianDataReaderByteReader
+
 
 class MyDataReader(AbstractDataReader):
     def __init__(self, data_stream):
@@ -15,6 +18,7 @@ class MyDataReader(AbstractDataReader):
                 list_of_bytes.append(self._data_stream[self._index])
                 self._index += 1
         return list_of_bytes
+
     def readinto(self, array):
         pass
 
