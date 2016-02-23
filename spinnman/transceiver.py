@@ -44,9 +44,6 @@ from spinnman.data.file_data_reader import FileDataReader
 from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinn_machine.utilities import utilities
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -900,7 +897,7 @@ class Transceiver(object):
         if (version_info is None and self._version >= 4 and
                 len(self._bmp_connections) > 0):
 
-            # start by powering up each bmp connection
+            # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
             self.power_on_machine()
 
@@ -928,7 +925,7 @@ class Transceiver(object):
         else:
             if self._machine is None:
                 self._update_machine()
-            logger.info("Machine communication sucessful")
+            logger.info("Machine communication successful")
 
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
@@ -1004,7 +1001,8 @@ class Transceiver(object):
         else:
 
             # Use the top corner
-            chips_to_check.append({'x': width - 1, 'y': height - 1})
+            chips_to_check = utility_functions.locate_top_right_chips_to_query(
+                width, height, self._ignore_chips)
 
         # check each chip required to ensure boot is finished
         for chip_to_check in chips_to_check:

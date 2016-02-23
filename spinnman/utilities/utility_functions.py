@@ -202,6 +202,19 @@ def locate_middle_chips_to_query(width, height, invalid_chips):
         middle_chip_x, middle_chip_y, width - 1, height - 1, invalid_chips)
 
 
+def locate_top_right_chips_to_query(width, height, invalid_chips):
+    """ Locate the top-right set of chips on the board, given chips that have\
+        been manually removed
+
+    :param width: the width of the machine in chips
+    :param height: the height of the machine in chips
+    :param invalid_chips: the list of chips that are down
+    :return: a list of chips to query
+    """
+    return utilities.get_closest_chips_to(
+        width - 2, height - 2, width - 1, height - 1, invalid_chips)
+
+
 def work_out_bmp_from_machine_details(hostname, number_of_boards):
     """ Work out the BMP connection ip address given the machine details.\
         This is assumed to be the IP address of the machine, with 1 subtracted\
