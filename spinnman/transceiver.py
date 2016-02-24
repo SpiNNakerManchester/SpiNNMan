@@ -44,6 +44,8 @@ from spinnman.data.file_data_reader import FileDataReader
 from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinn_machine.utilities import utilities
+from spinnman.processes.check_machine_booted_process \
+    import CheckMachineBootedProcess
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -977,53 +979,10 @@ class Transceiver(object):
         # boot has been sent, and 0 0 is up and running, but there will need to
         # be a delay whilst all the other chips complete boot.
         if version_info is not None:
-            version_info = self._wait_till_chips_are_fully_booted(
-                width, height, tries_to_go)
+            checker = CheckMachineBootedProcess(
+                self._scamp_connections[0], self._ignore_chips)
+            version_info = checker.check_machine_is_booted()
         return version_info
-
-    def _wait_till_chips_are_fully_booted(
-            self, width, height, current_tries_to_go):
-        """ Wait until a central set of chips are booted, and can speak to 0, 0
-
-        :param width: The width of the machine in chips
-        :param height: The height of the machine in chips
-        :return: the version info of the last important chip
-        """
-        found_version_info = None
-
-        # check if the machine is wrap-arounds
-        chips_to_check = list()
-        if self._check_if_machine_has_wrap_arounds():
-
-            # Use the middle of the machine
-            chips_to_check = utility_functions.locate_middle_chips_to_query(
-                width, height, self._ignore_chips)
-        else:
-
-            # Use the top corner
-            chips_to_check = utility_functions.locate_top_right_chips_to_query(
-                width, height, self._ignore_chips)
-
-        # check each chip required to ensure boot is finished
-        for chip_to_check in chips_to_check:
-            version_info = None
-            while version_info is None and current_tries_to_go > 0:
-                try:
-                    version_info = self.get_scamp_version(
-                        chip_x=chip_to_check['x'],
-                        chip_y=chip_to_check['y'])
-                    if version_info is not None:
-                        found_version_info = version_info
-                except (exceptions.SpinnmanTimeoutException,
-                        exceptions.SpinnmanUnexpectedResponseCodeException):
-
-                    # back off a little and try again
-                    current_tries_to_go -= 1
-                    time.sleep(4.0)
-            if version_info is None:
-                logger.warn("Could not get version from chip {}, {}".format(
-                            chip_to_check['x'], chip_to_check['y']))
-        return found_version_info
 
     def _check_if_machine_has_wrap_arounds(self):
         """ Determine if the machine has wrap-arounds, by querying the links\
