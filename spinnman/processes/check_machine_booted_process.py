@@ -163,7 +163,10 @@ class CheckMachineBootedProcess(object):
             chip = chip_search.pop()
             for link in range(0, 6):
                 _, chip_data = self._read_chip_down_link(chip.x, chip.y, link)
-                if chip_data is not None:
+                if chip_data is not None and (
+                        self._ignore_chips is None or
+                        not self._ignore_chips.is_chip(
+                            chip_data.x, chip_data.y)):
                     link_destination[(chip.x, chip.y, link)] = (
                         chip_data.x, chip_data.y)
                     if (chip_data.x, chip_data.y) not in seen_chips:
