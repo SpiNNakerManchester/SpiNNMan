@@ -26,6 +26,7 @@ class MultiConnectionProcessMostDirectConnectionSelector(
             return self._first_connection_index
         chip = self._machine.get_chip_at(message.sdp_header.destination_chip_x,
                                          message.sdp_header.destination_chip_y)
-        index = self._connections[(chip.nearest_ethernet_x,
-                                   chip.nearest_ethernet_y)]
-        return index
+        key = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
+        if key not in self._connections:
+            return 0
+        return self._connections[key]

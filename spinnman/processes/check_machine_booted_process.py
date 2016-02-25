@@ -9,6 +9,11 @@ from spinnman.messages.scp.impl.scp_read_memory_request \
 
 from collections import deque
 
+import logging
+import time
+
+logger = logging.getLogger(__file__)
+
 
 class CheckMachineBootedProcess(object):
 
@@ -27,23 +32,23 @@ class CheckMachineBootedProcess(object):
                     self._connection.receive_scp_response()
                 if result == SCPResult.RC_OK:
                     response.read_bytestring(data, offset)
-                    return response
+                    return result, response
                 retries -= 1
             except SpinnmanTimeoutException:
                 retries -= 1
-        return None
+        return result, None
 
     def _read_version(self, x, y):
-        version_response = self._send(SCPVersionRequest(x, y, 0))
+        result, version_response = self._send(SCPVersionRequest(x, y, 0))
         if version_response is not None:
-            return version_response.version_info
-        return None
+            return result, version_response.version_info
+        return result, None
 
     def _read_chip_data(self, read_request):
-        read_response = self._send(read_request)
+        result, read_response = self._send(read_request)
         if read_response is not None:
-            return ChipInfo(read_response.data, read_response.offset)
-        return None
+            return result, ChipInfo(read_response.data, read_response.offset)
+        return result, None
 
     def _read_0_0_data(self):
         read_request = SCPReadMemoryRequest(
@@ -61,8 +66,9 @@ class CheckMachineBootedProcess(object):
     def check_machine_is_booted(self):
 
         # Check that chip 0, 0 is booted
-        chip_0_0_data = self._read_0_0_data()
+        result, chip_0_0_data = self._read_0_0_data()
         if chip_0_0_data is None:
+            logger.error("Could not read from 0, 0: {}", result)
             return None
 
         # Go through the chips, link by link
@@ -72,7 +78,7 @@ class CheckMachineBootedProcess(object):
             chip = chip_search.pop()
             seen_chips.add((chip.x, chip.y))
             for link in chip.links_available:
-                chip_data = self._read_chip_down_link(chip.x, chip.y, link)
+                _, chip_data = self._read_chip_down_link(chip.x, chip.y, link)
                 if (chip_data is not None and
                         (chip_data.x, chip_data.y) not in seen_chips):
                     chip_search.append(chip_data)
@@ -82,8 +88,24 @@ class CheckMachineBootedProcess(object):
         for x, y in seen_chips:
             if (self._ignore_chips is None or
                     not self._ignore_chips.is_chip(x, y)):
-                version_info = self._read_version(x, y)
+
+                # Retry up to 3 times
+                retries = 3
+                result = None
+                while retries > 0:
+                    result, version_info = self._read_version(x, y)
+                    if version_info is not None:
+                        break
+
+                    # Wait between retries
+                    time.sleep(0.5)
+                    retries -= 1
+
+                # If no version could be read, the machine might be faulty
                 if version_info is None:
+                    logger.error(
+                        "Could not get version from chip {}, {}: {}".format(
+                            x, y))
                     return None
 
         return version_info
