@@ -67,13 +67,13 @@ class SystemVariableDefinition(Enum):
         doc="Indicates if peer-to-peer is working on the chip")
     nearest_neighbour_last_id = _Definition(
         _DataType.BYTE, offset=0x07,
-        doc="The last id used in nearest neighbor transaction")
+        doc="The last id used in nearest neighbour transaction")
     nearest_ethernet_x = _Definition(
         _DataType.BYTE, offset=0x08,
-        doc="The x-coordinate of the nearest chip with ethernet")
+        doc="The x-coordinate of the nearest chip with Ethernet")
     nearest_ethernet_y = _Definition(
         _DataType.BYTE, offset=0x09,
-        doc="The y-coordinate of the nearest chip with ethernet")
+        doc="The y-coordinate of the nearest chip with Ethernet")
     hardware_version = _Definition(
         _DataType.BYTE, offset=0x0a,
         doc="The version of the hardware in use")
@@ -125,7 +125,7 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x2b, default=50,
         doc="The LED half-period in 10 ms units")
     peer_to_peer_c_pkt_timer = _Definition(
-        _DataType.INT, offset=0x2c, default=0x02020a52,
+        _DataType.INT, offset=0x2c, default=0x010a6401,
         doc="The peer-to-peer C packet timer")
     led_0 = _Definition(
         _DataType.INT, offset=0x30, default=0x1,
@@ -134,7 +134,7 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0x34,
         doc="The last part of the LED definitions")
     peer_to_peer_b_pkt_timer = _Definition(
-        _DataType.INT, offset=0x38, default=0x01320001,
+        _DataType.INT, offset=0x38, default=0x01100a42,
         doc="The peer-to-peer B packet timer")
     random_seed = _Definition(
         _DataType.INT, offset=0x3c,
@@ -152,7 +152,7 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x43, default=3,
         doc="The number of watch dog timeouts before an error is raised")
     probe_timer = _Definition(
-        _DataType.INT, offset=0x44, default=0x010a0001,
+        _DataType.INT, offset=0x44, default=0x010a6401,
         doc="The probe timer")
     user_system_ram_size_words = _Definition(
         _DataType.INT, offset=0x48, default=1024,
@@ -359,10 +359,6 @@ spinnaker_standard_board_to_machine_sizes = {
     4: MachineDimensions(8, 8),
     5: MachineDimensions(8, 8)}
 
+# Can be used to enable extra things on larger machines
+# (but not currently used)
 spinnaker_multi_board_extra_configs = OrderedDict()
-spinnaker_multi_board_extra_configs[6] = \
-    {SystemVariableDefinition.peer_to_peer_c_pkt_timer: 0x010a6401,
-     SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01100a42}
-spinnaker_multi_board_extra_configs[120] = \
-    {SystemVariableDefinition.probe_timer: 0x010a6401,
-     SystemVariableDefinition.peer_to_peer_b_pkt_timer: 0x01140852}

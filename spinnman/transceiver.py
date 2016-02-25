@@ -980,8 +980,10 @@ class Transceiver(object):
         # be a delay whilst all the other chips complete boot.
         if version_info is not None:
             checker = CheckMachineBootedProcess(
-                self._scamp_connections[0], self._ignore_chips)
-            version_info = checker.check_machine_is_booted()
+                self._scamp_connections[0], self._ignore_chips,
+                self._ignore_cores, self._max_core_id)
+            version_info, self._machine, self._chip_info = \
+                checker.check_machine_is_booted()
         return version_info
 
     def _check_if_machine_has_wrap_arounds(self):

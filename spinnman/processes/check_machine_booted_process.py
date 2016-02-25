@@ -7,19 +7,34 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 
+from spinn_machine.machine import Machine
+from spinn_machine.processor import Processor
+from spinn_machine.router import Router
+from spinn_machine.chip import Chip
+from spinn_machine.sdram import SDRAM
+from spinn_machine.link import Link
+
 from collections import deque
+from collections import OrderedDict
 
 import logging
 import time
+import sys
 
 logger = logging.getLogger(__file__)
 
 
 class CheckMachineBootedProcess(object):
 
-    def __init__(self, connection, ignore_chips):
+    def __init__(self, connection, ignore_chips, ignore_cores, max_core_id):
         self._connection = connection
         self._ignore_chips = ignore_chips
+        self._ignore_cores = ignore_cores
+        self._max_core_id = max_core_id
+
+        self._total = 0
+        self._next_percent_to_print = 10
+        self._pos = 0.0
 
     def _send(self, request):
         response = request.get_scp_response()
@@ -63,28 +78,101 @@ class CheckMachineBootedProcess(object):
             size=constants.SYSTEM_VARIABLE_BYTES)
         return self._read_chip_data(read_request)
 
+    def _update_progress(self):
+        self._pos += 1
+        if (self._pos / self._total) * 100.0 >= self._next_percent_to_print:
+            sys.stdout.write("...{}%".format(self._next_percent_to_print))
+            self._next_percent_to_print += 10
+
+    def _add_chip(self, machine, chip_details, link_destination):
+
+        # Create the processor list
+        processors = list()
+        for virtual_core_id in chip_details.virtual_core_ids:
+            if (self._ignore_cores is not None and
+                    self._ignore_cores.is_core(
+                        chip_details.x, chip_details.y, virtual_core_id)):
+                continue
+            if (self._max_core_id is not None and
+                    virtual_core_id > self._max_core_id):
+                continue
+
+            processors.append(Processor(
+                virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
+                virtual_core_id == 0))
+
+        # Create the router
+        router = Router(
+            links=list(), emergency_routing_enabled=False,
+            clock_speed=Router.ROUTER_DEFAULT_CLOCK_SPEED,
+            n_available_multicast_entries=(
+                Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES -
+                chip_details.first_free_router_entry))
+
+        # Go through the links of the chip
+        for link in chip_details.links_available:
+
+            # Only continue if the chip link worked
+            if (chip_details.x, chip_details.y,
+                    link) in link_destination:
+
+                other_x, other_y = link_destination[
+                    (chip_details.x, chip_details.y, link)]
+
+                # Standard links use the opposite link id (with ids between
+                # 0 and 5) as default
+                opposite_link_id = (link + 3) % 6
+
+                # Check that the other chip link worked in reverse
+                if (other_x, other_y, opposite_link_id) in link_destination:
+
+                    # Add the link to this chip
+                    router.add_link(Link(
+                        chip_details.x, chip_details.y, link, other_x,
+                        other_y, opposite_link_id, opposite_link_id))
+
+        # Create the chip
+        chip = Chip(
+            x=chip_details.x, y=chip_details.y, processors=processors,
+            router=router, sdram=SDRAM(
+                user_base_address=chip_details.sdram_heap_address,
+                system_base_address=chip_details.system_sdram_base_address),
+            ip_address=chip_details.ip_address,
+            nearest_ethernet_x=chip_details.nearest_ethernet_x,
+            nearest_ethernet_y=chip_details.nearest_ethernet_y)
+
+        machine.add_chip(chip)
+
     def check_machine_is_booted(self):
 
         # Check that chip 0, 0 is booted
         result, chip_0_0_data = self._read_0_0_data()
         if chip_0_0_data is None:
             logger.error("Could not read from 0, 0: {}", result)
-            return None
+            return None, None
+
+        self._total = float(chip_0_0_data.x_size * chip_0_0_data.y_size * 2)
+        sys.stdout.write("0%")
 
         # Go through the chips, link by link
         chip_search = deque([chip_0_0_data])
-        seen_chips = set()
+        seen_chips = OrderedDict({(0, 0): chip_0_0_data})
+        link_destination = dict()
         while (len(chip_search) > 0):
             chip = chip_search.pop()
-            seen_chips.add((chip.x, chip.y))
-            for link in chip.links_available:
+            for link in range(0, 6):
                 _, chip_data = self._read_chip_down_link(chip.x, chip.y, link)
                 if (chip_data is not None and
                         (chip_data.x, chip_data.y) not in seen_chips):
+                    link_destination[(chip.x, chip.y, link)] = (
+                        chip_data.x, chip_data.y)
                     chip_search.append(chip_data)
+                    seen_chips[(chip_data.x, chip_data.y)] = chip_data
+                    self._update_progress()
 
         # Try to get the version number from each found chip
         version_info = None
+        machine = Machine([])
         for x, y in seen_chips:
             if (self._ignore_chips is None or
                     not self._ignore_chips.is_chip(x, y)):
@@ -95,6 +183,9 @@ class CheckMachineBootedProcess(object):
                 while retries > 0:
                     result, version_info = self._read_version(x, y)
                     if version_info is not None:
+                        chip_details = seen_chips[(x, y)]
+                        self._add_chip(machine, chip_details, link_destination)
+                        self._update_progress()
                         break
 
                     # Wait between retries
@@ -106,6 +197,7 @@ class CheckMachineBootedProcess(object):
                     logger.error(
                         "Could not get version from chip {}, {}: {}".format(
                             x, y))
-                    return None
+                    return None, None
+        sys.stdout.write("...100%\n")
 
-        return version_info
+        return version_info, machine, seen_chips
