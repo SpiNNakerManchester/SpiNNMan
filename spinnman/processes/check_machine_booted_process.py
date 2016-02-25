@@ -127,9 +127,10 @@ class CheckMachineBootedProcess(object):
                 if (other_x, other_y, opposite_link_id) in link_destination:
 
                     # Add the link to this chip
-                    router.add_link(Link(
+                    link = Link(
                         chip_details.x, chip_details.y, link, other_x,
-                        other_y, opposite_link_id, opposite_link_id))
+                        other_y, opposite_link_id, opposite_link_id)
+                    router.add_link(link)
 
         # Create the chip
         chip = Chip(
@@ -162,13 +163,13 @@ class CheckMachineBootedProcess(object):
             chip = chip_search.pop()
             for link in range(0, 6):
                 _, chip_data = self._read_chip_down_link(chip.x, chip.y, link)
-                if (chip_data is not None and
-                        (chip_data.x, chip_data.y) not in seen_chips):
+                if chip_data is not None:
                     link_destination[(chip.x, chip.y, link)] = (
                         chip_data.x, chip_data.y)
-                    chip_search.append(chip_data)
-                    seen_chips[(chip_data.x, chip_data.y)] = chip_data
-                    self._update_progress()
+                    if (chip_data.x, chip_data.y) not in seen_chips:
+                        chip_search.append(chip_data)
+                        seen_chips[(chip_data.x, chip_data.y)] = chip_data
+                        self._update_progress()
 
         # Try to get the version number from each found chip
         version_info = None

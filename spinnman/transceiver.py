@@ -984,6 +984,10 @@ class Transceiver(object):
                 self._ignore_cores, self._max_core_id)
             version_info, self._machine, self._chip_info = \
                 checker.check_machine_is_booted()
+            logger.info(
+                "Detected a machine on ip address {} which has {}".format(
+                    self._boot_send_connection.remote_ip_address,
+                    self._machine.cores_and_link_output_string()))
         return version_info
 
     def _check_if_machine_has_wrap_arounds(self):
