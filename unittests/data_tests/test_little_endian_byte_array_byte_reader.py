@@ -1,6 +1,8 @@
 import unittest
-from spinnman.data.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
 from struct import pack
+
+from spinn_storage_handlers.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
+
 
 class TestLittleEndianByteArrayByteReader(unittest.TestCase):
     def test_new_empty_reader(self):
