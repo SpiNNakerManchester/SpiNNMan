@@ -1,6 +1,3 @@
-"""
-Transceiver
-"""
 
 # local imports
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
@@ -173,10 +170,10 @@ def create_transceiver_from_hostname(
     :param boot_port_no: the port number used to boot the machine
     :type boot_port_no: int
     :param scamp_connections: the list of connections used for scamp
-    communications
+                communications
     :type scamp_connections: iterable of UDPScampConnections
-    :param max_sdram_size: the max size each chip can say it has for sdram (
-        mainly used in debugguing purposes)
+    :param max_sdram_size: the max size each chip can say it has for SDRAM (\
+                mainly used in debugging purposes)
     :type max_sdram_size: int or None
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
@@ -266,8 +263,8 @@ class Transceiver(object):
                     Requests for a "machine" will only have core ids up to and\
                     including this value.
         :type max_core_id: int
-        :param max_sdram_size: the max size set for each chip
-        (mainly debug purposes)
+        :param max_sdram_size: the max size each chip can say it has for SDRAM\
+                (mainly used in debugging purposes)
         :type max_sdram_size: int or None
         :param scamp_connections: a list of scamp connection data or None
         :type scamp_connections: list of \
@@ -2511,8 +2508,8 @@ class Transceiver(object):
                     passed to the transceiver in the constructor are also\
                     closed.  If False, only newly discovered connections are\
                     closed.
-        :param turn_off_machine: if true, the machine is sent a power down
-        command via its bmp (if it has one)
+        :param turn_off_machine: if true, the machine is sent a power down\
+                    command via its BMP (if it has one)
         :type turn_off_machine: bool
         :return: Nothing is returned
         :rtype: None
