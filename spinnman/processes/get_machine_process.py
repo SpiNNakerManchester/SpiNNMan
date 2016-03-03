@@ -37,7 +37,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     """
 
     def __init__(self, scamp_connections, ignore_chips, ignore_cores,
-                 max_core_id):
+                 max_core_id, max_sdram_size=None):
         """
         :param scamp_connections: The connections to use for the interaction
         :type scamp_connections: iterable of\
@@ -48,6 +48,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
         self._max_core_id = max_core_id
+        self._max_sdram_size = max_sdram_size
 
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
@@ -96,12 +97,30 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES -
                 chip_details.first_free_router_entry))
 
+        # Create the chip's SDRAM object
+        sdram = None
+        if self._max_sdram_size is not None:
+            size = (chip_details.system_sdram_base_address -
+                    chip_details.sdram_heap_address)
+            if size > self._max_sdram_size:
+                system_base_address = \
+                    chip_details.sdram_heap_address + self._max_sdram_size
+                sdram = SDRAM(
+                    user_base_address=chip_details.sdram_heap_address,
+                    system_base_address=system_base_address)
+            else:
+                sdram = SDRAM(
+                    user_base_address=chip_details.sdram_heap_address,
+                    system_base_address=chip_details.system_sdram_base_address)
+        else:
+            sdram = SDRAM(
+                user_base_address=chip_details.sdram_heap_address,
+                system_base_address=chip_details.system_sdram_base_address)
+
         # Create the chip
         chip = Chip(
             x=chip_details.x, y=chip_details.y, processors=processors,
-            router=router, sdram=SDRAM(
-                user_base_address=chip_details.sdram_heap_address,
-                system_base_address=chip_details.system_sdram_base_address),
+            router=router, sdram=sdram,
             ip_address=chip_details.ip_address,
             nearest_ethernet_x=chip_details.nearest_ethernet_x,
             nearest_ethernet_y=chip_details.nearest_ethernet_y)

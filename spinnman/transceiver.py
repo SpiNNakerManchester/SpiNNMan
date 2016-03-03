@@ -1,6 +1,3 @@
-"""
-Transceiver
-"""
 
 # local imports
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
@@ -133,7 +130,8 @@ _REINJECTOR_APP_ID = 17
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, max_core_id=None,
-        auto_detect_bmp=True, scamp_connections=None, boot_port_no=None):
+        auto_detect_bmp=True, scamp_connections=None, boot_port_no=None,
+        max_sdram_size=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -171,6 +169,12 @@ def create_transceiver_from_hostname(
     :type auto_detect_bmp: bool
     :param boot_port_no: the port number used to boot the machine
     :type boot_port_no: int
+    :param scamp_connections: the list of connections used for scamp
+                communications
+    :type scamp_connections: iterable of UDPScampConnections
+    :param max_sdram_size: the max size each chip can say it has for SDRAM (\
+                mainly used in debugging purposes)
+    :type max_sdram_size: int or None
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -216,7 +220,7 @@ def create_transceiver_from_hostname(
     return Transceiver(
         version, connections=connections, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id,
-        scamp_connections=scamp_connections)
+        scamp_connections=scamp_connections, max_sdram_size=max_sdram_size)
 
 
 class Transceiver(object):
@@ -235,7 +239,8 @@ class Transceiver(object):
     """
 
     def __init__(self, version, connections=None, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None, scamp_connections=None):
+                 ignore_cores=None, max_core_id=None, scamp_connections=None,
+                 max_sdram_size=None):
         """
 
         :param version: The version of the board being connected to
@@ -258,6 +263,9 @@ class Transceiver(object):
                     Requests for a "machine" will only have core ids up to and\
                     including this value.
         :type max_core_id: int
+        :param max_sdram_size: the max size each chip can say it has for SDRAM\
+                (mainly used in debugging purposes)
+        :type max_sdram_size: int or None
         :param scamp_connections: a list of scamp connection data or None
         :type scamp_connections: list of \
                 :py:class:`spinnman.connections.scoket_address_with_chip.SocketAddress_With_Chip`
@@ -279,6 +287,7 @@ class Transceiver(object):
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
         self._max_core_id = max_core_id
+        self._max_sdram_size = max_sdram_size
 
         # Place to keep the known chip information
         self._chip_info = dict()
@@ -643,7 +652,7 @@ class Transceiver(object):
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connections, self._ignore_chips, self._ignore_cores,
-            self._max_core_id)
+            self._max_core_id, self._max_sdram_size)
         self._machine = get_machine_process.get_machine_details()
         self._chip_info = get_machine_process.get_chip_info()
 
@@ -2499,6 +2508,9 @@ class Transceiver(object):
                     passed to the transceiver in the constructor are also\
                     closed.  If False, only newly discovered connections are\
                     closed.
+        :param turn_off_machine: if true, the machine is sent a power down\
+                    command via its BMP (if it has one)
+        :type turn_off_machine: bool
         :return: Nothing is returned
         :rtype: None
         :raise None: No known exceptions are raised
