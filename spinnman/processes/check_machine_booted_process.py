@@ -65,9 +65,9 @@ class CheckMachineBootedProcess(object):
             return result, ChipInfo(read_response.data, read_response.offset)
         return result, None
 
-    def _read_0_0_data(self):
+    def _read_chip(self, x, y):
         read_request = SCPReadMemoryRequest(
-            x=0, y=0, base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
+            x=x, y=y, base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
             size=constants.SYSTEM_VARIABLE_BYTES)
         return self._read_chip_data(read_request)
 
@@ -147,7 +147,7 @@ class CheckMachineBootedProcess(object):
     def check_machine_is_booted(self):
 
         # Check that chip 0, 0 is booted
-        result, chip_0_0_data = self._read_0_0_data()
+        result, chip_0_0_data = self._read_chip(0, 0)
         if chip_0_0_data is None:
             logger.error("Could not read from 0, 0: {}", result)
             return None, None
@@ -174,8 +174,7 @@ class CheckMachineBootedProcess(object):
                         seen_chips[(chip_data.x, chip_data.y)] = chip_data
                         self._update_progress()
 
-        # Try to get the version number from each found chip
-        version_info = None
+        # Try to read each found chip
         machine = Machine([])
         for x, y in seen_chips:
             if (self._ignore_chips is None or
@@ -185,9 +184,8 @@ class CheckMachineBootedProcess(object):
                 retries = 3
                 result = None
                 while retries > 0:
-                    result, version_info = self._read_version(x, y)
-                    if version_info is not None:
-                        chip_details = seen_chips[(x, y)]
+                    result, chip_details = self._read_chip(x, y)
+                    if chip_details is not None:
                         self._add_chip(machine, chip_details, link_destination)
                         self._update_progress()
                         break
@@ -197,11 +195,11 @@ class CheckMachineBootedProcess(object):
                     retries -= 1
 
                 # If no version could be read, the machine might be faulty
-                if version_info is None:
+                if chip_details is None:
                     logger.error(
                         "Could not get version from chip {}, {}: {}".format(
-                            x, y))
+                            x, y, result))
                     return None, None
         sys.stdout.write("...100%\n")
 
-        return version_info, machine, seen_chips
+        return machine, seen_chips

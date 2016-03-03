@@ -1,7 +1,3 @@
-"""
-Transceiver
-"""
-
 # local imports
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
@@ -963,6 +959,7 @@ class Transceiver(object):
             try:
                 version_info = self.get_scamp_version()
             except exceptions.SpinnmanTimeoutException:
+                logger.info("Attempting to boot machine")
                 self.boot_board(number_of_boards, width, height)
                 current_tries_to_go -= 1
             except exceptions.SpinnmanIOException:
@@ -982,8 +979,9 @@ class Transceiver(object):
             checker = CheckMachineBootedProcess(
                 self._scamp_connections[0], self._ignore_chips,
                 self._ignore_cores, self._max_core_id)
-            version_info, self._machine, self._chip_info = \
-                checker.check_machine_is_booted()
+            self._machine, self._chip_info = checker.check_machine_is_booted()
+            if self._machine is None:
+                return None
             logger.info(
                 "Detected a machine on ip address {} which has {}".format(
                     self._boot_send_connection.remote_ip_address,
