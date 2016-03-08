@@ -115,9 +115,7 @@ class CoreSubsets(object):
         return self._core_subsets.itervalues()
 
     def __len__(self):
-        """
-        returns the total number of processors that are in these core subsets
-        :return:
+        """ The total number of processors that are in these core subsets
         """
         counter = 0
         for (x, y) in self._core_subsets:
