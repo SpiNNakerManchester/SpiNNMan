@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
     name="SpiNNMan",
-    version="2015.004.01",
+    version="2016.001",
     description="Interaction with a SpiNNaker Machine",
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
     license="GNU GPLv3.0",
@@ -13,7 +13,6 @@ setup(
               'spinnman.connections',
               'spinnman.connections.abstract_classes',
               'spinnman.connections.udp_packet_connections',
-              'spinnman.data',
               'spinnman.messages',
               'spinnman.messages.eieio',
               'spinnman.messages.eieio.abstract_messages',

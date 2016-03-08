@@ -97,7 +97,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES -
                 chip_details.first_free_router_entry))
 
-        # Create the chip's sdram object
+        # Create the chip's SDRAM object
         sdram = None
         if self._max_sdram_size is not None:
             size = (chip_details.system_sdram_base_address -
