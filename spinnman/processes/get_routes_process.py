@@ -1,4 +1,6 @@
-from spinnman.processes.multi_connection_process_most_direct_connection_selector import MultiConnectionProcessMostDirectConnectionSelector
+from spinnman.processes\
+    .multi_connection_process_most_direct_connection_selector \
+    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry

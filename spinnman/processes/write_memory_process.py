@@ -33,7 +33,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :param base_address: the address in sdram to start writing
         :param data: the data to write
         :param offset: where in the data to start writing from
-        :param n_bytes: hwo much data to write
+        :param n_bytes: how much data to write
         :return:
         """
         self._write_memory_from_bytearray(

@@ -5,7 +5,9 @@ from collections import OrderedDict
 
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.model.io_buffer import IOBuffer
-from spinnman.processes.multi_connection_process_most_direct_connection_selector import MultiConnectionProcessMostDirectConnectionSelector
+from spinnman.processes\
+    .multi_connection_process_most_direct_connection_selector \
+    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \

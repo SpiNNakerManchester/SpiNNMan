@@ -1,4 +1,6 @@
-from spinnman.processes.multi_connection_process_most_direct_connection_selector import MultiConnectionProcessMostDirectConnectionSelector
+from spinnman.processes\
+    .multi_connection_process_most_direct_connection_selector \
+    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_flood_fill_end_request \
     import SCPFloodFillEndRequest
 from spinnman.messages.scp.impl.scp_flood_fill_start_request \
