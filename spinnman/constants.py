@@ -15,7 +15,7 @@ ROUTER_REGISTER_BASE_ADDRESS = 0xe1000000
 # offset for the router filter controls first register (one word each)
 ROUTER_FILTER_CONTROLS_OFFSET = 0x200
 
-# point where default filters finish and user settable ones are available
+# point where default filters finish and user set-able ones are available
 ROUTER_DEFAULT_FILTERS_MAX_POSITION = 11
 
 # size of a router diagnostic filter control register in bytes
@@ -27,7 +27,7 @@ NO_ROUTER_DIAGNOSTIC_FILTERS = 16
 # The size of the system variable structure in bytes
 SYSTEM_VARIABLE_BYTES = 256
 
-# The max size a udp packet can be
+# The max size a UDP packet can be
 UDP_MESSAGE_MAX_SIZE = 256
 
 # the amount of size in bytes that the EIEIO command header is
@@ -42,7 +42,13 @@ CPU_INFO_BYTES = 128
 # the address at which user0 register starts
 CPU_USER_0_START_ADDRESS = 112
 
-# default udp tag
+# the address at which user0 register starts
+CPU_USER_1_START_ADDRESS = 116
+
+# the address at which user0 register starts
+CPU_USER_2_START_ADDRESS = 120
+
+# default UDP tag
 DEFAULT_SDP_TAG = 0xFF
 
 # max user requested tag value
@@ -88,10 +94,10 @@ EIEIO_COMMAND_IDS = Enum(
         # End of all buffers, stop execution
         ("EVENT_STOP", 3),
 
-        # Stop complaining that there is sdram free space for buffers
+        # Stop complaining that there is SDRAM free space for buffers
         ("STOP_SENDING_REQUESTS", 4),
 
-        # Start complaining that there is sdram free space for buffers
+        # Start complaining that there is SDRAM free space for buffers
         ("START_SENDING_REQUESTS", 5),
 
         # Spinnaker requesting new buffers for spike source population
@@ -109,7 +115,7 @@ EIEIO_COMMAND_IDS = Enum(
 
 # the values used by the SCP iptag time outs. These control how long to wait
 # for any message request which requires a response, before raising an error.
-# The value is calcualted via the following formulae
+# The value is calculated via the following formulae
 # 10ms * 2^(tag_timeout_value - 1)
 IPTAG_TIME_OUT_WAIT_TIMES = Enum(
     value="IPTAG_TIME_OUT_WAIT_TIMES",
@@ -144,8 +150,8 @@ ROUTER_REGISTER_REGISTERS = Enum(
            ("USER_2", 14),
            ("USER_3", 15)]
 )
-# the types of read avilable from SARK. These values are used to tell sark how
-# to read the data in a time efficent manner.
+# the types of read available from SARK. These values are used to tell SARK how
+# to read the data in a time efficient manner.
 READ_TYPES = Enum(
     value="Read_types",
     names=[("BYTE", 0),
@@ -155,7 +161,7 @@ READ_TYPES = Enum(
 
 # This is a mapping between read address in the mapping between word byte
 # position, the number of bytes you wish to read, and the type of time
-# efficent way to read said amount of bytes via sark
+# efficient way to read said amount of bytes via SARK
 address_length_dtype = {
     (0, 0): READ_TYPES.WORD,
     (0, 1): READ_TYPES.BYTE,

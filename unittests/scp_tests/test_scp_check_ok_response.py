@@ -1,9 +1,10 @@
-import unittest
-from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse, SCPResult
 import struct
-from spinnman.data.little_endian_byte_array_byte_reader import LittleEndianByteArrayByteReader
+import unittest
+
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse, SCPResult
 from spinnman.messages.sdp.sdp_flag import SDPFlag
+
 
 class TestOkResponse(unittest.TestCase):
     def test_new_scp_check_ok_response(self):

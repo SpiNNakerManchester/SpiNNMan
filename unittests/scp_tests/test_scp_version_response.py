@@ -1,8 +1,7 @@
 import unittest
-from spinnman.messages.scp.impl.scp_version_response import SCPVersionResponse
-from spinnman.data.little_endian_byte_array_byte_reader \
-    import LittleEndianByteArrayByteReader
 from struct import pack
+
+from spinnman.messages.scp.impl.scp_version_response import SCPVersionResponse
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 
