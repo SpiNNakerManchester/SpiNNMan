@@ -20,11 +20,8 @@ _N_READS = 64
 
 class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, connections, app_id=None,
-                 next_connection_selector=None):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            next_connection_selector=next_connection_selector)
+    def __init__(self, connection_selector, app_id=None):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._entries = [None] * _N_ENTRIES
         self._app_id = app_id
 

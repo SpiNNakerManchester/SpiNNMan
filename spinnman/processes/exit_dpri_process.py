@@ -1,6 +1,3 @@
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_dpri_exit_request import SCPDPRIExitRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
@@ -8,12 +5,8 @@ from spinnman.processes.abstract_multi_connection_process \
 
 class ExitDPRIProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, machine, connections):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
-        self._connections = connections
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
     def exit(self, core_subsets):
         for core_subset in core_subsets.core_subsets:

@@ -13,9 +13,9 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
     """ A process for writing memory
     """
 
-    def __init__(self, connections, next_connection_selector=None):
+    def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(
-            self, connections, next_connection_selector,
+            self, connection_selector,
             n_channels=1, intermediate_channel_waits=0)
 
     def write_memory_from_bytearray(
@@ -28,7 +28,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :param base_address: the address in sdram to start writing
         :param data: the data to write
         :param offset: where in the data to start writing from
-        :param n_bytes: hwo much data to write
+        :param n_bytes: how much data to write
         :return:
         """
         self._write_memory_from_bytearray(

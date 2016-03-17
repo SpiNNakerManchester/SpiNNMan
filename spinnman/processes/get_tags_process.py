@@ -1,8 +1,5 @@
 from spinnman.processes.abstract_multi_connection_process\
     import AbstractMultiConnectionProcess
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_iptag_info_request import SCPTagInfoRequest
 from spinnman.messages.scp.impl.scp_iptag_get_request import SCPTagGetRequest
 
@@ -14,11 +11,8 @@ import functools
 
 class GetTagsProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, machine, connections):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._tag_info = None
         self._tags = None
 

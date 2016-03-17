@@ -16,11 +16,8 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
     """ A process for reading memory
     """
 
-    def __init__(self, machine, connections, next_connection_selector=None):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections, next_connection_selector)
-        self._connections = connections
-        self._machine = machine
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
         self._iobuf = defaultdict(OrderedDict)
@@ -85,7 +82,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
             response.offset:response.offset + response.length]
 
     def read_iobuf(self, chip_info, core_subsets):
-        cpu_info_process = GetCPUInfoProcess(self._machine, self._connections)
+        cpu_info_process = GetCPUInfoProcess(self._next_connection_selector)
         cpu_information = cpu_info_process.get_cpu_info(chip_info,
                                                         core_subsets)
 

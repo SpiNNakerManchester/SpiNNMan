@@ -7,8 +7,8 @@ class GetVersionProcess(AbstractSingleConnectionProcess):
     """ A process for getting the version of the machine
     """
 
-    def __init__(self, connection):
-        AbstractSingleConnectionProcess.__init__(self, connection)
+    def __init__(self, connection_selector):
+        AbstractSingleConnectionProcess.__init__(self, connection_selector)
         self._version_info = None
 
     def _get_response(self, version_response):

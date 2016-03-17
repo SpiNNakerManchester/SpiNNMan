@@ -10,13 +10,13 @@ from spinnman import constants
 
 import math
 
+
 class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
     """ A process for writing memory
     """
 
-    def __init__(self, connections, next_connection_selector=None):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections, next_connection_selector)
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
     def _start_flood_fill(self, n_bytes, nearest_neighbour_id):
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /

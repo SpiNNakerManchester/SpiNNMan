@@ -11,9 +11,8 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
     """ A process for reading memory
     """
 
-    def __init__(self, connections, next_connection_selector=None):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections, next_connection_selector)
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._view = None
 
     def handle_response(self, offset, response):

@@ -10,7 +10,7 @@ MAX_SEQUENCE = 65536
 _next_sequence = 0
 
 
-class SCPRequestSet(object):
+class SCPRequestPipeLine(object):
     """ Allows a set of SCP requests to be grouped together in a communication\
         across a number of channels for a given connection.
 

@@ -1,20 +1,13 @@
 from spinnman.messages.scp.impl.scp_sdram_de_alloc_request import \
     SCPSDRAMDeAllocRequest
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 
 
 class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, machine, connections):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
-        self._connections = connections
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._no_blocks_freed = None
 
     def de_alloc_sdram(self, x, y, app_id, base_address=None):
