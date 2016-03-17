@@ -1,6 +1,3 @@
-from spinnman.processes.\
-    multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_dpri_get_status_request \
     import SCPDPRIGetStatusRequest
 from spinnman.processes.abstract_multi_connection_process \
@@ -9,11 +6,8 @@ from spinnman.processes.abstract_multi_connection_process \
 
 class ReadDPRIStatusProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, machine, connections):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._dpri_status = None
 
     def handle_dpri_status_response(self, response):

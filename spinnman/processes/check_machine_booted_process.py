@@ -1,3 +1,4 @@
+from spinn_machine.utilities.progress_bar import ProgressBar
 from spinnman import constants
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.model.chip_info import ChipInfo
@@ -78,12 +79,6 @@ class CheckMachineBootedProcess(object):
             size=constants.SYSTEM_VARIABLE_BYTES)
         return self._read_chip_data(read_request)
 
-    def _update_progress(self):
-        self._pos += 1
-        if (self._pos / self._total) * 100.0 >= self._next_percent_to_print:
-            sys.stdout.write("...{}%".format(self._next_percent_to_print))
-            self._next_percent_to_print += 10
-
     def _add_chip(self, machine, chip_details, link_destination):
 
         # Create the processor list
@@ -152,14 +147,15 @@ class CheckMachineBootedProcess(object):
             logger.error("Could not read from 0, 0: {}", result)
             return None, None
 
-        self._total = float(chip_0_0_data.x_size * chip_0_0_data.y_size * 2)
-        sys.stdout.write("0%")
+        progress_bar = ProgressBar(
+            float(chip_0_0_data.x_size * chip_0_0_data.y_size * 2),
+            "Verifying Machine")
 
         # Go through the chips, link by link
         chip_search = deque([chip_0_0_data])
         seen_chips = OrderedDict({(0, 0): chip_0_0_data})
         link_destination = dict()
-        while (len(chip_search) > 0):
+        while len(chip_search) > 0:
             chip = chip_search.pop()
             for link in range(0, 6):
                 _, chip_data = self._read_chip_down_link(chip.x, chip.y, link)
@@ -172,7 +168,7 @@ class CheckMachineBootedProcess(object):
                     if (chip_data.x, chip_data.y) not in seen_chips:
                         chip_search.append(chip_data)
                         seen_chips[(chip_data.x, chip_data.y)] = chip_data
-                        self._update_progress()
+                        progress_bar.update()
 
         # Try to read each found chip
         machine = Machine([])
@@ -187,7 +183,7 @@ class CheckMachineBootedProcess(object):
                     result, chip_details = self._read_chip(x, y)
                     if chip_details is not None:
                         self._add_chip(machine, chip_details, link_destination)
-                        self._update_progress()
+                        progress_bar.update()
                         break
 
                     # Wait between retries
@@ -200,6 +196,6 @@ class CheckMachineBootedProcess(object):
                         "Could not get version from chip {}, {}: {}".format(
                             x, y, result))
                     return None, None
-        sys.stdout.write("...100%\n")
+        progress_bar.end()
 
         return machine, seen_chips

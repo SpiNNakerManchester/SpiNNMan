@@ -1,8 +1,5 @@
 import functools
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
@@ -14,11 +11,8 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
     """ A process for reading memory
     """
 
-    def __init__(self, machine, connections):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._view = None
 
     def handle_response(self, offset, response):

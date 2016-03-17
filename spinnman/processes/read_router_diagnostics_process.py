@@ -1,6 +1,3 @@
-from spinnman.processes.\
-    multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.model.router_diagnostics import RouterDiagnostics
@@ -14,11 +11,8 @@ _N_REGISTERS = 16
 
 class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, machine, connections):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._control_register = None
         self._error_status = None
         self._register_values = [0] * _N_REGISTERS

@@ -1,6 +1,3 @@
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
@@ -23,11 +20,8 @@ _N_READS = 64
 
 class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, machine, connections, app_id=None):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
+    def __init__(self, connection_selector, app_id=None):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._entries = [None] * _N_ENTRIES
         self._app_id = app_id
 

@@ -1,6 +1,3 @@
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.processes.write_memory_process import WriteMemoryProcess
 from spinnman.messages.scp.impl.scp_router_init_request \
@@ -15,13 +12,8 @@ import struct
 
 class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
-    def __init__(self, machine, connections):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
-        self._machine = machine
-        self._connections = connections
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._base_address = None
 
     def handle_router_alloc_response(self, response):
@@ -60,7 +52,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
         # Upload the data
         table_address = 0x67800000
-        process = WriteMemoryProcess(self._machine, self._connections)
+        process = WriteMemoryProcess(self._next_connection_selector)
         process.write_memory_from_bytearray(
             x, y, 0, table_address, routing_data, 0, len(routing_data))
 

@@ -5,9 +5,6 @@ from collections import OrderedDict
 
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.model.io_buffer import IOBuffer
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
@@ -19,13 +16,8 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
     """ A process for reading memory
     """
 
-    def __init__(self, machine, connections):
-        AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections))
-        self._connections = connections
-        self._machine = machine
+    def __init__(self, connection_selector):
+        AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
         self._iobuf = defaultdict(OrderedDict)
@@ -90,7 +82,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
             response.offset:response.offset + response.length]
 
     def read_iobuf(self, chip_info, core_subsets):
-        cpu_info_process = GetCPUInfoProcess(self._machine, self._connections)
+        cpu_info_process = GetCPUInfoProcess(self._next_connection_selector)
         cpu_information = cpu_info_process.get_cpu_info(chip_info,
                                                         core_subsets)
 

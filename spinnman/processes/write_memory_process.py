@@ -1,6 +1,3 @@
-from spinnman.processes\
-    .multi_connection_process_most_direct_connection_selector \
-    import MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.messages.scp.impl.scp_write_link_request \
     import SCPWriteLinkRequest
 from spinnman.processes.abstract_multi_connection_process \
@@ -16,11 +13,9 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
     """ A process for writing memory
     """
 
-    def __init__(self, machine, connections):
+    def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(
-            self, connections,
-            MultiConnectionProcessMostDirectConnectionSelector(
-                machine, connections),
+            self, connection_selector,
             n_channels=1, intermediate_channel_waits=0)
 
     def write_memory_from_bytearray(
