@@ -743,7 +743,7 @@ class Transceiver(object):
                 # check if it works
                 if self._try_sver_though_scamp_connection(
                         MultiConnectionProcessMostDirectConnectionSelector(
-                            None, new_connection), _STANDARD_RETIRES_NO):
+                            None, [new_connection]), _STANDARD_RETIRES_NO):
                     self._scp_sender_connections.append(new_connection)
                     self._all_connections.add(new_connection)
 
