@@ -20,7 +20,6 @@ from collections import OrderedDict
 
 import logging
 import time
-import sys
 
 logger = logging.getLogger(__file__)
 
@@ -32,10 +31,6 @@ class CheckMachineBootedProcess(object):
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
         self._max_core_id = max_core_id
-
-        self._total = 0
-        self._next_percent_to_print = 10
-        self._pos = 0.0
 
     def _send(self, request):
         response = request.get_scp_response()
@@ -122,10 +117,9 @@ class CheckMachineBootedProcess(object):
                 if (other_x, other_y, opposite_link_id) in link_destination:
 
                     # Add the link to this chip
-                    link = Link(
+                    router.add_link(Link(
                         chip_details.x, chip_details.y, link, other_x,
-                        other_y, opposite_link_id, opposite_link_id)
-                    router.add_link(link)
+                        other_y, opposite_link_id, opposite_link_id))
 
         # Create the chip
         chip = Chip(
@@ -157,18 +151,29 @@ class CheckMachineBootedProcess(object):
         link_destination = dict()
         while len(chip_search) > 0:
             chip = chip_search.pop()
+            details = seen_chips[chip.x, chip.y]
+
             for link in range(0, 6):
-                _, chip_data = self._read_chip_down_link(chip.x, chip.y, link)
-                if chip_data is not None and (
-                        self._ignore_chips is None or
-                        not self._ignore_chips.is_chip(
-                            chip_data.x, chip_data.y)):
-                    link_destination[(chip.x, chip.y, link)] = (
-                        chip_data.x, chip_data.y)
-                    if (chip_data.x, chip_data.y) not in seen_chips:
-                        chip_search.append(chip_data)
-                        seen_chips[(chip_data.x, chip_data.y)] = chip_data
-                        progress_bar.update()
+                chip_data = None
+                retries = 3
+                while chip_data is None and retries > 0:
+                    _, chip_data = self._read_chip_down_link(
+                        chip.x, chip.y, link)
+                    if chip_data is not None and (
+                            self._ignore_chips is None or
+                            not self._ignore_chips.is_chip(
+                                chip_data.x, chip_data.y)):
+                        link_destination[(chip.x, chip.y, link)] = (
+                            chip_data.x, chip_data.y)
+                        if (chip_data.x, chip_data.y) not in seen_chips:
+                            chip_search.append(chip_data)
+                            seen_chips[(chip_data.x, chip_data.y)] = chip_data
+                            progress_bar.update()
+                    elif link in details.links_available:
+                        retries -= 1
+                        time.sleep(0.2)
+                    else:
+                        retries = 0
 
         # Try to read each found chip
         machine = Machine([])
@@ -179,6 +184,7 @@ class CheckMachineBootedProcess(object):
                 # Retry up to 3 times
                 retries = 3
                 result = None
+                chip_details = None
                 while retries > 0:
                     result, chip_details = self._read_chip(x, y)
                     if chip_details is not None:
@@ -192,10 +198,10 @@ class CheckMachineBootedProcess(object):
 
                 # If no version could be read, the machine might be faulty
                 if chip_details is None:
-                    logger.error(
+                    logger.warn(
                         "Could not get version from chip {}, {}: {}".format(
                             x, y, result))
-                    return None, None
+                    progress_bar.update()
         progress_bar.end()
 
         return machine, seen_chips
