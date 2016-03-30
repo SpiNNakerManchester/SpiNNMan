@@ -132,7 +132,7 @@ _REINJECTOR_APP_ID = 17
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, max_core_id=None,
-        auto_detect_bmp=True, scamp_connections=None, boot_port_no=None,
+        auto_detect_bmp=False, scamp_connections=None, boot_port_no=None,
         max_sdram_size=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
@@ -1020,6 +1020,10 @@ class Transceiver(object):
             self._machine, self._chip_info = checker.check_machine_is_booted()
             if self._machine is None:
                 return None
+            spinnaker_links = utilities.locate_spinnaker_links(
+                self._version, self._machine)
+            for spinnaker_link in spinnaker_links:
+                self._machine.add_spinnaker_link(spinnaker_link)
             logger.info(
                 "Detected a machine on ip address {} which has {}".format(
                     self._boot_send_connection.remote_ip_address,
