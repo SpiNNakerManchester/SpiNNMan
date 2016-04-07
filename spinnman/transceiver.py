@@ -996,6 +996,18 @@ class Transceiver(object):
         while version_info is None and current_tries_to_go > 0:
             try:
                 version_info = self.get_scamp_version()
+            except exceptions.SpinnmanGenericProcessException as e:
+                if isinstance(
+                        e.exception, exceptions.SpinnmanTimeoutException):
+                    logger.info("Attempting to boot machine")
+                    self.boot_board(number_of_boards, width, height)
+                    current_tries_to_go -= 1
+                elif isinstance(
+                        e.exception, exceptions.SpinnmanIOException):
+                    raise exceptions.SpinnmanIOException(
+                        "Failed to communicate with the machine")
+                else:
+                    raise e
             except exceptions.SpinnmanTimeoutException:
                 logger.info("Attempting to boot machine")
                 self.boot_board(number_of_boards, width, height)

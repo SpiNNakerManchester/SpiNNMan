@@ -1,4 +1,7 @@
 from __future__ import print_function
+
+from spinnman import exceptions
+
 import sys
 import traceback
 
@@ -34,4 +37,10 @@ class AbstractProcess(object):
                     print(line, end="", file=sys.stderr)
                 for line in traceback.format_tb(self._traceback):
                     print(line, end="", file=sys.stderr)
+
+            exc_info = sys.exc_info()
+            sdp_header = self._error_request.sdp_header
+            self._exception = exceptions.SpinnmanGenericProcessException(
+                self._exception, exc_info[2], sdp_header.destination_chip_x,
+                sdp_header.destination_chip_y, sdp_header.destination_cpu)
             raise self._exception, None, self._traceback

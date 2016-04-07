@@ -1,3 +1,6 @@
+import traceback
+
+
 class SpinnmanException(Exception):
     """ Superclass of exceptions that occur when dealing with communication\
         with SpiNNaker
@@ -206,6 +209,27 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         """ The unexpected response
         """
         return self._response
+
+
+class SpinnmanGenericProcessException(SpinnmanException):
+    """
+    encapsulates exceptions from processes which communicate with some core/chip
+    """
+    def __init__(self, exception, tb, x, y, p):
+        problem = \
+            "\n     Received exception class: {} \n" \
+            "     With message: {} \n" \
+            "     When sending to {}:{}:{}\n" \
+            "     Stack trace: {}\n"\
+            .format(exception.__class__.__name__, exception.message, x, y, p,
+                    traceback.format_exc(tb))
+        SpinnmanException.__init__(self, problem)
+
+        self._stored_exception = exception
+
+    @property
+    def exception(self):
+        return self._stored_exception
 
 
 class SpinnmanUnsupportedOperationException(SpinnmanException):
