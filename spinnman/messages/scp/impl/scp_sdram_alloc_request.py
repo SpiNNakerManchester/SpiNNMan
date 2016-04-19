@@ -51,6 +51,7 @@ class SCPSDRAMAllocRequest(AbstractSCPRequest):
                 (app_id << 8) |
                 SCPAllocFreeType.ALLOC_SDRAM.value),  # @UndefinedVariable
             argument_2=size, argument_3=tag)
+        self._size = size
 
     def get_scp_response(self):
-        return SCPSDRAMAllocResponse()
+        return SCPSDRAMAllocResponse(self._size)
