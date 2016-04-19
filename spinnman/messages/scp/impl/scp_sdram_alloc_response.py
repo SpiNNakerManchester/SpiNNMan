@@ -3,16 +3,18 @@ from spinnman.messages.scp.abstract_messages.abstract_scp_response\
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 import struct
+from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class SCPSDRAMAllocResponse(AbstractSCPResponse):
     """ An SCP response to a request to allocate space in SDRAM
     """
 
-    def __init__(self):
+    def __init__(self, size):
         """
         """
         AbstractSCPResponse.__init__(self)
+        self._size = size
         self._base_address = None
 
     def read_data_bytestring(self, data, offset):
@@ -28,9 +30,9 @@ class SCPSDRAMAllocResponse(AbstractSCPResponse):
         # check that the base address is not null (0 in python case) as
         # this reflects a issue in the command on spinnaker side
         if self._base_address == 0:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "SDRAM Allocation response base address", "CMD_ALLOC",
-                result.name)
+            raise SpinnmanInvalidParameterException(
+                "SDRAM Allocation response base address", self._base_address,
+                "Could not allocate {} bytes of SDRAM".format(self._size))
 
     @property
     def base_address(self):
