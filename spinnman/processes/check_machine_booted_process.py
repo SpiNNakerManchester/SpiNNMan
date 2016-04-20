@@ -26,11 +26,14 @@ logger = logging.getLogger(__file__)
 
 class CheckMachineBootedProcess(object):
 
-    def __init__(self, connection, ignore_chips, ignore_cores, max_core_id):
+    def __init__(
+            self, connection, ignore_chips, ignore_cores, max_core_id,
+            max_sdram_size):
         self._connection = connection
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
         self._max_core_id = max_core_id
+        self._max_sdram_size = max_sdram_size
 
     def _send(self, request):
         response = request.get_scp_response()
@@ -121,12 +124,30 @@ class CheckMachineBootedProcess(object):
                         chip_details.x, chip_details.y, link, other_x,
                         other_y, opposite_link_id, opposite_link_id))
 
+        # Create the chip's SDRAM object
+        sdram = None
+        if self._max_sdram_size is not None:
+            size = (chip_details.system_sdram_base_address -
+                    chip_details.sdram_heap_address)
+            if size > self._max_sdram_size:
+                system_base_address = \
+                    chip_details.sdram_heap_address + self._max_sdram_size
+                sdram = SDRAM(
+                    user_base_address=chip_details.sdram_heap_address,
+                    system_base_address=system_base_address)
+            else:
+                sdram = SDRAM(
+                    user_base_address=chip_details.sdram_heap_address,
+                    system_base_address=chip_details.system_sdram_base_address)
+        else:
+            sdram = SDRAM(
+                user_base_address=chip_details.sdram_heap_address,
+                system_base_address=chip_details.system_sdram_base_address)
+
         # Create the chip
         chip = Chip(
             x=chip_details.x, y=chip_details.y, processors=processors,
-            router=router, sdram=SDRAM(
-                user_base_address=chip_details.sdram_heap_address,
-                system_base_address=chip_details.system_sdram_base_address),
+            router=router, sdram=sdram,
             ip_address=chip_details.ip_address,
             nearest_ethernet_x=chip_details.nearest_ethernet_x,
             nearest_ethernet_y=chip_details.nearest_ethernet_y)
