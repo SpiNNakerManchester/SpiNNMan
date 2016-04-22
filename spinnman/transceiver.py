@@ -450,7 +450,7 @@ class Transceiver(object):
                         board_address = connection.remote_ip_address
                         self._udp_scamp_connections[board_address] = connection
 
-        # update the transciever with the connection selectors.
+        # update the transceiver with the connection selectors.
         self._scamp_connection_selector = \
             MultiConnectionProcessMostDirectConnectionSelector(
                 self._machine, self._scamp_connections)
@@ -674,7 +674,7 @@ class Transceiver(object):
         # update the scamp selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # get cpu infos
+        # get cpu information
         self._chip_info = get_machine_process.get_chip_info()
 
         # Work out and add the spinnaker links
@@ -1028,7 +1028,7 @@ class Transceiver(object):
         if version_info is not None:
             checker = CheckMachineBootedProcess(
                 self._scamp_connections[0], self._ignore_chips,
-                self._ignore_cores, self._max_core_id)
+                self._ignore_cores, self._max_core_id, self._max_sdram_size)
             self._machine, self._chip_info = checker.check_machine_is_booted()
             if self._machine is None:
                 return None
