@@ -18,16 +18,27 @@ class VersionInfo(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     message does not contain valid version information
         """
-        (self._p, self._y, self._x, version_no, self._build_date) = \
-            struct.unpack_from("<BxBB2xHI", version_data, offset)
-        self._version_number = version_no / 100.0
-        self._version_string = version_data[offset + 12:-1].decode("ascii")
-        try:
+        (self._p, self._physical_cpu_id, self._y, self._x, _,
+            version_no, self._build_date) = struct.unpack_from(
+                "<BBBBHHI", version_data, offset)
+
+        version_string = version_data[offset + 12:-1].decode("utf-8")
+
+        if version_no < 0xFFFF:
+            try:
+                self._version_number = (version_no // 100, version_no % 100, 0)
+                self._name, self._hardware = version_string.split("/")
+                self._version_string = version_string
+            except ValueError as exception:
+                raise SpinnmanInvalidParameterException(
+                    "version_string", self._version_string,
+                    "Incorrect format: {}".format(exception))
+        else:
+            self._version_string, _, version = version_string.partition("\0")
+            self._version_number = tuple(map(
+                int, version.strip("\0").split(".")))
+            self._version_string = self._version_string.rstrip("\0")
             self._name, self._hardware = self._version_string.split("/")
-        except ValueError as exception:
-            raise SpinnmanInvalidParameterException(
-                "version_string", self._version_string,
-                "Incorrect format: {}".format(exception))
 
     @property
     def name(self):

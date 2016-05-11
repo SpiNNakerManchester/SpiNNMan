@@ -40,8 +40,6 @@ from spinnman.processes.application_run_process import ApplicationRunProcess
 from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinn_machine.utilities import utilities
-from spinnman.processes.check_machine_booted_process \
-    import CheckMachineBootedProcess
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -119,7 +117,7 @@ import os
 logger = logging.getLogger(__name__)
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = 1.33
+_SCAMP_VERSION = (2, 1, 0)
 
 _BMP_NAME = "BC&MP"
 _BMP_VERSIONS = [1.3, 1.33, 1.37, 1.36]
@@ -860,50 +858,45 @@ class Transceiver(object):
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
     def boot_board(
-            self, number_of_boards=1, width=None, height=None):
+            self, number_of_boards=None, width=None, height=None):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
 
-        :param number_of_boards: the number of boards that this machine is \
-                made out of, 1 by default
+        :param number_of_boards: this parameter is deprecated
         :type number_of_boards: int
-        :param width: The width of the machine in chips, or None to compute
+        :param width: this parameter is deprecated
         :type width: int or None
-        :param height: The height of the machine in chips, or None to compute
+        :param height: this parameter is deprecated
         :type height: int or None
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     board version is not known
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         """
-        logger.debug("Attempting to boot version {} board".format(
-            self._version))
-        if width is None or height is None:
-            dims = utility_functions.get_ideal_size(number_of_boards,
-                                                    self._version)
-            width = dims.width
-            height = dims.height
-        boot_messages = SpinnakerBootMessages(
-            self._version, number_of_boards=number_of_boards,
-            width=width, height=height)
+        if (width is not None or height is not None or
+                number_of_boards is not None):
+            logger.warning(
+                "The width, height and number_of_boards are no longer"
+                " supported, and might be removed in a future version")
+        boot_messages = SpinnakerBootMessages(board_version=self._version)
         for boot_message in boot_messages.messages:
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
     def ensure_board_is_ready(
-            self, number_of_boards=1, width=None, height=None,
+            self, number_of_boards=None, width=None, height=None,
             n_retries=5, enable_reinjector=True):
         """ Ensure that the board is ready to interact with this version\
             of the transceiver.  Boots the board if not already booted and\
             verifies that the version of SCAMP running is compatible with\
             this transceiver.
 
-        :param number_of_boards: the number of boards that this machine is
-                    constructed out of, 1 by default
+        :param number_of_boards: this parameter is deprecated and will be\
+                    ignored
         :type number_of_boards: int
-        :param width: The width of the machine in chips, or None to compute
+        :param width: this parameter is deprecated and will be ignored
         :type width: int or None
-        :param height: The height of the machine in chips, or None to compute
+        :param height: this parameter is deprecated and will be ignored
         :type height: int or None
         :param n_retries: The number of times to retry booting
         :type n_retries: int
@@ -919,11 +912,11 @@ class Transceiver(object):
         """
 
         # if the machine sizes not been given, calculate from assumption
-        if width is None or width is None:
-            dims = utility_functions.get_ideal_size(number_of_boards,
-                                                    self._version)
-            width = dims.width
-            height = dims.height
+        if (width is not None or height is not None or
+                number_of_boards is not None):
+            logger.warning(
+                "The width, height and number_of_boards are no longer"
+                " supported, and might be removed in a future version")
 
         # try to get a scamp version once
         logger.info("Working out if machine is booted")
@@ -931,8 +924,7 @@ class Transceiver(object):
             INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
 
         # If we fail to get a SCAMP version this time, try other things
-        if (version_info is None and self._version >= 4 and
-                len(self._bmp_connections) > 0):
+        if (version_info is None and len(self._bmp_connections) > 0):
 
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
@@ -960,8 +952,6 @@ class Transceiver(object):
                     _SCAMP_NAME, _SCAMP_VERSION))
 
         else:
-            if self._machine is None:
-                self._update_machine()
             logger.info("Machine communication successful")
 
         # Change the default SCP timeout on the machine, keeping the old one to
@@ -996,12 +986,16 @@ class Transceiver(object):
         while version_info is None and current_tries_to_go > 0:
             try:
                 version_info = self.get_scamp_version()
+                if version_info.x == 255 and version_info.y == 255:
+                    version_info = None
+                    time.sleep(0.1)
             except exceptions.SpinnmanGenericProcessException as e:
                 if isinstance(
                         e.exception, exceptions.SpinnmanTimeoutException):
                     logger.info("Attempting to boot machine")
                     self.boot_board(number_of_boards, width, height)
                     current_tries_to_go -= 1
+                    logger.info("Boot sent")
                 elif isinstance(
                         e.exception, exceptions.SpinnmanIOException):
                     raise exceptions.SpinnmanIOException(
@@ -1020,30 +1014,12 @@ class Transceiver(object):
         if version_info is None:
             try:
                 version_info = self.get_scamp_version()
+                if version_info.x == 255 and version_info.y == 255:
+                    version_info = None
             except exceptions.SpinnmanException:
                 pass
 
-        # boot has been sent, and 0 0 is up and running, but there will need to
-        # be a delay whilst all the other chips complete boot.
-        if version_info is not None:
-            checker = CheckMachineBootedProcess(
-                self._scamp_connections[0], self._ignore_chips,
-                self._ignore_cores, self._max_core_id, self._max_sdram_size)
-            self._machine, self._chip_info = checker.check_machine_is_booted()
-            if self._machine is None:
-                return None
-            spinnaker_links = utilities.locate_spinnaker_links(
-                self._version, self._machine)
-            for spinnaker_link in spinnaker_links:
-                self._machine.add_spinnaker_link(spinnaker_link)
-            logger.info(
-                "Detected a machine on ip address {} which has {}".format(
-                    self._boot_send_connection.remote_ip_address,
-                    self._machine.cores_and_link_output_string()))
-
-            # update scamp connection selector with machine dynamics
-            self._scamp_connection_selector.set_machine(self._machine)
-
+        logger.info("Found board with version {}".format(version_info))
         return version_info
 
     def _check_if_machine_has_wrap_arounds(self):
