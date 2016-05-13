@@ -12,6 +12,9 @@ SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 # The base address of a routers diagnostic filter controls
 ROUTER_REGISTER_BASE_ADDRESS = 0xe1000000
 
+# The base address of a routers p2p routing table
+ROUTER_REGISTER_P2P_ADDRESS = ROUTER_REGISTER_BASE_ADDRESS + 0x10000
+
 # offset for the router filter controls first register (one word each)
 ROUTER_FILTER_CONTROLS_OFFSET = 0x200
 

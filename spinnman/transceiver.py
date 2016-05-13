@@ -117,10 +117,10 @@ import os
 logger = logging.getLogger(__name__)
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = (2, 1, 0)
+_SCAMP_VERSION = (2, 2, 0)
 
 _BMP_NAME = "BC&MP"
-_BMP_VERSIONS = [1.3, 1.33, 1.37, 1.36]
+_BMP_VERSIONS = [(1, 3, 0), (1, 33, 0), (1, 37, 0), (1, 36, 0), (2, 0, 0)]
 
 _STANDARD_RETIRES_NO = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3

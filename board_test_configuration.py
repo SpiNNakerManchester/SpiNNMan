@@ -1,6 +1,7 @@
 import socket
 import ConfigParser
 import os
+from spinnman.model.bmp_connection_data import BMPConnectionData
 
 
 class BoardTestConfiguration(object):
@@ -29,6 +30,9 @@ class BoardTestConfiguration(object):
         self.bmp_names = self._config.get("Machine", "bmp_names")
         if self.bmp_names == "None":
             self.bmp_names = None
+        else:
+            self.bmp_names = [BMPConnectionData(
+                0, 0, self.bmp_names, [0], None)]
         self.auto_detect_bmp = \
             self._config.getboolean("Machine", "auto_detect_bmp")
         self.localport = 54321

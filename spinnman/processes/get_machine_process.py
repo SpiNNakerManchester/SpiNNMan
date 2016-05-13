@@ -4,6 +4,8 @@ from spinnman.messages.scp.impl.scp_read_memory_request\
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman import constants
 from spinnman import exceptions
+from spinnman.model.p2p_table import P2PTable
+from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman.processes.abstract_process import AbstractProcess
@@ -17,9 +19,11 @@ from spinn_machine.link import Link
 
 from collections import deque
 import traceback
+import functools
+import struct
 
 
-class _ChipInfoReceiver(object):
+class _ChipDetailsReceiver(object):
 
     def __init__(self, get_machine_process, x, y, link):
         self._get_machine_process = get_machine_process
@@ -50,113 +54,89 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
 
+        self._width = 0
+        self._height = 0
+        self._p2p_column_data = list()
+
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
 
-        # The machine so far
-        self._machine = Machine([])
+    def _make_chip(self, chip_info):
+        """ Creates a chip from a ChipSummaryInfo structure
 
-        # A dictionary of which link goes where from a chip:
-        # (x, y, link) -> (x, y)
-        self._link_destination = dict()
-
-        # A queue of ChipInfo to be examined
-        self._search = deque()
-
-    def _make_chip(self, chip_details):
-        """ Creates a chip from a ChipInfo structure
-
-        :param chip_details: The ChipInfo structure to create the chip\
+        :param chip_info: The ChipSummaryInfo structure to create the chip\
                     from
-        :type chip_details: \
-                    :py:class:`spinnman.model.chip_info.ChipInfo`
+        :type chip_info: \
+                    :py:class:`spinnman.model.chip_info.ChipSummaryInfo`
         :return: The created chip
         :rtype: :py:class:`spinn_machine.chip.Chip`
         """
 
         # Create the processor list
         processors = list()
-        for virtual_core_id in chip_details.virtual_core_ids:
-            if (self._ignore_cores is not None and
-                    self._ignore_cores.is_core(
-                        chip_details.x, chip_details.y, virtual_core_id)):
-                continue
-            if (self._max_core_id is not None and
-                    virtual_core_id > self._max_core_id):
-                continue
+        max_core_id = chip_info.n_cores - 1
+        if self._max_core_id is not None and max_core_id > self._max_core_id:
+            max_core_id = self._max_core_id
+        for virtual_core_id in range(max_core_id + 1):
 
-            processors.append(Processor(
-                virtual_core_id, chip_details.cpu_clock_mhz * 1000000,
-                virtual_core_id == 0))
+            # Add the core provided it is not to be ignored
+            if (self._ignore_cores is None or
+                    not self._ignore_cores.is_core(
+                        chip_info.x, chip_info.y, virtual_core_id)):
+                processors.append(Processor(
+                    virtual_core_id, is_monitor=virtual_core_id == 0))
 
-        # Create the router - add the links later during search
+        # Create the router
+        links = list()
+        for link in chip_info.working_links:
+            dest_x, dest_y = chip_info.get_link_destination(link)
+            opposite_link_id = (link + 3) % 6
+            links.append(Link(
+                chip_info.x, chip_info.y, link, dest_x, dest_y,
+                opposite_link_id, opposite_link_id))
         router = Router(
-            links=list(), emergency_routing_enabled=False,
-            clock_speed=Router.ROUTER_DEFAULT_CLOCK_SPEED,
+            links=links,
             n_available_multicast_entries=(
-                Router.ROUTER_DEFAULT_AVAILABLE_ENTRIES -
-                chip_details.first_free_router_entry))
+                chip_info.n_free_multicast_routing_entries))
 
         # Create the chip's SDRAM object
-        sdram = None
-        if self._max_sdram_size is not None:
-            size = (chip_details.system_sdram_base_address -
-                    chip_details.sdram_heap_address)
-            if size > self._max_sdram_size:
-                system_base_address = \
-                    chip_details.sdram_heap_address + self._max_sdram_size
-                sdram = SDRAM(
-                    user_base_address=chip_details.sdram_heap_address,
-                    system_base_address=system_base_address)
-            else:
-                sdram = SDRAM(
-                    user_base_address=chip_details.sdram_heap_address,
-                    system_base_address=chip_details.system_sdram_base_address)
-        else:
-            sdram = SDRAM(
-                user_base_address=chip_details.sdram_heap_address,
-                system_base_address=chip_details.system_sdram_base_address)
+        sdram_size = chip_info.largest_free_sdram_block
+        if (self._max_sdram_size is not None and
+                sdram_size > self._max_sdram_size):
+            sdram_size = self._max_sdram_size
+        sdram = SDRAM(size=sdram_size)
 
         # Create the chip
         chip = Chip(
-            x=chip_details.x, y=chip_details.y, processors=processors,
+            x=chip_info.x, y=chip_info.y, processors=processors,
             router=router, sdram=sdram,
-            ip_address=chip_details.ip_address,
-            nearest_ethernet_x=chip_details.nearest_ethernet_x,
-            nearest_ethernet_y=chip_details.nearest_ethernet_y)
+            ip_address=chip_info.ethernet_ip_address,
+            nearest_ethernet_x=chip_info.nearest_ethernet_x,
+            nearest_ethernet_y=chip_info.nearest_ethernet_y)
 
-        # reset params for next iteration
-        self._chip_x = None
-        self._chip_y = None
-        self._heap_address = None
-        self._heap_size = None
         return chip
 
-    def _receive_chip_details(self, scp_read_memory_response):
-        try:
-            new_chip_details = ChipInfo(scp_read_memory_response.data,
-                                        scp_read_memory_response.offset)
-            if (self._ignore_chips is not None and
-                    self._ignore_chips.is_chip(
-                        new_chip_details.x, new_chip_details.y)):
-                return None
-            key = (new_chip_details.x, new_chip_details.y)
-            if key not in self._chip_info:
-                self._chip_info[key] = new_chip_details
-                self._search.append(new_chip_details)
-                new_chip = self._make_chip(new_chip_details)
-                self._machine.add_chip(new_chip)
-                return new_chip
-            return self._machine.get_chip_at(new_chip_details.x,
-                                             new_chip_details.y)
-        except Exception:
-            traceback.print_exc()
+    def _receive_chip_id_from_link(
+            self, x, y, link, scp_read_link_response):
+        dest_y, dest_x = struct.unpack_from(
+            "<BB2x", scp_read_link_response.data,
+            scp_read_link_response.offset)
+        self._link_destination[x, y, link] = (dest_x, dest_y)
+        print x, y, link, "->", dest_x, dest_y
 
-    def _receive_chip_details_from_link(self, scp_read_link_response,
-                                        source_x, source_y, link):
-        new_chip = self._receive_chip_details(scp_read_link_response)
-        if new_chip is not None:
-            self._link_destination[(source_x, source_y, link)] = new_chip
+    def _receive_machine_dimensions(self, scp_read_response):
+        self._height, self._width = struct.unpack_from(
+            "<BB", scp_read_response.data, scp_read_response.offset)
+
+    def _receive_p2p_data(self, scp_read_response):
+        self._p2p_column_data.append(
+            (scp_read_response.data, scp_read_response.offset))
+
+    def _receive_chip_info(self, scp_read_chip_info_response):
+        chip_info = scp_read_chip_info_response.chip_info
+        self._chip_info[chip_info.x, chip_info.y] = chip_info
+        self._width = chip_info.width
+        self._height = chip_info.height
 
     def _receive_error(self, request, exception, tracebackinfo):
 
@@ -172,89 +152,43 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def get_machine_details(self):
 
-        # Get the details of chip 0, 0
+        # Read the machine dimensions
         self._send_request(
-            SCPReadMemoryRequest(
-                x=0, y=0, base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
-                size=constants.SYSTEM_VARIABLE_BYTES),
-            self._receive_chip_details,
-            self._receive_error)
+            SCPChipInfoRequest(x=255, y=255, with_size=True),
+            self._receive_chip_info)
         self._finish()
-
-        # Continue until there is nothing to search (and no exception)
-        while not self.is_error() and len(self._search) > 0:
-
-            # Set up the next round of searches using everything that
-            # needs to search (same loop as above, I know, but wait for it)
-            while not self.is_error() and len(self._search) > 0:
-                chip_info = self._search.pop()
-
-                # Examine the links of the chip to find the next chips
-                for link in chip_info.links_available:
-
-                    # Add the read_link request - note that this might
-                    # add to the search if a response is received
-                    receiver = _ChipInfoReceiver(self, chip_info.x,
-                                                 chip_info.y, link)
-                    self._send_request(
-                        SCPReadLinkRequest(
-                            x=chip_info.x, y=chip_info.y, cpu=0, link=link,
-                            base_address=(constants
-                                          .SYSTEM_VARIABLE_BASE_ADDRESS),
-                            size=constants.SYSTEM_VARIABLE_BYTES),
-                        receiver._receive_chip_details,
-                        self._receive_error)
-
-            # Ensure all responses up to this point have been received
-            self._finish()
-
-        # If there is an exception, raise it
         self.check_for_error()
 
-        # We now have all the chip details, now link them up and make a machine
-        # Start by making a queue of (chip, link ids) to search, starting at
-        # 0, 0
-        chip_0_0_info = self._chip_info[(0, 0)]
-        chip_0_0 = self._machine.get_chip_at(0, 0)
-        chip_search = deque([(chip_0_0, chip_0_0_info.links_available)])
+        # Get the P2P table - 8 entries are packed into each 32-bit word
+        p2p_column_bytes = P2PTable.get_n_column_bytes(self._height)
+        for column in range(self._width):
+            offset = P2PTable.get_column_offset(column)
+            self._send_request(
+                SCPReadMemoryRequest(
+                    x=255, y=255,
+                    base_address=(
+                        constants.ROUTER_REGISTER_P2P_ADDRESS + offset),
+                    size=p2p_column_bytes),
+                self._receive_p2p_data)
+        self._finish()
+        self.check_for_error()
+        p2p_table = P2PTable(self._width, self._height, self._p2p_column_data)
 
-        # Go through the chips, link by link
-        seen_chips = set()
-        seen_chips.add((0, 0))
-        while len(chip_search) > 0:
-            chip, links = chip_search.pop()
+        # Get the chip information for each chip
+        for (x, y) in p2p_table.iterchips():
+            if (x, y) not in self._chip_info:
+                self._send_request(
+                    SCPChipInfoRequest(x, y), self._receive_chip_info)
+        self._finish()
+        self.check_for_error()
 
-            # Go through the links of the chip
-            for link in links:
+        # Build a Machine
+        chips = [
+            self._make_chip(chip_info)
+            for chip_info in self._chip_info.itervalues()]
+        machine = Machine(chips)
 
-                # Only continue if the chip link worked
-                if (chip.x, chip.y, link) in self._link_destination:
-
-                    other_chip = self._link_destination[(chip.x, chip.y, link)]
-
-                    # Standard links use the opposite link id (with ids between
-                    # 0 and 5) as default
-                    opposite_link_id = (link + 3) % 6
-
-                    # Check that the other chip link worked in reverse
-                    if ((other_chip.x, other_chip.y, opposite_link_id) in
-                            self._link_destination):
-
-                        # Add the link to this chip
-                        chip.router.add_link(Link(
-                            chip.x, chip.y, link, other_chip.x, other_chip.y,
-                            opposite_link_id, opposite_link_id))
-
-                        # If the chip is not already seen, add it to the search
-                        if (other_chip.x, other_chip.y) not in seen_chips:
-                            other_chip_details = self._chip_info[
-                                (other_chip.x, other_chip.y)]
-                            chip_search.append((
-                                other_chip,
-                                other_chip_details.links_available))
-                            seen_chips.add((other_chip.x, other_chip.y))
-
-        return self._machine
+        return machine
 
     def get_chip_info(self):
         """ Get the chip information for the machine.  Note that\

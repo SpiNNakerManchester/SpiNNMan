@@ -12,6 +12,7 @@ class _DataType(Enum):
     SHORT = (2, "<H")
     INT = (4, "<I")
     LONG = (8, "<Q")
+    BYTE_ARRAY = (16, "s")
 
     def __new__(cls, value, struct_code, doc=""):
         obj = object.__new__(cls)
@@ -104,7 +105,7 @@ class SystemVariableDefinition(Enum):
     router_time_phase_timer = _Definition(
         _DataType.INT, offset=0x20,
         doc="The router time-phase timer")
-    cpu_clock_frequency_mhz = _Definition(
+    cpu_clock_mhz = _Definition(
         _DataType.SHORT, offset=0x24, default=200,
         doc="The CPU clock frequency in MHz")
     sdram_clock_frequency_mhz = _Definition(
@@ -162,13 +163,13 @@ class SystemVariableDefinition(Enum):
     padding_2 = _Definition(
         _DataType.INT, offset=0x44, default=0,
         doc="A word of padding")
-    user_system_ram_size_words = _Definition(
+    system_ram_heap_address = _Definition(
         _DataType.INT, offset=0x48, default=1024,
-        doc="The size of the user system RAM heap in bytes")
-    user_sdram_size_words = _Definition(
+        doc="The base address of the system SDRAM heap")
+    sdram_heap_address = _Definition(
         _DataType.INT, offset=0x4c, default=0,
-        doc="The size of the user SDRAM heap in bytes")
-    iobuf_bytes = _Definition(
+        doc="The base address of the user SDRAM heap")
+    iobuf_size = _Definition(
         _DataType.INT, offset=0x50, default=16384,
         doc="The size of the iobuf buffer in bytes")
     system_sdram_bytes = _Definition(
@@ -186,7 +187,7 @@ class SystemVariableDefinition(Enum):
     lock = _Definition(
         _DataType.BYTE, offset=0x64, default=0,
         doc="The lock")
-    link_en = _Definition(
+    links_available = _Definition(
         _DataType.BYTE, offset=0x65, default=0x3f,
         doc="Bit mask (6 bits) of links enabled")
     last_biff_id = _Definition(
@@ -217,13 +218,16 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0x7c,
         doc="The fourth user variable")
     status_map = _Definition(
-        _DataType.BYTE, offset=0x80, array_size=20,
+        _DataType.BYTE_ARRAY, offset=0x80, array_size=20,
+        default=bytes(bytearray(20)),
         doc="The status map set during SCAMP boot")
     physical_to_virtual_core_map = _Definition(
-        _DataType.BYTE, offset=0x94, array_size=20,
+        _DataType.BYTE_ARRAY, offset=0x94, array_size=20,
+        default=bytes(bytearray(20)),
         doc="The physical core id to virtual core id map")
     virtual_to_physical_core_map = _Definition(
-        _DataType.BYTE, offset=0xa8, array_size=20,
+        _DataType.BYTE_ARRAY, offset=0xa8, array_size=20,
+        default=bytes(bytearray(20)),
         doc="The virtual core id to physical core id map")
     n_working_cores = _Definition(
         _DataType.BYTE, offset=0xbc,
@@ -246,10 +250,10 @@ class SystemVariableDefinition(Enum):
     cpu_information_base_address = _Definition(
         _DataType.INT, offset=0xcc,
         doc="The base address of the cpu information blocks")
-    system_heap_sdram_base_address = _Definition(
+    system_sdram_heap_address = _Definition(
         _DataType.INT, offset=0xd0,
         doc="The base address of the system SDRAM heap")
-    routing_table_copy_address = _Definition(
+    router_table_copy_address = _Definition(
         _DataType.INT, offset=0xd4,
         doc="The address of the copy of the routing tables")
     peer_to_peer_hop_table_address = _Definition(
@@ -258,7 +262,7 @@ class SystemVariableDefinition(Enum):
     allocated_tag_table_address = _Definition(
         _DataType.INT, offset=0xdc,
         doc="The address of the allocated tag table")
-    router_first_free_entry = _Definition(
+    first_free_router_entry = _Definition(
         _DataType.SHORT, offset=0xe0,
         doc="The id of the first free router entry")
     n_active_peer_to_peer_addresses = _Definition(
@@ -274,7 +278,8 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0xec,
         doc="The monitor incoming mailbox flags")
     ethernet_ip_address = _Definition(
-        _DataType.BYTE, offset=0xf0, array_size=4,
+        _DataType.BYTE_ARRAY, offset=0xf0, array_size=4,
+        default=bytes(bytearray(4)),
         doc="The ip address of the chip")
     fixed_route_copy = _Definition(
         _DataType.INT, offset=0xf4,
@@ -309,6 +314,10 @@ class SystemVariableDefinition(Enum):
     @property
     def data_type(self):
         return self._data_type
+
+    @property
+    def array_size(self):
+        return self._array_size
 
     @property
     def offset(self):

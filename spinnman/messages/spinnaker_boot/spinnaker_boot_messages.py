@@ -8,7 +8,6 @@ from spinnman.messages.spinnaker_boot._system_variables import \
 from spinnman.messages.spinnaker_boot._system_variables.\
     _system_variable_boot_values import \
     SystemVariableDefinition
-import array
 from spinnman.messages.spinnaker_boot._system_variables\
     ._system_variable_boot_values import SystemVariableBootValues
 from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
@@ -23,11 +22,12 @@ from spinnman.exceptions import SpinnmanIOException
 import os
 import math
 import time
+import array
 
 _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4
 _BOOT_IMAGE_MAX_BYTES = 32 * 1024
-_BOOT_DATA_FILE_NAME = "scamp.boot"
+_BOOT_DATA_FILE_NAME = "scamp-3.boot"
 _BOOT_STRUCT_REPLACE_OFFSET = 384 / 4
 _BOOT_STRUCT_REPLACE_LENGTH = 128 / 4
 _BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES / 4) - 1) << 8

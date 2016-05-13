@@ -134,8 +134,8 @@ transceiver = create_transceiver_from_hostname(
     bmp_connection_data=board_config.bmp_names,
     auto_detect_bmp=board_config.auto_detect_bmp)
 
-
 try:
+
     print "Version Information"
     print "==================="
     version_info = transceiver.ensure_board_is_ready()
