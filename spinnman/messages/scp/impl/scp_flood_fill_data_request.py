@@ -39,8 +39,8 @@ class SCPFloodFillDataRequest(AbstractSCPRequest):
 
         super(SCPFloodFillDataRequest, self).__init__(
             SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                      destination_cpu=0, destination_chip_x=0,
-                      destination_chip_y=0),
+                      destination_cpu=0, destination_chip_x=255,
+                      destination_chip_y=255),
             SCPRequestHeader(command=SCPCommand.CMD_FFD),
             argument_1=argument_1, argument_2=argument_2,
             argument_3=base_address, data=None)

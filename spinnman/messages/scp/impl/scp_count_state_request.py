@@ -36,8 +36,8 @@ class SCPCountStateRequest(AbstractSCPRequest):
         super(SCPCountStateRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=0,
-                destination_chip_y=0),
+                destination_cpu=0, destination_chip_x=255,
+                destination_chip_y=255),
             SCPRequestHeader(command=SCPCommand.CMD_SIG),
             argument_1=_COUNT_SIGNAL_TYPE,
             argument_2=_get_data(app_id, state),

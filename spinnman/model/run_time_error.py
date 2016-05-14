@@ -24,6 +24,7 @@ class RunTimeError(Enum):
     PKT = 17
     TIMER = 18
     API = 19
+    SARK_VERSRION_INCORRECT = 20
 
     def __new__(cls, value, doc=""):
         obj = object.__new__(cls)

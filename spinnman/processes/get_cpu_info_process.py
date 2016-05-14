@@ -26,12 +26,13 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
             this_chip_info = chip_info[(x, y)]
 
             for p in core_subset.processor_ids:
-                if p not in this_chip_info.virtual_core_ids:
+                if p >= this_chip_info.n_cores:
                     raise SpinnmanInvalidParameterException(
                         "p", p, "Not a valid core on chip {}, {}".format(
                             x, y))
-                base_address = (this_chip_info.cpu_information_base_address +
-                                (constants.CPU_INFO_BYTES * p))
+                base_address = (
+                    this_chip_info.vcpu_base_address +
+                    (constants.CPU_INFO_BYTES * p))
                 self._send_request(SCPReadMemoryRequest(
                     x, y, base_address, constants.CPU_INFO_BYTES),
                     functools.partial(self.handle_response, x, y, p))

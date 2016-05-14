@@ -23,9 +23,13 @@ class SCPChipInfoRequest(AbstractSCPRequest):
                     False if not
         :type with_size: bool
         """
-        argument_1 = 1
+        # Bits 0-4 + bit 6 = all information except size
+        argument_1 = 0x5F
         if with_size:
-            argument_1 = 2
+
+            # Bits 0-6 = all information including size
+            argument_1 = 0x7F
+
         AbstractSCPRequest.__init__(
             self, SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

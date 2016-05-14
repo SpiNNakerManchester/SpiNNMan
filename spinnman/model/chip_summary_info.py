@@ -6,19 +6,17 @@ class ChipSummaryInfo(object):
     """ Represents the chip summary information read via an SCP command
     """
 
-    def __init__(self, chip_summary_data, offset, x=None, y=None):
+    def __init__(self, chip_summary_data, offset, x, y):
         """
         :param chip_summary_data: The data from the SCP response
         :type: chip_summary_data: bytearray
         :param offset: The offset into the data where the data starts
         :type offset: int
-        :param x: The x-coordinate of the chip that this data is from;\
-                required if the version of the data is 0
-        :param y: The y-coordinate of the chip that this data is from;\
-                required if the version of the data is 0
+        :param x: The x-coordinate of the chip that this data is from
+        :param y: The y-coordinate of the chip that this data is from
         """
         (chip_summary_flags, self._largest_free_sdram_block,
-            self._largest_free_sdram_block) = struct.unpack_from(
+            self._largest_free_sram_block) = struct.unpack_from(
                 "<3I", chip_summary_data, offset)
         self._n_cores = chip_summary_flags & 0x1F
         self._working_links = [
@@ -34,10 +32,12 @@ class ChipSummaryInfo(object):
             struct.unpack_from("<18B", chip_summary_data, data_offset)]
         data_offset += 18
 
-        # The following items are only included if the version is 1
+        self._x = x
+        self._y = y
+
+        # The following items are only included if the appropriate flags are
+        # set
         self._link_destinations = None
-        self._x = None
-        self._y = None
         self._vcpu_base_address = None
         self._multicast_routes_copy_address = None
         self._fixed_route_copy_address = None
@@ -47,44 +47,60 @@ class ChipSummaryInfo(object):
         self._ethernet_ip_address = None
         self._width = None
         self._height = None
+        self._iobuf_size = None
 
-        # If the version is 0, the x and y must be provided
-        self._version = (chip_summary_flags >> 26) & 0x1
-        if self._version == 0 and (x is None or y is None):
-            raise Exception(
-                "x and y must be specified if version 0 data is used")
-        if self._version == 0:
-            self._x = x
-            self._y = y
+        # If the link ids are included
+        if (chip_summary_flags & (1 << 26)) != 0:
+            extra_flags = struct.unpack_from(
+                "<H", chip_summary_data, data_offset)[0]
+            data_offset += 2
+            if (extra_flags & 1) != 0:
+                link_p2p_ids = struct.unpack_from(
+                    "<12B", chip_summary_data, data_offset)
+                data_offset += 12
+                self._link_destinations = {
+                    i: (link_p2p_ids[(i * 2) + 1], link_p2p_ids[i * 2])
+                    for i in self._working_links}
 
-        # The remaining items are only available if specified
-        if self._version == 1:
-            (link_p2p_ids, self._y, self._x, self._vcpu_base_address,
-                self._multicast_routes_copy_address,
-                self._fixed_route_copy_address,
-                self._nearest_ethernet_y, self._nearest_ethernet_x,
-                self._cpu_speed_mhz) = struct.unpack_from(
-                    "<12s2B3I2BH", chip_summary_data, data_offset)
-            data_offset += 30
+            # If the vcpu_t is included
+            if (extra_flags & (1 << 1)) != 0:
+                self._vcpu_base_address = struct.unpack_from(
+                    "<I", chip_summary_data, data_offset)[0]
+                data_offset += 4
 
-            link_p2p_ids = bytearray(link_p2p_ids)
-            self._link_destinations = {
-                i: (link_p2p_ids[(i * 2) + 1], link_p2p_ids[i * 2])
-                for i in self._working_links}
+            # If the router copy addresses are included
+            if (extra_flags & (1 << 2)) != 0:
+                (self._multicast_routes_copy_address,
+                    self._fixed_route_copy_address) = struct.unpack_from(
+                        "<2I", chip_summary_data, data_offset)
+                data_offset += 8
 
-            # The Ethernet address is only available if the Ethernet is
-            # available
-            if self._is_ethernet_available:
+            # If the nearest Ethernet is included
+            if (extra_flags & (1 << 3)) != 0:
+                (self._nearest_ethernet_y, self._nearest_ethernet_x) = \
+                    struct.unpack_from(
+                        "<BB", chip_summary_data, data_offset)
+                data_offset += 2
+
+            # If the Ethernet address is included
+            if (extra_flags & (1 << 4)) != 0:
                 ip_data = struct.unpack_from(
                     "<4B", chip_summary_data, data_offset)
                 self._ethernet_ip_address = "{}.{}.{}.{}".format(
                     ip_data[0], ip_data[1], ip_data[2], ip_data[3])
                 data_offset += 4
 
-            # The size of the machine is only available if bit 27 is 1
-            if (chip_summary_flags & (1 << 27)) != 0:
+            # If the machine size is included
+            if (extra_flags & (1 << 5)) != 0:
                 self._height, self._width = struct.unpack_from(
                     "<BB", chip_summary_data, data_offset)
+                data_offset += 2
+
+            # If the iobuf size is included
+            if (extra_flags & (1 << 6)) != 0:
+                self._iobuf_size = struct.unpack_from(
+                    "<I", chip_summary_data, data_offset)[0]
+                data_offset += 4
 
     @property
     def x(self):
@@ -101,15 +117,6 @@ class ChipSummaryInfo(object):
         :rtype: int
         """
         return self._y
-
-    @property
-    def version(self):
-        """ The version of the data - if 0, only contains:
-            n_cores, core_states, is_ethernet_available,
-            largest_free_sdram_block, largest_free_sram_block,
-            n_free_multicast_routing_entries and working links
-        """
-        return self._version
 
     @property
     def n_cores(self):
@@ -249,3 +256,11 @@ class ChipSummaryInfo(object):
         :rtype: int
         """
         return self._height
+
+    @property
+    def iobuf_size(self):
+        """ The size of an iobuf buffer in bytes, if requested, or None if not
+
+        :rtype: int
+        """
+        return self._iobuf_size

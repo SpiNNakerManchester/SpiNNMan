@@ -672,6 +672,13 @@ class Transceiver(object):
         # update the scamp selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
+        # update the scamp connections replacing any x and y of 255 with the
+        # boot chip coordinates
+        for connection in self._scamp_connections:
+            if connection.chip_x == 255 and connection.chip_y == 255:
+                connection.update_chip_coordinates(
+                    self._machine.boot_x, self._machine.boot_y)
+
         # get cpu information
         self._chip_info = get_machine_process.get_chip_info()
 
@@ -709,6 +716,7 @@ class Transceiver(object):
         # that supports SCP - this is done via the machine
         if len(self._scamp_connections) == 0:
             return list()
+
         # if the machine hasn't been created, create it
         if self._machine is None:
             self._update_machine()
@@ -832,7 +840,8 @@ class Transceiver(object):
                     return True
             return False
 
-    def get_scamp_version(self, chip_x=0, chip_y=0, connection_selector=None):
+    def get_scamp_version(
+            self, chip_x=255, chip_y=255, connection_selector=None):
         """ Get the version of scamp which is running on the board
 
         :param connection_selector: the connection to send the scamp
@@ -1022,41 +1031,6 @@ class Transceiver(object):
         logger.info("Found board with version {}".format(version_info))
         return version_info
 
-    def _check_if_machine_has_wrap_arounds(self):
-        """ Determine if the machine has wrap-arounds, by querying the links\
-            from 0, 0
-        :return: true if a wrap around toroid, false otherwise
-        :rtype: bool
-        """
-        try:
-            # Try the left link
-            self.read_neighbour_memory(
-                x=0, y=0, link=3,
-                base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
-                length=constants.SYSTEM_VARIABLE_BYTES)
-            return True
-        except (exceptions.SpinnmanUnexpectedResponseCodeException,
-                exceptions.SpinnmanTimeoutException):
-
-            # Do Nothing - check the bottom link for wrap around
-            pass
-
-        try:
-
-            # Try the bottom link
-            self.read_neighbour_memory(
-                x=0, y=0, link=4,
-                base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
-                length=constants.SYSTEM_VARIABLE_BYTES)
-            return True
-        except (exceptions.SpinnmanUnexpectedResponseCodeException,
-                exceptions.SpinnmanTimeoutException):
-
-            # Do Nothing
-            pass
-
-        return False
-
     def get_cpu_information(self, core_subsets=None):
         """ Get information about the processors on the board
 
@@ -1088,7 +1062,7 @@ class Transceiver(object):
             for chip_info in self._chip_info.itervalues():
                 x = chip_info.x
                 y = chip_info.y
-                for p in chip_info.virtual_core_ids:
+                for p in range(chip_info.n_cores):
                     core_subsets.add_processor(x, y, p)
 
         process = GetCPUInfoProcess(self._scamp_connection_selector)
@@ -1127,12 +1101,12 @@ class Transceiver(object):
         chip_info = self._chip_info[(x, y)]
 
         # check that p is a valid processor for this chip
-        if p not in chip_info.virtual_core_ids:
+        if p >= chip_info.n_cores:
             raise exceptions.SpinnmanInvalidParameterException(
                 "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
 
         # locate the base address for this chip info
-        base_address = (chip_info.cpu_information_base_address +
+        base_address = (chip_info.vcpu_base_address +
                         (constants.CPU_INFO_BYTES * p))
         base_address += constants.CPU_USER_0_START_ADDRESS
         return base_address
@@ -1170,12 +1144,12 @@ class Transceiver(object):
         chip_info = self._chip_info[(x, y)]
 
         # check that p is a valid processor for this chip
-        if p not in chip_info.virtual_core_ids:
+        if p >= chip_info.n_cores:
             raise exceptions.SpinnmanInvalidParameterException(
                 "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
 
         # locate the base address for this chip info
-        base_address = (chip_info.cpu_information_base_address +
+        base_address = (chip_info.vcpu_base_address +
                         (constants.CPU_INFO_BYTES * p))
         base_address += constants.CPU_USER_1_START_ADDRESS
         return base_address
@@ -1213,12 +1187,12 @@ class Transceiver(object):
         chip_info = self._chip_info[(x, y)]
 
         # check that p is a valid processor for this chip
-        if p not in chip_info.virtual_core_ids:
+        if p >= chip_info.n_cores:
             raise exceptions.SpinnmanInvalidParameterException(
                 "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
 
         # locate the base address for this chip info
-        base_address = (chip_info.cpu_information_base_address +
+        base_address = (chip_info.vcpu_base_address +
                         (constants.CPU_INFO_BYTES * p))
         base_address += constants.CPU_USER_2_START_ADDRESS
         return base_address
@@ -2278,7 +2252,7 @@ class Transceiver(object):
         if self._machine is None:
             self._update_machine()
         chip_info = self._chip_info[(x, y)]
-        base_address = chip_info.router_table_copy_address()
+        base_address = chip_info.multicast_routes_copy_address
         process = GetMultiCastRoutesProcess(
             self._scamp_connection_selector, app_id)
         return process.get_routes(x, y, base_address)

@@ -16,8 +16,9 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
     """ A UDP connection to SCAMP on the board
     """
 
-    def __init__(self, chip_x=0, chip_y=0, local_host=None, local_port=None,
-                 remote_host=None, remote_port=None):
+    def __init__(
+            self, chip_x=255, chip_y=255, local_host=None, local_port=None,
+            remote_host=None, remote_port=None):
         """
 
         :param chip_x: The x-coordinate of the chip on the board with this\
@@ -55,6 +56,10 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
     @property
     def chip_y(self):
         return self._chip_y
+
+    def update_chip_coordinates(self, x, y):
+        self._chip_x = x
+        self._chip_y = y
 
     def get_scp_data(self, scp_request):
         udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header,

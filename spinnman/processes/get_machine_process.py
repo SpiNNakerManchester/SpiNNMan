@@ -1,4 +1,3 @@
-from spinnman.model.chip_info import ChipInfo
 from spinnman.messages.scp.impl.scp_read_memory_request\
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
@@ -16,11 +15,6 @@ from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
 from spinn_machine.machine import Machine
 from spinn_machine.link import Link
-
-from collections import deque
-import traceback
-import functools
-import struct
 
 
 class _ChipDetailsReceiver(object):
@@ -54,8 +48,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
 
-        self._width = 0
-        self._height = 0
+        self._width = None
+        self._height = None
+        self._boot_x = None
+        self._boot_y = None
         self._p2p_column_data = list()
 
         # A dictionary of (x, y) -> ChipInfo
@@ -116,18 +112,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         return chip
 
-    def _receive_chip_id_from_link(
-            self, x, y, link, scp_read_link_response):
-        dest_y, dest_x = struct.unpack_from(
-            "<BB2x", scp_read_link_response.data,
-            scp_read_link_response.offset)
-        self._link_destination[x, y, link] = (dest_x, dest_y)
-        print x, y, link, "->", dest_x, dest_y
-
-    def _receive_machine_dimensions(self, scp_read_response):
-        self._height, self._width = struct.unpack_from(
-            "<BB", scp_read_response.data, scp_read_response.offset)
-
     def _receive_p2p_data(self, scp_read_response):
         self._p2p_column_data.append(
             (scp_read_response.data, scp_read_response.offset))
@@ -135,8 +119,14 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _receive_chip_info(self, scp_read_chip_info_response):
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
-        self._width = chip_info.width
-        self._height = chip_info.height
+        if self._width is None:
+            self._width = chip_info.width
+        if self._height is None:
+            self._height = chip_info.height
+        if self._boot_x is None:
+            self._boot_x = chip_info.x
+        if self._boot_y is None:
+            self._boot_y = chip_info.y
 
     def _receive_error(self, request, exception, tracebackinfo):
 
@@ -186,7 +176,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         chips = [
             self._make_chip(chip_info)
             for chip_info in self._chip_info.itervalues()]
-        machine = Machine(chips)
+        machine = Machine(chips, self._boot_x, self._boot_y)
 
         return machine
 

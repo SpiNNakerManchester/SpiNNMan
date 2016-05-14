@@ -31,8 +31,8 @@ class SCPAppStopRequest(AbstractSCPRequest):
         super(SCPAppStopRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=0,
-                destination_chip_y=0),
+                destination_cpu=0, destination_chip_x=255,
+                destination_chip_y=255),
             SCPRequestHeader(command=SCPCommand.CMD_NNP),
             argument_1=(0x3f << 16),
             argument_2=(5 << 28) | _get_data(app_id, SCPSignal.STOP),
