@@ -5,6 +5,7 @@ from spinnman import constants
 from spinnman import exceptions
 from spinnman.model.p2p_table import P2PTable
 from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
+from spinn_machine.utilities import utilities
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman.processes.abstract_process import AbstractProcess
@@ -15,19 +16,6 @@ from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
 from spinn_machine.machine import Machine
 from spinn_machine.link import Link
-
-
-class _ChipDetailsReceiver(object):
-
-    def __init__(self, get_machine_process, x, y, link):
-        self._get_machine_process = get_machine_process
-        self._x = x
-        self._y = y
-        self._link = link
-
-    def _receive_chip_details(self, scp_read_link_response):
-        self._get_machine_process._receive_chip_details_from_link(
-            scp_read_link_response, self._x, self._y, self._link)
 
 
 class GetMachineProcess(AbstractMultiConnectionProcess):
@@ -48,16 +36,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
 
-        self._width = None
-        self._height = None
-        self._boot_x = None
-        self._boot_y = None
         self._p2p_column_data = list()
 
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
 
-    def _make_chip(self, chip_info):
+    def _make_chip(self, width, height, chip_info):
         """ Creates a chip from a ChipSummaryInfo structure
 
         :param chip_info: The ChipSummaryInfo structure to create the chip\
@@ -85,7 +69,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Create the router
         links = list()
         for link in chip_info.working_links:
-            dest_x, dest_y = chip_info.get_link_destination(link)
+            dest_x, dest_y = utilities.get_chip_over_link(
+                chip_info.x, chip_info.y, link, width, height)
             opposite_link_id = (link + 3) % 6
             links.append(Link(
                 chip_info.x, chip_info.y, link, dest_x, dest_y,
@@ -119,14 +104,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _receive_chip_info(self, scp_read_chip_info_response):
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
-        if self._width is None:
-            self._width = chip_info.width
-        if self._height is None:
-            self._height = chip_info.height
-        if self._boot_x is None:
-            self._boot_x = chip_info.x
-        if self._boot_y is None:
-            self._boot_y = chip_info.y
 
     def _receive_error(self, request, exception, tracebackinfo):
 
@@ -140,43 +117,35 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             AbstractProcess._receive_error(self, request, exception,
                                            tracebackinfo)
 
-    def get_machine_details(self):
-
-        # Read the machine dimensions
-        self._send_request(
-            SCPChipInfoRequest(x=255, y=255, with_size=True),
-            self._receive_chip_info)
-        self._finish()
-        self.check_for_error()
+    def get_machine_details(self, boot_x, boot_y, width, height):
 
         # Get the P2P table - 8 entries are packed into each 32-bit word
-        p2p_column_bytes = P2PTable.get_n_column_bytes(self._height)
-        for column in range(self._width):
+        p2p_column_bytes = P2PTable.get_n_column_bytes(height)
+        for column in range(width):
             offset = P2PTable.get_column_offset(column)
             self._send_request(
                 SCPReadMemoryRequest(
-                    x=255, y=255,
+                    x=boot_x, y=boot_y,
                     base_address=(
                         constants.ROUTER_REGISTER_P2P_ADDRESS + offset),
                     size=p2p_column_bytes),
                 self._receive_p2p_data)
         self._finish()
         self.check_for_error()
-        p2p_table = P2PTable(self._width, self._height, self._p2p_column_data)
+        p2p_table = P2PTable(width, height, self._p2p_column_data)
 
         # Get the chip information for each chip
         for (x, y) in p2p_table.iterchips():
-            if (x, y) not in self._chip_info:
-                self._send_request(
-                    SCPChipInfoRequest(x, y), self._receive_chip_info)
+            self._send_request(
+                SCPChipInfoRequest(x, y), self._receive_chip_info)
         self._finish()
         self.check_for_error()
 
         # Build a Machine
         chips = [
-            self._make_chip(chip_info)
+            self._make_chip(width, height, chip_info)
             for chip_info in self._chip_info.itervalues()]
-        machine = Machine(chips, self._boot_x, self._boot_y)
+        machine = Machine(chips, boot_x, boot_y)
 
         return machine
 

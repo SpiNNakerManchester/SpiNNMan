@@ -39,7 +39,8 @@ from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
 from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
-from spinn_machine.utilities import utilities
+from spinnman.messages.spinnaker_boot._system_variables\
+    ._system_variable_boot_values import SystemVariableDefinition
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -103,6 +104,8 @@ from spinnman import exceptions
 from spinn_storage_handlers.abstract_classes.abstract_data_reader \
     import AbstractDataReader
 from spinn_storage_handlers.file_data_reader import FileDataReader
+
+from spinn_machine.utilities import utilities
 
 # general imports
 import random
@@ -284,13 +287,13 @@ class Transceiver(object):
         # Place to keep the current machine
         self._version = version
         self._machine = None
+        self._width = None
+        self._height = None
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
         self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
-
-        # Place to keep the known chip information
-        self._chip_info = dict()
+        self._iobuf_size = None
 
         # Place to keep the identity of the re-injector core on each chip,
         # indexed by chip x and y coordinates
@@ -663,11 +666,18 @@ class Transceiver(object):
         """ Get the current machine status and store it
         """
 
+        # Get the width and height of the machine
+        self.get_machine_dimensions()
+
+        # Get the coordinates of the boot chip
+        version_info = self.get_scamp_version()
+
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
             self._ignore_cores, self._max_core_id, self._max_sdram_size)
-        self._machine = get_machine_process.get_machine_details()
+        self._machine = get_machine_process.get_machine_details(
+            version_info.x, version_info.y, self._width, self._height)
 
         # update the scamp selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
@@ -678,9 +688,6 @@ class Transceiver(object):
             if connection.chip_x == 255 and connection.chip_y == 255:
                 connection.update_chip_coordinates(
                     self._machine.boot_x, self._machine.boot_y)
-
-        # get cpu information
-        self._chip_info = get_machine_process.get_chip_info()
 
         # Work out and add the spinnaker links
         spinnaker_links = utilities.locate_spinnaker_links(
@@ -794,10 +801,16 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        if self._machine is None:
-            self._update_machine()
-        return MachineDimensions(self._machine.max_chip_x + 1,
-                                 self._machine.max_chip_y + 1)
+        if self._width is None or self._height is None:
+            height_item = SystemVariableDefinition.y_size
+            self._height, self._width = struct.unpack_from(
+                "<BB",
+                self.read_memory(
+                    255, 255,
+                    (constants.SYSTEM_VARIABLE_BASE_ADDRESS +
+                        height_item.offset),
+                    2))
+        return MachineDimensions(self._width, self._height)
 
     def get_machine_details(self):
         """ Get the details of the machine made up of chips on a board and how\
@@ -1004,7 +1017,6 @@ class Transceiver(object):
                     logger.info("Attempting to boot machine")
                     self.boot_board(number_of_boards, width, height)
                     current_tries_to_go -= 1
-                    logger.info("Boot sent")
                 elif isinstance(
                         e.exception, exceptions.SpinnmanIOException):
                     raise exceptions.SpinnmanIOException(
@@ -1052,24 +1064,31 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
 
         # Get all the cores if the subsets are not given
         if core_subsets is None:
+            if self._machine is None:
+                self._update_machine()
             core_subsets = CoreSubsets()
-            for chip_info in self._chip_info.itervalues():
-                x = chip_info.x
-                y = chip_info.y
-                for p in range(chip_info.n_cores):
-                    core_subsets.add_processor(x, y, p)
+            for chip in self._machine.chips:
+                for processor in range(chip.processors):
+                    core_subsets.add_processor(
+                        chip.x, chip.y, processor.processor_id)
 
         process = GetCPUInfoProcess(self._scamp_connection_selector)
-        return process.get_cpu_info(self._chip_info, core_subsets)
+        cpu_info = process.get_cpu_info(core_subsets)
+        return cpu_info
+
+    def _get_sv_data(self, x, y, data_item):
+        return struct.unpack_from(
+            data_item.data_type.struct_code,
+            self.read_memory(
+                x, y,
+                constants.SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
+                data_item.data_type.value))[0]
 
     def get_user_0_register_address_from_core(self, x, y, p):
-        """Get the address of user 0 for a given processor on the board
+        """ Get the address of user 0 for a given processor on the board
 
         :param x: the x-coordinate of the chip containing the processor
         :param y: the y-coordinate of the chip containing the processor
@@ -1087,40 +1106,20 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
-
-        # check the chip exists in the info
-        if not (x, y) in self._chip_info:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "x, y", "{}, {}".format(x, y),
-                "Not a valid chip on the current machine")
-
-        # collect the chip info for the associated chip
-        chip_info = self._chip_info[(x, y)]
-
-        # check that p is a valid processor for this chip
-        if p >= chip_info.n_cores:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
-
-        # locate the base address for this chip info
-        base_address = (chip_info.vcpu_base_address +
-                        (constants.CPU_INFO_BYTES * p))
-        base_address += constants.CPU_USER_0_START_ADDRESS
-        return base_address
+        return (
+            utility_functions.get_vcpu_address(p) +
+            constants.CPU_USER_0_START_ADDRESS)
 
     def get_user_1_register_address_from_core(self, x, y, p):
-        """Get the address of user 1 for a given processor on the board
+        """ Get the address of user 1 for a given processor on the board
 
         :param x: the x-coordinate of the chip containing the processor
         :param y: the y-coordinate of the chip containing the processor
-        :param p: The id of the processor to get the user 0 address from
+        :param p: The id of the processor to get the user 1 address from
         :type x: int
         :type y: int
         :type p: int
-        :return: The address for user 0 register for this processor
+        :return: The address for user 1 register for this processor
         :rtype: int
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
@@ -1130,32 +1129,12 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
-
-        # check the chip exists in the info
-        if not (x, y) in self._chip_info:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "x, y", "{}, {}".format(x, y),
-                "Not a valid chip on the current machine")
-
-        # collect the chip info for the associated chip
-        chip_info = self._chip_info[(x, y)]
-
-        # check that p is a valid processor for this chip
-        if p >= chip_info.n_cores:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
-
-        # locate the base address for this chip info
-        base_address = (chip_info.vcpu_base_address +
-                        (constants.CPU_INFO_BYTES * p))
-        base_address += constants.CPU_USER_1_START_ADDRESS
-        return base_address
+        return (
+            utility_functions.get_vcpu_address(p) +
+            constants.CPU_USER_1_START_ADDRESS)
 
     def get_user_2_register_address_from_core(self, x, y, p):
-        """Get the address of user 2 for a given processor on the board
+        """ Get the address of user 2 for a given processor on the board
 
         :param x: the x-coordinate of the chip containing the processor
         :param y: the y-coordinate of the chip containing the processor
@@ -1173,29 +1152,9 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
-
-        # check the chip exists in the info
-        if not (x, y) in self._chip_info:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "x, y", "{}, {}".format(x, y),
-                "Not a valid chip on the current machine")
-
-        # collect the chip info for the associated chip
-        chip_info = self._chip_info[(x, y)]
-
-        # check that p is a valid processor for this chip
-        if p >= chip_info.n_cores:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
-
-        # locate the base address for this chip info
-        base_address = (chip_info.vcpu_base_address +
-                        (constants.CPU_INFO_BYTES * p))
-        base_address += constants.CPU_USER_2_START_ADDRESS
-        return base_address
+        return (
+            utility_functions.get_vcpu_address(p) +
+            constants.CPU_USER_2_START_ADDRESS)
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
@@ -1244,12 +1203,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
-
+        if self._iobuf_size is None:
+            self._iobuf_size = self._get_sv_data(
+                255, 255, SystemVariableDefinition.iobuf_size)
         process = ReadIOBufProcess(self._scamp_connection_selector)
-        return process.read_iobuf(self._chip_info, core_subsets)
+        return process.read_iobuf(self._iobuf_size, core_subsets)
 
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
@@ -2249,10 +2207,8 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        if self._machine is None:
-            self._update_machine()
-        chip_info = self._chip_info[(x, y)]
-        base_address = chip_info.multicast_routes_copy_address
+        base_address = self._get_sv_data(
+            x, y, SystemVariableDefinition.router_table_copy_address)
         process = GetMultiCastRoutesProcess(
             self._scamp_connection_selector, app_id)
         return process.get_routes(x, y, base_address)

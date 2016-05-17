@@ -35,72 +35,22 @@ class ChipSummaryInfo(object):
         self._x = x
         self._y = y
 
-        # The following items are only included if the appropriate flags are
-        # set
-        self._link_destinations = None
-        self._vcpu_base_address = None
-        self._multicast_routes_copy_address = None
-        self._fixed_route_copy_address = None
         self._nearest_ethernet_x = None
         self._nearest_ethernet_y = None
-        self._cpu_speed_mhz = None
         self._ethernet_ip_address = None
-        self._width = None
-        self._height = None
-        self._iobuf_size = None
 
-        # If the link ids are included
-        if (chip_summary_flags & (1 << 26)) != 0:
-            extra_flags = struct.unpack_from(
-                "<H", chip_summary_data, data_offset)[0]
-            data_offset += 2
-            if (extra_flags & 1) != 0:
-                link_p2p_ids = struct.unpack_from(
-                    "<12B", chip_summary_data, data_offset)
-                data_offset += 12
-                self._link_destinations = {
-                    i: (link_p2p_ids[(i * 2) + 1], link_p2p_ids[i * 2])
-                    for i in self._working_links}
+        (self._nearest_ethernet_y, self._nearest_ethernet_x) = \
+            struct.unpack_from(
+                "<BB", chip_summary_data, data_offset)
+        data_offset += 2
 
-            # If the vcpu_t is included
-            if (extra_flags & (1 << 1)) != 0:
-                self._vcpu_base_address = struct.unpack_from(
-                    "<I", chip_summary_data, data_offset)[0]
-                data_offset += 4
-
-            # If the router copy addresses are included
-            if (extra_flags & (1 << 2)) != 0:
-                (self._multicast_routes_copy_address,
-                    self._fixed_route_copy_address) = struct.unpack_from(
-                        "<2I", chip_summary_data, data_offset)
-                data_offset += 8
-
-            # If the nearest Ethernet is included
-            if (extra_flags & (1 << 3)) != 0:
-                (self._nearest_ethernet_y, self._nearest_ethernet_x) = \
-                    struct.unpack_from(
-                        "<BB", chip_summary_data, data_offset)
-                data_offset += 2
-
-            # If the Ethernet address is included
-            if (extra_flags & (1 << 4)) != 0:
-                ip_data = struct.unpack_from(
-                    "<4B", chip_summary_data, data_offset)
-                self._ethernet_ip_address = "{}.{}.{}.{}".format(
-                    ip_data[0], ip_data[1], ip_data[2], ip_data[3])
-                data_offset += 4
-
-            # If the machine size is included
-            if (extra_flags & (1 << 5)) != 0:
-                self._height, self._width = struct.unpack_from(
-                    "<BB", chip_summary_data, data_offset)
-                data_offset += 2
-
-            # If the iobuf size is included
-            if (extra_flags & (1 << 6)) != 0:
-                self._iobuf_size = struct.unpack_from(
-                    "<I", chip_summary_data, data_offset)[0]
-                data_offset += 4
+        ip_data = struct.unpack_from(
+            "<4B", chip_summary_data, data_offset)
+        ethernet_ip_address = "{}.{}.{}.{}".format(
+            ip_data[0], ip_data[1], ip_data[2], ip_data[3])
+        if self._is_ethernet_available:
+            self._ethernet_ip_address = ethernet_ip_address
+        data_offset += 4
 
     @property
     def x(self):
@@ -174,41 +124,6 @@ class ChipSummaryInfo(object):
         """
         return self._largest_free_sram_block
 
-    def get_link_destination(self, link):
-        """ Get the x and y coordinates of the chip down the given link, or\
-            None if the link is not working
-
-        :param link: The id of the link to find the destination of
-        :rtype: (int, int) or None
-        """
-        if link not in self._link_destinations:
-            return None
-        return self._link_destinations[link]
-
-    @property
-    def vcpu_base_address(self):
-        """ The address of the VCPU structure on the chip
-
-        :rtype: int
-        """
-        return self._vcpu_base_address
-
-    @property
-    def multicast_routes_copy_address(self):
-        """ The address of the copy of the multicast routes
-
-        :rtype: int
-        """
-        return self._multicast_routes_copy_address
-
-    @property
-    def fixed_route_copy_address(self):
-        """ The address of the copy of the fixed route
-
-        :rtype: int
-        """
-        return self._fixed_route_copy_address
-
     @property
     def nearest_ethernet_x(self):
         """ The x coordinate of the nearest Ethernet chip
@@ -226,41 +141,9 @@ class ChipSummaryInfo(object):
         return self._nearest_ethernet_y
 
     @property
-    def cpu_speed_mhz(self):
-        """ The speed of the CPUs in MHz
-
-        :rtype: int
-        """
-        return self._cpu_speed_mhz
-
-    @property
     def ethernet_ip_address(self):
         """ The IP address of the Ethernet if up, or None if not
 
         :rtype: str
         """
         return self._ethernet_ip_address
-
-    @property
-    def width(self):
-        """ The width of the machine, if requested, or None if not
-
-        :rtype: int
-        """
-        return self._width
-
-    @property
-    def height(self):
-        """ The height of the machine, if requested, or None if not
-
-        :rtype: int
-        """
-        return self._height
-
-    @property
-    def iobuf_size(self):
-        """ The size of an iobuf buffer in bytes, if requested, or None if not
-
-        :rtype: int
-        """
-        return self._iobuf_size

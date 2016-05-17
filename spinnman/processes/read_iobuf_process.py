@@ -3,8 +3,8 @@ import struct
 from collections import defaultdict
 from collections import OrderedDict
 
-from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.model.io_buffer import IOBuffer
+from spinnman.utilities import utility_functions
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
@@ -19,6 +19,9 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
+        # A dictionary of (x, y, p) -> iobuf address
+        self._iobuf_address = dict()
+
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
         self._iobuf = defaultdict(OrderedDict)
 
@@ -32,6 +35,14 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         # A list of next reads that need to be done as a result of the first
         # read = list of (x, y, p, n, next_address, first_read_size)
         self._next_reads = list()
+
+    def handle_iobuf_address_response(self, iobuf_size, x, y, p, response):
+        iobuf_address = struct.unpack_from(
+            "<I", response.data, response.offset)[0]
+        first_read_size = min(
+            (iobuf_size + 16, constants.UDP_MESSAGE_MAX_SIZE))
+        self._next_reads.append((
+            x, y, p, 0, iobuf_address, first_read_size))
 
     def handle_first_iobuf_response(self, x, y, p, n, base_address,
                                     first_read_size, response):
@@ -81,22 +92,23 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         view[offset:offset + response.length] = response.data[
             response.offset:response.offset + response.length]
 
-    def read_iobuf(self, chip_info, core_subsets):
-        cpu_info_process = GetCPUInfoProcess(self._next_connection_selector)
-        cpu_information = cpu_info_process.get_cpu_info(chip_info,
-                                                        core_subsets)
+    def read_iobuf(self, iobuf_size, core_subsets):
 
-        # Kick-start the reading of the IOBufs
-        for cpu_info in cpu_information:
-            this_chip_info = chip_info[(cpu_info.x, cpu_info.y)]
-            if cpu_info.iobuf_address != 0:
-                iobuf_size = this_chip_info.iobuf_size + 16
-                first_read_size = min(
-                    (iobuf_size, constants.UDP_MESSAGE_MAX_SIZE))
-
-                self._next_reads.append((
-                    cpu_info.x, cpu_info.y, cpu_info.p, 0,
-                    cpu_info.iobuf_address, first_read_size))
+        # Get the iobuf address for each core
+        for core_subset in core_subsets:
+            x = core_subset.x
+            y = core_subset.y
+            for p in core_subset.processor_ids:
+                base_address = (
+                    utility_functions.get_vcpu_address(p) +
+                    constants.CPU_IOBUF_ADDRESS_OFFSET)
+                self._send_request(
+                    SCPReadMemoryRequest(x, y, base_address, 4),
+                    functools.partial(
+                        self.handle_iobuf_address_response,
+                        iobuf_size, x, y, p))
+        self._finish()
+        self.check_for_error()
 
         # Run rounds of the process until reading is complete
         while len(self._extra_reads) > 0 or len(self._next_reads) > 0:

@@ -1,6 +1,7 @@
 
 # spinnman imports
 from spinnman.model.bmp_connection_data import BMPConnectionData
+from spinnman import constants
 
 # general imports
 import socket
@@ -67,3 +68,12 @@ def get_router_timeout_value_from_byte(value):
     :type value: int
     """
     return get_router_timeout_value(value & 0xF, (value >> 4) & 0XF)
+
+
+def get_vcpu_address(p):
+    """ Get the address of the vcpu_t structure for the given core
+
+    :param p: The core
+    :type p: int
+    """
+    return constants.CPU_INFO_OFFSET + (constants.CPU_INFO_BYTES * p)
