@@ -2,6 +2,8 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 from time import localtime
 from time import asctime
 import struct
+import re
+from spinnman import exceptions
 
 
 class VersionInfo(object):
@@ -22,23 +24,26 @@ class VersionInfo(object):
             version_no, self._build_date) = struct.unpack_from(
                 "<BBBBHHI", version_data, offset)
 
-        version_string = version_data[offset + 12:-1].decode("utf-8")
+        version_data = version_data[offset + 12:-1].decode("utf-8")
 
         if version_no < 0xFFFF:
             try:
                 self._version_number = (version_no // 100, version_no % 100, 0)
-                self._name, self._hardware = version_string.split("/")
-                self._version_string = version_string
+                self._name, self._hardware = version_data.split("/")
+                self._version_string = version_data
             except ValueError as exception:
                 raise SpinnmanInvalidParameterException(
-                    "version_string", self._version_string,
+                    "version_data", self._version_string,
                     "Incorrect format: {}".format(exception))
         else:
-            self._version_string, _, version = version_string.partition("\0")
-            self._version_number = tuple(map(
-                int, version.strip("\0").split(".")))
-            self._version_string = self._version_string.rstrip("\0")
-            self._name, self._hardware = self._version_string.split("/")
+            name_hardware, _, version = version_data.partition("\0")
+            self._version_string = version
+            matches = re.match("(\d+)\.(\d+)\.(\d+)", version)
+            if matches is None:
+                raise exceptions.SpinnmanInvalidParameterException(
+                    "version", version, "Cannot be parsed")
+            self._version_number = tuple(map(int, matches.group(1, 2, 3)))
+            self._name, self._hardware = name_hardware.rstrip("\0").split("/")
 
     @property
     def name(self):
@@ -115,5 +120,5 @@ class VersionInfo(object):
 
     def __str__(self):
         return "[Version: {} {} at {}:{}:{}:{} (built {})]".format(
-            self._name, self._version_number, self._hardware, self._x, self._y,
+            self._name, self._version_string, self._hardware, self._x, self._y,
             self._p, asctime(localtime(self._build_date)))

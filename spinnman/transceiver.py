@@ -123,7 +123,7 @@ _SCAMP_NAME = "SC&MP"
 _SCAMP_VERSION = (2, 2, 0)
 
 _BMP_NAME = "BC&MP"
-_BMP_VERSIONS = [(1, 3, 0), (1, 33, 0), (1, 37, 0), (1, 36, 0), (2, 0, 0)]
+_BMP_MAJOR_VERSIONS = [1, 2]
 
 _STANDARD_RETIRES_NO = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
@@ -474,15 +474,20 @@ class Transceiver(object):
                                                     connection.frame)])
                 fail_version_name = version_info.name != _BMP_NAME
                 fail_version_num = \
-                    version_info.version_number not in _BMP_VERSIONS
+                    version_info.version_number[0] not in _BMP_MAJOR_VERSIONS
                 if fail_version_name or fail_version_num:
                     raise exceptions.SpinnmanIOException(
-                        "The BMP is running {}"
+                        "The BMP at {} is running {}"
                         " {} which is incompatible with this transceiver, "
                         "required version is {} {}".format(
+                            connection.remote_ip_address,
                             version_info.name,
-                            version_info.version_number,
-                            _BMP_NAME, _BMP_VERSIONS))
+                            version_info.version_string,
+                            _BMP_NAME, _BMP_MAJOR_VERSIONS))
+
+                logger.info("Using BMP at {} with version {} {}".format(
+                    connection.remote_ip_address, version_info.name,
+                    version_info.version_string))
 
             # If it fails to respond due to timeout, maybe that the connection
             # isn't valid
