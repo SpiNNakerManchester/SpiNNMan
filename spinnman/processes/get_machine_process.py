@@ -17,6 +17,10 @@ from spinn_machine.sdram import SDRAM
 from spinn_machine.machine import Machine
 from spinn_machine.link import Link
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class GetMachineProcess(AbstractMultiConnectionProcess):
     """ A process for getting the machine details over a set of connections
@@ -71,10 +75,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         for link in chip_info.working_links:
             dest_x, dest_y = utilities.get_chip_over_link(
                 chip_info.x, chip_info.y, link, width, height)
-            opposite_link_id = (link + 3) % 6
-            links.append(Link(
-                chip_info.x, chip_info.y, link, dest_x, dest_y,
-                opposite_link_id, opposite_link_id))
+            if ((self._ignore_chips is None or
+                    not self._ignore_chips.is_chip(dest_x, dest_y)) and
+                    (dest_x, dest_y) in self._chip_info):
+                opposite_link_id = (link + 3) % 6
+                links.append(Link(
+                    chip_info.x, chip_info.y, link, dest_x, dest_y,
+                    opposite_link_id, opposite_link_id))
         router = Router(
             links=links,
             n_available_multicast_entries=(
@@ -139,14 +146,28 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self._send_request(
                 SCPChipInfoRequest(x, y), self._receive_chip_info)
         self._finish()
-        self.check_for_error()
+        try:
+            self.check_for_error()
+        except:
+
+            # Ignore errors so far, as any error here just means that a chip
+            # is down that wasn't marked as down
+            pass
+
+        # Warn about unexpected missing chips
+        for (x, y) in p2p_table.iterchips():
+            if (x, y) not in self._chip_info:
+                logger.warn("Chip {}, {} was expected but didn't reply".format(
+                    x, y))
 
         # Build a Machine
         chips = [
             self._make_chip(width, height, chip_info)
             for chip_info in sorted(
                 self._chip_info.values(),
-                key=lambda chip: (chip.x, chip.y))]
+                key=lambda chip: (chip.x, chip.y))
+            if (self._ignore_chips is None or
+                not self._ignore_chips.is_chip(chip_info.x, chip_info.y))]
         machine = Machine(chips, boot_x, boot_y)
 
         return machine

@@ -4,8 +4,8 @@ from enum import Enum
 class SignalType(Enum):
     """ The type of signal, determined by how it is transmitted
     """
-    MULTICAST = 0,
-    POINT_TO_POINT = 1,
+    MULTICAST = 0
+    POINT_TO_POINT = 1
     NEAREST_NEIGHBOUR = 2
 
 
@@ -16,11 +16,11 @@ class SCPSignal(Enum):
     POWER_DOWN = (1, SignalType.NEAREST_NEIGHBOUR)
     STOP = (2, SignalType.NEAREST_NEIGHBOUR)
     START = (3, SignalType.NEAREST_NEIGHBOUR)
-    SYNC0 = (4, SignalType.NEAREST_NEIGHBOUR)
-    SYNC1 = (5, SignalType.NEAREST_NEIGHBOUR)
+    SYNC0 = (4, SignalType.MULTICAST)
+    SYNC1 = (5, SignalType.MULTICAST)
     PAUSE = (6, SignalType.MULTICAST)
     CONTINUE = (7, SignalType.MULTICAST)
-    EXIT = (8, SignalType.NEAREST_NEIGHBOUR)
+    EXIT = (8, SignalType.MULTICAST)
     TIMER = (9, SignalType.MULTICAST)
     USER_0 = (10, SignalType.MULTICAST)
     USER_1 = (11, SignalType.MULTICAST)

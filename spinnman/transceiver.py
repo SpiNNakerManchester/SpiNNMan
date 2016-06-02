@@ -2421,6 +2421,7 @@ class Transceiver(object):
         if self._reinjection_running:
             process = ExitDPRIProcess(self._scamp_connection_selector)
             process.exit(self._reinjector_cores)
+            self.stop_application(_REINJECTOR_APP_ID)
             self._reinjection_running = False
 
         if power_off_machine and len(self._bmp_connections) > 0:
