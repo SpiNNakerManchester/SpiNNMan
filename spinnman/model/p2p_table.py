@@ -12,9 +12,12 @@ class P2PTable(object):
         self._height = height
         for x in range(len(column_data)):
             y = 0
+            pos = 0
             while y < height:
                 (data, offset) = column_data[x]
-                next_word = struct.unpack_from("<I", data, offset + (y * 4))[0]
+                next_word = struct.unpack_from(
+                    "<I", data, offset + (pos * 4))[0]
+                pos += 1
                 for entry in range(min(8, height - y)):
                     route = P2PTableRoute((next_word >> (3 * entry)) & 0b111)
                     if route is not P2PTableRoute.NONE:

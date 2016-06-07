@@ -508,6 +508,8 @@ class Transceiver(object):
             try:
                 self.get_scamp_version(connection_selector=connection_selector)
                 return True
+            except exceptions.SpinnmanGenericProcessException:
+                current_retries -= 1
             except exceptions.SpinnmanTimeoutException:
                 current_retries -= 1
             except exceptions.SpinnmanUnexpectedResponseCodeException:
@@ -764,6 +766,10 @@ class Transceiver(object):
                             None, [new_connection]), _STANDARD_RETIRES_NO):
                     self._scp_sender_connections.append(new_connection)
                     self._all_connections.add(new_connection)
+                else:
+                    logger.warn(
+                        "Additional Ethernet connection on {} cannot be"
+                        " contacted".format(chip.ip_address))
 
         # Update the connection queues after finding new connections
         return new_connections
