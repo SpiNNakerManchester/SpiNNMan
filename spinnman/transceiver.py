@@ -768,8 +768,9 @@ class Transceiver(object):
                     self._all_connections.add(new_connection)
                 else:
                     logger.warn(
-                        "Additional Ethernet connection on {} cannot be"
-                        " contacted".format(chip.ip_address))
+                        "Additional Ethernet connection on {} at chip {}, {}"
+                        " cannot be contacted".format(
+                            chip.ip_address, chip.x, chip.y))
 
         # Update the connection queues after finding new connections
         return new_connections
