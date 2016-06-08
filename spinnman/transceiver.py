@@ -76,7 +76,6 @@ from spinnman.connections.udp_packet_connections.udp_scamp_connection \
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
 from spinnman.model.machine_dimensions import MachineDimensions
-from spinnman.model.core_subsets import CoreSubsets
 from spinnman.messages.spinnaker_boot.spinnaker_boot_messages \
     import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_memory_request \
@@ -106,6 +105,7 @@ from spinn_storage_handlers.abstract_classes.abstract_data_reader \
 from spinn_storage_handlers.file_data_reader import FileDataReader
 
 from spinn_machine.utilities import utilities
+from spinn_machine.core_subsets import CoreSubsets
 
 # general imports
 import random
@@ -151,11 +151,11 @@ def create_transceiver_from_hostname(
                 machine.  Requests for a "machine" will have these chips\
                 excluded, as if they never existed.  The processor_ids of\
                 the specified chips are ignored.
-    :type ignore_chips: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+    :type ignore_chips: :py:class:`spinn_machine.core_subsets.CoreSubsets`
     :param ignore_cores: An optional set of cores to ignore in the\
                 machine.  Requests for a "machine" will have these cores\
                 excluded, as if they never existed.
-    :type ignore_cores: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+    :type ignore_cores: :py:class:`spinn_machine.core_subsets.CoreSubsets`
     :param max_core_id: The maximum core id in any discovered machine.\
                 Requests for a "machine" will only have core ids up to\
                 this value.
@@ -257,11 +257,11 @@ class Transceiver(object):
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
                     the specified chips are ignored.
-        :type ignore_chips: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :type ignore_chips: :py:class:`spinn_machine.core_subsets.CoreSubsets`
         :param ignore_cores: An optional set of cores to ignore in the\
                     machine.  Requests for a "machine" will have these cores\
                     excluded, as if they never existed.
-        :type ignore_cores: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :type ignore_cores: :py:class:`spinn_machine.core_subsets.CoreSubsets`
         :param max_core_id: The maximum core id in any discovered machine.\
                     Requests for a "machine" will only have core ids up to and\
                     including this value.
@@ -1062,7 +1062,7 @@ class Transceiver(object):
                     the information.  If not specified, the information from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :type core_subsets: :py:class:`spinn_machine.core_subsets.CoreSubsets`
         :return: An iterable of the cpu information for the selected cores, or\
                     all cores if core_subsets is not specified
         :rtype: iterable of :py:class:`spinnman.model.cpu_info.CPUInfo`
@@ -1201,7 +1201,7 @@ class Transceiver(object):
                     the buffers.  If not specified, the buffers from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :type core_subsets: :py:class:`spinn_machine.core_subsets.CoreSubsets`
         :return: An iterable of the buffers, which may not be in the order\
                     of core_subsets
         :rtype: iterable of :py:class:`spinnman.model.io_buffer.IOBuffer`
@@ -1340,7 +1340,7 @@ class Transceiver(object):
             require a number of communications with the board to execute.
 
         :param core_subsets: Which cores on which chips to start the executable
-        :type core_subsets: :py:class:`spinnman.model.core_subsets.CoreSubsets`
+        :type core_subsets: :py:class:`spinn_machine.core_subsets.CoreSubsets`
         :param executable: The data that is to be executed.  Should be one of\
                     the following:
                     * An instance of AbstractDataReader

@@ -8,8 +8,8 @@ from spinn_storage_handlers.file_data_reader import FileDataReader
 
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.cpu_state import CPUState
-from spinnman.model.core_subsets import CoreSubsets
-from spinnman.model.core_subset import CoreSubset
+from spinn_machine.core_subsets import CoreSubsets
+from spinn_machine.core_subset import CoreSubset
 from spinnman.messages.scp.scp_signal import SCPSignal
 from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
