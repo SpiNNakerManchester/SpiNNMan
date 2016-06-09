@@ -112,11 +112,6 @@ class SCPRequestPipeLine(object):
         self._send_time[_next_sequence] = time.time()
         _next_sequence = (_next_sequence + 1) % MAX_SEQUENCE
 
-        # Send the request, keeping track of how many are sent
-        # self._token_bucket.consume(284)
-        self._connection.send(request_data)
-        self._in_progress += 1
-
         # If the connection has not been measured
         if self._n_channels is None:
             if self._connection.is_ready_to_receive():
@@ -129,6 +124,11 @@ class SCPRequestPipeLine(object):
         while (self._n_channels is not None and
                 self._in_progress >= self._n_channels):
             self._do_retrieve(self._intermediate_channel_waits, 0.1)
+
+        # Send the request, keeping track of how many are sent
+        # self._token_bucket.consume(284)
+        self._connection.send(request_data)
+        self._in_progress += 1
 
     def finish(self):
         """ Indicate the end of the packets to be sent.  This must be called\
