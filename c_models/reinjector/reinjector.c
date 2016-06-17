@@ -258,8 +258,6 @@ INT_HANDLER dropped_packet_callback() {
 }
 
 static uint sark_cmd_dpri(sdp_msg_t *msg) {
-    io_printf(IO_BUF, "Received command %u, seq %u\n", msg->arg1, msg->seq);
-
     if (msg->arg1 == CMD_DPRI_SET_ROUTER_TIMEOUT) {
 
         // Set the router wait1 timeout
@@ -283,7 +281,6 @@ static uint sark_cmd_dpri(sdp_msg_t *msg) {
         return 0;
 
     } else if (msg->arg1 == CMD_DPRI_SET_PACKET_TYPES) {
-        io_printf(IO_BUF, "Setting packet types to 0x%.8x\n", msg->arg2);
 
         // Set the re-injection options
         reinject_mc = (msg->arg2 & DPRI_PACKET_TYPE_MC) != 0;
