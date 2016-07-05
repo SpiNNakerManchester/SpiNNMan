@@ -6,6 +6,7 @@ from spinnman import exceptions
 from spinnman.model.p2p_table import P2PTable
 from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
 from spinn_machine.utilities import utilities
+from spinnman.model.cpu_state import CPUState
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman.processes.abstract_process import AbstractProcess
@@ -59,6 +60,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Create the processor list
         processors = list()
         max_core_id = chip_info.n_cores - 1
+        core_states = chip_info.core_states
         if self._max_core_id is not None and max_core_id > self._max_core_id:
             max_core_id = self._max_core_id
         for virtual_core_id in range(max_core_id + 1):
@@ -67,8 +69,15 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if (self._ignore_cores is None or
                     not self._ignore_cores.is_core(
                         chip_info.x, chip_info.y, virtual_core_id)):
-                processors.append(Processor(
-                    virtual_core_id, is_monitor=virtual_core_id == 0))
+                if virtual_core_id == 0:
+                    processors.append(Processor(
+                        virtual_core_id, is_monitor=True))
+                elif core_states[virtual_core_id] == CPUState.IDLE:
+                    processors.append(Processor(virtual_core_id))
+                else:
+                    logger.warn("Not using core {}, {}, {} in state {}".format(
+                        chip_info.x, chip_info.y, virtual_core_id,
+                        core_states[virtual_core_id]))
 
         # Create the router
         links = list()
