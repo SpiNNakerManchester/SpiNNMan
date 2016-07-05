@@ -5,7 +5,6 @@ from spinnman import constants
 from spinnman import exceptions
 from spinnman.model.p2p_table import P2PTable
 from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
-from spinn_machine.utilities import utilities
 from spinnman.model.cpu_state import CPUState
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
