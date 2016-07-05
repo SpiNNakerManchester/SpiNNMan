@@ -105,8 +105,6 @@ from spinn_storage_handlers.abstract_classes.abstract_data_reader \
     import AbstractDataReader
 from spinn_storage_handlers.file_data_reader import FileDataReader
 
-from spinn_machine.utilities import utilities
-
 # general imports
 import random
 import struct
