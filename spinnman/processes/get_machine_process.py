@@ -82,7 +82,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Create the router
         links = list()
         for link in chip_info.working_links:
-            dest_x, dest_y = utilities.get_chip_over_link(
+            dest_x, dest_y = Machine.get_chip_over_link(
                 chip_info.x, chip_info.y, link, width, height)
             if ((self._ignore_chips is None or
                     not self._ignore_chips.is_chip(dest_x, dest_y)) and
