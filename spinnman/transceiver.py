@@ -1048,8 +1048,8 @@ class Transceiver(object):
                     version_info = None
             except exceptions.SpinnmanException:
                 pass
-
-        logger.info("Found board with version {}".format(version_info))
+        if version_info is not None:
+            logger.info("Found board with version {}".format(version_info))
         return version_info
 
     def get_cpu_information(self, core_subsets=None):
