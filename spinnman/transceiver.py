@@ -814,11 +814,11 @@ class Transceiver(object):
             height_item = SystemVariableDefinition.y_size
             self._height, self._width = struct.unpack_from(
                 "<BB",
-                self.read_memory(
+                str(self.read_memory(
                     255, 255,
                     (constants.SYSTEM_VARIABLE_BASE_ADDRESS +
                         height_item.offset),
-                    2))
+                    2)))
         return MachineDimensions(self._width, self._height)
 
     def get_machine_details(self):
