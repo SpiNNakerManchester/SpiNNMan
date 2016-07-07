@@ -9,8 +9,8 @@ class AbstractSCPRequest(object):
     """ Represents an Abstract SCP Request
     """
 
-    DEFAULT_DESTINATION_X_COORDINATE = 255
-    DEFAULT_DESTINATION_Y_COORDINATE = 255
+    DEFAULT_DEST_X_COORD = 255
+    DEFAULT_DEST_Y_COORD = 255
 
     def __init__(self, sdp_header, scp_request_header, argument_1=None,
                  argument_2=None, argument_3=None, data=None):

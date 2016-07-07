@@ -55,7 +55,6 @@ class SpinnakerBootMessages(object):
                 "board_version", str(board_version), "Unknown board version")
 
         # Get the boot packet values
-        spinnaker_boot_value = None
         if board_version is not None:
             spinnaker_boot_value = variable_boot_values.spinnaker_boot_values[
                 board_version]

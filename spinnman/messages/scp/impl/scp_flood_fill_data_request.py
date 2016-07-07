@@ -41,8 +41,8 @@ class SCPFloodFillDataRequest(AbstractSCPRequest):
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0,
-                destination_chip_x=self.DEFAULT_DESTINATION_X_COORDINATE,
-                destination_chip_y=self.DEFAULT_DESTINATION_Y_COORDINATE),
+                destination_chip_x=self.DEFAULT_DEST_X_COORD,
+                destination_chip_y=self.DEFAULT_DEST_Y_COORD),
             SCPRequestHeader(command=SCPCommand.CMD_FFD),
             argument_1=argument_1, argument_2=argument_2,
             argument_3=base_address, data=None)
