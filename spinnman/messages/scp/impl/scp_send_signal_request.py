@@ -39,8 +39,9 @@ class SCPSendSignalRequest(AbstractSCPRequest):
         super(SCPSendSignalRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=0,
-                destination_chip_y=0),
+                destination_cpu=0,
+                destination_chip_x=self.DEFAULT_DEST_X_COORD,
+                destination_chip_y=self.DEFAULT_DEST_Y_COORD),
             SCPRequestHeader(command=SCPCommand.CMD_SIG),
             argument_1=signal.signal_type.value,
             argument_2=_get_data(app_id, signal),

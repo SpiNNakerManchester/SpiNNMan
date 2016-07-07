@@ -8,7 +8,8 @@ from spinnman.messages.spinnaker_boot._system_variables import \
 from spinnman.messages.spinnaker_boot._system_variables.\
     _system_variable_boot_values import \
     SystemVariableDefinition
-import array
+from spinnman.messages.spinnaker_boot._system_variables\
+    ._system_variable_boot_values import SystemVariableBootValues
 from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
     import SpinnakerBootMessage
 from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
@@ -21,11 +22,12 @@ from spinnman.exceptions import SpinnmanIOException
 import os
 import math
 import time
+import array
 
 _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4
 _BOOT_IMAGE_MAX_BYTES = 32 * 1024
-_BOOT_DATA_FILE_NAME = "scamp-133.boot"
+_BOOT_DATA_FILE_NAME = "scamp-3.boot"
 _BOOT_STRUCT_REPLACE_OFFSET = 384 / 4
 _BOOT_STRUCT_REPLACE_LENGTH = 128 / 4
 _BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES / 4) - 1) << 8
@@ -35,32 +37,29 @@ class SpinnakerBootMessages(object):
     """ Represents a set of boot messages to be sent to boot the board
     """
 
-    def __init__(
-            self, board_version, width, height, number_of_boards):
+    def __init__(self, board_version=None):
         """
         builds the boot messages needed to boot the spinnaker machine
 
         :param board_version: The version of the board to be booted
         :type board_version: int
-        :param width: The width of the machine in chips
-        :type width: int or None
-        :param height: The height of the machine in chips
-        :type height: int or None
-        :param number_of_boards: the number of boards that this spinnaker
-            machine is built up from
-        :type number_of_boards: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     board version is not supported
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     assembling the packets
         """
-        if board_version not in variable_boot_values.spinnaker_boot_values:
+        if (board_version is not None and
+                board_version not in
+                variable_boot_values.spinnaker_boot_values):
             raise SpinnmanInvalidParameterException(
                 "board_version", str(board_version), "Unknown board version")
 
         # Get the boot packet values
-        spinnaker_boot_value = \
-            variable_boot_values.spinnaker_boot_values[board_version]
+        if board_version is not None:
+            spinnaker_boot_value = variable_boot_values.spinnaker_boot_values[
+                board_version]
+        else:
+            spinnaker_boot_value = SystemVariableBootValues()
 
         current_time = int(time.time())
         spinnaker_boot_value.set_value(
@@ -69,18 +68,6 @@ class SpinnakerBootMessages(object):
             SystemVariableDefinition.boot_signature, current_time)
         spinnaker_boot_value.set_value(
             SystemVariableDefinition.is_root_chip, 1)
-        spinnaker_boot_value.set_value(
-            SystemVariableDefinition.x_size, int(width))
-        spinnaker_boot_value.set_value(
-            SystemVariableDefinition.y_size, int(height))
-
-        # add any updates for multi-board systems
-        for multi_board_n_boards, extra_variables in (
-                variable_boot_values
-                .spinnaker_multi_board_extra_configs.iteritems()):
-            if number_of_boards >= multi_board_n_boards:
-                for extra_variable, extra_value in extra_variables.iteritems():
-                    spinnaker_boot_value.set_value(extra_variable, extra_value)
 
         # Get the data as an array, to be used later
         self._spinnaker_boot_data = array.array(

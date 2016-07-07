@@ -2,6 +2,8 @@
 # local imports
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
+from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
+    AbstractSCPRequest
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
     SCPBMPSetLedRequest
 from spinnman.messages.scp.impl.scp_bmp_version_request import \
@@ -39,9 +41,8 @@ from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
 from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
-from spinn_machine.utilities import utilities
-from spinnman.processes.check_machine_booted_process \
-    import CheckMachineBootedProcess
+from spinnman.messages.spinnaker_boot._system_variables\
+    ._system_variable_boot_values import SystemVariableDefinition
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -119,10 +120,10 @@ import os
 logger = logging.getLogger(__name__)
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = 1.33
+_SCAMP_VERSION = (3, 0, 0)
 
 _BMP_NAME = "BC&MP"
-_BMP_VERSIONS = [1.3, 1.33, 1.37, 1.36]
+_BMP_MAJOR_VERSIONS = [1, 2]
 
 _STANDARD_RETIRES_NO = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
@@ -286,13 +287,13 @@ class Transceiver(object):
         # Place to keep the current machine
         self._version = version
         self._machine = None
+        self._width = None
+        self._height = None
         self._ignore_chips = ignore_chips
         self._ignore_cores = ignore_cores
         self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
-
-        # Place to keep the known chip information
-        self._chip_info = dict()
+        self._iobuf_size = None
 
         # Place to keep the identity of the re-injector core on each chip,
         # indexed by chip x and y coordinates
@@ -473,15 +474,20 @@ class Transceiver(object):
                                                     connection.frame)])
                 fail_version_name = version_info.name != _BMP_NAME
                 fail_version_num = \
-                    version_info.version_number not in _BMP_VERSIONS
+                    version_info.version_number[0] not in _BMP_MAJOR_VERSIONS
                 if fail_version_name or fail_version_num:
                     raise exceptions.SpinnmanIOException(
-                        "The BMP is running {}"
+                        "The BMP at {} is running {}"
                         " {} which is incompatible with this transceiver, "
                         "required version is {} {}".format(
+                            connection.remote_ip_address,
                             version_info.name,
-                            version_info.version_number,
-                            _BMP_NAME, _BMP_VERSIONS))
+                            version_info.version_string,
+                            _BMP_NAME, _BMP_MAJOR_VERSIONS))
+
+                logger.info("Using BMP at {} with version {} {}".format(
+                    connection.remote_ip_address, version_info.name,
+                    version_info.version_string))
 
             # If it fails to respond due to timeout, maybe that the connection
             # isn't valid
@@ -502,6 +508,8 @@ class Transceiver(object):
             try:
                 self.get_scamp_version(connection_selector=connection_selector)
                 return True
+            except exceptions.SpinnmanGenericProcessException:
+                current_retries -= 1
             except exceptions.SpinnmanTimeoutException:
                 current_retries -= 1
             except exceptions.SpinnmanUnexpectedResponseCodeException:
@@ -665,21 +673,34 @@ class Transceiver(object):
         """ Get the current machine status and store it
         """
 
+        # Get the width and height of the machine
+        self.get_machine_dimensions()
+
+        # Get the coordinates of the boot chip
+        version_info = self.get_scamp_version()
+
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
             self._ignore_cores, self._max_core_id, self._max_sdram_size)
-        self._machine = get_machine_process.get_machine_details()
+        self._machine = get_machine_process.get_machine_details(
+            version_info.x, version_info.y, self._width, self._height)
 
         # update the scamp selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # get cpu information
-        self._chip_info = get_machine_process.get_chip_info()
+        # update the scamp connections replacing any x and y with the default
+        # scp request params with the boot chip coordinates
+        for connection in self._scamp_connections:
+            if (connection.chip_x ==
+                    AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
+                    (connection.chip_y ==
+                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
+                connection.update_chip_coordinates(
+                    self._machine.boot_x, self._machine.boot_y)
 
         # Work out and add the spinnaker links
-        spinnaker_links = utilities.locate_spinnaker_links(
-            self._version, self._machine)
+        spinnaker_links = self._machine.locate_spinnaker_links(self._version)
         for spinnaker_link in spinnaker_links:
             self._machine.add_spinnaker_link(spinnaker_link)
 
@@ -711,6 +732,7 @@ class Transceiver(object):
         # that supports SCP - this is done via the machine
         if len(self._scamp_connections) == 0:
             return list()
+
         # if the machine hasn't been created, create it
         if self._machine is None:
             self._update_machine()
@@ -746,6 +768,11 @@ class Transceiver(object):
                             None, [new_connection]), _STANDARD_RETIRES_NO):
                     self._scp_sender_connections.append(new_connection)
                     self._all_connections.add(new_connection)
+                else:
+                    logger.warn(
+                        "Additional Ethernet connection on {} at chip {}, {}"
+                        " cannot be contacted"
+                        .format(chip.ip_address, chip.x, chip.y))
 
         # Update the connection queues after finding new connections
         return new_connections
@@ -788,10 +815,17 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        if self._machine is None:
-            self._update_machine()
-        return MachineDimensions(self._machine.max_chip_x + 1,
-                                 self._machine.max_chip_y + 1)
+        if self._width is None or self._height is None:
+            height_item = SystemVariableDefinition.y_size
+            self._height, self._width = struct.unpack_from(
+                "<BB",
+                str(self.read_memory(
+                    AbstractSCPRequest.DEFAULT_DEST_X_COORD,
+                    AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
+                    (constants.SYSTEM_VARIABLE_BASE_ADDRESS +
+                        height_item.offset),
+                    2)))
+        return MachineDimensions(self._width, self._height)
 
     def get_machine_details(self):
         """ Get the details of the machine made up of chips on a board and how\
@@ -834,7 +868,10 @@ class Transceiver(object):
                     return True
             return False
 
-    def get_scamp_version(self, chip_x=0, chip_y=0, connection_selector=None):
+    def get_scamp_version(
+            self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
+            chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
+            connection_selector=None):
         """ Get the version of scamp which is running on the board
 
         :param connection_selector: the connection to send the scamp
@@ -860,50 +897,45 @@ class Transceiver(object):
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
     def boot_board(
-            self, number_of_boards=1, width=None, height=None):
+            self, number_of_boards=None, width=None, height=None):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
 
-        :param number_of_boards: the number of boards that this machine is \
-                made out of, 1 by default
+        :param number_of_boards: this parameter is deprecated
         :type number_of_boards: int
-        :param width: The width of the machine in chips, or None to compute
+        :param width: this parameter is deprecated
         :type width: int or None
-        :param height: The height of the machine in chips, or None to compute
+        :param height: this parameter is deprecated
         :type height: int or None
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     board version is not known
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         """
-        logger.debug("Attempting to boot version {} board".format(
-            self._version))
-        if width is None or height is None:
-            dims = utility_functions.get_ideal_size(number_of_boards,
-                                                    self._version)
-            width = dims.width
-            height = dims.height
-        boot_messages = SpinnakerBootMessages(
-            self._version, number_of_boards=number_of_boards,
-            width=width, height=height)
+        if (width is not None or height is not None or
+                number_of_boards is not None):
+            logger.warning(
+                "The width, height and number_of_boards are no longer"
+                " supported, and might be removed in a future version")
+        boot_messages = SpinnakerBootMessages(board_version=self._version)
         for boot_message in boot_messages.messages:
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
     def ensure_board_is_ready(
-            self, number_of_boards=1, width=None, height=None,
+            self, number_of_boards=None, width=None, height=None,
             n_retries=5, enable_reinjector=True):
         """ Ensure that the board is ready to interact with this version\
             of the transceiver.  Boots the board if not already booted and\
             verifies that the version of SCAMP running is compatible with\
             this transceiver.
 
-        :param number_of_boards: the number of boards that this machine is
-                    constructed out of, 1 by default
+        :param number_of_boards: this parameter is deprecated and will be\
+                    ignored
         :type number_of_boards: int
-        :param width: The width of the machine in chips, or None to compute
+        :param width: this parameter is deprecated and will be ignored
         :type width: int or None
-        :param height: The height of the machine in chips, or None to compute
+        :param height: this parameter is deprecated and will be ignored
         :type height: int or None
         :param n_retries: The number of times to retry booting
         :type n_retries: int
@@ -919,11 +951,11 @@ class Transceiver(object):
         """
 
         # if the machine sizes not been given, calculate from assumption
-        if width is None or width is None:
-            dims = utility_functions.get_ideal_size(number_of_boards,
-                                                    self._version)
-            width = dims.width
-            height = dims.height
+        if (width is not None or height is not None or
+                number_of_boards is not None):
+            logger.warning(
+                "The width, height and number_of_boards are no longer"
+                " supported, and might be removed in a future version")
 
         # try to get a scamp version once
         logger.info("Working out if machine is booted")
@@ -931,8 +963,7 @@ class Transceiver(object):
             INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
 
         # If we fail to get a SCAMP version this time, try other things
-        if (version_info is None and self._version >= 4 and
-                len(self._bmp_connections) > 0):
+        if version_info is None and len(self._bmp_connections) > 0:
 
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
@@ -960,8 +991,6 @@ class Transceiver(object):
                     _SCAMP_NAME, _SCAMP_VERSION))
 
         else:
-            if self._machine is None:
-                self._update_machine()
             logger.info("Machine communication successful")
 
         # Change the default SCP timeout on the machine, keeping the old one to
@@ -996,6 +1025,12 @@ class Transceiver(object):
         while version_info is None and current_tries_to_go > 0:
             try:
                 version_info = self.get_scamp_version()
+                if (version_info.x ==
+                        AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
+                        (version_info.y ==
+                         AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
+                    version_info = None
+                    time.sleep(0.1)
             except exceptions.SpinnmanGenericProcessException as e:
                 if isinstance(
                         e.exception, exceptions.SpinnmanTimeoutException):
@@ -1020,66 +1055,16 @@ class Transceiver(object):
         if version_info is None:
             try:
                 version_info = self.get_scamp_version()
+                if (version_info.x ==
+                        AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
+                        (version_info.y ==
+                         AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
+                    version_info = None
             except exceptions.SpinnmanException:
                 pass
-
-        # boot has been sent, and 0 0 is up and running, but there will need to
-        # be a delay whilst all the other chips complete boot.
         if version_info is not None:
-            checker = CheckMachineBootedProcess(
-                self._scamp_connections[0], self._ignore_chips,
-                self._ignore_cores, self._max_core_id, self._max_sdram_size)
-            self._machine, self._chip_info = checker.check_machine_is_booted()
-            if self._machine is None:
-                return None
-            spinnaker_links = utilities.locate_spinnaker_links(
-                self._version, self._machine)
-            for spinnaker_link in spinnaker_links:
-                self._machine.add_spinnaker_link(spinnaker_link)
-            logger.info(
-                "Detected a machine on ip address {} which has {}".format(
-                    self._boot_send_connection.remote_ip_address,
-                    self._machine.cores_and_link_output_string()))
-
-            # update scamp connection selector with machine dynamics
-            self._scamp_connection_selector.set_machine(self._machine)
-
+            logger.info("Found board with version {}".format(version_info))
         return version_info
-
-    def _check_if_machine_has_wrap_arounds(self):
-        """ Determine if the machine has wrap-arounds, by querying the links\
-            from 0, 0
-        :return: true if a wrap around toroid, false otherwise
-        :rtype: bool
-        """
-        try:
-            # Try the left link
-            self.read_neighbour_memory(
-                x=0, y=0, link=3,
-                base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
-                length=constants.SYSTEM_VARIABLE_BYTES)
-            return True
-        except (exceptions.SpinnmanUnexpectedResponseCodeException,
-                exceptions.SpinnmanTimeoutException):
-
-            # Do Nothing - check the bottom link for wrap around
-            pass
-
-        try:
-
-            # Try the bottom link
-            self.read_neighbour_memory(
-                x=0, y=0, link=4,
-                base_address=constants.SYSTEM_VARIABLE_BASE_ADDRESS,
-                length=constants.SYSTEM_VARIABLE_BYTES)
-            return True
-        except (exceptions.SpinnmanUnexpectedResponseCodeException,
-                exceptions.SpinnmanTimeoutException):
-
-            # Do Nothing
-            pass
-
-        return False
 
     def get_cpu_information(self, core_subsets=None):
         """ Get information about the processors on the board
@@ -1102,24 +1087,31 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
 
         # Get all the cores if the subsets are not given
         if core_subsets is None:
+            if self._machine is None:
+                self._update_machine()
             core_subsets = CoreSubsets()
-            for chip_info in self._chip_info.itervalues():
-                x = chip_info.x
-                y = chip_info.y
-                for p in chip_info.virtual_core_ids:
-                    core_subsets.add_processor(x, y, p)
+            for chip in self._machine.chips:
+                for processor in range(chip.processors):
+                    core_subsets.add_processor(
+                        chip.x, chip.y, processor.processor_id)
 
         process = GetCPUInfoProcess(self._scamp_connection_selector)
-        return process.get_cpu_info(self._chip_info, core_subsets)
+        cpu_info = process.get_cpu_info(core_subsets)
+        return cpu_info
+
+    def _get_sv_data(self, x, y, data_item):
+        return struct.unpack_from(
+            data_item.data_type.struct_code,
+            self.read_memory(
+                x, y,
+                constants.SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
+                data_item.data_type.value))[0]
 
     def get_user_0_register_address_from_core(self, x, y, p):
-        """Get the address of user 0 for a given processor on the board
+        """ Get the address of user 0 for a given processor on the board
 
         :param x: the x-coordinate of the chip containing the processor
         :param y: the y-coordinate of the chip containing the processor
@@ -1137,40 +1129,20 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
-
-        # check the chip exists in the info
-        if not (x, y) in self._chip_info:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "x, y", "{}, {}".format(x, y),
-                "Not a valid chip on the current machine")
-
-        # collect the chip info for the associated chip
-        chip_info = self._chip_info[(x, y)]
-
-        # check that p is a valid processor for this chip
-        if p not in chip_info.virtual_core_ids:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
-
-        # locate the base address for this chip info
-        base_address = (chip_info.cpu_information_base_address +
-                        (constants.CPU_INFO_BYTES * p))
-        base_address += constants.CPU_USER_0_START_ADDRESS
-        return base_address
+        return (
+            utility_functions.get_vcpu_address(p) +
+            constants.CPU_USER_0_START_ADDRESS)
 
     def get_user_1_register_address_from_core(self, x, y, p):
-        """Get the address of user 1 for a given processor on the board
+        """ Get the address of user 1 for a given processor on the board
 
         :param x: the x-coordinate of the chip containing the processor
         :param y: the y-coordinate of the chip containing the processor
-        :param p: The id of the processor to get the user 0 address from
+        :param p: The id of the processor to get the user 1 address from
         :type x: int
         :type y: int
         :type p: int
-        :return: The address for user 0 register for this processor
+        :return: The address for user 1 register for this processor
         :rtype: int
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
                     is received that is not in the valid format
@@ -1180,32 +1152,12 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
-
-        # check the chip exists in the info
-        if not (x, y) in self._chip_info:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "x, y", "{}, {}".format(x, y),
-                "Not a valid chip on the current machine")
-
-        # collect the chip info for the associated chip
-        chip_info = self._chip_info[(x, y)]
-
-        # check that p is a valid processor for this chip
-        if p not in chip_info.virtual_core_ids:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
-
-        # locate the base address for this chip info
-        base_address = (chip_info.cpu_information_base_address +
-                        (constants.CPU_INFO_BYTES * p))
-        base_address += constants.CPU_USER_1_START_ADDRESS
-        return base_address
+        return (
+            utility_functions.get_vcpu_address(p) +
+            constants.CPU_USER_1_START_ADDRESS)
 
     def get_user_2_register_address_from_core(self, x, y, p):
-        """Get the address of user 2 for a given processor on the board
+        """ Get the address of user 2 for a given processor on the board
 
         :param x: the x-coordinate of the chip containing the processor
         :param y: the y-coordinate of the chip containing the processor
@@ -1223,29 +1175,9 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
-
-        # check the chip exists in the info
-        if not (x, y) in self._chip_info:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "x, y", "{}, {}".format(x, y),
-                "Not a valid chip on the current machine")
-
-        # collect the chip info for the associated chip
-        chip_info = self._chip_info[(x, y)]
-
-        # check that p is a valid processor for this chip
-        if p not in chip_info.virtual_core_ids:
-            raise exceptions.SpinnmanInvalidParameterException(
-                "p", str(p), "Not a valid core on chip {}, {}".format(x, y))
-
-        # locate the base address for this chip info
-        base_address = (chip_info.cpu_information_base_address +
-                        (constants.CPU_INFO_BYTES * p))
-        base_address += constants.CPU_USER_2_START_ADDRESS
-        return base_address
+        return (
+            utility_functions.get_vcpu_address(p) +
+            constants.CPU_USER_2_START_ADDRESS)
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
@@ -1294,12 +1226,17 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        # Ensure that the information about each chip is present
-        if self._machine is None:
-            self._update_machine()
 
+        # making the assumption that all chips have the same iobuf size.
+        if self._iobuf_size is None:
+            self._iobuf_size = self._get_sv_data(
+                AbstractSCPRequest.DEFAULT_DEST_X_COORD,
+                AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
+                SystemVariableDefinition.iobuf_size)
+
+        # read iobuf from machine
         process = ReadIOBufProcess(self._scamp_connection_selector)
-        return process.read_iobuf(self._chip_info, core_subsets)
+        return process.read_iobuf(self._iobuf_size, core_subsets)
 
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
@@ -2299,10 +2236,8 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        if self._machine is None:
-            self._update_machine()
-        chip_info = self._chip_info[(x, y)]
-        base_address = chip_info.router_table_copy_address()
+        base_address = self._get_sv_data(
+            x, y, SystemVariableDefinition.router_table_copy_address)
         process = GetMultiCastRoutesProcess(
             self._scamp_connection_selector, app_id)
         return process.get_routes(x, y, base_address)
@@ -2510,6 +2445,7 @@ class Transceiver(object):
         if self._reinjection_running:
             process = ExitDPRIProcess(self._scamp_connection_selector)
             process.exit(self._reinjector_cores)
+            self.stop_application(_REINJECTOR_APP_ID)
             self._reinjection_running = False
 
         if power_off_machine and len(self._bmp_connections) > 0:

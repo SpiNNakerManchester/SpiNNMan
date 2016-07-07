@@ -38,9 +38,11 @@ class SCPFloodFillDataRequest(AbstractSCPRequest):
         argument_2 = (block_no << 16) | (((self._size / 4) - 1) << 8)
 
         super(SCPFloodFillDataRequest, self).__init__(
-            SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                      destination_cpu=0, destination_chip_x=0,
-                      destination_chip_y=0),
+            SDPHeader(
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                destination_cpu=0,
+                destination_chip_x=self.DEFAULT_DEST_X_COORD,
+                destination_chip_y=self.DEFAULT_DEST_Y_COORD),
             SCPRequestHeader(command=SCPCommand.CMD_FFD),
             argument_1=argument_1, argument_2=argument_2,
             argument_3=base_address, data=None)

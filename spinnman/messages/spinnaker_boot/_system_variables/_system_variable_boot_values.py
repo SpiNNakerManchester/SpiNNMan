@@ -1,7 +1,5 @@
 from enum import Enum
 from collections import namedtuple
-from collections import OrderedDict
-from spinnman.model.machine_dimensions import MachineDimensions
 import struct
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
@@ -14,6 +12,7 @@ class _DataType(Enum):
     SHORT = (2, "<H")
     INT = (4, "<I")
     LONG = (8, "<Q")
+    BYTE_ARRAY = (16, "s")
 
     def __new__(cls, value, struct_code, doc=""):
         obj = object.__new__(cls)
@@ -68,10 +67,10 @@ class SystemVariableDefinition(Enum):
     nearest_neighbour_last_id = _Definition(
         _DataType.BYTE, offset=0x07,
         doc="The last id used in nearest neighbour transaction")
-    nearest_ethernet_x = _Definition(
+    nearest_ethernet_y = _Definition(
         _DataType.BYTE, offset=0x08,
         doc="The x-coordinate of the nearest chip with Ethernet")
-    nearest_ethernet_y = _Definition(
+    nearest_ethernet_x = _Definition(
         _DataType.BYTE, offset=0x09,
         doc="The y-coordinate of the nearest chip with Ethernet")
     hardware_version = _Definition(
@@ -80,9 +79,9 @@ class SystemVariableDefinition(Enum):
     is_ethernet_available = _Definition(
         _DataType.BYTE, offset=0x0b,
         doc="Indicates if Ethernet is available on this chip")
-    links_available = _Definition(
+    p2p_b_repeats = _Definition(
         _DataType.BYTE, offset=0x0c,
-        doc="A bit-mask indicating which links are available")
+        doc="Number of times to send out P2PB packets")
     log_peer_to_peer_sequence_length = _Definition(
         _DataType.BYTE, offset=0x0d, default=4,
         doc="Log (base 2) of the peer-to-peer sequence length")
@@ -106,8 +105,8 @@ class SystemVariableDefinition(Enum):
     router_time_phase_timer = _Definition(
         _DataType.INT, offset=0x20,
         doc="The router time-phase timer")
-    cpu_clock_frequency_mhz = _Definition(
-        _DataType.SHORT, offset=0x24, default=150,
+    cpu_clock_mhz = _Definition(
+        _DataType.SHORT, offset=0x24, default=200,
         doc="The CPU clock frequency in MHz")
     sdram_clock_frequency_mhz = _Definition(
         _DataType.SHORT, offset=0x26, default=130,
@@ -122,20 +121,30 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x2a, default=100,
         doc="The link peek/poke timeout in microseconds")
     led_half_period_10_ms = _Definition(
-        _DataType.BYTE, offset=0x2b, default=50,
-        doc="The LED half-period in 10 ms units")
-    peer_to_peer_c_pkt_timer = _Definition(
-        _DataType.INT, offset=0x2c, default=0x010a6401,
-        doc="The peer-to-peer C packet timer")
+        _DataType.BYTE, offset=0x2b, default=1,
+        doc="The LED half-period in 10 ms units, or 1 to show load")
+    netinit_bc_wait_time = _Definition(
+        _DataType.BYTE, offset=0x2c, default=50,
+        doc="The time to wait after last BC during network initialisation"
+            " in 10 ms units")
+    netinit_phase = _Definition(
+        _DataType.BYTE, offset=0x2d, default=0,
+        doc="The phase of boot process (see enum netinit_phase_e)")
+    p2p_root_y = _Definition(
+        _DataType.BYTE, offset=0x2e, default=0,
+        doc="The y-coordinate of the chip from which the system was booted")
+    p2p_root_x = _Definition(
+        _DataType.BYTE, offset=0x2f, default=0,
+        doc="The x-coordinate of the chip from which the system was booted")
     led_0 = _Definition(
         _DataType.INT, offset=0x30, default=0x1,
         doc="The first part of the LED definitions")
     led_1 = _Definition(
-        _DataType.INT, offset=0x34,
+        _DataType.INT, offset=0x34, default=0,
         doc="The last part of the LED definitions")
-    peer_to_peer_b_pkt_timer = _Definition(
-        _DataType.INT, offset=0x38, default=0x01100a42,
-        doc="The peer-to-peer B packet timer")
+    padding_1 = _Definition(
+        _DataType.INT, offset=0x38, default=0,
+        doc="A word of padding")
     random_seed = _Definition(
         _DataType.INT, offset=0x3c,
         doc="The random seed")
@@ -151,16 +160,16 @@ class SystemVariableDefinition(Enum):
     software_watchdog_count = _Definition(
         _DataType.BYTE, offset=0x43, default=3,
         doc="The number of watch dog timeouts before an error is raised")
-    probe_timer = _Definition(
-        _DataType.INT, offset=0x44, default=0x010a6401,
-        doc="The probe timer")
-    user_system_ram_size_words = _Definition(
+    padding_2 = _Definition(
+        _DataType.INT, offset=0x44, default=0,
+        doc="A word of padding")
+    system_ram_heap_address = _Definition(
         _DataType.INT, offset=0x48, default=1024,
-        doc="The size of the user system RAM heap in bytes")
-    user_sdram_size_words = _Definition(
+        doc="The base address of the system SDRAM heap")
+    sdram_heap_address = _Definition(
         _DataType.INT, offset=0x4c, default=0,
-        doc="The size of the user SDRAM heap in bytes")
-    iobuf_bytes = _Definition(
+        doc="The base address of the user SDRAM heap")
+    iobuf_size = _Definition(
         _DataType.INT, offset=0x50, default=16384,
         doc="The size of the iobuf buffer in bytes")
     system_sdram_bytes = _Definition(
@@ -175,15 +184,15 @@ class SystemVariableDefinition(Enum):
     nearest_neighbour_memory_pointer = _Definition(
         _DataType.INT, offset=0x60,
         doc="The memory pointer for nearest neighbour global operations")
-    lock_0 = _Definition(
-        _DataType.BYTE, offset=0x64,
-        doc="The first lock")
-    lock_1 = _Definition(
-        _DataType.BYTE, offset=0x65,
-        doc="The second lock")
-    lock_2 = _Definition(
-        _DataType.BYTE, offset=0x66,
-        doc="The third lock")
+    lock = _Definition(
+        _DataType.BYTE, offset=0x64, default=0,
+        doc="The lock")
+    links_available = _Definition(
+        _DataType.BYTE, offset=0x65, default=0x3f,
+        doc="Bit mask (6 bits) of links enabled")
+    last_biff_id = _Definition(
+        _DataType.BYTE, offset=0x66, default=0,
+        doc="Last ID used in BIFF packet")
     board_test_flags = _Definition(
         _DataType.BYTE, offset=0x67,
         doc="Board testing flags")
@@ -196,26 +205,29 @@ class SystemVariableDefinition(Enum):
     shared_message_maximum_used = _Definition(
         _DataType.SHORT, offset=0x6e,
         doc="The maximum number of shared message buffers used")
-    padding_1 = _Definition(
+    user_temp_0 = _Definition(
         _DataType.INT, offset=0x70,
-        doc="The first padding word")
-    padding_2 = _Definition(
+        doc="The first user variable")
+    user_temp_1 = _Definition(
         _DataType.INT, offset=0x74,
-        doc="The second padding word")
-    padding_3 = _Definition(
+        doc="The second user variable")
+    user_temp_2 = _Definition(
         _DataType.INT, offset=0x78,
-        doc="The third padding word")
-    padding_4 = _Definition(
+        doc="The third user variable")
+    user_temp_4 = _Definition(
         _DataType.INT, offset=0x7c,
-        doc="The fourth padding word")
+        doc="The fourth user variable")
     status_map = _Definition(
-        _DataType.BYTE, offset=0x80, array_size=20,
+        _DataType.BYTE_ARRAY, offset=0x80, array_size=20,
+        default=bytes(bytearray(20)),
         doc="The status map set during SCAMP boot")
     physical_to_virtual_core_map = _Definition(
-        _DataType.BYTE, offset=0x94, array_size=20,
+        _DataType.BYTE_ARRAY, offset=0x94, array_size=20,
+        default=bytes(bytearray(20)),
         doc="The physical core id to virtual core id map")
     virtual_to_physical_core_map = _Definition(
-        _DataType.BYTE, offset=0xa8, array_size=20,
+        _DataType.BYTE_ARRAY, offset=0xa8, array_size=20,
+        default=bytes(bytearray(20)),
         doc="The virtual core id to physical core id map")
     n_working_cores = _Definition(
         _DataType.BYTE, offset=0xbc,
@@ -223,9 +235,9 @@ class SystemVariableDefinition(Enum):
     n_scamp_working_cores = _Definition(
         _DataType.BYTE, offset=0xbd,
         doc="The number of SCAMP working cores")
-    padding_5 = _Definition(
+    padding_3 = _Definition(
         _DataType.SHORT, offset=0xbe,
-        doc="The fifth padding short")
+        doc="A short of padding")
     sdram_base_address = _Definition(
         _DataType.INT, offset=0xc0,
         doc="The base address of SDRAM")
@@ -238,10 +250,10 @@ class SystemVariableDefinition(Enum):
     cpu_information_base_address = _Definition(
         _DataType.INT, offset=0xcc,
         doc="The base address of the cpu information blocks")
-    system_heap_sdram_base_address = _Definition(
+    system_sdram_heap_address = _Definition(
         _DataType.INT, offset=0xd0,
         doc="The base address of the system SDRAM heap")
-    routing_table_copy_address = _Definition(
+    router_table_copy_address = _Definition(
         _DataType.INT, offset=0xd4,
         doc="The address of the copy of the routing tables")
     peer_to_peer_hop_table_address = _Definition(
@@ -250,7 +262,7 @@ class SystemVariableDefinition(Enum):
     allocated_tag_table_address = _Definition(
         _DataType.INT, offset=0xdc,
         doc="The address of the allocated tag table")
-    router_first_free_entry = _Definition(
+    first_free_router_entry = _Definition(
         _DataType.SHORT, offset=0xe0,
         doc="The id of the first free router entry")
     n_active_peer_to_peer_addresses = _Definition(
@@ -266,17 +278,18 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0xec,
         doc="The monitor incoming mailbox flags")
     ethernet_ip_address = _Definition(
-        _DataType.BYTE, offset=0xf0, array_size=4,
+        _DataType.BYTE_ARRAY, offset=0xf0, array_size=4,
+        default=bytes(bytearray(4)),
         doc="The ip address of the chip")
-    user_temp_1 = _Definition(
+    fixed_route_copy = _Definition(
         _DataType.INT, offset=0xf4,
-        doc="The first user variable")
-    user_temp_2 = _Definition(
+        doc="A (virtual) copy of the router FR register")
+    board_info = _Definition(
         _DataType.INT, offset=0xf8,
-        doc="The second user variable")
-    user_temp_3 = _Definition(
+        doc="A pointer to the board information structure")
+    padding_4 = _Definition(
         _DataType.INT, offset=0xfc,
-        doc="The third user variable")
+        doc="A word of padding")
 
     def __init__(self, offset, data_type, default, array_size, doc):
         """
@@ -303,6 +316,10 @@ class SystemVariableDefinition(Enum):
         return self._data_type
 
     @property
+    def array_size(self):
+        return self._array_size
+
+    @property
     def offset(self):
         return self._offset
 
@@ -316,18 +333,18 @@ class SystemVariableBootValues(object):
         during boot
     """
 
-    def __init__(self, hardware_version, cpu_clock_frequency_mhz, led_0):
+    def __init__(self, hardware_version=None, led_0=None):
 
         # Create a dict of variable values
         self._values = dict()
         for variable in SystemVariableDefinition:
             self._values[variable] = variable.default
 
-        self._values[SystemVariableDefinition.hardware_version] =\
-            hardware_version
-        self._values[SystemVariableDefinition.cpu_clock_frequency_mhz] =\
-            cpu_clock_frequency_mhz
-        self._values[SystemVariableDefinition.led_0] = led_0
+        if hardware_version is not None:
+            self._values[SystemVariableDefinition.hardware_version] =\
+                hardware_version
+        if led_0 is not None:
+            self._values[SystemVariableDefinition.led_0] = led_0
 
     def set_value(self, system_variable_definition, value):
         self._values[system_variable_definition] = value
@@ -342,23 +359,12 @@ class SystemVariableBootValues(object):
 
 spinnaker_boot_values = {
     1: SystemVariableBootValues(
-        hardware_version=1, cpu_clock_frequency_mhz=200, led_0=0x00076104),
+        hardware_version=1, led_0=0x00076104),
     2: SystemVariableBootValues(
-        hardware_version=2, cpu_clock_frequency_mhz=200, led_0=0x00006103),
+        hardware_version=2, led_0=0x00006103),
     3: SystemVariableBootValues(
-        hardware_version=3, cpu_clock_frequency_mhz=200, led_0=0x00000502),
+        hardware_version=3, led_0=0x00000502),
     4: SystemVariableBootValues(
-        hardware_version=4, cpu_clock_frequency_mhz=200, led_0=0x00000001),
+        hardware_version=4, led_0=0x00000001),
     5: SystemVariableBootValues(
-        hardware_version=5, cpu_clock_frequency_mhz=200, led_0=0x00000001)}
-
-spinnaker_standard_board_to_machine_sizes = {
-    1: MachineDimensions(2, 2),
-    2: MachineDimensions(2, 2),
-    3: MachineDimensions(2, 2),
-    4: MachineDimensions(8, 8),
-    5: MachineDimensions(8, 8)}
-
-# Can be used to enable extra things on larger machines
-# (but not currently used)
-spinnaker_multi_board_extra_configs = OrderedDict()
+        hardware_version=5, led_0=0x00000001)}

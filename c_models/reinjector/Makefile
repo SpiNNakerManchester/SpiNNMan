@@ -20,7 +20,7 @@ CFLAGS += -Ofast
 LFLAGS += -Ofast -Wl,--wrap=sark_int
 
 # The spinnaker_tools standard makefile
-include $(SPINN_DIRS)/Makefile.common
+include $(SPINN_DIRS)/make/Makefile.common
 
 SPINN_LIBS := $(SPINN_LIB_DIR)/libsark.a
 

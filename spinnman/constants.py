@@ -12,6 +12,9 @@ SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 # The base address of a routers diagnostic filter controls
 ROUTER_REGISTER_BASE_ADDRESS = 0xe1000000
 
+# The base address of a routers p2p routing table
+ROUTER_REGISTER_P2P_ADDRESS = ROUTER_REGISTER_BASE_ADDRESS + 0x10000
+
 # offset for the router filter controls first register (one word each)
 ROUTER_FILTER_CONTROLS_OFFSET = 0x200
 
@@ -36,6 +39,9 @@ EIEIO_COMMAND_HEADER_SIZE = 3
 # The amount of size in bytes the EIEIO data header is
 EIEIO_DATA_HEADER_SIZE = 2
 
+# the address of the start of the VCPU structure (copied from sark.h)
+CPU_INFO_OFFSET = 0xe5007000
+
 # how many bytes the cpu info data takes up
 CPU_INFO_BYTES = 128
 
@@ -47,6 +53,9 @@ CPU_USER_1_START_ADDRESS = 116
 
 # the address at which user0 register starts
 CPU_USER_2_START_ADDRESS = 120
+
+# the address at which the iobuf address starts
+CPU_IOBUF_ADDRESS_OFFSET = 88
 
 # default UDP tag
 DEFAULT_SDP_TAG = 0xFF

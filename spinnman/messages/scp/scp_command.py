@@ -25,12 +25,13 @@ class SCPCommand(Enum):
     CMD_ALLOC = (28, "Allocate or Free SDRAM or Routing entries")
     CMD_RTR = (29, "Initialise the router")
     CMD_DPRI = (30, "Dropped Packet Reinjection setup")
+    CMD_INFO = (31, "Get Chip Summary Information")
     CMD_BMP_INFO = (48, "Get BMP info structures")
     CMD_FLASH_COPY = 49
     CMD_FLASH_ERASE = 50
     CMD_FLASH_WRITE = 51
     CMD_RESET = 55
-    CMD_BMP_POWER = (57, "Turns on or off the machine via bmp")
+    CMD_BMP_POWER = (57, "Turns on or off the machine via BMP")
     CMD_TUBE = 64
 
     def __new__(cls, value, doc=""):

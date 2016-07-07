@@ -31,8 +31,7 @@ class CPUInfo(object):
         (registers,                                                  # 32s 0
          self._processor_state_register, self._stack_pointer,
          self._link_register,                                        # 3I  32
-         run_time_error,                                             # B   44
-         # skipped                                                   # x   45
+         run_time_error, self._physical_cpu_id,                      # 2B  44
          state, self._application_id,                                # 2B  46
          self._application_mailbox_data_address,
          self._monitor_mailbox_data_address,                         # 2I  48
@@ -41,11 +40,11 @@ class CPUInfo(object):
          self._software_source_filename_address,
          self._software_source_line_number, self._time,              # 3I  60
          self._application_name,                                     # 16s 72
-         self._iobuf_address,                                        # I   88
-         # skipped                                                   # 20x 92
+         self._iobuf_address, self._software_version,                # 2I  88
+         # skipped                                                   # 16x 96
          user0, user1, user2, user3                                  # 4I  112
-         ) = struct.unpack_from("< 32s 3I B x 2B 2I 2B H 3I 16s I 20x 4I",
-                                cpu_data, offset)
+         ) = struct.unpack_from(
+             "< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I", cpu_data, offset)
 
         index = self._application_name.find('\0')
         if index != -1:
@@ -97,6 +96,15 @@ class CPUInfo(object):
         :rtype: :py:class:`spinnman.model.cpu_state.CPUState`
         """
         return self._state
+
+    @property
+    def physical_cpu_id(self):
+        """ The physical id of this processor
+
+        :return: The physical id of the processor
+        :rtype: int
+        """
+        return self._physical_cpu_id
 
     @property
     def application_name(self):
@@ -201,27 +209,27 @@ class CPUInfo(object):
 
     @property
     def processor_state_register(self):
-        """ The value in the processor state register (psr)
+        """ The value in the processor state register (PSR)
 
-        :return: The psr value
+        :return: The PSR value
         :rtype: int
         """
         return self._processor_state_register
 
     @property
     def stack_pointer(self):
-        """ The current stack pointer value (sp)
+        """ The current stack pointer value (SP)
 
-        :return: The sp value
+        :return: The SP value
         :rtype: int
         """
         return self._stack_pointer
 
     @property
     def link_register(self):
-        """ The current link register value (lr)
+        """ The current link register value (LR)
 
-        :return: The lr value
+        :return: The LR value
         :rtype: int
         """
         return self._link_register
@@ -252,6 +260,15 @@ class CPUInfo(object):
         :rtype: int
         """
         return self._iobuf_address
+
+    @property
+    def software_version(self):
+        """ The software version
+
+        :return: The software version
+        :rtype: int
+        """
+        return self._software_version
 
     def __str__(self):
         return "{}:{}:{:02n} {:18} {:16s} {:3n}".format(

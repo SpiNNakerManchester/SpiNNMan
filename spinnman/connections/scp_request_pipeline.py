@@ -26,7 +26,8 @@ class SCPRequestPipeLine(object):
                  intermediate_channel_waits=0,
                  retry_codes=set([SCPResult.RC_TIMEOUT,
                                   SCPResult.RC_P2P_TIMEOUT,
-                                  SCPResult.RC_LEN]),
+                                  SCPResult.RC_LEN,
+                                  SCPResult.RC_P2P_NOREPLY]),
                  n_retries=3, packet_timeout=0.5):
         """
         :param connection: The connection over which the communication is to\
@@ -111,11 +112,6 @@ class SCPRequestPipeLine(object):
         self._send_time[_next_sequence] = time.time()
         _next_sequence = (_next_sequence + 1) % MAX_SEQUENCE
 
-        # Send the request, keeping track of how many are sent
-        # self._token_bucket.consume(284)
-        self._connection.send(request_data)
-        self._in_progress += 1
-
         # If the connection has not been measured
         if self._n_channels is None:
             if self._connection.is_ready_to_receive():
@@ -128,6 +124,11 @@ class SCPRequestPipeLine(object):
         while (self._n_channels is not None and
                 self._in_progress >= self._n_channels):
             self._do_retrieve(self._intermediate_channel_waits, 0.1)
+
+        # Send the request, keeping track of how many are sent
+        # self._token_bucket.consume(284)
+        self._connection.send(request_data)
+        self._in_progress += 1
 
     def finish(self):
         """ Indicate the end of the packets to be sent.  This must be called\
