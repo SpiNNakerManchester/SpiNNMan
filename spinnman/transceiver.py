@@ -102,11 +102,12 @@ from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
 from spinnman.utilities import utility_functions
 from spinnman import exceptions
 
+# storage handlers imports
 from spinn_storage_handlers.abstract_classes.abstract_data_reader \
     import AbstractDataReader
 from spinn_storage_handlers.file_data_reader import FileDataReader
 
-from spinn_machine.utilities import utilities
+# spinnmachine imports
 from spinn_machine.core_subsets import CoreSubsets
 
 # general imports
