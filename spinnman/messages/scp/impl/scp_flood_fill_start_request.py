@@ -38,9 +38,11 @@ class SCPFloodFillStartRequest(AbstractSCPRequest):
                     (3 << 16) + (1 << m))
 
         super(SCPFloodFillStartRequest, self).__init__(
-            SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                      destination_cpu=0, destination_chip_x=255,
-                      destination_chip_y=255),
+            SDPHeader(
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                destination_cpu=0,
+                destination_chip_x=self.DEFAULT_DEST_X_COORD,
+                destination_chip_y=self.DEFAULT_DEST_Y_COORD),
             SCPRequestHeader(command=SCPCommand.CMD_NNP),
             argument_1=key, argument_2=data, argument_3=_NNP_FORWARD_RETRY)
 

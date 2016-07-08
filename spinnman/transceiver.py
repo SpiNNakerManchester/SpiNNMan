@@ -2,6 +2,8 @@
 # local imports
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
+from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
+    AbstractSCPRequest
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
     SCPBMPSetLedRequest
 from spinnman.messages.scp.impl.scp_bmp_version_request import \
@@ -120,7 +122,7 @@ import os
 logger = logging.getLogger(__name__)
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = (2, 2, 0)
+_SCAMP_VERSION = (3, 0, 0)
 
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
@@ -689,16 +691,18 @@ class Transceiver(object):
         # update the scamp selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # update the scamp connections replacing any x and y of 255 with the
-        # boot chip coordinates
+        # update the scamp connections replacing any x and y with the default
+        # scp request params with the boot chip coordinates
         for connection in self._scamp_connections:
-            if connection.chip_x == 255 and connection.chip_y == 255:
+            if (connection.chip_x ==
+                    AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
+                    (connection.chip_y ==
+                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
                 connection.update_chip_coordinates(
                     self._machine.boot_x, self._machine.boot_y)
 
         # Work out and add the spinnaker links
-        spinnaker_links = utilities.locate_spinnaker_links(
-            self._version, self._machine)
+        spinnaker_links = self._machine.locate_spinnaker_links(self._version)
         for spinnaker_link in spinnaker_links:
             self._machine.add_spinnaker_link(spinnaker_link)
 
@@ -769,8 +773,8 @@ class Transceiver(object):
                 else:
                     logger.warn(
                         "Additional Ethernet connection on {} at chip {}, {}"
-                        " cannot be contacted".format(
-                            chip.ip_address, chip.x, chip.y))
+                        " cannot be contacted"
+                        .format(chip.ip_address, chip.x, chip.y))
 
         # Update the connection queues after finding new connections
         return new_connections
@@ -817,11 +821,12 @@ class Transceiver(object):
             height_item = SystemVariableDefinition.y_size
             self._height, self._width = struct.unpack_from(
                 "<BB",
-                self.read_memory(
-                    255, 255,
+                str(self.read_memory(
+                    AbstractSCPRequest.DEFAULT_DEST_X_COORD,
+                    AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                     (constants.SYSTEM_VARIABLE_BASE_ADDRESS +
                         height_item.offset),
-                    2))
+                    2)))
         return MachineDimensions(self._width, self._height)
 
     def get_machine_details(self):
@@ -866,7 +871,9 @@ class Transceiver(object):
             return False
 
     def get_scamp_version(
-            self, chip_x=255, chip_y=255, connection_selector=None):
+            self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
+            chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
+            connection_selector=None):
         """ Get the version of scamp which is running on the board
 
         :param connection_selector: the connection to send the scamp
@@ -958,7 +965,7 @@ class Transceiver(object):
             INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
 
         # If we fail to get a SCAMP version this time, try other things
-        if (version_info is None and len(self._bmp_connections) > 0):
+        if version_info is None and len(self._bmp_connections) > 0:
 
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
@@ -1020,7 +1027,10 @@ class Transceiver(object):
         while version_info is None and current_tries_to_go > 0:
             try:
                 version_info = self.get_scamp_version()
-                if version_info.x == 255 and version_info.y == 255:
+                if (version_info.x ==
+                        AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
+                        (version_info.y ==
+                         AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
                     version_info = None
                     time.sleep(0.1)
             except exceptions.SpinnmanGenericProcessException as e:
@@ -1047,12 +1057,15 @@ class Transceiver(object):
         if version_info is None:
             try:
                 version_info = self.get_scamp_version()
-                if version_info.x == 255 and version_info.y == 255:
+                if (version_info.x ==
+                        AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
+                        (version_info.y ==
+                         AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
                     version_info = None
             except exceptions.SpinnmanException:
                 pass
-
-        logger.info("Found board with version {}".format(version_info))
+        if version_info is not None:
+            logger.info("Found board with version {}".format(version_info))
         return version_info
 
     def get_cpu_information(self, core_subsets=None):
@@ -1215,9 +1228,15 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+
+        # making the assumption that all chips have the same iobuf size.
         if self._iobuf_size is None:
             self._iobuf_size = self._get_sv_data(
-                255, 255, SystemVariableDefinition.iobuf_size)
+                AbstractSCPRequest.DEFAULT_DEST_X_COORD,
+                AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
+                SystemVariableDefinition.iobuf_size)
+
+        # read iobuf from machine
         process = ReadIOBufProcess(self._scamp_connection_selector)
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
