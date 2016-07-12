@@ -123,7 +123,7 @@ import os
 logger = logging.getLogger(__name__)
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = (3, 0, 0)
+_SCAMP_VERSION = (3, 0, 1)
 
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
