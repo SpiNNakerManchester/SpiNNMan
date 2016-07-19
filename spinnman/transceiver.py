@@ -703,7 +703,8 @@ class Transceiver(object):
                     self._machine.boot_x, self._machine.boot_y)
 
         # Work out and add the spinnaker links
-        spinnaker_links = self._machine.locate_spinnaker_links(self._version)
+        spinnaker_links = self._machine.locate_spinnaker_links(
+            self._version, self._machine)
         for spinnaker_link in spinnaker_links:
             self._machine.add_spinnaker_link(spinnaker_link)
 
