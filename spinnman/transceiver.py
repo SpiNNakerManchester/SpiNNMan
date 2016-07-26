@@ -1108,10 +1108,10 @@ class Transceiver(object):
     def _get_sv_data(self, x, y, data_item):
         return struct.unpack_from(
             data_item.data_type.struct_code,
-            self.read_memory(
+            str(self.read_memory(
                 x, y,
                 constants.SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
-                data_item.data_type.value))[0]
+                data_item.data_type.value)))[0]
 
     def get_user_0_register_address_from_core(self, x, y, p):
         """ Get the address of user 0 for a given processor on the board
