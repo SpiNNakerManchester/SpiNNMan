@@ -900,7 +900,8 @@ class Transceiver(object):
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
     def boot_board(
-            self, number_of_boards=None, width=None, height=None):
+            self, number_of_boards=None, width=None, height=None,
+            extra_boot_values=None):
         """ Attempt to boot the board.  No check is performed to see if the\
             board is already booted.
 
@@ -910,6 +911,8 @@ class Transceiver(object):
         :type width: int or None
         :param height: this parameter is deprecated
         :type height: int or None
+        :param extra_boot_values: extra values to set during boot
+        :type extra_boot_values: dict of SystemVariableDefinition to value
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     board version is not known
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -920,14 +923,15 @@ class Transceiver(object):
             logger.warning(
                 "The width, height and number_of_boards are no longer"
                 " supported, and might be removed in a future version")
-        boot_messages = SpinnakerBootMessages(board_version=self._version)
+        boot_messages = SpinnakerBootMessages(
+            board_version=self._version, extra_boot_values=extra_boot_values)
         for boot_message in boot_messages.messages:
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
     def ensure_board_is_ready(
             self, number_of_boards=None, width=None, height=None,
-            n_retries=5, enable_reinjector=True):
+            n_retries=5, enable_reinjector=True, extra_boot_values=None):
         """ Ensure that the board is ready to interact with this version\
             of the transceiver.  Boots the board if not already booted and\
             verifies that the version of SCAMP running is compatible with\
@@ -945,6 +949,8 @@ class Transceiver(object):
         :param enable_reinjector: a boolean that allows the reinjector to be\
                     added to the system
         :type enable_reinjector: bool
+        :param extra_boot_values: Any additional values to set during boot
+        :type extra_boot_values: dict of SystemVariableDefinition to value
         :return: The version identifier
         :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
         :raise: spinnman.exceptions.SpinnmanIOException:
