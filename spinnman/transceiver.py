@@ -693,7 +693,7 @@ class Transceiver(object):
         self._scamp_connection_selector.set_machine(self._machine)
 
         # update the scamp connections replacing any x and y with the default
-        # scp request params with the boot chip coordinates
+        # SCP request params with the boot chip coordinates
         for connection in self._scamp_connections:
             if (connection.chip_x ==
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
@@ -1097,7 +1097,7 @@ class Transceiver(object):
                 self._update_machine()
             core_subsets = CoreSubsets()
             for chip in self._machine.chips:
-                for processor in range(chip.processors):
+                for processor in chip.processors:
                     core_subsets.add_processor(
                         chip.x, chip.y, processor.processor_id)
 
