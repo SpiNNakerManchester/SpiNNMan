@@ -2609,9 +2609,14 @@ class Transceiver(object):
                     for processor in chip.processors:
                         if not processor.is_monitor:
                             first_processor = processor
-                    first_processor.is_monitor = True
-                    self._reinjector_cores.add_processor(
-                        chip.x, chip.y, first_processor.processor_id)
+                    if first_processor is not None:
+                        first_processor.is_monitor = True
+                        self._reinjector_cores.add_processor(
+                            chip.x, chip.y, first_processor.processor_id)
+                    else:
+                        logger.warn(
+                            "No processor on {}, {} was free to use for"
+                            " reinjection".format(chip.x, chip.y))
                 except StopIteration:
                     pass
 
