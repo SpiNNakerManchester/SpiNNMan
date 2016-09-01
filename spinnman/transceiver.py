@@ -702,11 +702,9 @@ class Transceiver(object):
                 connection.update_chip_coordinates(
                     self._machine.boot_x, self._machine.boot_y)
 
-        # Work out and add the spinnaker links
-        spinnaker_links = self._machine.locate_spinnaker_links(
-            self._version, self._machine)
-        for spinnaker_link in spinnaker_links:
-            self._machine.add_spinnaker_link(spinnaker_link)
+        # Work out and add the spinnaker links and FPGA links
+        self._machine.add_spinnaker_links(self._version)
+        self._machine.add_fpga_links(self._version)
 
         logger.info("Detected a machine on ip address {} which has {}"
                     .format(self._boot_send_connection.remote_ip_address,
