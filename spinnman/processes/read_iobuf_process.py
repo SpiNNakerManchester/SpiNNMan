@@ -39,10 +39,11 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
     def handle_iobuf_address_response(self, iobuf_size, x, y, p, response):
         iobuf_address = struct.unpack_from(
             "<I", response.data, response.offset)[0]
-        first_read_size = min(
-            (iobuf_size + 16, constants.UDP_MESSAGE_MAX_SIZE))
-        self._next_reads.append((
-            x, y, p, 0, iobuf_address, first_read_size))
+        if iobuf_address != 0:
+            first_read_size = min(
+                (iobuf_size + 16, constants.UDP_MESSAGE_MAX_SIZE))
+            self._next_reads.append((
+                x, y, p, 0, iobuf_address, first_read_size))
 
     def handle_first_iobuf_response(self, x, y, p, n, base_address,
                                     first_read_size, response):

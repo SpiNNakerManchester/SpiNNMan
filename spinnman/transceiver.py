@@ -123,7 +123,7 @@ import os
 logger = logging.getLogger(__name__)
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = (3, 0, 0)
+_SCAMP_VERSION = (3, 0, 1)
 
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
@@ -693,7 +693,7 @@ class Transceiver(object):
         self._scamp_connection_selector.set_machine(self._machine)
 
         # update the scamp connections replacing any x and y with the default
-        # scp request params with the boot chip coordinates
+        # SCP request params with the boot chip coordinates
         for connection in self._scamp_connections:
             if (connection.chip_x ==
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
@@ -1098,7 +1098,7 @@ class Transceiver(object):
                 self._update_machine()
             core_subsets = CoreSubsets()
             for chip in self._machine.chips:
-                for processor in range(chip.processors):
+                for processor in chip.processors:
                     core_subsets.add_processor(
                         chip.x, chip.y, processor.processor_id)
 
@@ -1109,10 +1109,10 @@ class Transceiver(object):
     def _get_sv_data(self, x, y, data_item):
         return struct.unpack_from(
             data_item.data_type.struct_code,
-            self.read_memory(
+            str(self.read_memory(
                 x, y,
                 constants.SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
-                data_item.data_type.value))[0]
+                data_item.data_type.value)))[0]
 
     def get_user_0_register_address_from_core(self, x, y, p):
         """ Get the address of user 0 for a given processor on the board
@@ -2610,9 +2610,14 @@ class Transceiver(object):
                     for processor in chip.processors:
                         if not processor.is_monitor:
                             first_processor = processor
-                    first_processor.is_monitor = True
-                    self._reinjector_cores.add_processor(
-                        chip.x, chip.y, first_processor.processor_id)
+                    if first_processor is not None:
+                        first_processor.is_monitor = True
+                        self._reinjector_cores.add_processor(
+                            chip.x, chip.y, first_processor.processor_id)
+                    else:
+                        logger.warn(
+                            "No processor on {}, {} was free to use for"
+                            " reinjection".format(chip.x, chip.y))
                 except StopIteration:
                     pass
 
