@@ -15,8 +15,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(
-            self, connection_selector,
-            n_channels=1, intermediate_channel_waits=0)
+            self, connection_selector)
 
     def write_memory_from_bytearray(
             self, x, y, p, base_address, data, offset, n_bytes):
