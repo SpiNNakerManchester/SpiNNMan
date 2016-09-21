@@ -30,10 +30,15 @@ extern INT_HANDLER sark_int_han(void);
 #define RTR_BLOCKED_BIT    25
 #define RTR_DOVRFLW_BIT    30
 #define RTR_DENABLE_BIT    2
+#define RTR_FPE_BIT        17
+#define RTR_LE_BIT         6
+
 
 #define RTR_BLOCKED_MASK   (1 << RTR_BLOCKED_BIT)   // router blocked
 #define RTR_DOVRFLW_MASK   (1 << RTR_DOVRFLW_BIT)   // router dump overflow
 #define RTR_DENABLE_MASK   (1 << RTR_DENABLE_BIT)   // enable dump interrupts
+#define RTR_FPE_MASK       (1 << RTR_FPE_BIT) - 1  // if the dumped packet was a processor failure
+#define RTR_LE_MASK        (1 << RTR_LE_BIT) -1 // if the dumped packet was a link failure
 
 #define PKT_CONTROL_SHFT   16
 #define PKT_PLD_SHFT       17
@@ -105,6 +110,8 @@ static uint n_dropped_packets;
 static uint n_missed_dropped_packets;
 static uint n_dropped_packet_overflows;
 static uint n_reinjected_packets;
+static uint n_link_dumped_packets;
+static uint n_processor_dumped_packets;
 
 // Determine what to reinject
 static bool reinject_mc;
@@ -219,6 +226,9 @@ INT_HANDLER dropped_packet_callback() {
 
     // clear dump status and interrupt in router,
     uint rtr_dstat = rtr[RTR_DSTAT];
+    uint rtr_dump_outputs = rtr[RTR_DLINK];
+    uint is_processor_dump = (rtr_dump_outputs >> 6) & RTR_FPE_MASK;
+    uint is_link_dump = rtr_dump_outputs & RTR_LE_MASK;
 
     // only reinject if configured
     uint packet_type = (hdr & PKT_TYPE_MASK);
@@ -231,28 +241,46 @@ INT_HANDLER dropped_packet_callback() {
         if (rtr_dstat & RTR_DOVRFLW_MASK) {
             n_missed_dropped_packets += 1;
         }
+        else{
+            if(is_processor_dump > 0){
+                // add to the count the number of active bits from this dumped
+                //packet, as this indicates how many processors this packet
+                // was meant to go to.
+                n_processor_dumped_packets +=
+                    __builtin_popcount(is_processor_dump);
+            }
+            if(is_link_dump > 0){
+                // add to the count the number of active bits from this dumped
+                //packet, as this indicates how many links this packet was
+                // meant to go to.
+                n_link_dumped_packets +=
+                    __builtin_popcount(is_link_dump);
+            }
+            if(is_processor_dump == 0 && n_link_dumped_packets == 0){
 
-        // Only update this counter if this is a packet to reinject
-        n_dropped_packets += 1;
+                // Only update this counter if this is a packet to reinject
+                n_dropped_packets += 1;
 
-        // try to insert dumped packet in the queue,
-        uint new_tail = (pkt_queue.tail + 1) % PKT_QUEUE_SIZE;
+                // try to insert dumped packet in the queue,
+                uint new_tail = (pkt_queue.tail + 1) % PKT_QUEUE_SIZE;
 
-        // check for space in the queue
-        if (new_tail != pkt_queue.head) {
+                // check for space in the queue
+                if (new_tail != pkt_queue.head) {
 
-            // queue packet,
-            pkt_queue.queue[pkt_queue.tail].hdr = hdr;
-            pkt_queue.queue[pkt_queue.tail].key = key;
-            pkt_queue.queue[pkt_queue.tail].pld = pld;
+                    // queue packet,
+                    pkt_queue.queue[pkt_queue.tail].hdr = hdr;
+                    pkt_queue.queue[pkt_queue.tail].key = key;
+                    pkt_queue.queue[pkt_queue.tail].pld = pld;
 
-            // update queue pointer,
-            pkt_queue.tail = new_tail;
+                    // update queue pointer,
+                    pkt_queue.tail = new_tail;
 
-        } else {
+                } else {
 
-            // The queue of packets has overflowed
-            n_dropped_packet_overflows += 1;
+                    // The queue of packets has overflowed
+                    n_dropped_packet_overflows += 1;
+                }
+            }
         }
     }
 }
@@ -304,21 +332,23 @@ static uint sark_cmd_dpri(sdp_msg_t *msg) {
         data[3] = n_missed_dropped_packets;
         data[4] = n_dropped_packet_overflows;
         data[5] = n_reinjected_packets;
+        data[6] = n_link_dumped_packets;
+        data[7] = n_processor_dumped_packets;
 
         // Put the current services enabled in the packet
-        data[6] = 0;
+        data[8] = 0;
         bool values_to_check[] = {reinject_mc, reinject_pp,
                                   reinject_nn, reinject_fr};
         int flags[] = {DPRI_PACKET_TYPE_MC, DPRI_PACKET_TYPE_PP,
                        DPRI_PACKET_TYPE_NN, DPRI_PACKET_TYPE_FR};
         for (int i = 0; i < 4; i++) {
             if (values_to_check[i]) {
-                data[6] |= flags[i];
+                data[8] |= flags[i];
             }
         }
 
         // Return the number of bytes in the packet
-        return 7 * 4;
+        return 9 * 4;
 
     } else if (msg->arg1 == CMD_DPRI_RESET_COUNTERS) {
 
@@ -327,6 +357,8 @@ static uint sark_cmd_dpri(sdp_msg_t *msg) {
         n_missed_dropped_packets = 0;
         n_dropped_packet_overflows = 0;
         n_reinjected_packets = 0;
+        n_link_dumped_packets = 0;
+        n_processor_dumped_packets = 0;
 
         return 0;
     } else if (msg->arg1 == CMD_DPRI_EXIT) {

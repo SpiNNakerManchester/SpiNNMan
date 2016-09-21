@@ -18,7 +18,8 @@ class DPRIStatus(object):
         (self._router_timeout, self._router_emergency_timeout,
          self._n_dropped_packets, self._n_missed_dropped_packets,
          self._n_dropped_packet_overflows, self._n_reinjected_packets,
-         self._flags) = struct.unpack_from("<IIIIIII", data, offset)
+         self._n_link_dumps, self._n_processor_dumps,
+         self._flags) = struct.unpack_from("<IIIIIIIII", data, offset)
 
     @property
     def router_timeout(self):
@@ -55,6 +56,24 @@ class DPRIStatus(object):
             having enough space in the queue of packets to reinject
         """
         return self._n_dropped_packet_overflows
+
+    @property
+    def n_processor_dumps(self):
+        """ The number of times that when a dropped packet was caused due to
+        a processor failing to take the packet.
+
+        :return: int
+        """
+        return self._n_processor_dumps
+
+    @property
+    def n_link_dumps(self):
+        """ The number of times that when a dropped packet was caused due to
+        a link failing to take the packet.
+
+        :return: int
+        """
+        return self._n_link_dumps
 
     @property
     def n_reinjected_packets(self):
