@@ -256,30 +256,28 @@ INT_HANDLER dropped_packet_callback() {
                 n_link_dumped_packets +=
                     __builtin_popcount(is_link_dump);
             }
-            if(is_processor_dump == 0 && n_link_dumped_packets == 0){
 
-                // Only update this counter if this is a packet to reinject
-                n_dropped_packets += 1;
+            // Only update this counter if this is a packet to reinject
+            n_dropped_packets += 1;
 
-                // try to insert dumped packet in the queue,
-                uint new_tail = (pkt_queue.tail + 1) % PKT_QUEUE_SIZE;
+            // try to insert dumped packet in the queue,
+            uint new_tail = (pkt_queue.tail + 1) % PKT_QUEUE_SIZE;
 
-                // check for space in the queue
-                if (new_tail != pkt_queue.head) {
+            // check for space in the queue
+            if (new_tail != pkt_queue.head) {
 
-                    // queue packet,
-                    pkt_queue.queue[pkt_queue.tail].hdr = hdr;
-                    pkt_queue.queue[pkt_queue.tail].key = key;
-                    pkt_queue.queue[pkt_queue.tail].pld = pld;
+                // queue packet,
+                pkt_queue.queue[pkt_queue.tail].hdr = hdr;
+                pkt_queue.queue[pkt_queue.tail].key = key;
+                pkt_queue.queue[pkt_queue.tail].pld = pld;
 
-                    // update queue pointer,
-                    pkt_queue.tail = new_tail;
+                // update queue pointer,
+                pkt_queue.tail = new_tail;
 
-                } else {
+            } else {
 
-                    // The queue of packets has overflowed
-                    n_dropped_packet_overflows += 1;
-                }
+                // The queue of packets has overflowed
+                n_dropped_packet_overflows += 1;
             }
         }
     }
