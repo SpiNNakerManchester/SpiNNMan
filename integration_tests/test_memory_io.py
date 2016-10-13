@@ -2,6 +2,7 @@ import unittest
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.utilities.memory_io import MemoryIO
 import numpy
+import os
 
 
 class TestMemoryIO(unittest.TestCase):
@@ -32,18 +33,11 @@ class TestMemoryIO(unittest.TestCase):
         test_data = bytearray(range(10))
         memory.write(bytes(test_data))
         memory.write(bytes(test_data))
-        memory.seek(20)
+        memory.seek(-10, os.SEEK_CUR)
         read_data = bytearray(memory.read(10))
-        read_data2 = bytearray(memory.read(10))
         self.assertEqual(
             test_data, read_data,
             "Written data is not the same as read data:\n    {}\n    {}"
             .format(
                 [hex(val) for val in test_data],
                 [hex(val) for val in read_data]))
-        self.assertEqual(
-            test_data, read_data2,
-            "Written data is not the same as read data:\n    {}\n    {}"
-            .format(
-                [hex(val) for val in test_data],
-                [hex(val) for val in read_data2]))

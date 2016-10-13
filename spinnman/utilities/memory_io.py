@@ -249,11 +249,13 @@ class MemoryIO(object):
                 self._write_buffer_offset + n_bytes_to_copy
             ] = data[:n_bytes_to_copy]
             self._write_buffer_offset += n_bytes_to_copy
+            self._current_address += n_bytes_to_copy
             n_bytes -= n_bytes_to_copy
             if self._write_buffer_offset == self._buffer_size:
                 self._flush_write_buffer()
             if n_bytes > 0:
                 self._write_memory_view[:n_bytes] = data[n_bytes_to_copy:]
                 self._write_buffer_offset += n_bytes
+                self._current_address += n_bytes
 
         return n_bytes
