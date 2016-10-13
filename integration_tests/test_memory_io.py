@@ -7,7 +7,7 @@ import numpy
 class TestMemoryIO(unittest.TestCase):
 
     def test_memory_io(self):
-        n_bytes = 10000
+        n_bytes = 1000
         read_start_offset = 5
         read_end_offset = -10
         transceiver = create_transceiver_from_hostname(
@@ -27,3 +27,23 @@ class TestMemoryIO(unittest.TestCase):
             compare_data, read_data,
             "Written data is not the same as read data:\n    {}\n    {}"
             .format(data_str, read_str))
+
+        memory.seek(20)
+        test_data = bytearray(range(10))
+        memory.write(bytes(test_data))
+        memory.write(bytes(test_data))
+        memory.seek(20)
+        read_data = bytearray(memory.read(10))
+        read_data2 = bytearray(memory.read(10))
+        self.assertEqual(
+            test_data, read_data,
+            "Written data is not the same as read data:\n    {}\n    {}"
+            .format(
+                [hex(val) for val in test_data],
+                [hex(val) for val in read_data]))
+        self.assertEqual(
+            test_data, read_data2,
+            "Written data is not the same as read data:\n    {}\n    {}"
+            .format(
+                [hex(val) for val in test_data],
+                [hex(val) for val in read_data2]))
