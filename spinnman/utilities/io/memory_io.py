@@ -1,7 +1,8 @@
 import os
+from spinnman.utilities.io.abstract_io import AbstractIO
 
 
-class MemoryIO(object):
+class MemoryIO(AbstractIO):
     """ A file-like object for reading and writing memory
     """
 

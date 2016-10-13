@@ -1,8 +1,7 @@
 import unittest
-from spinnman.transceiver import create_transceiver_from_hostname
-from spinnman.utilities.io.memory_io import MemoryIO
 import numpy
 import os
+from spinnman.utilities.io.file_io import FileIO
 
 
 class TestMemoryIO(unittest.TestCase):
@@ -11,12 +10,9 @@ class TestMemoryIO(unittest.TestCase):
         n_bytes = 1000
         read_start_offset = 5
         read_end_offset = -10
-        transceiver = create_transceiver_from_hostname(
-            "spinn-10.cs.man.ac.uk", 2)
-        transceiver.ensure_board_is_ready()
-        address = transceiver.malloc_sdram(0, 0, n_bytes, 30)
+        my_file = "test"
         data = bytearray(numpy.random.randint(0, 256, n_bytes).astype("uint8"))
-        memory = MemoryIO(transceiver, 0, 0, address, address + n_bytes)
+        memory = FileIO(my_file, 0, n_bytes)
         print "Written", memory.write(bytes(data)), "bytes"
         memory = memory[read_start_offset:read_end_offset]
         read_data = bytearray(memory.read())
