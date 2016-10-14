@@ -74,9 +74,9 @@ class HeapElement(object):
 
     def __str__(self):
         if self._is_free:
-            return "FREE  0x{:8X} SIZE: {:8d}".format(
+            return "FREE  0x{:8X} SIZE: {:9d}".format(
                 self._block_address, self.size)
         else:
-            return "BLOCK 0x{:8X} SIZE: {:8d} TAG: {:3d} APP_ID: {:3d}"\
+            return "BLOCK 0x{:8X} SIZE: {:9d} TAG: {:3d} APP_ID: {:3d}"\
                 .format(
                     self._block_address, self.size, self._tag, self._app_id)

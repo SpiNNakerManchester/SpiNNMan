@@ -27,7 +27,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
 
     def _read_heap_pointer(self, response):
         self._next_block_address = struct.unpack_from(
-            "<I", response.data, response.offset)[0]
+            "<4xI", response.data, response.offset)[0]
 
     def _read_next_block(self, block_address, response):
         self._next_block_address, free = struct.unpack_from(
@@ -48,7 +48,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
             pointer.data_type.value, self._read_heap_address_response)
 
         self._read_address(
-            x, y, self._heap_address, 4, self._read_heap_pointer)
+            x, y, self._heap_address, 8, self._read_heap_pointer)
 
         while self._next_block_address != 0:
             self._read_address(
