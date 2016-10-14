@@ -43,6 +43,7 @@ from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinnman.messages.spinnaker_boot._system_variables\
     ._system_variable_boot_values import SystemVariableDefinition
+from spinnman.processes.get_heap_process import GetHeapProcess
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -2704,6 +2705,19 @@ class Transceiver(object):
             self._reinjector_cores.get_core_subset_for_chip(x, y)
             .processor_ids)
         return process.get_dpri_status(x, y, reinjector_core)
+
+    def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
+        """ Get the contents of the given heap on a given chip
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :param heap: The SystemVariableDefinition which is the heap to read
+        :type heap: SystemVariableDefinition
+        """
+        process = GetHeapProcess(self._scamp_connection_selector)
+        return process.get_heap(x, y, heap)
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
