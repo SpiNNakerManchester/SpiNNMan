@@ -44,6 +44,8 @@ from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinnman.messages.spinnaker_boot._system_variables\
     ._system_variable_boot_values import SystemVariableDefinition
 from spinnman.processes.get_heap_process import GetHeapProcess
+from spinnman.processes.fill_process import FillDataType
+from spinnman.processes.fill_process import FillProcess
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.scp_dpri_packet_type_flags \
@@ -2718,6 +2720,32 @@ class Transceiver(object):
         """
         process = GetHeapProcess(self._scamp_connection_selector)
         return process.get_heap(x, y, heap)
+
+    def fill_memory(
+            self, x, y, base_address, repeat_value, bytes_to_fill,
+            data_type=FillDataType.WORD):
+        """ Fill some memory with repeated data
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :param base_address: The address at which to start the fill
+        :type base_address: int
+        :param repeat_value: The data to repeat
+        :type repeat_value: int
+        :param bytes_to_fill:\
+            The number of bytes to fill - must be compatible with the data\
+            type i.e. if the data type is WORD, the number of bytes must\
+            be divisible by 4
+        :type bytes_to_fill: int
+        :param data_type:
+        :type data_type:\
+            :py:class:`spinnman.processes.fill_process.FillDataType`
+        """
+        process = FillProcess(self._scamp_connection_selector)
+        return process.fill_memory(
+            x, y, base_address, repeat_value, bytes_to_fill, data_type)
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\

@@ -1,5 +1,7 @@
 import os
 from spinnman.utilities.io.abstract_io import AbstractIO
+from spinnman.processes.fill_process import FillDataType
+import struct
 
 
 class FileIO(AbstractIO):
@@ -11,11 +13,8 @@ class FileIO(AbstractIO):
         # The file to write to
         "_file",
 
-        # The total size of the file
-        "_size",
-
-        # The maximum position seen in the file
-        "_max_position",
+        # The current offset in the file
+        "_current_offset",
 
         # The start offset in the file
         "_start_offset",
@@ -38,8 +37,8 @@ class FileIO(AbstractIO):
         self._file = file_obj
         if isinstance(file_obj, str):
             self._file = open(file_obj, "wb+")
-        self._file.seek(start_offset)
 
+        self._current_offset = start_offset
         self._start_offset = start_offset
         self._end_offset = end_offset
 
@@ -122,7 +121,7 @@ class FileIO(AbstractIO):
         if from_what == os.SEEK_SET:
             position = self._start_offset + n_bytes
         elif from_what == os.SEEK_CUR:
-            position = self._file.tell() + n_bytes
+            position = self._current_offset + n_bytes
         elif from_what == os.SEEK_END:
             position = self._end_offset + n_bytes
         else:
@@ -135,18 +134,18 @@ class FileIO(AbstractIO):
                 "Attempt to seek to a position of {} which is outside of the"
                 " region".format(position))
 
-        self._file.seek(position)
+        self._current_offset = position
 
     def tell(self):
         """ Return the current position within the region relative to the start
         """
-        return self._file.tell() - self._start_offset
+        return self._current_offset - self._start_offset
 
     @property
     def address(self):
         """ Return the current absolute address within the region
         """
-        return self._file.tell()
+        return self._current_offset
 
     def read(self, n_bytes=None):
         """ Read a number of bytes, or the rest of the data if n_bytes is None\
@@ -159,8 +158,14 @@ class FileIO(AbstractIO):
         if n_bytes == 0:
             return b""
         if n_bytes is None or n_bytes < 0:
-            return self._file.read(self._end_offset - self._file.tell())
-        return bytes(self._file.read(n_bytes))
+            n_bytes = self._end_offset - self._current_offset
+        if self._current_offset + n_bytes > self._end_offset:
+            raise EOFError
+
+        self._file.seek(self._current_offset)
+        data = bytes(self._file.read(n_bytes))
+        self._current_offset += n_bytes
+        return data
 
     def write(self, data):
         """ Write some data to the region
@@ -172,8 +177,43 @@ class FileIO(AbstractIO):
         :raise EOFError: If the write will go over the end of the region
         """
         n_bytes = len(data)
-        if self._file.tell() + n_bytes > self._end_offset:
+
+        if self._current_offset + n_bytes > self._end_offset:
             raise EOFError
 
+        self._file.seek(self._current_offset)
         self._file.write(data)
+        self._current_offset += n_bytes
         return n_bytes
+
+    def fill(
+            self, repeat_value, bytes_to_fill=None,
+            data_type=FillDataType.WORD):
+        """ Fill the next part of the region with repeated data
+
+        :param repeat_value: The value to repeat
+        :type repeat_value: int
+        :param bytes_to_fill:\
+            Optional number of bytes to fill from current position, or None\
+            to fill to the end
+        :type bytes_to_fill: int
+        :param data_type: The type of the repeat value
+        :type data_type: :py:class:`spinnman.process.fill_process.FillProcess`
+        :raise EOFError: If the amount of data to fill is more than the region
+        """
+
+        if bytes_to_fill is None:
+            bytes_to_fill = self._end_offset - self._current_offset
+        if self._current_offset + bytes_to_fill > self._end_offset:
+            raise EOFError
+        if bytes_to_fill % data_type.value != 0:
+            raise ValueError(
+                "The size of {} bytes to fill is not divisible by the size of"
+                " the data of {} bytes".format(bytes_to_fill, data_type.value))
+        data_to_fill = struct.pack(
+            "{}".format(data_type.struct_type[-1]), repeat_value
+        )
+        self._file.seek(self._current_offset)
+        for _ in range(bytes_to_fill / data_type.value):
+            self._file.write(data_to_fill)
+        self._current_offset += bytes_to_fill

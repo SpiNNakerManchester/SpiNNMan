@@ -3,6 +3,7 @@ from abc import ABCMeta
 import os
 from abc import abstractmethod
 from abc import abstractproperty
+from spinnman.processes.fill_process import FillDataType
 
 
 @add_metaclass(ABCMeta)
@@ -85,4 +86,21 @@ class AbstractIO(object):
         :return: The number of bytes written
         :rtype: int
         :raise EOFError: If the write will go over the end of the region
+        """
+
+    @abstractmethod
+    def fill(
+            self, repeat_value, bytes_to_fill=None,
+            data_type=FillDataType.WORD):
+        """ Fill the next part of the region with repeated data
+
+        :param repeat_value: The value to repeat
+        :type repeat_value: int
+        :param bytes_to_fill:\
+            Optional number of bytes to fill from current position, or None\
+            to fill to the end
+        :type bytes_to_fill: int
+        :param data_type: The type of the repeat value
+        :type data_type: :py:class:`spinnman.process.fill_process.FillProcess`
+        :raise EOFError: If the amount of data to fill is more than the region
         """

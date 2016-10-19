@@ -2,6 +2,7 @@ import unittest
 import numpy
 import os
 from spinnman.utilities.io.file_io import FileIO
+import struct
 
 
 class TestMemoryIO(unittest.TestCase):
@@ -37,3 +38,16 @@ class TestMemoryIO(unittest.TestCase):
             .format(
                 [hex(val) for val in test_data],
                 [hex(val) for val in read_data]))
+
+        memory.seek(124)
+        memory.write(struct.pack("B", 10))
+        memory.seek(112)
+        memory[112:124].fill(5)
+        memory.seek(112)
+        test_data = struct.unpack("<III", memory.read(12))
+        self.assertEqual(
+            test_data, (5, 5, 5),
+            "Filled data values unexpected: {}".format(test_data))
+        self.assertEqual(
+            struct.unpack("B", memory.read(1))[0], 10,
+            "Fill overwritten value")

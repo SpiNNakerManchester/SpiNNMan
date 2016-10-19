@@ -1,5 +1,6 @@
 import os
 from spinnman.utilities.io.abstract_io import AbstractIO
+from spinnman.processes.fill_process import FillDataType
 
 
 class MemoryIO(AbstractIO):
@@ -260,3 +261,28 @@ class MemoryIO(AbstractIO):
                 self._current_address += n_bytes
 
         return n_bytes
+
+    def fill(
+            self, repeat_value, bytes_to_fill=None,
+            data_type=FillDataType.WORD):
+        """ Fill the next part of the region with repeated data
+
+        :param repeat_value: The value to repeat
+        :type repeat_value: int
+        :param bytes_to_fill:\
+            Optional number of bytes to fill from current position, or None\
+            to fill to the end
+        :type bytes_to_fill: int
+        :param data_type: The type of the repeat value
+        :type data_type: :py:class:`spinnman.process.fill_process.FillProcess`
+        :raise EOFError: If the amount of data to fill is more than the region
+        """
+        if bytes_to_fill is None:
+            bytes_to_fill = self._end_address - self._current_address
+        if self._current_address + bytes_to_fill > self._end_address:
+            raise EOFError
+        self._flush_write_buffer()
+        self._transceiver.fill_memory(
+            self._x, self._y, self._current_address, repeat_value,
+            bytes_to_fill, data_type)
+        self._current_address += bytes_to_fill
