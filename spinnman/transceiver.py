@@ -2576,6 +2576,22 @@ class Transceiver(object):
         listener.add_callback(callback)
         return connection.local_port
 
+    def add_connection(self, connection_class, local_host):
+        """ adds a connection to the transceivers pile
+        (supporting listeners etc), but where the original connection was used
+        for tag allocation
+
+
+        :param connection_class:  the connection class to instantiate
+        :param local_host: the local host to create the connection for.
+        :return:
+        """
+        connection = connection_class(local_host=local_host)
+        self._all_connections.add(connection)
+        self._udp_receive_connections_by_port[connection.local_port][
+            local_host] = (connection, None)
+        return connection
+
     def enable_reinjection(self, multicast=True, point_to_point=False,
                            nearest_neighbour=False, fixed_route=False):
         """ Enables or disables dropped packet reinjection - if all parameters\
