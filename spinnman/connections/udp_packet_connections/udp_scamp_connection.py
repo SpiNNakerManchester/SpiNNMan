@@ -73,3 +73,9 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
 
     def send_scp_request(self, scp_request):
         self.send(self.get_scp_data(scp_request))
+
+    def __repr__(self):
+        return "UDP_SCAMP_Connection for local_port:{}, local_host:{}, " \
+               "remote_port:{}, remote_host:{}, chip_x:{}, chip_y:{}".format(
+                    self.local_port, self.local_ip_address, self.remote_port,
+                    self.remote_ip_address, self._chip_x, self._chip_y)

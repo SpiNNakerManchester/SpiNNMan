@@ -57,3 +57,9 @@ class UDPBootConnection(UDPConnection,
         """
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)
+
+    def __repr__(self):
+        return "UDP_BOOT_Connection for local_port:{}, local_host:{}, " \
+               "remote_port:{}, remote_host:{}".format(
+                    self.local_port, self.local_ip_address, self.remote_port,
+                    self.remote_ip_address)

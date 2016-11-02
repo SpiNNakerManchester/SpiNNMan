@@ -35,3 +35,7 @@ class UDPIpAddressesConnection(UDPConnection):
             return None
         except Exception:
             return None
+
+    def __repr__(self):
+        return "UDP_IPAddress_Connection for local_port:{}, local_host:{}"\
+            .format(self.local_port, self.local_ip_address)

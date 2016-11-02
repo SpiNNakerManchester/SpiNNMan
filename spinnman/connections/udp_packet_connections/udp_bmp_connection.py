@@ -99,3 +99,11 @@ class UDPBMPConnection(
 
     def send_scp_request(self, scp_request):
         self.send(self.get_scp_data(scp_request))
+
+    def __repr__(self):
+        return "UDP_BMP_Connection for local_port:{}, local_host:{}, " \
+               "remote_port:{}, remote_host:{}, cabinet:{}, board:{}, " \
+               "frame:{}".format(
+                    self.local_port, self.local_ip_address, self.remote_port,
+                    self.remote_ip_address, self.cabinet, self.boards,
+                    self.frame)
