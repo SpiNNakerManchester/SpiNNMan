@@ -264,9 +264,9 @@ class UDPConnection(AbstractConnection):
     def is_ready_to_receive(self, timeout=0):
         return len(select.select([self._socket], [], [], timeout)[0]) == 1
 
-
     def __repr__(self):
-        return "UDP_BMP_Connection for local_port:{}, local_host:{}, " \
-               "remote_port:{}, remote_host:{}".format(
-                    self.local_port, self.local_ip_address, self.remote_port,
-                    self.remote_ip_address)
+        return \
+            "UDPConnection(local_host={}, local_port={}, remote_host={},"\
+            "remote_port={})".format(
+                self.local_ip_address, self.local_port,
+                self.remote_ip_address, self.remote_port)

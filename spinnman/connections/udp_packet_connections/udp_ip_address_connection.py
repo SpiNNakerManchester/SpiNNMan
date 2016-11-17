@@ -4,9 +4,8 @@ from spinnman import constants
 
 
 class UDPIpAddressesConnection(UDPConnection):
-    """
-    UDPIpAddressesConnection: a connection that detects any UDP packet that
-    is trnasmitted by none booted spinnaker boards
+    """ A connection that detects any UDP packet that is transmitted by \
+        spinnaker boards prior to boot
     """
 
     def __init__(self, local_host=None,
@@ -15,19 +14,9 @@ class UDPIpAddressesConnection(UDPConnection):
                                local_port=local_port)
 
     def supports_sends_message(self, message):
-        """
-        overides the udpconnection supports sends messages
-        :param message:
-        :return:
-        """
         return False
 
     def receive_ip_address(self, timeout=None):
-        """
-
-        :param timeout:
-        :return:
-        """
         try:
             (_, (ip_address, port)) = self.receive_with_address(timeout)
             if port == 54321:
@@ -37,5 +26,6 @@ class UDPIpAddressesConnection(UDPConnection):
             return None
 
     def __repr__(self):
-        return "UDP_IPAddress_Connection for local_port:{}, local_host:{}"\
-            .format(self.local_port, self.local_ip_address)
+        return \
+            "UDPIpAddressesConnection(local_host={}, local_port={})".format(
+                self.local_ip_address, self.local_port)

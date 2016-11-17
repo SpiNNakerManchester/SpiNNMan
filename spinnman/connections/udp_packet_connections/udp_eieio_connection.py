@@ -61,8 +61,8 @@ class UDPEIEIOConnection(UDPConnection, AbstractEIEIOReceiver,
         return self.receive_eieio_message
 
     def __repr__(self):
-        return "UDP_EIEIO_Connection for local_port:{}, local_host:{}, " \
-               "remote_port:{}, remote_host:{}".format(
-                    self.local_port, self.local_ip_address, self.remote_port,
-                    self.remote_ip_address)
-
+        return \
+            "UDPEIEIOConnection(local_host={}, local_port={}," \
+            "remote_host={}, remote_port={})".format(
+                self.local_ip_address, self.local_port,
+                self.remote_ip_address, self.remote_port)
