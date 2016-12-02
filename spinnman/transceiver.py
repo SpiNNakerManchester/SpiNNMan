@@ -1975,6 +1975,12 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
+        # Check that the tag has a port assigned
+        if ip_tag.port is None:
+            raise exceptions.SpinnmanInvalidParameterException(
+                "ip_tag.port", "None",
+                "The tag port must have been set")
+
         # Get the connections - if the tag specifies a connection, use that,
         # otherwise apply the tag to all connections
         connections = list()
@@ -2025,6 +2031,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+
+        if reverse_ip_tag.port is None:
+            raise exceptions.SpinnmanInvalidParameterException(
+                "reverse_ip_tag.port", "None",
+                "The tag port must have been set!")
 
         if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT or
                 reverse_ip_tag.port ==
