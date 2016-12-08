@@ -14,6 +14,8 @@ from spinnman.messages.scp.impl.scp_read_fpga_register_request import \
     SCPReadFPGARegisterRequest
 from spinnman.messages.scp.impl.scp_write_fpga_register_request import \
     SCPWriteFPGARegisterRequest
+from spinnman.model.core_info_subsets import CoreInfoSubsets
+from spinnman.model.cpu_state import CPUState
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.connections.abstract_classes.abstract_spinnaker_boot_receiver\
     import AbstractSpinnakerBootReceiver
@@ -114,7 +116,7 @@ from spinn_machine.core_subsets import CoreSubsets
 import random
 import struct
 from threading import Condition
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import logging
 import socket
 import time
@@ -1890,52 +1892,86 @@ class Transceiver(object):
 
         process.execute(SCPAppStopRequest(app_id))
 
-    @staticmethod
-    def wait_for_execution_to_complete(
-            executable_targets, app_id, runtime, time_scaling, txrx,
-            time_threshold):
+    def wait_for_cores_to_be_ready(
+            self, executable_targets, app_id, sync_state):
         """
 
-        :param executable_targets:
-        :param app_id:
-        :param runtime:
-        :param time_scaling:
-        :param time_threshold:
-        :param txrx:
+        :param executable_targets: the mapping between cores and binaries
+        :param app_id: the app id that being used by the simulation
+        :param txrx: the python interface to the spinnaker machine
+        :param sync_state: The expected state once the applications are ready
         :return:
         """
 
         total_processors = executable_targets.total_processors
         all_core_subsets = executable_targets.all_core_subsets
 
-        time_to_wait = ((runtime * time_scaling) / 1000.0) + 0.1
+        # check that everything has gone though c main
+        processor_c_main = self.get_core_state_count(app_id, CPUState.C_MAIN)
+        while processor_c_main != 0:
+            time.sleep(0.1)
+            processor_c_main = self.get_core_state_count(
+                app_id, CPUState.C_MAIN)
+
+        # check that the right number of processors are in sync state
+        processors_ready = self.get_core_state_count(app_id, sync_state)
+        if processors_ready != total_processors:
+            unsuccessful_cores = self.get_cores_not_in_state(
+                all_core_subsets, sync_state)
+
+            # last chance to slip out of error check
+            if len(unsuccessful_cores) != 0:
+                break_down = self.get_core_status_string(unsuccessful_cores)
+                raise exceptions.ExecutableFailedToStartException(
+                    "Only {} processors out of {} have successfully reached "
+                    "{}:{}".format(
+                        processors_ready, total_processors, sync_state.name,
+                        break_down), unsuccessful_cores.core_subsets)
+
+    def wait_for_execution_to_complete(
+            self, executable_targets, app_id, runtime, time_threshold):
+        """ takes a set of executable targers and waits for a given time
+        frame to verify if the cores have reached one of a set of finished
+        states. Raises exceptions with human readable content if the cores
+        do not finish
+        :param executable_targets: The targets to check when finished
+        :param app_id: the app id of the executables
+        :param runtime: the runtime in ms to wait before polling
+        :param time_threshold: length of time to wait after scheduled end
+        time before considering the system to had error.
+        :return:
+        """
+
+        total_processors = executable_targets.total_processors
+        all_core_subsets = executable_targets.all_core_subsets
+
+        time_to_wait = (runtime / 1000.0) + 0.1
         logger.info(
             "Application started - waiting {} seconds for it to stop".format(
                 time_to_wait))
         time.sleep(time_to_wait)
         processors_not_finished = total_processors
-        start_time = time.time()#
+        start_time = time.time()
 
         retries = 0
         while (processors_not_finished != 0 and
                 not Transceiver._has_overrun(start_time, time_threshold)):
             try:
-                processors_rte = txrx.get_core_state_count(
+                processors_rte = self.get_core_state_count(
                     app_id, CPUState.RUN_TIME_EXCEPTION)
-                processors_wdog = txrx.get_core_state_count(
+                processors_wdog = self.get_core_state_count(
                     app_id, CPUState.WATCHDOG)
                 if processors_rte > 0 or processors_wdog > 0:
-                    error_cores = helpful_functions.get_cores_in_state(
+                    error_cores = self.get_cores_in_state(
                         all_core_subsets,
-                        {CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}, txrx)
-                    break_down = helpful_functions.get_core_status_string(
-                        error_cores)
+                        {CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG})
+                    break_down = self.get_core_status_string(error_cores)
                     raise exceptions.ExecutableFailedToStopException(
                         "{} cores have gone into an error state:"
                         "{}".format(processors_rte, break_down),
-                        helpful_functions.get_core_subsets(error_cores), True)
+                        error_cores.core_subsets, True)
 
-                processors_not_finished = txrx.get_core_state_count(
+                processors_not_finished = self.get_core_state_count(
                     app_id, CPUState.RUNNING)
                 if processors_not_finished > 0:
                     logger.info("Simulation still not finished or failed - "
@@ -1950,34 +1986,31 @@ class Transceiver(object):
                 time.sleep(0.5)
 
         if processors_not_finished != 0:
-            running_cores = helpful_functions.get_cores_in_state(
-                all_core_subsets, CPUState.RUNNING, txrx)
+            running_cores = self.get_cores_in_state(
+                all_core_subsets, CPUState.RUNNING)
             if len(running_cores) > 0:
                 raise exceptions.ExecutableFailedToStopException(
                     "Simulation did not finish within the time allocated. "
                     "Please try increasing the machine time step and / "
                     "or time scale factor in your simulation.",
-                    helpful_functions.get_core_subsets(running_cores), False)
+                    running_cores.core_subsets, False)
 
         processors_exited = (
-            txrx.get_core_state_count(app_id, CPUState.PAUSED) +
-            txrx.get_core_state_count(app_id, CPUState.FINISHED))
+            self.get_core_state_count(app_id, CPUState.PAUSED) +
+            self.get_core_state_count(app_id, CPUState.FINISHED))
 
         if processors_exited < total_processors:
-            unsuccessful_cores = helpful_functions.get_cores_not_in_state(
-                all_core_subsets, {CPUState.PAUSED, CPUState.FINISHED}, txrx)
+            unsuccessful_cores = self.get_cores_not_in_state(
+                all_core_subsets, {CPUState.PAUSED, CPUState.FINISHED})
 
             # Last chance to get out of the error state
             if len(unsuccessful_cores) > 0:
-                break_down = helpful_functions.get_core_status_string(
-                    unsuccessful_cores)
+                break_down = self.get_core_status_string(unsuccessful_cores)
                 raise exceptions.ExecutableFailedToStopException(
                     "{} of {} processors failed to exit successfully:"
                     "{}".format(
                         total_processors - processors_exited, total_processors,
-                        break_down),
-                    helpful_functions.get_core_subsets(unsuccessful_cores),
-                    True)
+                        break_down), unsuccessful_cores.core_subsets, True)
         logger.info("Application has run to completion")
 
     @staticmethod
@@ -1993,6 +2026,61 @@ class Transceiver(object):
             return True
         else:
             return False
+
+    def get_cores_in_state(self, all_core_subsets, states):
+        """
+
+        :param all_core_subsets:
+        :param states:
+        :param txrx:
+        :return:
+        """
+        core_infos = self.get_cpu_information(all_core_subsets)
+        cores_in_state = CoreInfoSubsets()
+        for core_info in core_infos:
+            if hasattr(states, "__iter__"):
+                if core_info.state in states:
+                    cores_in_state.add_processor(
+                        core_info.x, core_info.y, core_info.p, core_info)
+            elif core_info.state == states:
+                cores_in_state.add_processor(
+                        core_info.x, core_info.y, core_info.p, core_info)
+
+        return cores_in_state
+
+    def get_cores_not_in_state(self, all_core_subsets, states):
+        """
+
+        :param all_core_subsets:
+        :param states:
+        :return:
+        """
+        core_infos = self.get_cpu_information(all_core_subsets)
+        cores_not_in_state = CoreInfoSubsets()
+        for core_info in core_infos:
+            if hasattr(states, "__iter__"):
+                if core_info.state not in states:
+                    cores_not_in_state.add_processor(
+                        core_info.x, core_info.y, core_info.p, core_info)
+            elif core_info.state != states:
+                cores_not_in_state.add_processor(
+                        core_info.x, core_info.y, core_info.p, core_info)
+        return cores_not_in_state
+
+    def get_core_status_string(self, core_infos):
+        """ Get a string indicating the status of the given cores
+        """
+        break_down = "\n"
+        for ((x, y, p), core_info) in core_infos.core_infos():
+            if core_info.state == CPUState.RUN_TIME_EXCEPTION:
+                break_down += "    {}:{}:{} in state {}:{}\n".format(
+                    x, y, p, core_info.state.name,
+                    core_info.run_time_error.name)
+            else:
+                break_down += "    {}:{}:{} in state {}\n".format(
+                    x, y, p, core_info.state.name)
+        return break_down
+
 
     def send_signal(self, app_id, signal):
         """ Send a signal to an application

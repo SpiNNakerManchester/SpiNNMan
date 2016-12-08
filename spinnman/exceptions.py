@@ -266,3 +266,39 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
     @property
     def packet(self):
         return self._packet
+
+class ExecutableFailedToStartException(SpinnmanException):
+    """ Raised when an executable has not entered the expected state during\
+        start up
+    """
+    def __init__(self, output_string, failed_core_subsets):
+        SpinnmanException.__init__(self, output_string)
+        self._failed_core_subsets = failed_core_subsets
+
+    @property
+    def failed_core_subsets(self):
+        """ The subset of cores in the incorrect state
+        """
+        return self._failed_core_subsets
+
+
+class ExecutableFailedToStopException(SpinnmanException):
+    """ Raised when an executable has not entered the expected state during\
+        execution
+    """
+    def __init__(self, output_string, failed_core_subsets, is_rte):
+        SpinnmanException.__init__(self, output_string)
+        self._failed_core_subsets = failed_core_subsets
+        self._is_rte = is_rte
+
+    @property
+    def failed_core_subsets(self):
+        """ The failed cores
+        """
+        return self._failed_core_subsets
+
+    @property
+    def is_rte(self):
+        """ True if the failure was an RTE
+        """
+        return self._is_rte
