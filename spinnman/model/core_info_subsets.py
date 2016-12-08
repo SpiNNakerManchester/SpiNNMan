@@ -35,7 +35,7 @@ class CoreInfoSubsets(object):
         if (x, y) not in self._core_subsets:
             self._add_core_subset(CoreSubset(x, y, []))
         self._core_subsets[(x, y)].add_processor(processor_id)
-        self._core_subsets[(x,y,p)] = core_info
+        self._core_infos[(x, y, processor_id)] = core_info
 
     @property
     def core_subsets(self):

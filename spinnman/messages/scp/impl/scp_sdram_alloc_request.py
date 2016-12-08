@@ -37,8 +37,9 @@ class SCPSDRAMAllocRequest(AbstractSCPRequest):
             tag = 0
         elif not(0 <= tag < 256):
             raise exceptions.SpinnmanInvalidParameterException(
+                "tag",
                 "The tag param needs to be between 0 and 255, or None (in "
-                "which case 0 will be used by default)")
+                "which case 0 will be used by default)", str(tag))
 
         AbstractSCPRequest.__init__(
             self,

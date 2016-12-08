@@ -116,11 +116,12 @@ from spinn_machine.core_subsets import CoreSubsets
 import random
 import struct
 from threading import Condition
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 import logging
 import socket
 import time
 import os
+import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -1977,10 +1978,11 @@ class Transceiver(object):
                     logger.info("Simulation still not finished or failed - "
                                 "waiting a bit longer...")
                     time.sleep(0.5)
-            except Exception as e:
+            except exceptions.SpinnmanTimeoutException as e:
                 retries += 1
                 if retries >= 10:
                     logger.error("Error getting state")
+                    traceback.print_exc()
                     raise e
                 logger.info("Error getting state - retrying...")
                 time.sleep(0.5)
@@ -2071,7 +2073,7 @@ class Transceiver(object):
         """ Get a string indicating the status of the given cores
         """
         break_down = "\n"
-        for ((x, y, p), core_info) in core_infos.core_infos():
+        for ((x, y, p), core_info) in core_infos.core_infos:
             if core_info.state == CPUState.RUN_TIME_EXCEPTION:
                 break_down += "    {}:{}:{} in state {}:{}\n".format(
                     x, y, p, core_info.state.name,
