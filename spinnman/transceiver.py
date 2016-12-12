@@ -1947,9 +1947,10 @@ class Transceiver(object):
         all_core_subsets = executable_targets.all_core_subsets
 
         time_to_wait = (runtime / 1000.0) + 0.1
+
         logger.info(
-            "Application started - waiting {} seconds for it to stop".format(
-                time_to_wait))
+            "Application started - waiting {} seconds for it to stop"
+            .format(time_to_wait))
         time.sleep(time_to_wait)
         processors_not_finished = total_processors
         start_time = time.time()
@@ -1975,7 +1976,7 @@ class Transceiver(object):
                 processors_not_finished = self.get_core_state_count(
                     app_id, CPUState.RUNNING)
                 if processors_not_finished > 0:
-                    logger.info("Simulation still not finished or failed - "
+                    logger.error("Simulation still not finished or failed - "
                                 "waiting a bit longer...")
                     time.sleep(0.5)
             except exceptions.SpinnmanTimeoutException as e:
