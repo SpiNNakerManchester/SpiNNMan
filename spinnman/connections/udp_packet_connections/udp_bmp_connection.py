@@ -1,10 +1,11 @@
 
 # spinnman imports
 from spinnman import constants
+import struct
+
 from spinnman.connections.udp_packet_connections.udp_connection import \
     UDPConnection
-import struct
-from spinnman.messages.scp.scp_result import SCPResult
+from spinnman.messages.scp.enums.scp_result import SCPResult
 from spinnman.connections.udp_packet_connections import udp_utils
 from spinnman.connections.abstract_classes.abstract_scp_receiver \
     import AbstractSCPReceiver

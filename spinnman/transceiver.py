@@ -1,9 +1,16 @@
 
 # local imports
+from spinnman import model_binaries
+from spinnman import constants
+from spinnman import exceptions
+
+from spinnman.model.core_info_subsets import CoreInfoSubsets
+
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
 from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
     AbstractSCPRequest
+from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
     SCPBMPSetLedRequest
 from spinnman.messages.scp.impl.scp_bmp_version_request import \
@@ -14,8 +21,7 @@ from spinnman.messages.scp.impl.scp_read_fpga_register_request import \
     SCPReadFPGARegisterRequest
 from spinnman.messages.scp.impl.scp_write_fpga_register_request import \
     SCPWriteFPGARegisterRequest
-from spinnman.model.core_info_subsets import CoreInfoSubsets
-from spinnman.model.cpu_state import CPUState
+from spinnman.model.enums.cpu_state import CPUState
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.connections.abstract_classes.abstract_spinnaker_boot_receiver\
     import AbstractSpinnakerBootReceiver
@@ -41,13 +47,12 @@ from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
-from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinnman.messages.spinnaker_boot._system_variables\
     ._system_variable_boot_values import SystemVariableDefinition
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
-from spinnman.messages.scp.scp_dpri_packet_type_flags \
+from spinnman.messages.scp.enums.scp_dpri_packet_type_flags \
     import SCPDPRIPacketTypeFlags
 from spinnman.processes.set_dpri_router_timeout_process \
     import SetDPRIRouterTimeoutProcess
@@ -71,10 +76,9 @@ from spinnman.processes.read_router_diagnostics_process \
 from spinnman.processes.\
     multi_connection_process_most_direct_connection_selector import \
     MultiConnectionProcessMostDirectConnectionSelector
-from spinnman.messages.scp.scp_power_command import SCPPowerCommand
+from spinnman.messages.scp.enums.scp_power_command import SCPPowerCommand
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
-from spinnman import constants
 from spinnman.connections.udp_packet_connections.udp_scamp_connection \
     import UDPSCAMPConnection
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
@@ -102,7 +106,9 @@ from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
 from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
 from spinnman.utilities import utility_functions
-from spinnman import exceptions
+
+
+
 
 # storage handlers imports
 from spinn_storage_handlers.abstract_classes.abstract_data_reader \
@@ -1894,18 +1900,14 @@ class Transceiver(object):
         process.execute(SCPAppStopRequest(app_id))
 
     def wait_for_cores_to_be_ready(
-            self, executable_targets, app_id, sync_state):
+            self, all_core_subsets, app_id, cpu_states):
         """
 
-        :param executable_targets: the mapping between cores and binaries
+        :param all_core_subsets: the cores to check are in a given sync state
         :param app_id: the app id that being used by the simulation
-        :param txrx: the python interface to the spinnaker machine
-        :param sync_state: The expected state once the applications are ready
+        :param cpu_states: The expected states once the applications are ready
         :return:
         """
-
-        total_processors = executable_targets.total_processors
-        all_core_subsets = executable_targets.all_core_subsets
 
         # check that everything has gone though c main
         processor_c_main = self.get_core_state_count(app_id, CPUState.C_MAIN)
@@ -1914,28 +1916,50 @@ class Transceiver(object):
             processor_c_main = self.get_core_state_count(
                 app_id, CPUState.C_MAIN)
 
-        # check that the right number of processors are in sync state
-        processors_ready = self.get_core_state_count(app_id, sync_state)
-        if processors_ready != total_processors:
-            unsuccessful_cores = self.get_cores_not_in_state(
-                all_core_subsets, sync_state)
+        # check that the right number of processors are in the states
+        processors_ready = 0
+        for cpu_state in cpu_states:
+            processors_ready += self.get_core_state_count(app_id, cpu_state)
+
+        # verify that all cores got into correct states
+        if processors_ready != len(all_core_subsets):
+            unsuccessful_cores = 0
+            for cpu_state in cpu_states:
+                unsuccessful_cores += len(self.get_cores_not_in_state(
+                    all_core_subsets, cpu_state))
 
             # last chance to slip out of error check
-            if len(unsuccessful_cores) != 0:
+            if unsuccessful_cores != 0:
                 break_down = self.get_core_status_string(unsuccessful_cores)
+
+                cpu_state_names = self._create_cpu_state_names(cpu_states)
+
                 raise exceptions.ExecutableFailedToStartException(
                     "Only {} processors out of {} have successfully reached "
                     "{}:{}".format(
-                        processors_ready, total_processors, sync_state.name,
-                        break_down), unsuccessful_cores.core_subsets)
+                        processors_ready, len(all_core_subsets),
+                        cpu_state_names, break_down),
+                    unsuccessful_cores.core_subsets)
+
+    @staticmethod
+    def _create_cpu_state_names(cpu_states):
+        names = ""
+        first = True
+        for cpu_state in cpu_states:
+            if first:
+                names += "{}".format(cpu_state.name)
+                first = False
+            else:
+                names += ", {}".format(cpu_state.name)
+        return names
 
     def wait_for_execution_to_complete(
-            self, executable_targets, app_id, runtime, time_threshold):
-        """ takes a set of executable targers and waits for a given time
+            self, all_core_subsets, app_id, runtime, time_threshold):
+        """ takes a core_subset and waits for a given time
         frame to verify if the cores have reached one of a set of finished
         states. Raises exceptions with human readable content if the cores
         do not finish
-        :param executable_targets: The targets to check when finished
+        :param all_core_subsets: the cores to check when finished
         :param app_id: the app id of the executables
         :param runtime: the runtime in ms to wait before polling
         :param time_threshold: length of time to wait after scheduled end
@@ -1943,16 +1967,13 @@ class Transceiver(object):
         :return:
         """
 
-        total_processors = executable_targets.total_processors
-        all_core_subsets = executable_targets.all_core_subsets
-
         time_to_wait = (runtime / 1000.0) + 0.1
 
         logger.info(
             "Application started - waiting {} seconds for it to stop"
             .format(time_to_wait))
         time.sleep(time_to_wait)
-        processors_not_finished = total_processors
+        processors_not_finished = len(all_core_subsets)
         start_time = time.time()
 
         retries = 0
@@ -2002,7 +2023,7 @@ class Transceiver(object):
             self.get_core_state_count(app_id, CPUState.PAUSED) +
             self.get_core_state_count(app_id, CPUState.FINISHED))
 
-        if processors_exited < total_processors:
+        if processors_exited < len(all_core_subsets):
             unsuccessful_cores = self.get_cores_not_in_state(
                 all_core_subsets, {CPUState.PAUSED, CPUState.FINISHED})
 
@@ -2012,9 +2033,58 @@ class Transceiver(object):
                 raise exceptions.ExecutableFailedToStopException(
                     "{} of {} processors failed to exit successfully:"
                     "{}".format(
-                        total_processors - processors_exited, total_processors,
-                        break_down), unsuccessful_cores.core_subsets, True)
+                        len(all_core_subsets) - processors_exited,
+                        len(all_core_subsets), break_down),
+                    unsuccessful_cores.core_subsets, True)
         logger.info("Application has run to completion")
+
+    def start_all_cores(self, core_subsets, app_id, sync_state_changes):
+        """
+        :param core_subsets: the mapping between cores and binaries
+        :param app_id: the app id that being used by the simulation
+        :param sync_state_changes: the number of runs been done between setup\
+                and end
+        :return: None
+        """
+
+        # check that the right number of processors are in correct sync
+        if sync_state_changes % 2 == 0:
+            sync_state = SCPSignal.SYNC0
+        else:
+            sync_state = SCPSignal.SYNC1
+
+        # if correct, start applications
+        logger.info("Starting application ({})".format(sync_state))
+        self.send_signal(app_id, sync_state)
+        sync_state_changes += 1
+
+        # check all apps have gone into run state
+        logger.info("Checking that the application has started")
+        processors_running = self.get_core_state_count(
+            app_id, CPUState.RUNNING)
+        if processors_running < len(core_subsets):
+
+            processors_finished = (
+                self.get_core_state_count(app_id, CPUState.PAUSED) +
+                self.get_core_state_count(app_id, CPUState.FINISHED))
+
+            if processors_running + processors_finished >= len(core_subsets):
+                logger.warn("some processors finished between signal "
+                            "transmissions. Could be a sign of an error")
+            else:
+                unsuccessful_cores = self.get_cores_not_in_state(
+                    core_subsets,
+                    {CPUState.RUNNING, CPUState.PAUSED, CPUState.FINISHED})
+
+                # Last chance to get out of error state
+                if len(unsuccessful_cores) > 0:
+                    break_down = self.get_core_status_string(
+                        unsuccessful_cores)
+                    raise exceptions.ExecutableFailedToStartException(
+                        "Only {} of {} processors started:{}".format(
+                            processors_running, len(core_subsets),
+                            break_down),
+                        unsuccessful_cores.core_subsets)
 
     @staticmethod
     def _has_overrun(start_time, time_threshold):
@@ -2083,7 +2153,6 @@ class Transceiver(object):
                 break_down += "    {}:{}:{} in state {}\n".format(
                     x, y, p, core_info.state.name)
         return break_down
-
 
     def send_signal(self, app_id, signal):
         """ Send a signal to an application

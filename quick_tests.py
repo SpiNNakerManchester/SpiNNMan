@@ -3,24 +3,23 @@ from random import randint
 from os.path import os
 import struct
 import time
+import sys
 
 from spinn_storage_handlers.file_data_reader import FileDataReader
-
 from spinnman.transceiver import create_transceiver_from_hostname
-from spinnman.model.cpu_state import CPUState
+from spinnman.model.enums.cpu_state import CPUState
 from spinn_machine.core_subsets import CoreSubsets
 from spinn_machine.core_subset import CoreSubset
-from spinnman.messages.scp.scp_signal import SCPSignal
+from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinn_machine.tags.reverse_iptag import ReverseIPTag
 from spinnman.model.diagnostic_filter import DiagnosticFilter
-import sys
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
-from spinnman.model.diagnostic_filter_destination \
+from spinnman.model.enums.diagnostic_filter_destination \
     import DiagnosticFilterDestination
-from spinnman.model.diagnostic_filter_packet_type \
+from spinnman.model.enums.diagnostic_filter_packet_type \
     import DiagnosticFilterPacketType
 from board_test_configuration import BoardTestConfiguration
 from spinnman import constants

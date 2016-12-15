@@ -7,7 +7,7 @@ from spinnman.messages.scp.abstract_messages.abstract_scp_bmp_request import \
     AbstractSCPBMPRequest
 from spinnman.messages.scp.impl.scp_read_fpga_register_response import \
     SCPReadFPGARegisterResponse
-from spinnman.messages.scp.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 
 

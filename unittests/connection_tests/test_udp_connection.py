@@ -1,12 +1,12 @@
 import unittest
+
 from board_test_configuration import BoardTestConfiguration
 from spinnman.connections.udp_packet_connections.udp_scamp_connection \
     import UDPSCAMPConnection
 import spinnman.exceptions as exc
 from spinnman.messages.scp.impl import scp_read_link_request,\
     scp_read_memory_request, scp_version_request, scp_version_response
-from spinnman.messages.scp.scp_result import SCPResult
-
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 board_config = BoardTestConfiguration()
 

@@ -1,9 +1,8 @@
-from spinnman.model.cpu_state import CPUState
-from spinnman.model.run_time_error import RunTimeError
-from spinnman.model.mailbox_command import MailboxCommand
-
 import struct
 
+from spinnman.model.enums.cpu_state import CPUState
+from spinnman.model.enums.run_time_error import RunTimeError
+from spinnman.model.enums.mailbox_command import MailboxCommand
 
 CPU_INFO_BYTES = 128
 CPU_USER_0_START_ADDRESS = 112

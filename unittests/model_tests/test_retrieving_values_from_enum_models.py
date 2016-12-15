@@ -1,8 +1,10 @@
 import unittest
-from spinnman.model.mailbox_command import MailboxCommand
-from spinnman.model.cpu_state import CPUState
-from spinnman.model.run_time_error import RunTimeError
+
+from spinnman.model.enums.mailbox_command import MailboxCommand
+from spinnman.model.enums.cpu_state import CPUState
+from spinnman.model.enums.run_time_error import RunTimeError
 import spinnman.model.router_diagnostics as router_diagnostics
+
 
 class TestingEnums(unittest.TestCase):
     def test_mailbox_command_enum(self):
