@@ -83,7 +83,7 @@ def get_vcpu_address(p):
     return constants.CPU_INFO_OFFSET + (constants.CPU_INFO_BYTES * p)
 
 
-def send_port_trigger_message(self, connection, board_address):
+def send_port_trigger_message(connection, board_address):
         """ Sends a port trigger message using a connection to (hopefully)\
             open a port in a NAT and/or firewall to allow incoming packets\
             to be received
