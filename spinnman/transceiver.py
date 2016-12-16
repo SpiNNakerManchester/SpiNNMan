@@ -2468,7 +2468,6 @@ class Transceiver(object):
                 self._udp_receive_connections_by_port.values():
             for (_, listener) in receiving_connections.values():
                 if listener is not None:
-                    print "Closing listener", listener
                     listener.close()
 
         for connection in self._all_connections:
