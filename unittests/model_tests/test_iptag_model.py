@@ -13,7 +13,7 @@ class TestIptag(unittest.TestCase):
         port = 1337
         tag = 255
         board_address = board_config.remotehost
-        iptag = IPTag(board_address, tag, ip, port)
+        iptag = IPTag(board_address, 0, 0, tag, ip, port)
         self.assertEqual(ip, iptag.ip_address)
         self.assertEqual(port, iptag.port)
         self.assertEqual(tag, iptag.tag)
