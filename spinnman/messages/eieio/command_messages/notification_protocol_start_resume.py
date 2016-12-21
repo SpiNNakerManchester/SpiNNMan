@@ -7,9 +7,7 @@ from spinnman import constants
 
 
 class NotificationProtocolStartResume(EIEIOCommandMessage):
-    """ Packet which contains the path to the database created by the\
-        toolchain which is to be used by any software which interfaces with\
-        SpiNNaker
+    """ Packet which indicates that the toolchain has started or resumed
     """
     def __init__(self):
         EIEIOCommandMessage.__init__(
