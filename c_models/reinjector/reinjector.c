@@ -240,45 +240,52 @@ INT_HANDLER dropped_packet_callback() {
         // check for overflow from router
         if (rtr_dstat & RTR_DOVRFLW_MASK) {
             n_missed_dropped_packets += 1;
-        }
-        else{
-            if(is_processor_dump > 0){
+        } else {
+
+            // Note that the processor_dump and link_dump flags are sticky
+            // so you can only really count these if you *haven't* missed a
+            // dropped packet - hence this being split out
+
+            if (is_processor_dump > 0) {
+
                 // add to the count the number of active bits from this dumped
                 //packet, as this indicates how many processors this packet
                 // was meant to go to.
                 n_processor_dumped_packets +=
                     __builtin_popcount(is_processor_dump);
             }
-            if(is_link_dump > 0){
+
+            if (is_link_dump > 0) {
+
                 // add to the count the number of active bits from this dumped
                 //packet, as this indicates how many links this packet was
                 // meant to go to.
                 n_link_dumped_packets +=
                     __builtin_popcount(is_link_dump);
             }
+        }
 
-            // Only update this counter if this is a packet to reinject
-            n_dropped_packets += 1;
+        // Only update this counter if this is a packet to reinject
+        n_dropped_packets += 1;
 
-            // try to insert dumped packet in the queue,
-            uint new_tail = (pkt_queue.tail + 1) % PKT_QUEUE_SIZE;
+        // try to insert dumped packet in the queue,
+        uint new_tail = (pkt_queue.tail + 1) % PKT_QUEUE_SIZE;
 
-            // check for space in the queue
-            if (new_tail != pkt_queue.head) {
+        // check for space in the queue
+        if (new_tail != pkt_queue.head) {
 
-                // queue packet,
-                pkt_queue.queue[pkt_queue.tail].hdr = hdr;
-                pkt_queue.queue[pkt_queue.tail].key = key;
-                pkt_queue.queue[pkt_queue.tail].pld = pld;
+            // queue packet,
+            pkt_queue.queue[pkt_queue.tail].hdr = hdr;
+            pkt_queue.queue[pkt_queue.tail].key = key;
+            pkt_queue.queue[pkt_queue.tail].pld = pld;
 
-                // update queue pointer,
-                pkt_queue.tail = new_tail;
+            // update queue pointer,
+            pkt_queue.tail = new_tail;
 
-            } else {
+        } else {
 
-                // The queue of packets has overflowed
-                n_dropped_packet_overflows += 1;
-            }
+            // The queue of packets has overflowed
+            n_dropped_packet_overflows += 1;
         }
     }
 }

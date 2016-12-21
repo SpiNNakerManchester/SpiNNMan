@@ -1975,6 +1975,12 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
+        # Check that the tag has a port assigned
+        if ip_tag.port is None:
+            raise exceptions.SpinnmanInvalidParameterException(
+                "ip_tag.port", "None",
+                "The tag port must have been set")
+
         # Get the connections - if the tag specifies a connection, use that,
         # otherwise apply the tag to all connections
         connections = list()
@@ -2025,6 +2031,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+
+        if reverse_ip_tag.port is None:
+            raise exceptions.SpinnmanInvalidParameterException(
+                "reverse_ip_tag.port", "None",
+                "The tag port must have been set!")
 
         if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT or
                 reverse_ip_tag.port ==
@@ -2481,8 +2492,9 @@ class Transceiver(object):
         :param local_host: The optional hostname or IP address to listen on;\
                 if not specified, all interfaces will be used for listening
         :type local_host: str
-        :return: The port number that the connection is listening on
-        :rtype: int
+        :return: The connection to be used
+        :rtype:\
+                :py:class:`spinnman.connection.udp_packet_connections.udp_connection.UDPConnection`
         """
 
         # If the connection class is not an AbstractListenable, this is an
@@ -2542,12 +2554,12 @@ class Transceiver(object):
                 connection = connection_class(local_port=local_port,
                                               local_host=local_host)
                 self._all_connections.add(connection)
-            listener = ConnectionListener(connection)
-            listener.start()
-            receiving_connections[local_host] = (connection, listener)
-            connections_of_class.append((connection, listener))
+                listener = ConnectionListener(connection)
+                listener.start()
+                receiving_connections[local_host] = (connection, listener)
+                connections_of_class.append((connection, listener))
             listener.add_callback(callback)
-            return connection.local_port
+            return connection
 
         # If we are here, the local port wasn't specified to try to use an
         # existing connection of the correct class
@@ -2574,7 +2586,7 @@ class Transceiver(object):
             local_host] = (connection, listener)
         connections_of_class.append((connection, listener))
         listener.add_callback(callback)
-        return connection.local_port
+        return connection
 
     def enable_reinjection(self, multicast=True, point_to_point=False,
                            nearest_neighbour=False, fixed_route=False):
