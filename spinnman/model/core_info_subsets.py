@@ -1,9 +1,10 @@
 from collections import OrderedDict
 from spinn_machine.core_subset import CoreSubset
 
+
 class CoreInfoSubsets(object):
     """
-    encpasulation of core subsets and core info subsets
+    encapsulation of core subsets and core info subsets
     """
 
     def __init__(self):
@@ -34,8 +35,18 @@ class CoreInfoSubsets(object):
         """
         if (x, y) not in self._core_subsets:
             self._add_core_subset(CoreSubset(x, y, []))
-        self._core_subsets[(x, y)].add_processor(processor_id)
-        self._core_infos[(x, y, processor_id)] = core_info
+        if processor_id not in self._core_subsets[(x, y)].processor_ids:
+            self._core_subsets[(x, y)].add_processor(processor_id)
+            self._core_infos[(x, y, processor_id)] = core_info
+
+    def merge_core_info_subset(self, other_core_info_subset):
+        """ merges a CoreInfoSubsets into another CoreInfoSubsets
+
+        :param other_core_info_subset: the CoreInfoSubsets to merge
+        :return: None
+        """
+        for (x, y, p), core_info in other_core_info_subset.core_infos:
+            self.add_processor(x, y, p, core_info)
 
     @property
     def core_subsets(self):

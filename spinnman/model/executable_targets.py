@@ -134,4 +134,4 @@ class ExecutableTargets(object):
                 "ExecutableStartType")
 
         return self._core_subsets_by_executable_start_type[
-            executable_start_type]
+            executable_start_type.value]

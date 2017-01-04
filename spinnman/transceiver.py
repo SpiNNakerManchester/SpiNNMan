@@ -1923,13 +1923,14 @@ class Transceiver(object):
 
         # verify that all cores got into correct states
         if processors_ready != len(all_core_subsets):
-            unsuccessful_cores = 0
+            unsuccessful_cores = CoreInfoSubsets()
             for cpu_state in cpu_states:
-                unsuccessful_cores += len(self.get_cores_not_in_state(
-                    all_core_subsets, cpu_state))
+                unsuccessful_cores.merge_core_info_subset(
+                    self.get_cores_not_in_state(all_core_subsets, cpu_state))
 
             # last chance to slip out of error check
-            if unsuccessful_cores != 0:
+            n = len(unsuccessful_cores)
+            if len(unsuccessful_cores) != 0:
                 break_down = self.get_core_status_string(unsuccessful_cores)
 
                 cpu_state_names = self._create_cpu_state_names(cpu_states)
@@ -1998,7 +1999,7 @@ class Transceiver(object):
                     app_id, CPUState.RUNNING)
                 if processors_not_finished > 0:
                     logger.error("Simulation still not finished or failed - "
-                                "waiting a bit longer...")
+                                 "waiting a bit longer...")
                     time.sleep(0.5)
             except exceptions.SpinnmanTimeoutException as e:
                 retries += 1
