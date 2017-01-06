@@ -2039,6 +2039,54 @@ class Transceiver(object):
                     unsuccessful_cores.core_subsets, True)
         logger.info("Application has run to completion")
 
+    def poll_for_execution_to_complete(
+            self, all_core_subsets, app_id, time_between_polls=1):
+        """ takes a core_subset and waits till the cores have reached one of a
+        set of finished states.
+        :param all_core_subsets: the cores to check when finished
+        :param app_id: the app id of the executables
+        :param time_between_polls: time between pollings
+        :return:
+        """
+
+        logger.info("Application started - waiting till it stops or errors")
+        retries = 0
+        time.sleep(time_between_polls)
+        processors_not_finished = len(all_core_subsets)
+
+        while processors_not_finished != 0:
+            try:
+                processors_rte = self.get_core_state_count(
+                    app_id, CPUState.RUN_TIME_EXCEPTION)
+                processors_wdog = self.get_core_state_count(
+                    app_id, CPUState.WATCHDOG)
+                if processors_rte > 0 or processors_wdog > 0:
+                    error_cores = self.get_cores_in_state(
+                        all_core_subsets,
+                        {CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG})
+                    break_down = self.get_core_status_string(error_cores)
+                    raise exceptions.ExecutableFailedToStopException(
+                        "{} cores have gone into an error state:"
+                        "{}".format(processors_rte, break_down),
+                        error_cores.core_subsets, True)
+
+                processors_not_finished = self.get_core_state_count(
+                    app_id, CPUState.RUNNING)
+                processors_not_finished += self.get_core_state_count(
+                    app_id, CPUState.C_MAIN)
+                if processors_not_finished > 0:
+                    time.sleep(time_between_polls)
+            except exceptions.SpinnmanTimeoutException as e:
+                retries += 1
+                if retries >= 10:
+                    logger.error("Error getting state")
+                    traceback.print_exc()
+                    raise e
+                logger.info("Error getting state - retrying...")
+                time.sleep(time_between_polls)
+
+        logger.info("Application has run to completion")
+
     def start_all_cores(self, core_subsets, app_id, sync_state_changes):
         """
         :param core_subsets: the mapping between cores and binaries
