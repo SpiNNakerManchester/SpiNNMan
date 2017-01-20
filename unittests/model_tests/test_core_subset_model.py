@@ -1,5 +1,5 @@
 import unittest
-from spinnman.model.core_subset import CoreSubset
+from spinn_machine.core_subset import CoreSubset
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 class TestCoreSubset(unittest.TestCase):
