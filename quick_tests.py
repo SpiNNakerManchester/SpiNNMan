@@ -222,8 +222,8 @@ try:
 
     print "Create IP Tags"
     print "=============="
-    transceiver.set_ip_tag(IPTag(None, 1, ".", 50000))
-    transceiver.set_ip_tag(IPTag(None, 2, ".", 60000, strip_sdp=True))
+    transceiver.set_ip_tag(IPTag(None, 0, 0, 1, ".", 50000))
+    transceiver.set_ip_tag(IPTag(None, 0, 0, 2, ".", 60000, strip_sdp=True))
     transceiver.set_reverse_ip_tag(ReverseIPTag(None, 3, 40000, 0, 1, 2))
     tags = transceiver.get_tags()
     for tag in tags:
