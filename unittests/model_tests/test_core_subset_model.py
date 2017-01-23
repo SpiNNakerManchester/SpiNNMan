@@ -10,7 +10,7 @@ class TestCoreSubset(unittest.TestCase):
         self.assertEqual(cs.y,0)
         for proc in cs.processor_ids:
             self.assertIn(proc, proc_list)
-        self.assertEqual(len(cs.processor_ids),len(proc_list))
+        self.assertEqual(len([x for x in cs.processor_ids]),len(proc_list))
 
     def test_create_new_core_subset_duplicate_processors(self):
         with self.assertRaises(SpinnmanInvalidParameterException):
@@ -26,7 +26,7 @@ class TestCoreSubset(unittest.TestCase):
             cs.add_processor(proc)
         for proc in cs.processor_ids:
             self.assertIn(proc, proc_list)
-        self.assertEqual(len(cs.processor_ids),len(proc_list))
+        self.assertEqual(len([x for x in cs.processor_ids]),len(proc_list))
 
 
 

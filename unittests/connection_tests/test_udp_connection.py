@@ -47,7 +47,7 @@ class TestUDPConnection(unittest.TestCase):
         self.assertEqual(result, SCPResult.RC_OK)
 
     def test_send_scp_request_to_nonexistent_host(self):
-        with self.assertRaises(exc.SpinnmanIOException):
+        with self.assertRaises(exc.SpinnmanTimeoutException):
             board_config.set_up_nonexistent_board()
             connection = UDPSCAMPConnection(
                 remote_host=board_config.remotehost)
