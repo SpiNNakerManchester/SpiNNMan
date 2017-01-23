@@ -20,7 +20,7 @@ class TestVersionInfo(unittest.TestCase):
         version_data = bytearray(version_data)
         vi = VersionInfo(version_data)
         self.assertEqual(vi.name,'my')
-        self.assertEqual(vi.version_number,ver_number/100.0)
+        self.assertEqual(vi.version_number,(2,55,0))
         self.assertEqual(vi.hardware,'spinnaker')
         self.assertEqual(vi.x,0xf0)
         self.assertEqual(vi.y,0xa1)
