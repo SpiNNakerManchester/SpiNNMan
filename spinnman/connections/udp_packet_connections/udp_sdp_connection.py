@@ -21,12 +21,12 @@ class UDPSDPConnection(UDPConnection, AbstractSDPReceiver, AbstractSDPSender,
         """
         :param chip_x: The optional x-coordinate of the chip at the remote\
                 end of the connection.  If not specified, it will not be\
-                possible to send sdp messages that require a response with\
+                possible to send SDP messages that require a response with\
                 this connection.
         :type chip_x: int
         :param chip_y: The optional y-coordinate of the chip at the remote\
                 end of the connection.  If not specified, it will not be\
-                possible to send sdp messages that require a response with\
+                possible to send SDP messages that require a response with\
                 this connection.
         :type chip_y: int
         :param local_host: The optional ip address or host name of the local\
@@ -67,3 +67,10 @@ class UDPSDPConnection(UDPConnection, AbstractSDPReceiver, AbstractSDPSender,
 
     def get_receive_method(self):
         return self.receive_sdp_message
+
+    def __repr__(self):
+        return \
+            "UDPSDPConnection(chip_x={}, chip_y={}, local_host={},"\
+            " local_port={}, remote_host={}, remote_port={})".format(
+                self._chip_x, self._chip_y, self.local_ip_address,
+                self.local_port, self.remote_ip_address, self.remote_port)

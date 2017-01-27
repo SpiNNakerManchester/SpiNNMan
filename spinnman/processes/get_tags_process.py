@@ -32,8 +32,9 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
                     response.spin_port)
             else:
                 self._tags[tag] = IPTag(
-                    board_address, tag, host, response.port,
-                    response.strip_sdp)
+                    board_address, response.sdp_header.source_chip_x,
+                    response.sdp_header.source_chip_y, tag, host,
+                    response.port, response.strip_sdp)
 
     def get_tags(self, connection):
 

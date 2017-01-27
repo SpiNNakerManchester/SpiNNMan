@@ -15,7 +15,9 @@ class ConnectionListener(Thread):
         :param n_processes: The number of threads to use when calling\
                 callbacks
         """
-        Thread.__init__(self)
+        Thread.__init__(
+            self,
+            name="Connection listener for connection {}".format(connection))
         self._connection = connection
         self._get_message_call = connection.get_receive_method()
         self._callback_pool = ThreadPool(processes=n_processes)
