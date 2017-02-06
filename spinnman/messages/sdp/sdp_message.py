@@ -26,7 +26,7 @@ class SDPMessage(object):
         """ The bytestring of the message
 
         :return: The bytestring of the message
-        :rtype: bytestring
+        :rtype: str
         """
         if self._data is not None:
             return self._sdp_header.bytestring + self._data[self._offset:]
@@ -50,7 +50,7 @@ class SDPMessage(object):
     def data(self):
         """ The data in the packet
 
-        :rtype: bytestring
+        :rtype: str
         """
         return self._data
 

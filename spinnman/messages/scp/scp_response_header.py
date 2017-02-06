@@ -35,7 +35,7 @@ class SCPResponseHeader(object):
         """ Read a header from a bytestring
 
         :param data: The bytestring to read from
-        :type data: bytestring
+        :type data: str
         :param offset:
         """
         result, sequence = struct.unpack_from("<2H", data, offset)

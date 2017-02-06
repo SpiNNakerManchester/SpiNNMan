@@ -58,6 +58,6 @@ class SCPRequestHeader(object):
         """ The header as a bytestring
 
         :return: The header as a bytestring
-        :rtype: bytestring
+        :rtype: str
         """
         return struct.pack("<2H", self._command.value, self._sequence)
