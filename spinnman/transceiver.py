@@ -1498,7 +1498,7 @@ class Transceiver(object):
         :param led:  Number of the LED or an iterable of LEDs to set the\
                 state of (0-7)
         :type led: int or iterable of int
-        :param action:State to set the LED to, either on, off or toggle
+        :param action: State to set the LED to, either on, off or toggle
         :type action:\
                 :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
         :param board: Specifies the board to control the LEDs of. This may \
@@ -1920,7 +1920,6 @@ class Transceiver(object):
         :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
-         :py:class:`spinnman.messages.scp.scp_signal.SCPSignal'
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
