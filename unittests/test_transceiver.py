@@ -10,6 +10,8 @@ board_config = BoardTestConfiguration()
 
 
 ver = 5     # Guess?
+
+
 class TestTransceiver(unittest.TestCase):
 
     def test_create_new_transceiver_to_board(self):
