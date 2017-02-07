@@ -924,6 +924,28 @@ class Transceiver(object):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
+    @staticmethod
+    def is_scamp_version_compabible(version):
+        """ Determine if the version of SCAMP is compatible with this\
+            transceiver
+
+        :param version: The version to test
+        :type version: (int, int, int)
+        """
+
+        # The major version must match exactly
+        if (version[0] != _SCAMP_VERSION[0]):
+            return False
+
+        # If the minor version matches, the patch version must be >= the
+        # required version
+        if (version[1] == _SCAMP_VERSION[1]):
+            return version[2] >= _SCAMP_VERSION[2]
+
+        # If the minor version is > than the required version, the patch
+        # version is irrelevant
+        return (version[1] > _SCAMP_VERSION[1])
+
     def ensure_board_is_ready(
             self, number_of_boards=None, width=None, height=None,
             n_retries=5, enable_reinjector=True):
@@ -984,7 +1006,8 @@ class Transceiver(object):
             raise exceptions.SpinnmanIOException(
                 "Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
-                version_info.version_number != _SCAMP_VERSION):
+                not self.is_scamp_version_compabible(
+                    version_info.version_number)):
             raise exceptions.SpinnmanIOException(
                 "The machine is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
