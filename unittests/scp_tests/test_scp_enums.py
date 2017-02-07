@@ -95,9 +95,9 @@ class TestSCPEnums(unittest.TestCase):
                          SignalType.NEAREST_NEIGHBOUR)
         self.assertEqual(SCPSignal.START.signal_type,
                          SignalType.NEAREST_NEIGHBOUR)
-        self.assertEqual(SCPSignal.SYNC0.signal_type,
-                         SignalType.NEAREST_NEIGHBOUR)
 
+        self.assertEqual(SCPSignal.SYNC0.signal_type,
+                         SignalType.MULTICAST)
         self.assertEqual(SCPSignal.SYNC1.signal_type,
                          SignalType.MULTICAST)
         self.assertEqual(SCPSignal.PAUSE.signal_type,
@@ -105,7 +105,7 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPSignal.CONTINUE.signal_type,
                          SignalType.MULTICAST)
         self.assertEqual(SCPSignal.EXIT.signal_type,
-                         SignalType.NEAREST_NEIGHBOUR)
+                         SignalType.MULTICAST)
         self.assertEqual(SCPSignal.TIMER.signal_type,
                          SignalType.MULTICAST)
 

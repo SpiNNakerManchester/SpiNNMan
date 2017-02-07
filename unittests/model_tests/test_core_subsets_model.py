@@ -1,6 +1,5 @@
 import unittest
-from spinnman.model.core_subsets import CoreSubset, CoreSubsets
-from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinn_machine.core_subsets import CoreSubset, CoreSubsets
 
 class TestCoreSubsets(unittest.TestCase):
     def test_create_new_default_core_subsets(self):
@@ -18,8 +17,7 @@ class TestCoreSubsets(unittest.TestCase):
         proc_list = [0,1,2,3,5,8,13]
         cs = CoreSubset(0,0,proc_list)
         css = CoreSubsets([cs])
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            css.add_processor(0,0,0)
+        css.add_processor(0,0,0)
 
     def test_add_processor_duplicate_processor_different_chip(self):
         proc_list = [0,1,2,3,5,8,13]
@@ -31,8 +29,7 @@ class TestCoreSubsets(unittest.TestCase):
         proc_list = [0,1,2,3,5,8,13]
         cs = CoreSubset(0,0,proc_list)
         css = CoreSubsets([cs])
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            css.add_core_subset(cs)
+        css.add_core_subset(cs)
 
     def test_add_core_subset(self):
         proc_list = [0,1,2,3,5,8,13]

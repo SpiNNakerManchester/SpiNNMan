@@ -1,6 +1,5 @@
 import unittest
-from spinnman.model.core_subset import CoreSubset
-from spinnman.exceptions import SpinnmanInvalidParameterException
+from spinn_machine.core_subset import CoreSubset
 
 class TestCoreSubset(unittest.TestCase):
     def test_create_new_core_subset(self):
@@ -10,12 +9,10 @@ class TestCoreSubset(unittest.TestCase):
         self.assertEqual(cs.y,0)
         for proc in cs.processor_ids:
             self.assertIn(proc, proc_list)
-        self.assertEqual(len(cs.processor_ids),len(proc_list))
+        self.assertEqual(len([x for x in cs.processor_ids]),len(proc_list))
 
     def test_create_new_core_subset_duplicate_processors(self):
-        with self.assertRaises(SpinnmanInvalidParameterException):
-            CoreSubset(0,0,[0,1,1,2,3,5,8,13])
-
+        CoreSubset(0,0,[0,1,1,2,3,5,8,13])
 
     def test_create_empty_core_subset_add_processor(self):
         proc_list = [0,1,2,3,5,8,13]
@@ -26,9 +23,7 @@ class TestCoreSubset(unittest.TestCase):
             cs.add_processor(proc)
         for proc in cs.processor_ids:
             self.assertIn(proc, proc_list)
-        self.assertEqual(len(cs.processor_ids),len(proc_list))
-
-
+        self.assertEqual(len([x for x in cs.processor_ids]),len(proc_list))
 
 if __name__ == '__main__':
     unittest.main()
