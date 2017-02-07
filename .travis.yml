@@ -8,8 +8,8 @@ virtualenv:
   system_site_packages: true
 
 before_script:
-  - pip install git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
-  - pip install git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
+  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
+  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
   - python ./setup.py install
   - pip install spinnaker_proxy
 script: "py.test ."
