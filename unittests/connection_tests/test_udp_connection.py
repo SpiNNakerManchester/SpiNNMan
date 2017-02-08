@@ -55,5 +55,6 @@ class TestUDPConnection(unittest.TestCase):
             connection.send_scp_request(scp)
             _, _, _, _ = connection.receive_scp_response(2)
 
+
 if __name__ == '__main__':
     unittest.main()

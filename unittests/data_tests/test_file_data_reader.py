@@ -55,12 +55,14 @@ class TestFileDataReader(unittest.TestCase):
         self.reader = FileDataReader(self._file_txt_one_byte)
         ba = bytearray(1)
         stream = self.reader.readinto(ba)
+        self.assertIsNotNone(stream)
         self.assertEqual(len(ba), 1)
         self.assertEqual(ba[0], ord('1'))
 
     def test_read_five_byte(self):
         self.reader = FileDataReader(self._file_txt_five_bytes)
         stream = self.reader.read(5)
+        self.assertIsNotNone(stream)
         self.assertEqual(len(stream), 5)
         self.assertEqual(ord(stream[0]), ord('1'))
         self.assertEqual(ord(stream[1]), ord('2'))
@@ -71,14 +73,17 @@ class TestFileDataReader(unittest.TestCase):
     def test_read_from_empty_file(self):
         self.reader = FileDataReader(self._file_txt_empty)
         stream = self.reader.read(1)
+        self.assertIsNotNone(stream)
         self.assertEqual(len(stream), 0)
 
     def test_read_truncate(self):
         self.reader = FileDataReader(self._file_txt_five_bytes)
         stream = self.reader.read(2)
+        self.assertIsNotNone(stream)
         self.assertEqual(len(stream), 2)
         self.assertEqual(ord(stream[0]), 49)
         self.assertEqual(ord(stream[1]), 50)
+
 
 if __name__ == '__main__':
     unittest.main()

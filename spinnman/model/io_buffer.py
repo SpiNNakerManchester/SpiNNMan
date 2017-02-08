@@ -58,5 +58,6 @@ class IOBuffer(object):
     def __str__(self):
         value = ""
         for line in self._iobuf.split("\n"):
-            value += "{}:{}:{:2n}: {}\n".format(self._x, self._y, self._p, line)
+            value += "{}:{}:{:2n}: {}\n".format(
+                self._x, self._y, self._p, line)
         return value[:-1]
