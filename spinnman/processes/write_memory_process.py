@@ -22,6 +22,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             self, x, y, p, base_address, data, offset, n_bytes):
         """
         writes memory onto a spinnaker chip from a bytearray
+
         :param x: the x coord of the chip in question
         :param y: the y coord of the chip in question
         :param p: the p coord of the chip in question

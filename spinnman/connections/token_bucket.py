@@ -14,7 +14,8 @@ class TokenBucket(object):
 
     def __init__(self, tokens, fill_rate):
         """tokens is the total tokens in the bucket. _fill_rate is the
-        rate in tokens/second that the bucket will be refilled."""
+        rate in tokens/second that the bucket will be refilled.
+        """
         self._capacity = float(tokens)
         self._tokens = float(tokens)
         self._fill_rate = float(fill_rate)
