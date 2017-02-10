@@ -24,7 +24,7 @@ class SCPPowerRequest(AbstractSCPBMPRequest):
         :param delay: Number of seconds delay between power state changes of\
                 the different boards.
         :type delay: int
-        :return:
+        :rtype: None
         """
 
         arg1 = (int(delay * 1000) << 16) | power_command.value

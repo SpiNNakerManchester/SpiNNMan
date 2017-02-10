@@ -32,7 +32,6 @@ class SCPWriteFPGARegisterRequest(AbstractSCPBMPRequest):
         :type addr: int
         :param value: A 32-bit int value to write to the register
         :type value: int
-        :return:
         """
 
         AbstractSCPBMPRequest.__init__(
@@ -43,6 +42,6 @@ class SCPWriteFPGARegisterRequest(AbstractSCPBMPRequest):
 
     def get_scp_response(self):
         """
-        :return:
+        :rtype: SCPCheckOKResponse
         """
         return SCPCheckOKResponse("Send FPGA register write", "CMD_LINK_WRITE")

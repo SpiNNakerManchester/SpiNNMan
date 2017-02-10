@@ -35,7 +35,7 @@ class AbstractSCPSender(AbstractConnection):
         last assigned + 1) % 65536 will be used
 
         :param scp_request: message packet to send
-        :type scp_request:
+        :type scp_request:\
                     :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
         :return: Nothing is returned
         :rtype: None

@@ -61,7 +61,6 @@ class ADCInfo(object):
     def voltage_1_2c(self):
         """
         property for voltage 1 2c
-        :return:
         """
         return self._voltage_1_2c
 
@@ -69,7 +68,6 @@ class ADCInfo(object):
     def voltage_1_2b(self):
         """
         property for voltage 1 2b
-        :return:
         """
         return self._voltage_1_2b
 
@@ -77,7 +75,6 @@ class ADCInfo(object):
     def voltage_1_2a(self):
         """
         property for voltage 1 2a
-        :return:
         """
         return self._voltage_1_2a
 
@@ -85,7 +82,6 @@ class ADCInfo(object):
     def voltage_1_8(self):
         """
         property for voltage 1 8
-        :return:
         """
         return self._voltage_1_8
 
@@ -93,7 +89,6 @@ class ADCInfo(object):
     def voltage_3_3(self):
         """
         property for voltage 3 3
-        :return:
         """
         return self._voltage_3_3
 
@@ -101,7 +96,6 @@ class ADCInfo(object):
     def voltage_supply(self):
         """
         property for voltage supply
-        :return:
         """
         return self._voltage_supply
 
@@ -109,7 +103,6 @@ class ADCInfo(object):
     def temp_top(self):
         """
         property for temp_top
-        :return:
         """
         return self._temp_top
 
@@ -117,7 +110,6 @@ class ADCInfo(object):
     def temp_btm(self):
         """
         property for temp btm
-        :return:
         """
         return self._temp_btm
 
@@ -125,7 +117,6 @@ class ADCInfo(object):
     def temp_ext_0(self):
         """
         property for temp ext 0
-        :return:
         """
         return self._temp_ext_0
 
@@ -133,7 +124,6 @@ class ADCInfo(object):
     def temp_ext_1(self):
         """
         property for temp_ext_1
-        :return:
         """
         return self._temp_ext_1
 
@@ -141,7 +131,6 @@ class ADCInfo(object):
     def fan_0(self):
         """
         property for fan 0
-        :return:
         """
         return self._fan_0
 
@@ -149,6 +138,5 @@ class ADCInfo(object):
     def fan_1(self):
         """
         property for fan 1
-        :return:
         """
         return self._fan_1

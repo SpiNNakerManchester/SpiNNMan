@@ -24,7 +24,7 @@ class SCPBMPSetLedRequest(AbstractSCPBMPRequest):
         :param boards: Specifies the board to control the LEDs of. This may\
                 also be an iterable of multiple boards (in the same frame).
         :type board: int or iterable of int
-        :return: None
+        :rtype: None
         """
 
         # set up the led entry for arg1
@@ -47,6 +47,5 @@ class SCPBMPSetLedRequest(AbstractSCPBMPRequest):
 
     def get_scp_response(self):
         """ Get the response from the write fpga register request
-        :return:
         """
         return SCPCheckOKResponse("Set the LEDs of a board", "CMD_LED")

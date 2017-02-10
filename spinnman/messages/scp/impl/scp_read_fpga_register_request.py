@@ -23,7 +23,7 @@ class SCPReadFPGARegisterRequest(AbstractSCPBMPRequest):
         :param register: Register address to read to (will be rounded down to
                 the nearest 32-bit word boundary).
         :param board: which board to request the fpga register from
-        :return: None
+        :rtype: None
         """
 
         # check to stop people asking for none word aligned memory addresses

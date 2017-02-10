@@ -16,7 +16,6 @@ def generate_machine_report(report_directory, machine, connections):
    :type machine: spinnmachine.machine.Machine object
    :type connections: iterable of implientations of \
    spinnman.connections.abstract_connection.AbstractConnection
-   :return: None
    :rtype: None
    :raise IOError: when a file cannot be opened for some reason
    """
