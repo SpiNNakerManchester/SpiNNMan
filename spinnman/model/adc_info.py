@@ -18,7 +18,7 @@ class ADCInfo(object):
         """
         :param adc_data: bytes from an SCP packet containing adc\
                     information
-        :type adc_data: bytestring
+        :type adc_data: str
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     message does not contain valid adc information
         """

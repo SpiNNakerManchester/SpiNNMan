@@ -24,7 +24,7 @@ class SpinnakerBootMessage(object):
         :param operand_3: The third operand
         :type operand_3: int
         :param data: The optional data, up to 256 words
-        :type data: bytestring
+        :type data: str
         :param offset: The offset of the valid data
         :type offset: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\

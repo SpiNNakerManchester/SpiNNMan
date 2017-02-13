@@ -22,7 +22,7 @@ class CPUInfo(object):
         :param p: The id of a core on the chip
         :type p: int
         :param cpu_data: A bytestring received from SDRAM on the board
-        :type cpu_data: bytestring
+        :type cpu_data: st
         """
         self._x = x
         self._y = y
