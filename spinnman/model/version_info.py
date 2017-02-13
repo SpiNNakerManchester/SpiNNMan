@@ -22,7 +22,7 @@ class VersionInfo(object):
         """
         (self._p, self._physical_cpu_id, self._y, self._x, _,
             version_no, self._build_date) = struct.unpack_from(
-                "<BBBBHHI", buffer(version_data), offset)
+            "<BBBBHHI", buffer(version_data), offset)
 
         version_data = version_data[offset + 12:-1].decode("utf-8")
 

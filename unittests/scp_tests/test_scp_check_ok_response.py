@@ -22,7 +22,7 @@ class TestOkResponse(unittest.TestCase):
         srce_port = 7
         srce_cpu = 31
         dest_source_short = dest_port << 13 | dest_cpu << 8 | srce_port << 5 \
-            | srce_cpu
+                            | srce_cpu
 
         dest_x = 1
         dest_y = 8
@@ -51,7 +51,7 @@ class TestOkResponse(unittest.TestCase):
             srce_port = 7
             srce_cpu = 31
             dest_source_short = dest_port << 13 | dest_cpu << 8 | \
-                srce_port << 5 | srce_cpu
+                                srce_port << 5 | srce_cpu
 
             dest_x = 1
             dest_y = 8
