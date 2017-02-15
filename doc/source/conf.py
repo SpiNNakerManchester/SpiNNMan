@@ -1,7 +1,3 @@
-# import sys
-import os
-from sphinx import apidoc
-
 # -*- coding: utf-8 -*-
 #
 # data_allocation documentation build configuration file, created by
@@ -15,6 +11,11 @@ from sphinx import apidoc
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+
+# import sys
+import os
+from sphinx import apidoc
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -36,7 +37,13 @@ extensions = [
     'sphinx.ext.intersphinx'
 ]
 
-intersphinx_mapping = {'spinn_machine': ('http://spinnmachine.readthedocs.org/en/latest/', None)}
+intersphinx_mapping = {'spinn_machine':
+                            ('http://spinnmachine.readthedocs.org/en/latest/',
+                             None),
+                       'spinn_storage_handlers':
+                           ('http://spinnmachine.readthedocs.io/en/latest/',
+                            None)
+                       }
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
