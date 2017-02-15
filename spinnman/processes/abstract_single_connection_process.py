@@ -15,7 +15,8 @@ class AbstractSingleConnectionProcess(AbstractProcess):
         if error_callback is None:
             error_callback = self._receive_error
 
-        # if no pipe line built yet, build one on the connection selected for it
+        # If no pipe line built yet, build one on the connection selected for
+        # it
         if self._scp_request_pipeline is None:
             self._scp_request_pipeline = SCPRequestPipeLine(
                 self._connection_selector.get_next_connection(request))

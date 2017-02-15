@@ -41,7 +41,6 @@ def generate_machine_report(report_directory, machine, connections):
     # TODO: Add further details on the target machine.
     f_machine_struct.write("\t\tMachine router information\n")
     f_machine_struct.write("\t\t==========================\n\n")
-    chips = machine.chips
     for x in range(machine.max_chip_x + 1):
         for y in range(machine.max_chip_y + 1):
             chip = machine.get_chip_at(x, y)
@@ -58,5 +57,3 @@ def generate_machine_report(report_directory, machine, connections):
                 f_machine_struct.write("\t\t==========================\n\n")
     # Close file:
     f_machine_struct.close()
-
-

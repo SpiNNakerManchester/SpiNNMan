@@ -2,7 +2,8 @@ import unittest
 from struct import pack
 
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.impl.scp_count_state_response import SCPCountStateResponse
+from spinnman.messages.scp.impl.scp_count_state_response \
+    import SCPCountStateResponse
 from spinnman.messages.scp.scp_result import SCPResult
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 
@@ -24,7 +25,8 @@ class TestCPUStateResponse(unittest.TestCase):
         dest_y = 0xab
         srce_x = 0x7
         srce_y = 0x0
-        data = pack('<8BHHI',flags, tag, dest_port_cpu, srce_port_cpu, dest_y, dest_x, srce_y, srce_x, rc, seq, argument_count)
+        data = pack('<8BHHI', flags, tag, dest_port_cpu, srce_port_cpu, dest_y,
+                    dest_x, srce_y, srce_x, rc, seq, argument_count)
         response.read_bytestring(data, 0)
         self.assertEqual(response.count, 5)
 
@@ -51,7 +53,10 @@ class TestCPUStateResponse(unittest.TestCase):
             dest_y = 0xab
             srce_x = 0x7
             srce_y = 0x0
-            data = pack('<8BHHHBBHHI15s',flags, tag, dest_port_cpu, srce_port_cpu, dest_y, dest_x, srce_y, srce_x, rc, seq, p2p_addr, phys_cpu, virt_cpu,version, buffer, build_date, ver_string)
+            data = pack('<8BHHHBBHHI15s', flags, tag, dest_port_cpu,
+                        srce_port_cpu, dest_y, dest_x, srce_y, srce_x, rc, seq,
+                        p2p_addr, phys_cpu, virt_cpu, version, buffer,
+                        build_date, ver_string)
             response.read_bytestring(data, 0)
 
 

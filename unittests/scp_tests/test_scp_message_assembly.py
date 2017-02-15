@@ -1,10 +1,10 @@
 import unittest
 import spinnman.messages.scp.scp_request_header as scp_req
-import spinnman.exceptions as exc
 import spinnman.messages.scp.scp_command as cmds
 import spinnman.messages.scp.impl.scp_version_request as ver_req
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
-from spinnman.messages.scp.impl.scp_read_memory_request import SCPReadMemoryRequest
+from spinnman.messages.scp.impl.scp_read_memory_request \
+    import SCPReadMemoryRequest
 
 
 class TestSCPMessageAssembly(unittest.TestCase):
@@ -34,6 +34,7 @@ class TestSCPMessageAssembly(unittest.TestCase):
         self.assertEqual(scp.argument_2, 256)
         self.assertEqual(scp.argument_3, 2)
         self.assertEqual(scp.data, None)
+
 
 if __name__ == '__main__':
     unittest.main()

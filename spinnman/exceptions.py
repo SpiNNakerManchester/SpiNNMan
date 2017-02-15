@@ -212,8 +212,8 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
 
 
 class SpinnmanGenericProcessException(SpinnmanException):
-    """
-    encapsulates exceptions from processes which communicate with some core/chip
+    """Encapsulates exceptions from processes which communicate with some
+    core/chip
     """
     def __init__(self, exception, tb, x, y, p):
         problem = \
