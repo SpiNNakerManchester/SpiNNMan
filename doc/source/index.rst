@@ -6,7 +6,7 @@ This code depends on SpiNNMachine_ and SpiNNStorageHandlers_ .
 .. _SpiNNaker: http://apt.cs.manchester.ac.uk/projects/SpiNNaker/
 .. _SpiNNMan: https://github.com/SpiNNakerManchester/SpiNNMan
 .. _SpiNNMachine: http://spinnmachine.readthedocs.io
-.. _SpiNNStorageHandlers: https://github.com/SpiNNakerManchester/SpiNNStorageHandlers
+.. _SpiNNStorageHandlers: http://spinnstoragehandlers.readthedocs.io
 
 SpiNNMan
 ========
