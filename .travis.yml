@@ -8,6 +8,12 @@ virtualenv:
   system_site_packages: true
 
 before_script:
+  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
+  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
   - python ./setup.py install
+  - pip install -r requirements-test.txt
   - pip install spinnaker_proxy
-script: "py.test ."
+script:
+  - py.test .
+  # Code quality check
+  - flake8 spinnman unittests

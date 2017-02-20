@@ -22,7 +22,7 @@ class VersionInfo(object):
         """
         (self._p, self._physical_cpu_id, self._y, self._x, _,
             version_no, self._build_date) = struct.unpack_from(
-                "<BBBBHHI", version_data, offset)
+                "<BBBBHHI", buffer(version_data), offset)
 
         version_data = version_data[offset + 12:-1].decode("utf-8")
 
@@ -33,7 +33,7 @@ class VersionInfo(object):
                 self._version_string = version_data
             except ValueError as exception:
                 raise SpinnmanInvalidParameterException(
-                    "version_data", self._version_string,
+                    "version_data", version_data,
                     "Incorrect format: {}".format(exception))
         else:
             name_hardware, _, version = version_data.partition("\0")
