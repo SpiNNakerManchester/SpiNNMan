@@ -119,7 +119,17 @@ EIEIO_COMMAND_IDS = Enum(
         ("SPINNAKER_REQUEST_READ_DATA", 8),
 
         # Host confirming data being read form SpiNNaker memory
-        ("HOST_DATA_READ", 9)]
+        ("HOST_DATA_READ", 9),
+
+        # command for notifying the external devices that the simulation
+        # has stopped
+        ("STOP_PAUSE_NOTIFICATION", 10),
+
+        # command for notifying the external devices that the simulation has
+        # started
+        ("START_RESUME_NOTIFICATION", 11)
+
+    ]
 )
 
 # the values used by the SCP iptag time outs. These control how long to wait
