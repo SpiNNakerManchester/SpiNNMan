@@ -20,7 +20,7 @@ class SCPPowerRequest(AbstractSCPBMPRequest):
         :type power_command:\
                 :py:class:`spinnman.messages.scp.scp_power_command.SCPPowerCommand`
         :param boards: The boards on the same backplane to power on or off
-        :type board: int or iterable of int
+        :type boards: int or iterable of int
         :param delay: Number of seconds delay between power state changes of\
                 the different boards.
         :type delay: int

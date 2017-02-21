@@ -23,7 +23,7 @@ class SCPBMPSetLedRequest(AbstractSCPBMPRequest):
                 :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
         :param boards: Specifies the board to control the LEDs of. This may\
                 also be an iterable of multiple boards (in the same frame).
-        :type board: int or iterable of int
+        :type boards: int or iterable of int
         :rtype: None
         """
 

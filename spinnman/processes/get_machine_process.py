@@ -28,11 +28,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
                  max_core_id, max_sdram_size=None):
-        """
-        :param scamp_connections: The connections to use for the interaction
-        :type scamp_connections: iterable of\
-                    :py:class:`spinnman.connections.abstract_classes.abstract_connection.AbstractConnection`
-        """
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
         self._ignore_chips = ignore_chips
