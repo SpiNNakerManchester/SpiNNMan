@@ -159,10 +159,10 @@ def create_transceiver_from_hostname(
                 machine.  Requests for a "machine" will have these cores\
                 excluded, as if they never existed.
     :type ignore_cores: set of (x, y, p) of cores to ignore
-    :param ignore_links: An optional set of links to ignore in the\
+    :param ignored_links: An optional set of links to ignore in the\
                     machine.  Requests for a "machine" will have these links\
                     excluded, as if they never existed.
-    :type ignore_links: set of (x, y, link) of links to ignore
+    :type ignored_links: set of (x, y, link) of links to ignore
     :param max_core_id: The maximum core id in any discovered machine.\
                 Requests for a "machine" will only have core ids up to\
                 this value.
