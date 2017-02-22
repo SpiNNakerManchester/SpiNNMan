@@ -154,15 +154,15 @@ def create_transceiver_from_hostname(
                 machine.  Requests for a "machine" will have these chips\
                 excluded, as if they never existed.  The processor_ids of\
                 the specified chips are ignored.
-    :type ignore_chips: set of (x, y) of chips to ignore
+    :type ignore_chips: set of (int, int) of chips to ignore
     :param ignore_cores: An optional set of cores to ignore in the\
                 machine.  Requests for a "machine" will have these cores\
                 excluded, as if they never existed.
-    :type ignore_cores: set of (x, y, p) of cores to ignore
+    :type ignore_cores: set of (int, int, int) of cores to ignore
     :param ignored_links: An optional set of links to ignore in the\
                     machine.  Requests for a "machine" will have these links\
                     excluded, as if they never existed.
-    :type ignored_links: set of (x, y, link) of links to ignore
+    :type ignored_links: set of (int, int, int) of links to ignore
     :param max_core_id: The maximum core id in any discovered machine.\
                 Requests for a "machine" will only have core ids up to\
                 this value.
@@ -265,15 +265,15 @@ class Transceiver(object):
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
                     the specified chips are ignored.
-        :type ignore_chips: set of (x, y) of chips to ignore
+        :type ignore_chips: set of (int, int of chips to ignore
         :param ignore_cores: An optional set of cores to ignore in the\
                     machine.  Requests for a "machine" will have these cores\
                     excluded, as if they never existed.
-        :type ignore_cores: set of (x, y, p) of cores to ignore
+        :type ignore_cores: set of (int, int, int) of cores to ignore
         :param ignore_links: An optional set of links to ignore in the\
                     machine.  Requests for a "machine" will have these links\
                     excluded, as if they never existed.
-        :type ignore_links: set of (x, y, link) of links to ignore
+        :type ignore_links: set of (int, int, int) of links to ignore
         :param max_core_id: The maximum core id in any discovered machine.\
                     Requests for a "machine" will only have core ids up to and\
                     including this value.
