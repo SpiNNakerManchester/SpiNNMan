@@ -50,8 +50,7 @@ class CPUInfo(object):
         if index != -1:
             self._application_name = self._application_name[0:index]
 
-        self._registers = [struct.unpack_from("<I", registers, i)
-                           for i in range(0, 32, 4)]
+        self._registers = struct.unpack_from("<IIIIIIII", registers)
         self._run_time_error = RunTimeError(run_time_error)
         self._state = CPUState(state)
 
