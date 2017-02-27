@@ -7,7 +7,6 @@ from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinnman.messages.scp.enums.scp_signal import SignalType
 
 
-
 class TestSCPEnums(unittest.TestCase):
     def test_iptag(self):
         self.assertEqual(SCPIPTagCommand.NEW.value, 0)

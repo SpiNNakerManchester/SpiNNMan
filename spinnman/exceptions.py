@@ -267,6 +267,7 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
     def packet(self):
         return self._packet
 
+
 class ExecutableFailedToStartException(SpinnmanException):
     """ Raised when an executable has not entered the expected state during\
         start up

@@ -86,6 +86,3 @@ class CoreInfoSubsets(object):
         for (x, y) in self._core_subsets:
             counter += len(self._core_subsets[(x, y)])
         return counter
-
-
-

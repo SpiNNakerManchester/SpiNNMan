@@ -107,9 +107,6 @@ from spinnman.messages.scp.impl.scp_led_request \
 from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
 from spinnman.utilities import utility_functions
 
-
-
-
 # storage handlers imports
 from spinn_storage_handlers.abstract_classes.abstract_data_reader \
     import AbstractDataReader
@@ -1963,7 +1960,6 @@ class Transceiver(object):
                     self.get_cores_not_in_state(all_core_subsets, cpu_state))
 
             # last chance to slip out of error check
-            n = len(unsuccessful_cores)
             if len(unsuccessful_cores) != 0:
                 break_down = self.get_core_status_string(unsuccessful_cores)
 
@@ -2079,7 +2075,7 @@ class Transceiver(object):
         set of finished states.
         :param all_core_subsets: the cores to check when finished
         :param app_id: the app id of the executables
-        :param time_between_polls: time between pollings
+        :param time_between_polls: time between polling
         :return:
         """
 
@@ -2200,7 +2196,7 @@ class Transceiver(object):
                         core_info.x, core_info.y, core_info.p, core_info)
             elif core_info.state == states:
                 cores_in_state.add_processor(
-                        core_info.x, core_info.y, core_info.p, core_info)
+                    core_info.x, core_info.y, core_info.p, core_info)
 
         return cores_in_state
 
@@ -2220,7 +2216,7 @@ class Transceiver(object):
                         core_info.x, core_info.y, core_info.p, core_info)
             elif core_info.state != states:
                 cores_not_in_state.add_processor(
-                        core_info.x, core_info.y, core_info.p, core_info)
+                    core_info.x, core_info.y, core_info.p, core_info)
         return cores_not_in_state
 
     def get_core_status_string(self, core_infos):
