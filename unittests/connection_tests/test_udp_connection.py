@@ -47,13 +47,14 @@ class TestUDPConnection(unittest.TestCase):
         self.assertEqual(result, SCPResult.RC_OK)
 
     def test_send_scp_request_to_nonexistent_host(self):
-        with self.assertRaises(exc.SpinnmanIOException):
+        with self.assertRaises(exc.SpinnmanTimeoutException):
             board_config.set_up_nonexistent_board()
             connection = UDPSCAMPConnection(
                 remote_host=board_config.remotehost)
             scp = scp_read_memory_request.SCPReadMemoryRequest(0, 0, 0, 256)
             connection.send_scp_request(scp)
             _, _, _, _ = connection.receive_scp_response(2)
+
 
 if __name__ == '__main__':
     unittest.main()

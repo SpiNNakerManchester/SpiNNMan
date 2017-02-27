@@ -357,6 +357,7 @@ class SystemVariableBootValues(object):
                                 self._values[sys_var])
         return data
 
+
 spinnaker_boot_values = {
     1: SystemVariableBootValues(
         hardware_version=1, led_0=0x00076104),

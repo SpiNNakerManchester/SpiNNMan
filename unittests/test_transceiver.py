@@ -9,20 +9,17 @@ from board_test_configuration import BoardTestConfiguration
 board_config = BoardTestConfiguration()
 
 
+ver = 5     # Guess?
+
+
 class TestTransceiver(unittest.TestCase):
-
-    def test_create_new_default_transceiver(self):
-        trans = transceiver.Transceiver()
-
-        self.assertEqual(trans.get_connections(), set())
-        trans.close()
 
     def test_create_new_transceiver_to_board(self):
         board_config.set_up_remote_board()
         connections = list()
         connections.append(UDPSCAMPConnection(
             remote_host=board_config.remotehost))
-        trans = transceiver.Transceiver(connections)
+        trans = transceiver.Transceiver(ver, connections=connections)
         trans.close()
 
     def test_create_new_transceiver_one_connection(self):
@@ -30,7 +27,7 @@ class TestTransceiver(unittest.TestCase):
         connections = set()
         connections.add(UDPSCAMPConnection(
             remote_host=board_config.remotehost))
-        trans = transceiver.Transceiver(connections)
+        trans = transceiver.Transceiver(ver, connections=connections)
 
         self.assertEqual(trans.get_connections(), connections)
         trans.close()
@@ -43,7 +40,7 @@ class TestTransceiver(unittest.TestCase):
         board_config.set_up_local_virtual_board()
         connections.append(UDPBootConnection(
             remote_host=board_config.remotehost))
-        trans = transceiver.Transceiver(connections)
+        trans = transceiver.Transceiver(ver, connections=connections)
         instantiated_connections = trans.get_connections()
 
         for connection in connections:
@@ -59,7 +56,7 @@ class TestTransceiver(unittest.TestCase):
         board_config.set_up_local_virtual_board()
         connections.append(UDPBootConnection(
             remote_host=board_config.remotehost))
-        trans = transceiver.Transceiver(connections)
+        trans = transceiver.Transceiver(ver, connections=connections)
 
         if board_config.board_version == 3 or board_config.board_version == 2:
             self.assertEqual(trans.get_machine_dimensions().width, 2)

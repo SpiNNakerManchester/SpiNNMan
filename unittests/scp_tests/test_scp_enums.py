@@ -7,6 +7,7 @@ from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinnman.messages.scp.enums.scp_signal import SignalType
 
 
+
 class TestSCPEnums(unittest.TestCase):
     def test_iptag(self):
         self.assertEqual(SCPIPTagCommand.NEW.value, 0)
@@ -48,7 +49,6 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPCommand.CMD_BMP_POWER.value, 57)
         self.assertEqual(SCPCommand.CMD_TUBE.value, 64)
 
-
     def test_result(self):
         self.assertEqual(SCPResult.RC_OK.value, 0x80)
         self.assertEqual(SCPResult.RC_LEN.value, 0x81)
@@ -69,7 +69,6 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPResult.RC_P2P_TIMEOUT.value, 0x8E)
 
         self.assertEqual(SCPResult.RC_PKT_TX.value, 0x8F)
-
 
     def test_signal(self):
         self.assertEqual(SCPSignal.INITIALISE.value, 0)
@@ -97,9 +96,9 @@ class TestSCPEnums(unittest.TestCase):
                          SignalType.NEAREST_NEIGHBOUR)
         self.assertEqual(SCPSignal.START.signal_type,
                          SignalType.NEAREST_NEIGHBOUR)
-        self.assertEqual(SCPSignal.SYNC0.signal_type,
-                         SignalType.NEAREST_NEIGHBOUR)
 
+        self.assertEqual(SCPSignal.SYNC0.signal_type,
+                         SignalType.MULTICAST)
         self.assertEqual(SCPSignal.SYNC1.signal_type,
                          SignalType.MULTICAST)
         self.assertEqual(SCPSignal.PAUSE.signal_type,
@@ -107,7 +106,7 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPSignal.CONTINUE.signal_type,
                          SignalType.MULTICAST)
         self.assertEqual(SCPSignal.EXIT.signal_type,
-                         SignalType.NEAREST_NEIGHBOUR)
+                         SignalType.MULTICAST)
         self.assertEqual(SCPSignal.TIMER.signal_type,
                          SignalType.MULTICAST)
 

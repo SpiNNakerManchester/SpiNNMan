@@ -41,5 +41,6 @@ class TestSCPVersionResponse(unittest.TestCase):
         response.read_bytestring(data, 0)
         print response.version_info
 
+
 if __name__ == '__main__':
     unittest.main()

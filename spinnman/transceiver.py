@@ -144,9 +144,9 @@ _REINJECTOR_APP_ID = 17
 
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
-        ignore_chips=None, ignore_cores=None, max_core_id=None,
-        auto_detect_bmp=False, scamp_connections=None, boot_port_no=None,
-        max_sdram_size=None):
+        ignore_chips=None, ignore_cores=None, ignored_links=None,
+        max_core_id=None, auto_detect_bmp=False, scamp_connections=None,
+        boot_port_no=None, max_sdram_size=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -163,11 +163,15 @@ def create_transceiver_from_hostname(
                 machine.  Requests for a "machine" will have these chips\
                 excluded, as if they never existed.  The processor_ids of\
                 the specified chips are ignored.
-    :type ignore_chips: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+    :type ignore_chips: set of (x, y) of chips to ignore
     :param ignore_cores: An optional set of cores to ignore in the\
                 machine.  Requests for a "machine" will have these cores\
                 excluded, as if they never existed.
-    :type ignore_cores: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+    :type ignore_cores: set of (x, y, p) of cores to ignore
+    :param ignore_links: An optional set of links to ignore in the\
+                    machine.  Requests for a "machine" will have these links\
+                    excluded, as if they never existed.
+    :type ignore_links: set of (x, y, link) of links to ignore
     :param max_core_id: The maximum core id in any discovered machine.\
                 Requests for a "machine" will only have core ids up to\
                 this value.
@@ -253,9 +257,10 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, version, connections=None, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None, scamp_connections=None,
-                 max_sdram_size=None):
+    def __init__(
+            self, version, connections=None, ignore_chips=None,
+            ignore_cores=None, ignore_links=None, max_core_id=None,
+            scamp_connections=None, max_sdram_size=None):
         """
 
         :param version: The version of the board being connected to
@@ -269,11 +274,15 @@ class Transceiver(object):
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
                     the specified chips are ignored.
-        :type ignore_chips: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+        :type ignore_chips: set of (x, y) of chips to ignore
         :param ignore_cores: An optional set of cores to ignore in the\
                     machine.  Requests for a "machine" will have these cores\
                     excluded, as if they never existed.
-        :type ignore_cores: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+        :type ignore_cores: set of (x, y, p) of cores to ignore
+        :param ignore_links: An optional set of links to ignore in the\
+                    machine.  Requests for a "machine" will have these links\
+                    excluded, as if they never existed.
+        :type ignore_links: set of (x, y, link) of links to ignore
         :param max_core_id: The maximum core id in any discovered machine.\
                     Requests for a "machine" will only have core ids up to and\
                     including this value.
@@ -301,8 +310,9 @@ class Transceiver(object):
         self._machine = None
         self._width = None
         self._height = None
-        self._ignore_chips = ignore_chips
-        self._ignore_cores = ignore_cores
+        self._ignore_chips = ignore_chips if ignore_chips is not None else {}
+        self._ignore_cores = ignore_cores if ignore_cores is not None else {}
+        self._ignore_links = ignore_links if ignore_links is not None else {}
         self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
         self._iobuf_size = None
@@ -694,7 +704,8 @@ class Transceiver(object):
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
-            self._ignore_cores, self._max_core_id, self._max_sdram_size)
+            self._ignore_cores, self._ignore_links, self._max_core_id,
+            self._max_sdram_size)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height)
 
@@ -933,6 +944,28 @@ class Transceiver(object):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
+    @staticmethod
+    def is_scamp_version_compabible(version):
+        """ Determine if the version of SCAMP is compatible with this\
+            transceiver
+
+        :param version: The version to test
+        :type version: (int, int, int)
+        """
+
+        # The major version must match exactly
+        if (version[0] != _SCAMP_VERSION[0]):
+            return False
+
+        # If the minor version matches, the patch version must be >= the
+        # required version
+        if (version[1] == _SCAMP_VERSION[1]):
+            return version[2] >= _SCAMP_VERSION[2]
+
+        # If the minor version is > than the required version, the patch
+        # version is irrelevant
+        return (version[1] > _SCAMP_VERSION[1])
+
     def ensure_board_is_ready(
             self, number_of_boards=None, width=None, height=None,
             n_retries=5, enable_reinjector=True):
@@ -993,7 +1026,8 @@ class Transceiver(object):
             raise exceptions.SpinnmanIOException(
                 "Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
-                version_info.version_number != _SCAMP_VERSION):
+                not self.is_scamp_version_compabible(
+                    version_info.version_number)):
             raise exceptions.SpinnmanIOException(
                 "The machine is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
