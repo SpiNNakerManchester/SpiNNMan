@@ -5,9 +5,14 @@ class ExecutableStartType(Enum):
     """ supports starting of different types of executables
     """
 
-    RUNNING = (0, "Runs immediately without waiting for barrier")
-    SYNC = (1, "Calls spin1_start(SYNC_WAIT)")
-    USES_SIMULATION_INTERFACE = (2, "Calls simulation_run()")
+    RUNNING = (
+        0, "Runs immediately without waiting for barrier and then exits")
+    SYNC = (
+        1, "Calls spin1_start(SYNC_WAIT) and then eventually spin1_exit()")
+    USES_SIMULATION_INTERFACE = (
+        2,
+        "Calls simulation_run() and simulation_exit() / "
+        "simulation_handle_pause_resume()")
 
     def __new__(cls, value, doc=""):
         obj = object.__new__(cls)

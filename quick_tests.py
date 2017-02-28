@@ -1,11 +1,9 @@
 import logging
 from random import randint
-from os.path import os
 import struct
 import time
 import sys
 
-from spinn_storage_handlers.file_data_reader import FileDataReader
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums.cpu_state import CPUState
 from spinn_machine.core_subsets import CoreSubsets
@@ -173,9 +171,7 @@ try:
 
     print "Execute Flood"
     print "============="
-    file_size = os.stat("hello.aplx").st_size
-    executable = FileDataReader("hello.aplx")
-    transceiver.execute_flood(core_subsets, executable, app_id, file_size)
+    transceiver.execute_flood(core_subsets, "hello.aplx", app_id)
     count = 0
     while count < 20:
         count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)

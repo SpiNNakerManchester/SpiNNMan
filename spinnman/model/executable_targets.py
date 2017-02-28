@@ -1,9 +1,4 @@
-from spinn_front_end_common.utilities import exceptions
-
 from spinn_machine.core_subsets import CoreSubsets
-
-from spinnman.model.enums.executable_start_type import ExecutableStartType
-
 from collections import defaultdict
 
 
@@ -23,9 +18,6 @@ class ExecutableTargets(object):
         """
         if binary not in self._targets:
             self._targets[binary] = CoreSubsets()
-        else:
-            raise exceptions.ConfigurationException(
-                "Binary {} already added".format(binary))
 
     def has_binary(self, binary):
         """ Determine if the binary is already in the set
@@ -50,13 +42,6 @@ class ExecutableTargets(object):
         else:
             self._targets[binary] = subsets
 
-        # verify state enum type
-        if not isinstance(binary_start_type, ExecutableStartType):
-            raise exceptions.ConfigurationException(
-                "The type of binary_start_type must be of "
-                "SpinnMan.model.enums.executable_start_type."
-                "ExecutableStartType")
-
         # verify that the executable start type is
         for subset in subsets.core_subsets:
             for p in subset.processor_ids:
@@ -79,13 +64,6 @@ class ExecutableTargets(object):
         if not self.has_binary(binary):
             self.add_binary(binary)
         self._targets[binary].add_processor(chip_x, chip_y, chip_p)
-
-        # verify state enum type
-        if not isinstance(binary_start_type, ExecutableStartType):
-            raise exceptions.ConfigurationException(
-                "The type of binary_start_type must be of "
-                "SpinnMan.model.enums.executable_start_type."
-                "ExecutableStartType")
 
         self._core_subsets_by_executable_start_type[binary_start_type.value].\
             add_processor(chip_x, chip_y, chip_p)
@@ -126,12 +104,5 @@ class ExecutableTargets(object):
         return all_core_subsets
 
     def get_start_core_subsets(self, executable_start_type):
-        # verify state enum type
-        if not isinstance(executable_start_type, ExecutableStartType):
-            raise exceptions.ConfigurationException(
-                "The type of executable_start_type must be of "
-                "SpinnMan.model.enums.executable_start_type."
-                "ExecutableStartType")
-
         return self._core_subsets_by_executable_start_type[
             executable_start_type.value]

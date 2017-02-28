@@ -10,7 +10,6 @@ from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
 from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
     AbstractSCPRequest
-from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
     SCPBMPSetLedRequest
 from spinnman.messages.scp.impl.scp_bmp_version_request import \
@@ -125,7 +124,6 @@ import logging
 import socket
 import time
 import os
-import traceback
 
 logger = logging.getLogger(__name__)
 
@@ -1358,18 +1356,22 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
+                    * A filename of a file containing the executable
         :type executable:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
-                    or bytearray
+                    or bytearray or str
         :param app_id: The id of the application with which to associate the\
                     executable
         :type app_id: int
         :param n_bytes: The size of the executable data in bytes.  If not\
                     specified:
-                        * If data is an AbstractDataReader, an error is raised
-                        * If data is a bytearray, the length of the bytearray\
-                          will be used
-                        * If data is an int, 4 will be used
+                        * If executable is an AbstractDataReader, an error\
+                          is raised
+                        * If executable is a bytearray, the length of the\
+                          bytearray will be used
+                        * If executable is an int, 4 will be used
+                        * If executable is a str, the length of the file will\
+                          be used
         :type n_bytes: int
         :return: Nothing is returned
         :rtype: None
@@ -1419,18 +1421,22 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
+                    * A filename of an executable
         :type executable:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
-                    or bytearray
+                    or bytearray or str
         :param app_id: The id of the application with which to associate the\
                     executable
         :type app_id: int
         :param n_bytes: The size of the executable data in bytes.  If not\
                     specified:
-                        * If data is an AbstractDataReader, an error is raised
-                        * If data is a bytearray, the length of the bytearray\
-                          will be used
-                        * If data is an int, 4 will be used
+                        * If executable is an AbstractDataReader, an error\
+                          is raised
+                        * If executable is a bytearray, the length of the\
+                          bytearray will be used
+                        * If executable is an int, 4 will be used
+                        * If executable is a str, the length of the file will\
+                          be used
         :type n_bytes: int
         :return: Nothing is returned
         :rtype: None
@@ -1666,15 +1672,17 @@ class Transceiver(object):
                     * A bytearray
                     * A single integer - will be written using little-endian\
                       byte ordering
+                    * A filename of a data file
         :type data:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
-                    or bytearray or int
+                    or bytearray or int or str
         :param n_bytes: The amount of data to be written in bytes.  If not\
                     specified:
                         * If data is an AbstractDataReader, an error is raised
                         * If data is a bytearray, the length of the bytearray\
                           will be used
                         * If data is an int, 4 will be used
+                        * If data is a str, the length of the file will be used
         :type n_bytes: int
         :param offset: The offset from which the valid data begins
         :type offset: int
@@ -1700,21 +1708,28 @@ class Transceiver(object):
         """
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, AbstractDataReader):
-            process.write_memory_from_reader(x, y, cpu, base_address, data,
-                                             n_bytes)
+            process.write_memory_from_reader(
+                x, y, cpu, base_address, data, n_bytes)
+        elif isinstance(data, str):
+            reader = FileDataReader(data)
+            if n_bytes is None:
+                n_bytes = os.stat(data).st_size
+            process.write_memory_from_reader(
+                x, y, cpu, base_address, reader, n_bytes)
+            reader.close()
         elif isinstance(data, int):
             data_to_write = struct.pack("<I", data)
-            process.write_memory_from_bytearray(x, y, cpu, base_address,
-                                                data_to_write, 0, 4)
+            process.write_memory_from_bytearray(
+                x, y, cpu, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
             data_to_write = struct.pack("<Q", data)
-            process.write_memory_from_bytearray(x, y, cpu, base_address,
-                                                data_to_write, 0, 8)
+            process.write_memory_from_bytearray(
+                x, y, cpu, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
-            process.write_memory_from_bytearray(x, y, cpu, base_address, data,
-                                                offset, n_bytes)
+            process.write_memory_from_bytearray(
+                x, y, cpu, base_address, data, offset, n_bytes)
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
                                n_bytes=None, offset=0, cpu=0):
@@ -1802,6 +1817,7 @@ class Transceiver(object):
                     * An instance of AbstractDataReader
                     * A bytearray
                     * A single integer
+                    * A file name of a file to read
         :type data:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
@@ -1811,7 +1827,7 @@ class Transceiver(object):
                         * If data is a bytearray, the length of the bytearray\
                           will be used
                         * If data is an int, 4 will be used
-                        * If n_bytes is less than 0
+                        * If data is a str, the size of the file will be used
         :type n_bytes: int
         :param offset: The offset where the valid data starts, if the data is \
                         a int, then the offset will be ignored and 0 is used.
@@ -1840,6 +1856,13 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)
+        elif isinstance(data, str):
+            reader = FileDataReader(data)
+            if n_bytes is None:
+                n_bytes = os.stat(data).st_size
+            process.write_memory_from_reader(
+                nearest_neighbour_id, base_address, reader, n_bytes)
+            reader.close()
         elif isinstance(data, int):
             data_to_write = struct.pack("<I", data)
             process.write_memory_from_bytearray(
@@ -1945,56 +1968,9 @@ class Transceiver(object):
 
         process.execute(SCPAppStopRequest(app_id))
 
-    def start_all_cores(self, core_subsets, app_id, sync_state_changes):
-        """
-        :param core_subsets: the mapping between cores and binaries
-        :param app_id: the app id that being used by the simulation
-        :param sync_state_changes:\
-            the number of runs been done between setup and end
-        :return: None
-        """
-
-        # check that the right number of processors are in correct sync
-        if sync_state_changes % 2 == 0:
-            sync_state = SCPSignal.SYNC0
-        else:
-            sync_state = SCPSignal.SYNC1
-
-        # if correct, start applications
-        logger.info("Starting application ({})".format(sync_state))
-        self.send_signal(app_id, sync_state)
-        sync_state_changes += 1
-
-        # check all apps have gone into run state
-        logger.info("Checking that the application has started")
-        processors_running = self.get_core_state_count(
-            app_id, CPUState.RUNNING)
-        if processors_running < len(core_subsets):
-
-            processors_finished = (
-                self.get_core_state_count(app_id, CPUState.PAUSED) +
-                self.get_core_state_count(app_id, CPUState.FINISHED))
-
-            if processors_running + processors_finished >= len(core_subsets):
-                logger.warn("some processors finished between signal "
-                            "transmissions. Could be a sign of an error")
-            else:
-                unsuccessful_cores = self.get_cores_not_in_state(
-                    core_subsets,
-                    {CPUState.RUNNING, CPUState.PAUSED, CPUState.FINISHED})
-
-                # Last chance to get out of error state
-                if len(unsuccessful_cores) > 0:
-                    break_down = self.get_core_status_string(
-                        unsuccessful_cores)
-                    raise exceptions.ExecutableFailedToStartException(
-                        "Only {} of {} processors started:{}".format(
-                            processors_running, len(core_subsets),
-                            break_down),
-                        unsuccessful_cores.core_subsets)
-
-    def wait_for_cores_to_be_ready(
+    def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
+            time_between_polls=0.1,
             error_states={CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG},
             counts_between_full_check=10):
         """
@@ -2007,6 +1983,7 @@ class Transceiver(object):
         :param timeout:\
             The amount of time to wait in seconds for the cores to reach one\
             of the states
+        :param time_between_polls: Time between checking the state
         :param error_states:\
             Set of states that the application can be in that indicate an\
             error, and so should raise an exception
@@ -2017,10 +1994,12 @@ class Transceiver(object):
 
         # check that the right number of processors are in the states
         processors_ready = 0
-        time_start = time.time()
+        timeout_time = None
+        if timeout is not None:
+            timeout_time = time.time() + timeout
         tries = 0
         while (processors_ready < len(all_core_subsets) and
-               (timeout is None or (time.time() - time_start) < timeout)):
+               (timeout_time is None or time.time() < timeout_time)):
 
             # Get the number of processors in the ready states
             for cpu_state in cpu_states:
@@ -2048,7 +2027,7 @@ class Transceiver(object):
 
                 # If we're still not in the correct state, wait a bit
                 if processors_ready < len(all_core_subsets):
-                    time.sleep(0.1)
+                    time.sleep(time_between_polls)
 
         # If we haven't reached the final state, do a final full check
         if processors_ready != len(all_core_subsets):
@@ -2061,154 +2040,6 @@ class Transceiver(object):
                 raise exceptions.SpinnmanTimeoutException(
                     "waiting for cores to reach one of {}".format(cpu_states),
                     timeout)
-
-    def wait_for_execution_to_complete(
-            self, all_core_subsets, app_id, runtime, time_threshold):
-        """ takes a core_subset and waits for a given time
-        frame to verify if the cores have reached one of a set of finished
-        states. Raises exceptions with human readable content if the cores
-        do not finish
-        :param all_core_subsets: the cores to check when finished
-        :param app_id: the app id of the executables
-        :param runtime: the runtime in ms to wait before polling
-        :param time_threshold: length of time to wait after scheduled end
-        time before considering the system to had error.
-        :return:
-        """
-
-        time_to_wait = (runtime / 1000.0) + 0.1
-
-        logger.info(
-            "Application started - waiting {} seconds for it to stop"
-            .format(time_to_wait))
-        time.sleep(time_to_wait)
-        processors_not_finished = len(all_core_subsets)
-        start_time = time.time()
-
-        retries = 0
-        while (processors_not_finished != 0 and
-                not Transceiver._has_overrun(start_time, time_threshold)):
-            try:
-                processors_rte = self.get_core_state_count(
-                    app_id, CPUState.RUN_TIME_EXCEPTION)
-                processors_wdog = self.get_core_state_count(
-                    app_id, CPUState.WATCHDOG)
-                if processors_rte > 0 or processors_wdog > 0:
-                    error_cores = self.get_cores_in_state(
-                        all_core_subsets,
-                        {CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG})
-                    break_down = self.get_core_status_string(error_cores)
-                    raise exceptions.ExecutableFailedToStopException(
-                        "{} cores have gone into an error state:"
-                        "{}".format(processors_rte, break_down),
-                        error_cores.core_subsets, True)
-
-                processors_not_finished = self.get_core_state_count(
-                    app_id, CPUState.RUNNING)
-                if processors_not_finished > 0:
-                    logger.error("Simulation still not finished or failed - "
-                                 "waiting a bit longer...")
-                    time.sleep(0.5)
-            except exceptions.SpinnmanTimeoutException as e:
-                retries += 1
-                if retries >= 10:
-                    logger.error("Error getting state")
-                    traceback.print_exc()
-                    raise e
-                logger.info("Error getting state - retrying...")
-                time.sleep(0.5)
-
-        if processors_not_finished != 0:
-            running_cores = self.get_cores_in_state(
-                all_core_subsets, CPUState.RUNNING)
-            if len(running_cores) > 0:
-                raise exceptions.ExecutableFailedToStopException(
-                    "Simulation did not finish within the time allocated. "
-                    "Please try increasing the machine time step and / "
-                    "or time scale factor in your simulation.",
-                    running_cores.core_subsets, False)
-
-        processors_exited = (
-            self.get_core_state_count(app_id, CPUState.PAUSED) +
-            self.get_core_state_count(app_id, CPUState.FINISHED))
-
-        if processors_exited < len(all_core_subsets):
-            unsuccessful_cores = self.get_cores_not_in_state(
-                all_core_subsets, {CPUState.PAUSED, CPUState.FINISHED})
-
-            # Last chance to get out of the error state
-            if len(unsuccessful_cores) > 0:
-                break_down = self.get_core_status_string(unsuccessful_cores)
-                raise exceptions.ExecutableFailedToStopException(
-                    "{} of {} processors failed to exit successfully:"
-                    "{}".format(
-                        len(all_core_subsets) - processors_exited,
-                        len(all_core_subsets), break_down),
-                    unsuccessful_cores.core_subsets, True)
-        logger.info("Application has run to completion")
-
-    def poll_for_execution_to_complete(
-            self, all_core_subsets, app_id, time_between_polls=1):
-        """ takes a core_subset and waits till the cores have reached one of a
-        set of finished states.
-        :param all_core_subsets: the cores to check when finished
-        :param app_id: the app id of the executables
-        :param time_between_polls: time between polling
-        :return:
-        """
-
-        logger.info("Application started - waiting till it stops or errors")
-        retries = 0
-        time.sleep(time_between_polls)
-        processors_not_finished = len(all_core_subsets)
-
-        while processors_not_finished != 0:
-            try:
-                processors_rte = self.get_core_state_count(
-                    app_id, CPUState.RUN_TIME_EXCEPTION)
-                processors_wdog = self.get_core_state_count(
-                    app_id, CPUState.WATCHDOG)
-                if processors_rte > 0 or processors_wdog > 0:
-                    error_cores = self.get_cores_in_state(
-                        all_core_subsets,
-                        {CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG})
-                    break_down = self.get_core_status_string(error_cores)
-                    raise exceptions.ExecutableFailedToStopException(
-                        "{} cores have gone into an error state:"
-                        "{}".format(processors_rte, break_down),
-                        error_cores.core_subsets, True)
-
-                processors_not_finished = self.get_core_state_count(
-                    app_id, CPUState.RUNNING)
-                processors_not_finished += self.get_core_state_count(
-                    app_id, CPUState.C_MAIN)
-                if processors_not_finished > 0:
-                    time.sleep(time_between_polls)
-            except exceptions.SpinnmanTimeoutException as e:
-                retries += 1
-                if retries >= 10:
-                    logger.error("Error getting state")
-                    traceback.print_exc()
-                    raise e
-                logger.info("Error getting state - retrying...")
-                time.sleep(time_between_polls)
-
-        logger.info("Application has run to completion")
-
-
-    @staticmethod
-    def _has_overrun(start_time, time_threshold):
-        """ Checks if the time has overrun
-
-        :param time_threshold: How long before the time is considered to have\
-                    overrun
-        :return: bool
-        """
-        current_time = time.time()
-        if current_time - start_time > time_threshold:
-            return True
-        else:
-            return False
 
     def get_cores_in_state(self, all_core_subsets, states):
         """
@@ -3012,12 +2843,12 @@ class Transceiver(object):
             # Load the reinjector on each free core
             reinjector_binary = os.path.join(
                 os.path.dirname(model_binaries.__file__), "reinjector.aplx")
-            reinjector_size = os.stat(reinjector_binary).st_size
-            reinjector = FileDataReader(reinjector_binary)
             self.execute_flood(
-                self._reinjector_cores, reinjector, self._reinjector_app_id,
-                reinjector_size)
-            reinjector.close()
+                self._reinjector_cores, reinjector_binary,
+                self._reinjector_app_id)
+            self.wait_for_cores_to_be_in_state(
+                self._reinjector_cores, self._reinjector_app_id,
+                [CPUState.RUNNING])
             self._reinjection_running = True
 
         # Set the types to be reinjected
