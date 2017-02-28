@@ -5,10 +5,9 @@ class ExecutableStartType(Enum):
     """ supports starting of different types of executables
     """
 
-    RUNNING = (0, "does not have a barrierisation requirement")
-    SYNC = (1, "requires a barrierisation step")
-    USES_SIMULATION_INTERFACE = (
-        2, "Supports sync interface, as well as simulation.c interface")
+    RUNNING = (0, "Runs immediately without waiting for barrier")
+    SYNC = (1, "Calls spin1_start(SYNC_WAIT)")
+    USES_SIMULATION_INTERFACE = (2, "Calls simulation_run()")
 
     def __new__(cls, value, doc=""):
         obj = object.__new__(cls)

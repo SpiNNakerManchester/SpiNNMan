@@ -34,7 +34,6 @@ board_config.set_up_remote_board()
 n_cores = 20
 core_subsets = CoreSubsets(core_subsets=[CoreSubset(0, 0, range(1, 11)),
                                          CoreSubset(1, 1, range(1, 11))])
-app_id = 30
 
 down_cores = CoreSubsets()
 down_cores.add_processor(0, 0, 5)
@@ -132,6 +131,8 @@ transceiver = create_transceiver_from_hostname(
     ignore_cores=down_cores, ignore_chips=down_chips,
     bmp_connection_data=board_config.bmp_names,
     auto_detect_bmp=board_config.auto_detect_bmp)
+
+app_id = transceiver.app_id_tracker.get_new_id()
 
 try:
 
