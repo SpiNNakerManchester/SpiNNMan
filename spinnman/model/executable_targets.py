@@ -10,23 +10,7 @@ class ExecutableTargets(object):
         self._total_processors = 0
         self._all_core_subsets = CoreSubsets()
 
-    def add_binary(self, binary):
-        """ Add a binary to the list of things to execute
-
-        :param binary: The binary to add
-        """
-        if binary not in self._targets:
-            self._targets[binary] = CoreSubsets()
-
-    def has_binary(self, binary):
-        """ Determine if the binary is already in the set
-
-        :param binary: The binary to find
-        :return: True if the binary exists, false otherwise
-        """
-        return binary in self._targets
-
-    def add_subsets(self, binary, subsets, binary_start_type):
+    def add_subsets(self, binary, subsets):
         """ Add core subsets to a binary
 
         :param binary: the path to the binary needed to be executed
@@ -34,7 +18,7 @@ class ExecutableTargets(object):
                     on
         :return:
         """
-        if self.has_binary(binary):
+        if binary in self._targets:
             self._targets[binary].add_core_subset(subsets)
         else:
             self._targets[binary] = subsets
@@ -53,8 +37,8 @@ class ExecutableTargets(object):
         :param chip_p: the processor id to place this executable on
         :return:
         """
-        if not self.has_binary(binary):
-            self.add_binary(binary)
+        if binary not in self._targets:
+            self._targets[binary] = CoreSubsets()
         self._targets[binary].add_processor(chip_x, chip_y, chip_p)
         self._all_core_subsets.add_processor(chip_x, chip_y, chip_p)
         self._total_processors += 1
@@ -64,10 +48,7 @@ class ExecutableTargets(object):
 
         :param binary: The binary to find the cores for
         """
-        if self.has_binary(binary):
-            return self._targets[binary]
-        else:
-            return None
+        return self._targets.get(binary)
 
     @property
     def binaries(self):

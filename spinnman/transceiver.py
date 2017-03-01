@@ -1344,7 +1344,7 @@ class Transceiver(object):
 
     def execute(
             self, x, y, processors, executable, app_id, n_bytes=None,
-            wait=False):
+            wait=False, is_filename=False):
         """ Start an executable running on a single core
 
         :param x: The x-coordinate of the chip on which to run the executable
@@ -1358,7 +1358,8 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
-                    * A filename of a file containing the executable
+                    * A filename of a file containing the executable (in which\
+                      case is_filename must be set to True)
         :type executable:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or str
@@ -1377,6 +1378,8 @@ class Transceiver(object):
         :type n_bytes: int
         :param wait: True if the binary should enter a "wait" state on loading
         :type wait: bool
+        :param is_filename: True if executable is a filename
+        :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1396,7 +1399,8 @@ class Transceiver(object):
         self._get_chip_execute_lock(x, y)
 
         # Write the executable
-        self.write_memory(x, y, 0x67800000, executable, n_bytes)
+        self.write_memory(
+            x, y, 0x67800000, executable, n_bytes, is_filename=is_filename)
 
         # Request the start of the executable
         process = SendSingleCommandProcess(self._scamp_connection_selector)
@@ -1415,7 +1419,8 @@ class Transceiver(object):
         return next_nearest_neighbour_id
 
     def execute_flood(
-            self, core_subsets, executable, app_id, n_bytes=None, wait=False):
+            self, core_subsets, executable, app_id, n_bytes=None, wait=False,
+            is_filename=False):
         """ Start an executable running on multiple places on the board.  This\
             will be optimised based on the selected cores, but it may still\
             require a number of communications with the board to execute.
@@ -1426,7 +1431,8 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
-                    * A filename of an executable
+                    * A filename of an executable (in which case is_filename\
+                      must be set to True)
         :type executable:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or str
@@ -1446,6 +1452,8 @@ class Transceiver(object):
         :param wait: True if the processors should enter a "wait" state on\
                     loading
         :type wait: bool
+        :param is_filename: True if the data is a filename
+        :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1468,7 +1476,8 @@ class Transceiver(object):
         self._get_flood_execute_lock()
 
         # Flood fill the system with the binary
-        self.write_memory_flood(0x67800000, executable, n_bytes)
+        self.write_memory_flood(
+            0x67800000, executable, n_bytes, is_filename=is_filename)
 
         # Execute the binary on the cores on the chips where required
         process = ApplicationRunProcess(self._scamp_connection_selector)
@@ -1494,7 +1503,8 @@ class Transceiver(object):
         # Execute each of the binaries and get them in to a "wait" state
         for binary in executable_targets.binaries:
             core_subsets = executable_targets.get_cores_for_binary(binary)
-            self.execute_flood(core_subsets, binary, app_id, wait=True)
+            self.execute_flood(
+                core_subsets, binary, app_id, wait=True, is_filename=True)
 
         # Sleep to allow cores to get going
         time.sleep(0.5)
@@ -1695,7 +1705,7 @@ class Transceiver(object):
                 "Unknown combination")
 
     def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
-                     cpu=0):
+                     cpu=0, is_filename=False):
         """ Write to the SDRAM on the board
 
         :param x: The x-coordinate of the chip where the memory is to be\
@@ -1712,7 +1722,8 @@ class Transceiver(object):
                     * A bytearray
                     * A single integer - will be written using little-endian\
                       byte ordering
-                    * A filename of a data file
+                    * A filename of a data file (in which case is_filename\
+                      must be set to True)
         :type data:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int or str
@@ -1728,6 +1739,8 @@ class Transceiver(object):
         :type offset: int
         :param cpu: The optional cpu to write to
         :type cpu: int
+        :param is_filename: True if the data is a filename
+        :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1750,7 +1763,7 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
                 x, y, cpu, base_address, data, n_bytes)
-        elif isinstance(data, str):
+        elif isinstance(data, str) and is_filename:
             reader = FileDataReader(data)
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
@@ -1846,7 +1859,9 @@ class Transceiver(object):
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data, offset, n_bytes)
 
-    def write_memory_flood(self, base_address, data, n_bytes=None, offset=0):
+    def write_memory_flood(
+            self, base_address, data, n_bytes=None, offset=0,
+            is_filename=False):
         """ Write to the SDRAM of all chips.
 
         :param base_address: The address in SDRAM where the region of memory\
@@ -1855,9 +1870,10 @@ class Transceiver(object):
         :param data: The data that is to be written.  Should be one of\
                     the following:
                     * An instance of AbstractDataReader
-                    * A bytearray
+                    * A bytearray or bytestring
                     * A single integer
-                    * A file name of a file to read
+                    * A file name of a file to read (in which case is_filename\
+                      should be set to True)
         :type data:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
@@ -1872,6 +1888,9 @@ class Transceiver(object):
         :param offset: The offset where the valid data starts, if the data is \
                         a int, then the offset will be ignored and 0 is used.
         :type offset: int
+        :param is_filename: True if the data should be interpreted as a file \
+                    name
+        :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1896,7 +1915,7 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)
-        elif isinstance(data, str):
+        elif isinstance(data, str) and is_filename:
             reader = FileDataReader(data)
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
@@ -2099,10 +2118,10 @@ class Transceiver(object):
             if hasattr(states, "__iter__"):
                 if core_info.state in states:
                     cores_in_state.add_processor(
-                        core_info.x, core_info.y, core_info.p, core_info)
+                        core_info.x, core_info.y, core_info.p)
             elif core_info.state == states:
                 cores_in_state.add_processor(
-                    core_info.x, core_info.y, core_info.p, core_info)
+                    core_info.x, core_info.y, core_info.p)
 
         return cores_in_state
 
@@ -2901,7 +2920,7 @@ class Transceiver(object):
                 os.path.dirname(model_binaries.__file__), "reinjector.aplx")
             self.execute_flood(
                 self._reinjector_cores, reinjector_binary,
-                self._reinjector_app_id)
+                self._reinjector_app_id, is_filename=True)
             self.wait_for_cores_to_be_in_state(
                 self._reinjector_cores, self._reinjector_app_id,
                 [CPUState.RUNNING])

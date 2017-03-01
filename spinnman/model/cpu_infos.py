@@ -51,7 +51,4 @@ class CPUInfos(object):
     def __len__(self):
         """ The total number of processors that are in these core subsets
         """
-        counter = 0
-        for (x, y) in self._core_subsets:
-            counter += len(self._core_subsets[(x, y)])
-        return counter
+        return len(self._cpu_infos)

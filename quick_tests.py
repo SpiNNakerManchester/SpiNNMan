@@ -171,7 +171,8 @@ try:
 
     print "Execute Flood"
     print "============="
-    transceiver.execute_flood(core_subsets, "hello.aplx", app_id)
+    transceiver.execute_flood(
+        core_subsets, "hello.aplx", app_id, is_filename=True)
     count = 0
     while count < 20:
         count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)
