@@ -4,8 +4,7 @@ from spinnman import model_binaries
 from spinnman import constants
 from spinnman import exceptions
 
-from spinnman.model.core_info_subsets import CoreInfoSubsets
-
+from spinnman.model.cpu_infos import CPUInfos
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
 from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
@@ -50,6 +49,7 @@ from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinnman.messages.spinnaker_boot._system_variables\
     ._system_variable_boot_values import SystemVariableDefinition
 from spinnman.utilities.appid_tracker import AppIdTracker
+from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
 from spinnman.messages.scp.enums.scp_dpri_packet_type_flags \
@@ -1342,7 +1342,9 @@ class Transceiver(object):
         response = process.execute(SCPCountStateRequest(app_id, state))
         return response.count
 
-    def execute(self, x, y, processors, executable, app_id, n_bytes=None):
+    def execute(
+            self, x, y, processors, executable, app_id, n_bytes=None,
+            wait=False):
         """ Start an executable running on a single core
 
         :param x: The x-coordinate of the chip on which to run the executable
@@ -1373,6 +1375,8 @@ class Transceiver(object):
                         * If executable is a str, the length of the file will\
                           be used
         :type n_bytes: int
+        :param wait: True if the binary should enter a "wait" state on loading
+        :type wait: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1397,7 +1401,7 @@ class Transceiver(object):
         # Request the start of the executable
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(
-            SCPApplicationRunRequest(app_id, x, y, processors))
+            SCPApplicationRunRequest(app_id, x, y, processors, wait))
 
         # Release the lock
         self._release_chip_execute_lock(x, y)
@@ -1410,7 +1414,8 @@ class Transceiver(object):
         self._next_nearest_neighbour_condition.release()
         return next_nearest_neighbour_id
 
-    def execute_flood(self, core_subsets, executable, app_id, n_bytes=None):
+    def execute_flood(
+            self, core_subsets, executable, app_id, n_bytes=None, wait=False):
         """ Start an executable running on multiple places on the board.  This\
             will be optimised based on the selected cores, but it may still\
             require a number of communications with the board to execute.
@@ -1438,6 +1443,9 @@ class Transceiver(object):
                         * If executable is a str, the length of the file will\
                           be used
         :type n_bytes: int
+        :param wait: True if the processors should enter a "wait" state on\
+                    loading
+        :type wait: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1464,10 +1472,42 @@ class Transceiver(object):
 
         # Execute the binary on the cores on the chips where required
         process = ApplicationRunProcess(self._scamp_connection_selector)
-        process.run(app_id, core_subsets)
+        process.run(app_id, core_subsets, wait)
 
         # Release the lock
         self._release_flood_execute_lock()
+
+    def execute_application(self, executable_targets, app_id):
+        """ Execute a set of binaries that make up a complete application\
+            on specified cores, wait for them to be ready and then start\
+            all of the binaries.  Note this will get the binaries into c_main\
+            but will not signal the barrier.
+
+        :param executable_targets: The binaries to be executed and the cores\
+                    to execute them on
+        :type executable_targets:\
+                    :py:class:`spinnman.model.executable_targets.ExecutableTargets`
+        :param app_id: The app_id to give this application
+        :type app_id: int
+        """
+
+        # Execute each of the binaries and get them in to a "wait" state
+        for binary in executable_targets.binaries:
+            core_subsets = executable_targets.get_cores_for_binary(binary)
+            self.execute_flood(core_subsets, binary, app_id, wait=True)
+
+        # Sleep to allow cores to get going
+        time.sleep(0.5)
+
+        # Check that the binaries have reached a wait state
+        count = self.get_core_state_count(app_id, CPUState.READY)
+        if count < executable_targets.total_processors:
+            raise exceptions.SpinnmanException(
+                "Only {} of {} cores reached ready state".format(
+                    count, executable_targets.total_processors))
+
+        # Send a signal telling the application to start
+        self.send_signal(app_id, SCPSignal.START)
 
     def power_on_machine(self):
         """ Power on the whole machine
@@ -2042,15 +2082,19 @@ class Transceiver(object):
                     timeout)
 
     def get_cores_in_state(self, all_core_subsets, states):
-        """
+        """ Get all cores that are in a given state or set of states
 
-        :param all_core_subsets:
-        :param states:
-        :param txrx:
-        :return:
+        :param all_core_subsets: The cores to filter
+        :type all_core_subsets:\
+                    :py:class:`spinnmachine.core_subsets.CoreSubsets`
+        :param states: The state or states to filter on
+        :type states:\
+                    :py:class:`spinnman.model.enums.cpu_state.CPUState` or\
+                    set of :py:class:`spinnman.model.enums.cpu_state.CPUState`
+        :return: Core subsets object containing cores in the
         """
         core_infos = self.get_cpu_information(all_core_subsets)
-        cores_in_state = CoreInfoSubsets()
+        cores_in_state = CoreSubsets()
         for core_info in core_infos:
             if hasattr(states, "__iter__"):
                 if core_info.state in states:
@@ -2063,14 +2107,14 @@ class Transceiver(object):
         return cores_in_state
 
     def get_cores_not_in_state(self, all_core_subsets, states):
-        """
+        """ Get all cores that are not in a given state or set of states
 
         :param all_core_subsets:
         :param states:
         :return:
         """
         core_infos = self.get_cpu_information(all_core_subsets)
-        cores_not_in_state = CoreInfoSubsets()
+        cores_not_in_state = CPUInfos()
         for core_info in core_infos:
             if hasattr(states, "__iter__"):
                 if core_info.state not in states:
@@ -2081,15 +2125,27 @@ class Transceiver(object):
                     core_info.x, core_info.y, core_info.p, core_info)
         return cores_not_in_state
 
-    def get_core_status_string(self, core_infos):
+    def get_core_status_string(self, cpu_infos):
         """ Get a string indicating the status of the given cores
+
+        :param cpu_infos: A CPUInfos objects
+        :type cpu_infos: :py:class:`spinnman.model.cpu_infos.CPUInfos`
         """
         break_down = "\n"
-        for ((x, y, p), core_info) in core_infos.core_infos:
+        for ((x, y, p), core_info) in cpu_infos.cpu_infos:
             if core_info.state == CPUState.RUN_TIME_EXCEPTION:
                 break_down += "    {}:{}:{} in state {}:{}\n".format(
                     x, y, p, core_info.state.name,
                     core_info.run_time_error.name)
+                break_down += "        r0={}, r1={}, r2={}, r3={}\n".format(
+                    core_info.registers[0], core_info.registers[1],
+                    core_info.registers[2], core_info.registers[3])
+                break_down += "        r4={}, r5={}, r6={}, r7={}\n".format(
+                    core_info.registers[4], core_info.registers[5],
+                    core_info.registers[6], core_info.registers[7])
+                break_down += "        PSR={}, SP={}, LR={}".format(
+                    core_info.processor_state_register,
+                    core_info.stack_pointer, core_info.link_register)
             else:
                 break_down += "    {}:{}:{} in state {}\n".format(
                     x, y, p, core_info.state.name)

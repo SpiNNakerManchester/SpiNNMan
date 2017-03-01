@@ -6,12 +6,14 @@ from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 
+_WAIT_FLAG = 0x1 << 18
+
 
 class SCPApplicationRunRequest(AbstractSCPRequest):
     """ An SCP request to run an application loaded on a chip
     """
 
-    def __init__(self, app_id, x, y, processors):
+    def __init__(self, app_id, x, y, processors, wait=False):
         """
 
         :param app_id: The id of the application to run, between 16 and 255
@@ -22,6 +24,10 @@ class SCPApplicationRunRequest(AbstractSCPRequest):
         :type y: int
         :param processors: The processors on the chip where the executable\
                     should be started, between 1 and 17
+        :type processors: list of int
+        :param wait: True if the processors should enter a "wait" state on\
+                    starting
+        :type wait: bool
         """
         processor_mask = 0
         if processors is not None:
@@ -29,6 +35,8 @@ class SCPApplicationRunRequest(AbstractSCPRequest):
                 processor_mask |= (1 << processor)
 
         processor_mask |= (app_id << 24)
+        if wait:
+            processor_mask |= _WAIT_FLAG
 
         super(SCPApplicationRunRequest, self).__init__(
             SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

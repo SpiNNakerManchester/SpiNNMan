@@ -8,13 +8,15 @@ from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 
 _NNP_FORWARD_RETRY = (0x3f << 8) | 0x18
 _NNP_FLOOD_FILL_END = 15
+_WAIT_FLAG = 0x1 << 18
 
 
 class SCPFloodFillEndRequest(AbstractSCPRequest):
     """ A request to start a flood fill of data
     """
 
-    def __init__(self, nearest_neighbour_id, app_id=0, processors=None):
+    def __init__(
+            self, nearest_neighbour_id, app_id=0, processors=None, wait=False):
         """
 
         :param nearest_neighbour_id: The id of the packet, between 0 and 127
@@ -26,6 +28,9 @@ class SCPFloodFillEndRequest(AbstractSCPRequest):
                     application, each between 1 and 17.  If not specified,\
                     no application is started.
         :type processors: iterable of int
+        :param wait: True if the binary should go into a "wait" state before\
+                    executing
+        :type wait: bool
         """
         processor_mask = 0
         if processors is not None:
@@ -34,6 +39,8 @@ class SCPFloodFillEndRequest(AbstractSCPRequest):
 
         key = (_NNP_FLOOD_FILL_END << 24) | nearest_neighbour_id
         data = (app_id << 24) | processor_mask
+        if wait:
+            data = data | _WAIT_FLAG
 
         super(SCPFloodFillEndRequest, self).__init__(
             SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
