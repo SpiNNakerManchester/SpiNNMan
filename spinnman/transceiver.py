@@ -2031,7 +2031,7 @@ class Transceiver(object):
             self, all_core_subsets, app_id, cpu_states, timeout=None,
             time_between_polls=0.1,
             error_states={CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG},
-            counts_between_full_check=10):
+            counts_between_full_check=100):
         """
 
         :param all_core_subsets: the cores to check are in a given sync state
@@ -2061,6 +2061,7 @@ class Transceiver(object):
                (timeout_time is None or time.time() < timeout_time)):
 
             # Get the number of processors in the ready states
+            processors_ready = 0
             for cpu_state in cpu_states:
                 processors_ready += self.get_core_state_count(
                     app_id, cpu_state)
