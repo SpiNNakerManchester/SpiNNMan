@@ -208,7 +208,7 @@ class UDPConnection(AbstractConnection):
         :type timeout: None
         :return: A tuple of the data received and a tuple of the\
                 (address, port) received from
-        :rtype: str, int
+        :rtype: str, (str, int)
         :raise SpinnmanTimeoutException: If a timeout occurs before any data\
                     is received
         :raise SpinnmanIOException: If an error occurs receiving the data

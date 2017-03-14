@@ -1,8 +1,6 @@
 import unittest
 import spinnman.messages.multicast_message as multicast_msg
 
-__author__ = 'Petrut'
-
 
 class TestMulticastMessage(unittest.TestCase):
     def test_create_new_multicast_message_without_payload(self):
