@@ -242,7 +242,7 @@ class SDPHeader(object):
         """ The header as a bytestring
 
         :return: The header bytestring
-        :rtype: bytestring
+        :rtype: str
         """
         dest_port_cpu = (((self._destination_port & 0x7) << 5) |
                          (self._destination_cpu & 0x1F))
@@ -258,8 +258,8 @@ class SDPHeader(object):
     def from_bytestring(data, offset):
         """ Read the header from a bytestring
 
-        :param data: The data to read the header from
-        :type data: bytestring
+        :param data: The bytestring to read the header from
+        :type data: str
         :param offset: The offset into the data from which to start reading
         :type offset: int
         """

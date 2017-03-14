@@ -9,7 +9,7 @@ class ChipSummaryInfo(object):
     def __init__(self, chip_summary_data, offset, x, y):
         """
         :param chip_summary_data: The data from the SCP response
-        :type: chip_summary_data: bytearray
+        :type chip_summary_data: bytearray
         :param offset: The offset into the data where the data starts
         :type offset: int
         :param x: The x-coordinate of the chip that this data is from

@@ -19,7 +19,7 @@ class ChipInfo(object):
         """
 
         :param system_data: An bytestring retrieved from SDRAM on the board
-        :type system_data: bytestring
+        :type system_data: str
         :param offset: The offset into the bytestring where the actual data\
                 starts
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\

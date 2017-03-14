@@ -154,15 +154,15 @@ def create_transceiver_from_hostname(
                 machine.  Requests for a "machine" will have these chips\
                 excluded, as if they never existed.  The processor_ids of\
                 the specified chips are ignored.
-    :type ignore_chips: set of (x, y) of chips to ignore
+    :type ignore_chips: set of (int, int) of chips to ignore
     :param ignore_cores: An optional set of cores to ignore in the\
                 machine.  Requests for a "machine" will have these cores\
                 excluded, as if they never existed.
-    :type ignore_cores: set of (x, y, p) of cores to ignore
-    :param ignore_links: An optional set of links to ignore in the\
+    :type ignore_cores: set of (int, int, int) of cores to ignore
+    :param ignored_links: An optional set of links to ignore in the\
                     machine.  Requests for a "machine" will have these links\
                     excluded, as if they never existed.
-    :type ignore_links: set of (x, y, link) of links to ignore
+    :type ignored_links: set of (int, int, int) of links to ignore
     :param max_core_id: The maximum core id in any discovered machine.\
                 Requests for a "machine" will only have core ids up to\
                 this value.
@@ -265,15 +265,15 @@ class Transceiver(object):
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
                     the specified chips are ignored.
-        :type ignore_chips: set of (x, y) of chips to ignore
+        :type ignore_chips: set of (int, int of chips to ignore
         :param ignore_cores: An optional set of cores to ignore in the\
                     machine.  Requests for a "machine" will have these cores\
                     excluded, as if they never existed.
-        :type ignore_cores: set of (x, y, p) of cores to ignore
+        :type ignore_cores: set of (int, int, int) of cores to ignore
         :param ignore_links: An optional set of links to ignore in the\
                     machine.  Requests for a "machine" will have these links\
                     excluded, as if they never existed.
-        :type ignore_links: set of (x, y, link) of links to ignore
+        :type ignore_links: set of (int, int, int) of links to ignore
         :param max_core_id: The maximum core id in any discovered machine.\
                     Requests for a "machine" will only have core ids up to and\
                     including this value.
@@ -472,8 +472,8 @@ class Transceiver(object):
     def _check_bmp_connections(self):
         """ Check that the BMP connections are actually connected to valid BMPs
 
-        :return: None
-        :raises SpinnmanIOException: when the connection is not linked to a BMP
+        :rtype: None
+        :raise SpinnmanIOException: when the connection is not linked to a BMP
         """
         # check that the UDP BMP connection is actually connected to a BMP
         #  via the sver command
@@ -643,7 +643,7 @@ class Transceiver(object):
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :return: None
+        :rtype: None
         """
         if connection is None:
             connection_to_use = self._get_random_connection(
@@ -795,7 +795,7 @@ class Transceiver(object):
             linked to a given chip
 
         :param chip: the chip to locate
-        :return:
+        :rtype: None
         """
         for connection in self._scamp_connections:
             if connection.chip_x == chip.x and connection.chip_y == chip.y:
@@ -806,6 +806,7 @@ class Transceiver(object):
         """ Get the currently known connections to the board, made up of those\
             passed in to the transceiver and those that are discovered during\
             calls to discover_connections.  No further discovery is done here.
+
         :return: An iterable of connections known to the transceiver
         :rtype: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
@@ -1053,7 +1054,7 @@ class Transceiver(object):
         :param width: The width of the machine in chips
         :param height: The height of the machine in chips
         :return: version_info
-        :raises SpinnmanIOException: If there is a problem communicating with\
+        :raise SpinnmanIOException: If there is a problem communicating with\
                 the machine
         """
         version_info = None
@@ -1491,7 +1492,7 @@ class Transceiver(object):
                 if the frame is not in a cabinet
         :param frame: the id of the frame in the cabinet containing the\
                 board(s), or 0 if the board is not in a frame
-        :return: None
+        :rtype: None
         """
         if (cabinet, frame) in self._bmp_connection_selectors:
             process = SendSingleCommandProcess(
@@ -1509,7 +1510,7 @@ class Transceiver(object):
         :param led:  Number of the LED or an iterable of LEDs to set the\
                 state of (0-7)
         :type led: int or iterable of int
-        :param action:State to set the LED to, either on, off or toggle
+        :param action: State to set the LED to, either on, off or toggle
         :type action:\
                 :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
         :param board: Specifies the board to control the LEDs of. This may \
@@ -1521,7 +1522,7 @@ class Transceiver(object):
         :type cabinet: int
         :param frame: the frame this is targeting
         :type frame: int
-        :return: None
+        :rtype: None
         """
         if (cabinet, frame) in self._bmp_connection_selectors:
             process = SendSingleCommandProcess(
@@ -1574,7 +1575,7 @@ class Transceiver(object):
         :param frame: the frame this is targeting
         :type frame: int
         :param board: which board to write the FPGA register to
-        :return: None
+        :rtype: None
         """
         if (cabinet, frame) in self._bmp_connection_selectors:
             process = SendSingleCommandProcess(
@@ -1931,7 +1932,6 @@ class Transceiver(object):
         :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
-         :py:class:`spinnman.messages.scp.scp_signal.SCPSignal'
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2351,7 +2351,7 @@ class Transceiver(object):
                     will result in a warning).
         :type diagnostic_filter:\
                     :py:class:`spinnman.model.diagnostic_filter.DiagnosticFilter`
-        :return: None
+        :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
                     * If there is an error communicating with the board
                     * If there is an error reading the data
@@ -2435,8 +2435,7 @@ class Transceiver(object):
         :param counter_ids: The ids of the counters to reset (all by default)\
                     and enable if enable is True; each must be between 0 and 15
         :type counter_ids: array-like of int
-        :return: None
-        :rtype: Nothing is returned
+        :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -2522,7 +2521,7 @@ class Transceiver(object):
         :param local_port: The optional port number to listen on; if not\
                 specified, an existing connection will be used if possible,\
                 otherwise a random free port number will be used
-        :type: local_port: int
+        :type local_port: int
         :param local_host: The optional hostname or IP address to listen on;\
                 if not specified, all interfaces will be used for listening
         :type local_host: str
@@ -2648,22 +2647,13 @@ class Transceiver(object):
                 self._update_machine()
 
             # Find a free core on each chip to use
-            for chip in self._machine.chips:
-                try:
-                    first_processor = None
-                    for processor in chip.processors:
-                        if not processor.is_monitor:
-                            first_processor = processor
-                    if first_processor is not None:
-                        first_processor.is_monitor = True
-                        self._reinjector_cores.add_processor(
-                            chip.x, chip.y, first_processor.processor_id)
-                    else:
-                        logger.warn(
-                            "No processor on {}, {} was free to use for"
-                            " reinjection".format(chip.x, chip.y))
-                except StopIteration:
-                    pass
+            self._reinjector_cores, failed_chips = \
+                self._machine.reserve_system_processors()
+            if len(failed_chips) > 0:
+                logger.warn(
+                    "The reinjector could not be enabled on the following"
+                    " chips due to lack of available cores: {}".format(
+                        failed_chips))
 
             # Load the reinjector on each free core
             reinjector_binary = os.path.join(

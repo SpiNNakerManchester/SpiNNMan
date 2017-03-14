@@ -9,17 +9,16 @@ def generate_machine_report(report_directory, machine, connections):
     """Generate report on the physical structure of the target SpiNNaker \
     machine.
 
-    :param report_directory: the directroy to which reports are stored
-    :param machine: the machine python object
-    :param connections: the list of connections to the machine
-    :type report_directory: str
-    :type machine: spinnmachine.machine.Machine object
-    :type connections: iterable of implientations of
-    spinnman.connections.abstract_connection.AbstractConnection
-    :return None
-    :rtype: None
-    :raise IOError: when a file cannot be opened for some reason
-    """
+   :param report_directory: the directory to which reports are stored
+   :param machine: the machine python object
+   :param connections: the list of connections to the machine
+   :type report_directory: str
+   :type machine: spinnmachine.machine.Machine object
+   :type connections: iterable of implementations of \
+               spinnman.connections.abstract_connection.AbstractConnection
+   :rtype: None
+   :raise IOError: when a file cannot be opened for some reason
+   """
     file_name = report_directory + os.sep + "machine_structure.rpt"
     f_machine_struct = None
     try:

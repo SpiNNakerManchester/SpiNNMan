@@ -1,7 +1,13 @@
-.. SpiNNMan documentation master file, created by
-   sphinx-quickstart on Thu Jun 19 09:12:08 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+These pages document the python code for the SpiNNMan_ module
+which is part of the SpiNNaker_ Project.
+
+This code depends on SpiNNMachine_ and SpiNNStorageHandlers_ (Combined_documentation_).
+
+.. _SpiNNaker: http://apt.cs.manchester.ac.uk/projects/SpiNNaker/
+.. _SpiNNMan: https://github.com/SpiNNakerManchester/SpiNNMan
+.. _SpiNNMachine: http://spinnmachine.readthedocs.io
+.. _SpiNNStorageHandlers: http://spinnstoragehandlers.readthedocs.io
+.. _Combined_documentation: http://spinnakermanchester.readthedocs.io
 
 SpiNNMan
 ========

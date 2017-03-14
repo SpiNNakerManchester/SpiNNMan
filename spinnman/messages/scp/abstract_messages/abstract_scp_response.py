@@ -27,8 +27,8 @@ class AbstractSCPResponse(object):
     def read_bytestring(self, data, offset):
         """ Reads a packet from a bytestring of data
 
-        :param data: The data to be read
-        :type data: bytestring
+        :param data: The bytestring to be read
+        :type data: str
         :param offset: The offset in the data from which the response should\
                     be read
         :type offset: int
@@ -42,8 +42,8 @@ class AbstractSCPResponse(object):
     def read_data_bytestring(self, data, offset):
         """ Reads the remainder of the data following the header
 
-        :param data: The data to read from
-        :type data: bytestring
+        :param data: The bytestring to read from
+        :type data: str
         :param offset: The offset into the data after the headers
         :type offset: int
         """

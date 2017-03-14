@@ -109,7 +109,7 @@ class EIEIODataHeader(object):
         """ Get a bytestring of the header
 
         :return: The header as a bytestring
-        :rtype: bytestring
+        :rtype: str
         """
 
         # Convert the flags to an int
@@ -168,8 +168,8 @@ class EIEIODataHeader(object):
     def from_bytestring(data, offset):
         """ Read an eieio data header from a bytestring
 
-        :param data: The data to be read
-        :type data: bytestring
+        :param data: The bytestring to be read
+        :type data: str
         :param offset: The offset at which the data starts
         :type offset: int
         :return: an EIEIO header

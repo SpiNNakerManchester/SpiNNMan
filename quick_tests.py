@@ -128,6 +128,7 @@ def print_reinjection_status(status):
                status.is_reinjecting_nearest_neighbour,
                status.is_reinjecting_fixed_route)
 
+
 transceiver = create_transceiver_from_hostname(
     board_config.remotehost, board_config.board_version,
     ignore_cores=down_cores, ignore_chips=down_chips,

@@ -18,11 +18,12 @@ class SCPReadFPGARegisterRequest(AbstractSCPBMPRequest):
     def __init__(self, fpga_num, register, board):
         """
         sets up a read fpga register request
+
         :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
         :param register: Register address to read to (will be rounded down to
                 the nearest 32-bit word boundary).
         :param board: which board to request the fpga register from
-        :return: None
+        :rtype: None
         """
 
         # check to stop people asking for none word aligned memory addresses

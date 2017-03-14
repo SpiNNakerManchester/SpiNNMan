@@ -18,7 +18,7 @@ class SCPReadADCRequest(AbstractSCPBMPRequest):
         """
 
         :param board: which board to request the adc register from
-        :return:
+        :rtype: None
         """
         AbstractSCPBMPRequest.__init__(
             self, board,

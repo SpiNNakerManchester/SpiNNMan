@@ -27,6 +27,7 @@ class AbstractSCPReceiver(AbstractConnection):
     def receive_scp_response(self, timeout=1.0):
         """ Receives an SCP response from this connection.  Blocks\
             until a message has been received, or a timeout occurs.
+
         :param timeout: The time in seconds to wait for the message to arrive;\
                     if not specified, will wait forever, or until the\
                     connection is closed
@@ -34,8 +35,8 @@ class AbstractSCPReceiver(AbstractConnection):
         :return: The SCP result, the sequence number, the data of the response\
                     and the offset at which the data starts (i.e. where the
                     SDP header starts)
-        :rtype: (:py:class:`spinnman.messages.scp.scp_result.SCPResult`,\
-                    int, bytestring, int)
+        :rtype: :py:class: `spinnman.messages.scp.scp_result.SCPResult`,\
+                    int, bytestring, int
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     receiving the message
         :raise spinnman.exceptions.SpinnmanTimeoutException: If there is a\
