@@ -8,6 +8,8 @@ class AbstractEIEIODataElement(object):
     """ A marker interface for possible data elements in the EIEIO data packet
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def get_bytestring(self, eieio_type):
         """ Get a bytestring for the given type

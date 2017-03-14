@@ -11,6 +11,8 @@ class AbstractSDPReceiver(AbstractConnection):
     """ A receiver of SDP messages
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def receive_sdp_message(self, timeout=None):
         """ Receives an SDP message from this connection.  Blocks until the\

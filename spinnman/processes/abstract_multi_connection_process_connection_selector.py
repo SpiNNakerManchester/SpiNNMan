@@ -8,6 +8,8 @@ class AbstractMultiConnectionProcessConnectionSelector(object):
     """ A connection selector for multi-connection processes
     """
 
+    # connections will be used when worked out how
+
     @abstractmethod
     def __init__(self, connections):
         """

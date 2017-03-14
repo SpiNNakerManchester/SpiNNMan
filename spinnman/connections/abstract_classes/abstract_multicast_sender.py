@@ -11,6 +11,8 @@ class AbstractMulticastSender(AbstractConnection):
     """ A sender of Multicast messages
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def get_input_chips(self):
         """ Get a list of chips which identify the chips to which this sender\

@@ -12,6 +12,8 @@ class AbstractSCPSender(AbstractConnection):
     """ A sender of SCP messages
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def get_scp_data(self, scp_request):
         """ Returns the data of an SCP request as it would be sent down this\

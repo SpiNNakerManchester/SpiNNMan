@@ -11,6 +11,8 @@ class AbstractEIEIOReceiver(AbstractConnection):
     """ A receiver of EIEIO data or commands
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def receive_eieio_message(self, timeout=None):
         """ Receives an EIEIO message from this connection.  Blocks\

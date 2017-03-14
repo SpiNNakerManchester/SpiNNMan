@@ -8,6 +8,8 @@ class AbstractConnection(object):
     """ An abstract connection to the SpiNNaker board over some medium
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def is_connected(self):
         """ Determines if the medium is connected at this point in time

@@ -11,6 +11,8 @@ class AbstractSpinnakerBootReceiver(AbstractConnection):
     """ A receiver of Spinnaker boot messages
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def receive_boot_message(self, timeout=None):
         """ Receives a boot message from this connection.  Blocks\

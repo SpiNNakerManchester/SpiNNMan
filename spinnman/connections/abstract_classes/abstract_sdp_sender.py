@@ -11,6 +11,8 @@ class AbstractSDPSender(AbstractConnection):
     """ A sender of SDP messages
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def send_sdp_message(self, sdp_message):
         """ Sends an SDP message down this connection

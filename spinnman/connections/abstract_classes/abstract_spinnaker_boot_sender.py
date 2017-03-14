@@ -11,6 +11,8 @@ class AbstractSpinnakerBootSender(AbstractConnection):
     """ A sender of Spinnaker Boot messages
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def send_boot_message(self, boot_message):
         """ Sends a SpiNNaker boot message using this connection

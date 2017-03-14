@@ -10,6 +10,8 @@ class AbstractEIEIOSender(AbstractConnection):
     """ A sender of EIEIO messages
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def send_eieio_message(self, eieio_message):
         """ Sends an EIEIO message down this connection

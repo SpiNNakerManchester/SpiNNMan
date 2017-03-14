@@ -6,6 +6,8 @@ from abc import abstractmethod
 @add_metaclass(ABCMeta)
 class AbstractListenable(object):
 
+    __slots__ = ()
+
     @abstractmethod
     def get_receive_method(self):
         """ Get the method that receives for this connection

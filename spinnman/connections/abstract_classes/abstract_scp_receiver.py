@@ -11,6 +11,8 @@ class AbstractSCPReceiver(AbstractConnection):
     """ A receiver of SCP messages
     """
 
+    __slots__ = ()
+
     @abstractmethod
     def is_ready_to_receive(self, timeout=0):
         """ Determines if there is an SCP packet to be read without blocking
