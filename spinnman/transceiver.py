@@ -2647,7 +2647,13 @@ class Transceiver(object):
                 self._update_machine()
 
             # Find a free core on each chip to use
-            self._machine.reserve_system_processors()
+            self._reinjector_cores, failed_chips = \
+                self._machine.reserve_system_processors()
+            if len(failed_chips) > 0:
+                logger.warn(
+                    "The reinjector could not be enabled on the following"
+                    " chips due to lack of available cores: {}".format(
+                        failed_chips))
 
             # Load the reinjector on each free core
             reinjector_binary = os.path.join(
