@@ -1,10 +1,9 @@
-from abc import ABCMeta
-from abc import abstractmethod
 from six import add_metaclass
 import struct
 
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
-@add_metaclass(ABCMeta)
+@add_metaclass(AbstractBase)
 class AbstractSCPRequest(object):
     """ Represents an Abstract SCP Request
     """

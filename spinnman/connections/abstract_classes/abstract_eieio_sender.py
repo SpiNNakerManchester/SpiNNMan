@@ -1,11 +1,11 @@
-from abc import ABCMeta
-from abc import abstractmethod
 from six import add_metaclass
+
 from spinnman.connections.abstract_classes.abstract_connection \
     import AbstractConnection
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
-@add_metaclass(ABCMeta)
+@add_metaclass(AbstractBase)
 class AbstractEIEIOSender(AbstractConnection):
     """ A sender of EIEIO messages
     """
