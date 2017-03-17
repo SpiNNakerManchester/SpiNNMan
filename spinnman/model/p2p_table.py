@@ -1,5 +1,6 @@
-from spinnman.model.p2p_table_route import P2PTableRoute
 import struct
+
+from spinnman.model.enums.p2p_table_route import P2PTableRoute
 
 
 class P2PTable(object):

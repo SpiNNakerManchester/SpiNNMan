@@ -1,5 +1,7 @@
 from spinnman import constants
-from spinnman.messages.scp.scp_result import SCPResult
+import struct
+
+from spinnman.messages.scp.enums.scp_result import SCPResult
 from spinnman.connections.udp_packet_connections import udp_utils
 from spinnman.connections.udp_packet_connections.udp_sdp_connection \
     import UDPSDPConnection
@@ -7,8 +9,6 @@ from spinnman.connections.abstract_classes.abstract_scp_sender \
     import AbstractSCPSender
 from spinnman.connections.abstract_classes.abstract_scp_receiver \
     import AbstractSCPReceiver
-
-import struct
 
 
 class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,

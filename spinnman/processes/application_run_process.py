@@ -10,12 +10,12 @@ class ApplicationRunProcess(AbstractMultiConnectionProcess):
         AbstractMultiConnectionProcess.__init__(
             self, connection_selector)
 
-    def run(self, app_id, core_subsets):
+    def run(self, app_id, core_subsets, wait):
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
             self._send_request(
-                SCPApplicationRunRequest(app_id, x, y,
-                                         core_subset.processor_ids))
+                SCPApplicationRunRequest(
+                    app_id, x, y, core_subset.processor_ids, wait))
         self._finish()
         self.check_for_error()

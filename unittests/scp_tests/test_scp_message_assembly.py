@@ -1,6 +1,7 @@
 import unittest
+
 import spinnman.messages.scp.scp_request_header as scp_req
-import spinnman.messages.scp.scp_command as cmds
+import spinnman.messages.scp.enums.scp_command as cmds
 import spinnman.messages.scp.impl.scp_version_request as ver_req
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
 from spinnman.messages.scp.impl.scp_read_memory_request \

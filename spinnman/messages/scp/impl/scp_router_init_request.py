@@ -4,7 +4,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-from spinnman.messages.scp.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 
 

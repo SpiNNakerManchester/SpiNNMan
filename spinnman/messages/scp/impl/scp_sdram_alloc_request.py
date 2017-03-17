@@ -1,3 +1,5 @@
+from spinnman import exceptions
+
 from spinnman.messages.scp.abstract_messages.abstract_scp_request\
     import AbstractSCPRequest
 from spinnman.messages.scp.impl.scp_sdram_alloc_response import \
@@ -5,9 +7,8 @@ from spinnman.messages.scp.impl.scp_sdram_alloc_response import \
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.messages.scp.scp_alloc_free_type import SCPAllocFreeType
-from spinnman import exceptions
+from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_alloc_free_type import SCPAllocFreeType
 
 
 class SCPSDRAMAllocRequest(AbstractSCPRequest):
@@ -37,8 +38,9 @@ class SCPSDRAMAllocRequest(AbstractSCPRequest):
             tag = 0
         elif not(0 <= tag < 256):
             raise exceptions.SpinnmanInvalidParameterException(
+                "tag",
                 "The tag param needs to be between 0 and 255, or None (in "
-                "which case 0 will be used by default)")
+                "which case 0 will be used by default)", str(tag))
 
         AbstractSCPRequest.__init__(
             self,
