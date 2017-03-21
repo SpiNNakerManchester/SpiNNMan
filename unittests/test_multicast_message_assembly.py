@@ -1,5 +1,3 @@
-__author__ = 'Petrut'
-
 import unittest
 import spinnman.messages.multicast_message as multicast_msg
 

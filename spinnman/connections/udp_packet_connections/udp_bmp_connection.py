@@ -1,10 +1,11 @@
 
 # spinnman imports
 from spinnman import constants
+import struct
+
 from spinnman.connections.udp_packet_connections.udp_connection import \
     UDPConnection
-import struct
-from spinnman.messages.scp.scp_result import SCPResult
+from spinnman.messages.scp.enums.scp_result import SCPResult
 from spinnman.connections.udp_packet_connections import udp_utils
 from spinnman.connections.abstract_classes.abstract_scp_receiver \
     import AbstractSCPReceiver
@@ -102,8 +103,8 @@ class UDPBMPConnection(
 
     def __repr__(self):
         return \
-            "UDPBMPConnection(cabinet={}, frame={}, boards={}, local_host={}," \
-            "local_port={}, remote_host={}, remote_port={}".format(
-                self._cabinet, self._frame, self._boards,
-                self.local_ip_address, self.local_port, self.remote_ip_address,
-                self.remote_port)
+            ("UDPBMPConnection(cabinet={}, frame={}, boards={}, local_host={},"
+             "local_port={}, remote_host={}, remote_port={}".format(
+                 self.cabinet, self.frame, self.boards,
+                 self.local_ip_address, self.local_port,
+                 self.remote_ip_address, self.remote_port))

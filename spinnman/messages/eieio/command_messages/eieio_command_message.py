@@ -13,7 +13,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         :type eieio_command_header:\
                     :py:class:`spinnman.messages.eieio.command_messages.eieio_command_header.EIEIOCommandHeader`
         :param data: Optional incoming data
-        :type data: bytestring
+        :type data: str
         :param offset: Offset into the data where valid data begins
         :type offset: int
         """

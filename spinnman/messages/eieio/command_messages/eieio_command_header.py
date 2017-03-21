@@ -22,7 +22,7 @@ class EIEIOCommandHeader(object):
         """ Read an eieio command header from a bytestring
 
         :param data: The bytestring to read the data from
-        :type data: bytestring
+        :type data: str
         :param offset: The offset where the valid data starts
         :type offset: int
         :return: an EIEIO command header
@@ -42,6 +42,6 @@ class EIEIOCommandHeader(object):
     def bytestring(self):
         """ Get a bytestring of the header
 
-        :rtype: bytestring
+        :rtype: str
         """
         return struct.pack("<H", 0 << 15 | 1 << 14 | self._command)

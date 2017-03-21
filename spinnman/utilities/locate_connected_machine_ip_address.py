@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
         :param signal:
         :param frame:
-        :return:
+        :return: Never returns as it causes a sys.exit()
         """
         "Exiting"
         sys.exit()

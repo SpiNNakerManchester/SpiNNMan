@@ -16,7 +16,7 @@ class AbstractEIEIODataElement(object):
         :type eieio_type:\
                     :py:class:`spinnman.messages.eieio.eieio_type.EIEIOType`
         :return: A bytestring for the element
-        :rtype: bytestring
+        :rtype: str
         :raise SpinnmanInvalidParameterException: If the type is incompatible\
                     with the element
         """

@@ -50,3 +50,9 @@ To install as a development version in a virtualenv, with the virutalenv
 enabled, run:
 
     python setup.py develop
+
+Documentation
+=============
+[SpiNNMan Python documentation](http://spinnman.readthedocs.io)
+
+[Combined python documentation](http://spinnakermanchester.readthedocs.io)

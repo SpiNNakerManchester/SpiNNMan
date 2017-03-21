@@ -1,6 +1,7 @@
 import struct
+
 from spinnman.utilities import utility_functions
-from spinnman.messages.scp.scp_dpri_packet_type_flags \
+from spinnman.messages.scp.enums.scp_dpri_packet_type_flags \
     import SCPDPRIPacketTypeFlags
 
 
@@ -11,7 +12,7 @@ class DPRIStatus(object):
     def __init__(self, data, offset):
         """
         :param data: The data containing the information
-        :type data: bytestring
+        :type data: str
         :param offset: The offset in the data where the information starts
         :type offset: int
         """
