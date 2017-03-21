@@ -9,10 +9,11 @@ virtualenv:
 
 before_script:
   - wget https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q3-update/+download/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
-  - tar jxf gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
+  - tar jxvf gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2
   - export PATH=$PATH:$PWD/gcc-arm-none-eabi-5_4-2016q3/bin/
+  - echo $PATH
   - wget https://github.com/SpiNNakerManchester/spinnaker_tools/releases/download/v3.1.0/spinnaker_tools_3.1.0.tar.gz
-  - tar zxf spinnaker_tools_3.1.0.tar.gz
+  - tar zxvf spinnaker_tools_3.1.0.tar.gz
   - export SPINN_DIRS=$PWD/spinnaker_tools_3.1.0
   - cd $SPINN_DIRS
   - make
