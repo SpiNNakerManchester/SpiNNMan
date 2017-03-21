@@ -7,13 +7,18 @@ matrix:
 virtualenv:
   system_site_packages: true
 
-before_script:
-  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
-  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
+before_install:
+  - pip install --upgrade pip setuptools wheel
+  # SpiNNakerManchester internal dependencies; development mode
+  - pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@$TRAVIS_BRANCH || pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
+  - pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@$TRAVIS_BRANCH || pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
+
+install:
   - python ./setup.py install
   - pip install -r requirements-test.txt
   - pip install -r doc/doc_requirements.txt
   - pip install spinnaker_proxy
+
 script:
   - py.test .
   # Code quality check
