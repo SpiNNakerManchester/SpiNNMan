@@ -3,6 +3,7 @@ import struct
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
+
 @add_metaclass(AbstractBase)
 class AbstractSCPRequest(object):
     """ Represents an Abstract SCP Request

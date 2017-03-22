@@ -2,6 +2,7 @@ from six import add_metaclass
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
+
 @add_metaclass(AbstractBase)
 class AbstractEIEIODataElement(object):
     """ A marker interface for possible data elements in the EIEIO data packet
