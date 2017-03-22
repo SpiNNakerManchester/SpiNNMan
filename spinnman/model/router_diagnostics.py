@@ -189,6 +189,42 @@ class RouterDiagnostics(object):
             constants.ROUTER_REGISTER_REGISTERS.DUMP_FR.value]
 
     @property
+    def user_0(self):
+        """ the data gained from the user 0 router diag filter
+
+        :return: the number of packets captured by this filter.
+        """
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.USER_0.value]
+
+    @property
+    def user_1(self):
+        """ the data gained from the user 1 router diag filter
+
+        :return: the number of packets captured by this filter.
+        """
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.USER_1.value]
+
+    @property
+    def user_2(self):
+        """ the data gained from the user 2 router diag filter
+
+        :return: the number of packets captured by this filter.
+        """
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.USER_2.value]
+
+    @property
+    def user_3(self):
+        """ the data gained from the user 3 router diag filter
+
+        :return: the number of packets captured by this filter.
+        """
+        return self._register_values[
+            constants.ROUTER_REGISTER_REGISTERS.USER_3.value]
+
+    @property
     def user_registers(self):
         """ The values in the user control registers
 

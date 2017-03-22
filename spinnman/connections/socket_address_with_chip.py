@@ -15,6 +15,7 @@ class SocketAddressWithChip(object):
     @property
     def hostname(self):
         """ The hostname of the socket
+
         :return: the hostname
         """
         return self._hostname
@@ -22,6 +23,7 @@ class SocketAddressWithChip(object):
     @property
     def port_num(self):
         """ The port number of the socket
+
         :return: the port
         """
         return self._port_num
@@ -29,6 +31,7 @@ class SocketAddressWithChip(object):
     @property
     def chip_x(self):
         """ The x-coordinate of the chip
+
         :return: the x-coordinate
         """
         return self._chip_x
@@ -36,6 +39,7 @@ class SocketAddressWithChip(object):
     @property
     def chip_y(self):
         """ The y-coordinate of the chip
+
         :return: the y-coordinate
         """
         return self._chip_y

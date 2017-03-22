@@ -267,8 +267,8 @@ def read_eieio_data_message(data, offset):
     """ Reads the content of an EIEIO data message and returns an object\
         identifying the data which was contained in the packet
 
-    :param data: data received from the network
-    :type data: bytestring
+    :param data: data received from the network as a bytestring
+    :type data: str
     :param offset: offset at which the parsing operation should start
     :type offset: int
     :return: an object which inherits from EIEIODataMessage which contains\

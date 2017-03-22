@@ -1,3 +1,4 @@
+from spinn_machine.router import Router
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.processes.write_memory_process import WriteMemoryProcess
 from spinnman.messages.scp.impl.scp_router_init_request \
@@ -27,19 +28,8 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         n_entries = 0
         for route in routes:
 
-            route_entry = 0
-            for processor_id in route.processor_ids:
-                if processor_id > 26 or processor_id < 0:
-                    raise SpinnmanInvalidParameterException(
-                        "route.processor_ids", str(route.processor_ids),
-                        "Processor ids must be between 0 and 26")
-                route_entry |= (1 << (6 + processor_id))
-            for link_id in route.link_ids:
-                if link_id > 5 or link_id < 0:
-                    raise SpinnmanInvalidParameterException(
-                        "route.link_ids", str(route.link_ids),
-                        "Link ids must be between 0 and 5")
-                route_entry |= (1 << link_id)
+            route_entry \
+                = Router.convert_routing_table_entry_to_spinnaker_route(route)
 
             struct.pack_into(
                 "<H2xIII", routing_data, n_entries * 16, n_entries,

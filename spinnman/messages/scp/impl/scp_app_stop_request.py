@@ -1,10 +1,10 @@
-from spinnman.messages.scp.scp_signal import SCPSignal
+from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinnman.messages.scp.abstract_messages.abstract_scp_request \
     import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-from spinnman.messages.scp.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
 
 _APP_MASK = 0xFF
@@ -25,8 +25,6 @@ class SCPAppStopRequest(AbstractSCPRequest):
 
         :param app_id: The id of the application, between 0 and 255
         :type app_id: int
-        :param signal: The signal to send
-        :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
         """
         super(SCPAppStopRequest, self).__init__(
             SDPHeader(

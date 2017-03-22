@@ -93,7 +93,7 @@ class AbstractSCPRequest(object):
         """ The request as a bytestring
 
         :return: The request as a bytestring
-        :rtype: bytestring
+        :rtype: str
         """
         data = (self._sdp_header.bytestring +
                 self._scp_request_header.bytestring)

@@ -1,12 +1,12 @@
 import unittest
+
 from board_test_configuration import BoardTestConfiguration
 from spinnman.connections.udp_packet_connections.udp_scamp_connection \
     import UDPSCAMPConnection
 import spinnman.exceptions as exc
 from spinnman.messages.scp.impl import scp_read_link_request,\
     scp_read_memory_request, scp_version_request, scp_version_response
-from spinnman.messages.scp.scp_result import SCPResult
-
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 board_config = BoardTestConfiguration()
 
@@ -47,13 +47,14 @@ class TestUDPConnection(unittest.TestCase):
         self.assertEqual(result, SCPResult.RC_OK)
 
     def test_send_scp_request_to_nonexistent_host(self):
-        with self.assertRaises(exc.SpinnmanIOException):
+        with self.assertRaises(exc.SpinnmanTimeoutException):
             board_config.set_up_nonexistent_board()
             connection = UDPSCAMPConnection(
                 remote_host=board_config.remotehost)
             scp = scp_read_memory_request.SCPReadMemoryRequest(0, 0, 0, 256)
             connection.send_scp_request(scp)
             _, _, _, _ = connection.receive_scp_response(2)
+
 
 if __name__ == '__main__':
     unittest.main()

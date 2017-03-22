@@ -1,8 +1,8 @@
-from spinnman.messages.scp.scp_result import SCPResult
-from spinnman.exceptions import SpinnmanTimeoutException
-
 import sys
 import time
+
+from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.exceptions import SpinnmanTimeoutException
 
 MAX_SEQUENCE = 65536
 
