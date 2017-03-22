@@ -2,7 +2,7 @@ import unittest
 from struct import pack
 
 from spinnman.messages.scp.impl.scp_version_response import SCPVersionResponse
-from spinnman.messages.scp.scp_result import SCPResult
+from spinnman.messages.scp.enums.scp_result import SCPResult
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 
 

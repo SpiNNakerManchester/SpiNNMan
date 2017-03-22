@@ -1,5 +1,6 @@
-from spinnman.model.cpu_state import CPUState
 import struct
+
+from spinnman.model.enums.cpu_state import CPUState
 
 
 class ChipSummaryInfo(object):

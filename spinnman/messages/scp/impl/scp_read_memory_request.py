@@ -1,12 +1,13 @@
+from spinnman import constants
+
 from spinnman.messages.scp.abstract_messages.abstract_scp_request\
     import AbstractSCPRequest
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-from spinnman.messages.scp.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.impl.scp_read_memory_response import \
     SCPReadMemoryResponse
-from spinnman import constants
 
 
 class SCPReadMemoryRequest(AbstractSCPRequest):

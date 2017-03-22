@@ -1,9 +1,10 @@
 import unittest
-from spinnman.messages.scp.scp_iptag_command import SCPIPTagCommand
-from spinnman.messages.scp.scp_command import SCPCommand
-from spinnman.messages.scp.scp_result import SCPResult
-from spinnman.messages.scp.scp_signal import SCPSignal
-from spinnman.messages.scp.scp_signal import SignalType
+
+from spinnman.messages.scp.enums.scp_iptag_command import SCPIPTagCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.messages.scp.enums.scp_signal import SCPSignal
+from spinnman.messages.scp.enums.scp_signal import SignalType
 
 
 class TestSCPEnums(unittest.TestCase):

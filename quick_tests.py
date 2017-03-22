@@ -1,26 +1,23 @@
 import logging
 from random import randint
-from os.path import os
 import struct
 import time
-
-from spinn_storage_handlers.file_data_reader import FileDataReader
+import sys
 
 from spinnman.transceiver import create_transceiver_from_hostname
-from spinnman.model.cpu_state import CPUState
+from spinnman.model.enums.cpu_state import CPUState
 from spinn_machine.core_subsets import CoreSubsets
 from spinn_machine.core_subset import CoreSubset
-from spinnman.messages.scp.scp_signal import SCPSignal
+from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinn_machine.tags.reverse_iptag import ReverseIPTag
 from spinnman.model.diagnostic_filter import DiagnosticFilter
-import sys
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
-from spinnman.model.diagnostic_filter_destination \
+from spinnman.model.enums.diagnostic_filter_destination \
     import DiagnosticFilterDestination
-from spinnman.model.diagnostic_filter_packet_type \
+from spinnman.model.enums.diagnostic_filter_packet_type \
     import DiagnosticFilterPacketType
 from board_test_configuration import BoardTestConfiguration
 from spinnman import constants
@@ -35,7 +32,6 @@ board_config.set_up_remote_board()
 n_cores = 20
 core_subsets = CoreSubsets(core_subsets=[CoreSubset(0, 0, range(1, 11)),
                                          CoreSubset(1, 1, range(1, 11))])
-app_id = 30
 
 down_cores = CoreSubsets()
 down_cores.add_processor(0, 0, 5)
@@ -135,6 +131,8 @@ transceiver = create_transceiver_from_hostname(
     bmp_connection_data=board_config.bmp_names,
     auto_detect_bmp=board_config.auto_detect_bmp)
 
+app_id = transceiver.app_id_tracker.get_new_id()
+
 try:
 
     print "Version Information"
@@ -174,9 +172,8 @@ try:
 
     print "Execute Flood"
     print "============="
-    file_size = os.stat("hello.aplx").st_size
-    executable = FileDataReader("hello.aplx")
-    transceiver.execute_flood(core_subsets, executable, app_id, file_size)
+    transceiver.execute_flood(
+        core_subsets, "hello.aplx", app_id, is_filename=True)
     count = 0
     while count < 20:
         count = transceiver.get_core_state_count(app_id, CPUState.SYNC0)

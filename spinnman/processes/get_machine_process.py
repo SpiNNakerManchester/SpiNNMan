@@ -1,23 +1,22 @@
+from spinnman import constants
+from spinnman import exceptions
+import logging
+
 from spinnman.messages.scp.impl.scp_read_memory_request\
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
-from spinnman import constants
-from spinnman import exceptions
 from spinnman.model.p2p_table import P2PTable
 from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
-from spinnman.model.cpu_state import CPUState
+from spinnman.model.enums.cpu_state import CPUState
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman.processes.abstract_process import AbstractProcess
-
 from spinn_machine.processor import Processor
 from spinn_machine.router import Router
 from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
 from spinn_machine.machine import Machine
 from spinn_machine.link import Link
-
-import logging
 
 logger = logging.getLogger(__name__)
 
