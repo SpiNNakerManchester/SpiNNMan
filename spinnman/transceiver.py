@@ -1657,9 +1657,8 @@ class Transceiver(object):
         if (cabinet, frame) in self._bmp_connection_selectors:
             process = SendSingleCommandProcess(
                 self._bmp_connection_selectors[(cabinet, frame)])
-            response = process.execute(
+            process.execute(
                 SCPWriteFPGARegisterRequest(fpga_num, register, value, board))
-            return response.fpga_register
         else:
             raise exceptions.SpinnmanInvalidParameterException(
                 "cabinet and frame", "{} and {}".format(cabinet, frame),
