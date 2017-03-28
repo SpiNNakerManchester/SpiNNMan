@@ -6,7 +6,7 @@ from collections import defaultdict
 import os
 
 # Build a list of all project modules, as well as supplementary files
-main_package = "spinn_front_end_common"
+main_package = "spinnman"
 data_extensions = {".aplx", ".xml"}
 main_package_dir = os.path.join(os.path.dirname(__file__), main_package)
 start = len(main_package_dir)
