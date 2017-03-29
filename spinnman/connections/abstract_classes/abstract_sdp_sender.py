@@ -1,15 +1,16 @@
-from abc import ABCMeta
-from abc import abstractmethod
 from six import add_metaclass
 
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.connections.abstract_classes.abstract_connection \
     import AbstractConnection
 
 
-@add_metaclass(ABCMeta)
+@add_metaclass(AbstractBase)
 class AbstractSDPSender(AbstractConnection):
     """ A sender of SDP messages
     """
+
+    __slots__ = ()
 
     @abstractmethod
     def send_sdp_message(self, sdp_message):

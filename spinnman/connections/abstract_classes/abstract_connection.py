@@ -1,12 +1,14 @@
-from abc import ABCMeta
-from abc import abstractmethod
 from six import add_metaclass
 
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
-@add_metaclass(ABCMeta)
+
+@add_metaclass(AbstractBase)
 class AbstractConnection(object):
     """ An abstract connection to the SpiNNaker board over some medium
     """
+
+    __slots__ = ()
 
     @abstractmethod
     def is_connected(self):
