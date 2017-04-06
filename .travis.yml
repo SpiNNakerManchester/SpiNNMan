@@ -17,6 +17,7 @@ before_install:
 install:
   - python ./setup.py install
   - pip install -r requirements-test.txt
+  - pip install -r doc/doc_requirements.txt
   - pip install spinnaker_proxy
 
 script:

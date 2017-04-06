@@ -2859,12 +2859,14 @@ class Transceiver(object):
         if connection is None:
             connection = connection_class(local_host=local_host)
             self._all_connections.add(connection)
-        listener = ConnectionListener(connection)
-        listener.start()
-        self._udp_receive_connections_by_port[connection.local_port][
-            local_host] = (connection, listener)
-        connections_of_class.append((connection, listener))
-        listener.add_callback(callback)
+            # indented from
+            listener = ConnectionListener(connection)
+            listener.start()
+            self._udp_receive_connections_by_port[connection.local_port][
+                local_host] = (connection, listener)
+            connections_of_class.append((connection, listener))
+            listener.add_callback(callback)
+            # to here
         return connection
 
     def enable_reinjection(self, multicast=True, point_to_point=False,
