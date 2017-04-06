@@ -2864,7 +2864,8 @@ class Transceiver(object):
             self._udp_receive_connections_by_port[connection.local_port][
                 local_host] = (connection, listener)
             connections_of_class.append((connection, listener))
-            listener.add_callback(callback)
+
+        listener.add_callback(callback)
         return connection
 
     def enable_reinjection(self, multicast=True, point_to_point=False,
