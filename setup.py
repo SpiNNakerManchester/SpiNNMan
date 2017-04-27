@@ -7,7 +7,7 @@ import os
 
 # Build a list of all project modules, as well as supplementary files
 main_package = "spinnman"
-data_extensions = {".aplx", ".xml"}
+data_extensions = {".aplx", ".xml", ".boot"}
 main_package_dir = os.path.join(os.path.dirname(__file__), main_package)
 start = len(main_package_dir)
 packages = []
@@ -23,11 +23,12 @@ for dirname, dirnames, filenames in os.walk(main_package_dir):
             package = "{}{}".format(
                 main_package, dirname[start:].replace(os.sep, '.'))
             package_data[package].append("*{}".format(ext))
+            print package
             break
 
 setup(
     name="SpiNNMan",
-    version="1!4.0.0a1",
+    version="1!4.0.0a2",
     description="Interaction with a SpiNNaker Machine",
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
     license="GNU GPLv3.0",
