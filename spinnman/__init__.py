@@ -125,3 +125,7 @@
           to read some statistics recorded in SDRAM after a simulation
 
 """
+from spinnman._version import __version__  # NOQA
+from spinnman._version import __version_name__  # NOQA
+from spinnman._version import __version_month__  # NOQA
+from spinnman._version import __version_year__  # NOQA
