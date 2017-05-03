@@ -53,4 +53,5 @@ class Test(unittest.TestCase):
         self.assertLessEqual(spinn_machine_parts[1], spinnman_parts[1])
 
         self.assertEqual(spinn_storage_handlers_parts[0], spinnman_parts[0])
-        self.assertLessEqual(spinn_storage_handlers_parts[1], spinnman_parts[1])
+        self.assertLessEqual(spinn_storage_handlers_parts[1],
+                             spinnman_parts[1])
