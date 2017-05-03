@@ -1,15 +1,16 @@
-from abc import ABCMeta
-from abc import abstractmethod
 from six import add_metaclass
 
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.connections.abstract_classes.abstract_connection \
     import AbstractConnection
 
 
-@add_metaclass(ABCMeta)
+@add_metaclass(AbstractBase)
 class AbstractSCPReceiver(AbstractConnection):
     """ A receiver of SCP messages
     """
+
+    __slots__ = ()
 
     @abstractmethod
     def is_ready_to_receive(self, timeout=0):

@@ -1,6 +1,6 @@
-from abc import ABCMeta
-from abc import abstractmethod
 from six import add_metaclass
+
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_response_header import SCPResponseHeader
 
@@ -13,7 +13,7 @@ _SCP_HEADER_OFFSET = 8
 _SCP_DATA_OFFSET = 12
 
 
-@add_metaclass(ABCMeta)
+@add_metaclass(AbstractBase)
 class AbstractSCPResponse(object):
     """ Represents an abstract SCP Response
     """

@@ -1657,9 +1657,8 @@ class Transceiver(object):
         if (cabinet, frame) in self._bmp_connection_selectors:
             process = SendSingleCommandProcess(
                 self._bmp_connection_selectors[(cabinet, frame)])
-            response = process.execute(
+            process.execute(
                 SCPWriteFPGARegisterRequest(fpga_num, register, value, board))
-            return response.fpga_register
         else:
             raise exceptions.SpinnmanInvalidParameterException(
                 "cabinet and frame", "{} and {}".format(cabinet, frame),
@@ -2860,12 +2859,14 @@ class Transceiver(object):
         if connection is None:
             connection = connection_class(local_host=local_host)
             self._all_connections.add(connection)
-        listener = ConnectionListener(connection)
-        listener.start()
-        self._udp_receive_connections_by_port[connection.local_port][
-            local_host] = (connection, listener)
-        connections_of_class.append((connection, listener))
-        listener.add_callback(callback)
+            # indented from
+            listener = ConnectionListener(connection)
+            listener.start()
+            self._udp_receive_connections_by_port[connection.local_port][
+                local_host] = (connection, listener)
+            connections_of_class.append((connection, listener))
+            listener.add_callback(callback)
+            # to here
         return connection
 
     def enable_reinjection(self, multicast=True, point_to_point=False,
