@@ -10,11 +10,12 @@ class SCPSDRAMDeAllocResponse(AbstractSCPResponse):
     """ An SCP response to a request to deallocate SDRAM
     """
 
-    def __init__(self):
+    def __init__(self, read_n_blocks_freed=False):
         """
         """
         AbstractSCPResponse.__init__(self)
         self._number_of_blocks_freed = None
+        self._read_n_blocks_freed = read_n_blocks_freed
 
     def read_data_bytestring(self, data, offset):
         """ See\
@@ -24,8 +25,9 @@ class SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "SDRAM deallocation", "CMD_DEALLOC", result.name)
-        self._number_of_blocks_freed = struct.unpack_from(
-            "<I", data, offset)[0]
+        if self._read_n_blocks_freed:
+            self._number_of_blocks_freed = struct.unpack_from(
+                "<I", data, offset)[0]
 
     @property
     def number_of_blocks_freed(self):

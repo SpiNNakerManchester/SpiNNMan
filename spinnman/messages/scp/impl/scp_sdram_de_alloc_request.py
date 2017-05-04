@@ -28,19 +28,19 @@ class SCPSDRAMDeAllocRequest(AbstractSCPRequest):
                 needs to be deallocated, or none if deallocating via app_id
         :type base_address: int or None
         """
+        self._read_n_blocks_freed = False
 
         if base_address is not None:
             AbstractSCPRequest.__init__(
                 self,
                 SDPHeader(
-                    flags=SDPFlag.REPLY_NOT_EXPECTED, destination_port=0,
+                    flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                     destination_cpu=0, destination_chip_x=x,
                     destination_chip_y=y),
                 SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
                 argument_1=(
-                    app_id << 8 |
-                    SCPAllocFreeType.
-                    FREE_SDRAM_BY_POINTER.value),  # @UndefinedVariable
+                    SCPAllocFreeType
+                    .FREE_SDRAM_BY_POINTER.value),  # @UndefinedVariable
                 argument_2=base_address)
         else:
             AbstractSCPRequest.__init__(
@@ -54,6 +54,7 @@ class SCPSDRAMDeAllocRequest(AbstractSCPRequest):
                     app_id << 8 |
                     SCPAllocFreeType.
                     FREE_SDRAM_BY_APP_ID.value))  # @UndefinedVariable
+            self._read_n_blocks_freed = True
 
     def get_scp_response(self):
-        return SCPSDRAMDeAllocResponse()
+        return SCPSDRAMDeAllocResponse(self._read_n_blocks_freed)
