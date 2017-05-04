@@ -53,7 +53,7 @@ class SCPSDRAMDeAllocRequest(AbstractSCPRequest):
                 argument_1=(
                     app_id << 8 |
                     SCPAllocFreeType.
-                    FREE_ROUTING_BY_APP_ID.value))  # @UndefinedVariable
+                    FREE_SDRAM_BY_APP_ID.value))  # @UndefinedVariable
 
     def get_scp_response(self):
         return SCPSDRAMDeAllocResponse()
