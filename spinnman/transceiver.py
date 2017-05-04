@@ -2775,7 +2775,7 @@ class Transceiver(object):
         :rtype:\
                 :py:class:`spinnman.connection.udp_packet_connections.udp_connection.UDPConnection`
         """
-
+        print "entering transceiver registration method"
         # If the connection class is not an AbstractListenable, this is an
         # error
         if not issubclass(connection_class, AbstractListenable):
