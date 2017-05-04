@@ -2837,7 +2837,7 @@ class Transceiver(object):
                 listener.start()
                 receiving_connections[local_host] = (connection, listener)
                 connections_of_class.append((connection, listener))
-                listener.add_callback(callback)
+            listener.add_callback(callback)
             return connection
 
         # If we are here, the local port wasn't specified to try to use an
@@ -2859,11 +2859,11 @@ class Transceiver(object):
         if connection is None:
             connection = connection_class(local_host=local_host)
             self._all_connections.add(connection)
-        listener = ConnectionListener(connection)
-        listener.start()
-        self._udp_receive_connections_by_port[connection.local_port][
-                local_host] = (connection, listener)
-        connections_of_class.append((connection, listener))
+            listener = ConnectionListener(connection)
+            listener.start()
+            self._udp_receive_connections_by_port[connection.local_port][
+                    local_host] = (connection, listener)
+            connections_of_class.append((connection, listener))
         listener.add_callback(callback)
         return connection
 
