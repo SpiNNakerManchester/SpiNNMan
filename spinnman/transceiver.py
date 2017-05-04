@@ -2840,7 +2840,6 @@ class Transceiver(object):
                 listener.start()
                 receiving_connections[local_host] = (connection, listener)
 
-
             listener.add_callback(callback)
             connections_of_class.append((connection, listener))
             return connection
