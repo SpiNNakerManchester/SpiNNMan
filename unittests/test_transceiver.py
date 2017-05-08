@@ -115,5 +115,6 @@ class TestTransceiver(unittest.TestCase):
         self.assertEqual(connection_3, orig_connection)
         self.assertNotEqual(connection_4, orig_connection)
 
+
 if __name__ == '__main__':
     unittest.main()
