@@ -2786,6 +2786,7 @@ class Transceiver(object):
         connections_of_class = self._udp_listenable_connections_by_class[
             connection_class]
         connection = None
+        listener = None
 
         # If the local port was specified
         if local_port is not None:
@@ -2833,11 +2834,14 @@ class Transceiver(object):
                 connection = connection_class(local_port=local_port,
                                               local_host=local_host)
                 self._all_connections.add(connection)
+
+            if listener is None:
                 listener = ConnectionListener(connection)
                 listener.start()
                 receiving_connections[local_host] = (connection, listener)
-                connections_of_class.append((connection, listener))
+
             listener.add_callback(callback)
+            connections_of_class.append((connection, listener))
             return connection
 
         # If we are here, the local port wasn't specified to try to use an
@@ -2859,14 +2863,15 @@ class Transceiver(object):
         if connection is None:
             connection = connection_class(local_host=local_host)
             self._all_connections.add(connection)
-            # indented from
+
+        if listener is None:
             listener = ConnectionListener(connection)
             listener.start()
             self._udp_receive_connections_by_port[connection.local_port][
                 local_host] = (connection, listener)
-            connections_of_class.append((connection, listener))
-            listener.add_callback(callback)
-            # to here
+
+        listener.add_callback(callback)
+        connections_of_class.append((connection, listener))
         return connection
 
     def enable_reinjection(self, multicast=True, point_to_point=False,

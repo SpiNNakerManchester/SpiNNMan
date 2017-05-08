@@ -1,6 +1,9 @@
 import unittest
-from spinnman.connections.udp_packet_connections.udp_boot_connection import \
-    UDPBootConnection
+from spinnman.transceiver import Transceiver
+from spinnman.connections.udp_packet_connections.udp_boot_connection \
+    import UDPBootConnection
+from spinnman.connections.udp_packet_connections.udp_eieio_connection \
+    import UDPEIEIOConnection
 from spinnman.connections.udp_packet_connections.udp_scamp_connection \
     import UDPSCAMPConnection
 import spinnman.transceiver as transceiver
@@ -81,6 +84,36 @@ class TestTransceiver(unittest.TestCase):
         # self.assertFalse(trans.is_connected())
         trans.boot_board()
         trans.close()
+
+    def test_listener_creation(self):
+        # Tests the creation of listening sockets
+
+        # Create board connections
+        connections = []
+        connections.append(UDPSCAMPConnection(
+            remote_host=None))
+        orig_connection = UDPEIEIOConnection()
+        connections.append(orig_connection)
+
+        # Create transceiver
+        trnx = Transceiver(version=5, connections=connections)
+
+        # Register a UDP listeners
+        connection_1 = trnx.register_udp_listener(
+            callback=None, connection_class=UDPEIEIOConnection)
+        connection_2 = trnx.register_udp_listener(
+            callback=None, connection_class=UDPEIEIOConnection)
+        connection_3 = trnx.register_udp_listener(
+            callback=None, connection_class=UDPEIEIOConnection,
+            local_port=orig_connection.local_port)
+        connection_4 = trnx.register_udp_listener(
+            callback=None, connection_class=UDPEIEIOConnection,
+            local_port=orig_connection.local_port + 1)
+
+        self.assertEqual(connection_1, orig_connection)
+        self.assertEqual(connection_2, orig_connection)
+        self.assertEqual(connection_3, orig_connection)
+        self.assertNotEqual(connection_4, orig_connection)
 
 
 if __name__ == '__main__':
