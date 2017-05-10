@@ -5,9 +5,13 @@ except ImportError:
 from collections import defaultdict
 import os
 
+__version__ = None
+exec(open("spinnman/_version.py").read())
+assert __version__
+
 # Build a list of all project modules, as well as supplementary files
 main_package = "spinnman"
-data_extensions = {".aplx", ".xml"}
+data_extensions = {".aplx", ".xml", ".boot"}
 main_package_dir = os.path.join(os.path.dirname(__file__), main_package)
 start = len(main_package_dir)
 packages = []
@@ -28,16 +32,16 @@ for dirname, dirnames, filenames in os.walk(main_package_dir):
 
 setup(
     name="SpiNNMan",
-    version="3.0.0",
+    version=__version__,
     description="Interaction with a SpiNNaker Machine",
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
     license="GNU GPLv3.0",
     packages=packages,
     package_data=package_data,
     install_requires=[
-        'SpiNNUtilities >= 3.0.0, < 4.0.0',
-        'SpiNNMachine >= 3.0.0, < 4.0.0',
-        'SpiNNStorageHandlers >= 3.0.0, < 4.0.0',
+        'SpiNNUtilities >= 1!4.0.0a5, < 1!5.0.0',
+        'SpiNNMachine >= 1!4.0.0a5, < 1!5.0.0',
+        'SpiNNStorageHandlers >= 1!4.0.0a5, < 1!5.0.0',
         'enum34',
         'six']
 )
