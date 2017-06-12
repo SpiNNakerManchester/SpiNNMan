@@ -2279,7 +2279,8 @@ class Transceiver(object):
 
             # Convert the host string
             host_string = ip_tag.ip_address
-            if host_string == "localhost" or host_string == ".":
+            if (host_string == "localhost" or host_string == "." or
+                    host_string == "0.0.0.0"):
                 host_string = connection.local_ip_address
             ip_string = socket.gethostbyname(host_string)
             ip_address = bytearray(socket.inet_aton(ip_string))
