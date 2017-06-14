@@ -12,7 +12,7 @@ class SDPHeader(object):
     """
 
     def __init__(self, flags=None, tag=None,
-                 destination_port=None, destination_cpu=None,
+                 port=None, destination_cpu=None,
                  destination_chip_x=None, destination_chip_y=None,
                  source_port=None, source_cpu=None,
                  source_chip_x=None, source_chip_y=None):
@@ -22,9 +22,9 @@ class SDPHeader(object):
         :param tag: The ip tag of the packet between 0 and 255, or None if it\
                     is to be set later
         :type tag: int
-        :param destination_port: The destination port of the packet between 0\
+        :param port: The destination port of the packet between 0\
                     and 7
-        :type destination_port: int
+        :type port: int
         :param destination_cpu: The destination processor id within the chip\
                     between 0 and 31
         :type destination_cpu: int
@@ -48,7 +48,7 @@ class SDPHeader(object):
         """
         self._flags = flags
         self._tag = tag
-        self._destination_port = destination_port
+        self._destination_port = port
         self._destination_cpu = destination_cpu
         self._destination_chip_x = destination_chip_x
         self._destination_chip_y = destination_chip_y
