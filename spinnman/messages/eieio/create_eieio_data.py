@@ -1,21 +1,13 @@
 
-from spinnman.messages.eieio.data_messages.eieio_16bit\
-    import EIEIO16DataMessage
-from spinnman.messages.eieio.data_messages.eieio_16bit\
-    import EIEIO16PayloadMessage
-from spinnman.messages.eieio.data_messages.eieio_32bit\
-    import EIEIO32DataMessage
-from spinnman.messages.eieio.data_messages.eieio_32bit\
-    import EIEIO32PayloadMessage
-from spinnman.messages.eieio.data_messages.eieio_data_message\
-    import EIEIODataMessage
-from spinnman.messages.eieio.data_messages.eieio_data_header\
-    import EIEIODataHeader
+from spinnman.messages.eieio.data_messages \
+    import EIEIODataMessage, EIEIODataHeader
+from spinnman.messages.eieio.data_messages \
+    import EIEIOWithoutPayloadDataMessage, EIEIOWithPayloadDataMessage
+from spinnman.messages.eieio.data_messages.specialized_message_types\
+    import EIEIO16DataMessage, EIEIO16PayloadMessage
+from spinnman.messages.eieio.data_messages.specialized_message_types\
+    import EIEIO32DataMessage, EIEIO32PayloadMessage
 from spinnman.messages.eieio.eieio_type import EIEIOType
-from spinnman.messages.eieio.data_messages.eieio_without_payload_data_message\
-    import EIEIOWithoutPayloadDataMessage
-from spinnman.messages.eieio.data_messages.eieio_with_payload_data_message\
-    import EIEIOWithPayloadDataMessage
 
 
 def _construct_message(factory, factory2, prefix, payload_base,
