@@ -1,6 +1,5 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_bmp_reponse import \
-    AbstractSCPBMPResponse
-from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.messages.scp.abstract_messages import AbstractSCPBMPResponse
+from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.model.adc_info import ADCInfo
 

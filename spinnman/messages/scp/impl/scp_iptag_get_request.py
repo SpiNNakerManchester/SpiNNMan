@@ -1,11 +1,8 @@
-from spinnman.messages.scp.abstract_messages.abstract_scp_request\
-    import AbstractSCPRequest
-from spinnman.messages.sdp.sdp_header import SDPHeader
-from spinnman.messages.sdp.sdp_flag import SDPFlag
-from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-from spinnman.messages.scp.enums.scp_command import SCPCommand
-from spinnman.messages.scp.impl.scp_iptag_get_response \
-    import SCPIPTagGetResponse
+from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.sdp import SDPFlag, SDPHeader
+from .scp_iptag_get_response import SCPIPTagGetResponse
 
 _IPTAG_GET = 2
 

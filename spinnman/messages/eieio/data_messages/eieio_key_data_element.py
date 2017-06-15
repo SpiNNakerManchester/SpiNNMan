@@ -1,7 +1,6 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.eieio.eieio_type import EIEIOType
-from spinnman.messages.eieio.data_messages.abstract_eieio_data_element \
-    import AbstractEIEIODataElement
+from spinnman.messages.eieio import EIEIOType
+from spinnman.messages.eieio.data_messages import AbstractEIEIODataElement
 
 import struct
 

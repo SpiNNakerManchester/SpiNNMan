@@ -3,11 +3,10 @@ SCPBMPVersionRequest
 """
 
 # spinnman imports
-from spinnman.messages.scp.abstract_messages.abstract_scp_bmp_request import \
-    AbstractSCPBMPRequest
-from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-from spinnman.messages.scp.enums.scp_command import SCPCommand
-from spinnman.messages.scp.impl.scp_version_response import SCPVersionResponse
+from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
+from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.enums import SCPCommand
+from .scp_version_response import SCPVersionResponse
 
 
 class SCPBMPVersionRequest(AbstractSCPBMPRequest):

@@ -1,4 +1,4 @@
-from spinnman.messages.sdp.sdp_header import SDPHeader
+from .sdp_header import SDPHeader
 
 
 class SDPMessage(object):

@@ -1,8 +1,7 @@
 import struct
 
-from spinnman.messages.scp.abstract_messages.abstract_scp_response \
-    import AbstractSCPResponse
-from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
+from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 

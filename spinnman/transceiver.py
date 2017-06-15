@@ -7,8 +7,7 @@ from spinnman import exceptions
 from spinnman.model.cpu_infos import CPUInfos
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
-    AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
     SCPBMPSetLedRequest
 from spinnman.messages.scp.impl.scp_bmp_version_request import \
@@ -49,11 +48,11 @@ from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinnman.messages.spinnaker_boot._system_variables\
     ._system_variable_boot_values import SystemVariableDefinition
 from spinnman.utilities.appid_tracker import AppIdTracker
-from spinnman.messages.scp.enums.scp_signal import SCPSignal
+from spinnman.messages.scp.enums import SCPSignal
+from spinnman.messages.scp.enums import SCPPowerCommand
+from spinnman.messages.scp.enums import SCPDPRIPacketTypeFlags
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
-from spinnman.messages.scp.enums.scp_dpri_packet_type_flags \
-    import SCPDPRIPacketTypeFlags
 from spinnman.processes.set_dpri_router_timeout_process \
     import SetDPRIRouterTimeoutProcess
 from spinnman.processes.set_dpri_router_emergency_timeout_process \
@@ -76,7 +75,6 @@ from spinnman.processes.read_router_diagnostics_process \
 from spinnman.processes.\
     multi_connection_process_most_direct_connection_selector import \
     MultiConnectionProcessMostDirectConnectionSelector
-from spinnman.messages.scp.enums.scp_power_command import SCPPowerCommand
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
 from spinnman.connections.udp_packet_connections.udp_scamp_connection \

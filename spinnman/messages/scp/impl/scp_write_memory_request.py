@@ -1,12 +1,9 @@
-from spinnman import constants
-
-from spinnman.messages.scp.abstract_messages.abstract_scp_request\
-    import AbstractSCPRequest
-from spinnman.messages.sdp.sdp_header import SDPHeader
-from spinnman.messages.sdp.sdp_flag import SDPFlag
-from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-from spinnman.messages.scp.enums.scp_command import SCPCommand
-from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
+from spinnman.constants import address_length_dtype
+from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.sdp import SDPFlag, SDPHeader
+from .scp_check_ok_response import SCPCheckOKResponse
 
 
 class SCPWriteMemoryRequest(AbstractSCPRequest):
@@ -37,7 +34,7 @@ class SCPWriteMemoryRequest(AbstractSCPRequest):
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_WRITE),
             argument_1=base_address, argument_2=size,
-            argument_3=constants.address_length_dtype[
+            argument_3=address_length_dtype[
                 (base_address % 4), (size % 4)].value,
             data=None)
         self._data_to_write = data

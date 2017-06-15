@@ -1,5 +1,5 @@
 import struct
-from spinnman.messages.sdp.sdp_flag import SDPFlag
+from .sdp_flag import SDPFlag
 
 N_BYTES = 8
 

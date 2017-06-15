@@ -1,15 +1,9 @@
 from spinnman.exceptions import SpinnmanInvalidPacketException
-from spinnman.messages.eieio.data_messages.eieio_key_payload_data_element\
-    import EIEIOKeyPayloadDataElement
-from spinnman.messages.eieio.data_messages.eieio_key_data_element\
-    import EIEIOKeyDataElement
-from spinnman.messages.eieio.data_messages.eieio_data_header\
-    import EIEIODataHeader
-from spinnman.messages.eieio.abstract_messages.abstract_eieio_message\
-    import AbstractEIEIOMessage
-from spinnman.messages.eieio.eieio_type import EIEIOType
-from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
-from spinnman import constants
+from spinnman.messages.eieio.data_messages \
+    import EIEIOKeyPayloadDataElement, EIEIOKeyDataElement, EIEIODataHeader
+from spinnman.messages.eieio.abstract_messages import AbstractEIEIOMessage
+from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
+from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 import math
 import struct
@@ -32,7 +26,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
 
         # The header
-        self._eieio_header = eieio_header
+        self._header = eieio_header
 
         # Elements to be written
         self._elements = b""
@@ -44,7 +38,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def eieio_header(self):
-        return self._eieio_header
+        return self._header
 
     @staticmethod
     def min_packet_length(eieio_type, is_prefix=False, is_payload_base=False):
@@ -61,8 +55,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :return: The minimum size of the packet in bytes
         :rtype: int
         """
-        header_size = EIEIODataHeader.get_header_size(eieio_type, is_prefix,
-                                                      is_payload_base)
+        header_size = EIEIODataHeader.get_header_size(
+            eieio_type, is_prefix, is_payload_base)
         return header_size + eieio_type.payload_bytes
 
     @property
@@ -71,25 +65,24 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
         :rtype: int
         """
-        return int(math.floor((constants.UDP_MESSAGE_MAX_SIZE -
-                               self._eieio_header.size) /
-                              (self._eieio_header.eieio_type.key_bytes +
-                               self._eieio_header.eieio_type.payload_bytes)))
+        return int(math.floor((UDP_MESSAGE_MAX_SIZE - self._header.size) /
+                              (self._header.eieio_type.key_bytes +
+                               self._header.eieio_type.payload_bytes)))
 
     @property
     def n_elements(self):
         """ The number of elements in the packet
         """
-        return self._eieio_header.count
+        return self._header.count
 
     @property
     def size(self):
         """ The size of the packet with the current contents
         """
-        return (self._eieio_header.size +
-                ((self._eieio_header.eieio_type.key_bytes +
-                 self._eieio_header.eieio_type.payload_bytes) *
-                 self._eieio_header.count))
+        return (self._header.size +
+                ((self._header.eieio_type.key_bytes +
+                 self._header.eieio_type.payload_bytes) *
+                 self._header.count))
 
     def add_element(self, element):
         """ Add an element to the message.  The correct type of element must\
@@ -107,8 +100,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             raise SpinnmanInvalidPacketException(
                 "EIEIODataMessage", "This packet is read-only")
 
-        self._elements += element.get_bytestring(self._eieio_header.eieio_type)
-        self._eieio_header.increment_count()
+        self._elements += element.get_bytestring(self._header.eieio_type)
+        self._header.increment_count()
 
     @property
     def is_next_element(self):
@@ -119,7 +112,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :rtype: bool
         """
         return (self._data is not None and
-                self._elements_read < self._eieio_header.count)
+                self._elements_read < self._header.count)
 
     @property
     def next_element(self):
@@ -134,47 +127,45 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         self._elements_read += 1
         key = None
         payload = None
-        if self._eieio_header.eieio_type == EIEIOType.KEY_16_BIT:
+        if self._header.eieio_type == EIEIOType.KEY_16_BIT:
             key = struct.unpack_from("<H", self._data, self._offset)[0]
             self._offset += 2
-        if self._eieio_header.eieio_type == EIEIOType.KEY_32_BIT:
+        if self._header.eieio_type == EIEIOType.KEY_32_BIT:
             key = struct.unpack_from("<I", self._data, self._offset)[0]
             self._offset += 4
-        if self._eieio_header.eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
+        if self._header.eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
             key, payload = struct.unpack_from("<HH", self._data, self._offset)
             self._offset += 4
-        if self._eieio_header.eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:
+        if self._header.eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:
             key, payload = struct.unpack_from("<II", self._data, self._offset)
             self._offset += 8
 
-        if self._eieio_header.prefix is not None:
-            if self._eieio_header.prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
-                key = key | (self._eieio_header.prefix << 16)
+        if self._header.prefix is not None:
+            if self._header.prefix_type == EIEIOPrefix.UPPER_HALF_WORD:
+                key |= self._header.prefix << 16
             else:
-                key = key | self._eieio_header.prefix
+                key = key | self._header.prefix
 
-        if self._eieio_header.payload_base is not None:
+        if self._header.payload_base is not None:
             if payload is not None:
-                payload = payload | self._eieio_header.payload_base
+                payload |= self._header.payload_base
             else:
-                payload = self._eieio_header.payload_base
+                payload = self._header.payload_base
 
         if payload is None:
             return EIEIOKeyDataElement(key)
-        else:
-            return EIEIOKeyPayloadDataElement(key, payload,
-                                              self._eieio_header.is_time)
+        return EIEIOKeyPayloadDataElement(key, payload, self._header.is_time)
 
     @property
     def bytestring(self):
-        return self._eieio_header.bytestring + self._elements
+        return self._header.bytestring + self._elements
 
     def __str__(self):
         if self._data is not None:
             return "EIEIODataMessage:{}:{}".format(
-                self._eieio_header, self._eieio_header.count)
+                self._header, self._header.count)
         return "EIEIODataMessage:{}:{}".format(
-            self._eieio_header, self._elements)
+            self._header, self._elements)
 
     def __repr__(self):
         return self.__str__()

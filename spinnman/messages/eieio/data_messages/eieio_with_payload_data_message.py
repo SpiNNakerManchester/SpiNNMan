@@ -1,8 +1,6 @@
-from spinnman.messages.eieio.data_messages.eieio_data_message\
-    import EIEIODataMessage
+from spinnman.messages.eieio.data_messages \
+    import EIEIODataMessage, EIEIOKeyPayloadDataElement
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.eieio.data_messages.eieio_key_payload_data_element \
-    import EIEIOKeyPayloadDataElement
 
 
 class EIEIOWithPayloadDataMessage(EIEIODataMessage):
@@ -28,16 +26,17 @@ class EIEIOWithPayloadDataMessage(EIEIODataMessage):
         :raise SpinnmanInvalidParameterException: If the key or payload is too\
                     big for the format
         """
-        if key > self._eieio_header.eieio_type.max_value:
+        if key > self._header.eieio_type.max_value:
             raise SpinnmanInvalidParameterException(
                 "key", key,
                 "Larger than the maximum allowed of {}".format(
-                    self._eieio_header.eieio_type.max_value))
-        if payload > self._eieio_header.eieio_type.max_value:
+                    self._header.eieio_type.max_value))
+        if payload > self._header.eieio_type.max_value:
             raise SpinnmanInvalidParameterException(
                 "payload", payload,
                 "Larger than the maximum allowed of {}".format(
-                    self._eieio_header.eieio_type.max_value))
+                    self._header.eieio_type.max_value))
+
         EIEIODataMessage.add_element(
-            self, EIEIOKeyPayloadDataElement(key, payload,
-                                             self._eieio_header.is_time))
+            self, EIEIOKeyPayloadDataElement(
+                key, payload, self._header.is_time))

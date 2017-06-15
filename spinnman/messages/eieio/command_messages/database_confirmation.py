@@ -1,8 +1,6 @@
-from spinnman.messages.eieio.command_messages.eieio_command_message\
-    import EIEIOCommandMessage
-from spinnman.messages.eieio.command_messages.eieio_command_header\
-    import EIEIOCommandHeader
-from spinnman import constants
+from .eieio_command_message import EIEIOCommandMessage
+from .eieio_command_header import EIEIOCommandHeader
+from spinnman.constants import EIEIO_COMMAND_IDS
 
 
 class DatabaseConfirmation(EIEIOCommandMessage):
@@ -13,7 +11,7 @@ class DatabaseConfirmation(EIEIOCommandMessage):
     def __init__(self, database_path=None):
         EIEIOCommandMessage.__init__(
             self, EIEIOCommandHeader(
-                constants.EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value))
+                EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value))
         self._database_path = database_path
 
     @property

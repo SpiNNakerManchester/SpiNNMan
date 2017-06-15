@@ -3,10 +3,8 @@ AbstractSCPBMPRequest
 """
 
 # spinnman imports
-from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
-    AbstractSCPRequest
-from spinnman.messages.sdp.sdp_header import SDPHeader
-from spinnman.messages.sdp.sdp_flag import SDPFlag
+from .abstract_scp_request import AbstractSCPRequest
+from spinnman.messages.sdp import SDPFlag, SDPHeader
 
 
 class AbstractSCPBMPRequest(AbstractSCPRequest):

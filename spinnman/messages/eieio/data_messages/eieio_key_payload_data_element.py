@@ -1,7 +1,6 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.eieio.eieio_type import EIEIOType
-from spinnman.messages.eieio.data_messages.abstract_eieio_data_element \
-    import AbstractEIEIODataElement
+from spinnman.messages.eieio import EIEIOType
+from spinnman.messages.eieio.data_messages import AbstractEIEIODataElement
 
 import struct
 
@@ -42,8 +41,8 @@ class EIEIOKeyPayloadDataElement(AbstractEIEIODataElement):
                 "eieio_type", eieio_type, "Unknown type")
 
     def __str__(self):
-        return "EIEIOKeyPayloadDataElement:{}:{}".format(hex(self._key),
-                                                         hex(self._payload))
+        return "EIEIOKeyPayloadDataElement:{}:{}".format(
+            hex(self._key), hex(self._payload))
 
     def __repr__(self):
         return self.__str__()

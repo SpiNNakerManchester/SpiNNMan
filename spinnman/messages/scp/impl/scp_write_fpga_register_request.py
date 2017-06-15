@@ -5,11 +5,10 @@ ScpWriteFPGARegisterRequest
 # spinnman imports
 import struct
 
-from spinnman.messages.scp.abstract_messages.abstract_scp_bmp_request import \
-    AbstractSCPBMPRequest
-from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
-from spinnman.messages.scp.enums.scp_command import SCPCommand
-from spinnman.messages.scp.scp_request_header import SCPRequestHeader
+from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
+from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.enums import SCPCommand
+from .scp_check_ok_response import SCPCheckOKResponse
 
 
 class SCPWriteFPGARegisterRequest(AbstractSCPBMPRequest):

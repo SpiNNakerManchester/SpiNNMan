@@ -1,8 +1,6 @@
-from spinnman.messages.eieio.data_messages.eieio_data_message\
-    import EIEIODataMessage
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.eieio.data_messages.eieio_key_data_element\
-    import EIEIOKeyDataElement
+from spinnman.messages.eieio.data_messages \
+    import EIEIODataMessage, EIEIOKeyDataElement
 
 
 class EIEIOWithoutPayloadDataMessage(EIEIODataMessage):
@@ -26,9 +24,9 @@ class EIEIOWithoutPayloadDataMessage(EIEIODataMessage):
         :raise SpinnmanInvalidParameterException: If the key is too\
                     big for the format
         """
-        if key > self._eieio_header.eieio_type.max_value:
+        if key > self._header.eieio_type.max_value:
             raise SpinnmanInvalidParameterException(
                 "key", key,
                 "Larger than the maximum allowed of {}".format(
-                    self._eieio_header.eieio_type.max_value))
+                    self._header.eieio_type.max_value))
         EIEIODataMessage.add_element(self, EIEIOKeyDataElement(key))
