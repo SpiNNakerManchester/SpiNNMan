@@ -1,7 +1,7 @@
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.model.chip_summary_info import ChipSummaryInfo
+from spinnman.model import ChipSummaryInfo
 
 
 class SCPChipInfoResponse(AbstractSCPResponse):

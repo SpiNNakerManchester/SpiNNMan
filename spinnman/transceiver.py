@@ -4,7 +4,8 @@ from spinnman import model_binaries
 from spinnman import constants
 from spinnman import exceptions
 
-from spinnman.model.cpu_infos import CPUInfos
+from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
+from spinnman.model.enums import CPUState
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
     SCPBMPSetLedRequest
@@ -16,8 +17,6 @@ from spinnman.messages.scp.impl.scp_read_fpga_register_request import \
     SCPReadFPGARegisterRequest
 from spinnman.messages.scp.impl.scp_write_fpga_register_request import \
     SCPWriteFPGARegisterRequest
-from spinnman.model.enums.cpu_state import CPUState
-from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.connections.abstract_classes \
     import AbstractSpinnakerBootReceiver, AbstractSpinnakerBootSender
 from spinnman.connections.udp_packet_connections \
@@ -69,7 +68,6 @@ from spinnman.connections.udp_packet_connections \
     import UDPBootConnection, UDPSCAMPConnection
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
-from spinnman.model.machine_dimensions import MachineDimensions
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
@@ -213,8 +211,8 @@ def create_transceiver_from_hostname(
         connections.append(UDPSCAMPConnection(remote_host=hostname))
 
     # handle the boot connection
-    connections.append(UDPBootConnection(remote_host=hostname,
-                                         remote_port=boot_port_no))
+    connections.append(UDPBootConnection(
+        remote_host=hostname, remote_port=boot_port_no))
 
     return Transceiver(
         version, connections=connections, ignore_chips=ignore_chips,
@@ -1083,7 +1081,7 @@ class Transceiver(object):
                     raise exceptions.SpinnmanIOException(
                         "Failed to communicate with the machine")
                 else:
-                    raise e
+                    raise
             except exceptions.SpinnmanTimeoutException:
                 logger.info("Attempting to boot machine")
                 self.boot_board(number_of_boards, width, height)

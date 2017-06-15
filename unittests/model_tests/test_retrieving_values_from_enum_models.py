@@ -1,9 +1,7 @@
 import unittest
 
-from spinnman.model.enums.mailbox_command import MailboxCommand
-from spinnman.model.enums.cpu_state import CPUState
-from spinnman.model.enums.run_time_error import RunTimeError
-from spinnman import constants
+from spinnman.model.enums import MailboxCommand, CPUState, RunTimeError
+from spinnman.constants import ROUTER_REGISTER_REGISTERS
 
 
 class TestingEnums(unittest.TestCase):
@@ -51,22 +49,22 @@ class TestingEnums(unittest.TestCase):
         self.assertEqual(RunTimeError.IOBUF.value, 14)
 
     def test_router_diagnostics_enum(self):
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.LOC_MC.value, 0)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.EXT_MC.value, 1)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.LOC_PP.value, 2)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.EXT_PP.value, 3)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.LOC_NN.value, 4)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.LOC_MC.value, 0)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.EXT_MC.value, 1)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.LOC_PP.value, 2)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.EXT_PP.value, 3)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.LOC_NN.value, 4)
 
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.EXT_NN.value, 5)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.LOC_FR.value, 6)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.EXT_FR.value, 7)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.DUMP_MC.value, 8)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.DUMP_PP.value, 9)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.EXT_NN.value, 5)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.LOC_FR.value, 6)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.EXT_FR.value, 7)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.DUMP_MC.value, 8)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.DUMP_PP.value, 9)
 
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.DUMP_NN.value, 10)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.DUMP_FR.value, 11)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.USER_0.value, 12)
-        self.assertEqual(constants.ROUTER_REGISTER_REGISTERS.USER_3.value, 15)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.DUMP_NN.value, 10)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.DUMP_FR.value, 11)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.USER_0.value, 12)
+        self.assertEqual(ROUTER_REGISTER_REGISTERS.USER_3.value, 15)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import unittest
-from spinnman.model.version_info import VersionInfo
 import struct
+from spinnman.model import VersionInfo
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 

@@ -1,5 +1,5 @@
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
-from spinnman.model.dpri_status import DPRIStatus
+from spinnman.model import DPRIStatus
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
 

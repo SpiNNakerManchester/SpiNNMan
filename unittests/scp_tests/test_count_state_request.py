@@ -2,7 +2,7 @@ import unittest
 
 from spinnman.messages.scp.impl.scp_count_state_request \
     import SCPCountStateRequest
-from spinnman.model.enums.cpu_state import CPUState
+from spinnman.model.enums import CPUState
 
 
 class TestCPUStateRequest(unittest.TestCase):

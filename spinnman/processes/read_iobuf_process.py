@@ -3,8 +3,8 @@ import struct
 from collections import defaultdict
 from collections import OrderedDict
 
-from spinnman.model.io_buffer import IOBuffer
-from spinnman.utilities import utility_functions
+from spinnman.model import IOBuffer
+from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
@@ -101,8 +101,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
             y = core_subset.y
             for p in core_subset.processor_ids:
                 base_address = (
-                    utility_functions.get_vcpu_address(p) +
-                    constants.CPU_IOBUF_ADDRESS_OFFSET)
+                    get_vcpu_address(p) + constants.CPU_IOBUF_ADDRESS_OFFSET)
                 self._send_request(
                     SCPReadMemoryRequest(x, y, base_address, 4),
                     functools.partial(

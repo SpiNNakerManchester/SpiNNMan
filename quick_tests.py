@@ -5,22 +5,20 @@ import time
 import sys
 
 from spinnman.transceiver import create_transceiver_from_hostname
-from spinnman.model.enums.cpu_state import CPUState
+from spinnman.model.enums import CPUState
+from spinnman.messages.scp.enums.scp_signal import SCPSignal
+from spinnman.model import DiagnosticFilter
+from spinnman.messages.scp.impl.scp_read_memory_request \
+    import SCPReadMemoryRequest
+from spinnman.model.enums \
+    import DiagnosticFilterDestination, DiagnosticFilterPacketType
+from spinnman.constants import ROUTER_REGISTER_REGISTERS
 from spinn_machine.core_subsets import CoreSubsets
 from spinn_machine.core_subset import CoreSubset
-from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinn_machine.tags.iptag import IPTag
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinn_machine.tags.reverse_iptag import ReverseIPTag
-from spinnman.model.diagnostic_filter import DiagnosticFilter
-from spinnman.messages.scp.impl.scp_read_memory_request \
-    import SCPReadMemoryRequest
-from spinnman.model.enums.diagnostic_filter_destination \
-    import DiagnosticFilterDestination
-from spinnman.model.enums.diagnostic_filter_packet_type \
-    import DiagnosticFilterPacketType
 from board_test_configuration import BoardTestConfiguration
-from spinnman import constants
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
@@ -279,10 +277,10 @@ try:
     print "Clear Router Diagnostics"
     print "========================"
     transceiver.clear_router_diagnostic_counters(
-        0, 0, counter_ids=[constants.ROUTER_REGISTER_REGISTERS.LOC_PP.value,
-                           constants.ROUTER_REGISTER_REGISTERS.EXT_PP.value])
+        0, 0, counter_ids=[ROUTER_REGISTER_REGISTERS.LOC_PP.value,
+                           ROUTER_REGISTER_REGISTERS.EXT_PP.value])
     diagnostics = transceiver.get_router_diagnostics(0, 0)
-    for register in constants.ROUTER_REGISTER_REGISTERS:
+    for register in ROUTER_REGISTER_REGISTERS:
         print "{}: {}".format(
             register.name, diagnostics.registers[register.value])
 
@@ -298,7 +296,7 @@ try:
     print "Get Router Diagnostics"
     print "======================"
     diagnostics = transceiver.get_router_diagnostics(0, 0)
-    for register in constants.ROUTER_REGISTER_REGISTERS:
+    for register in ROUTER_REGISTER_REGISTERS:
         print "{}: {}".format(
             register.name, diagnostics.registers[register.value])
     print ""

@@ -1,5 +1,5 @@
 import unittest
-from spinnman.model.machine_dimensions import MachineDimensions
+from spinnman.model import MachineDimensions
 
 
 class TestMachineDimensionsModel(unittest.TestCase):

@@ -1,8 +1,8 @@
 import struct
 
-from spinnman.utilities import utility_functions
-from spinnman.messages.scp.enums.scp_dpri_packet_type_flags \
-    import SCPDPRIPacketTypeFlags
+from spinnman.utilities.utility_functions \
+    import get_router_timeout_value_from_byte
+from spinnman.messages.scp.enums import SCPDPRIPacketTypeFlags
 
 
 class DPRIStatus(object):
@@ -26,14 +26,13 @@ class DPRIStatus(object):
     def router_timeout(self):
         """ The WAIT1 timeout value of the router in cycles
         """
-        return utility_functions.get_router_timeout_value_from_byte(
-            self._router_timeout)
+        return get_router_timeout_value_from_byte(self._router_timeout)
 
     @property
     def router_emergency_timeout(self):
         """ The WAIT2 timeout value of the router in cycles
         """
-        return utility_functions.get_router_timeout_value_from_byte(
+        return get_router_timeout_value_from_byte(
             self._router_emergency_timeout)
 
     @property

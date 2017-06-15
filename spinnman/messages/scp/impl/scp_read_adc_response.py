@@ -1,7 +1,7 @@
 from spinnman.messages.scp.abstract_messages import AbstractSCPBMPResponse
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.model.adc_info import ADCInfo
+from spinnman.model import ADCInfo
 
 
 class SCPReadADCResponse(AbstractSCPBMPResponse):

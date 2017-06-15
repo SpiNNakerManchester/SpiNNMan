@@ -1,8 +1,7 @@
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
-from spinnman.model.router_diagnostics import RouterDiagnostics
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from spinnman.model import RouterDiagnostics
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 import struct
 

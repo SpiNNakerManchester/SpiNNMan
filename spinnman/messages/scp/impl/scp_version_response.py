@@ -1,7 +1,7 @@
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.model.version_info import VersionInfo
+from spinnman.model import VersionInfo
 
 
 class SCPVersionResponse(AbstractSCPResponse):

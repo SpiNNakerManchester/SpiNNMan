@@ -1,5 +1,5 @@
 import unittest
-from spinnman.model.io_buffer import IOBuffer
+from spinnman.model import IOBuffer
 
 
 class TestingIOBuf(unittest.TestCase):

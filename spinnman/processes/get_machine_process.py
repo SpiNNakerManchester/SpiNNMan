@@ -5,9 +5,9 @@ import logging
 from spinnman.messages.scp.impl.scp_read_memory_request\
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
-from spinnman.model.p2p_table import P2PTable
 from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
-from spinnman.model.enums.cpu_state import CPUState
+from spinnman.model import P2PTable
+from spinnman.model.enums import CPUState
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman.processes.abstract_process import AbstractProcess
@@ -46,7 +46,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param chip_info: The ChipSummaryInfo structure to create the chip\
                     from
         :type chip_info: \
-                    :py:class:`spinnman.model.chip_info.ChipSummaryInfo`
+                    :py:class:`spinnman.model.ChipSummaryInfo`
         :return: The created chip
         :rtype: :py:class:`spinn_machine.chip.Chip`
         """
