@@ -82,8 +82,7 @@ from spinnman.connections.udp_packet_connections.udp_scamp_connection \
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
 from spinnman.model.machine_dimensions import MachineDimensions
-from spinnman.messages.spinnaker_boot.spinnaker_boot_messages \
-    import SpinnakerBootMessages
+from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
 from spinnman.messages.scp.impl.scp_read_memory_request \
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_count_state_request \

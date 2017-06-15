@@ -3,17 +3,14 @@ SpinnakerBootMessages
 """
 
 # spinnman imports
-from spinnman.messages.spinnaker_boot._system_variables import \
+from ._system_variables import \
     _system_variable_boot_values as variable_boot_values
-from spinnman.messages.spinnaker_boot._system_variables.\
-    _system_variable_boot_values import \
-    SystemVariableDefinition
-from spinnman.messages.spinnaker_boot._system_variables\
-    ._system_variable_boot_values import SystemVariableBootValues
-from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
-    import SpinnakerBootMessage
-from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
-    import SpinnakerBootOpCode
+from ._system_variables._system_variable_boot_values \
+    import SystemVariableDefinition
+from ._system_variables._system_variable_boot_values \
+    import SystemVariableBootValues
+from .spinnaker_boot_message import SpinnakerBootMessage
+from .spinnaker_boot_op_code import SpinnakerBootOpCode
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException

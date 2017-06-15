@@ -4,8 +4,7 @@ from spinnman.connections.abstract_classes.abstract_spinnaker_boot_receiver \
     import AbstractSpinnakerBootReceiver
 from spinnman.connections.udp_packet_connections.udp_connection import \
     UDPConnection
-from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
-    import SpinnakerBootMessage
+from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman import constants
 
 
