@@ -1,16 +1,11 @@
-
-# spinnman imports
-from spinnman import constants
 import struct
 
-from spinnman.connections.udp_packet_connections.udp_connection import \
-    UDPConnection
-from spinnman.messages.scp.enums.scp_result import SCPResult
-from spinnman.connections.udp_packet_connections import udp_utils
-from spinnman.connections.abstract_classes.abstract_scp_receiver \
-    import AbstractSCPReceiver
-from spinnman.connections.abstract_classes.abstract_scp_sender \
-    import AbstractSCPSender
+from .udp_connection import UDPConnection
+from .udp_utils import update_sdp_header_for_udp_send
+from spinnman.constants import SCP_SCAMP_PORT
+from spinnman.messages.scp.enums import SCPResult
+from spinnman.connections.abstract_classes \
+    import AbstractSCPReceiver, AbstractSCPSender
 
 
 class UDPBMPConnection(
@@ -44,7 +39,7 @@ class UDPBMPConnection(
                 connection
         """
         if remote_port is None:
-            remote_port = constants.SCP_SCAMP_PORT
+            remote_port = SCP_SCAMP_PORT
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
         AbstractSCPReceiver.__init__(self)
@@ -90,7 +85,7 @@ class UDPBMPConnection(
         return 0
 
     def get_scp_data(self, scp_request):
-        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header, 0, 0)
+        update_sdp_header_for_udp_send(scp_request.sdp_header, 0, 0)
         return struct.pack("<2x") + scp_request.bytestring
 
     def receive_scp_response(self, timeout=1.0):

@@ -1,14 +1,8 @@
-from spinnman.connections.udp_packet_connections.udp_connection\
-    import UDPConnection
-from spinnman.connections.abstract_classes.abstract_eieio_receiver\
-    import AbstractEIEIOReceiver
-from spinnman.connections.abstract_classes.abstract_eieio_sender\
-    import AbstractEIEIOSender
-from spinnman.connections.abstract_classes.abstract_listenable\
-    import AbstractListenable
-from spinnman.messages.eieio.create_eieio_command \
-    import read_eieio_command_message
-from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
+from .udp_connection import UDPConnection
+from spinnman.connections.abstract_classes \
+    import AbstractEIEIOReceiver, AbstractEIEIOSender, AbstractListenable
+from spinnman.messages.eieio \
+    import read_eieio_command_message, read_eieio_data_message
 
 import struct
 

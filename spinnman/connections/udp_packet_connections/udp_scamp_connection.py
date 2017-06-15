@@ -1,14 +1,11 @@
 from spinnman import constants
 import struct
 
-from spinnman.messages.scp.enums.scp_result import SCPResult
-from spinnman.connections.udp_packet_connections import udp_utils
-from spinnman.connections.udp_packet_connections.udp_sdp_connection \
-    import UDPSDPConnection
-from spinnman.connections.abstract_classes.abstract_scp_sender \
-    import AbstractSCPSender
-from spinnman.connections.abstract_classes.abstract_scp_receiver \
-    import AbstractSCPReceiver
+from spinnman.messages.scp.enums import SCPResult
+from .udp_utils import update_sdp_header_for_udp_send
+from .udp_sdp_connection import UDPSDPConnection
+from spinnman.connections.abstract_classes \
+    import AbstractSCPSender, AbstractSCPReceiver
 
 
 class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
@@ -62,8 +59,8 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
         self._chip_y = y
 
     def get_scp_data(self, scp_request):
-        udp_utils.update_sdp_header_for_udp_send(scp_request.sdp_header,
-                                                 self._chip_x, self._chip_y)
+        update_sdp_header_for_udp_send(scp_request.sdp_header,
+                                       self._chip_x, self._chip_y)
         return struct.pack("<2x") + scp_request.bytestring
 
     def receive_scp_response(self, timeout=1.0):

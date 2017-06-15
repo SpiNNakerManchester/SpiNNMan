@@ -5,8 +5,6 @@ from spinnman import constants
 from spinnman import exceptions
 
 from spinnman.model.cpu_infos import CPUInfos
-from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
-    UDPBMPConnection
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
     SCPBMPSetLedRequest
@@ -20,20 +18,14 @@ from spinnman.messages.scp.impl.scp_write_fpga_register_request import \
     SCPWriteFPGARegisterRequest
 from spinnman.model.enums.cpu_state import CPUState
 from spinnman.model.diagnostic_filter import DiagnosticFilter
-from spinnman.connections.abstract_classes.abstract_spinnaker_boot_receiver\
-    import AbstractSpinnakerBootReceiver
-from spinnman.connections.abstract_classes.abstract_spinnaker_boot_sender\
-    import AbstractSpinnakerBootSender
-from spinnman.connections.udp_packet_connections.udp_connection\
-    import UDPConnection
-from spinnman.connections.abstract_classes.abstract_scp_sender\
-    import AbstractSCPSender
-from spinnman.connections.abstract_classes.abstract_sdp_sender\
-    import AbstractSDPSender
-from spinnman.connections.abstract_classes.abstract_multicast_sender\
-    import AbstractMulticastSender
-from spinnman.connections.abstract_classes.abstract_scp_receiver\
-    import AbstractSCPReceiver
+from spinnman.connections.abstract_classes \
+    import AbstractSpinnakerBootReceiver, AbstractSpinnakerBootSender
+from spinnman.connections.udp_packet_connections \
+    import UDPBMPConnection, UDPConnection
+from spinnman.connections.abstract_classes \
+    import AbstractSCPSender, AbstractSDPSender, AbstractMulticastSender
+from spinnman.connections.abstract_classes \
+    import AbstractSCPReceiver, AbstractListenable
 from spinnman.processes.de_alloc_sdram_process import DeAllocSDRAMProcess
 from spinnman.processes.get_machine_process import GetMachineProcess
 from spinnman.processes.get_version_process import GetVersionProcess
@@ -60,8 +52,6 @@ from spinnman.processes.set_dpri_router_emergency_timeout_process \
 from spinnman.processes.reset_dpri_counters_process \
     import ResetDPRICountersProcess
 from spinnman.processes.read_dpri_status_process import ReadDPRIStatusProcess
-from spinnman.connections.abstract_classes.abstract_listenable \
-    import AbstractListenable
 from spinnman.connections.connection_listener import ConnectionListener
 from spinnman.processes.write_memory_flood_process \
     import WriteMemoryFloodProcess
@@ -75,10 +65,8 @@ from spinnman.processes.read_router_diagnostics_process \
 from spinnman.processes.\
     multi_connection_process_most_direct_connection_selector import \
     MultiConnectionProcessMostDirectConnectionSelector
-from spinnman.connections.udp_packet_connections.udp_boot_connection \
-    import UDPBootConnection
-from spinnman.connections.udp_packet_connections.udp_scamp_connection \
-    import UDPSCAMPConnection
+from spinnman.connections.udp_packet_connections \
+    import UDPBootConnection, UDPSCAMPConnection
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
     SCPReverseIPTagSetRequest
 from spinnman.model.machine_dimensions import MachineDimensions

@@ -1,14 +1,8 @@
-from spinnman.connections.udp_packet_connections.udp_connection \
-    import UDPConnection
-from spinnman.messages.sdp.sdp_message import SDPMessage
-from spinnman.messages.sdp.sdp_flag import SDPFlag
-from spinnman.connections.udp_packet_connections import udp_utils
-from spinnman.connections.abstract_classes.abstract_sdp_receiver \
-    import AbstractSDPReceiver
-from spinnman.connections.abstract_classes.abstract_sdp_sender \
-    import AbstractSDPSender
-from spinnman.connections.abstract_classes.abstract_listenable \
-    import AbstractListenable
+from spinnman.messages.sdp import SDPMessage, SDPFlag
+from .udp_connection import UDPConnection
+from .udp_utils import update_sdp_header_for_udp_send
+from spinnman.connections.abstract_classes \
+    import AbstractSDPReceiver, AbstractSDPSender, AbstractListenable
 
 import struct
 
@@ -58,11 +52,10 @@ class UDPSDPConnection(UDPConnection, AbstractSDPReceiver, AbstractSDPSender,
 
         # If a reply is expected, the connection should
         if sdp_message.sdp_header.flags == SDPFlag.REPLY_EXPECTED:
-            udp_utils.update_sdp_header_for_udp_send(
+            update_sdp_header_for_udp_send(
                 sdp_message.sdp_header, self._chip_x, self._chip_y)
         else:
-            udp_utils.update_sdp_header_for_udp_send(
-                sdp_message.sdp_header, 0, 0)
+            update_sdp_header_for_udp_send(sdp_message.sdp_header, 0, 0)
         self.send(struct.pack("<2x") + sdp_message.bytestring)
 
     def get_receive_method(self):

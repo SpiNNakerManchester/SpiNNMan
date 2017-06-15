@@ -1,8 +1,7 @@
 from six import add_metaclass
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinnman.connections.abstract_classes.abstract_connection \
-    import AbstractConnection
+from .abstract_connection import AbstractConnection
 
 
 @add_metaclass(AbstractBase)

@@ -1,11 +1,8 @@
-from spinnman.connections.abstract_classes.abstract_spinnaker_boot_sender \
-    import AbstractSpinnakerBootSender
-from spinnman.connections.abstract_classes.abstract_spinnaker_boot_receiver \
-    import AbstractSpinnakerBootReceiver
-from spinnman.connections.udp_packet_connections.udp_connection import \
-    UDPConnection
+from spinnman.connections.abstract_classes \
+    import AbstractSpinnakerBootSender, AbstractSpinnakerBootReceiver
+from .udp_connection import UDPConnection
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
-from spinnman import constants
+from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 
 
 class UDPBootConnection(UDPConnection,
@@ -37,7 +34,7 @@ class UDPBootConnection(UDPConnection,
         """
 
         if remote_port is None:
-            remote_port = constants.UDP_BOOT_CONNECTION_DEFAULT_PORT
+            remote_port = UDP_BOOT_CONNECTION_DEFAULT_PORT
 
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
