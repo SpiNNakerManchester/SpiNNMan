@@ -1,14 +1,11 @@
-from spinnman.messages.eieio.command_messages import PaddingRequest
-from spinnman.messages.eieio.command_messages import EventStopRequest
-from spinnman.messages.eieio.command_messages import StopRequests
-from spinnman.messages.eieio.command_messages import StartRequests
-from spinnman.messages.eieio.command_messages import SpinnakerRequestBuffers
-from spinnman.messages.eieio.command_messages import HostSendSequencedData
-from spinnman.messages.eieio.command_messages import SpinnakerRequestReadData
-from spinnman.messages.eieio.command_messages import HostDataRead
-from spinnman.messages.eieio.command_messages import EIEIOCommandHeader
-from spinnman.messages.eieio.command_messages import EIEIOCommandMessage
-from spinnman.messages.eieio.command_messages import DatabaseConfirmation
+from spinnman.messages.eieio.command_messages \
+    import PaddingRequest, EventStopRequest, StopRequests, StartRequests
+from spinnman.messages.eieio.command_messages \
+    import SpinnakerRequestBuffers, HostSendSequencedData
+from spinnman.messages.eieio.command_messages \
+    import SpinnakerRequestReadData, HostDataRead, EIEIOCommandHeader
+from spinnman.messages.eieio.command_messages \
+    import EIEIOCommandMessage, DatabaseConfirmation
 from spinnman.constants import EIEIO_COMMAND_IDS
 
 

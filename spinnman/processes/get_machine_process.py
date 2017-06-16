@@ -1,11 +1,9 @@
-from spinnman import constants
+from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman import exceptions
 import logging
 
-from spinnman.messages.scp.impl.scp_read_memory_request\
-    import SCPReadMemoryRequest
-from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
-from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
+from spinnman.messages.scp.impl \
+    import SCPReadMemoryRequest, SCPReadLinkRequest, SCPChipInfoRequest
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
 from spinnman.processes.abstract_multi_connection_process \
@@ -135,8 +133,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self._send_request(
                 SCPReadMemoryRequest(
                     x=boot_x, y=boot_y,
-                    base_address=(
-                        constants.ROUTER_REGISTER_P2P_ADDRESS + offset),
+                    base_address=(ROUTER_REGISTER_P2P_ADDRESS + offset),
                     size=p2p_column_bytes),
                 self._receive_p2p_data)
         self._finish()

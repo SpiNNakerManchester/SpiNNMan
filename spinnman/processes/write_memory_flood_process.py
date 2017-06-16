@@ -1,12 +1,8 @@
-from spinnman.messages.scp.impl.scp_flood_fill_end_request \
-    import SCPFloodFillEndRequest
-from spinnman.messages.scp.impl.scp_flood_fill_start_request \
-    import SCPFloodFillStartRequest
-from spinnman.messages.scp.impl.scp_flood_fill_data_request \
-    import SCPFloodFillDataRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
-from spinnman import constants
+from spinnman.messages.scp.impl \
+    import SCPFloodFillEndRequest, SCPFloodFillStartRequest, \
+        SCPFloodFillDataRequest
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 import math
 
@@ -20,7 +16,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
     def _start_flood_fill(self, n_bytes, nearest_neighbour_id):
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /
-                                 constants.UDP_MESSAGE_MAX_SIZE))
+                                 UDP_MESSAGE_MAX_SIZE))
         self._send_request(
             SCPFloodFillStartRequest(nearest_neighbour_id, n_blocks))
         self._finish()
@@ -41,12 +37,12 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
         while n_bytes > 0:
 
             bytes_to_send = int(n_bytes)
-            if bytes_to_send > constants.UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = constants.UDP_MESSAGE_MAX_SIZE
+            if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
+                bytes_to_send = UDP_MESSAGE_MAX_SIZE
 
-            self._send_request(
-                SCPFloodFillDataRequest(nearest_neighbour_id, block_no, offset,
-                                        data, data_offset, bytes_to_send))
+            self._send_request(SCPFloodFillDataRequest(
+                nearest_neighbour_id, block_no, offset,
+                data, data_offset, bytes_to_send))
 
             block_no += 1
             n_bytes -= bytes_to_send
@@ -66,13 +62,13 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
         while n_bytes > 0:
 
             bytes_to_send = int(n_bytes)
-            if bytes_to_send > constants.UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = constants.UDP_MESSAGE_MAX_SIZE
+            if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
+                bytes_to_send = UDP_MESSAGE_MAX_SIZE
             data_array = data.read(bytes_to_send)
 
-            self._send_request(
-                SCPFloodFillDataRequest(nearest_neighbour_id, block_no, offset,
-                                        data_array, 0, len(data_array)))
+            self._send_request(SCPFloodFillDataRequest(
+                nearest_neighbour_id, block_no, offset,
+                data_array, 0, len(data_array)))
 
             block_no += 1
             n_bytes -= bytes_to_send

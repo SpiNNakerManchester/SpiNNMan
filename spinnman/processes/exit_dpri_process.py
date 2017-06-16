@@ -1,4 +1,4 @@
-from spinnman.messages.scp.impl.scp_dpri_exit_request import SCPDPRIExitRequest
+from spinnman.messages.scp.impl import SCPDPRIExitRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 

@@ -1,4 +1,4 @@
-from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
+from spinnman.messages.scp.impl import SCPVersionRequest
 from spinnman.processes.abstract_single_connection_process \
     import AbstractSingleConnectionProcess
 

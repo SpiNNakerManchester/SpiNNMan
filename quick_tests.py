@@ -6,10 +6,9 @@ import sys
 
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums import CPUState
-from spinnman.messages.scp.enums.scp_signal import SCPSignal
+from spinnman.messages.scp.enums import SCPSignal
 from spinnman.model import DiagnosticFilter
-from spinnman.messages.scp.impl.scp_read_memory_request \
-    import SCPReadMemoryRequest
+from spinnman.messages.scp.impl import SCPReadMemoryRequest
 from spinnman.model.enums \
     import DiagnosticFilterDestination, DiagnosticFilterPacketType
 from spinnman.constants import ROUTER_REGISTER_REGISTERS

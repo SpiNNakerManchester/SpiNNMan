@@ -3,10 +3,13 @@ SCPReadFPGARegisterRequest
 """
 
 # spinnman imports
-from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPBMPRequest, AbstractSCPBMPResponse
+from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.scp import SCPRequestHeader
-from .scp_read_fpga_register_response import SCPReadFPGARegisterResponse
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+
+import struct
 
 
 class SCPReadFPGARegisterRequest(AbstractSCPBMPRequest):
@@ -34,4 +37,34 @@ class SCPReadFPGARegisterRequest(AbstractSCPBMPRequest):
             argument_1=arg1, argument_2=4, argument_3=fpga_num)
 
     def get_scp_response(self):
-        return SCPReadFPGARegisterResponse()
+        return _SCPReadFPGARegisterResponse()
+
+
+class _SCPReadFPGARegisterResponse(AbstractSCPBMPResponse):
+    """ An SCP response to a request for the version of software running
+    """
+
+    def __init__(self):
+        """
+        """
+        AbstractSCPBMPResponse.__init__(self)
+        self._fpga_register = None
+
+    def read_data_bytestring(self, data, offset):
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
+        """
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "Read FPGA register", "CMD_LINK_READ", result.name)
+
+        self._fpga_register = struct.unpack_from("<I", data, offset)[0]
+
+    @property
+    def fpga_register(self):
+        """ The register information received
+
+        :rtype: int
+        """
+        return self._fpga_register

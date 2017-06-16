@@ -1,8 +1,12 @@
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPAllocFreeType, SCPCommand
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPRequest, AbstractSCPResponse
+from spinnman.messages.scp.enums \
+    import SCPAllocFreeType, SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .scp_sdram_de_alloc_response import SCPSDRAMDeAllocResponse
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+
+import struct
 
 
 class SCPSDRAMDeAllocRequest(AbstractSCPRequest):
@@ -52,4 +56,42 @@ class SCPSDRAMDeAllocRequest(AbstractSCPRequest):
                     FREE_ROUTING_BY_APP_ID.value))  # @UndefinedVariable
 
     def get_scp_response(self):
-        return SCPSDRAMDeAllocResponse()
+        return _SCPSDRAMDeAllocResponse()
+
+
+class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
+    """ An SCP response to a request to deallocate SDRAM
+    """
+
+    def __init__(self):
+        """
+        """
+        AbstractSCPResponse.__init__(self)
+        self._number_of_blocks_freed = None
+
+    def read_data_bytestring(self, data, offset):
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
+        """
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "SDRAM deallocation", "CMD_DEALLOC", result.name)
+        self._number_of_blocks_freed = struct.unpack_from(
+            "<I", data, offset)[0]
+
+        # check that the base address is not null (0 in python case) as
+        # this reflects a issue in command on spinnaker side
+        if self._number_of_blocks_freed == 0:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "SDRAM deallocation response base address", "CMD_DEALLOC",
+                result.name)
+
+    @property
+    def number_of_blocks_freed(self):
+        """ The number of allocated blocks that have been freed from the\
+            app_id given
+
+        :rtype: int
+        """
+        return self._number_of_blocks_freed

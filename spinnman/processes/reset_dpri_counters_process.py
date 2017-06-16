@@ -1,7 +1,5 @@
-from spinnman.messages.scp.impl.scp_dpri_reset_counters_request \
-    import SCPDPRIResetCountersRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from spinnman.messages.scp.impl import SCPDPRIResetCountersRequest
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class ResetDPRICountersProcess(AbstractMultiConnectionProcess):

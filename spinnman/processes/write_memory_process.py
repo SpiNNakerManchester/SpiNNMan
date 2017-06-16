@@ -1,10 +1,7 @@
-from spinnman.messages.scp.impl.scp_write_link_request \
-    import SCPWriteLinkRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
-from spinnman.messages.scp.impl.scp_write_memory_request \
-    import SCPWriteMemoryRequest
-from spinnman import constants
+from spinnman.messages.scp.impl \
+    import SCPWriteLinkRequest, SCPWriteMemoryRequest
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 import functools
 
@@ -61,8 +58,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         while n_bytes_to_write > 0:
 
             bytes_to_send = n_bytes_to_write
-            if bytes_to_send > constants.UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = constants.UDP_MESSAGE_MAX_SIZE
+            if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
+                bytes_to_send = UDP_MESSAGE_MAX_SIZE
 
             request = packet_class(
                 base_address=offset,
@@ -82,8 +79,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         while n_bytes_to_write > 0:
 
             bytes_to_send = n_bytes_to_write
-            if bytes_to_send > constants.UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = constants.UDP_MESSAGE_MAX_SIZE
+            if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
+                bytes_to_send = UDP_MESSAGE_MAX_SIZE
             data_array = data.read(bytes_to_send)
             data_length = len(data_array)
 

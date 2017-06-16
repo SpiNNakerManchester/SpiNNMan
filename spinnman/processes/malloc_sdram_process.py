@@ -1,5 +1,4 @@
-from spinnman.messages.scp.impl.scp_sdram_alloc_request import \
-    SCPSDRAMAllocRequest
+from spinnman.messages.scp.impl import SCPSDRAMAllocRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 

@@ -1,7 +1,6 @@
 import functools
-from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
-from spinnman.messages.scp.impl.scp_read_memory_request \
-    import SCPReadMemoryRequest
+from spinnman.messages.scp.impl \
+    import SCPReadLinkRequest, SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman import constants

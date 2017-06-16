@@ -331,17 +331,17 @@ class EIEIO32PayloadMessage(EIEIOWithoutPayloadDataMessage):
 #             self, count=count, data=data, offset=offset,
 #             key_prefix=key_prefix, payload_prefix=payload_prefix,
 #             prefix_type=EIEIOPrefix.UPPER_HALF_WORD)
-# 
-# 
-# class EIEIO32BitTimedPayloadPrefixDataMessage(EIEIO32DataMessage):
-#     """ An EIEIO packet containing 32 bit events with a timestamp for the\
-#         events
-#     """
-#     def __init__(self, timestamp, count=0, data=None, offset=0):
-#         EIEIO32DataMessage.__init__(
-#             self, count=count, data=data, offset=offset, timestamp=timestamp)
-# 
-# 
+
+
+class EIEIO32BitTimedPayloadPrefixDataMessage(EIEIO32DataMessage):
+    """ An EIEIO packet containing 32 bit events with a timestamp for the\
+        events
+    """
+    def __init__(self, timestamp, count=0, data=None, offset=0):
+        EIEIO32DataMessage.__init__(
+            self, count=count, data=data, offset=offset, timestamp=timestamp)
+
+
 # class EIEIO32BitTimedPayloadPrefixLowerKeyPrefixDataMessage(
 #         EIEIO32DataMessage):
 #     """ An EIEIO packet containing 32 bit events, a key prefix to be applied\

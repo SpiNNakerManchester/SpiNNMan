@@ -1,5 +1,4 @@
-from spinnman.messages.scp.impl.scp_read_memory_request \
-    import SCPReadMemoryRequest
+from spinnman.messages.scp.impl import SCPReadMemoryRequest
 from spinnman.model import RouterDiagnostics
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 

@@ -1,8 +1,12 @@
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPAllocFreeType, SCPCommand
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPRequest, AbstractSCPResponse
+from spinnman.messages.scp.enums \
+    import SCPAllocFreeType, SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .scp_router_alloc_response import SCPRouterAllocResponse
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+
+import struct
 
 
 class SCPRouterAllocRequest(AbstractSCPRequest):
@@ -35,4 +39,33 @@ class SCPRouterAllocRequest(AbstractSCPRequest):
             argument_2=n_entries)
 
     def get_scp_response(self):
-        return SCPRouterAllocResponse()
+        return _SCPRouterAllocResponse()
+
+
+class _SCPRouterAllocResponse(AbstractSCPResponse):
+    """ An SCP response to a request to allocate router entries
+    """
+
+    def __init__(self):
+        """
+        """
+        super(_SCPRouterAllocResponse, self).__init__()
+        self._base_address = None
+
+    def read_data_bytestring(self, data, offset):
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
+        """
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "Router Allocation", "CMD_ALLOC", result.name)
+        self._base_address = struct.unpack_from("<I", data, offset)[0]
+
+    @property
+    def base_address(self):
+        """ The base address allocated, or 0 if none
+
+        :rtype: int
+        """
+        return self._base_address

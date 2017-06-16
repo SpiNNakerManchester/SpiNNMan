@@ -1,10 +1,8 @@
 from spinn_machine.router import Router
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.processes.write_memory_process import WriteMemoryProcess
-from spinnman.messages.scp.impl.scp_router_init_request \
-    import SCPRouterInitRequest
-from spinnman.messages.scp.impl.scp_router_alloc_request \
-    import SCPRouterAllocRequest
+from spinnman.messages.scp.impl \
+    import SCPRouterInitRequest, SCPRouterAllocRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 

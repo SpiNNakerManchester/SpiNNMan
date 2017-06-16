@@ -2,9 +2,9 @@ import struct
 import unittest
 
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.impl.scp_check_ok_response \
-    import SCPCheckOKResponse, SCPResult
-from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.scp.impl import SCPCheckOKResponse
+from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.sdp import SDPFlag
 
 
 class TestOkResponse(unittest.TestCase):

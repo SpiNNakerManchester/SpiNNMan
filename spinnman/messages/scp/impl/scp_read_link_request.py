@@ -1,8 +1,9 @@
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPRequest, AbstractSCPResponse
+from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .scp_read_link_response import SCPReadLinkResponse
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
 class SCPReadLinkRequest(AbstractSCPRequest):
@@ -38,4 +39,54 @@ class SCPReadLinkRequest(AbstractSCPRequest):
         """ See\
             :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
-        return SCPReadLinkResponse()
+        return _SCPReadLinkResponse()
+
+
+class _SCPReadLinkResponse(AbstractSCPResponse):
+    """ An SCP response to a request to read a region of memory via a link on\
+        a chip
+    """
+
+    def __init__(self):
+        """
+        """
+        super(_SCPReadLinkResponse, self).__init__()
+        self._data = None
+        self._offset = None
+        self._length = None
+
+    def read_data_bytestring(self, data, offset):
+        """ See\
+            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
+        """
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "ReadLink", "CMD_READ_LINK", result.name)
+        self._data = data
+        self._offset = offset
+        self._length = len(data) - offset
+
+    @property
+    def data(self):
+        """ The data read
+
+        :rtype: bytearray
+        """
+        return self._data
+
+    @property
+    def offset(self):
+        """ The offset where the valid data starts
+
+        :rtype: int
+        """
+        return self._offset
+
+    @property
+    def length(self):
+        """ The length of the valid data
+
+        :rtype: int
+        """
+        return self._length

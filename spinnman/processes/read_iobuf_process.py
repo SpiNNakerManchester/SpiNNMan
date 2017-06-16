@@ -5,8 +5,7 @@ from collections import OrderedDict
 
 from spinnman.model import IOBuffer
 from spinnman.utilities.utility_functions import get_vcpu_address
-from spinnman.messages.scp.impl.scp_read_memory_request \
-    import SCPReadMemoryRequest
+from spinnman.messages.scp.impl import SCPReadMemoryRequest
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman import constants

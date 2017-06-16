@@ -1,7 +1,7 @@
 import unittest
 
-from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
-from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.impl import SCPVersionRequest
+from spinnman.messages.scp.enums import SCPCommand
 
 
 class TestSCPVersionRequest(unittest.TestCase):

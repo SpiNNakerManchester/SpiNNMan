@@ -1,11 +1,8 @@
-from spinnman.messages.scp.impl.scp_dpri_set_reinjection_packet_types \
-    import SCPDPRISetReinjectionPacketTypesRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from spinnman.messages.scp.impl import SCPDPRISetReinjectionPacketTypesRequest
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class SetDPRIPacketTypesProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
 

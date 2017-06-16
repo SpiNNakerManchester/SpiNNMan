@@ -7,16 +7,12 @@ from spinnman import exceptions
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl.scp_bmp_set_led_request import \
-    SCPBMPSetLedRequest
-from spinnman.messages.scp.impl.scp_bmp_version_request import \
-    SCPBMPVersionRequest
-from spinnman.messages.scp.impl.scp_power_request import SCPPowerRequest
-from spinnman.messages.scp.impl.scp_read_adc_request import SCPReadADCRequest
-from spinnman.messages.scp.impl.scp_read_fpga_register_request import \
-    SCPReadFPGARegisterRequest
-from spinnman.messages.scp.impl.scp_write_fpga_register_request import \
-    SCPWriteFPGARegisterRequest
+from spinnman.messages.scp.impl \
+    import SCPBMPSetLedRequest, SCPBMPVersionRequest, SCPPowerRequest
+from spinnman.messages.scp.impl \
+    import SCPReadADCRequest, SCPReadFPGARegisterRequest
+from spinnman.messages.scp.impl \
+    import SCPWriteFPGARegisterRequest, SCPIPTagTTORequest
 from spinnman.connections.abstract_classes \
     import AbstractSpinnakerBootReceiver, AbstractSpinnakerBootSender
 from spinnman.connections.udp_packet_connections \
@@ -31,7 +27,6 @@ from spinnman.processes.get_version_process import GetVersionProcess
 from spinnman.processes.malloc_sdram_process import MallocSDRAMProcess
 from spinnman.processes.write_memory_process import WriteMemoryProcess
 from spinnman.processes.read_memory_process import ReadMemoryProcess
-from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
@@ -66,28 +61,15 @@ from spinnman.processes.\
     MultiConnectionProcessMostDirectConnectionSelector
 from spinnman.connections.udp_packet_connections \
     import UDPBootConnection, UDPSCAMPConnection
-from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
-    SCPReverseIPTagSetRequest
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
-from spinnman.messages.scp.impl.scp_read_memory_request \
-    import SCPReadMemoryRequest
-from spinnman.messages.scp.impl.scp_count_state_request \
-    import SCPCountStateRequest
-from spinnman.messages.scp.impl.scp_write_memory_request \
-    import SCPWriteMemoryRequest
-from spinnman.messages.scp.impl.scp_application_run_request \
-    import SCPApplicationRunRequest
-from spinnman.messages.scp.impl.scp_send_signal_request \
-    import SCPSendSignalRequest
-from spinnman.messages.scp.impl.scp_iptag_set_request \
-    import SCPIPTagSetRequest
-from spinnman.messages.scp.impl.scp_iptag_clear_request \
-    import SCPIPTagClearRequest
-from spinnman.messages.scp.impl.scp_router_clear_request \
-    import SCPRouterClearRequest
-from spinnman.messages.scp.impl.scp_led_request \
-    import SCPLEDRequest
-from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
+from spinnman.messages.scp.impl \
+    import SCPReverseIPTagSetRequest, SCPReadMemoryRequest
+from spinnman.messages.scp.impl \
+    import SCPCountStateRequest, SCPWriteMemoryRequest, SCPLEDRequest
+from spinnman.messages.scp.impl \
+    import SCPApplicationRunRequest, SCPSendSignalRequest, SCPAppStopRequest
+from spinnman.messages.scp.impl \
+    import SCPIPTagSetRequest, SCPIPTagClearRequest, SCPRouterClearRequest
 from spinnman.utilities import utility_functions
 
 # storage handlers imports

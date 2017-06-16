@@ -4,8 +4,8 @@ from struct import pack
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl.scp_count_state_response \
     import SCPCountStateResponse
-from spinnman.messages.scp.enums.scp_result import SCPResult
-from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.sdp import SDPFlag
 
 
 class TestCPUStateResponse(unittest.TestCase):

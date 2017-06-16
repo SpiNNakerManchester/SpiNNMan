@@ -1,10 +1,10 @@
-from spinnman import constants
-
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPRequest, AbstractSCPResponse
+from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .scp_read_memory_response import SCPReadMemoryResponse
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.constants import address_length_dtype
 
 
 class SCPReadMemoryRequest(AbstractSCPRequest):
@@ -34,11 +34,55 @@ class SCPReadMemoryRequest(AbstractSCPRequest):
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_READ),
             argument_1=base_address, argument_2=size,
-            argument_3=constants.address_length_dtype[
+            argument_3=address_length_dtype[
                 (base_address % 4, size % 4)].value)
 
     def get_scp_response(self):
         """ See\
             :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
-        return SCPReadMemoryResponse()
+        return _SCPReadMemoryResponse()
+
+
+class _SCPReadMemoryResponse(AbstractSCPResponse):
+    """ An SCP response to a request to read a region of memory on a chip
+    """
+
+    def __init__(self):
+        """
+        """
+        super(_SCPReadMemoryResponse, self).__init__()
+        self._data = None
+        self._offset = None
+
+    def read_data_bytestring(self, data, offset):
+        if self._scp_response_header.result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "Read", "CMD_READ", self._scp_response_header.result)
+        self._data = data
+        self._offset = offset
+        self._length = len(data) - offset
+
+    @property
+    def data(self):
+        """ The data read - note that the data starts at offset
+
+        :rtype: bytearray
+        """
+        return self._data
+
+    @property
+    def offset(self):
+        """ The offset where the valid data starts
+
+        :rtype: int
+        """
+        return self._offset
+
+    @property
+    def length(self):
+        """ The length of the valid data
+
+        :rtype: int
+        """
+        return self._length

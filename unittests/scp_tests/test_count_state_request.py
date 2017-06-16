@@ -1,7 +1,6 @@
 import unittest
 
-from spinnman.messages.scp.impl.scp_count_state_request \
-    import SCPCountStateRequest
+from spinnman.messages.scp.impl import SCPCountStateRequest
 from spinnman.model.enums import CPUState
 
 
