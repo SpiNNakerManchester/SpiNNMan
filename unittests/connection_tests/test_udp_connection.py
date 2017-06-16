@@ -6,7 +6,7 @@ import spinnman.exceptions as exc
 from spinnman.messages.scp.impl \
     import SCPVersionRequest, SCPReadLinkRequest, SCPReadMemoryRequest
 from spinnman.messages.scp.enums import SCPResult
-from spinnman.messages.scp.impl import scp_version_response
+from spinnman.messages.scp.impl.version_response import SCPVersionResponse
 
 board_config = BoardTestConfiguration()
 
@@ -18,7 +18,7 @@ class TestUDPConnection(unittest.TestCase):
         connection = UDPSCAMPConnection(
             remote_host=board_config.remotehost)
         scp_req = SCPVersionRequest(0, 0, 0)
-        scp_response = scp_version_response.SCPVersionResponse()
+        scp_response = SCPVersionResponse()
         connection.send_scp_request(scp_req)
         _, _, data, offset = connection.receive_scp_response()
         scp_response.read_bytestring(data, offset)

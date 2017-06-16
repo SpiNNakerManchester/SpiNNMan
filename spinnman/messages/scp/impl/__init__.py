@@ -1,44 +1,43 @@
-from .scp_app_stop_request import SCPAppStopRequest
-from .scp_application_run_request import SCPApplicationRunRequest
-from .scp_bmp_set_led_request import SCPBMPSetLedRequest
-from .scp_bmp_version_request import SCPBMPVersionRequest
-from .scp_check_ok_response import SCPCheckOKResponse
-from .scp_chip_info_request import SCPChipInfoRequest
-from .scp_count_state_request import SCPCountStateRequest
-from .scp_dpri_exit_request import SCPDPRIExitRequest
-from .scp_dpri_get_status_request import SCPDPRIGetStatusRequest
-from .scp_dpri_reset_counters_request import SCPDPRIResetCountersRequest
-from .scp_dpri_set_reinjection_packet_types \
+from .app_stop import SCPAppStopRequest
+from .application_run import SCPApplicationRunRequest
+from .bmp_set_led import SCPBMPSetLedRequest
+from .bmp_version import SCPBMPVersionRequest
+from .check_ok_response import SCPCheckOKResponse
+from .chip_info import SCPChipInfoRequest
+from .count_state import SCPCountStateRequest
+from .dpri_exit import SCPDPRIExitRequest
+from .dpri_get_status import SCPDPRIGetStatusRequest
+from .dpri_reset_counters import SCPDPRIResetCountersRequest
+from .dpri_set_reinjection_packet_types \
     import SCPDPRISetReinjectionPacketTypesRequest
-from .scp_dpri_set_router_emergency_timeout_request \
+from .dpri_set_router_emergency_timeout \
     import SCPDPRISetRouterEmergencyTimeoutRequest
-from .scp_dpri_set_router_timeout_request \
-    import SCPDPRISetRouterTimeoutRequest
-from .scp_flood_fill_data_request import SCPFloodFillDataRequest
-from .scp_flood_fill_end_request import SCPFloodFillEndRequest
-from .scp_flood_fill_start_request import SCPFloodFillStartRequest
-from .scp_iptag_clear_request import SCPIPTagClearRequest
-from .scp_iptag_get_request import SCPTagGetRequest
-from .scp_iptag_info_request import SCPTagInfoRequest
-from .scp_iptag_set_request import SCPIPTagSetRequest
-from .scp_iptag_tto_request import SCPIPTagTTORequest
-from .scp_led_request import SCPLEDRequest
-from .scp_power_request import SCPPowerRequest
-from .scp_read_adc_request import SCPReadADCRequest
-from .scp_read_fpga_register_request import SCPReadFPGARegisterRequest
-from .scp_read_link_request import SCPReadLinkRequest
-from .scp_read_memory_request import SCPReadMemoryRequest
-from .scp_reverse_iptag_set_request import SCPReverseIPTagSetRequest
-from .scp_router_alloc_request import SCPRouterAllocRequest
-from .scp_router_clear_request import SCPRouterClearRequest
-from .scp_router_init_request import SCPRouterInitRequest
-from .scp_sdram_alloc_request import SCPSDRAMAllocRequest
-from .scp_sdram_de_alloc_request import SCPSDRAMDeAllocRequest
-from .scp_send_signal_request import SCPSendSignalRequest
-from .scp_version_request import SCPVersionRequest
-from .scp_write_fpga_register_request import SCPWriteFPGARegisterRequest
-from .scp_write_link_request import SCPWriteLinkRequest
-from .scp_write_memory_request import SCPWriteMemoryRequest
+from .dpri_set_router_timeout import SCPDPRISetRouterTimeoutRequest
+from .flood_fill_data import SCPFloodFillDataRequest
+from .flood_fill_end import SCPFloodFillEndRequest
+from .flood_fill_start import SCPFloodFillStartRequest
+from .iptag_clear import SCPIPTagClearRequest
+from .iptag_get import SCPTagGetRequest
+from .iptag_info import SCPTagInfoRequest
+from .iptag_set import SCPIPTagSetRequest
+from .iptag_tto import SCPIPTagTTORequest
+from .led import SCPLEDRequest
+from .power import SCPPowerRequest
+from .read_adc import SCPReadADCRequest
+from .read_fpga_register import SCPReadFPGARegisterRequest
+from .read_link import SCPReadLinkRequest
+from .read_memory import SCPReadMemoryRequest
+from .reverse_iptag_set import SCPReverseIPTagSetRequest
+from .router_alloc import SCPRouterAllocRequest
+from .router_clear import SCPRouterClearRequest
+from .router_init import SCPRouterInitRequest
+from .sdram_alloc import SCPSDRAMAllocRequest
+from .sdram_de_alloc import SCPSDRAMDeAllocRequest
+from .send_signal import SCPSendSignalRequest
+from .version import SCPVersionRequest
+from .write_fpga_register import SCPWriteFPGARegisterRequest
+from .write_link import SCPWriteLinkRequest
+from .write_memory import SCPWriteMemoryRequest
 
 __all__ = ["SCPAppStopRequest", "SCPApplicationRunRequest",
            "SCPBMPSetLedRequest", "SCPBMPVersionRequest",
