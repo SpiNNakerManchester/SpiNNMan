@@ -6,7 +6,7 @@ SCPBMPVersionRequest
 from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
-from .scp_version_response import SCPVersionResponse
+from .version_response import SCPVersionResponse
 
 
 class SCPBMPVersionRequest(AbstractSCPBMPRequest):

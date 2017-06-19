@@ -2,7 +2,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .scp_iptag_info_response import SCPIPTagInfoResponse
+from .iptag_info_response import SCPIPTagInfoResponse
 
 _IPTAG_TTO = (4 << 16)
 

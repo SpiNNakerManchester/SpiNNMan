@@ -2,7 +2,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .scp_check_ok_response import SCPCheckOKResponse
+from .check_ok_response import SCPCheckOKResponse
 
 _NNP_FORWARD_RETRY = (0x3f << 8) | 0x18
 _NNP_FLOOD_FILL_END = 15

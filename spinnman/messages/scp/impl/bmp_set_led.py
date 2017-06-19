@@ -1,10 +1,10 @@
 """
 SCPBMPSetLedRequest
 """
-from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
-from .scp_check_ok_response import SCPCheckOKResponse
-from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
+from spinnman.messages.scp.enums import SCPCommand
+from .check_ok_response import SCPCheckOKResponse
 
 
 class SCPBMPSetLedRequest(AbstractSCPBMPRequest):

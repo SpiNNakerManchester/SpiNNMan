@@ -6,7 +6,7 @@ SCPPowerRequest
 from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp import SCPRequestHeader
-from .scp_check_ok_response import SCPCheckOKResponse
+from .check_ok_response import SCPCheckOKResponse
 
 
 class SCPPowerRequest(AbstractSCPBMPRequest):

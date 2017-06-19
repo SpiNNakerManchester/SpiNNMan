@@ -3,7 +3,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .scp_check_ok_response import SCPCheckOKResponse
+from .check_ok_response import SCPCheckOKResponse
 
 _ALL_CORE_MASK = 0xFFFF
 _APP_MASK = 0xFF

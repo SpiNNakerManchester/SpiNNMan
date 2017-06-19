@@ -2,7 +2,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .scp_count_state_response import SCPCountStateResponse
+from .count_state_response import SCPCountStateResponse
 
 _ALL_CORE_MASK = 0xFFFF
 _COUNT_OPERATION = 1

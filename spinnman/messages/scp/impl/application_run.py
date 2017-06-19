@@ -2,7 +2,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.messages.scp import SCPRequestHeader
-from .scp_check_ok_response import SCPCheckOKResponse
+from .check_ok_response import SCPCheckOKResponse
 
 _WAIT_FLAG = 0x1 << 18
 
