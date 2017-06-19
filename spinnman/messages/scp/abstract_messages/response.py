@@ -1,7 +1,7 @@
 from six import add_metaclass
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinnman.messages.sdp.sdp_header import SDPHeader
+from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.scp import SCPResponseHeader
 
 # The offset of the header from the start of a received packet

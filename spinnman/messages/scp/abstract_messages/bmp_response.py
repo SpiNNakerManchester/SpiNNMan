@@ -3,7 +3,7 @@ AbstractSCPBMPResponse
 """
 
 # spinnman imports
-from .abstract_scp_response import AbstractSCPResponse
+from .response import AbstractSCPResponse
 
 
 class AbstractSCPBMPResponse(AbstractSCPResponse):
