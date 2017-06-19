@@ -32,7 +32,7 @@ class TestTransceiver(unittest.TestCase):
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
 
-        self.assertEqual(trans.get_connections(), connections)
+        assert trans.get_connections() == connections
         trans.close()
 
     def test_create_new_transceiver_from_list_connections(self):
@@ -47,8 +47,8 @@ class TestTransceiver(unittest.TestCase):
         instantiated_connections = trans.get_connections()
 
         for connection in connections:
-            self.assertTrue(connection in instantiated_connections)
-        # self.assertEqual(trans.get_connections(), connections)
+            assert connection in instantiated_connections
+        # assert trans.get_connections() == connections
         trans.close()
 
     def test_retrieving_machine_details(self):
@@ -62,17 +62,17 @@ class TestTransceiver(unittest.TestCase):
         trans = transceiver.Transceiver(ver, connections=connections)
 
         if board_config.board_version == 3 or board_config.board_version == 2:
-            self.assertEqual(trans.get_machine_dimensions().width, 2)
-            self.assertEqual(trans.get_machine_dimensions().height, 2)
+            assert trans.get_machine_dimensions().width == 2
+            assert trans.get_machine_dimensions().height == 2
         elif (board_config.board_version == 5 or
                 board_config.board_version == 4):
-            self.assertEqual(trans.get_machine_dimensions().width, 8)
-            self.assertEqual(trans.get_machine_dimensions().height, 8)
+            assert trans.get_machine_dimensions().width == 8
+            assert trans.get_machine_dimensions().height == 8
         else:
             size = trans.get_machine_dimensions()
             print "Unknown board with x size {0:d} and y size {1:d}".format(
                 size.width, size.height)
-        self.assertTrue(trans.is_connected())
+        assert trans.is_connected()
         print trans.get_scamp_version()
         print trans.get_cpu_information()
         trans.close()
@@ -110,10 +110,10 @@ class TestTransceiver(unittest.TestCase):
             callback=None, connection_class=UDPEIEIOConnection,
             local_port=orig_connection.local_port + 1)
 
-        self.assertEqual(connection_1, orig_connection)
-        self.assertEqual(connection_2, orig_connection)
-        self.assertEqual(connection_3, orig_connection)
-        self.assertNotEqual(connection_4, orig_connection)
+        assert connection_1 == orig_connection
+        assert connection_2 == orig_connection
+        assert connection_3 == orig_connection
+        assert connection_4 != orig_connection
 
 
 if __name__ == '__main__':
