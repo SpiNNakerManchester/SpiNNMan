@@ -28,12 +28,12 @@ def generate_machine_report(report_directory, machine, connections):
             f.write("Generated: %s" % time_date_string)
             f.write(" for target machine '{}'".format(connections))
             f.write("\n\n")
-        
+
             x_dim = machine.max_chip_x + 1
             y_dim = machine.max_chip_y + 1
             f.write("Machine dimensions (in chips) x : {}  y : {}\n\n".format(
                 x_dim, y_dim))
-        
+
             # TODO: Add further details on the target machine.
             f.write("\t\tMachine router information\n")
             f.write("\t\t==========================\n\n")

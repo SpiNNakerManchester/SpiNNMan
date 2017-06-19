@@ -155,7 +155,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     x, y))
 
         # Build a Machine
-        chip_xy = lambda chip: (chip.x, chip.y)
+        def chip_xy(chip):
+            return chip.x, chip.y
+
         chips = [
             self._make_chip(width, height, chip_info)
             for chip_info in sorted(self._chip_info.values(), key=chip_xy)
