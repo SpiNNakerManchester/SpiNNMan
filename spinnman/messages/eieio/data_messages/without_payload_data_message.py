@@ -1,6 +1,6 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.eieio.data_messages \
-    import EIEIODataMessage, EIEIOKeyDataElement
+from .data_message import EIEIODataMessage
+from .key_data_element import EIEIOKeyDataElement
 
 
 class EIEIOWithoutPayloadDataMessage(EIEIODataMessage):

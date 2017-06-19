@@ -1,9 +1,10 @@
 from spinnman.exceptions import SpinnmanInvalidPacketException
-from spinnman.messages.eieio.data_messages \
-    import EIEIOKeyPayloadDataElement, EIEIOKeyDataElement, EIEIODataHeader
 from spinnman.messages.eieio.abstract_messages import AbstractEIEIOMessage
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+from .data_header import EIEIODataHeader
+from .key_data_element import EIEIOKeyDataElement
+from .key_payload_data_element import EIEIOKeyPayloadDataElement
 
 import math
 import struct

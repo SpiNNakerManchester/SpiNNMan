@@ -1,7 +1,8 @@
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
-from spinnman.messages.eieio.data_messages \
-    import EIEIOWithoutPayloadDataMessage, EIEIOWithPayloadDataMessage, \
-        EIEIODataHeader, EIEIODataMessage
+from .data_header import EIEIODataHeader
+from .data_message import EIEIODataMessage
+from .without_payload_data_message import EIEIOWithoutPayloadDataMessage
+from .with_payload_data_message import EIEIOWithPayloadDataMessage
 
 
 class EIEIO16DataMessage(EIEIOWithoutPayloadDataMessage):
@@ -28,7 +29,7 @@ class EIEIO16DataMessage(EIEIOWithoutPayloadDataMessage):
             is_payload_base=self._payload)
 
 
-class EIEIO16PayloadMessage(EIEIOWithoutPayloadDataMessage):
+class EIEIO16PayloadMessage(EIEIOWithPayloadDataMessage):
     """ An EIEIO packet containing 16 bit events
     """
     def __init__(self, count=0, data=None, offset=0,
