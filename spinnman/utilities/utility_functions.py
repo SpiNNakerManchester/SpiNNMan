@@ -82,24 +82,23 @@ def get_vcpu_address(p):
 
 
 def send_port_trigger_message(connection, board_address):
-        """ Sends a port trigger message using a connection to (hopefully)\
-            open a port in a NAT and/or firewall to allow incoming packets\
-            to be received
+    """Sends a port trigger message using a connection to (hopefully) open \
+    a port in a NAT and/or firewall to allow incoming packets to be received.
 
-        :param connection: The UDP connection down which the trigger message\
-                should be sent
-        :param board_address: The address of the SpiNNaker board to which the\
-                message should be sent
-        """
+    :param connection: The UDP connection down which the trigger message\
+        should be sent
+    :param board_address: The address of the SpiNNaker board to which the\
+        message should be sent
+    """
 
-        # Set up the message so that no reply is expected and it is sent to an
-        # invalid port for SCAMP.  The current version of SCAMP will reject
-        # this message, but then fail to send a response since the
-        # REPLY_NOT_EXPECTED flag is set (see scamp-3.c line 728 and 625-644)
-        trigger_message = SDPMessage(SDPHeader(
-            flags=SDPFlag.REPLY_NOT_EXPECTED, tag=0, destination_port=3,
-            destination_cpu=0, destination_chip_x=0, destination_chip_y=0))
-        update_sdp_header_for_udp_send(trigger_message.sdp_header, 0, 0)
-        connection.send_to(
-            trigger_message.bytestring,
-            (board_address, constants.SCP_SCAMP_PORT))
+    # Set up the message so that no reply is expected and it is sent to an
+    # invalid port for SCAMP.  The current version of SCAMP will reject
+    # this message, but then fail to send a response since the
+    # REPLY_NOT_EXPECTED flag is set (see scamp-3.c line 728 and 625-644)
+    trigger_message = SDPMessage(SDPHeader(
+        flags=SDPFlag.REPLY_NOT_EXPECTED, tag=0, destination_port=3,
+        destination_cpu=0, destination_chip_x=0, destination_chip_y=0))
+    update_sdp_header_for_udp_send(trigger_message.sdp_header, 0, 0)
+    connection.send_to(
+        trigger_message.bytestring,
+        (board_address, constants.SCP_SCAMP_PORT))

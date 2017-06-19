@@ -1,11 +1,11 @@
 """
-locates any spinnaker mchines ipadress from the auto trnasmitted packet from
-none booted spinnaker machines
+locates any spinnaker machines ip address from the auto transmitted packet from
+non-booted spinnaker machines
 """
 
 # spinnman imports
-from spinnman.connections.udp_packet_connections.\
-    udp_ip_address_connection import UDPIpAddressesConnection
+from spinnman.connections.udp_packet_connections \
+    import UDPIpAddressesConnection
 
 # general imports
 import time
@@ -15,7 +15,7 @@ import socket
 
 # main entrance
 if __name__ == "__main__":
-    def ctrlc_handler(signal, frame):
+    def ctrlc_handler(signal, frame):  # @UnusedVariable
         """
 
         :param signal:

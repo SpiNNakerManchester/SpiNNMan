@@ -56,16 +56,11 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         offset = base_address
         n_bytes_to_write = int(n_bytes)
         while n_bytes_to_write > 0:
-
-            bytes_to_send = n_bytes_to_write
-            if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = UDP_MESSAGE_MAX_SIZE
-
+            bytes_to_send = min((n_bytes_to_write, UDP_MESSAGE_MAX_SIZE))
             request = packet_class(
                 base_address=offset,
                 data=data[data_offset:data_offset + bytes_to_send])
             self._send_request(request)
-
             n_bytes_to_write -= bytes_to_send
             offset += bytes_to_send
             data_offset += bytes_to_send

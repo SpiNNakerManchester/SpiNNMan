@@ -1,14 +1,14 @@
 import functools
 import struct
-from collections import defaultdict
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 
 from spinnman.model import IOBuffer
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl import SCPReadMemoryRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
-from spinnman import constants
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinnman.constants import UDP_MESSAGE_MAX_SIZE, CPU_IOBUF_ADDRESS_OFFSET
+
+_ENCODING = "ascii"
 
 
 class ReadIOBufProcess(AbstractMultiConnectionProcess):
@@ -39,10 +39,16 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         iobuf_address = struct.unpack_from(
             "<I", response.data, response.offset)[0]
         if iobuf_address != 0:
-            first_read_size = min(
-                (iobuf_size + 16, constants.UDP_MESSAGE_MAX_SIZE))
+            first_read_size = min((iobuf_size + 16, UDP_MESSAGE_MAX_SIZE))
             self._next_reads.append((
                 x, y, p, 0, iobuf_address, first_read_size))
+
+    def _request_iobuf_region(self, region):
+        (x, y, p, n, next_address, first_read_size) = region
+        self._send_request(
+            SCPReadMemoryRequest(x, y, next_address, first_read_size),
+            functools.partial(self.handle_first_iobuf_response,
+                              x, y, p, n, next_address, first_read_size))
 
     def handle_first_iobuf_response(self, x, y, p, n, base_address,
                                     first_read_size, response):
@@ -74,8 +80,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         while bytes_to_read > 0:
 
             # Read the next bit of memory making up the buffer
-            next_bytes_to_read = min((bytes_to_read,
-                                      constants.UDP_MESSAGE_MAX_SIZE))
+            next_bytes_to_read = min((bytes_to_read, UDP_MESSAGE_MAX_SIZE))
             self._extra_reads.append((x, y, p, n, base_address,
                                       next_bytes_to_read, read_offset))
             base_address += next_bytes_to_read
@@ -87,55 +92,50 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
             self._next_reads.append((x, y, p, n + 1, next_address,
                                      first_read_size))
 
+    def _request_iobuf_region_tail(self, extra_region):
+        (x, y, p, n, base_address, size, offset) = extra_region
+        self._send_request(
+            SCPReadMemoryRequest(x, y, base_address, size),
+            functools.partial(self.handle_extra_iobuf_response,
+                              x, y, p, n, offset))
+
     def handle_extra_iobuf_response(self, x, y, p, n, offset, response):
         view = self._iobuf_view[(x, y, p)][n]
         view[offset:offset + response.length] = response.data[
             response.offset:response.offset + response.length]
 
-    def read_iobuf(self, iobuf_size, core_subsets):
+    def _request_iobuf_address(self, iobuf_size, x, y, p):
+        base_address = get_vcpu_address(p) + CPU_IOBUF_ADDRESS_OFFSET
+        self._send_request(
+            SCPReadMemoryRequest(x, y, base_address, 4),
+            functools.partial(self.handle_iobuf_address_response,
+                              iobuf_size, x, y, p))
 
+    def read_iobuf(self, iobuf_size, core_subsets):
         # Get the iobuf address for each core
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
             for p in core_subset.processor_ids:
-                base_address = (
-                    get_vcpu_address(p) + constants.CPU_IOBUF_ADDRESS_OFFSET)
-                self._send_request(
-                    SCPReadMemoryRequest(x, y, base_address, 4),
-                    functools.partial(
-                        self.handle_iobuf_address_response,
-                        iobuf_size, x, y, p))
+                self._request_iobuf_address(iobuf_size, x, y, p)
         self._finish()
         self.check_for_error()
 
         # Run rounds of the process until reading is complete
         while len(self._extra_reads) > 0 or len(self._next_reads) > 0:
-
             # Process the extra iobuf reads needed
-            while len(self._extra_reads) > 0:
-                (x, y, p, n, base_address, size, offset) = \
-                    self._extra_reads.pop()
-
-                self._send_request(
-                    SCPReadMemoryRequest(x, y, base_address, size),
-                    functools.partial(self.handle_extra_iobuf_response,
-                                      x, y, p, n, offset))
+            while self._extra_reads:
+                self._request_iobuf_region_tail(self._extra_reads.pop())
 
             # Process the next iobuf reads needed
-            while len(self._next_reads) > 0:
-                (x, y, p, n, next_address, first_read_size) = \
-                    self._next_reads.pop()
-                self._send_request(
-                    SCPReadMemoryRequest(x, y, next_address, first_read_size),
-                    functools.partial(self.handle_first_iobuf_response,
-                                      x, y, p, n, next_address,
-                                      first_read_size))
+            while self._next_reads:
+                self._request_iobuf_region(self._next_reads.pop())
 
             # Finish this round
             self._finish()
 
         self.check_for_error()
+
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
@@ -143,6 +143,6 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
                 iobufs = self._iobuf[(x, y, p)]
                 iobuf = ""
                 for item in iobufs.itervalues():
-                    iobuf += item.decode("ascii")
+                    iobuf += item.decode(_ENCODING)
 
                 yield IOBuffer(x, y, p, iobuf)

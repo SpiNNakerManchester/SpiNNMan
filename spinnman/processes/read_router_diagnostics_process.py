@@ -8,7 +8,6 @@ _N_REGISTERS = 16
 
 
 class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._control_register = None
@@ -37,5 +36,6 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
                            self.handle_register_response)
         self._finish()
         self.check_for_error()
+
         return RouterDiagnostics(self._control_register, self._error_status,
                                  self._register_values)

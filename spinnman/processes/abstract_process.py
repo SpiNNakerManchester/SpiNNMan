@@ -1,9 +1,8 @@
 from __future__ import print_function
-
-from spinnman import exceptions
-
 import sys
 import traceback
+
+from spinnman.exceptions import SpinnmanGenericProcessException
 
 
 class AbstractProcess(object):
@@ -40,7 +39,7 @@ class AbstractProcess(object):
 
             exc_info = sys.exc_info()
             sdp_header = self._error_request.sdp_header
-            self._exception = exceptions.SpinnmanGenericProcessException(
+            self._exception = SpinnmanGenericProcessException(
                 self._exception, exc_info[2], sdp_header.destination_chip_x,
                 sdp_header.destination_chip_y, sdp_header.destination_cpu)
             raise self._exception, None, self._traceback

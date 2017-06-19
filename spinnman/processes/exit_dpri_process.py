@@ -1,10 +1,8 @@
 from spinnman.messages.scp.impl import SCPDPRIExitRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class ExitDPRIProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
 

@@ -1,4 +1,3 @@
-
 from spinnman.messages.eieio.data_messages \
     import EIEIODataMessage, EIEIODataHeader
 from spinnman.messages.eieio.data_messages \

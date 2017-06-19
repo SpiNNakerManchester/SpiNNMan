@@ -1,20 +1,20 @@
-from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
-from spinnman import exceptions
 import logging
 
-from spinnman.messages.scp.impl \
-    import SCPReadMemoryRequest, SCPReadLinkRequest, SCPChipInfoRequest
-from spinnman.model import P2PTable
-from spinnman.model.enums import CPUState
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
-from spinnman.processes.abstract_process import AbstractProcess
 from spinn_machine.processor import Processor
 from spinn_machine.router import Router
 from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
 from spinn_machine.machine import Machine
 from spinn_machine.link import Link
+
+from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.messages.scp.impl \
+    import SCPReadMemoryRequest, SCPReadLinkRequest, SCPChipInfoRequest
+from spinnman.model import P2PTable
+from spinnman.model.enums import CPUState
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_process import AbstractProcess
 
 logger = logging.getLogger(__name__)
 
@@ -112,20 +112,16 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
 
-    def _receive_error(self, request, exception, tracebackinfo):
-
+    def _receive_error(self, request, exception, tb):
         # If we get an SCPReadLinkRequest with a
         # SpinnmanUnexpectedResponseCodeException, this is a failed link
         # and so can be ignored
-        if (not isinstance(request, SCPReadLinkRequest) or
-                not isinstance(
-                    exception,
-                    exceptions.SpinnmanUnexpectedResponseCodeException)):
-            AbstractProcess._receive_error(self, request, exception,
-                                           tracebackinfo)
+        if isinstance(request, SCPReadLinkRequest):
+            if isinstance(exception, SpinnmanUnexpectedResponseCodeException):
+                return
+        AbstractProcess._receive_error(self, request, exception, tb)
 
     def get_machine_details(self, boot_x, boot_y, width, height):
-
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         for column in range(width):
@@ -148,7 +144,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         try:
             self.check_for_error()
         except:
-
             # Ignore errors so far, as any error here just means that a chip
             # is down that wasn't marked as down
             pass
@@ -160,11 +155,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     x, y))
 
         # Build a Machine
+        chip_xy = lambda chip: (chip.x, chip.y)
         chips = [
             self._make_chip(width, height, chip_info)
-            for chip_info in sorted(
-                self._chip_info.values(),
-                key=lambda chip: (chip.x, chip.y))
+            for chip_info in sorted(self._chip_info.values(), key=chip_xy)
             if (chip_info.x, chip_info.y) not in self._ignore_chips]
         machine = Machine(chips, boot_x, boot_y)
 

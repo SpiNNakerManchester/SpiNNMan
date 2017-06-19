@@ -1,10 +1,8 @@
 from spinnman.messages.scp.impl import SCPDPRIGetStatusRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class ReadDPRIStatusProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._dpri_status = None

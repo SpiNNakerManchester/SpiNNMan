@@ -1,9 +1,7 @@
-from spinnman.processes.abstract_multi_connection_process\
-    import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class SendSingleCommandProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector, n_retries=3, timeout=0.5):
         AbstractMultiConnectionProcess.__init__(
             self, connection_selector, n_retries=n_retries,

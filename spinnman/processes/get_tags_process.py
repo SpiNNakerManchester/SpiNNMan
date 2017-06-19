@@ -1,5 +1,4 @@
-from spinnman.processes.abstract_multi_connection_process\
-    import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.messages.scp.impl import SCPTagInfoRequest, SCPTagGetRequest
 
 from spinn_machine.tags.reverse_iptag import ReverseIPTag

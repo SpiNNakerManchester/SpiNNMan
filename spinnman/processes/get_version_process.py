@@ -1,6 +1,5 @@
 from spinnman.messages.scp.impl import SCPVersionRequest
-from spinnman.processes.abstract_single_connection_process \
-    import AbstractSingleConnectionProcess
+from .abstract_single_connection_process import AbstractSingleConnectionProcess
 
 
 class GetVersionProcess(AbstractSingleConnectionProcess):

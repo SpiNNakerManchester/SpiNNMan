@@ -24,22 +24,28 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         self._entries = [None] * _N_ENTRIES
         self._app_id = app_id
 
+    def _add_routing_entry(self, route_no, offset, app_id, route, key, mask):
+        if route >= 0xFF000000:
+            return
+        if self._app_id is not None and self._app_id != app_id:
+            return
+
+        processor_ids = list()
+        for processor_id in range(0, 26):
+            if (route & (1 << (6 + processor_id))) != 0:
+                processor_ids.append(processor_id)
+        link_ids = list()
+        for link_id in range(0, 6):
+            if (route & (1 << link_id)) != 0:
+                link_ids.append(link_id)
+        self._entries[route_no + offset] = MulticastRoutingEntry(
+            key, mask, processor_ids, link_ids, False)
+
     def handle_read_response(self, offset, response):
         for route_no in range(_ENTRIES_PER_READ):
-            (app_id, route, key, mask) = struct.unpack_from(
+            entry = struct.unpack_from(
                 "<2xBxIII", response.data, response.offset + (route_no * 16))
-            if route < 0xFF000000 and (self._app_id is None or
-                                       self._app_id == app_id):
-                processor_ids = list()
-                for processor_id in range(0, 26):
-                    if (route & (1 << (6 + processor_id))) != 0:
-                        processor_ids.append(processor_id)
-                link_ids = list()
-                for link_id in range(0, 6):
-                    if (route & (1 << link_id)) != 0:
-                        link_ids.append(link_id)
-                self._entries[route_no + offset] = MulticastRoutingEntry(
-                    key, mask, processor_ids, link_ids, False)
+            self._add_routing_entry(route_no, offset, *entry)
 
     def get_routes(self, x, y, base_address):
 

@@ -1,4 +1,4 @@
-from spinnman.processes.abstract_multi_connection_process_connection_selector \
+from .abstract_multi_connection_process_connection_selector \
     import AbstractMultiConnectionProcessConnectionSelector
 
 

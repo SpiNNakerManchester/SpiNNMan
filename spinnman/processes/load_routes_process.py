@@ -1,16 +1,14 @@
 from spinn_machine.router import Router
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.processes.write_memory_process import WriteMemoryProcess
 from spinnman.messages.scp.impl \
     import SCPRouterInitRequest, SCPRouterAllocRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .write_memory_process import WriteMemoryProcess
 
 import struct
 
 
 class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._base_address = None
@@ -19,15 +17,13 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         self._base_address = response.base_address
 
     def load_routes(self, x, y, routes, app_id):
-
         # Create the routing data - 16 bytes per entry plus one for the end
         # entry
         routing_data = bytearray(16 * (len(routes) + 1))
         n_entries = 0
         for route in routes:
-
-            route_entry \
-                = Router.convert_routing_table_entry_to_spinnaker_route(route)
+            route_entry = \
+                Router.convert_routing_table_entry_to_spinnaker_route(route)
 
             struct.pack_into(
                 "<H2xIII", routing_data, n_entries * 16, n_entries,

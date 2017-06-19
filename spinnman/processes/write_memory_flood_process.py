@@ -1,6 +1,5 @@
-from spinnman.messages.scp.impl \
-    import SCPFloodFillEndRequest, SCPFloodFillStartRequest, \
-        SCPFloodFillDataRequest
+from spinnman.messages.scp.impl import \
+    SCPFloodFillEndRequest, SCPFloodFillStartRequest, SCPFloodFillDataRequest
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 

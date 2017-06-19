@@ -1,10 +1,9 @@
 from spinnman.messages.scp.impl import SCPSDRAMAllocRequest
-from spinnman.processes.abstract_multi_connection_process \
+from .abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._base_address = None

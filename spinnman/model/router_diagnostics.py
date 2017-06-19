@@ -216,7 +216,7 @@ class RouterDiagnostics(object):
         :rtype: array of int
         """
         return self._register_values[
-            ROUTER_REGISTER_REGISTERS.USER_0.value :
+            ROUTER_REGISTER_REGISTERS.USER_0.value:
             ROUTER_REGISTER_REGISTERS.USER_3.value + 1]
 
     @property
