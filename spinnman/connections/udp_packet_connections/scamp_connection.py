@@ -1,9 +1,9 @@
-from spinnman import constants
 import struct
 
+from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
-from .udp_utils import update_sdp_header_for_udp_send
-from .udp_sdp_connection import UDPSDPConnection
+from .utils import update_sdp_header_for_udp_send
+from .sdp_connection import UDPSDPConnection
 from spinnman.connections.abstract_classes \
     import AbstractSCPSender, AbstractSCPReceiver
 
@@ -39,7 +39,7 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
         :type remote_port: int
         """
         if remote_port is None:
-            remote_port = constants.SCP_SCAMP_PORT
+            remote_port = SCP_SCAMP_PORT
         UDPSDPConnection.__init__(
             self, chip_x, chip_y, local_host, local_port, remote_host,
             remote_port)

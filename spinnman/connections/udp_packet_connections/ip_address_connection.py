@@ -1,4 +1,4 @@
-from .udp_connection import UDPConnection
+from .connection import UDPConnection
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 
 

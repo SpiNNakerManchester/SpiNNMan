@@ -1,10 +1,13 @@
-from .udp_connection import UDPConnection
+from .connection import UDPConnection
 from spinnman.connections.abstract_classes \
     import AbstractEIEIOReceiver, AbstractEIEIOSender, AbstractListenable
 from spinnman.messages.eieio \
     import read_eieio_command_message, read_eieio_data_message
 
 import struct
+
+_REPR_TEMPLATE = "UDPEIEIOConnection(local_host={}, local_port={},"\
+    "remote_host={}, remote_port={})"
 
 
 class UDPEIEIOConnection(UDPConnection, AbstractEIEIOReceiver,
@@ -39,11 +42,9 @@ class UDPEIEIOConnection(UDPConnection, AbstractEIEIOReceiver,
         data = self.receive(timeout)
         header = struct.unpack_from("<H", data)[0]
         if header & 0xC000 == 0x4000:
-            eieio_message = read_eieio_command_message(data, 0)
+            return read_eieio_command_message(data, 0)
         else:
-            eieio_message = read_eieio_data_message(data, 0)
-
-        return eieio_message
+            return read_eieio_data_message(data, 0)
 
     def send_eieio_message(self, eieio_message):
         self.send(eieio_message.bytestring)
@@ -55,8 +56,6 @@ class UDPEIEIOConnection(UDPConnection, AbstractEIEIOReceiver,
         return self.receive_eieio_message
 
     def __repr__(self):
-        return \
-            "UDPEIEIOConnection(local_host={}, local_port={}," \
-            "remote_host={}, remote_port={})".format(
-                self.local_ip_address, self.local_port,
-                self.remote_ip_address, self.remote_port)
+        return _REPR_TEMPLATE.format(
+            self.local_ip_address, self.local_port,
+            self.remote_ip_address, self.remote_port)

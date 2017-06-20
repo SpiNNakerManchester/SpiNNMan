@@ -1,6 +1,6 @@
 from spinnman.messages.sdp import SDPMessage, SDPFlag
-from .udp_connection import UDPConnection
-from .udp_utils import update_sdp_header_for_udp_send
+from .connection import UDPConnection
+from .utils import update_sdp_header_for_udp_send
 from spinnman.connections.abstract_classes \
     import AbstractSDPReceiver, AbstractSDPSender, AbstractListenable
 
