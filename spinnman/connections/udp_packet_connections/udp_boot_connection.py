@@ -43,13 +43,13 @@ class UDPBootConnection(UDPConnection,
 
     def send_boot_message(self, boot_message):
         """ See\
-            :py:meth:`spinnman.connections.abstract_spinnaker_boot_sender.AbstractSpinnakerBootSender.send_boot_message`
+            :py:meth:`spinnman.connections.abstract_classes.spinnaker_boot_sender.AbstractSpinnakerBootSender.send_boot_message`
         """
         self.send(boot_message.bytestring)
 
     def receive_boot_message(self, timeout=None):
         """ See\
-            :py:meth:`spinnman.connections.abstract_spinnaker_boot_receiver.AbstractSpinnakerBootReceiver.receive_boot_message`
+            :py:meth:`spinnman.connections.abstract_classes.spinnaker_boot_receiver.AbstractSpinnakerBootReceiver.receive_boot_message`
         """
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)

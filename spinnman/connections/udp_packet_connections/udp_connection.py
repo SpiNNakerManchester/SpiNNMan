@@ -108,7 +108,7 @@ class UDPConnection(AbstractConnection):
 
     def is_connected(self):
         """ See\
-            :py:meth:`spinnman.connections.AbstractConnection.abstract_connection.is_connected`
+            :py:meth:`spinnman.connections.abstract_classes.connection.AbstractConnection.is_connected`
         """
 
         # If this is not a sending socket, it is not connected
@@ -250,7 +250,7 @@ class UDPConnection(AbstractConnection):
 
     def close(self):
         """ See\
-            :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
+            :py:meth:`spinnman.connections.abstract_classes.connection.AbstractConnection.close`
         """
         try:
             self._socket.shutdown(socket.SHUT_WR)

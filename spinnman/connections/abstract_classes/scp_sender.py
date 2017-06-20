@@ -2,7 +2,7 @@ from six import add_metaclass
 
 from spinn_utilities.abstract_base \
     import AbstractBase, abstractmethod, abstractproperty
-from .abstract_connection import AbstractConnection
+from .connection import AbstractConnection
 
 
 @add_metaclass(AbstractBase)

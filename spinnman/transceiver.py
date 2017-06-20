@@ -229,7 +229,7 @@ class Transceiver(object):
                     specified, no communication will be possible until\
                     connections are found.
         :type connections: iterable of\
-                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+                    :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
         :param ignore_chips: An optional set of chips to ignore in the\
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
@@ -581,7 +581,7 @@ class Transceiver(object):
                     :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
         :param connection: The connection to use
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+                    :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
         :return: The received response, or the callback if get_callback is True
         :rtype:\
                     :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
@@ -613,7 +613,7 @@ class Transceiver(object):
         :type message: SDPMessage
         :param connection: An optional connection to use
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+            :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
         :rtype: None
         """
         if connection is None:
@@ -634,12 +634,12 @@ class Transceiver(object):
         :type y: int
         :param multicast_message: A multicast message to send
         :type multicast_message:\
-                    :py:class:`spinnman.messages.multicast_message.MulticastMessage`
+            :py:class:`spinnman.messages.multicast_message.MulticastMessage`
         :param connection: A specific connection over which to send the\
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_multicast_sender.AbstractMulticastSender`
+            :py:class:`spinnman.connections.abstract_classes.multicast_sender.AbstractMulticastSender`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -704,7 +704,7 @@ class Transceiver(object):
         :return: An iterable of discovered connections, not including the\
                     initially given connections in the constructor
         :rtype: iterable of\
-                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+            :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -783,7 +783,7 @@ class Transceiver(object):
 
         :return: An iterable of connections known to the transceiver
         :rtype: iterable of\
-                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+            :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
         :raise None: No known exceptions are raised
         """
         return self._all_connections
@@ -851,7 +851,7 @@ class Transceiver(object):
                     all connections will be tested, and the board will be\
                     considered to be connected if any one connection works.
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
+            :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
         :return: True if the board can be contacted, False otherwise
         :rtype: bool
         :raise None: No known exceptions are raised
@@ -2325,7 +2325,7 @@ class Transceiver(object):
                     specified, all SCPSender connections will send the message\
                     to clear the tag
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
+                    :py:class:`spinnman.connections.abstract_classes.scp_sender.AbstractSCPSender`
         :param board_address: Board address where the tag should be cleared.\
                     If not specified, all SCPSender connections will send the\
                     message to clear the tag
@@ -2363,7 +2363,7 @@ class Transceiver(object):
                     If not specified, all SCPSender connections will be\
                     queried and the response will be combined.
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_scp_sender.AbstractSCPSender`
+                    :py:class:`spinnman.connections.abstract_classes.scp_sender.AbstractSCPSender`
         :return: An iterable of tags
         :rtype: iterable of\
                     :py:class:`spinn_machine.tags.abstract_tag.AbstractTag`
@@ -2724,7 +2724,7 @@ class Transceiver(object):
                               local_port=None, local_host=None):
         """ Register a callback for a certain type of traffic to be received\
             via UDP.  Note that the connection class must extend\
-            :py:class:`spinnman.connections.abstract_classes.abstract_listenable.AbstractListenable`
+            :py:class:`spinnman.connections.abstract_classes.listenable.AbstractListenable`
             to avoid clashing with the SCAMP and BMP functionality
 
         :param callback: Function to be called when a packet is received
