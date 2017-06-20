@@ -596,7 +596,7 @@ class Transceiver(object):
         """ Sends an SDP message using one of the connections.
 
         :param message: The message to send
-        :type message: SDPMessage
+        :type message: spinnman.messages.sdp.SDPMessage
         :param connection: An optional connection to use
         :type connection:\
             :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`

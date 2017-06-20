@@ -42,6 +42,6 @@ class SCPWriteFPGARegisterRequest(AbstractSCPBMPRequest):
 
     def get_scp_response(self):
         """
-        :rtype: SCPCheckOKResponse
+        :rtype: spinnman.messages.scp.impl.SCPCheckOKResponse
         """
         return SCPCheckOKResponse("Send FPGA register write", "CMD_LINK_WRITE")
