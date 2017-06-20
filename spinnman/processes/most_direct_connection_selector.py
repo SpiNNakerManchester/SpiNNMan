@@ -2,11 +2,11 @@ from .abstract_multi_connection_process_connection_selector \
     import AbstractMultiConnectionProcessConnectionSelector
 
 
-class MultiConnectionProcessMostDirectConnectionSelector(
+class MostDirectConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
     """
-    MultiConnectionProcessMostDirectConnectionSelector: selector that goes
-    for the most direct connection for the message
+    MostDirectConnectionSelector: selector that goes for the most direct \
+    connection for the message
     """
 
     def __init__(self, machine, connections):

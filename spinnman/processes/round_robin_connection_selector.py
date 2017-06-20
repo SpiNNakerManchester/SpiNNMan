@@ -2,10 +2,10 @@ from .abstract_multi_connection_process_connection_selector \
     import AbstractMultiConnectionProcessConnectionSelector
 
 
-class MultiConnectionProcessRoundRobinConnectionSelector(
+class RoundRobinConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
     """
-    MultiConnectionProcessRoundRobinConnectionSelector: selector
+    RoundRobinConnectionSelector: selector
     """
 
     def __init__(self, connections):

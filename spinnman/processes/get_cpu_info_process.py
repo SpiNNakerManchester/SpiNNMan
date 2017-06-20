@@ -1,7 +1,6 @@
 from spinnman.model import CPUInfo
 from spinnman.constants import CPU_INFO_BYTES
-from spinnman.messages.spinnaker_boot._system_variables.\
-    _system_variable_boot_values import SystemVariableDefinition
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl import SCPReadMemoryRequest
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
