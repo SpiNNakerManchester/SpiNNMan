@@ -61,9 +61,8 @@ from spinnman.processes import MostDirectConnectionSelector
 from spinnman.utilities import utility_functions
 
 # storage handlers imports
-from spinn_storage_handlers.abstract_classes.abstract_data_reader \
-    import AbstractDataReader
-from spinn_storage_handlers.file_data_reader import FileDataReader
+from spinn_storage_handlers.abstract_classes import AbstractDataReader
+from spinn_storage_handlers import FileDataReader
 
 # spinnmachine imports
 from spinn_machine.core_subsets import CoreSubsets
