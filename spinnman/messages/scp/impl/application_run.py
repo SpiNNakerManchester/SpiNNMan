@@ -37,7 +37,7 @@ class SCPApplicationRunRequest(AbstractSCPRequest):
             processor_mask |= _WAIT_FLAG
 
         super(SCPApplicationRunRequest, self).__init__(
-            SDPHeader(flags=SDPFlag.REPLY_EXPECTED, port=0,
+            SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                       destination_cpu=0, destination_chip_x=x,
                       destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_AR),

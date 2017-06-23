@@ -32,7 +32,7 @@ class SCPCountStateRequest(AbstractSCPRequest):
         """
         super(SCPCountStateRequest, self).__init__(
             SDPHeader(
-                flags=SDPFlag.REPLY_EXPECTED, port=0,
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0,
                 destination_chip_x=self.DEFAULT_DEST_X_COORD,
                 destination_chip_y=self.DEFAULT_DEST_Y_COORD),

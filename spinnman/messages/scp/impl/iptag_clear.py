@@ -22,7 +22,7 @@ class SCPIPTagClearRequest(AbstractSCPRequest):
         """
         super(SCPIPTagClearRequest, self).__init__(
             SDPHeader(
-                flags=SDPFlag.REPLY_EXPECTED, port=0,
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_IPTAG),
