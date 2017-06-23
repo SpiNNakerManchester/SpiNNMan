@@ -1,11 +1,7 @@
 import unittest
 from spinnman.transceiver import Transceiver
-from spinnman.connections.udp_packet_connections.udp_boot_connection \
-    import UDPBootConnection
-from spinnman.connections.udp_packet_connections.udp_eieio_connection \
-    import UDPEIEIOConnection
-from spinnman.connections.udp_packet_connections.udp_scamp_connection \
-    import UDPSCAMPConnection
+from spinnman.connections.udp_packet_connections \
+    import UDPBootConnection, UDPEIEIOConnection, UDPSCAMPConnection
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
 

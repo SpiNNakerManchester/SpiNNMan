@@ -1,6 +1,5 @@
 import unittest
-from spinnman.connections.udp_packet_connections.udp_boot_connection import \
-    UDPBootConnection
+from spinnman.connections.udp_packet_connections import UDPBootConnection
 
 
 class MyTestCase(unittest.TestCase):
