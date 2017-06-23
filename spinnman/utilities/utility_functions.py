@@ -2,7 +2,7 @@
 from spinnman.model import BMPConnectionData
 from spinnman import constants
 from spinnman.messages.sdp import SDPMessage, SDPHeader, SDPFlag
-from spinnman.connections.udp_packet_connections.udp_utils \
+from spinnman.connections.udp_packet_connections.utils \
     import update_sdp_header_for_udp_send
 
 # general imports
