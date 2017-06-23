@@ -12,11 +12,8 @@ from spinnman.messages.scp.impl import SCPReadMemoryRequest
 from spinnman.model.enums \
     import DiagnosticFilterDestination, DiagnosticFilterPacketType
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
-from spinn_machine.core_subsets import CoreSubsets
-from spinn_machine.core_subset import CoreSubset
-from spinn_machine.tags.iptag import IPTag
-from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
-from spinn_machine.tags.reverse_iptag import ReverseIPTag
+from spinn_machine import CoreSubsets, CoreSubset, MulticastRoutingEntry
+from spinn_machine.tags import IPTag, ReverseIPTag
 from board_test_configuration import BoardTestConfiguration
 
 logging.basicConfig(level=logging.INFO)

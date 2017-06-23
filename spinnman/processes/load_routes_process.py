@@ -1,4 +1,4 @@
-from spinn_machine.router import Router
+from spinn_machine import Router
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl \
     import SCPRouterInitRequest, SCPRouterAllocRequest

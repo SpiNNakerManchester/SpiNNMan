@@ -65,7 +65,7 @@ from spinn_storage_handlers.abstract_classes import AbstractDataReader
 from spinn_storage_handlers import FileDataReader
 
 # spinnmachine imports
-from spinn_machine.core_subsets import CoreSubsets
+from spinn_machine import CoreSubsets
 
 # general imports
 import random
@@ -805,7 +805,7 @@ class Transceiver(object):
             they are connected to each other.
 
         :return: A machine description
-        :rtype: :py:class:`spinn_machine.machine.Machine`
+        :rtype: :py:class:`spinn_machine.Machine`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -1076,10 +1076,10 @@ class Transceiver(object):
                     the information.  If not specified, the information from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type core_subsets: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+        :type core_subsets: :py:class:`spinn_machine.CoreSubsets`
         :return: An iterable of the cpu information for the selected cores, or\
                     all cores if core_subsets is not specified
-        :rtype: iterable of :py:class:`spinnman.model.cpu_info.CPUInfo`
+        :rtype: iterable of :py:class:`spinnman.model.CPUInfo`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -1215,10 +1215,10 @@ class Transceiver(object):
                     the buffers.  If not specified, the buffers from\
                     all of the cores on all of the chips on the board are\
                     obtained
-        :type core_subsets: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+        :type core_subsets: :py:class:`spinn_machine.CoreSubsets`
         :return: An iterable of the buffers, which may not be in the order\
                     of core_subsets
-        :rtype: iterable of :py:class:`spinnman.model.io_buffer.IOBuffer`
+        :rtype: iterable of :py:class:`spinnman.model.IOBuffer`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -1251,7 +1251,7 @@ class Transceiver(object):
         :param p: The id of the processor to get the IOBUF for
         :type p: int
         :return: An IOBUF buffer
-        :rtype: :py:class:`spinnman.model.io_buffer.IOBuffer`
+        :rtype: :py:class:`spinnman.model.IOBuffer`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -1272,7 +1272,7 @@ class Transceiver(object):
         :param app_id: The id of the application from which to get the count.
         :type app_id: int
         :param state: The state count to get
-        :type state: :py:class:`spinnman.model.cpu_state.CPUState`
+        :type state: :py:class:`spinnman.model.CPUState`
         :return: A count of the cores with the given status
         :rtype: int
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1374,7 +1374,7 @@ class Transceiver(object):
             require a number of communications with the board to execute.
 
         :param core_subsets: Which cores on which chips to start the executable
-        :type core_subsets: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+        :type core_subsets: :py:class:`spinn_machine.CoreSubsets`
         :param executable: The data that is to be executed.  Should be one of\
                     the following:
                     * An instance of AbstractDataReader
@@ -2030,7 +2030,7 @@ class Transceiver(object):
 
         :param all_core_subsets: The cores to filter
         :type all_core_subsets:\
-                    :py:class:`spinnmachine.core_subsets.CoreSubsets`
+                    :py:class:`spinn_machine.CoreSubsets`
         :param states: The state or states to filter on
         :type states:\
                     :py:class:`spinnman.model.enums.cpu_state.CPUState` or\
@@ -2101,7 +2101,7 @@ class Transceiver(object):
         :param app_id: The id of the application to send to
         :type app_id: int
         :param signal: The signal to send
-        :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
+        :type signal: :py:class:`spinnman.messages.scp.SCPSignal`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2165,7 +2165,7 @@ class Transceiver(object):
 
         :param ip_tag: The tag to set up; note board_address can be None, in\
                     which case, the tag will be assigned to all boards
-        :type ip_tag: :py:class:`spinn_machine.tags.ip_tag.IPTag`
+        :type ip_tag: :py:class:`spinn_machine.tags.IPTag`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2221,7 +2221,7 @@ class Transceiver(object):
                     can be None, in which case, the tag will be assigned to\
                     all boards
         :type reverse_ip_tag:\
-                    :py:class:`spinn_machine.tags.reverse_ip_tag.ReverseIPTag`
+                    :py:class:`spinn_machine.tags.ReverseIPTag`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2284,7 +2284,7 @@ class Transceiver(object):
                     specified, all SCPSender connections will send the message\
                     to clear the tag
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_classes.scp_sender.AbstractSCPSender`
+                    :py:class:`spinnman.connections.abstract_classes.AbstractSCPSender`
         :param board_address: Board address where the tag should be cleared.\
                     If not specified, all SCPSender connections will send the\
                     message to clear the tag
@@ -2322,10 +2322,10 @@ class Transceiver(object):
                     If not specified, all SCPSender connections will be\
                     queried and the response will be combined.
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_classes.scp_sender.AbstractSCPSender`
+                    :py:class:`spinnman.connections.abstract_classes.AbstractSCPSender`
         :return: An iterable of tags
         :rtype: iterable of\
-                    :py:class:`spinn_machine.tags.abstract_tag.AbstractTag`
+                    :py:class:`spinn_machine.tags.AbstractTag`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -2411,7 +2411,7 @@ class Transceiver(object):
         :type y: int
         :param routes: An iterable of multicast routes to load
         :type routes: iterable of\
-                    :py:class:`SpinnMachine.multicast_routing_entry.MulticastRoutingEntry`
+                    :py:class:`spinn_machine.MulticastRoutingEntry`
         :param app_id: The id of the application with which to associate the\
                     routes.  If not specified, defaults to 0.
         :type app_id: int
@@ -2683,7 +2683,7 @@ class Transceiver(object):
                               local_port=None, local_host=None):
         """ Register a callback for a certain type of traffic to be received\
             via UDP.  Note that the connection class must extend\
-            :py:class:`spinnman.connections.abstract_classes.listenable.AbstractListenable`
+            :py:class:`spinnman.connections.abstract_classes.AbstractListenable`
             to avoid clashing with the SCAMP and BMP functionality
 
         :param callback: Function to be called when a packet is received
@@ -2698,7 +2698,7 @@ class Transceiver(object):
         :type local_host: str
         :return: The connection to be used
         :rtype:\
-                :py:class:`spinnman.connection.udp_packet_connections.udp_connection.UDPConnection`
+                :py:class:`spinnman.connection.udp_packet_connections.UDPConnection`
         """
 
         # If the connection class is not an AbstractListenable, this is an

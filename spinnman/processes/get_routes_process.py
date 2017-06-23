@@ -1,7 +1,6 @@
 from spinnman.messages.scp.impl import SCPReadMemoryRequest
-from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from spinn_machine import MulticastRoutingEntry
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 import functools

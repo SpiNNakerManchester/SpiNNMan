@@ -1,11 +1,6 @@
 import logging
 
-from spinn_machine.processor import Processor
-from spinn_machine.router import Router
-from spinn_machine.chip import Chip
-from spinn_machine.sdram import SDRAM
-from spinn_machine.machine import Machine
-from spinn_machine.link import Link
+from spinn_machine import Processor, Router, Chip, SDRAM, Machine, Link
 
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -46,7 +41,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :type chip_info: \
                     :py:class:`spinnman.model.ChipSummaryInfo`
         :return: The created chip
-        :rtype: :py:class:`spinn_machine.chip.Chip`
+        :rtype: :py:class:`spinn_machine.Chip`
         """
 
         # Create the processor list

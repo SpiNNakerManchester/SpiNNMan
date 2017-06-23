@@ -1,4 +1,4 @@
-from spinn_machine.core_subsets import CoreSubsets
+from spinn_machine import CoreSubsets
 
 
 class ExecutableTargets(object):
