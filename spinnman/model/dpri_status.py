@@ -1,8 +1,20 @@
 import struct
 
-from spinnman.utilities.utility_functions \
-    import get_router_timeout_value_from_byte
 from spinnman.messages.scp.enums import SCPDPRIPacketTypeFlags
+
+
+def _decode_router_timeout_value(value):
+    """ Get the timeout value of a router in ticks, given an 8-bit floating\
+        point value stored in an int (!)
+
+    :param value: The value to convert
+    :type value: int
+    """
+    mantissa = value & 0xF
+    exponent = (value >> 4) & 0xF
+    if exponent <= 4:
+        return ((mantissa + 16) - (2 ** (4 - exponent))) * (2 ** exponent)
+    return (mantissa + 16) * (2 ** exponent)
 
 
 class DPRIStatus(object):
@@ -26,14 +38,13 @@ class DPRIStatus(object):
     def router_timeout(self):
         """ The WAIT1 timeout value of the router in cycles
         """
-        return get_router_timeout_value_from_byte(self._router_timeout)
+        return _decode_router_timeout_value(self._router_timeout)
 
     @property
     def router_emergency_timeout(self):
         """ The WAIT2 timeout value of the router in cycles
         """
-        return get_router_timeout_value_from_byte(
-            self._router_emergency_timeout)
+        return _decode_router_timeout_value(self._router_emergency_timeout)
 
     @property
     def n_dropped_packets(self):
