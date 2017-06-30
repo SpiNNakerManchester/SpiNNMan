@@ -1559,6 +1559,7 @@ class Transceiver(object):
                 board(s), or 0 if the board is not in a frame
         """
         self._power(SCPPowerCommand.POWER_OFF, boards, cabinet, frame)
+        self._reinjection_running = False
 
     def _power(self, power_command, boards=0, cabinet=0, frame=0):
         """ Send a power request to the machine
@@ -2901,13 +2902,14 @@ class Transceiver(object):
                 self._update_machine()
 
             # Find a free core on each chip to use
-            self._reinjector_cores, failed_chips = \
-                self._machine.reserve_system_processors()
-            if len(failed_chips) > 0:
-                logger.warn(
-                    "The reinjector could not be enabled on the following"
-                    " chips due to lack of available cores: {}".format(
-                        failed_chips))
+            if self._reinjector_cores is None:
+                self._reinjector_cores, failed_chips = \
+                    self._machine.reserve_system_processors()
+                if len(failed_chips) > 0:
+                    logger.warn(
+                        "The reinjector could not be enabled on the following"
+                        " chips due to lack of available cores: {}".format(
+                            failed_chips))
 
             # Get an app id for the reinjector
             if self._reinjector_app_id is None:
