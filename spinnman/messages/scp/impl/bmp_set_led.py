@@ -1,13 +1,13 @@
 """
-SCPBMPSetLedRequest
+BMPSetLed
 """
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp.enums import SCPCommand
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPBMPSetLedRequest(BMPRequest):
+class BMPSetLed(BMPRequest):
     """ Set the led(s) of a board to either on, off or toggling
     """
 
@@ -47,4 +47,4 @@ class SCPBMPSetLedRequest(BMPRequest):
     def get_scp_response(self):
         """ Get the response from the write fpga register request
         """
-        return SCPCheckOKResponse("Set the LEDs of a board", "CMD_LED")
+        return CheckOKResponse("Set the LEDs of a board", "CMD_LED")

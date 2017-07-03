@@ -1,5 +1,5 @@
 from spinnman.messages.scp.impl import \
-    SCPFloodFillEndRequest, SCPFloodFillStartRequest, SCPFloodFillDataRequest
+    FloodFillEnd, FloodFillStart, FloodFillData
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
@@ -17,12 +17,12 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /
                                  UDP_MESSAGE_MAX_SIZE))
         self._send_request(
-            SCPFloodFillStartRequest(nearest_neighbour_id, n_blocks))
+            FloodFillStart(nearest_neighbour_id, n_blocks))
         self._finish()
         self.check_for_error()
 
     def _end_flood_fill(self, nearest_neighbour_id):
-        self._send_request(SCPFloodFillEndRequest(nearest_neighbour_id))
+        self._send_request(FloodFillEnd(nearest_neighbour_id))
         self._finish()
         self.check_for_error()
 
@@ -39,7 +39,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
                 bytes_to_send = UDP_MESSAGE_MAX_SIZE
 
-            self._send_request(SCPFloodFillDataRequest(
+            self._send_request(FloodFillData(
                 nearest_neighbour_id, block_no, offset,
                 data, data_offset, bytes_to_send))
 
@@ -65,7 +65,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
                 bytes_to_send = UDP_MESSAGE_MAX_SIZE
             data_array = data.read(bytes_to_send)
 
-            self._send_request(SCPFloodFillDataRequest(
+            self._send_request(FloodFillData(
                 nearest_neighbour_id, block_no, offset,
                 data_array, 0, len(data_array)))
 

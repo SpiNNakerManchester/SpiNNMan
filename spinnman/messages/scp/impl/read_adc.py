@@ -10,7 +10,7 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.model import ADCInfo
 
 
-class SCPReadADCRequest(BMPRequest):
+class ReadADC(BMPRequest):
     """ SCP Request for the data from the BMP including voltages and\
         temperature.
     """

@@ -2,10 +2,10 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPRouterClearRequest(AbstractSCPRequest):
+class RouterClear(AbstractSCPRequest):
     """ A request to clear the router on a chip
     """
 
@@ -22,7 +22,7 @@ class SCPRouterClearRequest(AbstractSCPRequest):
                     * If x is out of range
                     * If y is out of range
         """
-        super(SCPRouterClearRequest, self).__init__(
+        super(RouterClear, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -30,4 +30,4 @@ class SCPRouterClearRequest(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_RTR))
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("RouterClear", "CMD_RTR")
+        return CheckOKResponse("RouterClear", "CMD_RTR")

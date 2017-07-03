@@ -5,14 +5,14 @@ from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
-class SCPIPTagInfoResponse(AbstractSCPResponse):
+class IPTagGetInfoResponse(AbstractSCPResponse):
     """ An SCP response to a request for information about IP tags
     """
 
     def __init__(self):
         """
         """
-        super(SCPIPTagInfoResponse, self).__init__()
+        super(IPTagGetInfoResponse, self).__init__()
         self._tto = None
         self._pool_size = None
         self._fixed_size = None

@@ -2,13 +2,13 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .iptag_info_response import SCPIPTagInfoResponse
+from .iptag_get_info_response import IPTagGetInfoResponse
 
 _IPTAG_INFO = 4
 _IPTAG_MAX = 255
 
 
-class SCPTagInfoRequest(AbstractSCPRequest):
+class IPTagGetInfo(AbstractSCPRequest):
     """ An SCP Request information about IP tags
     """
 
@@ -19,7 +19,7 @@ class SCPTagInfoRequest(AbstractSCPRequest):
         :param y: The y-coordinate of a chip, between 0 and 255
         :type y: int
         """
-        super(SCPTagInfoRequest, self).__init__(
+        super(IPTagGetInfo, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -29,4 +29,4 @@ class SCPTagInfoRequest(AbstractSCPRequest):
             argument_2=_IPTAG_MAX)
 
     def get_scp_response(self):
-        return SCPIPTagInfoResponse()
+        return IPTagGetInfoResponse()

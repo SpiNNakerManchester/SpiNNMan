@@ -1,5 +1,5 @@
 """
-SCPReadFPGARegisterRequest
+ReadFPGARegister
 """
 
 # spinnman imports
@@ -12,7 +12,7 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 import struct
 
 
-class SCPReadFPGARegisterRequest(BMPRequest):
+class ReadFPGARegister(BMPRequest):
     """ Requests the data from a fpga's register
     """
 

@@ -9,7 +9,7 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 import struct
 
 
-class SCPRouterAllocRequest(AbstractSCPRequest):
+class RouterAlloc(AbstractSCPRequest):
     """ An SCP Request to allocate space for routing entries
     """
 
@@ -27,7 +27,7 @@ class SCPRouterAllocRequest(AbstractSCPRequest):
         :param n_entries: The number of entries to allocate
         :type n_entries: int
         """
-        super(SCPRouterAllocRequest, self).__init__(
+        super(RouterAlloc, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,

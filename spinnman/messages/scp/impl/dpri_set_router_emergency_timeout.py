@@ -2,10 +2,10 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand, DPRICommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPDPRISetRouterEmergencyTimeoutRequest(AbstractSCPRequest):
+class DPRISetRouterEmergencyTimeout(AbstractSCPRequest):
     """ An SCP Request to set the router emergency timeout for dropped packet\
         reinjection
     """
@@ -37,5 +37,5 @@ class SCPDPRISetRouterEmergencyTimeoutRequest(AbstractSCPRequest):
                        ((timeout_exponent & 0xF) << 4))
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("Set router emergency timeout",
-                                  SCPCommand.CMD_DPRI)
+        return CheckOKResponse(
+            "Set router emergency timeout", SCPCommand.CMD_DPRI)

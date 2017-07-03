@@ -5,14 +5,14 @@ from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
-class SCPCountStateResponse(AbstractSCPResponse):
+class CountStateResponse(AbstractSCPResponse):
     """ An SCP response to a request for the number of cores in a given state
     """
 
     def __init__(self):
         """
         """
-        super(SCPCountStateResponse, self).__init__()
+        super(CountStateResponse, self).__init__()
         self._count = None
 
     def read_data_bytestring(self, data, offset):

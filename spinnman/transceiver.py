@@ -11,21 +11,21 @@ from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl \
-    import SCPBMPSetLedRequest, SCPBMPVersionRequest, SCPPowerRequest
+    import BMPSetLed, BMPGetVersion, SetPower
 from spinnman.messages.scp.impl \
-    import SCPReadADCRequest, SCPReadFPGARegisterRequest
+    import ReadADC, ReadFPGARegister
 from spinnman.messages.scp.impl \
-    import SCPWriteFPGARegisterRequest, SCPIPTagTTORequest
+    import WriteFPGARegister, IPTagSetTTO
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
 from spinnman.messages.scp.impl \
-    import SCPReverseIPTagSetRequest, SCPReadMemoryRequest
+    import ReverseIPTagSet, ReadMemory
 from spinnman.messages.scp.impl \
-    import SCPCountStateRequest, SCPWriteMemoryRequest, SCPLEDRequest
+    import CountState, WriteMemory, SetLED
 from spinnman.messages.scp.impl \
-    import SCPApplicationRunRequest, SCPSendSignalRequest, SCPAppStopRequest
+    import ApplicationRun, SendSignal, AppStop
 from spinnman.messages.scp.impl \
-    import SCPIPTagSetRequest, SCPIPTagClearRequest, SCPRouterClearRequest
+    import IPTagSet, IPTagClear, RouterClear
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes \
     import SpinnakerBootReceiver, SpinnakerBootSender
@@ -1002,7 +1002,7 @@ class Transceiver(object):
         # revert at close
         for scamp_connection in self._scamp_connections:
             process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(SCPIPTagTTORequest(
+            process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_640_ms.value))
 
@@ -1287,7 +1287,7 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
-        response = process.execute(SCPCountStateRequest(app_id, state))
+        response = process.execute(CountState(app_id, state))
         return response.count
 
     def execute(
@@ -1353,7 +1353,7 @@ class Transceiver(object):
         # Request the start of the executable
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(
-            SCPApplicationRunRequest(app_id, x, y, processors, wait))
+            ApplicationRun(app_id, x, y, processors, wait))
 
         # Release the lock
         self._release_chip_execute_lock(x, y)
@@ -1468,7 +1468,7 @@ class Transceiver(object):
         self.send_signal(app_id, Signal.START)
 
     def power_on_machine(self):
-        """ Power on the whole machine
+        """ SetPower on the whole machine
         """
         if len(self._bmp_connections) == 0:
             logger.warn("No BMP connections, so can't power on")
@@ -1477,7 +1477,7 @@ class Transceiver(object):
                           bmp_connection.frame)
 
     def power_on(self, boards=0, cabinet=0, frame=0):
-        """ Power on a set of boards in the machine
+        """ SetPower on a set of boards in the machine
 
         :param boards: The board or boards to power on
         :param cabinet: the id of the cabinet containing the frame, or 0 \
@@ -1488,7 +1488,7 @@ class Transceiver(object):
         self._power(PowerCommand.POWER_ON, boards, cabinet, frame)
 
     def power_off_machine(self):
-        """ Power off the whole machine
+        """ SetPower off the whole machine
         """
         if len(self._bmp_connections) == 0:
             logger.warn("No BMP connections, so can't power off")
@@ -1497,7 +1497,7 @@ class Transceiver(object):
                            bmp_connection.frame)
 
     def power_off(self, boards=0, cabinet=0, frame=0):
-        """ Power off a set of boards in the machine
+        """ SetPower off a set of boards in the machine
 
         :param boards: The board or boards to power off
         :param cabinet: the id of the cabinet containing the frame, or 0 \
@@ -1528,15 +1528,15 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame),
             timeout=constants.BMP_POWER_ON_TIMEOUT, n_retries=0)
-        process.execute(SCPPowerRequest(power_command, boards))
+        process.execute(SetPower(power_command, boards))
 
     def set_led(self, led, action, board, cabinet, frame):
-        """ Set the LED state of a board in the machine
+        """ Set the SetLED state of a board in the machine
 
-        :param led:  Number of the LED or an iterable of LEDs to set the\
+        :param led:  Number of the SetLED or an iterable of LEDs to set the\
                 state of (0-7)
         :type led: int or iterable of int
-        :param action: State to set the LED to, either on, off or toggle
+        :param action: State to set the SetLED to, either on, off or toggle
         :type action:\
                 :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
         :param board: Specifies the board to control the LEDs of. This may \
@@ -1552,7 +1552,7 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
-        process.execute(SCPBMPSetLedRequest(led, action, board))
+        process.execute(BMPSetLed(led, action, board))
 
     def read_fpga_register(self, fpga_num, register, cabinet, frame, board):
         """
@@ -1572,7 +1572,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(
-            SCPReadFPGARegisterRequest(fpga_num, register, board))
+            ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register
 
     def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
@@ -1596,7 +1596,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         process.execute(
-            SCPWriteFPGARegisterRequest(fpga_num, register, value, board))
+            WriteFPGARegister(fpga_num, register, value, board))
 
     def read_adc_data(self, board, cabinet, frame):
         """ Read the BMP ADC data
@@ -1610,7 +1610,7 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
-        response = process.execute(SCPReadADCRequest(board))
+        response = process.execute(ReadADC(board))
         return response.adc_info
 
     def read_bmp_version(self, board, cabinet, frame):
@@ -1625,7 +1625,7 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
-        response = process.execute(SCPBMPVersionRequest(board))
+        response = process.execute(BMPGetVersion(board))
         return response.version_info
 
     def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
@@ -1949,7 +1949,7 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
 
-        process.execute(SCPAppStopRequest(app_id))
+        process.execute(AppStop(app_id))
 
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
@@ -2116,10 +2116,10 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(SCPSendSignalRequest(app_id, signal))
+        process.execute(SendSignal(app_id, signal))
 
     def set_leds(self, x, y, cpu, led_states):
-        """ Set LED states.
+        """ Set SetLED states.
 
         :param x: The x-coordinate of the chip on which to set the LEDs
         :type x: int
@@ -2127,7 +2127,7 @@ class Transceiver(object):
         :type y: int
         :param cpu: The CPU of the chip on which to set the LEDs
         :type cpu: int
-        :param led_states: A dictionary mapping LED index to state with\
+        :param led_states: A dictionary mapping SetLED index to state with\
                            0 being off, 1 on and 2 inverted.
         :type led_states: dict
         :return: Nothing is returned
@@ -2143,7 +2143,7 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
 
-        process.execute(SCPLEDRequest(x, y, cpu, led_states))
+        process.execute(SetLED(x, y, cpu, led_states))
 
     def locate_spinnaker_connection_for_board_address(self, board_address):
         """ Find a connection that matches the given board IP address
@@ -2210,7 +2210,7 @@ class Transceiver(object):
             ip_address = bytearray(socket.inet_aton(ip_string))
 
             process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(SCPIPTagSetRequest(
+            process.execute(IPTagSet(
                 connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
                 ip_tag.tag, strip=ip_tag.strip_sdp))
 
@@ -2268,7 +2268,7 @@ class Transceiver(object):
 
         for connection in connections:
             process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(SCPReverseIPTagSetRequest(
+            process.execute(ReverseIPTagSet(
                 connection.chip_x, connection.chip_y,
                 reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
                 reverse_ip_tag.destination_p,
@@ -2312,7 +2312,7 @@ class Transceiver(object):
 
         for connection in connections:
             process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(SCPIPTagClearRequest(
+            process.execute(IPTagClear(
                 connection.chip_x, connection.chip_y, tag))
 
     def get_tags(self, connection=None):
@@ -2479,7 +2479,7 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(SCPRouterClearRequest(x, y))
+        process.execute(RouterClear(x, y))
 
     def get_router_diagnostics(self, x, y):
         """ Get router diagnostic information from a chip
@@ -2554,7 +2554,7 @@ class Transceiver(object):
                             constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
 
         process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(SCPWriteMemoryRequest(
+        process.execute(WriteMemory(
             x, y, memory_position, struct.pack("<I", data_to_send)))
 
     def get_router_diagnostic_filter(self, x, y, position):
@@ -2589,7 +2589,7 @@ class Transceiver(object):
                             constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(
-            SCPReadMemoryRequest(x, y, memory_position, 4))
+            ReadMemory(x, y, memory_position, 4))
         return DiagnosticFilter.read_from_int(struct.unpack_from(
             "<I", response.data, response.offset)[0])
 
@@ -2628,7 +2628,7 @@ class Transceiver(object):
             for counter_id in counter_ids:
                 clear_data |= 1 << counter_id + 16
         process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(SCPWriteMemoryRequest(
+        process.execute(WriteMemory(
             x, y, 0xf100002c, struct.pack("<I", clear_data)))
 
     @property

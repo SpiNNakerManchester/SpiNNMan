@@ -1,7 +1,7 @@
 from spinn_machine import Router
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl \
-    import SCPRouterInitRequest, SCPRouterAllocRequest
+    import RouterInit, RouterAlloc
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .write_memory_process import WriteMemoryProcess
 
@@ -41,7 +41,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             x, y, 0, table_address, routing_data, 0, len(routing_data))
 
         # Allocate space in the router table
-        self._send_request(SCPRouterAllocRequest(x, y, app_id, n_entries),
+        self._send_request(RouterAlloc(x, y, app_id, n_entries),
                            self.handle_router_alloc_response)
         self._finish()
         self.check_for_error()
@@ -52,7 +52,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
         # Load the entries
         self._send_request(
-            SCPRouterInitRequest(x, y, n_entries, table_address,
-                                 self._base_address, app_id))
+            RouterInit(
+                x, y, n_entries, table_address, self._base_address, app_id))
         self._finish()
         self.check_for_error()

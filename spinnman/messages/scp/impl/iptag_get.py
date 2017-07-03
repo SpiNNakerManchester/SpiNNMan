@@ -11,7 +11,7 @@ import struct
 _IPTAG_GET = 2
 
 
-class SCPTagGetRequest(AbstractSCPRequest):
+class IPTagGet(AbstractSCPRequest):
     """ An SCP Request to get an IP tag
     """
 
@@ -26,7 +26,7 @@ class SCPTagGetRequest(AbstractSCPRequest):
         :param tag: The tag, between 0 and 7
         :type tag: int
         """
-        super(SCPTagGetRequest, self).__init__(
+        super(IPTagGet, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,

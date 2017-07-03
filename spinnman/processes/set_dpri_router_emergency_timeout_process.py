@@ -1,4 +1,4 @@
-from spinnman.messages.scp.impl import SCPDPRISetRouterEmergencyTimeoutRequest
+from spinnman.messages.scp.impl import DPRISetRouterEmergencyTimeout
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
@@ -9,7 +9,7 @@ class SetDPRIRouterEmergencyTimeoutProcess(AbstractMultiConnectionProcess):
     def set_timeout(self, mantissa, exponent, core_subsets):
         for core_subset in core_subsets.core_subsets:
             for processor_id in core_subset.processor_ids:
-                self._send_request(SCPDPRISetRouterEmergencyTimeoutRequest(
+                self._send_request(DPRISetRouterEmergencyTimeout(
                     core_subset.x, core_subset.y, processor_id,
                     mantissa, exponent))
         self._finish()

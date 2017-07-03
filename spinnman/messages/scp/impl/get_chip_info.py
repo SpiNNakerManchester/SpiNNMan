@@ -7,7 +7,7 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.model import ChipSummaryInfo
 
 
-class SCPChipInfoRequest(AbstractSCPRequest):
+class GetChipInfo(AbstractSCPRequest):
     """ An SCP request to read the chip information from a core
     """
 

@@ -1,60 +1,58 @@
-from .app_stop import SCPAppStopRequest
-from .application_run import SCPApplicationRunRequest
-from .bmp_set_led import SCPBMPSetLedRequest
-from .bmp_version import SCPBMPVersionRequest
-from .check_ok_response import SCPCheckOKResponse
-from .chip_info import SCPChipInfoRequest
-from .count_state import SCPCountStateRequest
-from .dpri_exit import SCPDPRIExitRequest
-from .dpri_get_status import SCPDPRIGetStatusRequest
-from .dpri_reset_counters import SCPDPRIResetCountersRequest
-from .dpri_set_reinjection_packet_types \
-    import SCPDPRISetReinjectionPacketTypesRequest
-from .dpri_set_router_emergency_timeout \
-    import SCPDPRISetRouterEmergencyTimeoutRequest
-from .dpri_set_router_timeout import SCPDPRISetRouterTimeoutRequest
-from .flood_fill_data import SCPFloodFillDataRequest
-from .flood_fill_end import SCPFloodFillEndRequest
-from .flood_fill_start import SCPFloodFillStartRequest
-from .iptag_clear import SCPIPTagClearRequest
-from .iptag_get import SCPTagGetRequest
-from .iptag_info import SCPTagInfoRequest
-from .iptag_set import SCPIPTagSetRequest
-from .iptag_tto import SCPIPTagTTORequest
-from .led import SCPLEDRequest
-from .power import SCPPowerRequest
-from .read_adc import SCPReadADCRequest
-from .read_fpga_register import SCPReadFPGARegisterRequest
-from .read_link import SCPReadLinkRequest
-from .read_memory import SCPReadMemoryRequest
-from .reverse_iptag_set import SCPReverseIPTagSetRequest
-from .router_alloc import SCPRouterAllocRequest
-from .router_clear import SCPRouterClearRequest
-from .router_init import SCPRouterInitRequest
-from .sdram_alloc import SCPSDRAMAllocRequest
-from .sdram_de_alloc import SCPSDRAMDeAllocRequest
-from .send_signal import SCPSendSignalRequest
-from .version import SCPVersionRequest
-from .write_fpga_register import SCPWriteFPGARegisterRequest
-from .write_link import SCPWriteLinkRequest
-from .write_memory import SCPWriteMemoryRequest
+from .app_stop import AppStop
+from .application_run import ApplicationRun
+from .bmp_set_led import BMPSetLed
+from .bmp_get_version import BMPGetVersion
+from .check_ok_response import CheckOKResponse
+from .get_chip_info import GetChipInfo
+from .count_state import CountState
+from .dpri_exit import DPRIExit
+from .dpri_get_status import DPRIGetStatus
+from .dpri_reset_counters import DPRIResetCounters
+from .dpri_set_reinjection_packet_types import DPRISetReinjectionPacketTypes
+from .dpri_set_router_emergency_timeout import DPRISetRouterEmergencyTimeout
+from .dpri_set_router_timeout import DPRISetRouterTimeout
+from .flood_fill_data import FloodFillData
+from .flood_fill_end import FloodFillEnd
+from .flood_fill_start import FloodFillStart
+from .iptag_clear import IPTagClear
+from .iptag_get import IPTagGet
+from .iptag_get_info import IPTagGetInfo
+from .iptag_set import IPTagSet
+from .iptag_set_tto import IPTagSetTTO
+from .set_led import SetLED
+from .set_power import SetPower
+from .read_adc import ReadADC
+from .read_fpga_register import ReadFPGARegister
+from .read_link import ReadLink
+from .read_memory import ReadMemory
+from .reverse_iptag_set import ReverseIPTagSet
+from .router_alloc import RouterAlloc
+from .router_clear import RouterClear
+from .router_init import RouterInit
+from .sdram_alloc import SDRAMAlloc
+from .sdram_de_alloc import SDRAMDeAlloc
+from .send_signal import SendSignal
+from .get_version import GetVersion
+from .write_fpga_register import WriteFPGARegister
+from .write_link import WriteLink
+from .write_memory import WriteMemory
 
-__all__ = ["SCPAppStopRequest", "SCPApplicationRunRequest",
-           "SCPBMPSetLedRequest", "SCPBMPVersionRequest",
-           "SCPCheckOKResponse", "SCPChipInfoRequest", "SCPCountStateRequest",
-           "SCPDPRIExitRequest", "SCPDPRIGetStatusRequest",
-           "SCPDPRIResetCountersRequest",
-           "SCPDPRISetReinjectionPacketTypesRequest",
-           "SCPDPRISetRouterEmergencyTimeoutRequest",
-           "SCPDPRISetRouterTimeoutRequest", "SCPFloodFillDataRequest",
-           "SCPFloodFillEndRequest", "SCPFloodFillStartRequest",
-           "SCPIPTagClearRequest", "SCPTagGetRequest", "SCPTagInfoRequest",
-           "SCPIPTagSetRequest", "SCPIPTagTTORequest", "SCPLEDRequest",
-           "SCPPowerRequest", "SCPReadADCRequest",
-           "SCPReadFPGARegisterRequest", "SCPReadLinkRequest",
-           "SCPReadMemoryRequest", "SCPReverseIPTagSetRequest",
-           "SCPRouterAllocRequest", "SCPRouterClearRequest",
-           "SCPRouterInitRequest", "SCPSDRAMAllocRequest",
-           "SCPSDRAMDeAllocRequest", "SCPSendSignalRequest",
-           "SCPVersionRequest", "SCPWriteFPGARegisterRequest",
-           "SCPWriteLinkRequest", "SCPWriteMemoryRequest"]
+__all__ = ["AppStop", "ApplicationRun",
+           "BMPSetLed", "BMPGetVersion",
+           "CheckOKResponse", "GetChipInfo", "CountState",
+           "DPRIExit", "DPRIGetStatus",
+           "DPRIResetCounters",
+           "DPRISetReinjectionPacketTypes",
+           "DPRISetRouterEmergencyTimeout",
+           "DPRISetRouterTimeout", "FloodFillData",
+           "FloodFillEnd", "FloodFillStart",
+           "IPTagClear", "IPTagGet", "IPTagGetInfo",
+           "IPTagSet", "IPTagSetTTO", "SetLED",
+           "SetPower", "ReadADC",
+           "ReadFPGARegister", "ReadLink",
+           "ReadMemory", "ReverseIPTagSet",
+           "RouterAlloc", "RouterClear",
+           "RouterInit", "SDRAMAlloc",
+           "SDRAMDeAlloc", "SendSignal",
+           "GetVersion", "WriteFPGARegister",
+           "WriteLink", "WriteMemory"]

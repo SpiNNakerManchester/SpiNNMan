@@ -9,7 +9,7 @@ _SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 _SYSTEM_VARIABLE_BYTES = 256
 
 
-class ChipInfo(object):
+class GetChipInfo(object):
     """ Represents the system variables for a chip, received from the chip\
         SDRAM
     """

@@ -7,7 +7,7 @@ from spinnman.model import DPRIStatus
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
-class SCPDPRIGetStatusRequest(AbstractSCPRequest):
+class DPRIGetStatus(AbstractSCPRequest):
     """ An SCP Request to get the status of the dropped packet reinjection
     """
 

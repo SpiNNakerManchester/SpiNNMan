@@ -7,7 +7,7 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.constants import address_length_dtype
 
 
-class SCPReadMemoryRequest(AbstractSCPRequest):
+class ReadMemory(AbstractSCPRequest):
     """ An SCP request to read a region of memory on a chip
     """
 
@@ -27,7 +27,7 @@ class SCPReadMemoryRequest(AbstractSCPRequest):
                     * If the base address is not a positive number
                     * If the size is out of range
         """
-        super(SCPReadMemoryRequest, self).__init__(
+        super(ReadMemory, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=cpu, destination_chip_x=x,

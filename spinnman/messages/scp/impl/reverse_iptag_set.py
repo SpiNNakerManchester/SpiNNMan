@@ -2,12 +2,12 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 _IPTAG_SET = 1
 
 
-class SCPReverseIPTagSetRequest(AbstractSCPRequest):
+class ReverseIPTagSet(AbstractSCPRequest):
     """ An SCP Request to set an IP Tag
     """
 
@@ -40,7 +40,7 @@ class SCPReverseIPTagSetRequest(AbstractSCPRequest):
                 tag)
         arg2 = ((destination_x << 24) | (destination_y << 16) | port)
 
-        super(SCPReverseIPTagSetRequest, self).__init__(
+        super(ReverseIPTagSet, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -51,4 +51,4 @@ class SCPReverseIPTagSetRequest(AbstractSCPRequest):
             argument_3=0)
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("Set Reverse IP Tag", "CMD_IPTAG")
+        return CheckOKResponse("Set Reverse IP Tag", "CMD_IPTAG")

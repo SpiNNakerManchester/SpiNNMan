@@ -3,7 +3,7 @@ from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
-class SCPCheckOKResponse(AbstractSCPResponse):
+class CheckOKResponse(AbstractSCPResponse):
     """ An SCP response to a request which returns nothing other than OK
     """
 
@@ -15,7 +15,7 @@ class SCPCheckOKResponse(AbstractSCPResponse):
         :param command: The command that was sent
         :type command: str
         """
-        super(SCPCheckOKResponse, self).__init__()
+        super(CheckOKResponse, self).__init__()
         self._operation = operation
         self._command = command
 

@@ -1,5 +1,5 @@
 from spinnman.messages.scp.impl \
-    import SCPWriteLinkRequest, SCPWriteMemoryRequest
+    import WriteLink, WriteMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
@@ -31,24 +31,24 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         """
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(SCPWriteMemoryRequest, x=x, y=y, cpu=p))
+            functools.partial(WriteMemory, x=x, y=y, cpu=p))
 
     def write_link_memory_from_bytearray(self, x, y, p, link, base_address,
                                          data, offset, n_bytes):
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(SCPWriteLinkRequest, x=x, y=y, cpu=p, link=link))
+            functools.partial(WriteLink, x=x, y=y, cpu=p, link=link))
 
     def write_memory_from_reader(self, x, y, p, base_address, data, n_bytes):
         self._write_memory_from_reader(
             base_address, data, n_bytes,
-            functools.partial(SCPWriteMemoryRequest, x=x, y=y, cpu=p))
+            functools.partial(WriteMemory, x=x, y=y, cpu=p))
 
     def write_link_memory_from_reader(self, x, y, p, link, base_address, data,
                                       n_bytes):
         self._write_memory_from_reader(
             base_address, data, n_bytes,
-            functools.partial(SCPWriteLinkRequest, x=x, y=y, cpu=p, link=link))
+            functools.partial(WriteLink, x=x, y=y, cpu=p, link=link))
 
     def _write_memory_from_bytearray(self, base_address, data, offset,
                                      n_bytes, packet_class):

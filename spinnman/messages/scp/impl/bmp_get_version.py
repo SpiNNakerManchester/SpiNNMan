@@ -1,15 +1,15 @@
 """
-SCPBMPVersionRequest
+BMPGetVersion
 """
 
 # spinnman imports
 from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
-from .version_response import SCPVersionResponse
+from .get_version_response import GetVersionResponse
 
 
-class SCPBMPVersionRequest(BMPRequest):
+class BMPGetVersion(BMPRequest):
     """ An SCP request to read the version of software running on a core
     """
 
@@ -29,4 +29,4 @@ class SCPBMPVersionRequest(BMPRequest):
         """ See\
             :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
-        return SCPVersionResponse()
+        return GetVersionResponse()

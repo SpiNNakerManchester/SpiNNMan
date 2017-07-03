@@ -2,12 +2,12 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.messages.scp import SCPRequestHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 _WAIT_FLAG = 0x1 << 18
 
 
-class SCPApplicationRunRequest(AbstractSCPRequest):
+class ApplicationRun(AbstractSCPRequest):
     """ An SCP request to run an application loaded on a chip
     """
 
@@ -36,7 +36,7 @@ class SCPApplicationRunRequest(AbstractSCPRequest):
         if wait:
             processor_mask |= _WAIT_FLAG
 
-        super(SCPApplicationRunRequest, self).__init__(
+        super(ApplicationRun, self).__init__(
             SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                       destination_cpu=0, destination_chip_x=x,
                       destination_chip_y=y),
@@ -47,4 +47,4 @@ class SCPApplicationRunRequest(AbstractSCPRequest):
         """ See\
             :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
-        return SCPCheckOKResponse("Run Application", "CMD_AR")
+        return CheckOKResponse("Run Application", "CMD_AR")

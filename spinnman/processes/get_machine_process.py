@@ -5,7 +5,7 @@ from spinn_machine import Processor, Router, Chip, SDRAM, Machine, Link
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl \
-    import SCPReadMemoryRequest, SCPReadLinkRequest, SCPChipInfoRequest
+    import ReadMemory, ReadLink, GetChipInfo
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
@@ -30,7 +30,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         self._p2p_column_data = list()
 
-        # A dictionary of (x, y) -> ChipInfo
+        # A dictionary of (x, y) -> GetChipInfo
         self._chip_info = dict()
 
     def _make_chip(self, width, height, chip_info):
@@ -108,10 +108,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._chip_info[chip_info.x, chip_info.y] = chip_info
 
     def _receive_error(self, request, exception, tb):
-        # If we get an SCPReadLinkRequest with a
+        # If we get an ReadLink with a
         # SpinnmanUnexpectedResponseCodeException, this is a failed link
         # and so can be ignored
-        if isinstance(request, SCPReadLinkRequest):
+        if isinstance(request, ReadLink):
             if isinstance(exception, SpinnmanUnexpectedResponseCodeException):
                 return
         AbstractProcess._receive_error(self, request, exception, tb)
@@ -122,7 +122,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         for column in range(width):
             offset = P2PTable.get_column_offset(column)
             self._send_request(
-                SCPReadMemoryRequest(
+                ReadMemory(
                     x=boot_x, y=boot_y,
                     base_address=(ROUTER_REGISTER_P2P_ADDRESS + offset),
                     size=p2p_column_bytes),
@@ -134,7 +134,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Get the chip information for each chip
         for (x, y) in p2p_table.iterchips():
             self._send_request(
-                SCPChipInfoRequest(x, y), self._receive_chip_info)
+                GetChipInfo(x, y), self._receive_chip_info)
         self._finish()
         try:
             self.check_for_error()

@@ -9,7 +9,7 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 import struct
 
 
-class SCPSDRAMDeAllocRequest(AbstractSCPRequest):
+class SDRAMDeAlloc(AbstractSCPRequest):
     """ An SCP Request to free space in the SDRAM
     """
 

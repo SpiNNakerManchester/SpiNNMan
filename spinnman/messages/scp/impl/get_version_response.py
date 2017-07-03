@@ -4,14 +4,14 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.model import VersionInfo
 
 
-class SCPVersionResponse(AbstractSCPResponse):
+class GetVersionResponse(AbstractSCPResponse):
     """ An SCP response to a request for the version of software running
     """
 
     def __init__(self):
         """
         """
-        super(SCPVersionResponse, self).__init__()
+        super(GetVersionResponse, self).__init__()
         self._version_info = None
 
     def read_data_bytestring(self, data, offset):

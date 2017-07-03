@@ -2,13 +2,13 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 _NNP_FORWARD_RETRY = (1 << 31) | (0x3f << 8) | 0x18
 _NNP_FLOOD_FILL_START = 6
 
 
-class SCPFloodFillStartRequest(AbstractSCPRequest):
+class FloodFillStart(AbstractSCPRequest):
     """ A request to start a flood fill of data
     """
 
@@ -35,7 +35,7 @@ class SCPFloodFillStartRequest(AbstractSCPRequest):
             data = (((x & 0xfc) << 24) + ((y & 0xfc) << 16) +
                     (3 << 16) + (1 << m))
 
-        super(SCPFloodFillStartRequest, self).__init__(
+        super(FloodFillStart, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0,
@@ -45,4 +45,4 @@ class SCPFloodFillStartRequest(AbstractSCPRequest):
             argument_1=key, argument_2=data, argument_3=_NNP_FORWARD_RETRY)
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("Flood Fill", "CMD_NNP:NNP_FFS")
+        return CheckOKResponse("Flood Fill", "CMD_NNP:NNP_FFS")

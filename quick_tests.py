@@ -8,7 +8,7 @@ from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.enums import Signal
 from spinnman.model import DiagnosticFilter
-from spinnman.messages.scp.impl import SCPReadMemoryRequest
+from spinnman.messages.scp.impl import ReadMemory
 from spinnman.model.enums \
     import DiagnosticFilterDestination, DiagnosticFilterPacketType
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
@@ -282,12 +282,12 @@ try:
 
     print "Send read requests"
     print "======================"
-    transceiver.send_scp_message(SCPReadMemoryRequest(1, 0, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(1, 1, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
-    transceiver.send_scp_message(SCPReadMemoryRequest(0, 1, 0x70000000, 4))
+    transceiver.send_scp_message(ReadMemory(1, 0, 0x70000000, 4))
+    transceiver.send_scp_message(ReadMemory(1, 1, 0x70000000, 4))
+    transceiver.send_scp_message(ReadMemory(1, 1, 0x70000000, 4))
+    transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
+    transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
+    transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
 
     print "Get Router Diagnostics"
     print "======================"

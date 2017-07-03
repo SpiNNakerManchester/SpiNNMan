@@ -1,6 +1,6 @@
 import functools
 from spinnman.messages.scp.impl \
-    import SCPReadLinkRequest, SCPReadMemoryRequest
+    import ReadLink, ReadMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
@@ -20,12 +20,12 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
     def read_memory(self, x, y, p, base_address, length):
         return self._read_memory(
             base_address, length,
-            functools.partial(SCPReadMemoryRequest, x=x, y=y, cpu=p))
+            functools.partial(ReadMemory, x=x, y=y, cpu=p))
 
     def read_link_memory(self, x, y, p, link, base_address, length):
         return self._read_memory(
             base_address, length,
-            functools.partial(SCPReadLinkRequest, x=x, y=y, cpu=p, link=link))
+            functools.partial(ReadLink, x=x, y=y, cpu=p, link=link))
 
     def _read_memory(self, base_address, length, packet_class):
         data = bytearray(length)

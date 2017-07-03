@@ -1,6 +1,6 @@
 from .adc_info import ADCInfo
 from .bmp_connection_data import BMPConnectionData
-from .chip_info import ChipInfo
+from .chip_info import GetChipInfo
 from .chip_summary_info import ChipSummaryInfo
 from .cpu_info import CPUInfo
 from .cpu_infos import CPUInfos
@@ -13,7 +13,7 @@ from .p2p_table import P2PTable
 from .router_diagnostics import RouterDiagnostics
 from .version_info import VersionInfo
 
-__all__ = ["ADCInfo", "BMPConnectionData", "ChipInfo", "ChipSummaryInfo",
+__all__ = ["ADCInfo", "BMPConnectionData", "GetChipInfo", "ChipSummaryInfo",
            "CPUInfo", "CPUInfos", "DiagnosticFilter", "DPRIStatus",
            "ExecutableTargets", "IOBuffer", "MachineDimensions", "P2PTable",
            "RouterDiagnostics", "VersionInfo"]

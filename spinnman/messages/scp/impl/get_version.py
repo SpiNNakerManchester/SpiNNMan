@@ -2,10 +2,10 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .version_response import SCPVersionResponse
+from .get_version_response import GetVersionResponse
 
 
-class SCPVersionRequest(AbstractSCPRequest):
+class GetVersion(AbstractSCPRequest):
     """ An SCP request to read the version of software running on a core
     """
 
@@ -23,7 +23,7 @@ class SCPVersionRequest(AbstractSCPRequest):
                     * If the chip coordinates are out of range
                     * If the processor is out of range
         """
-        super(SCPVersionRequest, self).__init__(
+        super(GetVersion, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=p, destination_chip_x=x,
@@ -34,4 +34,4 @@ class SCPVersionRequest(AbstractSCPRequest):
         """ See\
             :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
         """
-        return SCPVersionResponse()
+        return GetVersionResponse()

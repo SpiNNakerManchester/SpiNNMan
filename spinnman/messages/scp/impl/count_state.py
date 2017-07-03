@@ -2,7 +2,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .count_state_response import SCPCountStateResponse
+from .count_state_response import CountStateResponse
 
 _ALL_CORE_MASK = 0xFFFF
 _COUNT_OPERATION = 1
@@ -18,7 +18,7 @@ def _get_data(app_id, state):
     return data
 
 
-class SCPCountStateRequest(AbstractSCPRequest):
+class CountState(AbstractSCPRequest):
     """ An SCP Request to get a count of the cores in a particular state
     """
 
@@ -30,7 +30,7 @@ class SCPCountStateRequest(AbstractSCPRequest):
         :param state: The state to count
         :type state: :py:class:`spinnman.model.cpu_state.CPUState`
         """
-        super(SCPCountStateRequest, self).__init__(
+        super(CountState, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0,
@@ -42,4 +42,4 @@ class SCPCountStateRequest(AbstractSCPRequest):
             argument_3=_ALL_CORE_MASK)
 
     def get_scp_response(self):
-        return SCPCountStateResponse()
+        return CountStateResponse()

@@ -3,7 +3,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 _ALL_CORE_MASK = 0xFFFF
 _APP_MASK = 0xFF
@@ -15,7 +15,7 @@ def _get_data(app_id, signal):
     return data
 
 
-class SCPSendSignalRequest(AbstractSCPRequest):
+class SendSignal(AbstractSCPRequest):
     """ An SCP Request to send a signal to cores
     """
 
@@ -34,7 +34,7 @@ class SCPSendSignalRequest(AbstractSCPRequest):
             raise SpinnmanInvalidParameterException(
                 "app_id", str(app_id), "Must be between 0 and 255")
 
-        super(SCPSendSignalRequest, self).__init__(
+        super(SendSignal, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0,
@@ -46,4 +46,4 @@ class SCPSendSignalRequest(AbstractSCPRequest):
             argument_3=_ALL_CORE_MASK)
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("Send Signal", "CMD_SIG")
+        return CheckOKResponse("Send Signal", "CMD_SIG")

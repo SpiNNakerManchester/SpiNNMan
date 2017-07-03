@@ -2,10 +2,10 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand, DPRICommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPDPRISetReinjectionPacketTypesRequest(AbstractSCPRequest):
+class DPRISetReinjectionPacketTypes(AbstractSCPRequest):
     """ An SCP Request to set the dropped packet reinjected packet types
     """
 
@@ -39,5 +39,5 @@ class SCPDPRISetReinjectionPacketTypesRequest(AbstractSCPRequest):
             argument_2=flags)
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("Set reinjected packet types",
-                                  SCPCommand.CMD_DPRI)
+        return CheckOKResponse(
+            "Set reinjected packet types", SCPCommand.CMD_DPRI)

@@ -10,7 +10,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 import struct
 
 
-class SCPSDRAMAllocRequest(AbstractSCPRequest):
+class SDRAMAlloc(AbstractSCPRequest):
     """ An SCP Request to allocate space in the SDRAM space
     """
 

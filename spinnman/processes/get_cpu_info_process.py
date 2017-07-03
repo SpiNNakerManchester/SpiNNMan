@@ -2,7 +2,7 @@ from spinnman.model import CPUInfo
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.utilities.utility_functions import get_vcpu_address
-from spinnman.messages.scp.impl import SCPReadMemoryRequest
+from spinnman.messages.scp.impl import ReadMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 import functools
@@ -32,7 +32,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
             y = core_subset.y
 
             for p in core_subset.processor_ids:
-                self._send_request(SCPReadMemoryRequest(
+                self._send_request(ReadMemory(
                     x, y, get_vcpu_address(p), CPU_INFO_BYTES),
                     functools.partial(self.handle_response, x, y, p))
         self._finish()

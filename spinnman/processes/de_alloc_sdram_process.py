@@ -1,4 +1,4 @@
-from spinnman.messages.scp.impl import SCPSDRAMDeAllocRequest
+from spinnman.messages.scp.impl import SDRAMDeAlloc
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
@@ -12,7 +12,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         # deallocate space in the SDRAM
         if base_address is None:
             callback = self.handle_sdram_alloc_response
-        self._send_request(SCPSDRAMDeAllocRequest(x, y, app_id, base_address),
+        self._send_request(SDRAMDeAlloc(x, y, app_id, base_address),
                            callback=callback)
         self._finish()
         self.check_for_error()

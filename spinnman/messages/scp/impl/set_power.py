@@ -1,15 +1,15 @@
 """
-SCPPowerRequest
+SetPower
 """
 
 # spinnman imports
 from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp import SCPRequestHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPPowerRequest(BMPRequest):
+class SetPower(BMPRequest):
     """ An SCP request for the BMP to power on or power off a rack of boards
     """
 
@@ -37,4 +37,4 @@ class SCPPowerRequest(BMPRequest):
     def get_scp_response(self):
         """ Get the response from the powering message
         """
-        return SCPCheckOKResponse("powering request", "CMD_BMP_POWER")
+        return CheckOKResponse("powering request", "CMD_BMP_POWER")

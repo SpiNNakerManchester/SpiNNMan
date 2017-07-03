@@ -2,7 +2,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand, Signal
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 _APP_MASK = 0xFF
 
@@ -13,7 +13,7 @@ def _get_data(app_id, signal):
     return data
 
 
-class SCPAppStopRequest(AbstractSCPRequest):
+class AppStop(AbstractSCPRequest):
     """ An SCP Request to stop an application
     """
 
@@ -23,7 +23,7 @@ class SCPAppStopRequest(AbstractSCPRequest):
         :param app_id: The id of the application, between 0 and 255
         :type app_id: int
         """
-        super(SCPAppStopRequest, self).__init__(
+        super(AppStop, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0,
@@ -35,4 +35,4 @@ class SCPAppStopRequest(AbstractSCPRequest):
             argument_3=(1 << 31) + (0x3f << 8))
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("Send Stop", "CMD_NNP")
+        return CheckOKResponse("Send Stop", "CMD_NNP")

@@ -8,10 +8,10 @@ import struct
 from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPWriteFPGARegisterRequest(BMPRequest):
+class WriteFPGARegister(BMPRequest):
     """ A request for writing data to a FPGA register
     """
 
@@ -42,6 +42,6 @@ class SCPWriteFPGARegisterRequest(BMPRequest):
 
     def get_scp_response(self):
         """
-        :rtype: spinnman.messages.scp.impl.SCPCheckOKResponse
+        :rtype: spinnman.messages.scp.impl.CheckOKResponse
         """
-        return SCPCheckOKResponse("Send FPGA register write", "CMD_LINK_WRITE")
+        return CheckOKResponse("Send FPGA register write", "CMD_LINK_WRITE")

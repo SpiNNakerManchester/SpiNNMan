@@ -2,10 +2,10 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand, DPRICommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPDPRIResetCountersRequest(AbstractSCPRequest):
+class DPRIResetCounters(AbstractSCPRequest):
     """ An SCP Request to reset the statistics counters of the dropped packet\
         reinjection
     """
@@ -30,5 +30,5 @@ class SCPDPRIResetCountersRequest(AbstractSCPRequest):
             argument_1=DPRICommand.RESET_COUNTERS.value)
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("Reset dropped packet reinjection counters",
-                                  SCPCommand.CMD_DPRI)
+        return CheckOKResponse(
+            "Reset dropped packet reinjection counters", SCPCommand.CMD_DPRI)

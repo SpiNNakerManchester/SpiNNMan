@@ -2,10 +2,10 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand, DPRICommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPDPRIExitRequest(AbstractSCPRequest):
+class DPRIExit(AbstractSCPRequest):
     """ An SCP Request to exit the dropped packet reinjection
     """
 
@@ -29,5 +29,5 @@ class SCPDPRIExitRequest(AbstractSCPRequest):
             argument_1=DPRICommand.EXIT.value)
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("Exit dropped packet reinjection",
-                                  SCPCommand.CMD_DPRI)
+        return CheckOKResponse(
+            "Exit dropped packet reinjection", SCPCommand.CMD_DPRI)

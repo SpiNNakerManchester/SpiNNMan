@@ -3,10 +3,10 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPRouterInitRequest(AbstractSCPRequest):
+class RouterInit(AbstractSCPRequest):
     """ A request to initialize the router on a chip
     """
 
@@ -48,7 +48,7 @@ class SCPRouterInitRequest(AbstractSCPRequest):
                 "table_address", str(table_address),
                 "Must be a positive integer")
 
-        super(SCPRouterInitRequest, self).__init__(
+        super(RouterInit, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -58,4 +58,4 @@ class SCPRouterInitRequest(AbstractSCPRequest):
             argument_2=table_address, argument_3=base_address)
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("RouterInit", "CMD_RTR")
+        return CheckOKResponse("RouterInit", "CMD_RTR")

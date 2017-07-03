@@ -2,10 +2,10 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import SCPCheckOKResponse
+from .check_ok_response import CheckOKResponse
 
 
-class SCPWriteLinkRequest(AbstractSCPRequest):
+class WriteLink(AbstractSCPRequest):
     """ A request to write memory on a neighbouring chip
     """
 
@@ -29,7 +29,7 @@ class SCPWriteLinkRequest(AbstractSCPRequest):
         :param data: Up to 256 bytes of data to write
         :type data: bytearray
         """
-        super(SCPWriteLinkRequest, self).__init__(
+        super(WriteLink, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=cpu, destination_chip_x=x,
@@ -41,8 +41,8 @@ class SCPWriteLinkRequest(AbstractSCPRequest):
 
     @property
     def bytestring(self):
-        datastring = super(SCPWriteLinkRequest, self).bytestring
+        datastring = super(WriteLink, self).bytestring
         return datastring + bytes(self._data_to_write)
 
     def get_scp_response(self):
-        return SCPCheckOKResponse("WriteMemory", "CMD_WRITE")
+        return CheckOKResponse("WriteMemory", "CMD_WRITE")

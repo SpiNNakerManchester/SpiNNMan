@@ -1,4 +1,4 @@
-from spinnman.messages.scp.impl import SCPReadMemoryRequest
+from spinnman.messages.scp.impl import ReadMemory
 from spinnman.model import RouterDiagnostics
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
@@ -28,11 +28,11 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
                 "<I", response.data, response.offset + (register * 4))[0]
 
     def get_router_diagnostics(self, x, y):
-        self._send_request(SCPReadMemoryRequest(x, y, 0xe1000000, 4),
+        self._send_request(ReadMemory(x, y, 0xe1000000, 4),
                            self.handle_control_register_response)
-        self._send_request(SCPReadMemoryRequest(x, y, 0xe1000014, 4),
+        self._send_request(ReadMemory(x, y, 0xe1000014, 4),
                            self.handle_error_status_response)
-        self._send_request(SCPReadMemoryRequest(x, y, 0xe1000300, 16 * 4),
+        self._send_request(ReadMemory(x, y, 0xe1000300, 16 * 4),
                            self.handle_register_response)
         self._finish()
         self.check_for_error()

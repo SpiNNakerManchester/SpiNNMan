@@ -4,7 +4,7 @@ from collections import defaultdict, OrderedDict
 
 from spinnman.model import IOBuffer
 from spinnman.utilities.utility_functions import get_vcpu_address
-from spinnman.messages.scp.impl import SCPReadMemoryRequest
+from spinnman.messages.scp.impl import ReadMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE, CPU_IOBUF_ADDRESS_OFFSET
 
@@ -46,7 +46,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
     def _request_iobuf_region(self, region):
         (x, y, p, n, next_address, first_read_size) = region
         self._send_request(
-            SCPReadMemoryRequest(x, y, next_address, first_read_size),
+            ReadMemory(x, y, next_address, first_read_size),
             functools.partial(self.handle_first_iobuf_response,
                               x, y, p, n, next_address, first_read_size))
 
@@ -95,7 +95,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
     def _request_iobuf_region_tail(self, extra_region):
         (x, y, p, n, base_address, size, offset) = extra_region
         self._send_request(
-            SCPReadMemoryRequest(x, y, base_address, size),
+            ReadMemory(x, y, base_address, size),
             functools.partial(self.handle_extra_iobuf_response,
                               x, y, p, n, offset))
 
@@ -107,7 +107,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
     def _request_iobuf_address(self, iobuf_size, x, y, p):
         base_address = get_vcpu_address(p) + CPU_IOBUF_ADDRESS_OFFSET
         self._send_request(
-            SCPReadMemoryRequest(x, y, base_address, 4),
+            ReadMemory(x, y, base_address, 4),
             functools.partial(self.handle_iobuf_address_response,
                               iobuf_size, x, y, p))
 

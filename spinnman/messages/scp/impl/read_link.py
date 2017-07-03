@@ -6,7 +6,7 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
-class SCPReadLinkRequest(AbstractSCPRequest):
+class ReadLink(AbstractSCPRequest):
     """ An SCP request to read a region of memory via a link on a chip
     """
 
@@ -27,7 +27,7 @@ class SCPReadLinkRequest(AbstractSCPRequest):
         :param size: The number of bytes to read, between 1 and 256
         :type size: int
         """
-        super(SCPReadLinkRequest, self).__init__(
+        super(ReadLink, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=cpu, destination_chip_x=x,
