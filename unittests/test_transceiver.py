@@ -1,7 +1,7 @@
 import unittest
 from spinnman.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections \
-    import BootConnection, UDPEIEIOConnection, SCAMPConnection
+    import BootConnection, EIEIOConnection, SCAMPConnection
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
 
@@ -88,7 +88,7 @@ class TestTransceiver(unittest.TestCase):
         connections = []
         connections.append(SCAMPConnection(
             remote_host=None))
-        orig_connection = UDPEIEIOConnection()
+        orig_connection = EIEIOConnection()
         connections.append(orig_connection)
 
         # Create transceiver
@@ -96,14 +96,14 @@ class TestTransceiver(unittest.TestCase):
 
         # Register a UDP listeners
         connection_1 = trnx.register_udp_listener(
-            callback=None, connection_class=UDPEIEIOConnection)
+            callback=None, connection_class=EIEIOConnection)
         connection_2 = trnx.register_udp_listener(
-            callback=None, connection_class=UDPEIEIOConnection)
+            callback=None, connection_class=EIEIOConnection)
         connection_3 = trnx.register_udp_listener(
-            callback=None, connection_class=UDPEIEIOConnection,
+            callback=None, connection_class=EIEIOConnection,
             local_port=orig_connection.local_port)
         connection_4 = trnx.register_udp_listener(
-            callback=None, connection_class=UDPEIEIOConnection,
+            callback=None, connection_class=EIEIOConnection,
             local_port=orig_connection.local_port + 1)
 
         assert connection_1 == orig_connection

@@ -5,9 +5,9 @@ from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 
 
-class BootConnection(UDPConnection,
-                        AbstractSpinnakerBootSender,
-                        AbstractSpinnakerBootReceiver):
+class BootConnection(
+        UDPConnection, AbstractSpinnakerBootSender,
+        AbstractSpinnakerBootReceiver):
     """ A connection to the spinnaker board that uses UDP to for booting
     """
 

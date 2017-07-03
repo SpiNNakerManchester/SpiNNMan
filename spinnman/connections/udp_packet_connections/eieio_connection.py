@@ -1,4 +1,4 @@
-from spinnman.connections.udp_packet_connections.udp_connection import UDPConnection
+from .udp_connection import UDPConnection
 from spinnman.connections.abstract_classes \
     import AbstractEIEIOReceiver, AbstractEIEIOSender, AbstractListenable
 from spinnman.messages.eieio \
@@ -6,12 +6,13 @@ from spinnman.messages.eieio \
 
 import struct
 
-_REPR_TEMPLATE = "UDPEIEIOConnection(local_host={}, local_port={},"\
+_REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
     "remote_host={}, remote_port={})"
 
 
-class UDPEIEIOConnection(UDPConnection, AbstractEIEIOReceiver,
-                         AbstractEIEIOSender, AbstractListenable):
+class EIEIOConnection(
+        UDPConnection, AbstractEIEIOReceiver, AbstractEIEIOSender,
+        AbstractListenable):
     """ A UDP connection for sending and receiving raw EIEIO messages
     """
 

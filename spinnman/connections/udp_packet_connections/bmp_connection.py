@@ -1,6 +1,6 @@
 import struct
 
-from spinnman.connections.udp_packet_connections.udp_connection import UDPConnection
+from .udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult

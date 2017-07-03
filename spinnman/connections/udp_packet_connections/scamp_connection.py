@@ -8,8 +8,8 @@ from spinnman.connections.abstract_classes \
     import AbstractSCPSender, AbstractSCPReceiver
 
 
-class SCAMPConnection(SDPConnection, AbstractSCPSender,
-                         AbstractSCPReceiver):
+class SCAMPConnection(
+        SDPConnection, AbstractSCPSender, AbstractSCPReceiver):
     """ A UDP connection to SCAMP on the board
     """
 
