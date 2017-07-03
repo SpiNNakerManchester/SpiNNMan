@@ -1,4 +1,4 @@
-from .connection import UDPConnection
+from spinnman.connections.udp_packet_connections.udp_connection import UDPConnection
 from spinnman.connections.abstract_classes \
     import AbstractEIEIOReceiver, AbstractEIEIOSender, AbstractListenable
 from spinnman.messages.eieio \

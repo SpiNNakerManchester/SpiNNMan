@@ -5,7 +5,7 @@ non-booted spinnaker machines
 
 # spinnman imports
 from spinnman.connections.udp_packet_connections \
-    import UDPIpAddressesConnection
+    import IPAddressesConnection
 
 # general imports
 import time
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, ctrlc_handler)
     print ("The following addresses might be SpiNNaker boards "
            "(press Ctrl-C to quit):")
-    connection = UDPIpAddressesConnection()
+    connection = IPAddressesConnection()
     seen_boards = set()
     while True:
         ip_address = connection.receive_ip_address()

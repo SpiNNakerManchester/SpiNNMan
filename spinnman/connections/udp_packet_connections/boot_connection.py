@@ -1,11 +1,11 @@
 from spinnman.connections.abstract_classes \
     import AbstractSpinnakerBootSender, AbstractSpinnakerBootReceiver
-from .connection import UDPConnection
+from spinnman.connections.udp_packet_connections.udp_connection import UDPConnection
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 
 
-class UDPBootConnection(UDPConnection,
+class BootConnection(UDPConnection,
                         AbstractSpinnakerBootSender,
                         AbstractSpinnakerBootReceiver):
     """ A connection to the spinnaker board that uses UDP to for booting
@@ -56,7 +56,7 @@ class UDPBootConnection(UDPConnection,
 
     def __repr__(self):
         return\
-            "UDPBootConnection(local_host={}, local_port={}, remote_host={},"\
+            "BootConnection(local_host={}, local_port={}, remote_host={},"\
             "remote_port={})".format(
                 self.local_ip_address, self.local_port,
                 self.remote_ip_address, self.remote_port)

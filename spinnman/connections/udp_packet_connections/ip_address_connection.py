@@ -1,8 +1,8 @@
-from .connection import UDPConnection
+from spinnman.connections.udp_packet_connections.udp_connection import UDPConnection
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 
 
-class UDPIpAddressesConnection(UDPConnection):
+class IPAddressesConnection(UDPConnection):
     """ A connection that detects any UDP packet that is transmitted by \
         spinnaker boards prior to boot
     """
@@ -26,5 +26,5 @@ class UDPIpAddressesConnection(UDPConnection):
 
     def __repr__(self):
         return \
-            "UDPIpAddressesConnection(local_host={}, local_port={})".format(
+            "IPAddressesConnection(local_host={}, local_port={})".format(
                 self.local_ip_address, self.local_port)

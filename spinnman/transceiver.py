@@ -30,13 +30,13 @@ from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes \
     import AbstractSpinnakerBootReceiver, AbstractSpinnakerBootSender
 from spinnman.connections.udp_packet_connections \
-    import UDPBMPConnection, UDPConnection
+    import BMPConnection, UDPConnection
 from spinnman.connections.abstract_classes \
     import AbstractSCPSender, AbstractSDPSender, AbstractMulticastSender
 from spinnman.connections.abstract_classes \
     import AbstractSCPReceiver, AbstractListenable
 from spinnman.connections.udp_packet_connections \
-    import UDPBootConnection, UDPSCAMPConnection
+    import BootConnection, SCAMPConnection
 from spinnman.processes import DeAllocSDRAMProcess, GetMachineProcess
 from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
 from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
@@ -96,7 +96,7 @@ def create_transceiver_from_hostname(
         boot_port_no=None, max_sdram_size=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
-        UDPBootConnection on port 54321 (the default boot port),
+        BootConnection on port 54321 (the default boot port),
         optionally discovering any additional links using the UDPConnection,\
         and then returning the transceiver created with the conjunction of the\
         created UDPConnection and the discovered connections
@@ -168,7 +168,7 @@ def create_transceiver_from_hostname(
     if bmp_connection_data is not None:
         for bmp_connection in bmp_connection_data:
 
-            udp_bmp_connection = UDPBMPConnection(
+            udp_bmp_connection = BMPConnection(
                 bmp_connection.cabinet, bmp_connection.frame,
                 bmp_connection.boards, remote_host=bmp_connection.ip_address,
                 remote_port=bmp_connection.port_num)
@@ -177,10 +177,10 @@ def create_transceiver_from_hostname(
     if scamp_connections is None:
 
         # handle the spinnaker connection
-        connections.append(UDPSCAMPConnection(remote_host=hostname))
+        connections.append(SCAMPConnection(remote_host=hostname))
 
     # handle the boot connection
-    connections.append(UDPBootConnection(
+    connections.append(BootConnection(
         remote_host=hostname, remote_port=boot_port_no))
 
     return Transceiver(
@@ -326,7 +326,7 @@ class Transceiver(object):
         # if there has been scamp connections given, build them
         if scamp_connections is not None:
             for socket_address in scamp_connections:
-                new_connection = UDPSCAMPConnection(
+                new_connection = SCAMPConnection(
                     remote_host=socket_address.hostname,
                     remote_port=socket_address.port_num,
                     chip_x=socket_address.chip_x,
@@ -392,7 +392,7 @@ class Transceiver(object):
             # Locate any connections that can send SCP
             # (that are not BMP connections)
             if (isinstance(connection, AbstractSCPSender) and
-                    not isinstance(connection, UDPBMPConnection)):
+                    not isinstance(connection, BMPConnection)):
                 self._scp_sender_connections.append(connection)
 
             # Locate any connections that can send SDP
@@ -408,7 +408,7 @@ class Transceiver(object):
                     isinstance(connection, AbstractSCPReceiver)):
 
                 # If it is a BMP connection, add it here
-                if isinstance(connection, UDPBMPConnection):
+                if isinstance(connection, BMPConnection):
                     self._bmp_connections.append(connection)
                     self._bmp_connection_selectors[
                         (connection.cabinet, connection.frame)] = \
@@ -717,7 +717,7 @@ class Transceiver(object):
 
                 # if no data, no proxy
                 if new_connection is None:
-                    new_connection = UDPSCAMPConnection(
+                    new_connection = SCAMPConnection(
                         remote_host=chip.ip_address, chip_x=chip.x,
                         chip_y=chip.y)
                     new_connections.append(new_connection)
@@ -2154,7 +2154,7 @@ class Transceiver(object):
         :return: A connection for the given IP address, or None if no such\
                     connection exists
         :rtype:\
-                    :py:class:`spinnman.connections.udp_packet_connections.udp_scamp_connection.UDPSCAMPConnection`
+                    :py:class:`spinnman.connections.udp_packet_connections.udp_scamp_connection.SCAMPConnection`
         """
         if board_address in self._udp_scamp_connections:
             return self._udp_scamp_connections[board_address]

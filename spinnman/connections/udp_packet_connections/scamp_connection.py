@@ -3,12 +3,12 @@ import struct
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
 from .utils import update_sdp_header_for_udp_send
-from .sdp_connection import UDPSDPConnection
+from .sdp_connection import SDPConnection
 from spinnman.connections.abstract_classes \
     import AbstractSCPSender, AbstractSCPReceiver
 
 
-class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
+class SCAMPConnection(SDPConnection, AbstractSCPSender,
                          AbstractSCPReceiver):
     """ A UDP connection to SCAMP on the board
     """
@@ -40,7 +40,7 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
         """
         if remote_port is None:
             remote_port = SCP_SCAMP_PORT
-        UDPSDPConnection.__init__(
+        SDPConnection.__init__(
             self, chip_x, chip_y, local_host, local_port, remote_host,
             remote_port)
         AbstractSCPReceiver.__init__(self)
@@ -73,7 +73,7 @@ class UDPSCAMPConnection(UDPSDPConnection, AbstractSCPSender,
 
     def __repr__(self):
         return \
-            "UDPSCAMPConnection(chip_x={}, chip_y={}, local_host={}," \
+            "SCAMPConnection(chip_x={}, chip_y={}, local_host={}," \
             " local_port={}, remote_host={}, remote_port={})".format(
                 self._chip_x, self._chip_y, self.local_ip_address,
                 self.local_port, self.remote_ip_address, self.remote_port)

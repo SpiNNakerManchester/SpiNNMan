@@ -1,7 +1,7 @@
 import unittest
 from spinnman.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections \
-    import UDPBootConnection, UDPEIEIOConnection, UDPSCAMPConnection
+    import BootConnection, UDPEIEIOConnection, SCAMPConnection
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
 
@@ -16,7 +16,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_to_board(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSCAMPConnection(
+        connections.append(SCAMPConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
         trans.close()
@@ -24,7 +24,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_one_connection(self):
         board_config.set_up_remote_board()
         connections = set()
-        connections.add(UDPSCAMPConnection(
+        connections.add(SCAMPConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
 
@@ -34,10 +34,10 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_from_list_connections(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSCAMPConnection(
+        connections.append(SCAMPConnection(
             remote_host=board_config.remotehost))
         board_config.set_up_local_virtual_board()
-        connections.append(UDPBootConnection(
+        connections.append(BootConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
         instantiated_connections = trans.get_connections()
@@ -50,10 +50,10 @@ class TestTransceiver(unittest.TestCase):
     def test_retrieving_machine_details(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSCAMPConnection(
+        connections.append(SCAMPConnection(
             remote_host=board_config.remotehost))
         board_config.set_up_local_virtual_board()
-        connections.append(UDPBootConnection(
+        connections.append(BootConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
 
@@ -86,7 +86,7 @@ class TestTransceiver(unittest.TestCase):
 
         # Create board connections
         connections = []
-        connections.append(UDPSCAMPConnection(
+        connections.append(SCAMPConnection(
             remote_host=None))
         orig_connection = UDPEIEIOConnection()
         connections.append(orig_connection)

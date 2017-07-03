@@ -1,6 +1,6 @@
 import struct
 
-from .connection import UDPConnection
+from spinnman.connections.udp_packet_connections.udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
@@ -8,7 +8,7 @@ from spinnman.connections.abstract_classes \
     import AbstractSCPReceiver, AbstractSCPSender
 
 
-class UDPBMPConnection(
+class BMPConnection(
         UDPConnection, AbstractSCPReceiver, AbstractSCPSender):
     """ A BMP connection which supports queries to the BMP of a SpiNNaker\
         machine
@@ -98,7 +98,7 @@ class UDPBMPConnection(
 
     def __repr__(self):
         return \
-            "UDPBMPConnection(cabinet={}, frame={}, boards={}, local_host={},"\
+            "BMPConnection(cabinet={}, frame={}, boards={}, local_host={},"\
             "local_port={}, remote_host={}, remote_port={}".format(
                 self._cabinet, self._frame, self._boards,
                 self.local_ip_address, self.local_port, self.remote_ip_address,

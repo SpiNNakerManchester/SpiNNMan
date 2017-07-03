@@ -1,5 +1,5 @@
 from spinnman.messages.sdp import SDPMessage, SDPFlag
-from .connection import UDPConnection
+from .udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
 from spinnman.connections.abstract_classes \
     import AbstractSDPReceiver, AbstractSDPSender, AbstractListenable
@@ -7,8 +7,9 @@ from spinnman.connections.abstract_classes \
 import struct
 
 
-class UDPSDPConnection(UDPConnection, AbstractSDPReceiver, AbstractSDPSender,
-                       AbstractListenable):
+class SDPConnection(
+        UDPConnection, AbstractSDPReceiver, AbstractSDPSender,
+        AbstractListenable):
 
     def __init__(self, chip_x=None, chip_y=None, local_host=None,
                  local_port=None, remote_host=None, remote_port=None):
@@ -63,7 +64,7 @@ class UDPSDPConnection(UDPConnection, AbstractSDPReceiver, AbstractSDPSender,
 
     def __repr__(self):
         return \
-            "UDPSDPConnection(chip_x={}, chip_y={}, local_host={},"\
+            "SDPConnection(chip_x={}, chip_y={}, local_host={},"\
             " local_port={}, remote_host={}, remote_port={})".format(
                 self._chip_x, self._chip_y, self.local_ip_address,
                 self.local_port, self.remote_ip_address, self.remote_port)
