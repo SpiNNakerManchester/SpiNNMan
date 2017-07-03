@@ -5,11 +5,11 @@ from .utils import update_sdp_header_for_udp_send
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.connections.abstract_classes \
-    import AbstractSCPReceiver, AbstractSCPSender
+    import SCPReceiver, SCPSender
 
 
 class BMPConnection(
-        UDPConnection, AbstractSCPReceiver, AbstractSCPSender):
+        UDPConnection, SCPReceiver, SCPSender):
     """ A BMP connection which supports queries to the BMP of a SpiNNaker\
         machine
     """
@@ -42,8 +42,8 @@ class BMPConnection(
             remote_port = SCP_SCAMP_PORT
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
-        AbstractSCPReceiver.__init__(self)
-        AbstractSCPSender.__init__(self)
+        SCPReceiver.__init__(self)
+        SCPSender.__init__(self)
         self._cabinet = cabinet
         self._frame = frame
         self._boards = boards
@@ -74,13 +74,13 @@ class BMPConnection(
 
     @property
     def chip_x(self):
-        """ Defined to satisfy the AbstractSCPSender - always 0 for a BMP
+        """ Defined to satisfy the SCPSender - always 0 for a BMP
         """
         return 0
 
     @property
     def chip_y(self):
-        """ Defined to satisfy the AbstractSCPSender - always 0 for a BMP
+        """ Defined to satisfy the SCPSender - always 0 for a BMP
         """
         return 0
 

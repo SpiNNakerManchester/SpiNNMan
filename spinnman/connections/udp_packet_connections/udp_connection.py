@@ -1,6 +1,6 @@
 from spinnman.exceptions \
     import SpinnmanIOException, SpinnmanTimeoutException
-from spinnman.connections.abstract_classes import AbstractConnection
+from spinnman.connections.abstract_classes import Connection
 
 import platform
 import subprocess
@@ -8,7 +8,7 @@ import socket
 import select
 
 
-class UDPConnection(AbstractConnection):
+class UDPConnection(Connection):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
@@ -108,7 +108,7 @@ class UDPConnection(AbstractConnection):
 
     def is_connected(self):
         """ See\
-            :py:meth:`spinnman.connections.abstract_classes.connection.AbstractConnection.is_connected`
+            :py:meth:`spinnman.connections.abstract_classes.connection.Connection.is_connected`
         """
 
         # If this is not a sending socket, it is not connected
@@ -250,7 +250,7 @@ class UDPConnection(AbstractConnection):
 
     def close(self):
         """ See\
-            :py:meth:`spinnman.connections.abstract_classes.connection.AbstractConnection.close`
+            :py:meth:`spinnman.connections.abstract_classes.connection.Connection.close`
         """
         try:
             self._socket.shutdown(socket.SHUT_WR)

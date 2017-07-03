@@ -1,11 +1,11 @@
 from six import add_metaclass
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from .connection import AbstractConnection
+from .connection import Connection
 
 
 @add_metaclass(AbstractBase)
-class AbstractEIEIOReceiver(AbstractConnection):
+class EIEIOReceiver(Connection):
     """ A receiver of EIEIO data or commands
     """
 

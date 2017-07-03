@@ -1,19 +1,19 @@
-from .connection import AbstractConnection
-from .eieio_receiver import AbstractEIEIOReceiver
-from .eieio_sender import AbstractEIEIOSender
-from .listenable import AbstractListenable
-from .multicast_receiver import AbstractMulticastReceiver
-from .multicast_sender import AbstractMulticastSender
-from .scp_receiver import AbstractSCPReceiver
-from .scp_sender import AbstractSCPSender
-from .sdp_receiver import AbstractSDPReceiver
-from .sdp_sender import AbstractSDPSender
-from .spinnaker_boot_receiver import AbstractSpinnakerBootReceiver
-from .spinnaker_boot_sender import AbstractSpinnakerBootSender
+from .connection import Connection
+from .eieio_receiver import EIEIOReceiver
+from .eieio_sender import EIEIOSender
+from .listenable import Listenable
+from .multicast_receiver import MulticastReceiver
+from .multicast_sender import MulticastSender
+from .scp_receiver import SCPReceiver
+from .scp_sender import SCPSender
+from .sdp_receiver import SDPReceiver
+from .sdp_sender import SDPSender
+from .spinnaker_boot_receiver import SpinnakerBootReceiver
+from .spinnaker_boot_sender import SpinnakerBootSender
 
-__all__ = ["AbstractConnection", "AbstractEIEIOReceiver",
-           "AbstractEIEIOSender", "AbstractListenable",
-           "AbstractMulticastReceiver", "AbstractMulticastSender",
-           "AbstractSCPReceiver", "AbstractSCPSender", "AbstractSDPReceiver",
-           "AbstractSDPSender", "AbstractSpinnakerBootReceiver",
-           "AbstractSpinnakerBootSender"]
+__all__ = ["Connection", "EIEIOReceiver",
+           "EIEIOSender", "Listenable",
+           "MulticastReceiver", "MulticastSender",
+           "SCPReceiver", "SCPSender", "SDPReceiver",
+           "SDPSender", "SpinnakerBootReceiver",
+           "SpinnakerBootSender"]

@@ -4,7 +4,7 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
 @add_metaclass(AbstractBase)
-class AbstractConnection(object):
+class Connection(object):
     """ An abstract connection to the SpiNNaker board over some medium
     """
 

@@ -28,13 +28,13 @@ from spinnman.messages.scp.impl \
     import SCPIPTagSetRequest, SCPIPTagClearRequest, SCPRouterClearRequest
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes \
-    import AbstractSpinnakerBootReceiver, AbstractSpinnakerBootSender
+    import SpinnakerBootReceiver, SpinnakerBootSender
 from spinnman.connections.udp_packet_connections \
     import BMPConnection, UDPConnection
 from spinnman.connections.abstract_classes \
-    import AbstractSCPSender, AbstractSDPSender, AbstractMulticastSender
+    import SCPSender, SDPSender, MulticastSender
 from spinnman.connections.abstract_classes \
-    import AbstractSCPReceiver, AbstractListenable
+    import SCPReceiver, Listenable
 from spinnman.connections.udp_packet_connections \
     import BootConnection, SCAMPConnection
 from spinnman.processes import DeAllocSDRAMProcess, GetMachineProcess
@@ -368,44 +368,44 @@ class Transceiver(object):
         for connection in connections:
 
             # locate the only boot send connection
-            if isinstance(connection, AbstractSpinnakerBootSender):
+            if isinstance(connection, SpinnakerBootSender):
                 if self._boot_send_connection is not None:
                     raise SpinnmanInvalidParameterException(
                         "connections", "[... {} ...]".format(connection),
-                        "Only a single AbstractSpinnakerBootSender can be"
+                        "Only a single SpinnakerBootSender can be"
                         " specified")
                 else:
                     self._boot_send_connection = connection
 
             # locate any boot receiver connections
-            if isinstance(connection, AbstractSpinnakerBootReceiver):
+            if isinstance(connection, SpinnakerBootReceiver):
                 self._boot_receive_connections.append(connection)
 
             # Locate any connections listening on a UDP port
             if isinstance(connection, UDPConnection):
                 self._udp_receive_connections_by_port[connection.local_port][
                     connection.local_ip_address] = (connection, None)
-                if isinstance(connection, AbstractListenable):
+                if isinstance(connection, Listenable):
                     self._udp_listenable_connections_by_class[
                         connection.__class__].append((connection, None))
 
             # Locate any connections that can send SCP
             # (that are not BMP connections)
-            if (isinstance(connection, AbstractSCPSender) and
+            if (isinstance(connection, SCPSender) and
                     not isinstance(connection, BMPConnection)):
                 self._scp_sender_connections.append(connection)
 
             # Locate any connections that can send SDP
-            if isinstance(connection, AbstractSDPSender):
+            if isinstance(connection, SDPSender):
                 self._sdp_sender_connections.append(connection)
 
             # Locate any connections that can send Multicast
-            if isinstance(connection, AbstractMulticastSender):
+            if isinstance(connection, MulticastSender):
                 self._multicast_sender_connections.append(connection)
 
             # Locate any connections that can send and receive SCP
-            if (isinstance(connection, AbstractSCPSender) and
-                    isinstance(connection, AbstractSCPReceiver)):
+            if (isinstance(connection, SCPSender) and
+                    isinstance(connection, SCPReceiver)):
 
                 # If it is a BMP connection, add it here
                 if isinstance(connection, BMPConnection):
@@ -624,7 +624,7 @@ class Transceiver(object):
                     message.  If not specified, an appropriate connection is\
                     chosen automatically
         :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.multicast_sender.AbstractMulticastSender`
+            :py:class:`spinnman.connections.abstract_classes.multicast_sender.MulticastSender`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2284,7 +2284,7 @@ class Transceiver(object):
                     specified, all SCPSender connections will send the message\
                     to clear the tag
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_classes.AbstractSCPSender`
+                    :py:class:`spinnman.connections.abstract_classes.SCPSender`
         :param board_address: Board address where the tag should be cleared.\
                     If not specified, all SCPSender connections will send the\
                     message to clear the tag
@@ -2322,7 +2322,7 @@ class Transceiver(object):
                     If not specified, all SCPSender connections will be\
                     queried and the response will be combined.
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_classes.AbstractSCPSender`
+                    :py:class:`spinnman.connections.abstract_classes.SCPSender`
         :return: An iterable of tags
         :rtype: iterable of\
                     :py:class:`spinn_machine.tags.AbstractTag`
@@ -2683,7 +2683,7 @@ class Transceiver(object):
                               local_port=None, local_host=None):
         """ Register a callback for a certain type of traffic to be received\
             via UDP.  Note that the connection class must extend\
-            :py:class:`spinnman.connections.abstract_classes.AbstractListenable`
+            :py:class:`spinnman.connections.abstract_classes.Listenable`
             to avoid clashing with the SCAMP and BMP functionality
 
         :param callback: Function to be called when a packet is received
@@ -2701,12 +2701,12 @@ class Transceiver(object):
                 :py:class:`spinnman.connection.udp_packet_connections.UDPConnection`
         """
 
-        # If the connection class is not an AbstractListenable, this is an
+        # If the connection class is not an Listenable, this is an
         # error
-        if not issubclass(connection_class, AbstractListenable):
+        if not issubclass(connection_class, Listenable):
             raise SpinnmanInvalidParameterException(
                 "connection_class", connection_class,
-                "The connection class must be AbstractListenable")
+                "The connection class must be Listenable")
 
         connections_of_class = self._udp_listenable_connections_by_class[
             connection_class]

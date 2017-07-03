@@ -1,11 +1,11 @@
 from six import add_metaclass
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from .connection import AbstractConnection
+from .connection import Connection
 
 
 @add_metaclass(AbstractBase)
-class AbstractMulticastSender(AbstractConnection):
+class MulticastSender(Connection):
     """ A sender of Multicast messages
     """
 

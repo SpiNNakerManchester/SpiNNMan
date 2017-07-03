@@ -5,11 +5,11 @@ from spinnman.messages.scp.enums import SCPResult
 from .utils import update_sdp_header_for_udp_send
 from .sdp_connection import SDPConnection
 from spinnman.connections.abstract_classes \
-    import AbstractSCPSender, AbstractSCPReceiver
+    import SCPSender, SCPReceiver
 
 
 class SCAMPConnection(
-        SDPConnection, AbstractSCPSender, AbstractSCPReceiver):
+        SDPConnection, SCPSender, SCPReceiver):
     """ A UDP connection to SCAMP on the board
     """
 
@@ -43,8 +43,8 @@ class SCAMPConnection(
         SDPConnection.__init__(
             self, chip_x, chip_y, local_host, local_port, remote_host,
             remote_port)
-        AbstractSCPReceiver.__init__(self)
-        AbstractSCPSender.__init__(self)
+        SCPReceiver.__init__(self)
+        SCPSender.__init__(self)
 
     @property
     def chip_x(self):

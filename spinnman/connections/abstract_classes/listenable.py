@@ -4,7 +4,7 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
 @add_metaclass(AbstractBase)
-class AbstractListenable(object):
+class Listenable(object):
 
     __slots__ = ()
 

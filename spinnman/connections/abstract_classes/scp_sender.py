@@ -2,11 +2,11 @@ from six import add_metaclass
 
 from spinn_utilities.abstract_base \
     import AbstractBase, abstractmethod, abstractproperty
-from .connection import AbstractConnection
+from .connection import Connection
 
 
 @add_metaclass(AbstractBase)
-class AbstractSCPSender(AbstractConnection):
+class SCPSender(Connection):
     """ A sender of SCP messages
     """
 

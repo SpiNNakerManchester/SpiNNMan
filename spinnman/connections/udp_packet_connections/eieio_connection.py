@@ -1,6 +1,6 @@
 from .udp_connection import UDPConnection
 from spinnman.connections.abstract_classes \
-    import AbstractEIEIOReceiver, AbstractEIEIOSender, AbstractListenable
+    import EIEIOReceiver, EIEIOSender, Listenable
 from spinnman.messages.eieio \
     import read_eieio_command_message, read_eieio_data_message
 
@@ -11,8 +11,8 @@ _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
 
 
 class EIEIOConnection(
-        UDPConnection, AbstractEIEIOReceiver, AbstractEIEIOSender,
-        AbstractListenable):
+        UDPConnection, EIEIOReceiver, EIEIOSender,
+        Listenable):
     """ A UDP connection for sending and receiving raw EIEIO messages
     """
 
@@ -35,9 +35,9 @@ class EIEIOConnection(
         """
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
-        AbstractEIEIOReceiver.__init__(self)
-        AbstractEIEIOSender.__init__(self)
-        AbstractListenable.__init__(self)
+        EIEIOReceiver.__init__(self)
+        EIEIOSender.__init__(self)
+        Listenable.__init__(self)
 
     def receive_eieio_message(self, timeout=None):
         data = self.receive(timeout)
