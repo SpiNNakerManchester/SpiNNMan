@@ -30,7 +30,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         self._p2p_column_data = list()
 
-        # A dictionary of (x, y) -> GetChipInfo
+        # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
 
     def _make_chip(self, width, height, chip_info):
