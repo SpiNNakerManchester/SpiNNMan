@@ -4,7 +4,7 @@ SCPReadFPGARegisterRequest
 
 # spinnman imports
 from spinnman.messages.scp.abstract_messages \
-    import AbstractSCPBMPRequest, AbstractSCPBMPResponse
+    import BMPRequest, BMPResponse
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -12,7 +12,7 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 import struct
 
 
-class SCPReadFPGARegisterRequest(AbstractSCPBMPRequest):
+class SCPReadFPGARegisterRequest(BMPRequest):
     """ Requests the data from a fpga's register
     """
 
@@ -31,7 +31,7 @@ class SCPReadFPGARegisterRequest(AbstractSCPBMPRequest):
         # inverses all bits of a value, so is basically a inverse mask for the
         # value entered.
         arg1 = register & (~0x3)
-        AbstractSCPBMPRequest.__init__(
+        BMPRequest.__init__(
             self, board,
             SCPRequestHeader(command=SCPCommand.CMD_LINK_READ),
             argument_1=arg1, argument_2=4, argument_3=fpga_num)
@@ -40,14 +40,14 @@ class SCPReadFPGARegisterRequest(AbstractSCPBMPRequest):
         return _SCPReadFPGARegisterResponse()
 
 
-class _SCPReadFPGARegisterResponse(AbstractSCPBMPResponse):
+class _SCPReadFPGARegisterResponse(BMPResponse):
     """ An SCP response to a request for the version of software running
     """
 
     def __init__(self):
         """
         """
-        AbstractSCPBMPResponse.__init__(self)
+        BMPResponse.__init__(self)
         self._fpga_register = None
 
     def read_data_bytestring(self, data, offset):

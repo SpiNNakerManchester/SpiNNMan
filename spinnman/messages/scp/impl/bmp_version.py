@@ -3,13 +3,13 @@ SCPBMPVersionRequest
 """
 
 # spinnman imports
-from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
+from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from .version_response import SCPVersionResponse
 
 
-class SCPBMPVersionRequest(AbstractSCPBMPRequest):
+class SCPBMPVersionRequest(BMPRequest):
     """ An SCP request to read the version of software running on a core
     """
 
@@ -21,7 +21,7 @@ class SCPBMPVersionRequest(AbstractSCPBMPRequest):
                     * If the chip coordinates are out of range
                     * If the processor is out of range
         """
-        AbstractSCPBMPRequest.__init__(
+        BMPRequest.__init__(
             self, board,
             SCPRequestHeader(command=SCPCommand.CMD_VER))
 

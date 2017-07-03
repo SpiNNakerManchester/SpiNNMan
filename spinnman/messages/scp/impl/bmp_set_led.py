@@ -2,12 +2,12 @@
 SCPBMPSetLedRequest
 """
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
+from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from .check_ok_response import SCPCheckOKResponse
 
 
-class SCPBMPSetLedRequest(AbstractSCPBMPRequest):
+class SCPBMPSetLedRequest(BMPRequest):
     """ Set the led(s) of a board to either on, off or toggling
     """
 
@@ -39,7 +39,7 @@ class SCPBMPSetLedRequest(AbstractSCPBMPRequest):
         arg2 = self.get_board_mask(boards)
 
         # initilise the request now
-        AbstractSCPBMPRequest.__init__(
+        BMPRequest.__init__(
             self, boards,
             SCPRequestHeader(command=SCPCommand.CMD_LED),
             argument_1=arg1, argument_2=arg2)

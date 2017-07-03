@@ -3,13 +3,13 @@ SCPPowerRequest
 """
 
 # spinnman imports
-from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
+from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp import SCPRequestHeader
 from .check_ok_response import SCPCheckOKResponse
 
 
-class SCPPowerRequest(AbstractSCPBMPRequest):
+class SCPPowerRequest(BMPRequest):
     """ An SCP request for the BMP to power on or power off a rack of boards
     """
 
@@ -29,7 +29,7 @@ class SCPPowerRequest(AbstractSCPBMPRequest):
         arg1 = (int(delay * 1000) << 16) | power_command.value
         arg2 = self.get_board_mask(boards)
 
-        AbstractSCPBMPRequest.__init__(
+        BMPRequest.__init__(
             self, boards,
             SCPRequestHeader(command=SCPCommand.CMD_BMP_POWER),
             argument_1=arg1, argument_2=arg2)

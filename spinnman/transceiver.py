@@ -43,9 +43,9 @@ from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
 from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
 from spinnman.processes import ApplicationRunProcess, ExitDPRIProcess
 from spinnman.utilities.appid_tracker import AppIdTracker
-from spinnman.messages.scp.enums import SCPSignal
-from spinnman.messages.scp.enums import SCPPowerCommand
-from spinnman.messages.scp.enums import SCPDPRIPacketTypeFlags
+from spinnman.messages.scp.enums import Signal
+from spinnman.messages.scp.enums import PowerCommand
+from spinnman.messages.scp.enums import DPRIFlags
 from spinnman.processes import SetDPRIPacketTypesProcess
 from spinnman.processes import SetDPRIRouterTimeoutProcess
 from spinnman.processes import SetDPRIRouterEmergencyTimeoutProcess
@@ -1465,7 +1465,7 @@ class Transceiver(object):
                     count, executable_targets.total_processors))
 
         # Send a signal telling the application to start
-        self.send_signal(app_id, SCPSignal.START)
+        self.send_signal(app_id, Signal.START)
 
     def power_on_machine(self):
         """ Power on the whole machine
@@ -1485,7 +1485,7 @@ class Transceiver(object):
         :param frame: the id of the frame in the cabinet containing the\
                 board(s), or 0 if the board is not in a frame
         """
-        self._power(SCPPowerCommand.POWER_ON, boards, cabinet, frame)
+        self._power(PowerCommand.POWER_ON, boards, cabinet, frame)
 
     def power_off_machine(self):
         """ Power off the whole machine
@@ -1505,7 +1505,7 @@ class Transceiver(object):
         :param frame: the id of the frame in the cabinet containing the\
                 board(s), or 0 if the board is not in a frame
         """
-        self._power(SCPPowerCommand.POWER_OFF, boards, cabinet, frame)
+        self._power(PowerCommand.POWER_OFF, boards, cabinet, frame)
 
     def _bmp_connection(self, cabinet, frame):
         if (cabinet, frame) not in self._bmp_connection_selectors:
@@ -2101,7 +2101,7 @@ class Transceiver(object):
         :param app_id: The id of the application to send to
         :type app_id: int
         :param signal: The signal to send
-        :type signal: :py:class:`spinnman.messages.scp.SCPSignal`
+        :type signal: :py:class:`spinnman.messages.scp.Signal`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -2853,10 +2853,10 @@ class Transceiver(object):
         packet_types = list()
         values_to_check = [multicast, point_to_point,
                            nearest_neighbour, fixed_route]
-        flags_to_set = [SCPDPRIPacketTypeFlags.MULTICAST,
-                        SCPDPRIPacketTypeFlags.POINT_TO_POINT,
-                        SCPDPRIPacketTypeFlags.NEAREST_NEIGHBOUR,
-                        SCPDPRIPacketTypeFlags.FIXED_ROUTE]
+        flags_to_set = [DPRIFlags.MULTICAST,
+                        DPRIFlags.POINT_TO_POINT,
+                        DPRIFlags.NEAREST_NEIGHBOUR,
+                        DPRIFlags.FIXED_ROUTE]
         for value, flag in zip(values_to_check, flags_to_set):
             if value:
                 packet_types.append(flag)

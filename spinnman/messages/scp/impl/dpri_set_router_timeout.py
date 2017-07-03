@@ -1,6 +1,6 @@
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand, SCPDPRICommand
+from spinnman.messages.scp.enums import SCPCommand, DPRICommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import SCPCheckOKResponse
 
@@ -31,7 +31,7 @@ class SCPDPRISetRouterTimeoutRequest(AbstractSCPRequest):
                 destination_cpu=p, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_DPRI),
-            argument_1=SCPDPRICommand.SET_ROUTER_TIMEOUT.value,
+            argument_1=DPRICommand.SET_ROUTER_TIMEOUT.value,
             argument_2=(timeout_mantissa & 0xF) |
                        ((timeout_exponent & 0xF) << 4))
 

@@ -1,6 +1,6 @@
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand, SCPDPRICommand
+from spinnman.messages.scp.enums import SCPCommand, DPRICommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import SCPCheckOKResponse
 
@@ -26,7 +26,7 @@ class SCPDPRIExitRequest(AbstractSCPRequest):
                 destination_cpu=p, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_DPRI),
-            argument_1=SCPDPRICommand.EXIT.value)
+            argument_1=DPRICommand.EXIT.value)
 
     def get_scp_response(self):
         return SCPCheckOKResponse("Exit dropped packet reinjection",

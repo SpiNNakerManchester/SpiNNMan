@@ -1,6 +1,6 @@
 import struct
 
-from spinnman.messages.scp.enums import SCPDPRIPacketTypeFlags
+from spinnman.messages.scp.enums import DPRIFlags
 
 
 def _decode_router_timeout_value(value):
@@ -97,23 +97,23 @@ class DPRIStatus(object):
     def is_reinjecting_multicast(self):
         """ True if reinjection of multicast packets is enabled
         """
-        return self._flags & SCPDPRIPacketTypeFlags.MULTICAST.value != 0
+        return self._flags & DPRIFlags.MULTICAST.value != 0
 
     @property
     def is_reinjecting_point_to_point(self):
         """ True if reinjection of point-to-point packets is enabled
         """
-        return self._flags & SCPDPRIPacketTypeFlags.POINT_TO_POINT.value != 0
+        return self._flags & DPRIFlags.POINT_TO_POINT.value != 0
 
     @property
     def is_reinjecting_nearest_neighbour(self):
         """ True if reinjection of nearest neighbour packets is enabled
         """
         return (self._flags &
-                SCPDPRIPacketTypeFlags.NEAREST_NEIGHBOUR.value != 0)
+                DPRIFlags.NEAREST_NEIGHBOUR.value != 0)
 
     @property
     def is_reinjecting_fixed_route(self):
         """ True if reinjection of fixed-route packets is enabled
         """
-        return self._flags & SCPDPRIPacketTypeFlags.FIXED_ROUTE.value != 0
+        return self._flags & DPRIFlags.FIXED_ROUTE.value != 0

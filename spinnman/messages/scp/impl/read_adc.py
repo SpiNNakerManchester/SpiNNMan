@@ -3,14 +3,14 @@ ScpReadAdcRequest
 """
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages \
-    import AbstractSCPBMPRequest, AbstractSCPBMPResponse
+    import BMPRequest, BMPResponse
 from spinnman.messages.scp.enums \
-    import SCPBMPInfoType, SCPCommand, SCPResult
+    import BMPInfo, SCPCommand, SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.model import ADCInfo
 
 
-class SCPReadADCRequest(AbstractSCPBMPRequest):
+class SCPReadADCRequest(BMPRequest):
     """ SCP Request for the data from the BMP including voltages and\
         temperature.
     """
@@ -21,10 +21,10 @@ class SCPReadADCRequest(AbstractSCPBMPRequest):
         :param board: which board to request the adc register from
         :rtype: None
         """
-        AbstractSCPBMPRequest.__init__(
+        BMPRequest.__init__(
             self, board,
             SCPRequestHeader(command=SCPCommand.CMD_BMP_INFO),
-            argument_1=SCPBMPInfoType.ADC)
+            argument_1=BMPInfo.ADC)
 
     def get_scp_response(self):
         """
@@ -32,14 +32,14 @@ class SCPReadADCRequest(AbstractSCPBMPRequest):
         return _SCPReadADCResponse()
 
 
-class _SCPReadADCResponse(AbstractSCPBMPResponse):
+class _SCPReadADCResponse(BMPResponse):
     """ An SCP response to a request for ADC information
     """
 
     def __init__(self):
         """
         """
-        AbstractSCPBMPResponse.__init__(self)
+        BMPResponse.__init__(self)
         self._adc_info = None
 
     def read_data_bytestring(self, data, offset):

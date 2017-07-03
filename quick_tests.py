@@ -6,7 +6,7 @@ import sys
 
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums import CPUState
-from spinnman.messages.scp.enums import SCPSignal
+from spinnman.messages.scp.enums import Signal
 from spinnman.model import DiagnosticFilter
 from spinnman.messages.scp.impl import SCPReadMemoryRequest
 from spinnman.model.enums \
@@ -186,7 +186,7 @@ try:
 
     print "Send SYNC0"
     print "=========="
-    transceiver.send_signal(app_id, SCPSignal.SYNC0)
+    transceiver.send_signal(app_id, Signal.SYNC0)
     count = 0
     while count < 20:
         count = transceiver.get_core_state_count(app_id, CPUState.FINISHED)
@@ -203,7 +203,7 @@ try:
 
     print "Stop Application"
     print "================"
-    transceiver.send_signal(app_id, SCPSignal.STOP)
+    transceiver.send_signal(app_id, Signal.STOP)
     time.sleep(0.5)
     cpu_infos = transceiver.get_cpu_information(core_subsets)
     cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))

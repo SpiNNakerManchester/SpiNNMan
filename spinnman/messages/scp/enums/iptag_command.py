@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SCPIPTagCommand(Enum):
+class IPTagCommand(Enum):
     """ SCP IPTag Commands
     """
     NEW = 0

@@ -2,7 +2,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums \
-    import SCPAllocFreeType, SCPCommand, SCPResult
+    import AllocFree, SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
@@ -35,7 +35,7 @@ class SCPRouterAllocRequest(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
             argument_1=(
                 (app_id << 8) |
-                SCPAllocFreeType.ALLOC_ROUTING.value),  # @UndefinedVariable
+                AllocFree.ALLOC_ROUTING.value),  # @UndefinedVariable
             argument_2=n_entries)
 
     def get_scp_response(self):

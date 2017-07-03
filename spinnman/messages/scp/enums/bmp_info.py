@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SCPBMPInfoType(Enum):
+class BMPInfo(Enum):
     """ The SCP BMP Information Types
     """
 

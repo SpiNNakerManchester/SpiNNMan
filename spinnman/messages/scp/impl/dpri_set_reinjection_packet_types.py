@@ -1,6 +1,6 @@
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand, SCPDPRICommand
+from spinnman.messages.scp.enums import SCPCommand, DPRICommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import SCPCheckOKResponse
 
@@ -35,7 +35,7 @@ class SCPDPRISetReinjectionPacketTypesRequest(AbstractSCPRequest):
                 destination_cpu=p, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_DPRI),
-            argument_1=SCPDPRICommand.SET_PACKET_TYPES.value,
+            argument_1=DPRICommand.SET_PACKET_TYPES.value,
             argument_2=flags)
 
     def get_scp_response(self):

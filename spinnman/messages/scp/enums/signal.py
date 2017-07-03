@@ -9,7 +9,7 @@ class SignalType(Enum):
     NEAREST_NEIGHBOUR = 2
 
 
-class SCPSignal(Enum):
+class Signal(Enum):
     """ SCP Signals
     """
     INITIALISE = (0, SignalType.NEAREST_NEIGHBOUR)

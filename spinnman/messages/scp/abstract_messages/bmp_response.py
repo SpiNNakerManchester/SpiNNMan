@@ -1,12 +1,12 @@
 """
-AbstractSCPBMPResponse
+BMPResponse
 """
 
 # spinnman imports
-from .response import AbstractSCPResponse
+from .scp_response import AbstractSCPResponse
 
 
-class AbstractSCPBMPResponse(AbstractSCPResponse):
+class BMPResponse(AbstractSCPResponse):
     """
     represents a scp request thats tialored for the bmp connection
     """

@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SCPAllocFreeType(Enum):
+class AllocFree(Enum):
     """ The SCP Allocation and Free codes
     """
 

@@ -1,15 +1,15 @@
-from .alloc_free_type import SCPAllocFreeType
-from .bmp_info_type import SCPBMPInfoType
-from .command import SCPCommand
-from .dpri_command import SCPDPRICommand
-from .dpri_packet_type_flags import SCPDPRIPacketTypeFlags
-from .iptag_command import SCPIPTagCommand
-from .led_action import SCPLEDAction
-from .power_command import SCPPowerCommand
-from .result import SCPResult
-from .signal import SCPSignal
+from .alloc_free import AllocFree
+from .bmp_info import BMPInfo
+from .scp_command import SCPCommand
+from .dpri_command import DPRICommand
+from .dpri_flags import DPRIFlags
+from .iptag_command import IPTagCommand
+from .led_action import LEDAction
+from .power_command import PowerCommand
+from .scp_result import SCPResult
+from .signal import Signal
 
 __all__ = [
-    "SCPAllocFreeType", "SCPBMPInfoType", "SCPCommand", "SCPDPRICommand",
-    "SCPDPRIPacketTypeFlags", "SCPIPTagCommand", "SCPLEDAction",
-    "SCPPowerCommand", "SCPResult", "SCPSignal", ]
+    "AllocFree", "BMPInfo", "SCPCommand", "DPRICommand",
+    "DPRIFlags", "IPTagCommand", "LEDAction",
+    "PowerCommand", "SCPResult", "Signal", ]

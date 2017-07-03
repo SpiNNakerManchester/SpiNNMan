@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SCPLEDAction(Enum):
+class LEDAction(Enum):
     """ The SCP LED actions
     """
 

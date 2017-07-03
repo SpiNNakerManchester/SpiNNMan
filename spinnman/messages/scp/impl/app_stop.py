@@ -1,6 +1,6 @@
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand, SCPSignal
+from spinnman.messages.scp.enums import SCPCommand, Signal
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import SCPCheckOKResponse
 
@@ -31,7 +31,7 @@ class SCPAppStopRequest(AbstractSCPRequest):
                 destination_chip_y=self.DEFAULT_DEST_Y_COORD),
             SCPRequestHeader(command=SCPCommand.CMD_NNP),
             argument_1=(0x3f << 16),
-            argument_2=(5 << 28) | _get_data(app_id, SCPSignal.STOP),
+            argument_2=(5 << 28) | _get_data(app_id, Signal.STOP),
             argument_3=(1 << 31) + (0x3f << 8))
 
     def get_scp_response(self):

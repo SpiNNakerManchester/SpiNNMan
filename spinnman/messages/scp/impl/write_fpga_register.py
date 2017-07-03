@@ -5,13 +5,13 @@ ScpWriteFPGARegisterRequest
 # spinnman imports
 import struct
 
-from spinnman.messages.scp.abstract_messages import AbstractSCPBMPRequest
+from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from .check_ok_response import SCPCheckOKResponse
 
 
-class SCPWriteFPGARegisterRequest(AbstractSCPBMPRequest):
+class SCPWriteFPGARegisterRequest(BMPRequest):
     """ A request for writing data to a FPGA register
     """
 
@@ -34,7 +34,7 @@ class SCPWriteFPGARegisterRequest(AbstractSCPBMPRequest):
         :type value: int
         """
 
-        AbstractSCPBMPRequest.__init__(
+        BMPRequest.__init__(
             self, board,
             SCPRequestHeader(command=SCPCommand.CMD_LINK_WRITE),
             argument_1=addr & (~0x3), argument_2=4, argument_3=fpga_num,

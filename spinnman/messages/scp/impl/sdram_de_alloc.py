@@ -2,7 +2,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums \
-    import SCPAllocFreeType, SCPCommand, SCPResult
+    import AllocFree, SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
@@ -39,7 +39,7 @@ class SCPSDRAMDeAllocRequest(AbstractSCPRequest):
                 SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
                 argument_1=(
                     app_id << 8 |
-                    SCPAllocFreeType.
+                    AllocFree.
                     FREE_SDRAM_BY_POINTER.value),  # @UndefinedVariable
                 argument_2=base_address)
         else:
@@ -52,7 +52,7 @@ class SCPSDRAMDeAllocRequest(AbstractSCPRequest):
                 SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
                 argument_1=(
                     app_id << 8 |
-                    SCPAllocFreeType.
+                    AllocFree.
                     FREE_ROUTING_BY_APP_ID.value))  # @UndefinedVariable
 
     def get_scp_response(self):

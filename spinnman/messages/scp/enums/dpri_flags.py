@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SCPDPRIPacketTypeFlags(Enum):
+class DPRIFlags(Enum):
     """ SCP Dropped Packet Reinjection Packet type flags
     """
     MULTICAST = 1

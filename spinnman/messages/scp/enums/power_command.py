@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class SCPPowerCommand(Enum):
+class PowerCommand(Enum):
     """ The SCP Power Commands
     """
 

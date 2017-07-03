@@ -1,7 +1,7 @@
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
-from spinnman.messages.scp.enums import SCPCommand, SCPDPRICommand, SCPResult
+from spinnman.messages.scp.enums import SCPCommand, DPRICommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.model import DPRIStatus
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -28,7 +28,7 @@ class SCPDPRIGetStatusRequest(AbstractSCPRequest):
                 destination_cpu=p, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_DPRI),
-            argument_1=SCPDPRICommand.GET_STATUS.value)
+            argument_1=DPRICommand.GET_STATUS.value)
 
     def get_scp_response(self):
         return SCPDPRIGetStatusResponse()

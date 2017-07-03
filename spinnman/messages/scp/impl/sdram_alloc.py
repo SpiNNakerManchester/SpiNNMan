@@ -2,7 +2,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums \
-    import SCPAllocFreeType, SCPCommand, SCPResult
+    import AllocFree, SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -50,7 +50,7 @@ class SCPSDRAMAllocRequest(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
             argument_1=(
                 (app_id << 8) |
-                SCPAllocFreeType.ALLOC_SDRAM.value),  # @UndefinedVariable
+                AllocFree.ALLOC_SDRAM.value),  # @UndefinedVariable
             argument_2=size, argument_3=tag)
         self._size = size
 
