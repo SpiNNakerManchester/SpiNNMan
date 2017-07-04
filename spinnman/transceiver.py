@@ -1,5 +1,10 @@
 
 # local imports
+from spinnman import model_binaries
+from spinnman import constants
+from spinnman import exceptions
+
+from spinnman.model.cpu_infos import CPUInfos
 from spinnman.connections.udp_packet_connections.udp_bmp_connection import \
     UDPBMPConnection
 from spinnman.messages.scp.abstract_messages.abstract_scp_request import \
@@ -14,6 +19,7 @@ from spinnman.messages.scp.impl.scp_read_fpga_register_request import \
     SCPReadFPGARegisterRequest
 from spinnman.messages.scp.impl.scp_write_fpga_register_request import \
     SCPWriteFPGARegisterRequest
+from spinnman.model.enums.cpu_state import CPUState
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.connections.abstract_classes.abstract_spinnaker_boot_receiver\
     import AbstractSpinnakerBootReceiver
@@ -39,13 +45,14 @@ from spinnman.messages.scp.impl.scp_iptag_tto_request import SCPIPTagTTORequest
 from spinnman.processes.get_cpu_info_process import GetCPUInfoProcess
 from spinnman.processes.read_iobuf_process import ReadIOBufProcess
 from spinnman.processes.application_run_process import ApplicationRunProcess
-from spinnman import model_binaries
 from spinnman.processes.exit_dpri_process import ExitDPRIProcess
 from spinnman.messages.spinnaker_boot._system_variables\
     ._system_variable_boot_values import SystemVariableDefinition
+from spinnman.utilities.appid_tracker import AppIdTracker
+from spinnman.messages.scp.enums.scp_signal import SCPSignal
 from spinnman.processes.set_dpri_packet_types_process \
     import SetDPRIPacketTypesProcess
-from spinnman.messages.scp.scp_dpri_packet_type_flags \
+from spinnman.messages.scp.enums.scp_dpri_packet_type_flags \
     import SCPDPRIPacketTypeFlags
 from spinnman.processes.set_dpri_router_timeout_process \
     import SetDPRIRouterTimeoutProcess
@@ -69,10 +76,9 @@ from spinnman.processes.read_router_diagnostics_process \
 from spinnman.processes.\
     multi_connection_process_most_direct_connection_selector import \
     MultiConnectionProcessMostDirectConnectionSelector
-from spinnman.messages.scp.scp_power_command import SCPPowerCommand
+from spinnman.messages.scp.enums.scp_power_command import SCPPowerCommand
 from spinnman.connections.udp_packet_connections.udp_boot_connection \
     import UDPBootConnection
-from spinnman import constants
 from spinnman.connections.udp_packet_connections.udp_scamp_connection \
     import UDPSCAMPConnection
 from spinnman.messages.scp.impl.scp_reverse_iptag_set_request import \
@@ -100,7 +106,6 @@ from spinnman.messages.scp.impl.scp_led_request \
     import SCPLEDRequest
 from spinnman.messages.scp.impl.scp_app_stop_request import SCPAppStopRequest
 from spinnman.utilities import utility_functions
-from spinnman import exceptions
 
 # storage handlers imports
 from spinn_storage_handlers.abstract_classes.abstract_data_reader \
@@ -130,14 +135,13 @@ _BMP_MAJOR_VERSIONS = [1, 2]
 
 _STANDARD_RETIRES_NO = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
-_REINJECTOR_APP_ID = 17
 
 
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
-        ignore_chips=None, ignore_cores=None, max_core_id=None,
-        auto_detect_bmp=False, scamp_connections=None, boot_port_no=None,
-        max_sdram_size=None):
+        ignore_chips=None, ignore_cores=None, ignored_links=None,
+        max_core_id=None, auto_detect_bmp=False, scamp_connections=None,
+        boot_port_no=None, max_sdram_size=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         UDPBootConnection on port 54321 (the default boot port),
@@ -154,11 +158,15 @@ def create_transceiver_from_hostname(
                 machine.  Requests for a "machine" will have these chips\
                 excluded, as if they never existed.  The processor_ids of\
                 the specified chips are ignored.
-    :type ignore_chips: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+    :type ignore_chips: set of (int, int) of chips to ignore
     :param ignore_cores: An optional set of cores to ignore in the\
                 machine.  Requests for a "machine" will have these cores\
                 excluded, as if they never existed.
-    :type ignore_cores: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+    :type ignore_cores: set of (int, int, int) of cores to ignore
+    :param ignored_links: An optional set of links to ignore in the\
+                    machine.  Requests for a "machine" will have these links\
+                    excluded, as if they never existed.
+    :type ignored_links: set of (int, int, int) of links to ignore
     :param max_core_id: The maximum core id in any discovered machine.\
                 Requests for a "machine" will only have core ids up to\
                 this value.
@@ -244,9 +252,10 @@ class Transceiver(object):
 
     """
 
-    def __init__(self, version, connections=None, ignore_chips=None,
-                 ignore_cores=None, max_core_id=None, scamp_connections=None,
-                 max_sdram_size=None):
+    def __init__(
+            self, version, connections=None, ignore_chips=None,
+            ignore_cores=None, ignore_links=None, max_core_id=None,
+            scamp_connections=None, max_sdram_size=None):
         """
 
         :param version: The version of the board being connected to
@@ -260,11 +269,15 @@ class Transceiver(object):
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
                     the specified chips are ignored.
-        :type ignore_chips: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+        :type ignore_chips: set of (int, int of chips to ignore
         :param ignore_cores: An optional set of cores to ignore in the\
                     machine.  Requests for a "machine" will have these cores\
                     excluded, as if they never existed.
-        :type ignore_cores: :py:class:`spinn_machine.core_subsets.CoreSubsets`
+        :type ignore_cores: set of (int, int, int) of cores to ignore
+        :param ignore_links: An optional set of links to ignore in the\
+                    machine.  Requests for a "machine" will have these links\
+                    excluded, as if they never existed.
+        :type ignore_links: set of (int, int, int) of links to ignore
         :param max_core_id: The maximum core id in any discovered machine.\
                     Requests for a "machine" will only have core ids up to and\
                     including this value.
@@ -292,16 +305,19 @@ class Transceiver(object):
         self._machine = None
         self._width = None
         self._height = None
-        self._ignore_chips = ignore_chips
-        self._ignore_cores = ignore_cores
+        self._ignore_chips = ignore_chips if ignore_chips is not None else {}
+        self._ignore_cores = ignore_cores if ignore_cores is not None else {}
+        self._ignore_links = ignore_links if ignore_links is not None else {}
         self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
         self._iobuf_size = None
+        self._app_id_tracker = None
 
         # Place to keep the identity of the re-injector core on each chip,
         # indexed by chip x and y coordinates
         self._reinjector_cores = CoreSubsets()
         self._reinjection_running = False
+        self._reinjector_app_id = None
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -462,8 +478,8 @@ class Transceiver(object):
     def _check_bmp_connections(self):
         """ Check that the BMP connections are actually connected to valid BMPs
 
-        :return: None
-        :raises SpinnmanIOException: when the connection is not linked to a BMP
+        :rtype: None
+        :raise SpinnmanIOException: when the connection is not linked to a BMP
         """
         # check that the UDP BMP connection is actually connected to a BMP
         #  via the sver command
@@ -633,7 +649,7 @@ class Transceiver(object):
         :param connection: An optional connection to use
         :type connection:\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
-        :return: None
+        :rtype: None
         """
         if connection is None:
             connection_to_use = self._get_random_connection(
@@ -685,7 +701,8 @@ class Transceiver(object):
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
-            self._ignore_cores, self._max_core_id, self._max_sdram_size)
+            self._ignore_cores, self._ignore_links, self._max_core_id,
+            self._max_sdram_size)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height)
 
@@ -705,6 +722,9 @@ class Transceiver(object):
         # Work out and add the spinnaker links and FPGA links
         self._machine.add_spinnaker_links(self._version)
         self._machine.add_fpga_links(self._version)
+
+        # TODO: Actually get the existing APP_IDs in use
+        self._app_id_tracker = AppIdTracker()
 
         logger.info("Detected a machine on ip address {} which has {}"
                     .format(self._boot_send_connection.remote_ip_address,
@@ -784,7 +804,7 @@ class Transceiver(object):
             linked to a given chip
 
         :param chip: the chip to locate
-        :return:
+        :rtype: None
         """
         for connection in self._scamp_connections:
             if connection.chip_x == chip.x and connection.chip_y == chip.y:
@@ -795,6 +815,7 @@ class Transceiver(object):
         """ Get the currently known connections to the board, made up of those\
             passed in to the transceiver and those that are discovered during\
             calls to discover_connections.  No further discovery is done here.
+
         :return: An iterable of connections known to the transceiver
         :rtype: iterable of\
                     :py:class:`spinnman.connections.abstract_connection.AbstractConnection`
@@ -847,6 +868,16 @@ class Transceiver(object):
         if self._machine is None:
             self._update_machine()
         return self._machine
+
+    @property
+    def app_id_tracker(self):
+        """ Get the app id tracker for this transceiver
+
+        :rtype: :py:class:`spinnman.utilities.appid_tracker.AppIdTracker`
+        """
+        if self._app_id_tracker is None:
+            self._update_machine()
+        return self._app_id_tracker
 
     def is_connected(self, connection=None):
         """ Determines if the board can be contacted
@@ -928,6 +959,28 @@ class Transceiver(object):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
+    @staticmethod
+    def is_scamp_version_compabible(version):
+        """ Determine if the version of SCAMP is compatible with this\
+            transceiver
+
+        :param version: The version to test
+        :type version: (int, int, int)
+        """
+
+        # The major version must match exactly
+        if (version[0] != _SCAMP_VERSION[0]):
+            return False
+
+        # If the minor version matches, the patch version must be >= the
+        # required version
+        if (version[1] == _SCAMP_VERSION[1]):
+            return version[2] >= _SCAMP_VERSION[2]
+
+        # If the minor version is > than the required version, the patch
+        # version is irrelevant
+        return (version[1] > _SCAMP_VERSION[1])
+
     def ensure_board_is_ready(
             self, number_of_boards=None, width=None, height=None,
             n_retries=5, enable_reinjector=True, extra_boot_values=None):
@@ -990,7 +1043,8 @@ class Transceiver(object):
             raise exceptions.SpinnmanIOException(
                 "Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
-                version_info.version_number != _SCAMP_VERSION):
+                not self.is_scamp_version_compabible(
+                    version_info.version_number)):
             raise exceptions.SpinnmanIOException(
                 "The machine is currently booted with {}"
                 " {} which is incompatible with this transceiver, "
@@ -1025,7 +1079,7 @@ class Transceiver(object):
         :param width: The width of the machine in chips
         :param height: The height of the machine in chips
         :return: version_info
-        :raises SpinnmanIOException: If there is a problem communicating with\
+        :raise SpinnmanIOException: If there is a problem communicating with\
                 the machine
         """
         version_info = None
@@ -1295,7 +1349,9 @@ class Transceiver(object):
         response = process.execute(SCPCountStateRequest(app_id, state))
         return response.count
 
-    def execute(self, x, y, processors, executable, app_id, n_bytes=None):
+    def execute(
+            self, x, y, processors, executable, app_id, n_bytes=None,
+            wait=False, is_filename=False):
         """ Start an executable running on a single core
 
         :param x: The x-coordinate of the chip on which to run the executable
@@ -1309,19 +1365,28 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
+                    * A filename of a file containing the executable (in which\
+                      case is_filename must be set to True)
         :type executable:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
-                    or bytearray
+                    or bytearray or str
         :param app_id: The id of the application with which to associate the\
                     executable
         :type app_id: int
         :param n_bytes: The size of the executable data in bytes.  If not\
                     specified:
-                        * If data is an AbstractDataReader, an error is raised
-                        * If data is a bytearray, the length of the bytearray\
-                          will be used
-                        * If data is an int, 4 will be used
+                        * If executable is an AbstractDataReader, an error\
+                          is raised
+                        * If executable is a bytearray, the length of the\
+                          bytearray will be used
+                        * If executable is an int, 4 will be used
+                        * If executable is a str, the length of the file will\
+                          be used
         :type n_bytes: int
+        :param wait: True if the binary should enter a "wait" state on loading
+        :type wait: bool
+        :param is_filename: True if executable is a filename
+        :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1341,12 +1406,13 @@ class Transceiver(object):
         self._get_chip_execute_lock(x, y)
 
         # Write the executable
-        self.write_memory(x, y, 0x67800000, executable, n_bytes)
+        self.write_memory(
+            x, y, 0x67800000, executable, n_bytes, is_filename=is_filename)
 
         # Request the start of the executable
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(
-            SCPApplicationRunRequest(app_id, x, y, processors))
+            SCPApplicationRunRequest(app_id, x, y, processors, wait))
 
         # Release the lock
         self._release_chip_execute_lock(x, y)
@@ -1359,7 +1425,9 @@ class Transceiver(object):
         self._next_nearest_neighbour_condition.release()
         return next_nearest_neighbour_id
 
-    def execute_flood(self, core_subsets, executable, app_id, n_bytes=None):
+    def execute_flood(
+            self, core_subsets, executable, app_id, n_bytes=None, wait=False,
+            is_filename=False):
         """ Start an executable running on multiple places on the board.  This\
             will be optimised based on the selected cores, but it may still\
             require a number of communications with the board to execute.
@@ -1370,19 +1438,29 @@ class Transceiver(object):
                     the following:
                     * An instance of AbstractDataReader
                     * A bytearray
+                    * A filename of an executable (in which case is_filename\
+                      must be set to True)
         :type executable:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
-                    or bytearray
+                    or bytearray or str
         :param app_id: The id of the application with which to associate the\
                     executable
         :type app_id: int
         :param n_bytes: The size of the executable data in bytes.  If not\
                     specified:
-                        * If data is an AbstractDataReader, an error is raised
-                        * If data is a bytearray, the length of the bytearray\
-                          will be used
-                        * If data is an int, 4 will be used
+                        * If executable is an AbstractDataReader, an error\
+                          is raised
+                        * If executable is a bytearray, the length of the\
+                          bytearray will be used
+                        * If executable is an int, 4 will be used
+                        * If executable is a str, the length of the file will\
+                          be used
         :type n_bytes: int
+        :param wait: True if the processors should enter a "wait" state on\
+                    loading
+        :type wait: bool
+        :param is_filename: True if the data is a filename
+        :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1405,14 +1483,48 @@ class Transceiver(object):
         self._get_flood_execute_lock()
 
         # Flood fill the system with the binary
-        self.write_memory_flood(0x67800000, executable, n_bytes)
+        self.write_memory_flood(
+            0x67800000, executable, n_bytes, is_filename=is_filename)
 
         # Execute the binary on the cores on the chips where required
         process = ApplicationRunProcess(self._scamp_connection_selector)
-        process.run(app_id, core_subsets)
+        process.run(app_id, core_subsets, wait)
 
         # Release the lock
         self._release_flood_execute_lock()
+
+    def execute_application(self, executable_targets, app_id):
+        """ Execute a set of binaries that make up a complete application\
+            on specified cores, wait for them to be ready and then start\
+            all of the binaries.  Note this will get the binaries into c_main\
+            but will not signal the barrier.
+
+        :param executable_targets: The binaries to be executed and the cores\
+                    to execute them on
+        :type executable_targets:\
+                    :py:class:`spinnman.model.executable_targets.ExecutableTargets`
+        :param app_id: The app_id to give this application
+        :type app_id: int
+        """
+
+        # Execute each of the binaries and get them in to a "wait" state
+        for binary in executable_targets.binaries:
+            core_subsets = executable_targets.get_cores_for_binary(binary)
+            self.execute_flood(
+                core_subsets, binary, app_id, wait=True, is_filename=True)
+
+        # Sleep to allow cores to get going
+        time.sleep(0.5)
+
+        # Check that the binaries have reached a wait state
+        count = self.get_core_state_count(app_id, CPUState.READY)
+        if count < executable_targets.total_processors:
+            raise exceptions.SpinnmanException(
+                "Only {} of {} cores reached ready state".format(
+                    count, executable_targets.total_processors))
+
+        # Send a signal telling the application to start
+        self.send_signal(app_id, SCPSignal.START)
 
     def power_on_machine(self):
         """ Power on the whole machine
@@ -1463,7 +1575,7 @@ class Transceiver(object):
                 if the frame is not in a cabinet
         :param frame: the id of the frame in the cabinet containing the\
                 board(s), or 0 if the board is not in a frame
-        :return: None
+        :rtype: None
         """
         if (cabinet, frame) in self._bmp_connection_selectors:
             process = SendSingleCommandProcess(
@@ -1481,7 +1593,7 @@ class Transceiver(object):
         :param led:  Number of the LED or an iterable of LEDs to set the\
                 state of (0-7)
         :type led: int or iterable of int
-        :param action:State to set the LED to, either on, off or toggle
+        :param action: State to set the LED to, either on, off or toggle
         :type action:\
                 :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
         :param board: Specifies the board to control the LEDs of. This may \
@@ -1493,7 +1605,7 @@ class Transceiver(object):
         :type cabinet: int
         :param frame: the frame this is targeting
         :type frame: int
-        :return: None
+        :rtype: None
         """
         if (cabinet, frame) in self._bmp_connection_selectors:
             process = SendSingleCommandProcess(
@@ -1546,14 +1658,13 @@ class Transceiver(object):
         :param frame: the frame this is targeting
         :type frame: int
         :param board: which board to write the FPGA register to
-        :return: None
+        :rtype: None
         """
         if (cabinet, frame) in self._bmp_connection_selectors:
             process = SendSingleCommandProcess(
                 self._bmp_connection_selectors[(cabinet, frame)])
-            response = process.execute(
+            process.execute(
                 SCPWriteFPGARegisterRequest(fpga_num, register, value, board))
-            return response.fpga_register
         else:
             raise exceptions.SpinnmanInvalidParameterException(
                 "cabinet and frame", "{} and {}".format(cabinet, frame),
@@ -1600,7 +1711,7 @@ class Transceiver(object):
                 "Unknown combination")
 
     def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
-                     cpu=0):
+                     cpu=0, is_filename=False):
         """ Write to the SDRAM on the board
 
         :param x: The x-coordinate of the chip where the memory is to be\
@@ -1617,20 +1728,25 @@ class Transceiver(object):
                     * A bytearray
                     * A single integer - will be written using little-endian\
                       byte ordering
+                    * A filename of a data file (in which case is_filename\
+                      must be set to True)
         :type data:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
-                    or bytearray or int
+                    or bytearray or int or str
         :param n_bytes: The amount of data to be written in bytes.  If not\
                     specified:
                         * If data is an AbstractDataReader, an error is raised
                         * If data is a bytearray, the length of the bytearray\
                           will be used
                         * If data is an int, 4 will be used
+                        * If data is a str, the length of the file will be used
         :type n_bytes: int
         :param offset: The offset from which the valid data begins
         :type offset: int
         :param cpu: The optional cpu to write to
         :type cpu: int
+        :param is_filename: True if the data is a filename
+        :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1651,21 +1767,28 @@ class Transceiver(object):
         """
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, AbstractDataReader):
-            process.write_memory_from_reader(x, y, cpu, base_address, data,
-                                             n_bytes)
+            process.write_memory_from_reader(
+                x, y, cpu, base_address, data, n_bytes)
+        elif isinstance(data, str) and is_filename:
+            reader = FileDataReader(data)
+            if n_bytes is None:
+                n_bytes = os.stat(data).st_size
+            process.write_memory_from_reader(
+                x, y, cpu, base_address, reader, n_bytes)
+            reader.close()
         elif isinstance(data, int):
             data_to_write = struct.pack("<I", data)
-            process.write_memory_from_bytearray(x, y, cpu, base_address,
-                                                data_to_write, 0, 4)
+            process.write_memory_from_bytearray(
+                x, y, cpu, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
             data_to_write = struct.pack("<Q", data)
-            process.write_memory_from_bytearray(x, y, cpu, base_address,
-                                                data_to_write, 0, 8)
+            process.write_memory_from_bytearray(
+                x, y, cpu, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
-            process.write_memory_from_bytearray(x, y, cpu, base_address, data,
-                                                offset, n_bytes)
+            process.write_memory_from_bytearray(
+                x, y, cpu, base_address, data, offset, n_bytes)
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
                                n_bytes=None, offset=0, cpu=0):
@@ -1742,7 +1865,9 @@ class Transceiver(object):
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data, offset, n_bytes)
 
-    def write_memory_flood(self, base_address, data, n_bytes=None, offset=0):
+    def write_memory_flood(
+            self, base_address, data, n_bytes=None, offset=0,
+            is_filename=False):
         """ Write to the SDRAM of all chips.
 
         :param base_address: The address in SDRAM where the region of memory\
@@ -1751,8 +1876,10 @@ class Transceiver(object):
         :param data: The data that is to be written.  Should be one of\
                     the following:
                     * An instance of AbstractDataReader
-                    * A bytearray
+                    * A bytearray or bytestring
                     * A single integer
+                    * A file name of a file to read (in which case is_filename\
+                      should be set to True)
         :type data:\
                     :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
                     or bytearray or int
@@ -1762,11 +1889,14 @@ class Transceiver(object):
                         * If data is a bytearray, the length of the bytearray\
                           will be used
                         * If data is an int, 4 will be used
-                        * If n_bytes is less than 0
+                        * If data is a str, the size of the file will be used
         :type n_bytes: int
         :param offset: The offset where the valid data starts, if the data is \
                         a int, then the offset will be ignored and 0 is used.
         :type offset: int
+        :param is_filename: True if the data should be interpreted as a file \
+                    name
+        :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
@@ -1791,6 +1921,13 @@ class Transceiver(object):
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)
+        elif isinstance(data, str) and is_filename:
+            reader = FileDataReader(data)
+            if n_bytes is None:
+                n_bytes = os.stat(data).st_size
+            process.write_memory_from_reader(
+                nearest_neighbour_id, base_address, reader, n_bytes)
+            reader.close()
         elif isinstance(data, int):
             data_to_write = struct.pack("<I", data)
             process.write_memory_from_bytearray(
@@ -1896,6 +2033,150 @@ class Transceiver(object):
 
         process.execute(SCPAppStopRequest(app_id))
 
+    def wait_for_cores_to_be_in_state(
+            self, all_core_subsets, app_id, cpu_states, timeout=None,
+            time_between_polls=0.1,
+            error_states={CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG},
+            counts_between_full_check=100):
+        """
+
+        :param all_core_subsets: the cores to check are in a given sync state
+        :param app_id: the app id that being used by the simulation
+        :param cpu_states:\
+            The expected states once the applications are ready; success is\
+            when each application is in one of these states
+        :param timeout:\
+            The amount of time to wait in seconds for the cores to reach one\
+            of the states
+        :param time_between_polls: Time between checking the state
+        :param error_states:\
+            Set of states that the application can be in that indicate an\
+            error, and so should raise an exception
+        :param counts_between_full_check:\
+            The number of times to use the count signal before instead using\
+            the full CPU state check
+        """
+
+        # check that the right number of processors are in the states
+        processors_ready = 0
+        timeout_time = None
+        if timeout is not None:
+            timeout_time = time.time() + timeout
+        tries = 0
+        while (processors_ready < len(all_core_subsets) and
+               (timeout_time is None or time.time() < timeout_time)):
+
+            # Get the number of processors in the ready states
+            processors_ready = 0
+            for cpu_state in cpu_states:
+                processors_ready += self.get_core_state_count(
+                    app_id, cpu_state)
+
+            # If the count is too small, check for error states
+            if processors_ready < len(all_core_subsets):
+                for cpu_state in error_states:
+                    error_cores = self.get_core_state_count(
+                        app_id, cpu_state)
+                    if error_cores > 0:
+                        raise exceptions.SpinnmanException(
+                            "{} cores have reached an error state {}:".format(
+                                error_cores, cpu_state))
+
+                # If we haven't seen an error, increase the tries, and
+                # do a full check if required
+                tries += 1
+                if tries >= counts_between_full_check:
+                    cores_in_state = self.get_cores_in_state(
+                        all_core_subsets, cpu_states)
+                    processors_ready = len(cores_in_state)
+                    tries = 0
+
+                # If we're still not in the correct state, wait a bit
+                if processors_ready < len(all_core_subsets):
+                    time.sleep(time_between_polls)
+
+        # If we haven't reached the final state, do a final full check
+        if processors_ready != len(all_core_subsets):
+            cores_in_state = self.get_cores_in_state(
+                all_core_subsets, cpu_states)
+
+            # If we are sure we haven't reached the final state,
+            # report a timeout error
+            if len(cores_in_state) != len(all_core_subsets):
+                raise exceptions.SpinnmanTimeoutException(
+                    "waiting for cores to reach one of {}".format(cpu_states),
+                    timeout)
+
+    def get_cores_in_state(self, all_core_subsets, states):
+        """ Get all cores that are in a given state or set of states
+
+        :param all_core_subsets: The cores to filter
+        :type all_core_subsets:\
+                    :py:class:`spinnmachine.core_subsets.CoreSubsets`
+        :param states: The state or states to filter on
+        :type states:\
+                    :py:class:`spinnman.model.enums.cpu_state.CPUState` or\
+                    set of :py:class:`spinnman.model.enums.cpu_state.CPUState`
+        :return: Core subsets object containing cores in the
+        """
+        core_infos = self.get_cpu_information(all_core_subsets)
+        cores_in_state = CoreSubsets()
+        for core_info in core_infos:
+            if hasattr(states, "__iter__"):
+                if core_info.state in states:
+                    cores_in_state.add_processor(
+                        core_info.x, core_info.y, core_info.p)
+            elif core_info.state == states:
+                cores_in_state.add_processor(
+                    core_info.x, core_info.y, core_info.p)
+
+        return cores_in_state
+
+    def get_cores_not_in_state(self, all_core_subsets, states):
+        """ Get all cores that are not in a given state or set of states
+
+        :param all_core_subsets:
+        :param states:
+        :return:
+        """
+        core_infos = self.get_cpu_information(all_core_subsets)
+        cores_not_in_state = CPUInfos()
+        for core_info in core_infos:
+            if hasattr(states, "__iter__"):
+                if core_info.state not in states:
+                    cores_not_in_state.add_processor(
+                        core_info.x, core_info.y, core_info.p, core_info)
+            elif core_info.state != states:
+                cores_not_in_state.add_processor(
+                    core_info.x, core_info.y, core_info.p, core_info)
+        return cores_not_in_state
+
+    def get_core_status_string(self, cpu_infos):
+        """ Get a string indicating the status of the given cores
+
+        :param cpu_infos: A CPUInfos objects
+        :type cpu_infos: :py:class:`spinnman.model.cpu_infos.CPUInfos`
+        """
+        break_down = "\n"
+        for ((x, y, p), core_info) in cpu_infos.cpu_infos:
+            if core_info.state == CPUState.RUN_TIME_EXCEPTION:
+                break_down += "    {}:{}:{} in state {}:{}\n".format(
+                    x, y, p, core_info.state.name,
+                    core_info.run_time_error.name)
+                break_down += "        r0={}, r1={}, r2={}, r3={}\n".format(
+                    core_info.registers[0], core_info.registers[1],
+                    core_info.registers[2], core_info.registers[3])
+                break_down += "        r4={}, r5={}, r6={}, r7={}\n".format(
+                    core_info.registers[4], core_info.registers[5],
+                    core_info.registers[6], core_info.registers[7])
+                break_down += "        PSR={}, SP={}, LR={}".format(
+                    core_info.processor_state_register,
+                    core_info.stack_pointer, core_info.link_register)
+            else:
+                break_down += "    {}:{}:{} in state {}\n".format(
+                    x, y, p, core_info.state.name)
+        return break_down
+
     def send_signal(self, app_id, signal):
         """ Send a signal to an application
 
@@ -1903,7 +2184,6 @@ class Transceiver(object):
         :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
-         :py:class:`spinnman.messages.scp.scp_signal.SCPSignal'
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -1981,6 +2261,12 @@ class Transceiver(object):
                     a response indicates an error during the exchange
         """
 
+        # Check that the tag has a port assigned
+        if ip_tag.port is None:
+            raise exceptions.SpinnmanInvalidParameterException(
+                "ip_tag.port", "None",
+                "The tag port must have been set")
+
         # Get the connections - if the tag specifies a connection, use that,
         # otherwise apply the tag to all connections
         connections = list()
@@ -1999,7 +2285,8 @@ class Transceiver(object):
 
             # Convert the host string
             host_string = ip_tag.ip_address
-            if host_string == "localhost" or host_string == ".":
+            if (host_string == "localhost" or host_string == "." or
+                    host_string == "0.0.0.0"):
                 host_string = connection.local_ip_address
             ip_string = socket.gethostbyname(host_string)
             ip_address = bytearray(socket.inet_aton(ip_string))
@@ -2031,6 +2318,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
+
+        if reverse_ip_tag.port is None:
+            raise exceptions.SpinnmanInvalidParameterException(
+                "reverse_ip_tag.port", "None",
+                "The tag port must have been set!")
 
         if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT or
                 reverse_ip_tag.port ==
@@ -2312,7 +2604,7 @@ class Transceiver(object):
                     will result in a warning).
         :type diagnostic_filter:\
                     :py:class:`spinnman.model.diagnostic_filter.DiagnosticFilter`
-        :return: None
+        :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
                     * If there is an error communicating with the board
                     * If there is an error reading the data
@@ -2396,8 +2688,7 @@ class Transceiver(object):
         :param counter_ids: The ids of the counters to reset (all by default)\
                     and enable if enable is True; each must be between 0 and 15
         :type counter_ids: array-like of int
-        :return: None
-        :rtype: Nothing is returned
+        :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -2453,7 +2744,7 @@ class Transceiver(object):
         if self._reinjection_running:
             process = ExitDPRIProcess(self._scamp_connection_selector)
             process.exit(self._reinjector_cores)
-            self.stop_application(_REINJECTOR_APP_ID)
+            self.stop_application(self._reinjector_app_id)
             self._reinjection_running = False
 
         if power_off_machine and len(self._bmp_connections) > 0:
@@ -2483,12 +2774,13 @@ class Transceiver(object):
         :param local_port: The optional port number to listen on; if not\
                 specified, an existing connection will be used if possible,\
                 otherwise a random free port number will be used
-        :type: local_port: int
+        :type local_port: int
         :param local_host: The optional hostname or IP address to listen on;\
                 if not specified, all interfaces will be used for listening
         :type local_host: str
-        :return: The port number that the connection is listening on
-        :rtype: int
+        :return: The connection to be used
+        :rtype:\
+                :py:class:`spinnman.connection.udp_packet_connections.udp_connection.UDPConnection`
         """
 
         # If the connection class is not an AbstractListenable, this is an
@@ -2501,6 +2793,7 @@ class Transceiver(object):
         connections_of_class = self._udp_listenable_connections_by_class[
             connection_class]
         connection = None
+        listener = None
 
         # If the local port was specified
         if local_port is not None:
@@ -2548,12 +2841,15 @@ class Transceiver(object):
                 connection = connection_class(local_port=local_port,
                                               local_host=local_host)
                 self._all_connections.add(connection)
-            listener = ConnectionListener(connection)
-            listener.start()
-            receiving_connections[local_host] = (connection, listener)
-            connections_of_class.append((connection, listener))
+
+            if listener is None:
+                listener = ConnectionListener(connection)
+                listener.start()
+                receiving_connections[local_host] = (connection, listener)
+
             listener.add_callback(callback)
-            return connection.local_port
+            connections_of_class.append((connection, listener))
+            return connection
 
         # If we are here, the local port wasn't specified to try to use an
         # existing connection of the correct class
@@ -2574,13 +2870,16 @@ class Transceiver(object):
         if connection is None:
             connection = connection_class(local_host=local_host)
             self._all_connections.add(connection)
-        listener = ConnectionListener(connection)
-        listener.start()
-        self._udp_receive_connections_by_port[connection.local_port][
-            local_host] = (connection, listener)
-        connections_of_class.append((connection, listener))
+
+        if listener is None:
+            listener = ConnectionListener(connection)
+            listener.start()
+            self._udp_receive_connections_by_port[connection.local_port][
+                local_host] = (connection, listener)
+
         listener.add_callback(callback)
-        return connection.local_port
+        connections_of_class.append((connection, listener))
+        return connection
 
     def enable_reinjection(self, multicast=True, point_to_point=False,
                            nearest_neighbour=False, fixed_route=False):
@@ -2608,31 +2907,27 @@ class Transceiver(object):
                 self._update_machine()
 
             # Find a free core on each chip to use
-            for chip in self._machine.chips:
-                try:
-                    first_processor = None
-                    for processor in chip.processors:
-                        if not processor.is_monitor:
-                            first_processor = processor
-                    if first_processor is not None:
-                        first_processor.is_monitor = True
-                        self._reinjector_cores.add_processor(
-                            chip.x, chip.y, first_processor.processor_id)
-                    else:
-                        logger.warn(
-                            "No processor on {}, {} was free to use for"
-                            " reinjection".format(chip.x, chip.y))
-                except StopIteration:
-                    pass
+            self._reinjector_cores, failed_chips = \
+                self._machine.reserve_system_processors()
+            if len(failed_chips) > 0:
+                logger.warn(
+                    "The reinjector could not be enabled on the following"
+                    " chips due to lack of available cores: {}".format(
+                        failed_chips))
+
+            # Get an app id for the reinjector
+            if self._reinjector_app_id is None:
+                self._reinjector_app_id = self._app_id_tracker.get_new_id()
 
             # Load the reinjector on each free core
             reinjector_binary = os.path.join(
                 os.path.dirname(model_binaries.__file__), "reinjector.aplx")
-            reinjector_size = os.stat(reinjector_binary).st_size
-            reinjector = FileDataReader(reinjector_binary)
-            self.execute_flood(self._reinjector_cores, reinjector,
-                               _REINJECTOR_APP_ID, reinjector_size)
-            reinjector.close()
+            self.execute_flood(
+                self._reinjector_cores, reinjector_binary,
+                self._reinjector_app_id, is_filename=True)
+            self.wait_for_cores_to_be_in_state(
+                self._reinjector_cores, self._reinjector_app_id,
+                [CPUState.RUNNING])
             self._reinjection_running = True
 
         # Set the types to be reinjected

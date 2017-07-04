@@ -20,7 +20,8 @@ class AbstractMultiConnectionProcess(AbstractProcess):
     def _send_request(self, request, callback=None, error_callback=None):
         if error_callback is None:
             error_callback = self._receive_error
-        connection = self._next_connection_selector.get_next_connection(request)
+        connection = self._next_connection_selector.get_next_connection(
+            request)
         if connection not in self._scp_request_pipe_lines:
             scp_request_set = SCPRequestPipeLine(
                 connection, n_retries=self._n_retries,

@@ -1,23 +1,22 @@
+from spinnman import constants
+from spinnman import exceptions
+import logging
+
 from spinnman.messages.scp.impl.scp_read_memory_request\
     import SCPReadMemoryRequest
 from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
-from spinnman import constants
-from spinnman import exceptions
 from spinnman.model.p2p_table import P2PTable
 from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
-from spinnman.model.cpu_state import CPUState
+from spinnman.model.enums.cpu_state import CPUState
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 from spinnman.processes.abstract_process import AbstractProcess
-
 from spinn_machine.processor import Processor
 from spinn_machine.router import Router
 from spinn_machine.chip import Chip
 from spinn_machine.sdram import SDRAM
 from spinn_machine.machine import Machine
 from spinn_machine.link import Link
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -27,16 +26,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     """
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
-                 max_core_id, max_sdram_size=None):
-        """
-        :param scamp_connections: The connections to use for the interaction
-        :type scamp_connections: iterable of\
-                    :py:class:`spinnman.connections.abstract_classes.abstract_connection.AbstractConnection`
-        """
+                 ignore_links, max_core_id, max_sdram_size=None):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
-        self._ignore_chips = ignore_chips
-        self._ignore_cores = ignore_cores
+        self._ignore_chips = ignore_chips if ignore_chips is not None else {}
+        self._ignore_cores = ignore_cores if ignore_cores is not None else {}
+        self._ignore_links = ignore_links if ignore_links is not None else {}
         self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
 
@@ -65,9 +60,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         for virtual_core_id in range(max_core_id + 1):
 
             # Add the core provided it is not to be ignored
-            if (self._ignore_cores is None or
-                    not self._ignore_cores.is_core(
-                        chip_info.x, chip_info.y, virtual_core_id)):
+            if ((chip_info.x, chip_info.y, virtual_core_id) not in
+                    self._ignore_cores):
                 if virtual_core_id == 0:
                     processors.append(Processor(
                         virtual_core_id, is_monitor=True))
@@ -83,8 +77,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         for link in chip_info.working_links:
             dest_x, dest_y = Machine.get_chip_over_link(
                 chip_info.x, chip_info.y, link, width, height)
-            if ((self._ignore_chips is None or
-                    not self._ignore_chips.is_chip(dest_x, dest_y)) and
+            if ((chip_info.x, chip_info.y, link) not in self._ignore_links and
+                    (dest_x, dest_y) not in self._ignore_chips and
                     (dest_x, dest_y) in self._chip_info):
                 opposite_link_id = (link + 3) % 6
                 links.append(Link(
@@ -174,8 +168,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             for chip_info in sorted(
                 self._chip_info.values(),
                 key=lambda chip: (chip.x, chip.y))
-            if (self._ignore_chips is None or
-                not self._ignore_chips.is_chip(chip_info.x, chip_info.y))]
+            if (chip_info.x, chip_info.y) not in self._ignore_chips]
         machine = Machine(chips, boot_x, boot_y)
 
         return machine

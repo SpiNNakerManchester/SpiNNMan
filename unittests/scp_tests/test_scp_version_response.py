@@ -2,7 +2,7 @@ import unittest
 from struct import pack
 
 from spinnman.messages.scp.impl.scp_version_response import SCPVersionResponse
-from spinnman.messages.scp.scp_result import SCPResult
+from spinnman.messages.scp.enums.scp_result import SCPResult
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 
 
@@ -40,6 +40,7 @@ class TestSCPVersionResponse(unittest.TestCase):
         self.assertEqual(response.version_info, None)
         response.read_bytestring(data, 0)
         print response.version_info
+
 
 if __name__ == '__main__':
     unittest.main()

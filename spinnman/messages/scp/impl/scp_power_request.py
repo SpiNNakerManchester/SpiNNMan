@@ -6,7 +6,7 @@ SCPPowerRequest
 from spinnman.messages.scp.abstract_messages.abstract_scp_bmp_request import \
     AbstractSCPBMPRequest
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
-from spinnman.messages.scp.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 
 
@@ -20,11 +20,11 @@ class SCPPowerRequest(AbstractSCPBMPRequest):
         :type power_command:\
                 :py:class:`spinnman.messages.scp.scp_power_command.SCPPowerCommand`
         :param boards: The boards on the same backplane to power on or off
-        :type board: int or iterable of int
+        :type boards: int or iterable of int
         :param delay: Number of seconds delay between power state changes of\
                 the different boards.
         :type delay: int
-        :return:
+        :rtype: None
         """
 
         arg1 = (int(delay * 1000) << 16) | power_command.value

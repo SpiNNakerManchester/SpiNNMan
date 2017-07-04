@@ -4,7 +4,7 @@ SCPBMPSetLedRequest
 from spinnman.messages.scp.abstract_messages.abstract_scp_bmp_request import \
     AbstractSCPBMPRequest
 from spinnman.messages.scp.impl.scp_check_ok_response import SCPCheckOKResponse
-from spinnman.messages.scp.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 
 
@@ -23,8 +23,8 @@ class SCPBMPSetLedRequest(AbstractSCPBMPRequest):
                 :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
         :param boards: Specifies the board to control the LEDs of. This may\
                 also be an iterable of multiple boards (in the same frame).
-        :type board: int or iterable of int
-        :return: None
+        :type boards: int or iterable of int
+        :rtype: None
         """
 
         # set up the led entry for arg1
@@ -47,6 +47,5 @@ class SCPBMPSetLedRequest(AbstractSCPBMPRequest):
 
     def get_scp_response(self):
         """ Get the response from the write fpga register request
-        :return:
         """
         return SCPCheckOKResponse("Set the LEDs of a board", "CMD_LED")

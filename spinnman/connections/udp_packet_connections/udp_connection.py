@@ -186,8 +186,8 @@ class UDPConnection(AbstractConnection):
 
         :param timeout: The timeout, or None to wait forever
         :type timeout: None
-        :return: The data received
-        :rtype: bytestring
+        :return: The data received as a bytestring
+        :rtype: str
         :raise SpinnmanTimeoutException: If a timeout occurs before any data\
                     is received
         :raise SpinnmanIOException: If an error occurs receiving the data
@@ -208,7 +208,7 @@ class UDPConnection(AbstractConnection):
         :type timeout: None
         :return: A tuple of the data received and a tuple of the\
                 (address, port) received from
-        :rtype: (bytestring, (str, int))
+        :rtype: str, (str, int)
         :raise SpinnmanTimeoutException: If a timeout occurs before any data\
                     is received
         :raise SpinnmanIOException: If an error occurs receiving the data
@@ -225,7 +225,7 @@ class UDPConnection(AbstractConnection):
         """ Send data down this connection
 
         :param data: The data to be sent
-        :type data: bytestring
+        :type data: str
         :raise SpinnmanIOException: If there is an error sending the data
         """
         if not self._can_send:
@@ -240,8 +240,8 @@ class UDPConnection(AbstractConnection):
     def send_to(self, data, address):
         """ Send data down this connection
 
-        :param data: The data to be sent
-        :type data: bytestring
+        :param data: The data to be sent as a bytestring
+        :type data: str
         :param address: A tuple of (address, port) to send the data to
         :type address: (str, int)
         :raise SpinnmanIOException: If there is an error sending the data
@@ -263,3 +263,10 @@ class UDPConnection(AbstractConnection):
 
     def is_ready_to_receive(self, timeout=0):
         return len(select.select([self._socket], [], [], timeout)[0]) == 1
+
+    def __repr__(self):
+        return \
+            "UDPConnection(local_host={}, local_port={}, remote_host={},"\
+            "remote_port={})".format(
+                self.local_ip_address, self.local_port,
+                self.remote_ip_address, self.remote_port)

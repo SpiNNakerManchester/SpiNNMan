@@ -5,7 +5,7 @@ from spinnman.messages.scp.abstract_messages.abstract_scp_request \
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.sdp.sdp_header import SDPHeader
 from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-from spinnman.messages.scp.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 
 _IPTAG_TTO = (4 << 16)
 
@@ -21,8 +21,8 @@ class SCPIPTagTTORequest(AbstractSCPRequest):
         :type x: int
         :param y: The y-coordinate of the chip to run on, between 0 and 255
         :type y: int
-        :param tag_timeout: The timeout value, via the IPTAG_TIME_OUT_WAIT_TIMES\
-            enum located in spinnman.constants
+        :param tag_timeout: The timeout value, via the
+            IPTAG_TIME_OUT_WAIT_TIMES enum located in spinnman.constants
         """
 
         super(SCPIPTagTTORequest, self).__init__(

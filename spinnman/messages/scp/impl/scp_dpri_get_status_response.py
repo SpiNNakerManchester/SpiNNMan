@@ -2,8 +2,8 @@ from spinnman.messages.scp.abstract_messages.abstract_scp_response\
     import AbstractSCPResponse
 from spinnman.model.dpri_status import DPRIStatus
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.scp_result import SCPResult
-from spinnman.messages.scp.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 
 
 class SCPDPRIGetStatusResponse(AbstractSCPResponse):

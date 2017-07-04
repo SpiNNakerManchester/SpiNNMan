@@ -1,10 +1,10 @@
-from abc import ABCMeta
-from abc import abstractmethod
 from six import add_metaclass
 import struct
 
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
-@add_metaclass(ABCMeta)
+
+@add_metaclass(AbstractBase)
 class AbstractSCPRequest(object):
     """ Represents an Abstract SCP Request
     """
@@ -93,7 +93,7 @@ class AbstractSCPRequest(object):
         """ The request as a bytestring
 
         :return: The request as a bytestring
-        :rtype: bytestring
+        :rtype: str
         """
         data = (self._sdp_header.bytestring +
                 self._scp_request_header.bytestring)

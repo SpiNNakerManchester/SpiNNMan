@@ -20,12 +20,12 @@ class SCPResult(Enum):
     RC_P2P_BUSY = (0x8d, "Destination busy")
     RC_P2P_TIMEOUT = (0x8e, "Dest did not respond")
     RC_PKT_TX = (0x8f, "Pkt Transmission failed")
-    
+
     def __new__(cls, value, doc=""):
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
-    
+
     def __init__(self, value, doc=""):
         self._value_ = value
         self.__doc__ = doc

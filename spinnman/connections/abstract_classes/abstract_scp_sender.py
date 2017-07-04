@@ -1,16 +1,17 @@
-from abc import ABCMeta
-from abc import abstractmethod
 from six import add_metaclass
-from abc import abstractproperty
 
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod, \
+    abstractproperty
 from spinnman.connections.abstract_classes.abstract_connection \
     import AbstractConnection
 
 
-@add_metaclass(ABCMeta)
+@add_metaclass(AbstractBase)
 class AbstractSCPSender(AbstractConnection):
     """ A sender of SCP messages
     """
+
+    __slots__ = ()
 
     @abstractmethod
     def get_scp_data(self, scp_request):
@@ -35,7 +36,7 @@ class AbstractSCPSender(AbstractConnection):
         last assigned + 1) % 65536 will be used
 
         :param scp_request: message packet to send
-        :type scp_request:
+        :type scp_request:\
                     :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
         :return: Nothing is returned
         :rtype: None

@@ -26,7 +26,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :type eieio_header:\
                     :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
         :param data: Optional data contained within the packet
-        :type data: bytestring
+        :type data: str
         :param offset: Optional offset where the valid data starts
         :type offset: int
         """
