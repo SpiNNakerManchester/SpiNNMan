@@ -2,9 +2,9 @@ from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.eieio.abstract_messages import AbstractEIEIOMessage
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
-from .data_header import EIEIODataHeader
-from .key_data_element import EIEIOKeyDataElement
-from .key_payload_data_element import EIEIOKeyPayloadDataElement
+from .eieio_data_header import EIEIODataHeader
+from .key_data_element import KeyDataElement
+from .key_payload_data_element import KeyPayloadDataElement
 
 import math
 import struct
@@ -154,8 +154,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                 payload = self._header.payload_base
 
         if payload is None:
-            return EIEIOKeyDataElement(key)
-        return EIEIOKeyPayloadDataElement(key, payload, self._header.is_time)
+            return KeyDataElement(key)
+        return KeyPayloadDataElement(key, payload, self._header.is_time)
 
     @property
     def bytestring(self):

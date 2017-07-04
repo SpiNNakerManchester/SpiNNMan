@@ -1,7 +1,7 @@
 from spinnman.messages.eieio.data_messages \
     import EIEIODataMessage, EIEIODataHeader
 from spinnman.messages.eieio.data_messages \
-    import EIEIOWithoutPayloadDataMessage, EIEIOWithPayloadDataMessage
+    import WithoutPayloadDataMessage, WithPayloadDataMessage
 from spinnman.messages.eieio.data_messages.specialized_message_types\
     import EIEIO16DataMessage, EIEIO16PayloadMessage
 from spinnman.messages.eieio.data_messages.specialized_message_types\
@@ -57,22 +57,22 @@ def read_eieio_data_message(data, offset):
     is_time = eieio_header.is_time
     if eieio_type == EIEIOType.KEY_16_BIT:
         return _construct_message(
-            EIEIO16DataMessage, EIEIOWithoutPayloadDataMessage,
+            EIEIO16DataMessage, WithoutPayloadDataMessage,
             prefix, payload_base, prefix_type, is_time, data, offset,
             eieio_header)
     elif eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
         return _construct_message(
-            EIEIO16PayloadMessage, EIEIOWithPayloadDataMessage,
+            EIEIO16PayloadMessage, WithPayloadDataMessage,
             prefix, payload_base, prefix_type, is_time, data, offset,
             eieio_header)
     elif eieio_type == EIEIOType.KEY_32_BIT:
         return _construct_message(
-            EIEIO32DataMessage, EIEIOWithoutPayloadDataMessage,
+            EIEIO32DataMessage, WithoutPayloadDataMessage,
             prefix, payload_base, prefix_type, is_time, data, offset,
             eieio_header)
     elif eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:
         return _construct_message(
-            EIEIO32PayloadMessage, EIEIOWithPayloadDataMessage,
+            EIEIO32PayloadMessage, WithPayloadDataMessage,
             prefix, payload_base, prefix_type, is_time, data, offset,
             eieio_header)
     return EIEIODataMessage(eieio_header, data, offset)

@@ -1,11 +1,11 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.eieio import EIEIOType
-from .abstract_data_element import AbstractEIEIODataElement
+from .abstract_data_element import AbstractDataElement
 
 import struct
 
 
-class EIEIOKeyPayloadDataElement(AbstractEIEIODataElement):
+class KeyPayloadDataElement(AbstractDataElement):
     """ A data element that contains a key and a payload
     """
 
@@ -41,7 +41,7 @@ class EIEIOKeyPayloadDataElement(AbstractEIEIODataElement):
                 "eieio_type", eieio_type, "Unknown type")
 
     def __str__(self):
-        return "EIEIOKeyPayloadDataElement:{}:{}".format(
+        return "KeyPayloadDataElement:{}:{}".format(
             hex(self._key), hex(self._payload))
 
     def __repr__(self):

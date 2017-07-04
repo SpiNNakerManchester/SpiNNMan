@@ -1,11 +1,11 @@
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
-from .data_header import EIEIODataHeader
-from .data_message import EIEIODataMessage
-from .without_payload_data_message import EIEIOWithoutPayloadDataMessage
-from .with_payload_data_message import EIEIOWithPayloadDataMessage
+from .eieio_data_header import EIEIODataHeader
+from .eieio_data_message import EIEIODataMessage
+from .without_payload_data_message import WithoutPayloadDataMessage
+from .with_payload_data_message import WithPayloadDataMessage
 
 
-class EIEIO16DataMessage(EIEIOWithoutPayloadDataMessage):
+class EIEIO16DataMessage(WithoutPayloadDataMessage):
     """ An EIEIO packet containing 16 bit events
     """
     def __init__(self, count=0, data=None, offset=0,
@@ -14,7 +14,7 @@ class EIEIO16DataMessage(EIEIOWithoutPayloadDataMessage):
         payload = payload_prefix
         if timestamp is not None:
             payload = timestamp
-        EIEIOWithoutPayloadDataMessage.__init__(
+        WithoutPayloadDataMessage.__init__(
             self, EIEIODataHeader(
                 EIEIOType.KEY_16_BIT, count=count, prefix=key_prefix,
                 payload_base=payload, prefix_type=prefix_type,
@@ -29,7 +29,7 @@ class EIEIO16DataMessage(EIEIOWithoutPayloadDataMessage):
             is_payload_base=self._payload)
 
 
-class EIEIO16PayloadMessage(EIEIOWithPayloadDataMessage):
+class EIEIO16PayloadMessage(WithPayloadDataMessage):
     """ An EIEIO packet containing 16 bit events
     """
     def __init__(self, count=0, data=None, offset=0,
@@ -38,7 +38,7 @@ class EIEIO16PayloadMessage(EIEIOWithPayloadDataMessage):
         payload = payload_prefix
         if timestamp is not None:
             payload = timestamp
-        EIEIOWithPayloadDataMessage.__init__(
+        WithPayloadDataMessage.__init__(
             self, EIEIODataHeader(
                 EIEIOType.KEY_PAYLOAD_16_BIT, count=count, prefix=key_prefix,
                 payload_base=payload, prefix_type=prefix_type,
@@ -53,7 +53,7 @@ class EIEIO16PayloadMessage(EIEIOWithPayloadDataMessage):
             is_payload_base=self._payload)
 
 
-class EIEIO32DataMessage(EIEIOWithoutPayloadDataMessage):
+class EIEIO32DataMessage(WithoutPayloadDataMessage):
     """ An EIEIO packet containing 32 bit events
     """
     def __init__(self, count=0, data=None, offset=0,
@@ -62,7 +62,7 @@ class EIEIO32DataMessage(EIEIOWithoutPayloadDataMessage):
         payload = payload_prefix
         if timestamp is not None:
             payload = timestamp
-        EIEIOWithoutPayloadDataMessage.__init__(
+        WithoutPayloadDataMessage.__init__(
             self, EIEIODataHeader(
                 EIEIOType.KEY_32_BIT, count=count, prefix=key_prefix,
                 payload_base=payload, prefix_type=prefix_type,
@@ -77,7 +77,7 @@ class EIEIO32DataMessage(EIEIOWithoutPayloadDataMessage):
             is_payload_base=self._payload)
 
 
-class EIEIO32PayloadMessage(EIEIOWithoutPayloadDataMessage):
+class EIEIO32PayloadMessage(WithoutPayloadDataMessage):
     """ An EIEIO packet containing 32 bit events
     """
     def __init__(self, count=0, data=None, offset=0,
@@ -86,7 +86,7 @@ class EIEIO32PayloadMessage(EIEIOWithoutPayloadDataMessage):
         payload = payload_prefix
         if timestamp is not None:
             payload = timestamp
-        EIEIOWithPayloadDataMessage.__init__(
+        WithPayloadDataMessage.__init__(
             self, EIEIODataHeader(
                 EIEIOType.KEY_PAYLOAD_32_BIT, count=count, prefix=key_prefix,
                 payload_base=payload, prefix_type=prefix_type,

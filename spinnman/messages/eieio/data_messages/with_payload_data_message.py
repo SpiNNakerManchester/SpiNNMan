@@ -1,9 +1,9 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from .data_message import EIEIODataMessage
-from .key_payload_data_element import EIEIOKeyPayloadDataElement
+from .eieio_data_message import EIEIODataMessage
+from .key_payload_data_element import KeyPayloadDataElement
 
 
-class EIEIOWithPayloadDataMessage(EIEIODataMessage):
+class WithPayloadDataMessage(EIEIODataMessage):
     """ An EIEIO message with a payload
     """
 
@@ -38,5 +38,5 @@ class EIEIOWithPayloadDataMessage(EIEIODataMessage):
                     self._header.eieio_type.max_value))
 
         EIEIODataMessage.add_element(
-            self, EIEIOKeyPayloadDataElement(
+            self, KeyPayloadDataElement(
                 key, payload, self._header.is_time))

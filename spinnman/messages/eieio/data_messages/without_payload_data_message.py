@@ -1,9 +1,9 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from .data_message import EIEIODataMessage
-from .key_data_element import EIEIOKeyDataElement
+from .eieio_data_message import EIEIODataMessage
+from .key_data_element import KeyDataElement
 
 
-class EIEIOWithoutPayloadDataMessage(EIEIODataMessage):
+class WithoutPayloadDataMessage(EIEIODataMessage):
     """ An EIEIO message without a payload
     """
 
@@ -29,4 +29,4 @@ class EIEIOWithoutPayloadDataMessage(EIEIODataMessage):
                 "key", key,
                 "Larger than the maximum allowed of {}".format(
                     self._header.eieio_type.max_value))
-        EIEIODataMessage.add_element(self, EIEIOKeyDataElement(key))
+        EIEIODataMessage.add_element(self, KeyDataElement(key))
