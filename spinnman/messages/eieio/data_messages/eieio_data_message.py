@@ -1,4 +1,5 @@
-from spinnman.exceptions import SpinnmanInvalidPacketException
+from spinnman.exceptions import SpinnmanInvalidPacketException,\
+    SpinnmanInvalidParameterException
 from spinnman.messages.eieio.abstract_messages import AbstractEIEIOMessage
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
@@ -37,12 +38,40 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         self._offset = offset
         self._elements_read = 0
 
+    @staticmethod
+    def create(
+            eieio_type, count=0, data=None, offset=0, key_prefix=None,
+            payload_prefix=None, timestamp=None,
+            prefix_type=EIEIOPrefix.LOWER_HALF_WORD):
+        """ Create a data message
+
+        :param eieio_type: The EIEIOType of the message
+        :param count: The number of items in the message
+        :param data: The data in the message
+        :param offset: The offset in the data where the actual data starts
+        :param key_prefix: The prefix of the keys
+        :param payload_prefix: The prefix of the payload
+        :param timestamp: The timestamp of the packet
+        :param prefix_type: The type of the key prefix if 16-bits
+        """
+        payload_base = payload_prefix
+        if timestamp is not None:
+            payload_base = timestamp
+        return EIEIODataMessage(
+            eieio_header=EIEIODataHeader(
+                eieio_type, count=count, prefix=key_prefix,
+                payload_base=payload_base, prefix_type=prefix_type,
+                is_time=timestamp is not None),
+            data=data, offset=offset)
+
     @property
     def eieio_header(self):
         return self._header
 
     @staticmethod
-    def min_packet_length(eieio_type, is_prefix=False, is_payload_base=False):
+    def min_packet_length(
+            eieio_type, is_prefix=False, is_payload_base=False,
+            is_timestamp=False):
         """ The minimum length of a message with the given header, in bytes
 
         :param eieio_type: the type of message
@@ -53,12 +82,23 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :param is_payload_base: True if there is a payload base, False\
                     otherwise
         :type is_payload_base: bool
+        :param is_timestamp: True if there is a timestamp, False otherwise
         :return: The minimum size of the packet in bytes
         :rtype: int
         """
         header_size = EIEIODataHeader.get_header_size(
-            eieio_type, is_prefix, is_payload_base)
+            eieio_type, is_prefix, is_payload_base | is_timestamp)
         return header_size + eieio_type.payload_bytes
+
+    def get_min_packet_length(self):
+        """ Get the minimum length of a message instance in bytes
+
+        :rtype: int
+        """
+        return EIEIODataMessage.min_packet_length(
+            eieio_type=self._header.eieio_type,
+            is_prefix=self._header.prefix is not None,
+            is_payload_base=self._header.payload_base is not None)
 
     @property
     def max_n_elements(self):
@@ -84,6 +124,48 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                 ((self._header.eieio_type.key_bytes +
                  self._header.eieio_type.payload_bytes) *
                  self._header.count))
+
+    def add_key_and_payload(self, key, payload):
+        """ Adds a key and payload to the packet
+
+        :param key: The key to add
+        :type key: int
+        :param payload: The payload to add
+        :type payload: int
+        :raise SpinnmanInvalidParameterException:\
+            If the key or payload is too big for the format, or the format\
+            doesn't expect a payload
+        """
+        if key > self._header.eieio_type.max_value:
+            raise SpinnmanInvalidParameterException(
+                "key", key,
+                "Larger than the maximum allowed of {}".format(
+                    self._header.eieio_type.max_value))
+        if payload > self._header.eieio_type.max_value:
+            raise SpinnmanInvalidParameterException(
+                "payload", payload,
+                "Larger than the maximum allowed of {}".format(
+                    self._header.eieio_type.max_value))
+
+        EIEIODataMessage.add_element(
+            self, KeyPayloadDataElement(
+                key, payload, self._header.is_time))
+
+    def add_key(self, key):
+        """ Add a key to the packet
+
+        :param key: The key to add
+        :type key: int
+        :raise SpinnmanInvalidParameterException:\
+            If the key is too big for the format, or the format expects a\
+            payload
+        """
+        if key > self._header.eieio_type.max_value:
+            raise SpinnmanInvalidParameterException(
+                "key", key,
+                "Larger than the maximum allowed of {}".format(
+                    self._header.eieio_type.max_value))
+        EIEIODataMessage.add_element(self, KeyDataElement(key))
 
     def add_element(self, element):
         """ Add an element to the message.  The correct type of element must\

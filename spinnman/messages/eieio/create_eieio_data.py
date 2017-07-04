@@ -1,38 +1,5 @@
 from spinnman.messages.eieio.data_messages \
     import EIEIODataMessage, EIEIODataHeader
-from spinnman.messages.eieio.data_messages \
-    import WithoutPayloadDataMessage, WithPayloadDataMessage
-from spinnman.messages.eieio.data_messages.specialized_message_types\
-    import EIEIO16DataMessage, EIEIO16PayloadMessage
-from spinnman.messages.eieio.data_messages.specialized_message_types\
-    import EIEIO32DataMessage, EIEIO32PayloadMessage
-from spinnman.messages.eieio.eieio_type import EIEIOType
-
-
-def _construct_message(factory, factory2, prefix, payload_base,
-                       prefix_type, is_time, data, offset, eieio_header):
-    """ Return a packet containing 16 bit elements
-    """
-    if payload_base is None:
-        if prefix is None:
-            return factory(eieio_header.count, data, offset)
-        return factory(eieio_header.count, data, offset, key_prefix=prefix,
-                       prefix_type=prefix_type)
-    elif payload_base is not None and not is_time:
-        if prefix is None:
-            return factory(eieio_header.count, data, offset,
-                           payload_prefix=payload_base)
-        return factory(eieio_header.count, data, offset,
-                       payload_prefix=payload_base,
-                       key_prefix=prefix, prefix_type=prefix_type)
-    elif payload_base is not None and is_time:
-        if prefix is None:
-            return factory(eieio_header.count, data, offset,
-                           timestamp=payload_base)
-        return factory(eieio_header.count, data, offset,
-                       timestamp=payload_base,
-                       key_prefix=prefix, prefix_type=prefix_type)
-    return factory2(eieio_header, data, offset)
 
 
 def read_eieio_data_message(data, offset):
@@ -50,29 +17,4 @@ def read_eieio_data_message(data, offset):
     """
     eieio_header = EIEIODataHeader.from_bytestring(data, offset)
     offset += eieio_header.size
-    eieio_type = eieio_header.eieio_type
-    prefix = eieio_header.prefix
-    payload_base = eieio_header.payload_base
-    prefix_type = eieio_header.prefix_type
-    is_time = eieio_header.is_time
-    if eieio_type == EIEIOType.KEY_16_BIT:
-        return _construct_message(
-            EIEIO16DataMessage, WithoutPayloadDataMessage,
-            prefix, payload_base, prefix_type, is_time, data, offset,
-            eieio_header)
-    elif eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
-        return _construct_message(
-            EIEIO16PayloadMessage, WithPayloadDataMessage,
-            prefix, payload_base, prefix_type, is_time, data, offset,
-            eieio_header)
-    elif eieio_type == EIEIOType.KEY_32_BIT:
-        return _construct_message(
-            EIEIO32DataMessage, WithoutPayloadDataMessage,
-            prefix, payload_base, prefix_type, is_time, data, offset,
-            eieio_header)
-    elif eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:
-        return _construct_message(
-            EIEIO32PayloadMessage, WithPayloadDataMessage,
-            prefix, payload_base, prefix_type, is_time, data, offset,
-            eieio_header)
     return EIEIODataMessage(eieio_header, data, offset)

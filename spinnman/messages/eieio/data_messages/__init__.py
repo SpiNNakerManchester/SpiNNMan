@@ -3,10 +3,7 @@ from .eieio_data_header import EIEIODataHeader
 from .eieio_data_message import EIEIODataMessage
 from .key_data_element import KeyDataElement
 from .key_payload_data_element import KeyPayloadDataElement
-from .with_payload_data_message import WithPayloadDataMessage
-from .without_payload_data_message import WithoutPayloadDataMessage
 
 __all__ = [
     "AbstractDataElement", "EIEIODataHeader", "EIEIODataMessage",
-    "KeyDataElement", "KeyPayloadDataElement",
-    "WithPayloadDataMessage", "WithoutPayloadDataMessage"]
+    "KeyDataElement", "KeyPayloadDataElement"]
