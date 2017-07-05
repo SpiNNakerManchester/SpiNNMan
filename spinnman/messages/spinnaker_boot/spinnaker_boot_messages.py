@@ -37,12 +37,14 @@ class SpinnakerBootMessages(object):
     """ Represents a set of boot messages to be sent to boot the board
     """
 
-    def __init__(self, board_version=None):
+    def __init__(self, board_version=None, extra_boot_values=None):
         """
         builds the boot messages needed to boot the spinnaker machine
 
         :param board_version: The version of the board to be booted
         :type board_version: int
+        :param extra_boot_values: Any additional values to be set during boot
+        :type extra_boot_values: dict of SystemVariableDefinition to value
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     board version is not supported
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
@@ -68,6 +70,11 @@ class SpinnakerBootMessages(object):
             SystemVariableDefinition.boot_signature, current_time)
         spinnaker_boot_value.set_value(
             SystemVariableDefinition.is_root_chip, 1)
+
+        # Set any additional values
+        if extra_boot_values is not None:
+            for variable, value in extra_boot_values.iter_items():
+                spinnaker_boot_value.set_value(variable, value)
 
         # Get the data as an array, to be used later
         self._spinnaker_boot_data = array.array(
