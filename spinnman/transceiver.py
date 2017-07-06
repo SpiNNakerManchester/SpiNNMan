@@ -216,7 +216,7 @@ class Transceiver(object):
                     specified, no communication will be possible until\
                     connections are found.
         :type connections: iterable of\
-                    :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
+                    :py:class:`spinnman.connections.abstract_classes.connection.Connection`
         :param ignore_chips: An optional set of chips to ignore in the\
                     machine.  Requests for a "machine" will have these chips\
                     excluded, as if they never existed.  The processor_ids of\
@@ -566,7 +566,7 @@ class Transceiver(object):
                     :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
         :param connection: The connection to use
         :type connection:\
-                    :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
+                    :py:class:`spinnman.connections.abstract_classes.connection.Connection`
         :return: The received response, or the callback if get_callback is True
         :rtype:\
                     :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
@@ -598,7 +598,7 @@ class Transceiver(object):
         :type message: spinnman.messages.sdp.SDPMessage
         :param connection: An optional connection to use
         :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
+            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
         :rtype: None
         """
         if connection is None:
@@ -689,7 +689,7 @@ class Transceiver(object):
         :return: An iterable of discovered connections, not including the\
                     initially given connections in the constructor
         :rtype: iterable of\
-            :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
+            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
         :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
                     communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
@@ -768,7 +768,7 @@ class Transceiver(object):
 
         :return: An iterable of connections known to the transceiver
         :rtype: iterable of\
-            :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
+            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
         :raise None: No known exceptions are raised
         """
         return self._all_connections
@@ -836,7 +836,7 @@ class Transceiver(object):
                     all connections will be tested, and the board will be\
                     considered to be connected if any one connection works.
         :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.connection.AbstractConnection`
+            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
         :return: True if the board can be contacted, False otherwise
         :rtype: bool
         :raise None: No known exceptions are raised
@@ -1468,7 +1468,7 @@ class Transceiver(object):
         self.send_signal(app_id, Signal.START)
 
     def power_on_machine(self):
-        """ SetPower on the whole machine
+        """ Power on the whole machine
         """
         if len(self._bmp_connections) == 0:
             logger.warn("No BMP connections, so can't power on")
@@ -1477,7 +1477,7 @@ class Transceiver(object):
                           bmp_connection.frame)
 
     def power_on(self, boards=0, cabinet=0, frame=0):
-        """ SetPower on a set of boards in the machine
+        """ Power on a set of boards in the machine
 
         :param boards: The board or boards to power on
         :param cabinet: the id of the cabinet containing the frame, or 0 \
@@ -1488,7 +1488,7 @@ class Transceiver(object):
         self._power(PowerCommand.POWER_ON, boards, cabinet, frame)
 
     def power_off_machine(self):
-        """ SetPower off the whole machine
+        """ Power off the whole machine
         """
         if len(self._bmp_connections) == 0:
             logger.warn("No BMP connections, so can't power off")
@@ -1497,7 +1497,7 @@ class Transceiver(object):
                            bmp_connection.frame)
 
     def power_off(self, boards=0, cabinet=0, frame=0):
-        """ SetPower off a set of boards in the machine
+        """ Power off a set of boards in the machine
 
         :param boards: The board or boards to power off
         :param cabinet: the id of the cabinet containing the frame, or 0 \
@@ -1531,12 +1531,12 @@ class Transceiver(object):
         process.execute(SetPower(power_command, boards))
 
     def set_led(self, led, action, board, cabinet, frame):
-        """ Set the SetLED state of a board in the machine
+        """ Set the LED state of a board in the machine
 
-        :param led:  Number of the SetLED or an iterable of LEDs to set the\
+        :param led:  Number of the LED or an iterable of LEDs to set the\
                 state of (0-7)
         :type led: int or iterable of int
-        :param action: State to set the SetLED to, either on, off or toggle
+        :param action: State to set the LED to, either on, off or toggle
         :type action:\
                 :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
         :param board: Specifies the board to control the LEDs of. This may \
