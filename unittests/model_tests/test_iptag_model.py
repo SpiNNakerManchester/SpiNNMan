@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 import unittest
 
-from spinn_machine.tags.iptag import IPTag
+from spinn_machine.tags import IPTag
 from board_test_configuration import BoardTestConfiguration
 
 board_config = BoardTestConfiguration()

@@ -1,7 +1,7 @@
 import socket
 import ConfigParser
 import os
-from spinnman.model.bmp_connection_data import BMPConnectionData
+from spinnman.model import BMPConnectionData
 import platform
 import subprocess
 import unittest

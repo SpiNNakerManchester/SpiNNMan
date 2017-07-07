@@ -2,17 +2,17 @@ import struct
 import unittest
 
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.impl.scp_check_ok_response \
-    import SCPCheckOKResponse, SCPResult
-from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.scp.impl import CheckOKResponse
+from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.sdp import SDPFlag
 
 
 class TestOkResponse(unittest.TestCase):
     def test_new_scp_check_ok_response(self):
-        SCPCheckOKResponse("Testing operation", "Testing command")
+        CheckOKResponse("Testing operation", "Testing command")
 
     def test_read_ok_response(self):
-        scp = SCPCheckOKResponse("Testing operation", "Testing command")
+        scp = CheckOKResponse("Testing operation", "Testing command")
         result = SCPResult.RC_OK.value
         flags = SDPFlag.REPLY_NOT_EXPECTED.value
         tag = 0x01
@@ -41,7 +41,7 @@ class TestOkResponse(unittest.TestCase):
 
     def test_not_ok_response(self):
         with self.assertRaises(SpinnmanUnexpectedResponseCodeException):
-            scp = SCPCheckOKResponse("Testing operation", "Testing command")
+            scp = CheckOKResponse("Testing operation", "Testing command")
             result = SCPResult.RC_TIMEOUT.value
             flags = SDPFlag.REPLY_NOT_EXPECTED.value
             tag = 0x01

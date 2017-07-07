@@ -1,10 +1,8 @@
 from spinnman.exceptions import SpinnmanInvalidPacketException, \
     SpinnmanInvalidParameterTypeException
-from spinnman.messages.eieio.command_messages.eieio_command_message\
-    import EIEIOCommandMessage
-from spinnman.messages.eieio.command_messages.eieio_command_header\
-    import EIEIOCommandHeader
-from spinnman import constants
+from .eieio_command_message import EIEIOCommandMessage
+from .eieio_command_header import EIEIOCommandHeader
+from spinnman.constants import EIEIO_COMMAND_IDS
 import struct
 
 
@@ -41,7 +39,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
                     len(region_id), len(channel)))
         EIEIOCommandMessage.__init__(
             self, EIEIOCommandHeader(
-                constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA.value))
+                EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA.value))
         self._header = _SpinnakerRequestReadDataHeader(
             x, y, p, n_requests, sequence_no)
         self._requests = _SpinnakerRequestReadDataRequest(

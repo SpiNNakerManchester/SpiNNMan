@@ -18,7 +18,7 @@ class CPUInfos(object):
         :param processor_id: A processor id
         :type processor_id: int
         :param cpu_info: The CPU information for the core
-        :type cpu_info: :py:class:`spinnman.model.cpu_info.CPUInfo`
+        :type cpu_info: :py:class:`spinnman.model.enums.cpu_info.CPUInfo`
         """
         self._cpu_infos[x, y, processor_id] = cpu_info
 

@@ -1,8 +1,20 @@
 import struct
 
-from spinnman.utilities import utility_functions
-from spinnman.messages.scp.enums.scp_dpri_packet_type_flags \
-    import SCPDPRIPacketTypeFlags
+from spinnman.messages.scp.enums import DPRIFlags
+
+
+def _decode_router_timeout_value(value):
+    """ Get the timeout value of a router in ticks, given an 8-bit floating\
+        point value stored in an int (!)
+
+    :param value: The value to convert
+    :type value: int
+    """
+    mantissa = value & 0xF
+    exponent = (value >> 4) & 0xF
+    if exponent <= 4:
+        return ((mantissa + 16) - (2 ** (4 - exponent))) * (2 ** exponent)
+    return (mantissa + 16) * (2 ** exponent)
 
 
 class DPRIStatus(object):
@@ -26,15 +38,13 @@ class DPRIStatus(object):
     def router_timeout(self):
         """ The WAIT1 timeout value of the router in cycles
         """
-        return utility_functions.get_router_timeout_value_from_byte(
-            self._router_timeout)
+        return _decode_router_timeout_value(self._router_timeout)
 
     @property
     def router_emergency_timeout(self):
         """ The WAIT2 timeout value of the router in cycles
         """
-        return utility_functions.get_router_timeout_value_from_byte(
-            self._router_emergency_timeout)
+        return _decode_router_timeout_value(self._router_emergency_timeout)
 
     @property
     def n_dropped_packets(self):
@@ -87,23 +97,23 @@ class DPRIStatus(object):
     def is_reinjecting_multicast(self):
         """ True if reinjection of multicast packets is enabled
         """
-        return self._flags & SCPDPRIPacketTypeFlags.MULTICAST.value != 0
+        return self._flags & DPRIFlags.MULTICAST.value != 0
 
     @property
     def is_reinjecting_point_to_point(self):
         """ True if reinjection of point-to-point packets is enabled
         """
-        return self._flags & SCPDPRIPacketTypeFlags.POINT_TO_POINT.value != 0
+        return self._flags & DPRIFlags.POINT_TO_POINT.value != 0
 
     @property
     def is_reinjecting_nearest_neighbour(self):
         """ True if reinjection of nearest neighbour packets is enabled
         """
         return (self._flags &
-                SCPDPRIPacketTypeFlags.NEAREST_NEIGHBOUR.value != 0)
+                DPRIFlags.NEAREST_NEIGHBOUR.value != 0)
 
     @property
     def is_reinjecting_fixed_route(self):
         """ True if reinjection of fixed-route packets is enabled
         """
-        return self._flags & SCPDPRIPacketTypeFlags.FIXED_ROUTE.value != 0
+        return self._flags & DPRIFlags.FIXED_ROUTE.value != 0

@@ -3,17 +3,10 @@ SpinnakerBootMessages
 """
 
 # spinnman imports
-from spinnman.messages.spinnaker_boot._system_variables import \
-    _system_variable_boot_values as variable_boot_values
-from spinnman.messages.spinnaker_boot._system_variables.\
-    _system_variable_boot_values import \
-    SystemVariableDefinition
-from spinnman.messages.spinnaker_boot._system_variables\
-    ._system_variable_boot_values import SystemVariableBootValues
-from spinnman.messages.spinnaker_boot.spinnaker_boot_message \
-    import SpinnakerBootMessage
-from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
-    import SpinnakerBootOpCode
+from .system_variable_boot_values import \
+    SystemVariableBootValues, spinnaker_boot_values, SystemVariableDefinition
+from .spinnaker_boot_message import SpinnakerBootMessage
+from .spinnaker_boot_op_code import SpinnakerBootOpCode
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.exceptions import SpinnmanIOException
@@ -51,15 +44,13 @@ class SpinnakerBootMessages(object):
                     assembling the packets
         """
         if (board_version is not None and
-                board_version not in
-                variable_boot_values.spinnaker_boot_values):
+                board_version not in spinnaker_boot_values):
             raise SpinnmanInvalidParameterException(
                 "board_version", str(board_version), "Unknown board version")
 
         # Get the boot packet values
         if board_version is not None:
-            spinnaker_boot_value = variable_boot_values.spinnaker_boot_values[
-                board_version]
+            spinnaker_boot_value = spinnaker_boot_values[board_version]
         else:
             spinnaker_boot_value = SystemVariableBootValues()
 

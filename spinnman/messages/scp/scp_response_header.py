@@ -1,6 +1,6 @@
 import struct
 
-from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.messages.scp.enums import SCPResult
 
 
 class SCPResponseHeader(object):

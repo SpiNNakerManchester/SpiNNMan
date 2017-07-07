@@ -1,10 +1,7 @@
-from spinnman.processes.abstract_multi_connection_process\
-    import AbstractMultiConnectionProcess
-from spinnman.messages.scp.impl.scp_iptag_info_request import SCPTagInfoRequest
-from spinnman.messages.scp.impl.scp_iptag_get_request import SCPTagGetRequest
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinnman.messages.scp.impl import IPTagGetInfo, IPTagGet
 
-from spinn_machine.tags.reverse_iptag import ReverseIPTag
-from spinn_machine.tags.iptag import IPTag
+from spinn_machine.tags import ReverseIPTag, IPTag
 
 import functools
 
@@ -39,7 +36,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
     def get_tags(self, connection):
 
         # Get the tag information, without which we cannot continue
-        self._send_request(SCPTagInfoRequest(
+        self._send_request(IPTagGetInfo(
             connection.chip_x, connection.chip_y),
             self.handle_tag_info_response)
         self._finish()
@@ -49,7 +46,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         n_tags = self._tag_info.pool_size + self._tag_info.fixed_size
         self._tags = [None] * n_tags
         for tag in xrange(n_tags):
-            self._send_request(SCPTagGetRequest(
+            self._send_request(IPTagGet(
                 connection.chip_x, connection.chip_y, tag),
                 functools.partial(
                     self.handle_get_tag_response, tag,

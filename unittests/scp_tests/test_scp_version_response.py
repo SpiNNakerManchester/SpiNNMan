@@ -1,17 +1,17 @@
 import unittest
 from struct import pack
 
-from spinnman.messages.scp.impl.scp_version_response import SCPVersionResponse
-from spinnman.messages.scp.enums.scp_result import SCPResult
-from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
+from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.sdp import SDPFlag
 
 
 class TestSCPVersionResponse(unittest.TestCase):
     def test_new_scp_version_response(self):
-        SCPVersionResponse()
+        GetVersionResponse()
 
     def test_read_scp_response(self):
-        response = SCPVersionResponse()
+        response = GetVersionResponse()
         # y
         # SCP Stuff
         rc = SCPResult.RC_OK.value

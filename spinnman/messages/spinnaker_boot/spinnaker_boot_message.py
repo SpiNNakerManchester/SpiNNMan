@@ -1,6 +1,5 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
-    import SpinnakerBootOpCode
+from .spinnaker_boot_op_code import SpinnakerBootOpCode
 
 import struct
 

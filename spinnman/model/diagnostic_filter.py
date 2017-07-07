@@ -1,15 +1,7 @@
-from spinnman.model.enums.diagnostic_filter_destination \
-    import DiagnosticFilterDestination
-from spinnman.model.enums.diagnostic_filter_source \
-    import DiagnosticFilterSource
-from spinnman.model.enums.diagnostic_filter_payload_status \
-    import DiagnosticFilterPayloadStatus
-from spinnman.model.enums.diagnostic_filter_default_routing_status \
-    import DiagnosticFilterDefaultRoutingStatus
-from spinnman.model.enums.diagnostic_filter_emergency_routing_status \
-    import DiagnosticFilterEmergencyRoutingStatus
-from spinnman.model.enums.diagnostic_filter_packet_type \
-    import DiagnosticFilterPacketType
+from spinnman.model.enums import \
+    DiagnosticFilterDestination, DiagnosticFilterSource, \
+    DiagnosticFilterPayloadStatus, DiagnosticFilterDefaultRoutingStatus, \
+    DiagnosticFilterEmergencyRoutingStatus, DiagnosticFilterPacketType
 
 # Bit offsets of the various fields in the filter word
 _PACKET_TYPE_OFFSET = 0
