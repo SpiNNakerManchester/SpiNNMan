@@ -1,5 +1,5 @@
 import unittest
-from spinn_machine.core_subsets import CoreSubset, CoreSubsets
+from spinn_machine import CoreSubset, CoreSubsets
 
 
 class TestCoreSubsets(unittest.TestCase):

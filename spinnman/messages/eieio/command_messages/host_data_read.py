@@ -1,10 +1,8 @@
 from spinnman.exceptions import SpinnmanInvalidPacketException, \
     SpinnmanInvalidParameterTypeException
-from spinnman.messages.eieio.command_messages.eieio_command_message\
-    import EIEIOCommandMessage
-from spinnman.messages.eieio.command_messages.eieio_command_header\
-    import EIEIOCommandHeader
-from spinnman import constants
+from .eieio_command_message import EIEIOCommandMessage
+from .eieio_command_header import EIEIOCommandHeader
+from spinnman.constants import EIEIO_COMMAND_IDS
 import struct
 
 
@@ -35,8 +33,7 @@ class HostDataRead(EIEIOCommandMessage):
                 "defined, {2:d} region(s) defined, {3:d} channel(s) "
                 "defined".format(
                     n_requests, len(space_read), len(region_id), len(channel)))
-        cmd_header = EIEIOCommandHeader(
-            constants.EIEIO_COMMAND_IDS.HOST_DATA_READ.value)
+        cmd_header = EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ.value)
         EIEIOCommandMessage.__init__(self, cmd_header)
         self._header = _HostDataReadHeader(n_requests, sequence_no)
         self._acks = _HostDataReadAck(channel, region_id, space_read)

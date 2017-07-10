@@ -1,11 +1,9 @@
-from spinnman.messages.scp.impl.scp_sdram_alloc_request import \
-    SCPSDRAMAllocRequest
-from spinnman.processes.abstract_multi_connection_process \
+from spinnman.messages.scp.impl import SDRAMAlloc
+from .abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._base_address = None
@@ -15,7 +13,7 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
 
     def malloc_sdram(self, x, y, size, app_id, tag):
         # Allocate space in the sdram space
-        self._send_request(SCPSDRAMAllocRequest(x, y, app_id, size, tag),
+        self._send_request(SDRAMAlloc(x, y, app_id, size, tag),
                            self.handle_sdram_alloc_response)
         self._finish()
         self.check_for_error()

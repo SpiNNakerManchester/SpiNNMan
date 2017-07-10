@@ -1,11 +1,7 @@
 import unittest
 from spinnman.transceiver import Transceiver
-from spinnman.connections.udp_packet_connections.udp_boot_connection \
-    import UDPBootConnection
-from spinnman.connections.udp_packet_connections.udp_eieio_connection \
-    import UDPEIEIOConnection
-from spinnman.connections.udp_packet_connections.udp_scamp_connection \
-    import UDPSCAMPConnection
+from spinnman.connections.udp_packet_connections \
+    import BootConnection, EIEIOConnection, SCAMPConnection
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
 
@@ -20,7 +16,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_to_board(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSCAMPConnection(
+        connections.append(SCAMPConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
         trans.close()
@@ -28,51 +24,51 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_one_connection(self):
         board_config.set_up_remote_board()
         connections = set()
-        connections.add(UDPSCAMPConnection(
+        connections.add(SCAMPConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
 
-        self.assertEqual(trans.get_connections(), connections)
+        assert trans.get_connections() == connections
         trans.close()
 
     def test_create_new_transceiver_from_list_connections(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSCAMPConnection(
+        connections.append(SCAMPConnection(
             remote_host=board_config.remotehost))
         board_config.set_up_local_virtual_board()
-        connections.append(UDPBootConnection(
+        connections.append(BootConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
         instantiated_connections = trans.get_connections()
 
         for connection in connections:
-            self.assertTrue(connection in instantiated_connections)
-        # self.assertEqual(trans.get_connections(), connections)
+            assert connection in instantiated_connections
+        # assert trans.get_connections() == connections
         trans.close()
 
     def test_retrieving_machine_details(self):
         board_config.set_up_remote_board()
         connections = list()
-        connections.append(UDPSCAMPConnection(
+        connections.append(SCAMPConnection(
             remote_host=board_config.remotehost))
         board_config.set_up_local_virtual_board()
-        connections.append(UDPBootConnection(
+        connections.append(BootConnection(
             remote_host=board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
 
         if board_config.board_version == 3 or board_config.board_version == 2:
-            self.assertEqual(trans.get_machine_dimensions().width, 2)
-            self.assertEqual(trans.get_machine_dimensions().height, 2)
+            assert trans.get_machine_dimensions().width == 2
+            assert trans.get_machine_dimensions().height == 2
         elif (board_config.board_version == 5 or
                 board_config.board_version == 4):
-            self.assertEqual(trans.get_machine_dimensions().width, 8)
-            self.assertEqual(trans.get_machine_dimensions().height, 8)
+            assert trans.get_machine_dimensions().width == 8
+            assert trans.get_machine_dimensions().height == 8
         else:
             size = trans.get_machine_dimensions()
             print "Unknown board with x size {0:d} and y size {1:d}".format(
                 size.width, size.height)
-        self.assertTrue(trans.is_connected())
+        assert trans.is_connected()
         print trans.get_scamp_version()
         print trans.get_cpu_information()
         trans.close()
@@ -90,9 +86,9 @@ class TestTransceiver(unittest.TestCase):
 
         # Create board connections
         connections = []
-        connections.append(UDPSCAMPConnection(
+        connections.append(SCAMPConnection(
             remote_host=None))
-        orig_connection = UDPEIEIOConnection()
+        orig_connection = EIEIOConnection()
         connections.append(orig_connection)
 
         # Create transceiver
@@ -100,20 +96,20 @@ class TestTransceiver(unittest.TestCase):
 
         # Register a UDP listeners
         connection_1 = trnx.register_udp_listener(
-            callback=None, connection_class=UDPEIEIOConnection)
+            callback=None, connection_class=EIEIOConnection)
         connection_2 = trnx.register_udp_listener(
-            callback=None, connection_class=UDPEIEIOConnection)
+            callback=None, connection_class=EIEIOConnection)
         connection_3 = trnx.register_udp_listener(
-            callback=None, connection_class=UDPEIEIOConnection,
+            callback=None, connection_class=EIEIOConnection,
             local_port=orig_connection.local_port)
         connection_4 = trnx.register_udp_listener(
-            callback=None, connection_class=UDPEIEIOConnection,
+            callback=None, connection_class=EIEIOConnection,
             local_port=orig_connection.local_port + 1)
 
-        self.assertEqual(connection_1, orig_connection)
-        self.assertEqual(connection_2, orig_connection)
-        self.assertEqual(connection_3, orig_connection)
-        self.assertNotEqual(connection_4, orig_connection)
+        assert connection_1 == orig_connection
+        assert connection_2 == orig_connection
+        assert connection_3 == orig_connection
+        assert connection_4 != orig_connection
 
 
 if __name__ == '__main__':

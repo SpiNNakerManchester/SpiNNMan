@@ -1,9 +1,6 @@
-
-from spinnman.messages.eieio.command_messages.eieio_command_message\
-    import EIEIOCommandMessage
-from spinnman.messages.eieio.command_messages.eieio_command_header\
-    import EIEIOCommandHeader
-from spinnman import constants
+from .eieio_command_message import EIEIOCommandMessage
+from .eieio_command_header import EIEIOCommandHeader
+from spinnman.constants import EIEIO_COMMAND_IDS
 
 
 class NotificationProtocolStartResume(EIEIOCommandMessage):
@@ -12,7 +9,7 @@ class NotificationProtocolStartResume(EIEIOCommandMessage):
     def __init__(self):
         EIEIOCommandMessage.__init__(
             self, EIEIOCommandHeader(
-                constants.EIEIO_COMMAND_IDS.START_RESUME_NOTIFICATION.value))
+                EIEIO_COMMAND_IDS.START_RESUME_NOTIFICATION.value))
 
     @property
     def bytestring(self):

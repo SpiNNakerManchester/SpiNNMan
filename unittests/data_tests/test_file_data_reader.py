@@ -2,7 +2,7 @@ import unittest
 import tempfile
 import os
 
-from spinn_storage_handlers.file_data_reader import FileDataReader
+from spinn_storage_handlers import FileDataReader
 
 
 class TestFileDataReader(unittest.TestCase):
