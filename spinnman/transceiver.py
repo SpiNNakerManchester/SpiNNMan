@@ -267,7 +267,7 @@ class Transceiver(object):
 
         # Place to keep the identity of the re-injector core on each chip,
         # indexed by chip x and y coordinates
-        self._reinjector_cores = CoreSubsets()
+        self._reinjector_cores = None
         self._reinjection_running = False
         self._reinjector_app_id = None
 
@@ -1496,6 +1496,7 @@ class Transceiver(object):
     def power_off_machine(self):
         """ Power off the whole machine
         """
+        self._reinjection_running = False
         if len(self._bmp_connections) == 0:
             logger.warn("No BMP connections, so can't power off")
         for bmp_connection in self._bmp_connections:
