@@ -39,6 +39,7 @@ class UDPConnection(Connection):
 
             # Create a UDP Socket
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self._socket.setsockopt(socket.SOL_SOCKET,socket.SO_RCVBUF, 1048576)
 
         except Exception as exception:
             raise SpinnmanIOException(

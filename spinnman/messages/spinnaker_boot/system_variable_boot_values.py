@@ -158,7 +158,7 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x42, default=10,
         doc="The delay between nearest-neighbour packets in microseconds")
     software_watchdog_count = _Definition(
-        _DataType.BYTE, offset=0x43, default=3,
+        _DataType.BYTE, offset=0x43, default=0,
         doc="The number of watch dog timeouts before an error is raised")
     padding_2 = _Definition(
         _DataType.INT, offset=0x44, default=0,
