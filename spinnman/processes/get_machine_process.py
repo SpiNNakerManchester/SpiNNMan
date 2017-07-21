@@ -1,22 +1,15 @@
-from spinnman import constants
-from spinnman import exceptions
 import logging
 
-from spinnman.messages.scp.impl.scp_read_memory_request\
-    import SCPReadMemoryRequest
-from spinnman.messages.scp.impl.scp_read_link_request import SCPReadLinkRequest
-from spinnman.model.p2p_table import P2PTable
-from spinnman.messages.scp.impl.scp_chip_info_request import SCPChipInfoRequest
-from spinnman.model.enums.cpu_state import CPUState
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
-from spinnman.processes.abstract_process import AbstractProcess
-from spinn_machine.processor import Processor
-from spinn_machine.router import Router
-from spinn_machine.chip import Chip
-from spinn_machine.sdram import SDRAM
-from spinn_machine.machine import Machine
-from spinn_machine.link import Link
+from spinn_machine import Processor, Router, Chip, SDRAM, Machine, Link
+
+from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.messages.scp.impl \
+    import ReadMemory, ReadLink, GetChipInfo
+from spinnman.model import P2PTable
+from spinnman.model.enums import CPUState
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_process import AbstractProcess
 
 logger = logging.getLogger(__name__)
 
@@ -46,9 +39,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param chip_info: The ChipSummaryInfo structure to create the chip\
                     from
         :type chip_info: \
-                    :py:class:`spinnman.model.chip_info.ChipSummaryInfo`
+                    :py:class:`spinnman.model.ChipSummaryInfo`
         :return: The created chip
-        :rtype: :py:class:`spinn_machine.chip.Chip`
+        :rtype: :py:class:`spinn_machine.Chip`
         """
 
         # Create the processor list
@@ -114,29 +107,24 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
 
-    def _receive_error(self, request, exception, tracebackinfo):
-
-        # If we get an SCPReadLinkRequest with a
+    def _receive_error(self, request, exception, tb):
+        # If we get an ReadLink with a
         # SpinnmanUnexpectedResponseCodeException, this is a failed link
         # and so can be ignored
-        if (not isinstance(request, SCPReadLinkRequest) or
-                not isinstance(
-                    exception,
-                    exceptions.SpinnmanUnexpectedResponseCodeException)):
-            AbstractProcess._receive_error(self, request, exception,
-                                           tracebackinfo)
+        if isinstance(request, ReadLink):
+            if isinstance(exception, SpinnmanUnexpectedResponseCodeException):
+                return
+        AbstractProcess._receive_error(self, request, exception, tb)
 
     def get_machine_details(self, boot_x, boot_y, width, height):
-
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         for column in range(width):
             offset = P2PTable.get_column_offset(column)
             self._send_request(
-                SCPReadMemoryRequest(
+                ReadMemory(
                     x=boot_x, y=boot_y,
-                    base_address=(
-                        constants.ROUTER_REGISTER_P2P_ADDRESS + offset),
+                    base_address=(ROUTER_REGISTER_P2P_ADDRESS + offset),
                     size=p2p_column_bytes),
                 self._receive_p2p_data)
         self._finish()
@@ -146,12 +134,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Get the chip information for each chip
         for (x, y) in p2p_table.iterchips():
             self._send_request(
-                SCPChipInfoRequest(x, y), self._receive_chip_info)
+                GetChipInfo(x, y), self._receive_chip_info)
         self._finish()
         try:
             self.check_for_error()
         except:
-
             # Ignore errors so far, as any error here just means that a chip
             # is down that wasn't marked as down
             pass
@@ -163,11 +150,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     x, y))
 
         # Build a Machine
+        def chip_xy(chip):
+            return chip.x, chip.y
+
         chips = [
             self._make_chip(width, height, chip_info)
-            for chip_info in sorted(
-                self._chip_info.values(),
-                key=lambda chip: (chip.x, chip.y))
+            for chip_info in sorted(self._chip_info.values(), key=chip_xy)
             if (chip_info.x, chip_info.y) not in self._ignore_chips]
         machine = Machine(chips, boot_x, boot_y)
 

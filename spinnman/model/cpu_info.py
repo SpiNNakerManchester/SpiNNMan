@@ -1,8 +1,6 @@
 import struct
 
-from spinnman.model.enums.cpu_state import CPUState
-from spinnman.model.enums.run_time_error import RunTimeError
-from spinnman.model.enums.mailbox_command import MailboxCommand
+from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
 CPU_INFO_BYTES = 128
 CPU_USER_0_START_ADDRESS = 112
@@ -91,7 +89,7 @@ class CPUInfo(object):
         """ The current state of the core
 
         :return: The state of the core
-        :rtype: :py:class:`spinnman.model.cpu_state.CPUState`
+        :rtype: :py:class:`spinnman.model.enums.cpu_state.CPUState`
         """
         return self._state
 
@@ -136,7 +134,7 @@ class CPUInfo(object):
         """ The reason for a run time error
 
         :return: The run time error
-        :rtype: :py:class:`spinnman.model.run_time_error.RunTimeError`
+        :rtype: :py:class:`spinnman.model.enums.run_time_error.RunTimeError`
         """
         return self._run_time_error
 
@@ -146,7 +144,7 @@ class CPUInfo(object):
             processor to the application
 
         :return: The command
-        :rtype: :py:class:`spinnman.model.mailbox_command.MailboxCommand`
+        :rtype: :py:class:`spinnman.model.enums.mailbox_command.MailboxCommand`
         """
         return self._application_mailbox_command
 

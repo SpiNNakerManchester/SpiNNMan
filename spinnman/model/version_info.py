@@ -1,9 +1,7 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from time import localtime
-from time import asctime
+from time import localtime, asctime
 import struct
 import re
-from spinnman import exceptions
 
 
 class VersionInfo(object):
@@ -40,7 +38,7 @@ class VersionInfo(object):
             self._version_string = version
             matches = re.match("(\d+)\.(\d+)\.(\d+)", version)
             if matches is None:
-                raise exceptions.SpinnmanInvalidParameterException(
+                raise SpinnmanInvalidParameterException(
                     "version", version, "Cannot be parsed")
             self._version_number = tuple(map(int, matches.group(1, 2, 3)))
             self._name, self._hardware = name_hardware.rstrip("\0").split("/")

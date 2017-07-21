@@ -25,13 +25,16 @@ class ConnectionListener(Thread):
         self._callbacks = set()
         self.setDaemon(True)
 
+    def _run_step(self):
+        if self._connection.is_ready_to_receive(timeout=1):
+            message = self._get_message_call()
+            for callback in self._callbacks:
+                self._callback_pool.apply_async(callback, [message])
+
     def run(self):
         while not self._done:
             try:
-                if self._connection.is_ready_to_receive(timeout=1):
-                    message = self._get_message_call()
-                    for callback in self._callbacks:
-                        self._callback_pool.apply_async(callback, [message])
+                self._run_step()
             except:
                 if not self._done:
                     traceback.print_exc()

@@ -1,5 +1,4 @@
-from spinnman.messages.eieio.eieio_type import EIEIOType
-from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
+from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
 from spinnman.exceptions import SpinnmanInvalidPacketException
 import struct
 

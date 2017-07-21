@@ -1,12 +1,12 @@
 import unittest
 
-from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
-from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.impl import GetVersion
+from spinnman.messages.scp.enums import SCPCommand
 
 
 class TestSCPVersionRequest(unittest.TestCase):
     def test_new_version_request(self):
-        ver_request = SCPVersionRequest(0, 1, 2)
+        ver_request = GetVersion(0, 1, 2)
         self.assertEqual(ver_request.scp_request_header.command,
                          SCPCommand.CMD_VER)
         self.assertEqual(ver_request.sdp_header.destination_chip_x, 0)
