@@ -8,18 +8,33 @@ virtualenv:
   system_site_packages: true
 
 before_install:
+  - sudo apt-get update
+  - sudo apt-get install libc6:i386
   - pip install --upgrade pip setuptools wheel
   # SpiNNakerManchester internal dependencies; development mode
-  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNUtils.git@$TRAVIS_BRANCH || pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNUtils.git@master
-  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@$TRAVIS_BRANCH || pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
-  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@$TRAVIS_BRANCH || pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
+  - pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNUtils.git@$TRAVIS_BRANCH || pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNUtils.git@master
+  - pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@$TRAVIS_BRANCH || pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
+  - pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@$TRAVIS_BRANCH || pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
+  - wget https://github.com/SpiNNakerManchester/spinnaker_tools/releases/download/v3.0.0/gcc-5.4-stripped.tar.gz
+  - tar zxf gcc-5.4-stripped.tar.gz
+  - export PATH=$PATH:$PWD/gcc-stripped/bin/
+  - wget https://github.com/SpiNNakerManchester/spinnaker_tools/releases/download/v3.1.0/spinnaker_tools_3.1.0.tar.gz
+  - tar zxf spinnaker_tools_3.1.0.tar.gz
+  - export SPINN_DIRS=$PWD/spinnaker_tools_3.1.0
 
 install:
   - python ./setup.py install
   - pip install -r requirements-test.txt
+  - pip install -r doc/doc_requirements.txt
   - pip install spinnaker_proxy
 
+before_script:
+  - cd $SPINN_DIRS
+  - make
+  - cd ..
+
 script:
+  - cd c_models && make && cd ..
   - py.test .
   # Code quality check
   - flake8 spinnman unittests
