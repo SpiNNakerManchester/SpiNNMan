@@ -976,7 +976,8 @@ class Transceiver(object):
         else:
             logger.info("Working out if machine is booted")
             version_info = self._try_to_find_scamp_and_boot(
-            INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
+                INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards,
+                width, height)
 
         # If we fail to get a SCAMP version this time, try other things
         if version_info is None and len(self._bmp_connections) > 0:
@@ -2850,9 +2851,9 @@ class Transceiver(object):
                         self._machine.reserve_system_processors()
                     if len(failed_chips) > 0:
                         logger.warn(
-                            "The reinjector could not be enabled on the following"
-                            " chips due to lack of available cores: {}".format(
-                                failed_chips))
+                            "The reinjector could not be enabled on the "
+                            "following chips due to lack of available cores: "
+                            "{}".format(failed_chips))
 
                 # Get an app id for the reinjector
                 if self._reinjector_app_id is None:
@@ -2860,7 +2861,8 @@ class Transceiver(object):
 
                 # Load the reinjector on each free core
                 reinjector_binary = os.path.join(
-                    os.path.dirname(model_binaries.__file__), "reinjector.aplx")
+                    os.path.dirname(model_binaries.__file__),
+                    "reinjector.aplx")
                 self.execute_flood(
                     self._reinjector_cores, reinjector_binary,
                     self._reinjector_app_id, is_filename=True)
@@ -2870,7 +2872,8 @@ class Transceiver(object):
                 self._reinjection_running = True
 
             # Set the types to be reinjected
-            process = SetDPRIPacketTypesProcess(self._scamp_connection_selector)
+            process = SetDPRIPacketTypesProcess(
+                self._scamp_connection_selector)
             packet_types = list()
             values_to_check = [multicast, point_to_point,
                                nearest_neighbour, fixed_route]
