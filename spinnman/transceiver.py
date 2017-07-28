@@ -1962,15 +1962,15 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        try:
+
+        if not self._machine_off:
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(AppStop(app_id))
-        except Exception as ex:
-            if self._machine_off:
-                logger.info("Ignoring exception in stop_application as "
-                            "machine if probably off")
-            else:
-                raise ex
+        else:
+            logger.warn(
+                "You are calling a app stop on a turned off machine. "
+                "Please fix and try again")
+
 
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
@@ -2838,7 +2838,7 @@ class Transceiver(object):
                 enabled
         :type fixed_route: bool
         """
-        try:
+        if not self._machine_off:
             if not self._reinjection_running:
 
                 # Get the machine
@@ -2885,12 +2885,9 @@ class Transceiver(object):
                 if value:
                     packet_types.append(flag)
             process.set_packet_types(packet_types, self._reinjector_cores)
-        except Exception as ex:
-            if self._machine_off:
-                logger.info("Ignoring exception in enable_reinjection as "
-                            "machine if probably off")
-            else:
-                raise ex
+        else:
+            logger.warn("Ignoring exception in enable_reinjection as "
+                        "machine if probably off")
 
     def set_reinjection_router_timeout(self, timeout_mantissa,
                                        timeout_exponent):
