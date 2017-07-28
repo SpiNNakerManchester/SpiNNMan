@@ -68,8 +68,7 @@ class SpinnakerBootMessages(object):
                 spinnaker_boot_value.set_value(variable, value)
 
         # Get the data as an array, to be used later
-        spinnaker_boot_data = array.array(
-            "I", spinnaker_boot_value.bytestring)
+        spinnaker_boot_data = array.array("I", spinnaker_boot_value.bytestring)
 
         # Find the data file and size
         this_dir, _ = os.path.split(__file__)
@@ -87,29 +86,33 @@ class SpinnakerBootMessages(object):
                 " be divisible by 4".format(boot_data_file_size))
 
         # Compute how many packets to send
-        self._n_words_to_read = boot_data_file_size / 4
+        n_words_to_read = boot_data_file_size / 4
         self._no_data_packets = int(math.ceil(
             float(boot_data_file_size) / float(_BOOT_MESSAGE_DATA_BYTES)))
 
         # Read the data
         boot_data = array.array("I")
         with open(boot_data_file_name, "rb") as boot_data_file:
-            boot_data.fromfile(boot_data_file, self._n_words_to_read)
+            boot_data.fromfile(boot_data_file, n_words_to_read)
 
-        # Update the boot data to be in the correct form
-        boot_data[
-            _BOOT_STRUCT_REPLACE_OFFSET:
-            _BOOT_STRUCT_REPLACE_OFFSET + _BOOT_STRUCT_REPLACE_LENGTH] =\
-            spinnaker_boot_data[0:_BOOT_STRUCT_REPLACE_OFFSET]
+        # Replace the appropriate part with the custom boot options
+        offset = _BOOT_STRUCT_REPLACE_OFFSET
+        length = _BOOT_STRUCT_REPLACE_LENGTH
+        boot_data[offset:offset + length] = spinnaker_boot_data[0:length]
+
+        # Byte swap and store the data for later use
         boot_data.byteswap()
         self._boot_data = boot_data.tostring()
+        self._n_bytes_to_read = n_words_to_read * 4
 
-    def _get_packet_data(self, packet_index):
+    def _get_packet_data(self, block_id):
         """ Read a packet of data
         """
-        offset = _BOOT_MESSAGE_DATA_WORDS * packet_index
-        length = min(_BOOT_MESSAGE_DATA_WORDS, len(self._boot_data) - offset)
-        return self._boot_data[offset:offset + length]
+        offset = block_id * _BOOT_MESSAGE_DATA_BYTES
+        n_bytes = min(
+            (self._n_bytes_to_read - offset, _BOOT_MESSAGE_DATA_BYTES))
+        data = self._boot_data[offset:offset + n_bytes]
+        return data
 
     @property
     def messages(self):
