@@ -1971,7 +1971,6 @@ class Transceiver(object):
                 "You are calling a app stop on a turned off machine. "
                 "Please fix and try again")
 
-
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
             time_between_polls=0.1,
