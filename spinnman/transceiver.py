@@ -267,7 +267,7 @@ class Transceiver(object):
 
         # Place to keep the identity of the re-injector core on each chip,
         # indexed by chip x and y coordinates
-        self._reinjector_cores = CoreSubsets()
+        self._reinjector_cores = None
         self._reinjection_running = False
         self._reinjector_app_id = None
 
@@ -362,6 +362,8 @@ class Transceiver(object):
 
         # Check that the BMP connections are valid
         self._check_bmp_connections()
+
+        self._machine_off = False
 
     def _sort_out_connections(self, connections):
 
@@ -969,9 +971,13 @@ class Transceiver(object):
                 " supported, and might be removed in a future version")
 
         # try to get a scamp version once
-        logger.info("Working out if machine is booted")
-        version_info = self._try_to_find_scamp_and_boot(
-            INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
+        if self._machine_off:
+            version_info = None
+        else:
+            logger.info("Working out if machine is booted")
+            version_info = self._try_to_find_scamp_and_boot(
+                INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards,
+                width, height)
 
         # If we fail to get a SCAMP version this time, try other things
         if version_info is None and len(self._bmp_connections) > 0:
@@ -1496,6 +1502,7 @@ class Transceiver(object):
     def power_off_machine(self):
         """ Power off the whole machine
         """
+        self._reinjection_running = False
         if len(self._bmp_connections) == 0:
             logger.warn("No BMP connections, so can't power off")
         for bmp_connection in self._bmp_connections:
@@ -1512,6 +1519,7 @@ class Transceiver(object):
                 board(s), or 0 if the board is not in a frame
         """
         self._power(PowerCommand.POWER_OFF, boards, cabinet, frame)
+        self._reinjection_running = False
 
     def _bmp_connection(self, cabinet, frame):
         if (cabinet, frame) not in self._bmp_connection_selectors:
@@ -1535,6 +1543,7 @@ class Transceiver(object):
             self._bmp_connection(cabinet, frame),
             timeout=constants.BMP_POWER_ON_TIMEOUT, n_retries=0)
         process.execute(SetPower(power_command, boards))
+        self._machine_off = power_command == PowerCommand.POWER_OFF
 
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
@@ -1953,9 +1962,14 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
 
-        process.execute(AppStop(app_id))
+        if not self._machine_off:
+            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process.execute(AppStop(app_id))
+        else:
+            logger.warn(
+                "You are calling a app stop on a turned off machine. "
+                "Please fix and try again")
 
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
@@ -2823,50 +2837,56 @@ class Transceiver(object):
                 enabled
         :type fixed_route: bool
         """
+        if not self._machine_off:
+            if not self._reinjection_running:
 
-        if not self._reinjection_running:
+                # Get the machine
+                if self._machine is None:
+                    self._update_machine()
 
-            # Get the machine
-            if self._machine is None:
-                self._update_machine()
+                # Find a free core on each chip to use
+                if self._reinjector_cores is None:
+                    self._reinjector_cores, failed_chips = \
+                        self._machine.reserve_system_processors()
+                    if len(failed_chips) > 0:
+                        logger.warn(
+                            "The reinjector could not be enabled on the "
+                            "following chips due to lack of available cores: "
+                            "{}".format(failed_chips))
 
-            # Find a free core on each chip to use
-            self._reinjector_cores, failed_chips = \
-                self._machine.reserve_system_processors()
-            if len(failed_chips) > 0:
-                logger.warn(
-                    "The reinjector could not be enabled on the following"
-                    " chips due to lack of available cores: {}".format(
-                        failed_chips))
+                # Get an app id for the reinjector
+                if self._reinjector_app_id is None:
+                    self._reinjector_app_id = self._app_id_tracker.get_new_id()
 
-            # Get an app id for the reinjector
-            if self._reinjector_app_id is None:
-                self._reinjector_app_id = self._app_id_tracker.get_new_id()
+                # Load the reinjector on each free core
+                reinjector_binary = os.path.join(
+                    os.path.dirname(model_binaries.__file__),
+                    "reinjector.aplx")
+                self.execute_flood(
+                    self._reinjector_cores, reinjector_binary,
+                    self._reinjector_app_id, is_filename=True)
+                self.wait_for_cores_to_be_in_state(
+                    self._reinjector_cores, self._reinjector_app_id,
+                    [CPUState.RUNNING])
+                self._reinjection_running = True
 
-            # Load the reinjector on each free core
-            reinjector_binary = os.path.join(
-                os.path.dirname(model_binaries.__file__), "reinjector.aplx")
-            self.execute_flood(
-                self._reinjector_cores, reinjector_binary,
-                self._reinjector_app_id, is_filename=True)
-            self.wait_for_cores_to_be_in_state(
-                self._reinjector_cores, self._reinjector_app_id,
-                [CPUState.RUNNING])
-            self._reinjection_running = True
-
-        # Set the types to be reinjected
-        process = SetDPRIPacketTypesProcess(self._scamp_connection_selector)
-        packet_types = list()
-        values_to_check = [multicast, point_to_point,
-                           nearest_neighbour, fixed_route]
-        flags_to_set = [DPRIFlags.MULTICAST,
-                        DPRIFlags.POINT_TO_POINT,
-                        DPRIFlags.NEAREST_NEIGHBOUR,
-                        DPRIFlags.FIXED_ROUTE]
-        for value, flag in zip(values_to_check, flags_to_set):
-            if value:
-                packet_types.append(flag)
-        process.set_packet_types(packet_types, self._reinjector_cores)
+            # Set the types to be reinjected
+            process = SetDPRIPacketTypesProcess(
+                self._scamp_connection_selector)
+            packet_types = list()
+            values_to_check = [multicast, point_to_point,
+                               nearest_neighbour, fixed_route]
+            flags_to_set = [DPRIFlags.MULTICAST,
+                            DPRIFlags.POINT_TO_POINT,
+                            DPRIFlags.NEAREST_NEIGHBOUR,
+                            DPRIFlags.FIXED_ROUTE]
+            for value, flag in zip(values_to_check, flags_to_set):
+                if value:
+                    packet_types.append(flag)
+            process.set_packet_types(packet_types, self._reinjector_cores)
+        else:
+            logger.warn("Ignoring exception in enable_reinjection as "
+                        "machine if probably off")
 
     def set_reinjection_router_timeout(self, timeout_mantissa,
                                        timeout_exponent):
