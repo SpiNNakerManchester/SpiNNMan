@@ -182,7 +182,7 @@ class UDPConnection(Connection):
         """ Receive data from the connection
 
         :param timeout: The timeout in seconds, or None to wait forever
-        :type timeout: None or float 
+        :type timeout: None or float
         :return: The data received as a bytestring
         :rtype: str
         :raise SpinnmanTimeoutException: If a timeout occurs before any data\
