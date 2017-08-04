@@ -1253,6 +1253,68 @@ class Transceiver(object):
         process = ReadIOBufProcess(self._scamp_connection_selector)
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
+    def set_watch_dog_mode_at_chip(self, watch_dog_mode, chip_x, chip_y):
+        """ changes the chips watchdog parameter to watch_dog_mode
+
+        :param watch_dog_mode: the mode / value to change the watchdog value\
+         in sv to
+         :type watch_dog_mode: int or bool
+        :param chip_x: chip x coord to write new watchdog param to
+        :type chip_x: int
+        :param chip_y: chip y coord to write new watchdog param to
+        :type chip_y: int
+        :rtype: None 
+        """
+
+        # get actual watchdog value from machine
+        actual_watch_dog_value = self._get_sv_data(
+            chip_x, chip_y, SystemVariableDefinition.software_watchdog_count)
+
+        # build what we expect it to be
+        expected_watch_dog_value = watch_dog_mode
+        if isinstance(watch_dog_mode, bool):
+            if not watch_dog_mode:
+                expected_watch_dog_value = 0
+            else:
+                expected_watch_dog_value = \
+                    SystemVariableDefinition.software_watchdog_count.default
+
+        # if needs changing, go off and change it, and write the entire 4 bytes
+        if expected_watch_dog_value != actual_watch_dog_value:
+
+            # get other 3 bits of data needed to write word
+            is_root_chip = self._get_sv_data(
+                chip_x, chip_y, SystemVariableDefinition.is_root_chip)
+            n_shared_message_buffers = self._get_sv_data(
+                chip_x, chip_y,
+                SystemVariableDefinition.n_shared_message_buffers)
+            nearest_neighbour_delay_us = self._get_sv_data(
+                chip_x, chip_y,
+                SystemVariableDefinition.nearest_neighbour_delay_us)
+
+            # build data holder
+            data = struct.pack(
+                "<BBBB", is_root_chip, n_shared_message_buffers,
+                nearest_neighbour_delay_us, expected_watch_dog_value)
+
+            # write data
+            base_address = (
+                constants.SYSTEM_VARIABLE_BASE_ADDRESS +
+                SystemVariableDefinition.is_root_chip.offset)
+
+            self.write_memory(x=chip_x, y=chip_y, base_address=base_address,
+                              data=data)
+
+    def set_watch_dog_mode_global(self, watch_dog_mode):
+        """ sets the watch dog value all over the machine
+        
+        :param watch_dog_mode: status of the watchdog parameter of sv
+        :type watch_dog_mode: boolean or int
+        :rtype: None
+        """
+        for chip in self._machine.chips:
+            self.set_watch_dog_mode_at_chip(watch_dog_mode, chip.x, chip.y)
+
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
 
