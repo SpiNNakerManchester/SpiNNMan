@@ -1253,6 +1253,57 @@ class Transceiver(object):
         process = ReadIOBufProcess(self._scamp_connection_selector)
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
+    def set_watch_dog_on_chip(self, x, y, watch_dog):
+        """ Enable, disable or set the value of the watch dog timer on a\
+            specific chip
+
+        :param x: chip x coord to write new watch dog param to
+        :type x: int
+        :param y: chip y coord to write new watch dog param to
+        :type y: int
+        :param watch_dog:\
+            Either a boolean indicating whether to enable (True) or \
+            disable (False) the watch dog timer or an int value to set the \
+            timer count to
+        :type watch_dog: boolean or int
+        :rtype: None
+        """
+
+        # build what we expect it to be
+        value_to_set = watch_dog
+        if isinstance(watch_dog, bool):
+            if not watch_dog:
+                value_to_set = 0
+            else:
+                value_to_set = \
+                    SystemVariableDefinition.software_watchdog_count.default
+
+        # build data holder
+        data = struct.pack("B", value_to_set)
+
+        # write data
+        base_address = (
+            constants.SYSTEM_VARIABLE_BASE_ADDRESS +
+            SystemVariableDefinition.software_watchdog_count.offset)
+
+        self.write_memory(
+            x=x, y=y, base_address=base_address, data=data)
+
+    def set_watch_dog(self, watch_dog):
+        """ Enable, disable or set the value of the watch dog timer
+
+        :param watch_dog:\
+            Either a boolean indicating whether to enable (True) or \
+            disable (False) the watch dog timer or an int value to set the \
+            timer count to
+        :type watch_dog: boolean or int
+        :rtype: None
+        """
+        if self._machine is None:
+            self._update_machine()
+        for x, y in self._machine.chip_coordinates:
+            self.set_watch_dog_on_chip(x, y, watch_dog)
+
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
 
