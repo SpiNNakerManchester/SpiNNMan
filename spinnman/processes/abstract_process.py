@@ -30,9 +30,9 @@ class AbstractProcess(object):
             if print_exception:
                 sdp_header = self._error_request.sdp_header
                 logger.error("failure in request to (%d, %d, %d)",
-                    sdp_header.destination_chip_x,
-                    sdp_header.destination_chip_y,
-                    sdp_header.destination_cpu, exc_info=exc_info)
+                             sdp_header.destination_chip_x,
+                             sdp_header.destination_chip_y,
+                             sdp_header.destination_cpu, exc_info=exc_info)
             sdp_header = self._error_request.sdp_header
             self._exception = SpinnmanGenericProcessException(
                 self._exception, exc_info[2], sdp_header.destination_chip_x,
