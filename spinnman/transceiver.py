@@ -971,10 +971,10 @@ class Transceiver(object):
                 " supported, and might be removed in a future version")
 
         # try to get a scamp version once
+        logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None
         else:
-            logger.info("Working out if machine is booted")
             version_info = self._try_to_find_scamp_and_boot(
                 INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards,
                 width, height)
