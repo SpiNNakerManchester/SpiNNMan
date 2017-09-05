@@ -7,6 +7,9 @@ from .write_memory_process import WriteMemoryProcess
 
 import struct
 
+_ROUTE_PATTERN = struct.Struct("<H2xIII")
+_END_PATTERN = struct.Struct("<IIII")
+
 
 class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
     def __init__(self, connection_selector):
@@ -25,14 +28,15 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             route_entry = \
                 Router.convert_routing_table_entry_to_spinnaker_route(route)
 
-            struct.pack_into(
-                "<H2xIII", routing_data, n_entries * 16, n_entries,
+            _ROUTE_PATTERN.pack_into(
+                routing_data, n_entries * 16, n_entries,
                 route_entry, route.routing_entry_key, route.mask)
             n_entries += 1
 
         # Add an entry to mark the end
-        struct.pack_into("<IIII", routing_data, n_entries * 16,
-                         0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF)
+        _END_PATTERN.pack_into(
+            routing_data, n_entries * 16,
+            0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF)
 
         # Upload the data
         table_address = 0x67800000

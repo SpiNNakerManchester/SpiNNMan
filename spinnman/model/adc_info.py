@@ -8,6 +8,16 @@ from spinnman import constants
 # general imports
 import struct
 
+_PATTERN = struct.Struct(
+    "<"   # Little-endian
+    "8H"  # uint16_t adc[8]
+    "4h"  # int16_t t_int[4]
+    "4h"  # int16_t t_ext[4]
+    "4h"  # int16_t fan[4]
+    "I"   # uint32_t warning
+    "I")  # uint32_t shutdown
+
+
 
 class ADCInfo(object):
     """
@@ -22,15 +32,7 @@ class ADCInfo(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
                     message does not contain valid adc information
         """
-        data = struct.unpack_from(
-            "<"   # Little-endian
-            "8H"  # uint16_t adc[8]
-            "4h"  # int16_t t_int[4]
-            "4h"  # int16_t t_ext[4]
-            "4h"  # int16_t fan[4]
-            "I"   # uint32_t warning
-            "I",  # uint32_t shutdown
-            adc_data, offset)
+        data = _PATTERN.unpack_from(adc_data, offset)
 
         self._voltage_1_2c = data[1] * constants.BMP_V_SCALE_2_5
         self._voltage_1_2b = data[2] * constants.BMP_V_SCALE_2_5

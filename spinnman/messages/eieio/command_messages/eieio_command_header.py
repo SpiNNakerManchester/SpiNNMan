@@ -1,6 +1,8 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
 import struct
 
+_ONE_SHORT = struct.Struct("<H")
+
 
 class EIEIOCommandHeader(object):
     """ EIEIO header for command packets
@@ -33,7 +35,7 @@ class EIEIOCommandHeader(object):
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
                     is an error setting any of the values
         """
-        command_header = struct.unpack_from("<H", data, offset)[0]
+        command_header = _ONE_SHORT.unpack_from(data, offset)[0]
         command = command_header & 0x3FFF
 
         return EIEIOCommandHeader(command)
@@ -44,4 +46,4 @@ class EIEIOCommandHeader(object):
 
         :rtype: str
         """
-        return struct.pack("<H", 0 << 15 | 1 << 14 | self._command)
+        return _ONE_SHORT.pack(0 << 15 | 1 << 14 | self._command)

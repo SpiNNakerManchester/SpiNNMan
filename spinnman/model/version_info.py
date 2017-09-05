@@ -3,6 +3,8 @@ from time import localtime, asctime
 import struct
 import re
 
+_VERSION_PATTERN = struct.Struct("<BBBBHHI")
+
 
 class VersionInfo(object):
     """ Decodes SC&MP/SARK version information as returned by the SVER command
@@ -19,8 +21,8 @@ class VersionInfo(object):
                     message does not contain valid version information
         """
         (self._p, self._physical_cpu_id, self._y, self._x, _,
-            version_no, self._build_date) = struct.unpack_from(
-                "<BBBBHHI", buffer(version_data), offset)
+            version_no, self._build_date) = _VERSION_PATTERN.unpack_from(
+                buffer(version_data), offset)
 
         version_data = version_data[offset + 12:-1].decode("utf-8")
 

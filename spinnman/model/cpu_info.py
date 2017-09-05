@@ -5,6 +5,9 @@ from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 CPU_INFO_BYTES = 128
 CPU_USER_0_START_ADDRESS = 112
 
+_INFO_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
+_REGISTERS_PATTERN = struct.Struct("<IIIIIIII")
+
 
 class CPUInfo(object):
     """ Represents information about the state of a CPU
@@ -40,14 +43,13 @@ class CPUInfo(object):
          self._iobuf_address, self._software_version,                # 2I  88
          # skipped                                                   # 16x 96
          user0, user1, user2, user3                                  # 4I  112
-         ) = struct.unpack_from(
-             "< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I", cpu_data, offset)
+         ) = _INFO_PATTERN.unpack_from(cpu_data, offset)
 
         index = self._application_name.find('\0')
         if index != -1:
             self._application_name = self._application_name[0:index]
 
-        self._registers = struct.unpack_from("<IIIIIIII", registers)
+        self._registers = _REGISTERS_PATTERN.unpack_from(registers)
         self._run_time_error = RunTimeError(run_time_error)
         self._state = CPUState(state)
 

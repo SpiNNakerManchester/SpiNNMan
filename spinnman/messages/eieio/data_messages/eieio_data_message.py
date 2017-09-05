@@ -10,6 +10,11 @@ from .key_payload_data_element import KeyPayloadDataElement
 import math
 import struct
 
+_ONE_SHORT = struct.Struct("<H")
+_TWO_SHORTS = struct.Struct("<HH")
+_ONE_WORD = struct.Struct("<I")
+_TWO_WORDS = struct.Struct("<II")
+
 
 class EIEIODataMessage(AbstractEIEIOMessage):
     """ An EIEIO Data message
@@ -211,16 +216,16 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         key = None
         payload = None
         if self._header.eieio_type == EIEIOType.KEY_16_BIT:
-            key = struct.unpack_from("<H", self._data, self._offset)[0]
+            key = _ONE_SHORT.unpack_from(self._data, self._offset)[0]
             self._offset += 2
         if self._header.eieio_type == EIEIOType.KEY_32_BIT:
-            key = struct.unpack_from("<I", self._data, self._offset)[0]
+            key = _ONE_WORD.unpack_from(self._data, self._offset)[0]
             self._offset += 4
         if self._header.eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
-            key, payload = struct.unpack_from("<HH", self._data, self._offset)
+            key, payload = _TWO_SHORTS.unpack_from(self._data, self._offset)
             self._offset += 4
         if self._header.eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:
-            key, payload = struct.unpack_from("<II", self._data, self._offset)
+            key, payload = _TWO_WORDS.unpack_from(self._data, self._offset)
             self._offset += 8
 
         if self._header.prefix is not None:

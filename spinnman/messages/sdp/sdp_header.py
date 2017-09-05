@@ -2,6 +2,7 @@ import struct
 from .sdp_flag import SDPFlag
 
 N_BYTES = 8
+_EIGHT_BYTES = struct.Struct("<8B")
 
 
 class SDPHeader(object):
@@ -249,10 +250,10 @@ class SDPHeader(object):
         source_port_cpu = (((self._source_port & 0x7) << 5) |
                            (self._source_cpu & 0x1F))
 
-        return struct.pack(
-            "<8B", self._flags.value, self._tag, dest_port_cpu,
-            source_port_cpu, self._destination_chip_y,
-            self._destination_chip_x, self._source_chip_y, self._source_chip_x)
+        return _EIGHT_BYTES.pack(
+            self._flags.value, self._tag, dest_port_cpu, source_port_cpu,
+            self._destination_chip_y, self._destination_chip_x,
+            self._source_chip_y, self._source_chip_x)
 
     @staticmethod
     def from_bytestring(data, offset):
@@ -266,8 +267,7 @@ class SDPHeader(object):
 
         (flags, tag, dest_port_cpu, source_port_cpu,
          destination_chip_y, destination_chip_x,
-         source_chip_y, source_chip_x) = struct.unpack_from(
-            "<8B", data, offset)
+         source_chip_y, source_chip_x) = _EIGHT_BYTES.unpack_from(data, offset)
         destination_port = dest_port_cpu >> 5
         destination_cpu = dest_port_cpu & 0x1F
         source_port = source_port_cpu >> 5

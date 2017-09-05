@@ -3,6 +3,8 @@ from .spinnaker_boot_op_code import SpinnakerBootOpCode
 
 import struct
 
+_PATTERN_HIIII = struct.Struct(">HIIII")
+_PATTERN_2xIIII = struct.Struct("2xIIII")
 BOOT_MESSAGE_VERSION = 1
 
 
@@ -94,14 +96,14 @@ class SpinnakerBootMessage(object):
         data = ""
         if self._data is not None:
             data = self._data[self._offset:]
-        return struct.pack(
-            ">HIIII", BOOT_MESSAGE_VERSION, self._opcode.value,
+        return _PATTERN_HIIII.pack(
+            BOOT_MESSAGE_VERSION, self._opcode.value,
             self._operand_1, self._operand_2, self._operand_3) + data
 
     @staticmethod
     def from_bytestring(data, offset):
-        (opcode_value, operand_1, operand_2, operand_3) = struct.unpack_from(
-            "2xIIII", data, offset)
+        (opcode_value, operand_1, operand_2, operand_3) = \
+            _PATTERN_2xIIII.unpack_from(data, offset)
         the_data = None
         if len(data) - offset > 0:
             the_data = data

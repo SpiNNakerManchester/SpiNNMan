@@ -2,6 +2,11 @@ import struct
 
 from spinnman.model.enums import CPUState
 
+_THREE_WORDS = struct.Struct("<3I")
+_TWO_BYTES = struct.Struct("<BB")
+_FOUR_BYTES = struct.Struct("<4B")
+_EIGHTEEN_BYTES = struct.Struct("<18B")
+
 
 class ChipSummaryInfo(object):
     """ Represents the chip summary information read via an SCP command
@@ -17,8 +22,8 @@ class ChipSummaryInfo(object):
         :param y: The y-coordinate of the chip that this data is from
         """
         (chip_summary_flags, self._largest_free_sdram_block,
-            self._largest_free_sram_block) = struct.unpack_from(
-                "<3I", chip_summary_data, offset)
+            self._largest_free_sram_block) = _THREE_WORDS.unpack_from(
+                chip_summary_data, offset)
         self._n_cores = chip_summary_flags & 0x1F
         self._working_links = [
             link for link in range(0, 6)
@@ -30,7 +35,7 @@ class ChipSummaryInfo(object):
         data_offset = offset + 12
         self._core_states = [
             CPUState(state) for state in
-            struct.unpack_from("<18B", chip_summary_data, data_offset)]
+            _EIGHTEEN_BYTES.unpack_from(chip_summary_data, data_offset)]
         data_offset += 18
 
         self._x = x
@@ -41,12 +46,10 @@ class ChipSummaryInfo(object):
         self._ethernet_ip_address = None
 
         (self._nearest_ethernet_y, self._nearest_ethernet_x) = \
-            struct.unpack_from(
-                "<BB", chip_summary_data, data_offset)
+            _TWO_BYTES.unpack_from(chip_summary_data, data_offset)
         data_offset += 2
 
-        ip_data = struct.unpack_from(
-            "<4B", chip_summary_data, data_offset)
+        ip_data = _FOUR_BYTES.unpack_from(chip_summary_data, data_offset)
         ethernet_ip_address = "{}.{}.{}.{}".format(
             ip_data[0], ip_data[1], ip_data[2], ip_data[3])
         if self._is_ethernet_available:
