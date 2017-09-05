@@ -25,7 +25,7 @@ class CountStateResponse(AbstractSCPResponse):
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "CountState", "CMD_SIGNAL", result.name)
-        self._count = _ONE_WORD.unpack_from("<I", data, offset)[0]
+        self._count = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
     def count(self):

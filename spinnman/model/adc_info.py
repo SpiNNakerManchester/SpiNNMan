@@ -18,7 +18,6 @@ _PATTERN = struct.Struct(
     "I")  # uint32_t shutdown
 
 
-
 class ADCInfo(object):
     """
     container for the ADC data thats been retrieved from a fpga
