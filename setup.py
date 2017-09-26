@@ -45,9 +45,9 @@ setup(
     packages=packages,
     package_data=package_data,
     install_requires=[
-        'SpiNNUtilities >= 1!4.0.0, < 1!5.0.0',
-        'SpiNNMachine >= 1!4.0.0, < 1!5.0.0',
-        'SpiNNStorageHandlers >= 1!4.0.0, < 1!5.0.0',
+        'SpiNNUtilities >= 1!4.0.1, < 1!5.0.0',
+        'SpiNNMachine >= 1!4.0.1, < 1!5.0.0',
+        'SpiNNStorageHandlers >= 1!4.0.1, < 1!5.0.0',
         'enum34',
         'six']
 )
