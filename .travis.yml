@@ -12,9 +12,9 @@ before_install:
   - sudo apt-get install libc6:i386
   - pip install --upgrade pip setuptools wheel
   # SpiNNakerManchester internal dependencies; development mode
-  - pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNUtils.git@$TRAVIS_BRANCH || pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNUtils.git@master
-  - pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@$TRAVIS_BRANCH || pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
-  - pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@$TRAVIS_BRANCH || pip install -q --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
+  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNUtils.git@$TRAVIS_BRANCH || pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNUtils.git@master
+  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@$TRAVIS_BRANCH || pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNMachine.git@master
+  - pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@$TRAVIS_BRANCH || pip install --upgrade git+git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git@master
   - wget https://github.com/SpiNNakerManchester/spinnaker_tools/releases/download/v3.0.0/gcc-5.4-stripped.tar.gz
   - tar zxf gcc-5.4-stripped.tar.gz
   - export PATH=$PATH:$PWD/gcc-stripped/bin/
