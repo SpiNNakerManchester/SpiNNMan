@@ -8,6 +8,8 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 import struct
 
+_ONE_WORD = struct.Struct("<I")
+
 
 class RouterAlloc(AbstractSCPRequest):
     """ An SCP Request to allocate space for routing entries
@@ -60,7 +62,7 @@ class _SCPRouterAllocResponse(AbstractSCPResponse):
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "Router Allocation", "CMD_ALLOC", result.name)
-        self._base_address = struct.unpack_from("<I", data, offset)[0]
+        self._base_address = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
     def base_address(self):

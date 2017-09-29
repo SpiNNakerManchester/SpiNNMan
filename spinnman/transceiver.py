@@ -88,6 +88,11 @@ _BMP_MAJOR_VERSIONS = [1, 2]
 _STANDARD_RETIRES_NO = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
 
+_ONE_BYTE = struct.Struct("B")
+_TWO_BYTES = struct.Struct("<BB")
+_ONE_WORD = struct.Struct("<I")
+_ONE_LONG = struct.Struct("<Q")
+
 
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
@@ -792,8 +797,7 @@ class Transceiver(object):
         """
         if self._width is None or self._height is None:
             height_item = SystemVariableDefinition.y_size
-            self._height, self._width = struct.unpack_from(
-                "<BB",
+            self._height, self._width = _TWO_BYTES.unpack_from(
                 str(self.read_memory(
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
@@ -1279,7 +1283,7 @@ class Transceiver(object):
                     SystemVariableDefinition.software_watchdog_count.default
 
         # build data holder
-        data = struct.pack("B", value_to_set)
+        data = _ONE_BYTE.pack(value_to_set)
 
         # write data
         base_address = (
@@ -1761,11 +1765,11 @@ class Transceiver(object):
                 x, y, cpu, base_address, reader, n_bytes)
             reader.close()
         elif isinstance(data, int):
-            data_to_write = struct.pack("<I", data)
+            data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
                 x, y, cpu, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("<Q", data)
+            data_to_write = _ONE_LONG.pack(data)
             process.write_memory_from_bytearray(
                 x, y, cpu, base_address, data_to_write, 0, 8)
         else:
@@ -1836,11 +1840,11 @@ class Transceiver(object):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
         elif isinstance(data, int):
-            data_to_write = struct.pack("<I", data)
+            data_to_write = _ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("<Q", data)
+            data_to_write = _ONE_LONG.pack(data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 8)
         else:
@@ -1913,11 +1917,11 @@ class Transceiver(object):
                 nearest_neighbour_id, base_address, reader, n_bytes)
             reader.close()
         elif isinstance(data, int):
-            data_to_write = struct.pack("<I", data)
+            data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("<Q", data)
+            data_to_write = _ONE_LONG.pack(data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 8)
         else:
@@ -2626,7 +2630,7 @@ class Transceiver(object):
 
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(WriteMemory(
-            x, y, memory_position, struct.pack("<I", data_to_send)))
+            x, y, memory_position, _ONE_WORD.pack(data_to_send)))
 
     def get_router_diagnostic_filter(self, x, y, position):
         """ Gets a router diagnostic filter from a router
@@ -2661,8 +2665,8 @@ class Transceiver(object):
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(
             ReadMemory(x, y, memory_position, 4))
-        return DiagnosticFilter.read_from_int(struct.unpack_from(
-            "<I", response.data, response.offset)[0])
+        return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
+            response.data, response.offset)[0])
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
                                          counter_ids=range(0, 16)):
@@ -2700,7 +2704,7 @@ class Transceiver(object):
                 clear_data |= 1 << counter_id + 16
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(WriteMemory(
-            x, y, 0xf100002c, struct.pack("<I", clear_data)))
+            x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
 
     @property
     def number_of_boards_located(self):

@@ -6,6 +6,8 @@ from spinnman.connections.abstract_classes \
 
 import struct
 
+_TWO_SKIP = struct.Struct("<2x")
+
 
 class SDPConnection(
         UDPConnection, SDPReceiver, SDPSender,
@@ -57,7 +59,7 @@ class SDPConnection(
                 sdp_message.sdp_header, self._chip_x, self._chip_y)
         else:
             update_sdp_header_for_udp_send(sdp_message.sdp_header, 0, 0)
-        self.send(struct.pack("<2x") + sdp_message.bytestring)
+        self.send(_TWO_SKIP.pack() + sdp_message.bytestring)
 
     def get_receive_method(self):
         return self.receive_sdp_message

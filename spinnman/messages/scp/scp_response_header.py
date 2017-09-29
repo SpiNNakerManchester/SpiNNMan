@@ -2,6 +2,8 @@ import struct
 
 from spinnman.messages.scp.enums import SCPResult
 
+_TWO_SHORTS = struct.Struct("<2H")
+
 
 class SCPResponseHeader(object):
     """ Represents the header of an SCP Response
@@ -39,5 +41,5 @@ class SCPResponseHeader(object):
         :type data: str
         :param offset:
         """
-        result, sequence = struct.unpack_from("<2H", data, offset)
+        result, sequence = _TWO_SHORTS.unpack_from(data, offset)
         return SCPResponseHeader(SCPResult(result), sequence)

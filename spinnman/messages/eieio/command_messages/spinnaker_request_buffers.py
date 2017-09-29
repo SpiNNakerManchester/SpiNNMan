@@ -3,6 +3,8 @@ from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
 import struct
 
+_PATTERN_BBBxBBI = struct.Struct("<BBBxBBI")
+
 
 class SpinnakerRequestBuffers(EIEIOCommandMessage):
     """ Message used in the context of the buffering input mechanism which is\
@@ -49,15 +51,16 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         return 12
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
-        y, x, processor, region_id, sequence_no, space = struct.unpack_from(
-            "<BBBxBBI", data, offset)
+    def from_bytestring(command_header, data, offset):  # @UnusedVariable
+        y, x, processor, region_id, sequence_no, space = \
+            _PATTERN_BBBxBBI.unpack_from(data, offset)
         p = (processor >> 3) & 0x1F
         return SpinnakerRequestBuffers(x, y, p, region_id & 0xF, sequence_no,
                                        space)
 
     @property
     def bytestring(self):
-        return (super(SpinnakerRequestBuffers, self).bytestring + struct.pack(
-            "<BBBxBBI", self._y, self._x, self._p << 3, self._region_id,
-            self._sequence_no, self._space_available))
+        return (super(SpinnakerRequestBuffers, self).bytestring +
+                _PATTERN_BBBxBBI.pack(
+                    self._y, self._x, self._p << 3, self._region_id,
+                    self._sequence_no, self._space_available))
