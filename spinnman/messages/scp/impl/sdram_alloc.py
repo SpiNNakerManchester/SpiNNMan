@@ -9,6 +9,8 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 
 import struct
 
+_ONE_WORD = struct.Struct("<I")
+
 
 class SDRAMAlloc(AbstractSCPRequest):
     """ An SCP Request to allocate space in the SDRAM space
@@ -77,7 +79,7 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "SDRAM Allocation", "CMD_ALLOC", result.name)
-        self._base_address = struct.unpack_from("<I", data, offset)[0]
+        self._base_address = _ONE_WORD.unpack_from(data, offset)[0]
 
         # check that the base address is not null (0 in python case) as
         # this reflects a issue in the command on spinnaker side

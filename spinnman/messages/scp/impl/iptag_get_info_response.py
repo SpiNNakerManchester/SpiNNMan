@@ -4,6 +4,8 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
+_BYTE_SKIP_BYTE_BYTE = struct.Struct("<Bx2B")
+
 
 class IPTagGetInfoResponse(AbstractSCPResponse):
     """ An SCP response to a request for information about IP tags
@@ -26,8 +28,8 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
             raise SpinnmanUnexpectedResponseCodeException(
                 "Get IP Tag Info", "CMD_IPTAG", result.name)
 
-        self._tto, self._pool_size, self._fixed_size = struct.unpack_from(
-            "<Bx2B", data, offset)
+        self._tto, self._pool_size, self._fixed_size = \
+            _BYTE_SKIP_BYTE_BYTE.unpack_from(data, offset)
 
     @property
     def transient_timeout(self):

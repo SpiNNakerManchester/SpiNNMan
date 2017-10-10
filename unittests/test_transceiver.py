@@ -1,14 +1,49 @@
 import unittest
+import struct
+
+from spinn_machine.virtual_machine import VirtualMachine
+
 from spinnman.transceiver import Transceiver
+from spinnman import constants
+from spinnman.messages.spinnaker_boot.system_variable_boot_values \
+    import SystemVariableDefinition
 from spinnman.connections.udp_packet_connections \
     import BootConnection, EIEIOConnection, SCAMPConnection
 import spinnman.transceiver as transceiver
+
 from board_test_configuration import BoardTestConfiguration
 
 board_config = BoardTestConfiguration()
 
 
 ver = 5     # Guess?
+
+
+class MockWriteTransceiver(Transceiver):
+
+    def __init__(
+            self, version, connections=None, ignore_chips=None,
+            ignore_cores=None, ignore_links=None, max_core_id=None,
+            scamp_connections=None, max_sdram_size=None):
+        Transceiver.__init__(
+            self, version, connections=connections, ignore_chips=ignore_chips,
+            ignore_cores=ignore_cores, ignore_links=ignore_links,
+            max_core_id=max_core_id, scamp_connections=scamp_connections,
+            max_sdram_size=max_sdram_size)
+        self.written_memory = list()
+
+    def get_machine_details(self):
+        return VirtualMachine(2, 2)
+
+    def _update_machine(self):
+        self._machine = self.get_machine_details()
+
+    def write_memory(
+            self, x, y, base_address, data, n_bytes=None, offset=0,
+            cpu=0, is_filename=False):
+        print "Doing write to", x, y
+        self.written_memory.append(
+            (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
 
 
 class TestTransceiver(unittest.TestCase):
@@ -110,6 +145,36 @@ class TestTransceiver(unittest.TestCase):
         assert connection_2 == orig_connection
         assert connection_3 == orig_connection
         assert connection_4 != orig_connection
+
+    def test_set_watch_dog(self):
+        connections = []
+        connections.append(SCAMPConnection(
+            remote_host=None))
+        tx = MockWriteTransceiver(version=5, connections=connections)
+
+        # All chips
+        tx.set_watch_dog(True)
+        tx.set_watch_dog(False)
+        tx.set_watch_dog(5)
+
+        # The expected write values for the watch dog
+        expected_writes = (
+            SystemVariableDefinition.software_watchdog_count.default, 0, 5)
+
+        # Check the values that were "written" for set_watch_dog,
+        # which should be one per chip
+        written_memory = tx.written_memory
+        write_item = 0
+        for write in range(3):
+            for x, y in tx.get_machine_details().chip_coordinates:
+                assert written_memory[write_item][0] == x
+                assert written_memory[write_item][1] == y
+                assert written_memory[write_item][2] == (
+                    constants.SYSTEM_VARIABLE_BASE_ADDRESS +
+                    SystemVariableDefinition.software_watchdog_count.offset)
+                expected_data = struct.pack("B", expected_writes[write])
+                assert written_memory[write_item][3] == expected_data
+                write_item += 1
 
 
 if __name__ == '__main__':

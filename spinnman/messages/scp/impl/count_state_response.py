@@ -4,6 +4,8 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
+_ONE_WORD = struct.Struct("<I")
+
 
 class CountStateResponse(AbstractSCPResponse):
     """ An SCP response to a request for the number of cores in a given state
@@ -23,7 +25,7 @@ class CountStateResponse(AbstractSCPResponse):
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "CountState", "CMD_SIGNAL", result.name)
-        self._count = struct.unpack_from("<I", data, offset)[0]
+        self._count = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
     def count(self):

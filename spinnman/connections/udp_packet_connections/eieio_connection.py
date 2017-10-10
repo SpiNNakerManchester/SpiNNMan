@@ -6,6 +6,7 @@ from spinnman.messages.eieio \
 
 import struct
 
+_ONE_SHORT = struct.Struct("<H")
 _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
     "remote_host={}, remote_port={})"
 
@@ -41,7 +42,7 @@ class EIEIOConnection(
 
     def receive_eieio_message(self, timeout=None):
         data = self.receive(timeout)
-        header = struct.unpack_from("<H", data)[0]
+        header = _ONE_SHORT.unpack_from(data)[0]
         if header & 0xC000 == 0x4000:
             return read_eieio_command_message(data, 0)
         else:

@@ -3,6 +3,8 @@ import struct
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
+_THREE_WORDS = struct.Struct("<III")
+
 
 @add_metaclass(AbstractBase)
 class AbstractSCPRequest(object):
@@ -97,18 +99,10 @@ class AbstractSCPRequest(object):
         """
         data = (self._sdp_header.bytestring +
                 self._scp_request_header.bytestring)
-        if self._argument_1 is not None:
-            data += struct.pack("<I", self._argument_1)
-        else:
-            data += struct.pack("<I", 0)
-        if self._argument_2 is not None:
-            data += struct.pack("<I", self._argument_2)
-        else:
-            data += struct.pack("<I", 0)
-        if self._argument_3 is not None:
-            data += struct.pack("<I", self._argument_3)
-        else:
-            data += struct.pack("<I", 0)
+        data += _THREE_WORDS.pack(
+            0 if self._argument_1 is None else self._argument_1,
+            0 if self._argument_2 is None else self._argument_2,
+            0 if self._argument_3 is None else self._argument_3)
         if self._data is not None:
             data += bytes(self._data)
         return data

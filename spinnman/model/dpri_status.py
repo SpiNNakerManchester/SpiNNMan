@@ -2,6 +2,8 @@ import struct
 
 from spinnman.messages.scp.enums import DPRIFlags
 
+_PATTERN = struct.Struct("<IIIIIIIII")
+
 
 def _decode_router_timeout_value(value):
     """ Get the timeout value of a router in ticks, given an 8-bit floating\
@@ -32,7 +34,7 @@ class DPRIStatus(object):
          self._n_dropped_packets, self._n_missed_dropped_packets,
          self._n_dropped_packet_overflows, self._n_reinjected_packets,
          self._n_link_dumps, self._n_processor_dumps,
-         self._flags) = struct.unpack_from("<IIIIIIIII", data, offset)
+         self._flags) = _PATTERN.unpack_from(data, offset)
 
     @property
     def router_timeout(self):

@@ -10,6 +10,8 @@ import struct
 
 _IPTAG_GET = 2
 
+_IPTAG_FORMAT = struct.Struct("<4s6s3HIH3B")
+
 
 class IPTagGet(AbstractSCPRequest):
     """ An SCP Request to get an IP tag
@@ -68,8 +70,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
                 "Get IP Tag Info", "CMD_IPTAG", result.name)
         (ip_address, mac_address, self._port, self._timeout,
          self._flags, self._count, self._rx_port, self._spin_chip_y,
-         self._spin_chip_x, processor_and_port) = struct.unpack_from(
-            "<4s6s3HIH3B", data, offset)
+         self._spin_chip_x, processor_and_port) = _IPTAG_FORMAT.unpack_from(
+            data, offset)
         self._ip_address = bytearray(ip_address)
         self._mac_address = bytearray(mac_address)
         self._spin_port = (processor_and_port >> 5) & 0x7

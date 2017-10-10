@@ -9,6 +9,8 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE, CPU_IOBUF_ADDRESS_OFFSET
 
 _ENCODING = "ascii"
+_ONE_WORD = struct.Struct("<I")
+_FIRST_IOBUF = struct.Struct("<I8xI")
 
 
 class ReadIOBufProcess(AbstractMultiConnectionProcess):
@@ -36,8 +38,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         self._next_reads = list()
 
     def handle_iobuf_address_response(self, iobuf_size, x, y, p, response):
-        iobuf_address = struct.unpack_from(
-            "<I", response.data, response.offset)[0]
+        iobuf_address, = _ONE_WORD.unpack_from(response.data, response.offset)
         if iobuf_address != 0:
             first_read_size = min((iobuf_size + 16, UDP_MESSAGE_MAX_SIZE))
             self._next_reads.append((
@@ -54,8 +55,8 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
                                     first_read_size, response):
 
         # Unpack the iobuf header
-        (next_address, bytes_to_read) = struct.unpack_from(
-            "<I8xI", response.data, response.offset)
+        (next_address, bytes_to_read) = _FIRST_IOBUF.unpack_from(
+            response.data, response.offset)
 
         # Create a buffer for the data
         data = bytearray(bytes_to_read)

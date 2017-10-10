@@ -7,6 +7,9 @@ from spinnman.messages.scp.enums import SCPResult
 from spinnman.connections.abstract_classes \
     import SCPReceiver, SCPSender
 
+_TWO_SHORTS = struct.Struct("<2H")
+_TWO_SKIP = struct.Struct("<2x")
+
 
 class BMPConnection(
         UDPConnection, SCPReceiver, SCPSender):
@@ -86,11 +89,11 @@ class BMPConnection(
 
     def get_scp_data(self, scp_request):
         update_sdp_header_for_udp_send(scp_request.sdp_header, 0, 0)
-        return struct.pack("<2x") + scp_request.bytestring
+        return _TWO_SKIP.pack() + scp_request.bytestring
 
     def receive_scp_response(self, timeout=1.0):
         data = self.receive(timeout)
-        result, sequence = struct.unpack_from("<2H", data, 10)
+        result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
     def send_scp_request(self, scp_request):

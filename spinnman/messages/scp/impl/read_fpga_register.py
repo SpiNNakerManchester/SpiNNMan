@@ -11,6 +11,8 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 import struct
 
+_ONE_WORD = struct.Struct("<I")
+
 
 class ReadFPGARegister(BMPRequest):
     """ Requests the data from a fpga's register
@@ -59,7 +61,7 @@ class _SCPReadFPGARegisterResponse(BMPResponse):
             raise SpinnmanUnexpectedResponseCodeException(
                 "Read FPGA register", "CMD_LINK_READ", result.name)
 
-        self._fpga_register = struct.unpack_from("<I", data, offset)[0]
+        self._fpga_register = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
     def fpga_register(self):
