@@ -1,7 +1,5 @@
-from spinnman.messages.scp.impl.scp_application_run_request\
-    import SCPApplicationRunRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from spinnman.messages.scp.impl import ApplicationRun
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class ApplicationRunProcess(AbstractMultiConnectionProcess):
@@ -15,7 +13,7 @@ class ApplicationRunProcess(AbstractMultiConnectionProcess):
             x = core_subset.x
             y = core_subset.y
             self._send_request(
-                SCPApplicationRunRequest(
+                ApplicationRun(
                     app_id, x, y, core_subset.processor_ids, wait))
         self._finish()
         self.check_for_error()

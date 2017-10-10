@@ -1,10 +1,7 @@
-from spinnman.messages.scp.impl.scp_write_link_request \
-    import SCPWriteLinkRequest
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
-from spinnman.messages.scp.impl.scp_write_memory_request \
-    import SCPWriteMemoryRequest
-from spinnman import constants
+from spinnman.messages.scp.impl \
+    import WriteLink, WriteMemory
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 import functools
 
@@ -33,24 +30,24 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         """
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(SCPWriteMemoryRequest, x=x, y=y, cpu=p))
+            functools.partial(WriteMemory, x=x, y=y, cpu=p))
 
     def write_link_memory_from_bytearray(self, x, y, p, link, base_address,
                                          data, offset, n_bytes):
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(SCPWriteLinkRequest, x=x, y=y, cpu=p, link=link))
+            functools.partial(WriteLink, x=x, y=y, cpu=p, link=link))
 
     def write_memory_from_reader(self, x, y, p, base_address, data, n_bytes):
         self._write_memory_from_reader(
             base_address, data, n_bytes,
-            functools.partial(SCPWriteMemoryRequest, x=x, y=y, cpu=p))
+            functools.partial(WriteMemory, x=x, y=y, cpu=p))
 
     def write_link_memory_from_reader(self, x, y, p, link, base_address, data,
                                       n_bytes):
         self._write_memory_from_reader(
             base_address, data, n_bytes,
-            functools.partial(SCPWriteLinkRequest, x=x, y=y, cpu=p, link=link))
+            functools.partial(WriteLink, x=x, y=y, cpu=p, link=link))
 
     def _write_memory_from_bytearray(self, base_address, data, offset,
                                      n_bytes, packet_class):
@@ -58,16 +55,11 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         offset = base_address
         n_bytes_to_write = int(n_bytes)
         while n_bytes_to_write > 0:
-
-            bytes_to_send = n_bytes_to_write
-            if bytes_to_send > constants.UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = constants.UDP_MESSAGE_MAX_SIZE
-
+            bytes_to_send = min((n_bytes_to_write, UDP_MESSAGE_MAX_SIZE))
             request = packet_class(
                 base_address=offset,
                 data=data[data_offset:data_offset + bytes_to_send])
             self._send_request(request)
-
             n_bytes_to_write -= bytes_to_send
             offset += bytes_to_send
             data_offset += bytes_to_send
@@ -81,8 +73,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         while n_bytes_to_write > 0:
 
             bytes_to_send = n_bytes_to_write
-            if bytes_to_send > constants.UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = constants.UDP_MESSAGE_MAX_SIZE
+            if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
+                bytes_to_send = UDP_MESSAGE_MAX_SIZE
             data_array = data.read(bytes_to_send)
             data_length = len(data_array)
 

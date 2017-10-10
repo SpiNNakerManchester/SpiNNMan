@@ -1,5 +1,5 @@
-from spinnman.processes.abstract_process import AbstractProcess
-from spinnman.connections.scp_request_pipeline import SCPRequestPipeLine
+from .abstract_process import AbstractProcess
+from spinnman.connections import SCPRequestPipeLine
 
 
 class AbstractMultiConnectionProcess(AbstractProcess):

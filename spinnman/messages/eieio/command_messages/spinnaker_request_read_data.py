@@ -1,11 +1,15 @@
 from spinnman.exceptions import SpinnmanInvalidPacketException, \
     SpinnmanInvalidParameterTypeException
-from spinnman.messages.eieio.command_messages.eieio_command_message\
-    import EIEIOCommandMessage
-from spinnman.messages.eieio.command_messages.eieio_command_header\
-    import EIEIOCommandHeader
-from spinnman import constants
+from .eieio_command_message import EIEIOCommandMessage
+from .eieio_command_header import EIEIOCommandHeader
+from spinnman.constants import EIEIO_COMMAND_IDS
 import struct
+
+_PATTERN_BBBB = struct.Struct("<BBBB")
+_PATTERN_BBII = struct.Struct("<BBII")
+_PATTERN_xxBBII = struct.Struct("<xxBBII")
+_PATTERN_BB = struct.Struct("<BB")
+_PATTERN_BBBBII = struct.Struct("<BBBBII")
 
 
 class SpinnakerRequestReadData(EIEIOCommandMessage):
@@ -41,7 +45,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
                     len(region_id), len(channel)))
         EIEIOCommandMessage.__init__(
             self, EIEIOCommandHeader(
-                constants.EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA.value))
+                EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA.value))
         self._header = _SpinnakerRequestReadDataHeader(
             x, y, p, n_requests, sequence_no)
         self._requests = _SpinnakerRequestReadDataRequest(
@@ -86,7 +90,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
     @staticmethod
     def from_bytestring(command_header, data, offset):
         (y, x, processor_and_requests, sequence_no) = \
-            struct.unpack_from("<BBBB", data, offset)
+            _PATTERN_BBBB.unpack_from(data, offset)
         p = (processor_and_requests >> 3) & 0x1F
         n_requests = processor_and_requests & 0x7
         offset += 4
@@ -98,13 +102,13 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         for i in xrange(n_requests):
             if i == 0:
                 request_channel, request_region_id, request_start_address, \
-                    request_space_to_be_read = struct.unpack_from(
-                        "<BBII", data, offset)
+                    request_space_to_be_read = _PATTERN_BBII.unpack_from(
+                        data, offset)
                 offset += 10
             else:
                 request_channel, request_region_id, request_start_address, \
-                    request_space_to_be_read = struct.unpack_from(
-                        "<xxBBII", data, offset)
+                    request_space_to_be_read = _PATTERN_xxBBII.unpack_from(
+                        data, offset)
                 offset += 12
             channel.append(request_channel)
             region_id.append(request_region_id)
@@ -117,19 +121,19 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
     @property
     def bytestring(self):
         byte_string = super(SpinnakerRequestReadData, self).bytestring
-        byte_string += struct.pack("<BB", self.x, self.y)
+        byte_string += _PATTERN_BB.pack(self.x, self.y)
         n_requests = self.n_requests
         processor_and_request = (self.p << 3) | n_requests
 
         for i in xrange(n_requests):
             if i == 0:
-                byte_string += struct.pack(
-                    "<BBBBII", processor_and_request, self.sequence_no,
+                byte_string += _PATTERN_BBBBII.pack(
+                    processor_and_request, self.sequence_no,
                     self.channel(i), self.region_id(i),
                     self.start_address(0), self.space_to_be_read(i))
             else:
-                byte_string += struct.pack(
-                    "<xxBBII", self.channel(i), self.region_id(i),
+                byte_string += _PATTERN_xxBBII.pack(
+                    self.channel(i), self.region_id(i),
                     self.start_address(0), self.space_to_be_read(i))
         return byte_string
 

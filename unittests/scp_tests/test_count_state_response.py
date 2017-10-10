@@ -2,15 +2,15 @@ import unittest
 from struct import pack
 
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.impl.scp_count_state_response \
-    import SCPCountStateResponse
-from spinnman.messages.scp.enums.scp_result import SCPResult
-from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.scp.impl.count_state_response \
+    import CountStateResponse
+from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.sdp import SDPFlag
 
 
 class TestCPUStateResponse(unittest.TestCase):
     def test_new_count_state_response(self):
-        response = SCPCountStateResponse()
+        response = CountStateResponse()
         # SCP Stuff
         rc = SCPResult.RC_OK.value
         seq = 105
@@ -32,7 +32,7 @@ class TestCPUStateResponse(unittest.TestCase):
 
     def test_new_count_state_response_response_not_ok(self):
         with self.assertRaises(SpinnmanUnexpectedResponseCodeException):
-            response = SCPCountStateResponse()
+            response = CountStateResponse()
             # SCP Stuff
             rc = SCPResult.RC_TIMEOUT.value
             seq = 105

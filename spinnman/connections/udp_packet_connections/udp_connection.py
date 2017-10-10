@@ -1,7 +1,6 @@
-from spinnman.exceptions import SpinnmanIOException
-from spinnman.exceptions import SpinnmanTimeoutException
-from spinnman.connections.abstract_classes.abstract_connection \
-    import AbstractConnection
+from spinnman.exceptions \
+    import SpinnmanIOException, SpinnmanTimeoutException
+from spinnman.connections.abstract_classes import Connection
 
 import platform
 import subprocess
@@ -9,7 +8,7 @@ import socket
 import select
 
 
-class UDPConnection(AbstractConnection):
+class UDPConnection(Connection):
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
@@ -109,7 +108,7 @@ class UDPConnection(AbstractConnection):
 
     def is_connected(self):
         """ See\
-            :py:meth:`spinnman.connections.AbstractConnection.abstract_connection.is_connected`
+            :py:meth:`spinnman.connections.abstract_classes.connection.Connection.is_connected`
         """
 
         # If this is not a sending socket, it is not connected
@@ -119,28 +118,26 @@ class UDPConnection(AbstractConnection):
         # check if machine is active and on the network
         pingtimeout = 5
         while pingtimeout > 0:
-
             # Start a ping process
-            process = None
-            if platform.platform().lower().startswith("windows"):
-                process = subprocess.Popen(
-                    "ping -n 1 -w 1 " + self._remote_ip_address,
-                    shell=True, stdout=subprocess.PIPE)
-            else:
-                process = subprocess.Popen(
-                    "ping -c 1 -W 1 " + self._remote_ip_address,
-                    shell=True, stdout=subprocess.PIPE)
-            process.wait()
-
+            process = self._do_single_ping(self._remote_ip_address)
             if process.returncode == 0:
-
                 # ping worked
                 return True
-            else:
-                pingtimeout -= 1
+            pingtimeout -= 1
 
         # If the ping fails this number of times, the host cannot be contacted
         return False
+
+    @staticmethod
+    def _do_single_ping(address):
+        if platform.platform().lower().startswith("windows"):
+            process = subprocess.Popen("ping -n 1 -w 1 " + address,
+                                       shell=True, stdout=subprocess.PIPE)
+        else:
+            process = subprocess.Popen("ping -c 1 -W 1 " + address,
+                                       shell=True, stdout=subprocess.PIPE)
+        process.wait()
+        return process
 
     @property
     def local_ip_address(self):
@@ -184,8 +181,8 @@ class UDPConnection(AbstractConnection):
     def receive(self, timeout=None):
         """ Receive data from the connection
 
-        :param timeout: The timeout, or None to wait forever
-        :type timeout: None
+        :param timeout: The timeout in seconds, or None to wait forever
+        :type timeout: None or float
         :return: The data received as a bytestring
         :rtype: str
         :raise SpinnmanTimeoutException: If a timeout occurs before any data\
@@ -253,7 +250,7 @@ class UDPConnection(AbstractConnection):
 
     def close(self):
         """ See\
-            :py:meth:`spinnman.connections.abstract_connection.AbstractConnection.close`
+            :py:meth:`spinnman.connections.abstract_classes.connection.Connection.close`
         """
         try:
             self._socket.shutdown(socket.SHUT_WR)

@@ -1,5 +1,4 @@
-from spinnman.messages.spinnaker_boot._system_variables.\
-    _system_variable_boot_values import SystemVariableDefinition
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 
 import struct
 

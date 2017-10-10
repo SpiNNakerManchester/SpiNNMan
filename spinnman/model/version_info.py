@@ -1,9 +1,9 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from time import localtime
-from time import asctime
+from time import localtime, asctime
 import struct
 import re
-from spinnman import exceptions
+
+_VERSION_PATTERN = struct.Struct("<BBBBHHI")
 
 
 class VersionInfo(object):
@@ -21,8 +21,8 @@ class VersionInfo(object):
                     message does not contain valid version information
         """
         (self._p, self._physical_cpu_id, self._y, self._x, _,
-            version_no, self._build_date) = struct.unpack_from(
-                "<BBBBHHI", buffer(version_data), offset)
+            version_no, self._build_date) = _VERSION_PATTERN.unpack_from(
+                buffer(version_data), offset)
 
         version_data = version_data[offset + 12:-1].decode("utf-8")
 
@@ -40,7 +40,7 @@ class VersionInfo(object):
             self._version_string = version
             matches = re.match("(\d+)\.(\d+)\.(\d+)", version)
             if matches is None:
-                raise exceptions.SpinnmanInvalidParameterException(
+                raise SpinnmanInvalidParameterException(
                     "version", version, "Cannot be parsed")
             self._version_number = tuple(map(int, matches.group(1, 2, 3)))
             self._name, self._hardware = name_hardware.rstrip("\0").split("/")

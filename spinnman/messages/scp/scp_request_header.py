@@ -1,5 +1,7 @@
 import struct
 
+_TWO_SHORTS = struct.Struct("<2H")
+
 
 class SCPRequestHeader(object):
     """ Represents the header of an SCP Request
@@ -60,4 +62,4 @@ class SCPRequestHeader(object):
         :return: The header as a bytestring
         :rtype: str
         """
-        return struct.pack("<2H", self._command.value, self._sequence)
+        return _TWO_SHORTS.pack(self._command.value, self._sequence)
