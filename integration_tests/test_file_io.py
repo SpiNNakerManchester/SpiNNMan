@@ -45,6 +45,8 @@ class TestMemoryIO(unittest.TestCase):
         memory[112:124].fill(5)
         memory.seek(112)
         test_data = struct.unpack("<III", memory.read(12))
+        memory.close()
+        os.remove(my_file)
         self.assertEqual(
             test_data, (5, 5, 5),
             "Filled data values unexpected: {}".format(test_data))
