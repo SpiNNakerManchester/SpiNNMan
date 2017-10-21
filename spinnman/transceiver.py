@@ -42,9 +42,8 @@ from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
 from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
 from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
 from spinnman.processes import ApplicationRunProcess, ExitDPRIProcess
-from spinnman.processes.get_heap_process import GetHeapProcess
-from spinnman.processes.fill_process import FillDataType
-from spinnman.processes.fill_process import FillProcess
+from spinnman.processes import GetHeapProcess
+from spinnman.processes import FillProcess, FillDataType
 from spinnman.utilities.appid_tracker import AppIdTracker
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.enums import PowerCommand

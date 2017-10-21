@@ -5,7 +5,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import CheckOKResponse
 
 
-class SCPFillRequest(AbstractSCPRequest):
+class FillRequest(AbstractSCPRequest):
     """ An SCP request to fill a region of memory on a chip with repeated data
     """
 

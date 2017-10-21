@@ -1,6 +1,6 @@
 from spinnman.processes import AbstractMultiConnectionProcess
 from spinnman import constants
-from spinnman.model.heap_element import HeapElement
+from spinnman.model import HeapElement
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.messages.scp.impl import ReadMemory
 

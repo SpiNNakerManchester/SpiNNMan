@@ -1,7 +1,6 @@
 import struct
 from enum import Enum
-from spinnman.messages.scp.impl.scp_fill_request import SCPFillRequest
-from spinnman.messages.scp.impl import WriteMemory
+from spinnman.messages.scp.impl import FillRequest, WriteMemory
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 
@@ -92,14 +91,14 @@ class FillProcess(AbstractMultiConnectionProcess):
         if extra_bytes != 0:
             fill_bytes -= 4
         if fill_bytes > 0:
-            self._send_request(SCPFillRequest(
+            self._send_request(FillRequest(
                 x, y, address, data_to_send, fill_bytes))
             bytes_to_write -= fill_bytes
             address += fill_bytes
 
         # Send the post-data if required
         if bytes_to_write > 0:
-            self._send_request(SCPWriteMemoryRequest(
+            self._send_request(WriteMemory(
                 x, y, address, post_bytes[:bytes_to_write]))
 
         # Wait for all the packets to be confirmed and then check there
