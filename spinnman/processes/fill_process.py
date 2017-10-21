@@ -1,8 +1,7 @@
 import struct
 from enum import Enum
 from spinnman.messages.scp.impl.scp_fill_request import SCPFillRequest
-from spinnman.messages.scp.impl.scp_write_memory_request \
-    import SCPWriteMemoryRequest
+from spinnman.messages.scp.impl import WriteMemory
 from spinnman.processes.abstract_multi_connection_process \
     import AbstractMultiConnectionProcess
 
@@ -83,7 +82,7 @@ class FillProcess(AbstractMultiConnectionProcess):
         # return all of pre_bytes if size >= len(pre_bytes)
         pre_data = pre_bytes[:size]
         if len(pre_data) > 0:
-            self._send_request(SCPWriteMemoryRequest(
+            self._send_request(WriteMemory(
                 x, y, base_address, pre_bytes[:size]))
             bytes_to_write -= extra_bytes
             address += extra_bytes

@@ -1,12 +1,10 @@
-from spinnman.processes.abstract_multi_connection_process\
-    import AbstractMultiConnectionProcess
-from spinnman.messages.spinnaker_boot._system_variables\
-    ._system_variable_boot_values import SystemVariableDefinition
-from spinnman.messages.scp.impl.scp_read_memory_request\
-    import SCPReadMemoryRequest
+from spinnman.processes import AbstractMultiConnectionProcess
 from spinnman import constants
-import struct
 from spinnman.model.heap_element import HeapElement
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
+from spinnman.messages.scp.impl import ReadMemory
+
+import struct
 import functools
 
 HEAP_ADDRESS = SystemVariableDefinition.sdram_heap_address
@@ -38,7 +36,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
 
     def _read_address(self, x, y, address, size, callback):
         self._send_request(
-            SCPReadMemoryRequest(x, y, address, size), callback)
+            ReadMemory(x, y, address, size), callback)
         self._finish()
         self.check_for_error()
 
