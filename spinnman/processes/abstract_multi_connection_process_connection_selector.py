@@ -1,12 +1,14 @@
 from six import add_metaclass
-from abc import ABCMeta
-from abc import abstractmethod
+
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
-@add_metaclass(ABCMeta)
+@add_metaclass(AbstractBase)
 class AbstractMultiConnectionProcessConnectionSelector(object):
     """ A connection selector for multi-connection processes
     """
+
+    # connections will be used when worked out how
 
     @abstractmethod
     def __init__(self, connections):

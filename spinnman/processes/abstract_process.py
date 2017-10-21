@@ -1,9 +1,10 @@
 from __future__ import print_function
-
-from spinnman import exceptions
-
+import logging
 import sys
-import traceback
+
+from spinnman.exceptions import SpinnmanGenericProcessException
+
+logger = logging.getLogger(__name__)
 
 
 class AbstractProcess(object):
@@ -25,22 +26,15 @@ class AbstractProcess(object):
 
     def check_for_error(self, print_exception=False):
         if self._exception is not None:
+            exc_info = sys.exc_info()
             if print_exception:
                 sdp_header = self._error_request.sdp_header
-                print("Error in request to {}, {}, {}".format(
-                    sdp_header.destination_chip_x,
-                    sdp_header.destination_chip_y,
-                    sdp_header.destination_cpu),
-                    file=sys.stderr)
-                for line in traceback.format_exception_only(
-                        self._exception.__class__, self._exception):
-                    print(line, end="", file=sys.stderr)
-                for line in traceback.format_tb(self._traceback):
-                    print(line, end="", file=sys.stderr)
-
-            exc_info = sys.exc_info()
+                logger.error("failure in request to (%d, %d, %d)",
+                             sdp_header.destination_chip_x,
+                             sdp_header.destination_chip_y,
+                             sdp_header.destination_cpu, exc_info=exc_info)
             sdp_header = self._error_request.sdp_header
-            self._exception = exceptions.SpinnmanGenericProcessException(
+            self._exception = SpinnmanGenericProcessException(
                 self._exception, exc_info[2], sdp_header.destination_chip_x,
                 sdp_header.destination_chip_y, sdp_header.destination_cpu)
             raise self._exception, None, self._traceback

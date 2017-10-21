@@ -1,6 +1,8 @@
 import struct
 
-from spinnman.model.enums.p2p_table_route import P2PTableRoute
+from spinnman.model.enums import P2PTableRoute
+
+_ONE_WORD = struct.Struct("<I")
 
 
 class P2PTable(object):
@@ -11,13 +13,12 @@ class P2PTable(object):
         self._routes = dict()
         self._width = width
         self._height = height
-        for x in range(len(column_data)):
+        for x in xrange(len(column_data)):
             y = 0
             pos = 0
             while y < height:
-                (data, offset) = column_data[x]
-                next_word = struct.unpack_from(
-                    "<I", data, offset + (pos * 4))[0]
+                data, offset = column_data[x]
+                next_word, = _ONE_WORD.unpack_from(data, offset + (pos * 4))
                 pos += 1
                 for entry in range(min(8, height - y)):
                     route = P2PTableRoute((next_word >> (3 * entry)) & 0b111)

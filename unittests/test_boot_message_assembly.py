@@ -1,7 +1,6 @@
 import unittest
 import spinnman.messages.spinnaker_boot.spinnaker_boot_message as boot_msg
-from spinnman.messages.spinnaker_boot.spinnaker_boot_op_code \
-    import SpinnakerBootOpCode
+from spinnman.messages.spinnaker_boot import SpinnakerBootOpCode
 
 
 class TestSpiNNakerBootMessage(unittest.TestCase):

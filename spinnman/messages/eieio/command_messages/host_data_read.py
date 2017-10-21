@@ -1,11 +1,12 @@
 from spinnman.exceptions import SpinnmanInvalidPacketException, \
     SpinnmanInvalidParameterTypeException
-from spinnman.messages.eieio.command_messages.eieio_command_message\
-    import EIEIOCommandMessage
-from spinnman.messages.eieio.command_messages.eieio_command_header\
-    import EIEIOCommandHeader
-from spinnman import constants
+from .eieio_command_message import EIEIOCommandMessage
+from .eieio_command_header import EIEIOCommandHeader
+from spinnman.constants import EIEIO_COMMAND_IDS
 import struct
+
+_PATTERN_BB = struct.Struct("<BB")
+_PATTERN_xxBBI = struct.Struct("<xxBBI")
 
 
 class HostDataRead(EIEIOCommandMessage):
@@ -35,8 +36,7 @@ class HostDataRead(EIEIOCommandMessage):
                 "defined, {2:d} region(s) defined, {3:d} channel(s) "
                 "defined".format(
                     n_requests, len(space_read), len(region_id), len(channel)))
-        cmd_header = EIEIOCommandHeader(
-            constants.EIEIO_COMMAND_IDS.HOST_DATA_READ.value)
+        cmd_header = EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ.value)
         EIEIOCommandMessage.__init__(self, cmd_header)
         self._header = _HostDataReadHeader(n_requests, sequence_no)
         self._acks = _HostDataReadAck(channel, region_id, space_read)
@@ -63,9 +63,8 @@ class HostDataRead(EIEIOCommandMessage):
         return 8
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
-        n_requests, sequence_no = struct.unpack_from(
-            "<BB", data, offset)
+    def from_bytestring(command_header, data, offset):  # @UnusedVariable
+        n_requests, sequence_no = _PATTERN_BB.unpack_from(data, offset)
 
         offset += 2
         n_requests &= 0x7
@@ -75,7 +74,7 @@ class HostDataRead(EIEIOCommandMessage):
 
         for _ in xrange(n_requests):
             channel_ack, region_id_ack, space_read_ack = \
-                struct.unpack_from("<xxBBI", data, offset)
+                _PATTERN_xxBBI.unpack_from(data, offset)
             channel.append(channel_ack)
             region_id.append(region_id_ack)
             space_read.append(space_read_ack)
@@ -87,11 +86,10 @@ class HostDataRead(EIEIOCommandMessage):
     def bytestring(self):
         byte_string = super(HostDataRead, self).bytestring
         n_requests = self.n_requests
-        byte_string += struct.pack("<BB", n_requests, self.sequence_no)
+        byte_string += _PATTERN_BB.pack(n_requests, self.sequence_no)
         for i in xrange(n_requests):
-            byte_string += struct.pack(
-                "<xxBBI", self.channel(i), self.region_id(i),
-                self.space_read(i))
+            byte_string += _PATTERN_xxBBI.pack(
+                self.channel(i), self.region_id(i), self.space_read(i))
         return byte_string
 
 

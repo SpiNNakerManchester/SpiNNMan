@@ -1,5 +1,4 @@
-from spinnman.messages.eieio.abstract_messages.abstract_eieio_message\
-    import AbstractEIEIOMessage
+from spinnman.messages.eieio.abstract_messages import AbstractEIEIOMessage
 
 
 class EIEIOCommandMessage(AbstractEIEIOMessage):

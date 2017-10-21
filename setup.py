@@ -2,39 +2,45 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+from collections import defaultdict
+import os
+
+__version__ = None
+exec(open("spinnman/_version.py").read())
+assert __version__
+
+# Build a list of all project modules, as well as supplementary files
+main_package = "spinnman"
+extensions = {".aplx", ".boot", ".cfg", ".json", ".sql", ".template", ".xml",
+              ".xsd"}
+main_package_dir = os.path.join(os.path.dirname(__file__), main_package)
+start = len(main_package_dir)
+packages = []
+package_data = defaultdict(list)
+for dirname, dirnames, filenames in os.walk(main_package_dir):
+    if '__init__.py' in filenames:
+        package = "{}{}".format(
+            main_package, dirname[start:].replace(os.sep, '.'))
+        packages.append(package)
+    for filename in filenames:
+        _, ext = os.path.splitext(filename)
+        if ext in extensions:
+            package = "{}{}".format(
+                main_package, dirname[start:].replace(os.sep, '.'))
+            package_data[package].append(filename)
 
 setup(
     name="SpiNNMan",
-    version="3.0.0",
+    version=__version__,
     description="Interaction with a SpiNNaker Machine",
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
     license="GNU GPLv3.0",
-    packages=['spinnman',
-              'spinnman.connections',
-              'spinnman.connections.abstract_classes',
-              'spinnman.connections.udp_packet_connections',
-              'spinnman.messages',
-              'spinnman.messages.eieio',
-              'spinnman.messages.eieio.abstract_messages',
-              'spinnman.messages.eieio.command_messages',
-              'spinnman.messages.eieio.data_messages',
-              'spinnman.messages.eieio.data_messages.eieio_16bit',
-              'spinnman.messages.eieio.data_messages.eieio_16bit_with_payload',
-              'spinnman.messages.eieio.data_messages.eieio_32bit',
-              'spinnman.messages.eieio.data_messages.eieio_32bit_with_payload',
-              'spinnman.messages.scp',
-              'spinnman.messages.scp.abstract_messages',
-              'spinnman.messages.scp.impl',
-              'spinnman.messages.sdp',
-              'spinnman.messages.spinnaker_boot',
-              'spinnman.messages.spinnaker_boot._system_variables',
-              'spinnman.model',
-              'spinnman.model_binaries',
-              'spinnman.processes',
-              'spinnman.utilities'],
-    package_data={'spinnman.messages.spinnaker_boot': ['boot_data/*.boot'],
-                  'spinnman.model_binaries': ['*.aplx']},
+    packages=packages,
+    package_data=package_data,
     install_requires=[
-        'six', 'enum34', 'SpiNNMachine >= 3.0.0, < 4.0.0',
-        'SpiNNStorageHandlers >= 3.0.0, < 4.0.0']
+        'SpiNNUtilities >= 1!4.0.1, < 1!5.0.0',
+        'SpiNNStorageHandlers >= 1!4.0.1, < 1!5.0.0',
+        'SpiNNMachine >= 1!4.0.1, < 1!5.0.0',
+        'enum34',
+        'six']
 )

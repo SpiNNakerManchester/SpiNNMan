@@ -1,11 +1,9 @@
-
 # spinnman imports
-from spinnman.model.bmp_connection_data import BMPConnectionData
+from spinnman.model import BMPConnectionData
 from spinnman import constants
-from spinnman.messages.sdp.sdp_message import SDPMessage
-from spinnman.messages.sdp.sdp_header import SDPHeader
-from spinnman.messages.sdp.sdp_flag import SDPFlag
-from spinnman.connections.udp_packet_connections import udp_utils
+from spinnman.messages.sdp import SDPMessage, SDPHeader, SDPFlag
+from spinnman.connections.udp_packet_connections.utils \
+    import update_sdp_header_for_udp_send
 
 # general imports
 import socket
@@ -50,30 +48,6 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
                              boards=board_range, port_num=int(bmp_port))
 
 
-def get_router_timeout_value(mantissa, exponent):
-    """ Get the timeout value of a router in ticks, given the mantissa and\
-        exponent of the value
-
-    :param mantissa: The mantissa of the value, between 0 and 15
-    :type mantissa: int
-    :param exponent: The exponent of the value, between 0 and 15
-    :type exponent: int
-    """
-    if exponent <= 4:
-        return ((mantissa + 16) - (2 ** (4 - exponent))) * (2 ** exponent)
-    return (mantissa + 16) * (2 ** exponent)
-
-
-def get_router_timeout_value_from_byte(value):
-    """ Get the timeout value of a router in ticks, given an 8-bit floating\
-        point value stored in an int(!)
-
-    :param value: The value to convert
-    :type value: int
-    """
-    return get_router_timeout_value(value & 0xF, (value >> 4) & 0XF)
-
-
 def get_vcpu_address(p):
     """ Get the address of the vcpu_t structure for the given core
 
@@ -84,14 +58,13 @@ def get_vcpu_address(p):
 
 
 def send_port_trigger_message(connection, board_address):
-    """ Sends a port trigger message using a connection to (hopefully)\
-        open a port in a NAT and/or firewall to allow incoming packets\
-        to be received
+    """Sends a port trigger message using a connection to (hopefully) open \
+    a port in a NAT and/or firewall to allow incoming packets to be received.
 
     :param connection: The UDP connection down which the trigger message\
-            should be sent
+        should be sent
     :param board_address: The address of the SpiNNaker board to which the\
-            message should be sent
+        message should be sent
     """
 
     # Set up the message so that no reply is expected and it is sent to an
@@ -101,8 +74,7 @@ def send_port_trigger_message(connection, board_address):
     trigger_message = SDPMessage(SDPHeader(
         flags=SDPFlag.REPLY_NOT_EXPECTED, tag=0, destination_port=3,
         destination_cpu=0, destination_chip_x=0, destination_chip_y=0))
-    udp_utils.update_sdp_header_for_udp_send(
-        trigger_message.sdp_header, 0, 0)
+    update_sdp_header_for_udp_send(trigger_message.sdp_header, 0, 0)
     connection.send_to(
         trigger_message.bytestring,
         (board_address, constants.SCP_SCAMP_PORT))

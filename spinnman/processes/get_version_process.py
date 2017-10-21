@@ -1,6 +1,5 @@
-from spinnman.messages.scp.impl.scp_version_request import SCPVersionRequest
-from spinnman.processes.abstract_single_connection_process \
-    import AbstractSingleConnectionProcess
+from spinnman.messages.scp.impl import GetVersion
+from .abstract_single_connection_process import AbstractSingleConnectionProcess
 
 
 class GetVersionProcess(AbstractSingleConnectionProcess):
@@ -15,7 +14,7 @@ class GetVersionProcess(AbstractSingleConnectionProcess):
         self._version_info = version_response.version_info
 
     def get_version(self, x, y, p):
-        self._send_request(SCPVersionRequest(x=x, y=y, p=p),
+        self._send_request(GetVersion(x=x, y=y, p=p),
                            self._get_response)
         self._finish()
 

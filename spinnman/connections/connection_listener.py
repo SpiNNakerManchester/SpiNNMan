@@ -1,6 +1,8 @@
+import logging
 from threading import Thread
-import traceback
 from multiprocessing.pool import ThreadPool
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionListener(Thread):
@@ -25,16 +27,20 @@ class ConnectionListener(Thread):
         self._callbacks = set()
         self.setDaemon(True)
 
+    def _run_step(self):
+        if self._connection.is_ready_to_receive(timeout=1):
+            message = self._get_message_call()
+            for callback in self._callbacks:
+                self._callback_pool.apply_async(callback, [message])
+
     def run(self):
         while not self._done:
             try:
-                if self._connection.is_ready_to_receive(timeout=1):
-                    message = self._get_message_call()
-                    for callback in self._callbacks:
-                        self._callback_pool.apply_async(callback, [message])
+                self._run_step()
             except:
                 if not self._done:
-                    traceback.print_exc()
+                    logger.warn("problem when dispatching message",
+                                exc_info=True)
         self._callback_pool.close()
         self._callback_pool.join()
 

@@ -1,19 +1,19 @@
 import unittest
 
-from spinnman.messages.scp.enums.scp_iptag_command import SCPIPTagCommand
-from spinnman.messages.scp.enums.scp_command import SCPCommand
-from spinnman.messages.scp.enums.scp_result import SCPResult
-from spinnman.messages.scp.enums.scp_signal import SCPSignal
-from spinnman.messages.scp.enums.scp_signal import SignalType
+from spinnman.messages.scp.enums import IPTagCommand
+from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.enums import Signal
+from spinnman.messages.scp.enums.signal import SignalType
 
 
 class TestSCPEnums(unittest.TestCase):
     def test_iptag(self):
-        self.assertEqual(SCPIPTagCommand.NEW.value, 0)
-        self.assertEqual(SCPIPTagCommand.SET.value, 1)
-        self.assertEqual(SCPIPTagCommand.GET.value, 2)
-        self.assertEqual(SCPIPTagCommand.CLR.value, 3)
-        self.assertEqual(SCPIPTagCommand.TTO.value, 4)
+        self.assertEqual(IPTagCommand.NEW.value, 0)
+        self.assertEqual(IPTagCommand.SET.value, 1)
+        self.assertEqual(IPTagCommand.GET.value, 2)
+        self.assertEqual(IPTagCommand.CLR.value, 3)
+        self.assertEqual(IPTagCommand.TTO.value, 4)
 
     def test_command(self):
         self.assertEqual(SCPCommand.CMD_VER.value, 0)
@@ -70,52 +70,52 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPResult.RC_PKT_TX.value, 0x8F)
 
     def test_signal(self):
-        self.assertEqual(SCPSignal.INITIALISE.value, 0)
-        self.assertEqual(SCPSignal.POWER_DOWN.value, 1)
-        self.assertEqual(SCPSignal.STOP.value, 2)
-        self.assertEqual(SCPSignal.START.value, 3)
-        self.assertEqual(SCPSignal.SYNC0.value, 4)
+        self.assertEqual(Signal.INITIALISE.value, 0)
+        self.assertEqual(Signal.POWER_DOWN.value, 1)
+        self.assertEqual(Signal.STOP.value, 2)
+        self.assertEqual(Signal.START.value, 3)
+        self.assertEqual(Signal.SYNC0.value, 4)
 
-        self.assertEqual(SCPSignal.SYNC1.value, 5)
-        self.assertEqual(SCPSignal.PAUSE.value, 6)
-        self.assertEqual(SCPSignal.CONTINUE.value, 7)
-        self.assertEqual(SCPSignal.EXIT.value, 8)
-        self.assertEqual(SCPSignal.TIMER.value, 9)
+        self.assertEqual(Signal.SYNC1.value, 5)
+        self.assertEqual(Signal.PAUSE.value, 6)
+        self.assertEqual(Signal.CONTINUE.value, 7)
+        self.assertEqual(Signal.EXIT.value, 8)
+        self.assertEqual(Signal.TIMER.value, 9)
 
-        self.assertEqual(SCPSignal.USER_0.value, 10)
-        self.assertEqual(SCPSignal.USER_1.value, 11)
-        self.assertEqual(SCPSignal.USER_2.value, 12)
-        self.assertEqual(SCPSignal.USER_3.value, 13)
+        self.assertEqual(Signal.USER_0.value, 10)
+        self.assertEqual(Signal.USER_1.value, 11)
+        self.assertEqual(Signal.USER_2.value, 12)
+        self.assertEqual(Signal.USER_3.value, 13)
 
-        self.assertEqual(SCPSignal.INITIALISE.signal_type,
+        self.assertEqual(Signal.INITIALISE.signal_type,
                          SignalType.NEAREST_NEIGHBOUR)
-        self.assertEqual(SCPSignal.POWER_DOWN.signal_type,
+        self.assertEqual(Signal.POWER_DOWN.signal_type,
                          SignalType.NEAREST_NEIGHBOUR)
-        self.assertEqual(SCPSignal.STOP.signal_type,
+        self.assertEqual(Signal.STOP.signal_type,
                          SignalType.NEAREST_NEIGHBOUR)
-        self.assertEqual(SCPSignal.START.signal_type,
+        self.assertEqual(Signal.START.signal_type,
                          SignalType.NEAREST_NEIGHBOUR)
 
-        self.assertEqual(SCPSignal.SYNC0.signal_type,
+        self.assertEqual(Signal.SYNC0.signal_type,
                          SignalType.MULTICAST)
-        self.assertEqual(SCPSignal.SYNC1.signal_type,
+        self.assertEqual(Signal.SYNC1.signal_type,
                          SignalType.MULTICAST)
-        self.assertEqual(SCPSignal.PAUSE.signal_type,
+        self.assertEqual(Signal.PAUSE.signal_type,
                          SignalType.MULTICAST)
-        self.assertEqual(SCPSignal.CONTINUE.signal_type,
+        self.assertEqual(Signal.CONTINUE.signal_type,
                          SignalType.MULTICAST)
-        self.assertEqual(SCPSignal.EXIT.signal_type,
+        self.assertEqual(Signal.EXIT.signal_type,
                          SignalType.MULTICAST)
-        self.assertEqual(SCPSignal.TIMER.signal_type,
+        self.assertEqual(Signal.TIMER.signal_type,
                          SignalType.MULTICAST)
 
-        self.assertEqual(SCPSignal.USER_0.signal_type,
+        self.assertEqual(Signal.USER_0.signal_type,
                          SignalType.MULTICAST)
-        self.assertEqual(SCPSignal.USER_1.signal_type,
+        self.assertEqual(Signal.USER_1.signal_type,
                          SignalType.MULTICAST)
-        self.assertEqual(SCPSignal.USER_2.signal_type,
+        self.assertEqual(Signal.USER_2.signal_type,
                          SignalType.MULTICAST)
-        self.assertEqual(SCPSignal.USER_3.signal_type,
+        self.assertEqual(Signal.USER_3.signal_type,
                          SignalType.MULTICAST)
 
 
