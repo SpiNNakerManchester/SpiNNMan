@@ -263,7 +263,7 @@ class UDPConnection(Connection):
 
     def __repr__(self):
         return \
-            "UDPConnection(local_host={}, local_port={}, remote_host={}," \
+            "UDPConnection(local_host={}, local_port={}, remote_host={},"\
             "remote_port={})".format(
                 self.local_ip_address, self.local_port,
                 self.remote_ip_address, self.remote_port)
