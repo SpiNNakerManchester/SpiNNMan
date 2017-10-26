@@ -13,7 +13,7 @@ class SetPower(BMPRequest):
     """ An SCP request for the BMP to power on or power off a rack of boards
     """
 
-    def __init__(self, power_command, boards, delay=0.0, board_to_send_to=None):
+    def __init__(self, power_command, boards, delay=0.0, board_to_send_to=0):
         """
         :param power_command: The power command being sent
         :type power_command:\
@@ -23,14 +23,14 @@ class SetPower(BMPRequest):
         :param delay: Number of seconds delay between power state changes of\
                 the different boards.
         :type delay: int
+        :param board_to_send_to: The optional board to send the command to if\
+            this is to be sent to a frame of boards
+        :type: board_to_send_to: 0
         :rtype: None
         """
 
         arg1 = (int(delay * 1000) << 16) | power_command.value
         arg2 = self.get_board_mask(boards)
-
-        if board_to_send_to is None:
-            board_to_send_to = BMPRequest.get_first_board(boards)
 
         BMPRequest.__init__(
             self, board_to_send_to,

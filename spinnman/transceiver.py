@@ -477,7 +477,8 @@ class Transceiver(object):
                         connection.remote_ip_address))
 
             except Exception:
-                logger.exception("Failed to speak to BMP at {}".format(connection.remote_ip_address))
+                logger.exception("Failed to speak to BMP at {}".format(
+                    connection.remote_ip_address))
                 raise
 
     def _try_sver_though_scamp_connection(self, connection_selector, retries):
@@ -1606,13 +1607,9 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             connection_selector,
             timeout=constants.BMP_POWER_ON_TIMEOUT, n_retries=0)
-        board_to_send_to = None
-        if len(connection.boards) == 0:
-            board_to_send_to = connection.boards[0]
-        process.execute(SetPower(
-            power_command, boards, board_to_send_to=board_to_send_to))
+        process.execute(SetPower(power_command, boards))
         self._machine_off = power_command == PowerCommand.POWER_OFF
- 
+
         # Sleep for 5 seconds if the machine has just been powered on
         if not self._machine_off:
             time.sleep(5.0)
