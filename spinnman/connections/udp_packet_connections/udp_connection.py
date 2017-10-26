@@ -254,7 +254,7 @@ class UDPConnection(Connection):
         """
         try:
             self._socket.shutdown(socket.SHUT_WR)
-        except:
+        except Exception:
             pass
         self._socket.close()
 
