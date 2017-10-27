@@ -1606,7 +1606,8 @@ class Transceiver(object):
         connection_selector = self._bmp_connection(cabinet, frame)
         timeout = (
             constants.BMP_POWER_ON_TIMEOUT
-            if power_command == PowerCommand.POWER_ON else 0.5)
+            if power_command == PowerCommand.POWER_ON
+            else constants.BMP_TIMEOUT)
         process = SendSingleCommandProcess(
             connection_selector, timeout=timeout, n_retries=0)
         process.execute(SetPower(power_command, boards))
@@ -1614,7 +1615,7 @@ class Transceiver(object):
 
         # Sleep for 5 seconds if the machine has just been powered on
         if not self._machine_off:
-            time.sleep(5.0)
+            time.sleep(constants.BMP_POST_POWER_ON_SLEEP_TIME)
 
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
