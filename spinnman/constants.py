@@ -84,8 +84,14 @@ BMP_MISSING_TEMP = -0x8000
 # Fan speed value returned when a fan is absent.
 BMP_MISSING_FAN = -1
 
-# Additional timeout for BMP power-on commands to reply.
+# Timeout for BMP power-on commands to reply.
 BMP_POWER_ON_TIMEOUT = 10.0
+
+# Timeout for other BMP commands to reply
+BMP_TIMEOUT = 0.5
+
+# Time to sleep after powering on boards
+BMP_POST_POWER_ON_SLEEP_TIME = 5.0
 
 # number of chips to check are booted fully from the middle
 NO_MIDDLE_CHIPS_TO_CHECK = 8
