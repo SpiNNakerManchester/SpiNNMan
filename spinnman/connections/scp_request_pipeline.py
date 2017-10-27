@@ -1,6 +1,8 @@
 import sys
 import time
 
+from threading import RLock
+
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException
 
@@ -8,6 +10,7 @@ MAX_SEQUENCE = 65536
 
 # Keep a global track of the sequence numbers used
 _next_sequence = 0
+_next_sequence_lock = RLock()
 
 
 class SCPRequestPipeLine(object):
@@ -100,17 +103,23 @@ class SCPRequestPipeLine(object):
                     (filename, line number, function name, text) as a traceback
         """
 
-        # Update the packet and store required details
+        # Get the next sequence to be used
         global _next_sequence
-        request.scp_request_header.sequence = _next_sequence
-        request_data = self._connection.get_scp_data(request)
-        self._requests[_next_sequence] = request
-        self._request_data[_next_sequence] = request_data
-        self._retries[_next_sequence] = self._n_retries
-        self._callbacks[_next_sequence] = callback
-        self._error_callbacks[_next_sequence] = error_callback
-        self._send_time[_next_sequence] = time.time()
+        global _next_sequence_lock
+        _next_sequence_lock.acquire()
+        sequence = _next_sequence
         _next_sequence = (_next_sequence + 1) % MAX_SEQUENCE
+        _next_sequence_lock.release()
+
+        # Update the packet and store required details
+        request.scp_request_header.sequence = sequence
+        request_data = self._connection.get_scp_data(request)
+        self._requests[sequence] = request
+        self._request_data[sequence] = request_data
+        self._retries[sequence] = self._n_retries
+        self._callbacks[sequence] = callback
+        self._error_callbacks[sequence] = error_callback
+        self._send_time[sequence] = time.time()
 
         # If the connection has not been measured
         if self._n_channels is None:

@@ -1604,9 +1604,11 @@ class Transceiver(object):
         :rtype: None
         """
         connection_selector = self._bmp_connection(cabinet, frame)
+        timeout = (
+            constants.BMP_POWER_ON_TIMEOUT
+            if power_command == PowerCommand.POWER_ON else 0.5)
         process = SendSingleCommandProcess(
-            connection_selector,
-            timeout=constants.BMP_POWER_ON_TIMEOUT, n_retries=0)
+            connection_selector, timeout=timeout, n_retries=0)
         process.execute(SetPower(power_command, boards))
         self._machine_off = power_command == PowerCommand.POWER_OFF
 
@@ -1654,7 +1656,7 @@ class Transceiver(object):
         :return: the register data
         """
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+            self._bmp_connection(cabinet, frame), timeout=1.0)
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register
