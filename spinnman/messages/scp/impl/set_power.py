@@ -8,6 +8,10 @@ from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp import SCPRequestHeader
 from .check_ok_response import CheckOKResponse
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class SetPower(BMPRequest):
     """ An SCP request for the BMP to power on or power off a rack of boards
@@ -24,10 +28,19 @@ class SetPower(BMPRequest):
                 the different boards.
         :type delay: int
         :param board_to_send_to: The optional board to send the command to if\
-            this is to be sent to a frame of boards
+            this is to be sent to a frame of boards.  NOTE: There is currently\
+            a bug in the BMP that means some boards don't respond to power\
+            commands not sent to BMP 0.  Thus changing this parameter is\
+            not recommended!
         :type: board_to_send_to: 0
         :rtype: None
         """
+
+        if board_to_send_to != 0:
+            logger.warning(
+                "There is currently a bug in the BMP that means some boards"
+                " don't respond to power commands not sent to BMP 0.  Thus "
+                "changing the board_to_send_to is not recommended!")
 
         arg1 = (int(delay * 1000) << 16) | power_command.value
         arg2 = self.get_board_mask(boards)
