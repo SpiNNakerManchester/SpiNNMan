@@ -90,6 +90,19 @@ class SCPRequestPipeLine(object):
         # self._token_bucket = TokenBucket(43750, 4375000)
         # self._token_bucket = TokenBucket(3408, 700000)
 
+    def _get_next_sequence_number(self):
+        """Get the next number from the global sequence, applying appropriate\
+        wrapping rules as the sequence numbers have a fixed number of bits.
+
+        :return: The next number in the sequence.
+        :rtype: int
+        """
+        global _next_sequence, _next_sequence_lock
+        with _next_sequence_lock:
+            sequence = _next_sequence
+            _next_sequence = (sequence + 1) % MAX_SEQUENCE
+        return sequence
+
     def send_request(self, request, callback, error_callback):
         """ Add an SCP request to the set to be sent
 
@@ -104,12 +117,7 @@ class SCPRequestPipeLine(object):
         """
 
         # Get the next sequence to be used
-        global _next_sequence
-        global _next_sequence_lock
-        _next_sequence_lock.acquire()
-        sequence = _next_sequence
-        _next_sequence = (_next_sequence + 1) % MAX_SEQUENCE
-        _next_sequence_lock.release()
+        sequence = self._get_next_sequence_number()
 
         # Update the packet and store required details
         request.scp_request_header.sequence = sequence
