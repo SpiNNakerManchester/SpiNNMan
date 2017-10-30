@@ -2714,12 +2714,6 @@ class Transceiver(object):
         :raise None: No known exceptions are raised
         """
 
-        if self._reinjection_running:
-            process = ExitDPRIProcess(self._scamp_connection_selector)
-            process.exit(self._reinjector_cores)
-            self.stop_application(self._reinjector_app_id)
-            self._reinjection_running = False
-
         if power_off_machine and len(self._bmp_connections) > 0:
             self.power_off_machine()
 
