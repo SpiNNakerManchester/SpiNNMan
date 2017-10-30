@@ -40,11 +40,10 @@ from spinnman.processes import DeAllocSDRAMProcess, GetMachineProcess
 from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
 from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
 from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
-from spinnman.processes import ApplicationRunProcess, ExitDPRIProcess
+from spinnman.processes import ApplicationRunProcess
 from spinnman.utilities.appid_tracker import AppIdTracker
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.enums import PowerCommand
-from spinnman.processes import ReadDPRIStatusProcess
 from spinnman.processes import WriteMemoryFloodProcess
 from spinnman.processes import GetTagsProcess
 from spinnman.processes import LoadMultiCastRoutesProcess
