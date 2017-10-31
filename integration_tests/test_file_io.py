@@ -30,6 +30,13 @@ def test_file_io():
     _test_fill(memory, 102)
     _test_fill(memory, 103)
 
+    memory.seek(0)
+    sub_memory_1 = memory[0:10]
+    sub_memory_2 = memory[0:10]
+    sub_memory_1.write(b'test')
+    result = sub_memory_2.read(4)
+    assert(result == b'test')
+
     memory.close()
     os.remove(my_file)
 

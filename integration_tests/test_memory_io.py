@@ -27,7 +27,7 @@ class _MockTransceiver(object):
 
     def read_memory(self, x, y, address, n_bytes):
         memory = self._get_memory(x, y)
-        return memory[address:address + n_bytes]
+        return bytearray(memory[address:address + n_bytes])
 
     def fill_memory(
             self, x, y, address, repeat_value, bytes_to_fill, data_type):
@@ -65,6 +65,13 @@ def test_memory_io():
     _test_fill(memory, 101)
     _test_fill(memory, 102)
     _test_fill(memory, 103)
+
+    memory.seek(0)
+    sub_memory_1 = memory[0:10]
+    sub_memory_2 = memory[0:10]
+    sub_memory_1.write(b'test')
+    result = sub_memory_2.read(4)
+    assert(result == b'test')
 
 
 def _test_fill(memory, offset):

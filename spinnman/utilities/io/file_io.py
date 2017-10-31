@@ -23,8 +23,7 @@ class FileIO(AbstractIO):
         "_end_offset"
     ]
 
-    def __init__(
-            self, file_obj, start_offset, end_offset):
+    def __init__(self, file_obj, start_offset, end_offset):
         """
 
         :param file_obj: The file handle or file name to write to
