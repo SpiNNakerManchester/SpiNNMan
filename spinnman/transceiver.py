@@ -44,6 +44,8 @@ from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
 from spinnman.processes import ApplicationRunProcess, ExitDPRIProcess
 from spinnman.processes.load_fixed_route_routing_entry_process import \
     LoadFixedRouteRoutingEntryProcess
+from spinnman.processes.read_fixed_route_routing_entry_process import \
+    ReadFixedRouteRoutingEntryProcess
 from spinnman.utilities.appid_tracker import AppIdTracker
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.enums import PowerCommand
@@ -2537,15 +2539,21 @@ class Transceiver(object):
             self._scamp_connection_selector)
         process.load_fixed_route(x, y, fixed_route, app_id)
 
-    def read_fixed_route(self, x, y):
-        """ reads a fixed route routing tbale entry
+    def read_fixed_route(self, x, y, app_id):
+        """ reads a fixed route routing table entry
         
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
         :type y: int
+        :param app_id: The id of the application with which to associate the\
+                    routes.  If not specified, defaults to 0.
+        :type app_id: int
         :return: 
         """
+        process = ReadFixedRouteRoutingEntryProcess(
+            self._scamp_connection_selector)
+        process.read_fixed_route(x, y, app_id)
 
     def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
