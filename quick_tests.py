@@ -305,22 +305,6 @@ try:
         print_filter(current_filter)
         print ""
 
-    print "Setup Dropped Packet Reinjection"
-    print "================================"
-    transceiver.enable_reinjection(True, False, False, False)
-    print_reinjection_status(transceiver.get_reinjection_status(0, 0))
-
-    print "Set Router Timeouts"
-    print "==================="
-    transceiver.set_reinjection_router_timeout(2, 0)
-    transceiver.set_reinjection_router_emergency_timeout(3, 4)
-    print_reinjection_status(transceiver.get_reinjection_status(1, 1))
-
-    print "Reset Reinjection Counters"
-    print "=========================="
-    transceiver.reset_reinjection_counters()
-    print_reinjection_status(transceiver.get_reinjection_status(1, 0))
-
     print "Test writing longs and ints to write memory and extracting them"
     print "========================="
     transceiver.write_memory(0, 0, 0x70000000, data=long(123456789123456789))
