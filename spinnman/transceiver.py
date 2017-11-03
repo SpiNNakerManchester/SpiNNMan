@@ -2570,7 +2570,7 @@ class Transceiver(object):
         """
         process = ReadFixedRouteRoutingEntryProcess(
             self._scamp_connection_selector)
-        process.read_fixed_route(x, y, app_id)
+        return process.read_fixed_route(x, y, app_id)
 
     def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
