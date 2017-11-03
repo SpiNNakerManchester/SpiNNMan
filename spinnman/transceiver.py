@@ -42,6 +42,10 @@ from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
 from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
 from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
 from spinnman.processes import ApplicationRunProcess, ExitDPRIProcess
+from spinnman.processes.load_fixed_route_routing_entry_process import \
+    LoadFixedRouteRoutingEntryProcess
+from spinnman.processes.read_fixed_route_routing_entry_process import \
+    ReadFixedRouteRoutingEntryProcess
 from spinnman.utilities.appid_tracker import AppIdTracker
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.enums import PowerCommand
@@ -87,6 +91,11 @@ _BMP_MAJOR_VERSIONS = [1, 2]
 
 _STANDARD_RETIRES_NO = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
+
+_ONE_BYTE = struct.Struct("B")
+_TWO_BYTES = struct.Struct("<BB")
+_ONE_WORD = struct.Struct("<I")
+_ONE_LONG = struct.Struct("<Q")
 
 
 def create_transceiver_from_hostname(
@@ -152,7 +161,8 @@ def create_transceiver_from_hostname(
     :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                 a response indicates an error during the exchange
     """
-    logger.info("Creating transceiver for {}".format(hostname))
+    if hostname is not None:
+        logger.info("Creating transceiver for {}".format(hostname))
     connections = list()
 
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
@@ -166,6 +176,7 @@ def create_transceiver_from_hostname(
 
     # handle BMP connections
     if bmp_connection_data is not None:
+        bmp_string = list()
         for bmp_connection in bmp_connection_data:
 
             udp_bmp_connection = BMPConnection(
@@ -173,6 +184,8 @@ def create_transceiver_from_hostname(
                 bmp_connection.boards, remote_host=bmp_connection.ip_address,
                 remote_port=bmp_connection.port_num)
             connections.append(udp_bmp_connection)
+            bmp_string.append(udp_bmp_connection.remote_ip_address)
+        logger.info("Transceiver using BMPs: {}".format(bmp_string))
 
     if scamp_connections is None:
 
@@ -267,7 +280,7 @@ class Transceiver(object):
 
         # Place to keep the identity of the re-injector core on each chip,
         # indexed by chip x and y coordinates
-        self._reinjector_cores = CoreSubsets()
+        self._reinjector_cores = None
         self._reinjection_running = False
         self._reinjector_app_id = None
 
@@ -362,6 +375,8 @@ class Transceiver(object):
 
         # Check that the BMP connections are valid
         self._check_bmp_connections()
+
+        self._machine_off = False
 
     def _sort_out_connections(self, connections):
 
@@ -464,6 +479,11 @@ class Transceiver(object):
                 raise SpinnmanException(
                     "BMP connection to {} is not responding".format(
                         connection.remote_ip_address))
+
+            except Exception:
+                logger.exception("Failed to speak to BMP at {}".format(
+                    connection.remote_ip_address))
+                raise
 
     def _try_sver_though_scamp_connection(self, connection_selector, retries):
         """ Try to query 0, 0 for SVER through a given connection
@@ -790,8 +810,7 @@ class Transceiver(object):
         """
         if self._width is None or self._height is None:
             height_item = SystemVariableDefinition.y_size
-            self._height, self._width = struct.unpack_from(
-                "<BB",
+            self._height, self._width = _TWO_BYTES.unpack_from(
                 str(self.read_memory(
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
@@ -970,8 +989,12 @@ class Transceiver(object):
 
         # try to get a scamp version once
         logger.info("Working out if machine is booted")
-        version_info = self._try_to_find_scamp_and_boot(
-            INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards, width, height)
+        if self._machine_off:
+            version_info = None
+        else:
+            version_info = self._try_to_find_scamp_and_boot(
+                INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards,
+                width, height)
 
         # If we fail to get a SCAMP version this time, try other things
         if version_info is None and len(self._bmp_connections) > 0:
@@ -1247,6 +1270,57 @@ class Transceiver(object):
         process = ReadIOBufProcess(self._scamp_connection_selector)
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
+    def set_watch_dog_on_chip(self, x, y, watch_dog):
+        """ Enable, disable or set the value of the watch dog timer on a\
+            specific chip
+
+        :param x: chip x coord to write new watch dog param to
+        :type x: int
+        :param y: chip y coord to write new watch dog param to
+        :type y: int
+        :param watch_dog:\
+            Either a boolean indicating whether to enable (True) or \
+            disable (False) the watch dog timer or an int value to set the \
+            timer count to
+        :type watch_dog: boolean or int
+        :rtype: None
+        """
+
+        # build what we expect it to be
+        value_to_set = watch_dog
+        if isinstance(watch_dog, bool):
+            if not watch_dog:
+                value_to_set = 0
+            else:
+                value_to_set = \
+                    SystemVariableDefinition.software_watchdog_count.default
+
+        # build data holder
+        data = _ONE_BYTE.pack(value_to_set)
+
+        # write data
+        base_address = (
+            constants.SYSTEM_VARIABLE_BASE_ADDRESS +
+            SystemVariableDefinition.software_watchdog_count.offset)
+
+        self.write_memory(
+            x=x, y=y, base_address=base_address, data=data)
+
+    def set_watch_dog(self, watch_dog):
+        """ Enable, disable or set the value of the watch dog timer
+
+        :param watch_dog:\
+            Either a boolean indicating whether to enable (True) or \
+            disable (False) the watch dog timer or an int value to set the \
+            timer count to
+        :type watch_dog: boolean or int
+        :rtype: None
+        """
+        if self._machine is None:
+            self._update_machine()
+        for x, y in self._machine.chip_coordinates:
+            self.set_watch_dog_on_chip(x, y, watch_dog)
+
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
 
@@ -1496,6 +1570,7 @@ class Transceiver(object):
     def power_off_machine(self):
         """ Power off the whole machine
         """
+        self._reinjection_running = False
         if len(self._bmp_connections) == 0:
             logger.warn("No BMP connections, so can't power off")
         for bmp_connection in self._bmp_connections:
@@ -1512,6 +1587,7 @@ class Transceiver(object):
                 board(s), or 0 if the board is not in a frame
         """
         self._power(PowerCommand.POWER_OFF, boards, cabinet, frame)
+        self._reinjection_running = False
 
     def _bmp_connection(self, cabinet, frame):
         if (cabinet, frame) not in self._bmp_connection_selectors:
@@ -1531,10 +1607,19 @@ class Transceiver(object):
                 board(s), or 0 if the board is not in a frame
         :rtype: None
         """
+        connection_selector = self._bmp_connection(cabinet, frame)
+        timeout = (
+            constants.BMP_POWER_ON_TIMEOUT
+            if power_command == PowerCommand.POWER_ON
+            else constants.BMP_TIMEOUT)
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame),
-            timeout=constants.BMP_POWER_ON_TIMEOUT, n_retries=0)
+            connection_selector, timeout=timeout, n_retries=0)
         process.execute(SetPower(power_command, boards))
+        self._machine_off = power_command == PowerCommand.POWER_OFF
+
+        # Sleep for 5 seconds if the machine has just been powered on
+        if not self._machine_off:
+            time.sleep(constants.BMP_POST_POWER_ON_SLEEP_TIME)
 
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
@@ -1576,7 +1661,7 @@ class Transceiver(object):
         :return: the register data
         """
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+            self._bmp_connection(cabinet, frame), timeout=1.0)
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register
@@ -1701,11 +1786,11 @@ class Transceiver(object):
                 x, y, cpu, base_address, reader, n_bytes)
             reader.close()
         elif isinstance(data, int):
-            data_to_write = struct.pack("<I", data)
+            data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
                 x, y, cpu, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("<Q", data)
+            data_to_write = _ONE_LONG.pack(data)
             process.write_memory_from_bytearray(
                 x, y, cpu, base_address, data_to_write, 0, 8)
         else:
@@ -1776,11 +1861,11 @@ class Transceiver(object):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
         elif isinstance(data, int):
-            data_to_write = struct.pack("<I", data)
+            data_to_write = _ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("<Q", data)
+            data_to_write = _ONE_LONG.pack(data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 8)
         else:
@@ -1853,11 +1938,11 @@ class Transceiver(object):
                 nearest_neighbour_id, base_address, reader, n_bytes)
             reader.close()
         elif isinstance(data, int):
-            data_to_write = struct.pack("<I", data)
+            data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
-            data_to_write = struct.pack("<Q", data)
+            data_to_write = _ONE_LONG.pack(data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data_to_write, 0, 8)
         else:
@@ -1953,9 +2038,14 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                     a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
 
-        process.execute(AppStop(app_id))
+        if not self._machine_off:
+            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process.execute(AppStop(app_id))
+        else:
+            logger.warn(
+                "You are calling a app stop on a turned off machine. "
+                "Please fix and try again")
 
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
@@ -2438,6 +2528,50 @@ class Transceiver(object):
 
         process.load_routes(x, y, routes, app_id)
 
+    def load_fixed_route(self, x, y, fixed_route, app_id):
+        """ loads a fixed route routing table entry to a chips router
+        
+        :param x: The x-coordinate of the chip onto which to load the routes
+        :type x: int
+        :param y: The y-coordinate of the chip onto which to load the routes
+        :type y: int
+        :param fixed_route: the route for the fixed route entry on this chip
+        :type fixed_route: :py:class:`spinn_machine.fixed_route_routing_entry`
+        :param app_id: The id of the application with which to associate the\
+                    routes.  If not specified, defaults to 0.
+        :type app_id: int
+        :return: Nothing is returned
+        :rtype: None
+        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
+                    communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
+                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+                    * If any of the routes are invalid
+                    * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
+                    a response indicates an error during the exchange
+        """
+        process = LoadFixedRouteRoutingEntryProcess(
+            self._scamp_connection_selector)
+        process.load_fixed_route(x, y, fixed_route, app_id)
+
+    def read_fixed_route(self, x, y, app_id):
+        """ reads a fixed route routing table entry
+        
+        :param x: The x-coordinate of the chip onto which to load the routes
+        :type x: int
+        :param y: The y-coordinate of the chip onto which to load the routes
+        :type y: int
+        :param app_id: The id of the application with which to associate the\
+                    routes.  If not specified, defaults to 0.
+        :type app_id: int
+        :return: 
+        """
+        process = ReadFixedRouteRoutingEntryProcess(
+            self._scamp_connection_selector)
+        return process.read_fixed_route(x, y, app_id)
+
     def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
 
@@ -2561,7 +2695,7 @@ class Transceiver(object):
 
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(WriteMemory(
-            x, y, memory_position, struct.pack("<I", data_to_send)))
+            x, y, memory_position, _ONE_WORD.pack(data_to_send)))
 
     def get_router_diagnostic_filter(self, x, y, position):
         """ Gets a router diagnostic filter from a router
@@ -2596,8 +2730,8 @@ class Transceiver(object):
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(
             ReadMemory(x, y, memory_position, 4))
-        return DiagnosticFilter.read_from_int(struct.unpack_from(
-            "<I", response.data, response.offset)[0])
+        return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
+            response.data, response.offset)[0])
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
                                          counter_ids=range(0, 16)):
@@ -2635,7 +2769,7 @@ class Transceiver(object):
                 clear_data |= 1 << counter_id + 16
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(WriteMemory(
-            x, y, 0xf100002c, struct.pack("<I", clear_data)))
+            x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
 
     @property
     def number_of_boards_located(self):
@@ -2823,50 +2957,56 @@ class Transceiver(object):
                 enabled
         :type fixed_route: bool
         """
+        if not self._machine_off:
+            if not self._reinjection_running:
 
-        if not self._reinjection_running:
+                # Get the machine
+                if self._machine is None:
+                    self._update_machine()
 
-            # Get the machine
-            if self._machine is None:
-                self._update_machine()
+                # Find a free core on each chip to use
+                if self._reinjector_cores is None:
+                    self._reinjector_cores, failed_chips = \
+                        self._machine.reserve_system_processors()
+                    if len(failed_chips) > 0:
+                        logger.warn(
+                            "The reinjector could not be enabled on the "
+                            "following chips due to lack of available cores: "
+                            "{}".format(failed_chips))
 
-            # Find a free core on each chip to use
-            self._reinjector_cores, failed_chips = \
-                self._machine.reserve_system_processors()
-            if len(failed_chips) > 0:
-                logger.warn(
-                    "The reinjector could not be enabled on the following"
-                    " chips due to lack of available cores: {}".format(
-                        failed_chips))
+                # Get an app id for the reinjector
+                if self._reinjector_app_id is None:
+                    self._reinjector_app_id = self._app_id_tracker.get_new_id()
 
-            # Get an app id for the reinjector
-            if self._reinjector_app_id is None:
-                self._reinjector_app_id = self._app_id_tracker.get_new_id()
+                # Load the reinjector on each free core
+                reinjector_binary = os.path.join(
+                    os.path.dirname(model_binaries.__file__),
+                    "reinjector.aplx")
+                self.execute_flood(
+                    self._reinjector_cores, reinjector_binary,
+                    self._reinjector_app_id, is_filename=True)
+                self.wait_for_cores_to_be_in_state(
+                    self._reinjector_cores, self._reinjector_app_id,
+                    [CPUState.RUNNING])
+                self._reinjection_running = True
 
-            # Load the reinjector on each free core
-            reinjector_binary = os.path.join(
-                os.path.dirname(model_binaries.__file__), "reinjector.aplx")
-            self.execute_flood(
-                self._reinjector_cores, reinjector_binary,
-                self._reinjector_app_id, is_filename=True)
-            self.wait_for_cores_to_be_in_state(
-                self._reinjector_cores, self._reinjector_app_id,
-                [CPUState.RUNNING])
-            self._reinjection_running = True
-
-        # Set the types to be reinjected
-        process = SetDPRIPacketTypesProcess(self._scamp_connection_selector)
-        packet_types = list()
-        values_to_check = [multicast, point_to_point,
-                           nearest_neighbour, fixed_route]
-        flags_to_set = [DPRIFlags.MULTICAST,
-                        DPRIFlags.POINT_TO_POINT,
-                        DPRIFlags.NEAREST_NEIGHBOUR,
-                        DPRIFlags.FIXED_ROUTE]
-        for value, flag in zip(values_to_check, flags_to_set):
-            if value:
-                packet_types.append(flag)
-        process.set_packet_types(packet_types, self._reinjector_cores)
+            # Set the types to be reinjected
+            process = SetDPRIPacketTypesProcess(
+                self._scamp_connection_selector)
+            packet_types = list()
+            values_to_check = [multicast, point_to_point,
+                               nearest_neighbour, fixed_route]
+            flags_to_set = [DPRIFlags.MULTICAST,
+                            DPRIFlags.POINT_TO_POINT,
+                            DPRIFlags.NEAREST_NEIGHBOUR,
+                            DPRIFlags.FIXED_ROUTE]
+            for value, flag in zip(values_to_check, flags_to_set):
+                if value:
+                    packet_types.append(flag)
+            process.set_packet_types(packet_types, self._reinjector_cores)
+        else:
+            logger.warn("Ignoring exception in enable_reinjection as "
+                        "machine if probably off")
 
     def set_reinjection_router_timeout(self, timeout_mantissa,
                                        timeout_exponent):

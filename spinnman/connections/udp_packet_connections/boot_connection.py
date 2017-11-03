@@ -1,3 +1,4 @@
+import time
 from spinnman.connections.abstract_classes \
     import SpinnakerBootSender, SpinnakerBootReceiver
 from .udp_connection import UDPConnection
@@ -46,6 +47,9 @@ class BootConnection(
             :py:meth:`spinnman.connections.abstract_classes.spinnaker_boot_sender.SpinnakerBootSender.send_boot_message`
         """
         self.send(boot_message.bytestring)
+
+        # Sleep between messages to avoid flooding the machine
+        time.sleep(0.1)
 
     def receive_boot_message(self, timeout=None):
         """ See\

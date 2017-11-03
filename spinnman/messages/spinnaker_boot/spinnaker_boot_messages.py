@@ -68,8 +68,7 @@ class SpinnakerBootMessages(object):
                 spinnaker_boot_value.set_value(variable, value)
 
         # Get the data as an array, to be used later
-        self._spinnaker_boot_data = array.array(
-            "I", spinnaker_boot_value.bytestring)
+        spinnaker_boot_data = array.array("I", spinnaker_boot_value.bytestring)
 
         # Find the data file and size
         this_dir, _ = os.path.split(__file__)
@@ -87,26 +86,33 @@ class SpinnakerBootMessages(object):
                 " be divisible by 4".format(boot_data_file_size))
 
         # Compute how many packets to send
-        self._boot_data_file = open(boot_data_file_name, "rb")
+        n_words_to_read = boot_data_file_size / 4
         self._no_data_packets = int(math.ceil(
             float(boot_data_file_size) / float(_BOOT_MESSAGE_DATA_BYTES)))
-        self._n_words_to_read = boot_data_file_size / 4
 
-    def _get_packet_data(self, replace_data=None, offset=None, length=None):
+        # Read the data
+        boot_data = array.array("I")
+        with open(boot_data_file_name, "rb") as boot_data_file:
+            boot_data.fromfile(boot_data_file, n_words_to_read)
 
-        # Read the next bit of data
-        data = array.array("I")
-        n_words = min((self._n_words_to_read, _BOOT_MESSAGE_DATA_WORDS))
-        self._n_words_to_read -= n_words
-        data.fromfile(self._boot_data_file, n_words)
+        # Replace the appropriate part with the custom boot options
+        offset = _BOOT_STRUCT_REPLACE_OFFSET
+        length = _BOOT_STRUCT_REPLACE_LENGTH
+        boot_data[offset:offset + length] = spinnaker_boot_data[0:length]
 
-        # If there is any replace_data, replace it now
-        if replace_data is not None:
-            data[offset:offset + length] = replace_data[0:length]
+        # Byte swap and store the data for later use
+        boot_data.byteswap()
+        self._boot_data = boot_data.tostring()
+        self._n_bytes_to_read = n_words_to_read * 4
 
-        # Byte-swap the data to make it big-endian and return
-        data.byteswap()
-        return data.tostring()
+    def _get_packet_data(self, block_id):
+        """ Read a packet of data
+        """
+        offset = block_id * _BOOT_MESSAGE_DATA_BYTES
+        n_bytes = min(
+            (self._n_bytes_to_read - offset, _BOOT_MESSAGE_DATA_BYTES))
+        data = self._boot_data[offset:offset + n_bytes]
+        return data
 
     @property
     def messages(self):
@@ -118,22 +124,13 @@ class SpinnakerBootMessages(object):
             opcode=SpinnakerBootOpCode.FLOOD_FILL_START,
             operand_1=0, operand_2=0, operand_3=self._no_data_packets - 1)
 
-        # Construct and yield the first data packet replacing the appropriate
-        # part with the boot data values
-        yield SpinnakerBootMessage(
-            opcode=SpinnakerBootOpCode.FLOOD_FILL_BLOCK,
-            operand_1=_BOOT_DATA_OPERAND_1 | 0, operand_2=0, operand_3=0,
-            data=self._get_packet_data(
-                self._spinnaker_boot_data, _BOOT_STRUCT_REPLACE_OFFSET,
-                _BOOT_STRUCT_REPLACE_LENGTH))
-
-        # Construct an yield the remaining packets
-        for block_id in range(1, self._no_data_packets):
+        # Construct and yield the data packets
+        for block_id in range(0, self._no_data_packets):
             operand_1 = _BOOT_DATA_OPERAND_1 | (block_id & 0xFF)
             yield SpinnakerBootMessage(
                 opcode=SpinnakerBootOpCode.FLOOD_FILL_BLOCK,
                 operand_1=operand_1, operand_2=0, operand_3=0,
-                data=self._get_packet_data())
+                data=self._get_packet_data(block_id))
 
         # Construct and yield the end packet
         yield SpinnakerBootMessage(

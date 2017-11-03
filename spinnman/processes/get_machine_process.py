@@ -138,7 +138,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._finish()
         try:
             self.check_for_error()
-        except:
+        except Exception:
             # Ignore errors so far, as any error here just means that a chip
             # is down that wasn't marked as down
             pass

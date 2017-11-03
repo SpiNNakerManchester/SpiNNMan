@@ -10,6 +10,8 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from .check_ok_response import CheckOKResponse
 
+_ONE_WORD = struct.Struct("<I")
+
 
 class WriteFPGARegister(BMPRequest):
     """ A request for writing data to a FPGA register
@@ -38,7 +40,7 @@ class WriteFPGARegister(BMPRequest):
             self, board,
             SCPRequestHeader(command=SCPCommand.CMD_LINK_WRITE),
             argument_1=addr & (~0x3), argument_2=4, argument_3=fpga_num,
-            data=struct.pack("<I", value))
+            data=_ONE_WORD.pack(value))
 
     def get_scp_response(self):
         """

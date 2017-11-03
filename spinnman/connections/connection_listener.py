@@ -1,6 +1,8 @@
+import logging
 from threading import Thread
-import traceback
 from multiprocessing.pool import ThreadPool
+
+logger = logging.getLogger(__name__)
 
 
 class ConnectionListener(Thread):
@@ -35,9 +37,10 @@ class ConnectionListener(Thread):
         while not self._done:
             try:
                 self._run_step()
-            except:
+            except Exception:
                 if not self._done:
-                    traceback.print_exc()
+                    logger.warn("problem when dispatching message",
+                                exc_info=True)
         self._callback_pool.close()
         self._callback_pool.join()
 

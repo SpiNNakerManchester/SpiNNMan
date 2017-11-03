@@ -4,6 +4,9 @@ from .abstract_data_element import AbstractDataElement
 
 import struct
 
+_TWO_SHORTS = struct.Struct("<HH")
+_TWO_WORDS = struct.Struct("<II")
+
 
 class KeyPayloadDataElement(AbstractDataElement):
     """ A data element that contains a key and a payload
@@ -33,9 +36,9 @@ class KeyPayloadDataElement(AbstractDataElement):
                 "The type specifies no payload, but this element has a"
                 " payload")
         if eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
-            return struct.pack("<HH", self._key, self._payload)
+            return _TWO_SHORTS.pack(self._key, self._payload)
         elif eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:
-            return struct.pack("<II", self._key, self._payload)
+            return _TWO_WORDS.pack(self._key, self._payload)
         else:
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type, "Unknown type")

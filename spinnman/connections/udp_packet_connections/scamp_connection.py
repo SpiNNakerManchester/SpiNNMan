@@ -7,6 +7,9 @@ from .sdp_connection import SDPConnection
 from spinnman.connections.abstract_classes \
     import SCPSender, SCPReceiver
 
+_TWO_SHORTS = struct.Struct("<2H")
+_TWO_SKIP = struct.Struct("<2x")
+
 
 class SCAMPConnection(
         SDPConnection, SCPSender, SCPReceiver):
@@ -61,11 +64,11 @@ class SCAMPConnection(
     def get_scp_data(self, scp_request):
         update_sdp_header_for_udp_send(scp_request.sdp_header,
                                        self._chip_x, self._chip_y)
-        return struct.pack("<2x") + scp_request.bytestring
+        return _TWO_SKIP.pack() + scp_request.bytestring
 
     def receive_scp_response(self, timeout=1.0):
         data = self.receive(timeout)
-        result, sequence = struct.unpack_from("<2H", data, 10)
+        result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
     def send_scp_request(self, scp_request):

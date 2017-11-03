@@ -4,6 +4,8 @@ from spinnman.constants import EIEIO_COMMAND_IDS
 from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
 import struct
 
+_PATTERN_BB = struct.Struct("<BB")
+
 
 class HostSendSequencedData(EIEIOCommandMessage):
     """ Packet sent from the host to the SpiNNaker system in the context of\
@@ -35,14 +37,14 @@ class HostSendSequencedData(EIEIOCommandMessage):
         return 4
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
-        region_id, sequence_no = struct.unpack_from("<BB", data, offset)
+    def from_bytestring(command_header, data, offset):  # @UnusedVariable
+        region_id, sequence_no = _PATTERN_BB.unpack_from(data, offset)
         eieio_data_message = read_eieio_data_message(data, offset)
-        return HostSendSequencedData(region_id, sequence_no,
-                                     eieio_data_message)
+        return HostSendSequencedData(
+            region_id, sequence_no, eieio_data_message)
 
     @property
     def bytestring(self):
-        return (super(HostSendSequencedData, self).bytestring + struct.pack(
-            "<BB", self._region_id, self._sequence_no) +
-            self._eieio_data_message.bytestring)
+        return (super(HostSendSequencedData, self).bytestring +
+                _PATTERN_BB.pack(self._region_id, self._sequence_no) +
+                self._eieio_data_message.bytestring)

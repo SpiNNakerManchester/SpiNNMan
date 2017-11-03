@@ -37,7 +37,7 @@ class BMPRequest(AbstractSCPRequest):
         """
         if isinstance(boards, int):
             return boards
-        return boards[0]
+        return min(boards)
 
     @staticmethod
     def get_board_mask(boards):

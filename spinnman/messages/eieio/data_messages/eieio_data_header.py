@@ -2,6 +2,16 @@ from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
 from spinnman.exceptions import SpinnmanInvalidPacketException
 import struct
 
+_PATTERN_BBHH = struct.Struct("<BBHH")
+_PATTERN_BBH = struct.Struct("<BBH")
+_PATTERN_BBHI = struct.Struct("<BBHI")
+_PATTERN_BBI = struct.Struct("<BBI")
+_PATTERN_BB = struct.Struct("<BB")
+_PATTERN_HH = struct.Struct("<HH")
+_PATTERN_H = struct.Struct("<H")
+_PATTERN_HI = struct.Struct("<HI")
+_PATTERN_I = struct.Struct("<I")
+
 
 class EIEIODataHeader(object):
 
@@ -140,28 +150,24 @@ class EIEIODataHeader(object):
             if (self._eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT or
                     self._eieio_type == EIEIOType.KEY_16_BIT):
                 if self._prefix is not None:
-                    return struct.pack(
-                        "<BBHH", self._count, data, self._prefix,
-                        self._payload_base)
+                    return _PATTERN_BBHH.pack(
+                        self._count, data, self._prefix, self._payload_base)
                 else:
-                    return struct.pack(
-                        "<BBH", self._count, data, self._payload_base)
+                    return _PATTERN_BBH.pack(
+                        self._count, data, self._payload_base)
             elif (self._eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT or
                     self._eieio_type == EIEIOType.KEY_32_BIT):
                 if self._prefix is not None:
-                    return struct.pack(
-                        "<BBHI", self._count, data, self._prefix,
-                        self._payload_base)
+                    return _PATTERN_BBHI.pack(
+                        self._count, data, self._prefix, self._payload_base)
                 else:
-                    return struct.pack(
-                        "<BBI", self._count, data, self._payload_base)
+                    return _PATTERN_BBI.pack(
+                        self._count, data, self._payload_base)
         else:
             if self._prefix is not None:
-                return struct.pack(
-                    "<BBH", self._count, data, self._prefix)
+                return _PATTERN_BBH.pack(self._count, data, self._prefix)
             else:
-                return struct.pack(
-                    "<BB", self._count, data)
+                return _PATTERN_BB.pack(self._count, data)
 
     @staticmethod
     def from_bytestring(data, offset):
@@ -176,7 +182,7 @@ class EIEIODataHeader(object):
                     :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
         """
 
-        (count, header_data) = struct.unpack_from("<BB", data, offset)
+        (count, header_data) = _PATTERN_BB.unpack_from(data, offset)
 
         # Read the flags in the header
         prefix_flag = (header_data >> 7) & 1
@@ -202,22 +208,22 @@ class EIEIODataHeader(object):
             if (eieio_type == EIEIOType.KEY_16_BIT or
                     eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT):
                 if prefix_flag == 1:
-                    (prefix, payload_prefix) = struct.unpack_from(
-                        "<HH", data, offset + 2)
+                    (prefix, payload_prefix) = _PATTERN_HH.unpack_from(
+                        data, offset + 2)
                 else:
-                    payload_prefix = struct.unpack_from(
-                        "<H", data, offset + 2)[0]
+                    payload_prefix = _PATTERN_H.unpack_from(
+                        data, offset + 2)[0]
             elif (eieio_type == EIEIOType.KEY_32_BIT or
                     eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT):
                 if prefix_flag == 1:
-                    (prefix, payload_prefix) = struct.unpack_from(
-                        "<HI", data, offset + 2)
+                    (prefix, payload_prefix) = _PATTERN_HI.unpack_from(
+                        data, offset + 2)
                 else:
-                    payload_prefix = struct.unpack_from(
-                        "<I", data, offset + 2)[0]
+                    payload_prefix = _PATTERN_I.unpack_from(
+                        data, offset + 2)[0]
         else:
             if prefix_flag == 1:
-                prefix = struct.unpack_from("<H", data, offset + 2)[0]
+                prefix = _PATTERN_H.unpack_from(data, offset + 2)[0]
 
         return EIEIODataHeader(
             eieio_type=eieio_type, tag=tag, prefix=prefix,

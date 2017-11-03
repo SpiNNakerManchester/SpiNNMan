@@ -8,6 +8,8 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 import struct
 
+_ONE_WORD = struct.Struct("<I")
+
 
 class SDRAMDeAlloc(AbstractSCPRequest):
     """ An SCP Request to free space in the SDRAM
@@ -77,8 +79,7 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "SDRAM deallocation", "CMD_DEALLOC", result.name)
-        self._number_of_blocks_freed = struct.unpack_from(
-            "<I", data, offset)[0]
+        self._number_of_blocks_freed = _ONE_WORD.unpack_from(data, offset)[0]
 
         # check that the base address is not null (0 in python case) as
         # this reflects a issue in command on spinnaker side

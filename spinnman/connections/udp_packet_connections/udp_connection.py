@@ -182,8 +182,8 @@ class UDPConnection(Connection):
     def receive(self, timeout=None):
         """ Receive data from the connection
 
-        :param timeout: The timeout, or None to wait forever
-        :type timeout: None
+        :param timeout: The timeout in seconds, or None to wait forever
+        :type timeout: None or float
         :return: The data received as a bytestring
         :rtype: str
         :raise SpinnmanTimeoutException: If a timeout occurs before any data\
@@ -255,7 +255,7 @@ class UDPConnection(Connection):
         """
         try:
             self._socket.shutdown(socket.SHUT_WR)
-        except:
+        except Exception:
             pass
         self._socket.close()
 

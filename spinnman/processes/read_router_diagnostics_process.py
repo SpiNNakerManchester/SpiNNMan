@@ -5,6 +5,7 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 import struct
 
 _N_REGISTERS = 16
+_ONE_WORD = struct.Struct("<I")
 
 
 class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
@@ -15,17 +16,17 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
         self._register_values = [0] * _N_REGISTERS
 
     def handle_control_register_response(self, response):
-        self._control_register = struct.unpack_from(
-            "<I", response.data, response.offset)[0]
+        self._control_register = _ONE_WORD.unpack_from(
+            response.data, response.offset)[0]
 
     def handle_error_status_response(self, response):
-        self._error_status = struct.unpack_from(
-            "<I", response.data, response.offset)[0]
+        self._error_status = _ONE_WORD.unpack_from(
+            response.data, response.offset)[0]
 
     def handle_register_response(self, response):
         for register in range(_N_REGISTERS):
-            self._register_values[register] = struct.unpack_from(
-                "<I", response.data, response.offset + (register * 4))[0]
+            self._register_values[register] = _ONE_WORD.unpack_from(
+                response.data, response.offset + (register * 4))[0]
 
     def get_router_diagnostics(self, x, y):
         self._send_request(ReadMemory(x, y, 0xe1000000, 4),
