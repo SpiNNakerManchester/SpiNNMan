@@ -35,15 +35,15 @@ class SDRAMDeAlloc(AbstractSCPRequest):
             AbstractSCPRequest.__init__(
                 self,
                 SDPHeader(
-                    flags=SDPFlag.REPLY_NOT_EXPECTED, destination_port=0,
+                    flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                     destination_cpu=0, destination_chip_x=x,
                     destination_chip_y=y),
                 SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
                 argument_1=(
-                    app_id << 8 |
                     AllocFree.
                     FREE_SDRAM_BY_POINTER.value),  # @UndefinedVariable
                 argument_2=base_address)
+            self._read_n_blocks_freed = False
         else:
             AbstractSCPRequest.__init__(
                 self,
@@ -55,21 +55,23 @@ class SDRAMDeAlloc(AbstractSCPRequest):
                 argument_1=(
                     app_id << 8 |
                     AllocFree.
-                    FREE_ROUTING_BY_APP_ID.value))  # @UndefinedVariable
+                    FREE_SDRAM_BY_APP_ID.value))  # @UndefinedVariable
+            self._read_n_blocks_freed = True
 
     def get_scp_response(self):
-        return _SCPSDRAMDeAllocResponse()
+        return _SCPSDRAMDeAllocResponse(self._read_n_blocks_freed)
 
 
 class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
     """ An SCP response to a request to deallocate SDRAM
     """
 
-    def __init__(self):
+    def __init__(self, read_n_blocks_freed=False):
         """
         """
         AbstractSCPResponse.__init__(self)
         self._number_of_blocks_freed = None
+        self._read_n_blocks_freed = read_n_blocks_freed
 
     def read_data_bytestring(self, data, offset):
         """ See\
@@ -79,14 +81,16 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
                 "SDRAM deallocation", "CMD_DEALLOC", result.name)
-        self._number_of_blocks_freed = _ONE_WORD.unpack_from(data, offset)[0]
+        if self._read_n_blocks_freed:
+            self._number_of_blocks_freed = _ONE_WORD.unpack_from(
+                data, offset)[0]
 
-        # check that the base address is not null (0 in python case) as
-        # this reflects a issue in command on spinnaker side
-        if self._number_of_blocks_freed == 0:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "SDRAM deallocation response base address", "CMD_DEALLOC",
-                result.name)
+            # check that the base address is not null (0 in python case) as
+            # this reflects a issue in command on spinnaker side
+            if self._number_of_blocks_freed == 0:
+                raise SpinnmanUnexpectedResponseCodeException(
+                    "SDRAM deallocation response base address", "CMD_DEALLOC",
+                    result.name)
 
     @property
     def number_of_blocks_freed(self):
