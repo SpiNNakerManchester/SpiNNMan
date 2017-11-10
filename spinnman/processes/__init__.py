@@ -18,13 +18,11 @@ from .write_memory_flood_process import WriteMemoryFloodProcess
 from .write_memory_process import WriteMemoryProcess
 
 __all__ = ["AbstractMultiConnectionProcess", "ApplicationRunProcess",
-           "DeAllocSDRAMProcess", "ExitDPRIProcess", "GetCPUInfoProcess",
+           "DeAllocSDRAMProcess", "GetCPUInfoProcess",
            "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
            "GetVersionProcess", "LoadMultiCastRoutesProcess",
            "MallocSDRAMProcess", "MostDirectConnectionSelector",
-           "ReadDPRIStatusProcess", "ReadIOBufProcess", "ReadMemoryProcess",
-           "ReadRouterDiagnosticsProcess", "ResetDPRICountersProcess",
+           "ReadIOBufProcess", "ReadMemoryProcess",
+           "ReadRouterDiagnosticsProcess",
            "RoundRobinConnectionSelector", "SendSingleCommandProcess",
-           "SetDPRIPacketTypesProcess", "SetDPRIRouterTimeoutProcess",
-           "SetDPRIRouterEmergencyTimeoutProcess", "WriteMemoryFloodProcess",
-           "WriteMemoryProcess"]
+           "WriteMemoryFloodProcess", "WriteMemoryProcess"]
