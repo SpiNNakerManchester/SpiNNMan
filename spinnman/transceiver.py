@@ -2530,7 +2530,7 @@ class Transceiver(object):
 
     def load_fixed_route(self, x, y, fixed_route, app_id):
         """ loads a fixed route routing table entry to a chips router
-        
+
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
@@ -2558,7 +2558,7 @@ class Transceiver(object):
 
     def read_fixed_route(self, x, y, app_id):
         """ reads a fixed route routing table entry
-        
+
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
@@ -2566,7 +2566,7 @@ class Transceiver(object):
         :param app_id: The id of the application with which to associate the\
                     routes.  If not specified, defaults to 0.
         :type app_id: int
-        :return: 
+        :return: the route as a fixed route entry
         """
         process = ReadFixedRouteRoutingEntryProcess(
             self._scamp_connection_selector)
