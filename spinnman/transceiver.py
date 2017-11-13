@@ -42,6 +42,8 @@ from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
 from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
 from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
 from spinnman.processes import ApplicationRunProcess, ExitDPRIProcess
+from spinnman.processes import GetHeapProcess
+from spinnman.processes import FillProcess, FillDataType
 from spinnman.utilities.appid_tracker import AppIdTracker
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.enums import PowerCommand
@@ -3021,6 +3023,45 @@ class Transceiver(object):
             self._reinjector_cores.get_core_subset_for_chip(x, y)
             .processor_ids)
         return process.get_dpri_status(x, y, reinjector_core)
+
+    def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
+        """ Get the contents of the given heap on a given chip
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :param heap: The SystemVariableDefinition which is the heap to read
+        :type heap: SystemVariableDefinition
+        """
+        process = GetHeapProcess(self._scamp_connection_selector)
+        return process.get_heap(x, y, heap)
+
+    def fill_memory(
+            self, x, y, base_address, repeat_value, bytes_to_fill,
+            data_type=FillDataType.WORD):
+        """ Fill some memory with repeated data
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :param base_address: The address at which to start the fill
+        :type base_address: int
+        :param repeat_value: The data to repeat
+        :type repeat_value: int
+        :param bytes_to_fill:\
+            The number of bytes to fill - must be compatible with the data\
+            type i.e. if the data type is WORD, the number of bytes must\
+            be divisible by 4
+        :type bytes_to_fill: int
+        :param data_type:
+        :type data_type:\
+            :py:class:`spinnman.processes.fill_process.FillDataType`
+        """
+        process = FillProcess(self._scamp_connection_selector)
+        return process.fill_memory(
+            x, y, base_address, repeat_value, bytes_to_fill, data_type)
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
