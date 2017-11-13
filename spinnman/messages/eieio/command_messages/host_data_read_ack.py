@@ -12,7 +12,8 @@ class HostDataReadAck(EIEIOCommandMessage):
         received a request to read data
     """
     def __init__(self, sequence_no):
-        cmd_header = EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ.value)
+        cmd_header = EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.HOST_DATA_READ_ACK.value)
         EIEIOCommandMessage.__init__(self, cmd_header)
         self._sequence_no = sequence_no
 
