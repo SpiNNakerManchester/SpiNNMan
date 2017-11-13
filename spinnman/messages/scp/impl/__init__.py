@@ -30,11 +30,12 @@ from .set_power import SetPower
 from .write_fpga_register import WriteFPGARegister
 from .write_link import WriteLink
 from .write_memory import WriteMemory
+from .fill_request import FillRequest
 
 __all__ = ["AppStop", "ApplicationRun",
            "BMPSetLed", "BMPGetVersion",
            "CheckOKResponse", "GetChipInfo", "CountState",
-           "FloodFillData",
+           "FloodFillData", "FillRequest",
            "FloodFillEnd", "FloodFillStart",
            "IPTagClear", "IPTagGet", "IPTagGetInfo",
            "IPTagSet", "IPTagSetTTO", "SetLED",
