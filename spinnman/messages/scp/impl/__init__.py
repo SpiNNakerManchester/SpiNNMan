@@ -4,6 +4,7 @@ from .bmp_get_version import BMPGetVersion
 from .bmp_set_led import BMPSetLed
 from .check_ok_response import CheckOKResponse
 from .count_state import CountState
+from .fill_request import FillRequest
 from .flood_fill_data import FloodFillData
 from .flood_fill_end import FloodFillEnd
 from .flood_fill_start import FloodFillStart
@@ -34,7 +35,7 @@ from .write_memory import WriteMemory
 __all__ = ["AppStop", "ApplicationRun",
            "BMPSetLed", "BMPGetVersion",
            "CheckOKResponse", "GetChipInfo", "CountState",
-           "FloodFillData",
+           "FloodFillData","FillRequest",
            "FloodFillEnd", "FloodFillStart",
            "IPTagClear", "IPTagGet", "IPTagGetInfo",
            "IPTagSet", "IPTagSetTTO", "SetLED",

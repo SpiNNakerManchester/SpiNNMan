@@ -15,8 +15,7 @@ from board_test_configuration import BoardTestConfiguration
 
 board_config = BoardTestConfiguration()
 
-
-ver = 5     # Guess?
+ver = 5  # Guess?
 
 
 class MockWriteTransceiver(Transceiver):

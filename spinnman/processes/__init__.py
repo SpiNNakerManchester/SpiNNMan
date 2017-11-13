@@ -16,13 +16,18 @@ from .round_robin_connection_selector import RoundRobinConnectionSelector
 from .send_single_command_process import SendSingleCommandProcess
 from .write_memory_flood_process import WriteMemoryFloodProcess
 from .write_memory_process import WriteMemoryProcess
+from .fill_process import FillProcess
+from .fill_process import FillDataType
+from .get_heap_process import GetHeapProcess
 
 __all__ = ["AbstractMultiConnectionProcess", "ApplicationRunProcess",
            "DeAllocSDRAMProcess", "ExitDPRIProcess", "GetCPUInfoProcess",
-           "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
-           "GetVersionProcess", "LoadMultiCastRoutesProcess",
-           "MallocSDRAMProcess", "MostDirectConnectionSelector",
-           "ReadDPRIStatusProcess", "ReadIOBufProcess", "ReadMemoryProcess",
+           "GetHeapProcess", "GetMachineProcess", "GetMultiCastRoutesProcess",
+           "GetTagsProcess", "GetVersionProcess", "FillProcess",
+           "FillDataType",
+           "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
+           "MostDirectConnectionSelector", "ReadDPRIStatusProcess",
+           "ReadIOBufProcess", "ReadMemoryProcess",
            "ReadRouterDiagnosticsProcess", "ResetDPRICountersProcess",
            "RoundRobinConnectionSelector", "SendSingleCommandProcess",
            "SetDPRIPacketTypesProcess", "SetDPRIRouterTimeoutProcess",

@@ -37,7 +37,7 @@ class ConnectionListener(Thread):
         while not self._done:
             try:
                 self._run_step()
-            except:
+            except Exception:
                 if not self._done:
                     logger.warn("problem when dispatching message",
                                 exc_info=True)

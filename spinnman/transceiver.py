@@ -41,6 +41,8 @@ from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
 from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
 from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
 from spinnman.processes import ApplicationRunProcess
+from spinnman.processes import GetHeapProcess
+from spinnman.processes import FillProcess, FillDataType
 from spinnman.utilities.appid_tracker import AppIdTracker
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.enums import PowerCommand
@@ -150,7 +152,8 @@ def create_transceiver_from_hostname(
     :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
                 a response indicates an error during the exchange
     """
-    logger.info("Creating transceiver for {}".format(hostname))
+    if hostname is not None:
+        logger.info("Creating transceiver for {}".format(hostname))
     connections = list()
 
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
@@ -164,6 +167,7 @@ def create_transceiver_from_hostname(
 
     # handle BMP connections
     if bmp_connection_data is not None:
+        bmp_string = list()
         for bmp_connection in bmp_connection_data:
 
             udp_bmp_connection = BMPConnection(
@@ -171,6 +175,8 @@ def create_transceiver_from_hostname(
                 bmp_connection.boards, remote_host=bmp_connection.ip_address,
                 remote_port=bmp_connection.port_num)
             connections.append(udp_bmp_connection)
+            bmp_string.append(udp_bmp_connection.remote_ip_address)
+        logger.info("Transceiver using BMPs: {}".format(bmp_string))
 
     if scamp_connections is None:
 
@@ -458,6 +464,11 @@ class Transceiver(object):
                 raise SpinnmanException(
                     "BMP connection to {} is not responding".format(
                         connection.remote_ip_address))
+
+            except Exception:
+                logger.exception("Failed to speak to BMP at {}".format(
+                    connection.remote_ip_address))
+                raise
 
     def _try_sver_though_scamp_connection(self, connection_selector, retries):
         """ Try to query 0, 0 for SVER through a given connection
@@ -1004,7 +1015,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
-                constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_640_ms.value))
+                constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms.value))
 
         return version_info
 
@@ -1572,11 +1583,19 @@ class Transceiver(object):
                 board(s), or 0 if the board is not in a frame
         :rtype: None
         """
+        connection_selector = self._bmp_connection(cabinet, frame)
+        timeout = (
+            constants.BMP_POWER_ON_TIMEOUT
+            if power_command == PowerCommand.POWER_ON
+            else constants.BMP_TIMEOUT)
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame),
-            timeout=constants.BMP_POWER_ON_TIMEOUT, n_retries=0)
+            connection_selector, timeout=timeout, n_retries=0)
         process.execute(SetPower(power_command, boards))
         self._machine_off = power_command == PowerCommand.POWER_OFF
+
+        # Sleep for 5 seconds if the machine has just been powered on
+        if not self._machine_off:
+            time.sleep(constants.BMP_POST_POWER_ON_SLEEP_TIME)
 
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
@@ -1618,7 +1637,7 @@ class Transceiver(object):
         :return: the register data
         """
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+            self._bmp_connection(cabinet, frame), timeout=1.0)
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register
@@ -2854,6 +2873,45 @@ class Transceiver(object):
     @property
     def bmp_connection(self):
         return self._bmp_connection_selectors
+
+    def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
+        """ Get the contents of the given heap on a given chip
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :param heap: The SystemVariableDefinition which is the heap to read
+        :type heap: SystemVariableDefinition
+        """
+        process = GetHeapProcess(self._scamp_connection_selector)
+        return process.get_heap(x, y, heap)
+
+    def fill_memory(
+            self, x, y, base_address, repeat_value, bytes_to_fill,
+            data_type=FillDataType.WORD):
+        """ Fill some memory with repeated data
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :param base_address: The address at which to start the fill
+        :type base_address: int
+        :param repeat_value: The data to repeat
+        :type repeat_value: int
+        :param bytes_to_fill:\
+            The number of bytes to fill - must be compatible with the data\
+            type i.e. if the data type is WORD, the number of bytes must\
+            be divisible by 4
+        :type bytes_to_fill: int
+        :param data_type:
+        :type data_type:\
+            :py:class:`spinnman.processes.fill_process.FillDataType`
+        """
+        process = FillProcess(self._scamp_connection_selector)
+        return process.fill_memory(
+            x, y, base_address, repeat_value, bytes_to_fill, data_type)
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
