@@ -1,6 +1,6 @@
 import struct
 
-from spinn_machine.fixed_route_entry import FixedRouteEntry
+from spinn_machine import FixedRouteEntry
 from spinn_utilities.overrides import overrides
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp import SCPRequestHeader
