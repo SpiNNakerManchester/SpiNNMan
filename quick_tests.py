@@ -371,6 +371,12 @@ try:
         "<I", str(buffer(transceiver.read_memory(1, 1, 0x70000000, 4))))[0]
     if data != long(123456789) or data2 != long(123456789):
         raise Exception("values are not identical")
+
+    print "Get Heap:"
+    print "========="
+    for heap_element in transceiver.get_heap(0, 0):
+        print heap_element
+
     transceiver.close()
 
 except Exception as e:

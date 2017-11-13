@@ -11,6 +11,7 @@ from .dpri_reset_counters import DPRIResetCounters
 from .dpri_set_reinjection_packet_types import DPRISetReinjectionPacketTypes
 from .dpri_set_router_emergency_timeout import DPRISetRouterEmergencyTimeout
 from .dpri_set_router_timeout import DPRISetRouterTimeout
+from .fill_request import FillRequest
 from .flood_fill_data import FloodFillData
 from .flood_fill_end import FloodFillEnd
 from .flood_fill_start import FloodFillStart
@@ -44,7 +45,7 @@ __all__ = ["AppStop", "ApplicationRun",
            "DPRIResetCounters",
            "DPRISetReinjectionPacketTypes",
            "DPRISetRouterEmergencyTimeout",
-           "DPRISetRouterTimeout", "FloodFillData",
+           "DPRISetRouterTimeout", "FillRequest", "FloodFillData",
            "FloodFillEnd", "FloodFillStart",
            "IPTagClear", "IPTagGet", "IPTagGetInfo",
            "IPTagSet", "IPTagSetTTO", "SetLED",
