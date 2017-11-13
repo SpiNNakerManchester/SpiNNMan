@@ -10,7 +10,7 @@ class FixedRouteInit(AbstractSCPRequest):
 
     def __init__(self, x, y, entry, app_id):
         """ sets a fixed route entry
-        
+
         :param x: The x-coordinate of the chip, between 0 and 255, \
         this is not checked due to speed restrictions
         :type x: int

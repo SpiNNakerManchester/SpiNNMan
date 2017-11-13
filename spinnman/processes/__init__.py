@@ -2,6 +2,9 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .application_run_process import ApplicationRunProcess
 from .de_alloc_sdram_process import DeAllocSDRAMProcess
 from .get_cpu_info_process import GetCPUInfoProcess
+from .get_heap_process import GetHeapProcess
+from .fill_process import FillProcess
+from .fill_process import FillDataType
 from .get_machine_process import GetMachineProcess
 from .get_routes_process import GetMultiCastRoutesProcess
 from .get_tags_process import GetTagsProcess
@@ -19,10 +22,12 @@ from .write_memory_process import WriteMemoryProcess
 
 __all__ = ["AbstractMultiConnectionProcess", "ApplicationRunProcess",
            "DeAllocSDRAMProcess", "ExitDPRIProcess", "GetCPUInfoProcess",
-           "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
-           "GetVersionProcess", "LoadMultiCastRoutesProcess",
-           "MallocSDRAMProcess", "MostDirectConnectionSelector",
-           "ReadDPRIStatusProcess", "ReadIOBufProcess", "ReadMemoryProcess",
+           "GetHeapProcess", "GetMachineProcess", "GetMultiCastRoutesProcess",
+           "GetTagsProcess", "GetVersionProcess", "FillProcess",
+           "FillDataType",
+           "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
+           "MostDirectConnectionSelector", "ReadDPRIStatusProcess",
+           "ReadIOBufProcess", "ReadMemoryProcess",
            "ReadRouterDiagnosticsProcess", "ResetDPRICountersProcess",
            "RoundRobinConnectionSelector", "SendSingleCommandProcess",
            "SetDPRIPacketTypesProcess", "SetDPRIRouterTimeoutProcess",

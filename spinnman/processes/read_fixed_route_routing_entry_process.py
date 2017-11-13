@@ -13,7 +13,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
     )
 
     def __init__(self, connection_selector):
-        """ creates the process for writing a fixed route entry to a chips 
+        """ creates the process for writing a fixed route entry to a chips \
         router
 
         :param connection_selector: the scamp connection selector
@@ -36,7 +36,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         :param app_id: The id of the application with which to associate the\
                     routes.  If not specified, defaults to 0.
         :type app_id: int
-        :rtype: None 
+        :rtype: None
         """
         self._send_request(FixedRouteRead(x, y, app_id),
                            self.handle_read_response)

@@ -41,6 +41,8 @@ from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
 from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
 from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
 from spinnman.processes import ApplicationRunProcess
+from spinnman.processes import GetHeapProcess
+from spinnman.processes import FillProcess, FillDataType
 from spinnman.processes.load_fixed_route_routing_entry_process import \
     LoadFixedRouteRoutingEntryProcess
 from spinnman.processes.read_fixed_route_routing_entry_process import \
@@ -1017,7 +1019,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
-                constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_640_ms.value))
+                constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms.value))
 
         return version_info
 
@@ -2509,7 +2511,7 @@ class Transceiver(object):
 
     def load_fixed_route(self, x, y, fixed_route, app_id):
         """ loads a fixed route routing table entry to a chips router
-        
+
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
@@ -2537,7 +2539,7 @@ class Transceiver(object):
 
     def read_fixed_route(self, x, y, app_id):
         """ reads a fixed route routing table entry
-        
+
         :param x: The x-coordinate of the chip onto which to load the routes
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
@@ -2545,7 +2547,7 @@ class Transceiver(object):
         :param app_id: The id of the application with which to associate the\
                     routes.  If not specified, defaults to 0.
         :type app_id: int
-        :return: 
+        :return: the route as a fixed route entry
         """
         process = ReadFixedRouteRoutingEntryProcess(
             self._scamp_connection_selector)
@@ -2919,6 +2921,45 @@ class Transceiver(object):
     @property
     def bmp_connection(self):
         return self._bmp_connection_selectors
+
+    def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
+        """ Get the contents of the given heap on a given chip
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :param heap: The SystemVariableDefinition which is the heap to read
+        :type heap: SystemVariableDefinition
+        """
+        process = GetHeapProcess(self._scamp_connection_selector)
+        return process.get_heap(x, y, heap)
+
+    def fill_memory(
+            self, x, y, base_address, repeat_value, bytes_to_fill,
+            data_type=FillDataType.WORD):
+        """ Fill some memory with repeated data
+
+        :param x: The x-coordinate of the chip
+        :type x: int
+        :param y: The y-coordinate of the chip
+        :type y: int
+        :param base_address: The address at which to start the fill
+        :type base_address: int
+        :param repeat_value: The data to repeat
+        :type repeat_value: int
+        :param bytes_to_fill:\
+            The number of bytes to fill - must be compatible with the data\
+            type i.e. if the data type is WORD, the number of bytes must\
+            be divisible by 4
+        :type bytes_to_fill: int
+        :param data_type:
+        :type data_type:\
+            :py:class:`spinnman.processes.fill_process.FillDataType`
+        """
+        process = FillProcess(self._scamp_connection_selector)
+        return process.fill_memory(
+            x, y, base_address, repeat_value, bytes_to_fill, data_type)
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\

@@ -11,6 +11,9 @@ class TestOkResponse(unittest.TestCase):
     def test_new_scp_check_ok_response(self):
         CheckOKResponse("Testing operation", "Testing command")
 
+    def _encode_addr_tuple(self, dest_port, dest_cpu, src_port, src_cpu):
+        return dest_port << 13 | dest_cpu << 8 | src_port << 5 | src_cpu
+
     def test_read_ok_response(self):
         scp = CheckOKResponse("Testing operation", "Testing command")
         result = SCPResult.RC_OK.value
@@ -21,8 +24,8 @@ class TestOkResponse(unittest.TestCase):
         dest_cpu = 15
         srce_port = 7
         srce_cpu = 31
-        dest_source_short = dest_port << 13 | dest_cpu << 8 | srce_port << 5 \
-            | srce_cpu
+        dest_source_short = self._encode_addr_tuple(
+            dest_port, dest_cpu, srce_port, srce_cpu)
 
         dest_x = 1
         dest_y = 8
@@ -50,8 +53,8 @@ class TestOkResponse(unittest.TestCase):
             dest_cpu = 15
             srce_port = 7
             srce_cpu = 31
-            dest_source_short = dest_port << 13 | dest_cpu << 8 | \
-                srce_port << 5 | srce_cpu
+            dest_source_short = self._encode_addr_tuple(
+                dest_port, dest_cpu, srce_port, srce_cpu)
 
             dest_x = 1
             dest_y = 8
