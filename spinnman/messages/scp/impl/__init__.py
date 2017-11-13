@@ -11,6 +11,7 @@ from .dpri_reset_counters import DPRIResetCounters
 from .dpri_set_reinjection_packet_types import DPRISetReinjectionPacketTypes
 from .dpri_set_router_emergency_timeout import DPRISetRouterEmergencyTimeout
 from .dpri_set_router_timeout import DPRISetRouterTimeout
+from .fill_request import FillRequest
 from .flood_fill_data import FloodFillData
 from .flood_fill_end import FloodFillEnd
 from .flood_fill_start import FloodFillStart
@@ -36,6 +37,8 @@ from .get_version import GetVersion
 from .write_fpga_register import WriteFPGARegister
 from .write_link import WriteLink
 from .write_memory import WriteMemory
+from .fixed_route_init import FixedRouteInit
+from .fixed_route_read import FixedRouteRead
 
 __all__ = ["AppStop", "ApplicationRun",
            "BMPSetLed", "BMPGetVersion",
@@ -44,7 +47,7 @@ __all__ = ["AppStop", "ApplicationRun",
            "DPRIResetCounters",
            "DPRISetReinjectionPacketTypes",
            "DPRISetRouterEmergencyTimeout",
-           "DPRISetRouterTimeout", "FloodFillData",
+           "DPRISetRouterTimeout", "FillRequest", "FloodFillData",
            "FloodFillEnd", "FloodFillStart",
            "IPTagClear", "IPTagGet", "IPTagGetInfo",
            "IPTagSet", "IPTagSetTTO", "SetLED",
@@ -54,5 +57,5 @@ __all__ = ["AppStop", "ApplicationRun",
            "RouterAlloc", "RouterClear",
            "RouterInit", "SDRAMAlloc",
            "SDRAMDeAlloc", "SendSignal",
-           "GetVersion", "WriteFPGARegister",
-           "WriteLink", "WriteMemory"]
+           "GetVersion", "WriteFPGARegister", "FixedRouteRead",
+           "WriteLink", "WriteMemory", "FixedRouteInit"]
