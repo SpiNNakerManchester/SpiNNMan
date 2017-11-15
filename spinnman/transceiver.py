@@ -642,11 +642,10 @@ class Transceiver(object):
 
         # update the scamp connections replacing any x and y with the default
         # SCP request params with the boot chip coordinates
-        for connection in self._scamp_connections:
-            if (connection.chip_x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
-                    and connection.chip_y == \
-                        AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
-                connection.update_chip_coordinates(
+        for sc in self._scamp_connections:
+            if (sc.chip_x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
+                    and sc.chip_y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
+                sc.update_chip_coordinates(
                     self._machine.boot_x, self._machine.boot_y)
 
         # Work out and add the spinnaker links and FPGA links
@@ -2222,7 +2221,7 @@ class Transceiver(object):
         """Get the connections for talking to a board.
 
         :param connection: \
-            Optional param that directly gives the connection to use. 
+            Optional param that directly gives the connection to use.
         :type connection: \
             :py:class:`spinnman.connections.abstract_classes.SCPSender`
         :param board_address: \
