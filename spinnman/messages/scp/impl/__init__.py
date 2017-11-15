@@ -35,7 +35,7 @@ from .write_memory import WriteMemory
 __all__ = ["AppStop", "ApplicationRun",
            "BMPSetLed", "BMPGetVersion",
            "CheckOKResponse", "GetChipInfo", "CountState",
-           "FloodFillData","FillRequest",
+           "FloodFillData", "FillRequest",
            "FloodFillEnd", "FloodFillStart",
            "IPTagClear", "IPTagGet", "IPTagGetInfo",
            "IPTagSet", "IPTagSetTTO", "SetLED",
