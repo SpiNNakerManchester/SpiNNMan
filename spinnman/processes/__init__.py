@@ -9,6 +9,10 @@ from .get_version_process import GetVersionProcess
 from .load_routes_process import LoadMultiCastRoutesProcess
 from .malloc_sdram_process import MallocSDRAMProcess
 from .most_direct_connection_selector import MostDirectConnectionSelector
+from .read_fixed_route_routing_entry_process import \
+    ReadFixedRouteRoutingEntryProcess
+from .load_fixed_route_routing_entry_process import \
+    LoadFixedRouteRoutingEntryProcess
 from .read_iobuf_process import ReadIOBufProcess
 from .read_memory_process import ReadMemoryProcess
 from .read_router_diagnostics_process import ReadRouterDiagnosticsProcess
@@ -32,4 +36,5 @@ __all__ = ["AbstractMultiConnectionProcess", "ApplicationRunProcess",
            "RoundRobinConnectionSelector", "SendSingleCommandProcess",
            "SetDPRIPacketTypesProcess", "SetDPRIRouterTimeoutProcess",
            "SetDPRIRouterEmergencyTimeoutProcess", "WriteMemoryFloodProcess",
-           "WriteMemoryProcess"]
+           "WriteMemoryProcess", "ReadFixedRouteRoutingEntryProcess",
+           "LoadFixedRouteRoutingEntryProcess"]
