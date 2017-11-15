@@ -4,6 +4,7 @@ from .bmp_get_version import BMPGetVersion
 from .bmp_set_led import BMPSetLed
 from .check_ok_response import CheckOKResponse
 from .count_state import CountState
+from .fill_request import FillRequest
 from .flood_fill_data import FloodFillData
 from .flood_fill_end import FloodFillEnd
 from .flood_fill_start import FloodFillStart
@@ -30,7 +31,8 @@ from .set_power import SetPower
 from .write_fpga_register import WriteFPGARegister
 from .write_link import WriteLink
 from .write_memory import WriteMemory
-from .fill_request import FillRequest
+from .fixed_route_init import FixedRouteInit
+from .fixed_route_read import FixedRouteRead
 
 __all__ = ["AppStop", "ApplicationRun",
            "BMPSetLed", "BMPGetVersion",
@@ -45,5 +47,5 @@ __all__ = ["AppStop", "ApplicationRun",
            "RouterAlloc", "RouterClear",
            "RouterInit", "SDRAMAlloc",
            "SDRAMDeAlloc", "SendSignal",
-           "GetVersion", "WriteFPGARegister",
-           "WriteLink", "WriteMemory"]
+           "GetVersion", "WriteFPGARegister", "FixedRouteRead",
+           "WriteLink", "WriteMemory", "FixedRouteInit"]

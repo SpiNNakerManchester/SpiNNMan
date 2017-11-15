@@ -133,7 +133,10 @@ EIEIO_COMMAND_IDS = Enum(
 
         # command for notifying the external devices that the simulation has
         # started
-        ("START_RESUME_NOTIFICATION", 11)
+        ("START_RESUME_NOTIFICATION", 11),
+
+        # Host confirming request to read data received
+        ("HOST_DATA_READ_ACK", 12)
 
     ]
 )
