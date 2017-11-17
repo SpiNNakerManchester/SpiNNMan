@@ -2,10 +2,14 @@ from spinnman.exceptions \
     import SpinnmanIOException, SpinnmanTimeoutException
 from spinnman.connections.abstract_classes import Connection
 
+import logging
 import platform
 import subprocess
 import socket
 import select
+
+logger = logging.getLogger(__name__)
+_RECEIVE_BUFFER_SIZE = 1048576
 
 
 class UDPConnection(Connection):
@@ -36,13 +40,19 @@ class UDPConnection(Connection):
 
         self._socket = None
         try:
-
             # Create a UDP Socket
             self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
         except Exception as exception:
             raise SpinnmanIOException(
                 "Error setting up socket: {}".format(exception))
+        try:
+            self._socket.setsockopt(
+                socket.SOL_SOCKET, socket.SO_RCVBUF, _RECEIVE_BUFFER_SIZE)
+        except Exception:
+            # The OS said no, but we might still be able to work right with
+            # the defaults. Just warn and hope...
+            logger.warn("failed to configure UDP socket to have a large "
+                        "receive buffer", exc_info=True)
 
         # Get the port to bind to locally
         local_bind_port = 0
@@ -57,7 +67,6 @@ class UDPConnection(Connection):
         try:
             # Bind the socket
             self._socket.bind((local_bind_host, local_bind_port))
-
         except Exception as exception:
             raise SpinnmanIOException(
                 "Error binding socket to {}:{}: {}".format(
