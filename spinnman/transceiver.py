@@ -1522,6 +1522,12 @@ class Transceiver(object):
         # Check that the binaries have reached a wait state
         count = self.get_core_state_count(app_id, CPUState.READY)
         if count < executable_targets.total_processors:
+            print "Only {} of {} cores reached ready state, waiting 30 more seconds".format(
+                    count, executable_targets.total_processors)
+            time.sleep(30)
+
+        count = self.get_core_state_count(app_id, CPUState.READY)
+        if count < executable_targets.total_processors:
             raise SpinnmanException(
                 "Only {} of {} cores reached ready state".format(
                     count, executable_targets.total_processors))
