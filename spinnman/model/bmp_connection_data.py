@@ -3,6 +3,7 @@ class BMPConnectionData(object):
     """
 
     def __init__(self, cabinet, frame, ip_address, boards, port_num):
+        # pylint: disable=too-many-arguments
         self._cabinet = cabinet
         self._frame = frame
         self._ip_address = ip_address

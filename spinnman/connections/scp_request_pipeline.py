@@ -7,6 +7,9 @@ from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException
 
 MAX_SEQUENCE = 65536
+RETRY_CODES = frozenset([
+    SCPResult.RC_TIMEOUT, SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_LEN,
+    SCPResult.RC_P2P_NOREPLY])
 
 # Keep a global track of the sequence numbers used
 _next_sequence = 0
@@ -27,10 +30,6 @@ class SCPRequestPipeLine(object):
 
     def __init__(self, connection, n_channels=1,
                  intermediate_channel_waits=0,
-                 retry_codes=frozenset([SCPResult.RC_TIMEOUT,
-                                        SCPResult.RC_P2P_TIMEOUT,
-                                        SCPResult.RC_LEN,
-                                        SCPResult.RC_P2P_NOREPLY]),
                  n_retries=3, packet_timeout=0.5):
         """
         :param connection: The connection over which the communication is to\
@@ -40,7 +39,6 @@ class SCPRequestPipeLine(object):
         :param intermediate_channel_waits: The number of outstanding responses\
                     to wait for before continuing sending requests.  If None,\
                     this will be determined automatically
-        :param retry_codes: The set of response codes that will be retried
         :param n_retries: The number of times to resend any packet for any\
                     reason before an error is triggered
         :param packet_timeout: The number of elapsed seconds after sending a\
@@ -49,7 +47,6 @@ class SCPRequestPipeLine(object):
         self._connection = connection
         self._n_channels = n_channels
         self._intermediate_channel_waits = intermediate_channel_waits
-        self._retry_codes = retry_codes
         self._n_retries = n_retries
         self._packet_timeout = packet_timeout
 
@@ -191,7 +188,7 @@ class SCPRequestPipeLine(object):
             # If the response can be retried, retry it, as long as the
             # timeout hasn't expired
 
-            if (result in self._retry_codes and
+            if (result in RETRY_CODES and
                     (time.time() - self._send_time[seq] <
                         self._packet_timeout)):
                 self._connection.send(self._request_data[seq])
@@ -260,19 +257,18 @@ class SCPRequestPipeLine(object):
         # Try to resend the packets
         for seq, request_sent in to_resend:
             try:
-                if self._retries[seq] > 0:
-                    # If the request can be retried, retry it
-                    self._retries[seq] -= 1
-                    self._in_progress += 1
-                    self._requests[seq] = request_sent
-                    self._send_time[seq] = time.time()
-                    self._connection.send(self._request_data[seq])
-                    self._n_resent += 1
-                else:
-                    # Otherwise, report it as a timeout
+                if self._retries[seq] == 0:
+                    # If the request can't be retried, report it as a timeout
                     raise SpinnmanTimeoutException(
                         request_sent.scp_request_header.command,
                         self._packet_timeout)
+                # Otherwise, retry it
+                self._retries[seq] -= 1
+                self._in_progress += 1
+                self._requests[seq] = request_sent
+                self._send_time[seq] = time.time()
+                self._connection.send(self._request_data[seq])
+                self._n_resent += 1
             except Exception as e:
                 self._error_callbacks[seq](
                     request_sent, e, sys.exc_info()[2])

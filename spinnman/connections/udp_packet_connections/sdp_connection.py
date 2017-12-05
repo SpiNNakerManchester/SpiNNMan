@@ -7,12 +7,11 @@ from spinnman.connections.abstract_classes \
 import struct
 
 _TWO_SKIP = struct.Struct("<2x")
+_REPR_TEMPLATE = "SDPConnection(chip_x={}, chip_y={}, local_host={},"\
+    " local_port={}, remote_host={}, remote_port={})"
 
 
-class SDPConnection(
-        UDPConnection, SDPReceiver, SDPSender,
-        Listenable):
-
+class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
     def __init__(self, chip_x=None, chip_y=None, local_host=None,
                  local_port=None, remote_host=None, remote_port=None):
         """
@@ -39,11 +38,9 @@ class SDPConnection(
                 to.  If not specified, sending will not be possible using this\
                 connection
         """
+        # pylint: disable=too-many-arguments
         UDPConnection.__init__(
             self, local_host, local_port, remote_host, remote_port)
-        SDPReceiver.__init__(self)
-        SDPSender.__init__(self)
-        Listenable.__init__(self)
         self._chip_x = chip_x
         self._chip_y = chip_y
 
@@ -65,8 +62,6 @@ class SDPConnection(
         return self.receive_sdp_message
 
     def __repr__(self):
-        return \
-            "SDPConnection(chip_x={}, chip_y={}, local_host={},"\
-            " local_port={}, remote_host={}, remote_port={})".format(
-                self._chip_x, self._chip_y, self.local_ip_address,
-                self.local_port, self.remote_ip_address, self.remote_port)
+        return _REPR_TEMPLATE.format(
+            self._chip_x, self._chip_y, self.local_ip_address,
+            self.local_port, self.remote_ip_address, self.remote_port)

@@ -9,10 +9,11 @@ from spinnman.connections.abstract_classes \
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")
+_REPR_TEMPLATE = "SCAMPConnection(chip_x={}, chip_y={}, local_host={}," \
+    " local_port={}, remote_host={}, remote_port={})"
 
 
-class SCAMPConnection(
-        SDPConnection, SCPSender, SCPReceiver):
+class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
     """ A UDP connection to SCAMP on the board
     """
 
@@ -41,13 +42,12 @@ class SCAMPConnection(
                 connection
         :type remote_port: int
         """
+        # pylint: disable=too-many-arguments
         if remote_port is None:
             remote_port = SCP_SCAMP_PORT
         SDPConnection.__init__(
             self, chip_x, chip_y, local_host, local_port, remote_host,
             remote_port)
-        SCPReceiver.__init__(self)
-        SCPSender.__init__(self)
 
     @property
     def chip_x(self):
@@ -75,8 +75,6 @@ class SCAMPConnection(
         self.send(self.get_scp_data(scp_request))
 
     def __repr__(self):
-        return \
-            "SCAMPConnection(chip_x={}, chip_y={}, local_host={}," \
-            " local_port={}, remote_host={}, remote_port={})".format(
-                self._chip_x, self._chip_y, self.local_ip_address,
-                self.local_port, self.remote_ip_address, self.remote_port)
+        return _REPR_TEMPLATE.format(
+            self._chip_x, self._chip_y, self.local_ip_address,
+            self.local_port, self.remote_ip_address, self.remote_port)
