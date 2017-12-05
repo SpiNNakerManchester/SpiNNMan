@@ -954,7 +954,7 @@ class Transceiver(object):
         else:
             version_info = self._try_to_find_scamp_and_boot(
                 INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards,
-                width, height)
+                width, height, extra_boot_values)
 
         # If we fail to get a SCAMP version this time, try other things
         if version_info is None and self._bmp_connections:
@@ -969,7 +969,7 @@ class Transceiver(object):
 
             # retry to get a scamp version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
-                n_retries, number_of_boards, width, height)
+                n_retries, number_of_boards, width, height, extra_boot_values)
 
         # verify that the version is the expected one for this transceiver
         if version_info is None:
@@ -998,7 +998,8 @@ class Transceiver(object):
         return version_info
 
     def _try_to_find_scamp_and_boot(
-            self, tries_to_go, number_of_boards, width, height):
+            self, tries_to_go, number_of_boards, width, height,
+            extra_boot_values):
         """ Try to detect if SCAMP is running, and if not, boot the machine
 
         :param tries_to_go: how many attempts should be supported
@@ -1006,6 +1007,7 @@ class Transceiver(object):
             is built out of
         :param width: The width of the machine in chips
         :param height: The height of the machine in chips
+        :param extra_boot_values: Any additional values to set during boot
         :return: version_info
         :raise SpinnmanIOException: \
             If there is a problem communicating with the machine
@@ -1024,7 +1026,8 @@ class Transceiver(object):
             except SpinnmanGenericProcessException as e:
                 if isinstance(e.exception, SpinnmanTimeoutException):
                     logger.info("Attempting to boot machine")
-                    self.boot_board(number_of_boards, width, height)
+                    self.boot_board(
+                        number_of_boards, width, height, extra_boot_values)
                     current_tries_to_go -= 1
                 elif isinstance(e.exception, SpinnmanIOException):
                     raise SpinnmanIOException(
@@ -1033,7 +1036,8 @@ class Transceiver(object):
                     raise
             except SpinnmanTimeoutException:
                 logger.info("Attempting to boot machine")
-                self.boot_board(number_of_boards, width, height)
+                self.boot_board(
+                    number_of_boards, width, height, extra_boot_values)
                 current_tries_to_go -= 1
             except SpinnmanIOException:
                 raise SpinnmanIOException(
