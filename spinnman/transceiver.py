@@ -161,13 +161,10 @@ def create_transceiver_from_hostname(
     # handle BMP connections
     if bmp_connection_data is not None:
         bmp_ip_list = list()
-        for bmp_connection in bmp_connection_data:
-            udp_bmp_connection = BMPConnection(
-                bmp_connection.cabinet, bmp_connection.frame,
-                bmp_connection.boards, remote_host=bmp_connection.ip_address,
-                remote_port=bmp_connection.port_num)
-            connections.append(udp_bmp_connection)
-            bmp_ip_list.append(udp_bmp_connection.remote_ip_address)
+        for conn_data in bmp_connection_data:
+            bmp_connection = BMPConnection(conn_data)
+            connections.append(bmp_connection)
+            bmp_ip_list.append(bmp_connection.remote_ip_address)
         logger.info("Transceiver using BMPs: %s", bmp_ip_list)
 
     # handle the spinnaker connection

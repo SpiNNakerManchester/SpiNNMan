@@ -4,52 +4,34 @@ from .udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
+from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes \
     import SCPReceiver, SCPSender
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")
+_REPR_TEMPLATE = "BMPConnection(cabinet={}, frame={}, boards={}, " \
+    "local_host={}, local_port={}, remote_host={}, remote_port={}"
 
 
-class BMPConnection(
-        UDPConnection, SCPReceiver, SCPSender):
+class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
     """ A BMP connection which supports queries to the BMP of a SpiNNaker\
         machine
     """
 
-    def __init__(self, cabinet, frame, boards, local_host=None,
-                 local_port=None, remote_host=None,
-                 remote_port=None):
+    def __init__(self, connection_data):
         """
-        :param cabinet: The cabinet number of the connection
-        :type cabinet: int
-        :param frame: The frame number of the connection
-        :type frame: int
-        :param boards: The boards that the connection can control on the same\
-                backplane
-        :type boards: iterable of int
-        :param local_host: The optional ip address or host name of the local\
-                interface to listen on
-        :type local_host: str
-        :param local_port: The optional local port to listen on
-        :type local_port: int
-        :param remote_host: The optional remote host name or ip address to\
-                send messages to.  If not specified, sending will not be\
-                possible using this connection
-        :type remote_host: str
-        :param remote_port: The optional remote port number to send messages\
-                to.  If not specified, sending will not be possible using this\
-                connection
+        :param connection_data: The description of what to connect to.
+        :type connection_data: \
+            :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
         """
-        if remote_port is None:
-            remote_port = SCP_SCAMP_PORT
+        port = SCP_SCAMP_PORT if connection_data.port_num \
+            else connection_data.port_num
         UDPConnection.__init__(
-            self, local_host, local_port, remote_host, remote_port)
-        SCPReceiver.__init__(self)
-        SCPSender.__init__(self)
-        self._cabinet = cabinet
-        self._frame = frame
-        self._boards = boards
+            self, remote_host=connection_data.ip_address, remote_port=port)
+        self._cabinet = connection_data.cabinet
+        self._frame = connection_data.frame
+        self._boards = connection_data.boards
 
     @property
     def cabinet(self):
@@ -87,22 +69,23 @@ class BMPConnection(
         """
         return 0
 
+    @overrides(SCPSender.get_scp_data)
     def get_scp_data(self, scp_request):
         update_sdp_header_for_udp_send(scp_request.sdp_header, 0, 0)
         return _TWO_SKIP.pack() + scp_request.bytestring
 
+    @overrides(SCPReceiver.receive_scp_response)
     def receive_scp_response(self, timeout=1.0):
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
+    @overrides(SCPSender.send_scp_request)
     def send_scp_request(self, scp_request):
         self.send(self.get_scp_data(scp_request))
 
     def __repr__(self):
-        return \
-            "BMPConnection(cabinet={}, frame={}, boards={}, local_host={},"\
-            "local_port={}, remote_host={}, remote_port={}".format(
-                self._cabinet, self._frame, self._boards,
-                self.local_ip_address, self.local_port, self.remote_ip_address,
-                self.remote_port)
+        return _REPR_TEMPLATE.format(
+            self._cabinet, self._frame, self._boards,
+            self.local_ip_address, self.local_port, self.remote_ip_address,
+            self.remote_port)
