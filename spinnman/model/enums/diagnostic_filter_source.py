@@ -9,6 +9,7 @@ class DiagnosticFilterSource(Enum):
     NON_LOCAL = (1, "Source is not a local core")
 
     def __new__(cls, value, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         return obj

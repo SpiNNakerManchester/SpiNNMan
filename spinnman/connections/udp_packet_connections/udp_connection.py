@@ -13,64 +13,102 @@ _RECEIVE_BUFFER_SIZE = 1048576
 
 
 class UDPConnection(Connection):
-
-    def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=None):
-        """
-        :param local_host: The local host name or ip address to bind to.\
-                    If not specified defaults to bind to all interfaces,\
-                    unless remote_host is specified, in which case binding is\
-                    _done to the ip address that will be used to send packets
-        :type local_host: str or None
-        :param local_port: The local port to bind to, between 1025 and 65535.\
-                    If not specified, defaults to a random unused local port
-        :type local_port: int
-        :param remote_host: The remote host name or ip address to send packets\
-                    to.  If not specified, the socket will be available for\
-                    listening only, and will throw and exception if used for\
-                    sending
-        :type remote_host: str or None
-        :param remote_port: The remote port to send packets to.  If\
-                    remote_host is None, this is ignored.  If remote_host is\
-                    specified, this must also be specified for the connection\
-                    to allow sending
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    setting up the communication channel
-        """
-
-        self._socket = None
+    @staticmethod
+    def __get_socket():
+        """Wrapper round socket() system call"""
         try:
             # Create a UDP Socket
-            self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         except Exception as exception:
             raise SpinnmanIOException(
                 "Error setting up socket: {}".format(exception))
+
+    @staticmethod
+    def __set_receive_buffer_size(sock, size):
+        """Wrapper round setsockopt() system call"""
         try:
-            self._socket.setsockopt(
-                socket.SOL_SOCKET, socket.SO_RCVBUF, _RECEIVE_BUFFER_SIZE)
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, size)
         except Exception:
             # The OS said no, but we might still be able to work right with
             # the defaults. Just warn and hope...
             logger.warn("failed to configure UDP socket to have a large "
                         "receive buffer", exc_info=True)
 
-        # Get the port to bind to locally
-        local_bind_port = 0
-        if local_port is not None:
-            local_bind_port = int(local_port)
-
-        # Get the host to bind to locally
-        local_bind_host = ""
-        if local_host is not None:
-            local_bind_host = str(local_host)
-
+    @staticmethod
+    def __bind_socket(sock, host, port):
+        """Wrapper round bind() system call"""
         try:
             # Bind the socket
-            self._socket.bind((local_bind_host, local_bind_port))
+            sock.bind((str(host), int(port)))
         except Exception as exception:
             raise SpinnmanIOException(
                 "Error binding socket to {}:{}: {}".format(
-                    local_bind_host, local_bind_port, exception))
+                    host, port, exception))
+
+    @staticmethod
+    def __resolve_host(host):
+        """Wrapper round gethostbyname() system call"""
+        try:
+            return socket.gethostbyname(host)
+        except Exception as exception:
+            raise SpinnmanIOException(
+                "Error getting ip address for {}: {}".format(
+                    host, exception))
+
+    @staticmethod
+    def __connect_socket(sock, remote_address, remote_port):
+        """Wrapper round connect() system call"""
+        try:
+            sock.connect((str(remote_address), int(remote_port)))
+        except Exception as exception:
+            raise SpinnmanIOException(
+                "Error connecting to {}:{}: {}".format(
+                    remote_address, remote_port, exception))
+
+    @staticmethod
+    def __get_socket_address(sock):
+        """Wrapper round getsockname() system call"""
+        try:
+            addr, port = sock.getsockname()
+            # Ensure that a standard address is used for the INADDR_ANY
+            # hostname
+            if addr is None or addr == "":
+                addr = "0.0.0.0"
+            return addr, port
+        except Exception as exception:
+            raise SpinnmanIOException("Error querying socket: {}".format(
+                exception))
+
+    def __init__(self, local_host=None, local_port=None, remote_host=None,
+                 remote_port=None):
+        """
+        :param local_host: The local host name or ip address to bind to.\
+            If not specified defaults to bind to all interfaces, unless\
+            remote_host is specified, in which case binding is done to the\
+            IP address that will be used to send packets
+        :type local_host: str or None
+        :param local_port: The local port to bind to, between 1025 and 65535.\
+            If not specified, defaults to a random unused local port
+        :type local_port: int
+        :param remote_host: The remote host name or ip address to send packets\
+            to. If not specified, the socket will be available for listening\
+            only, and will throw and exception if used for sending
+        :type remote_host: str or None
+        :param remote_port: The remote port to send packets to.  If\
+            remote_host is None, this is ignored.  If remote_host is specified\
+            specified, this must also be specified for the connection to allow\
+            sending
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error setting up the communication channel
+        """
+
+        self._socket = self.__get_socket()
+        self.__set_receive_buffer_size(self._socket, _RECEIVE_BUFFER_SIZE)
+
+        # Get the host and port to bind to locally
+        local_bind_host = "" if local_host is None else local_host
+        local_bind_port = 0 if local_port is None else local_port
+        self.__bind_socket(self._socket, local_bind_host, local_bind_port)
 
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
@@ -80,37 +118,15 @@ class UDPConnection(Connection):
 
         # Get the host to connect to remotely
         if remote_host is not None and remote_port is not None:
-            self._can_send = True
             self._remote_port = remote_port
-
-            try:
-                self._remote_ip_address = socket.gethostbyname(remote_host)
-            except Exception as exception:
-                raise SpinnmanIOException(
-                    "Error getting ip address for {}: {}".format(
-                        remote_host, exception))
-
-            try:
-                self._socket.connect((self._remote_ip_address, remote_port))
-            except Exception as exception:
-                raise SpinnmanIOException(
-                    "Error connecting to {}:{}: {}".format(
-                        self._remote_ip_address, remote_port, exception))
+            self._remote_ip_address = self.__resolve_host(remote_host)
+            self.__connect_socket(self._socket, self._remote_ip_address,
+                                  remote_port)
+            self._can_send = True
 
         # Get the details of where the socket is connected
-        self._local_ip_address = None
-        self._local_port = None
-        try:
-            self._local_ip_address, self._local_port =\
-                self._socket.getsockname()
-
-            # Ensure that a standard address is used for the INADDR_ANY
-            # hostname
-            if self._local_ip_address is None or self._local_ip_address == "":
-                self._local_ip_address = "0.0.0.0"
-        except Exception as exception:
-            raise SpinnmanIOException("Error querying socket: {}".format(
-                exception))
+        self._local_ip_address, self._local_port = \
+            self.__get_socket_address(self._socket)
 
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
@@ -194,8 +210,8 @@ class UDPConnection(Connection):
         :type timeout: None or float
         :return: The data received as a bytestring
         :rtype: str
-        :raise SpinnmanTimeoutException: If a timeout occurs before any data\
-                    is received
+        :raise SpinnmanTimeoutException: \
+            If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
         """
         try:
@@ -215,8 +231,8 @@ class UDPConnection(Connection):
         :return: A tuple of the data received and a tuple of the\
                 (address, port) received from
         :rtype: str, (str, int)
-        :raise SpinnmanTimeoutException: If a timeout occurs before any data\
-                    is received
+        :raise SpinnmanTimeoutException: \
+            If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
         """
         try:

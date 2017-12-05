@@ -22,19 +22,19 @@ class EIEIODataHeader(object):
 
         :param eieio_type: the type of message
         :type eieio_type:\
-                    :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
+            :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
         :param tag: the tag of the message (0 by default)
         :type tag: int
         :param prefix: the key prefix of the message or None if not prefixed
         :type prefix: int or None
         :param prefix_type: the position of the prefix (upper or lower)
         :type prefix_type:\
-                    :py:class:`spinnman.messages.eieio.eieio_prefix.EIEIOPrefix`
-        :param payload_base: The base payload to be applied, or None if no\
-                    base payload
+            :py:class:`spinnman.messages.eieio.eieio_prefix.EIEIOPrefix`
+        :param payload_base: \
+            The base payload to be applied, or None if no base payload
         :type payload_base: int or None
         :param is_time: True if the payloads should be taken to be timestamps,\
-                    or False otherwise
+            or False otherwise
         :type is_time: bool
         :param count: Count of the number of items in the packet
         :type count: int
@@ -91,11 +91,11 @@ class EIEIODataHeader(object):
 
         :param eieio_type: the type of message
         :type eieio_type:\
-                    :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
+            :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
         :param is_prefix: True if there is a prefix, False otherwise
         :type is_prefix: bool
-        :param is_payload_base: True if there is a payload base, False\
-                    otherwise
+        :param is_payload_base: \
+            True if there is a payload base, False otherwise
         :type is_payload_base: bool
         :return: The size of the header in bytes
         :rtype: int
@@ -146,28 +146,23 @@ class EIEIODataHeader(object):
         data |= self._tag
 
         # Convert the remaining data, depending on the various options
-        if self._payload_base is not None:
-            if (self._eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT or
-                    self._eieio_type == EIEIOType.KEY_16_BIT):
-                if self._prefix is not None:
-                    return _PATTERN_BBHH.pack(
-                        self._count, data, self._prefix, self._payload_base)
-                else:
-                    return _PATTERN_BBH.pack(
-                        self._count, data, self._payload_base)
-            elif (self._eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT or
-                    self._eieio_type == EIEIOType.KEY_32_BIT):
-                if self._prefix is not None:
-                    return _PATTERN_BBHI.pack(
-                        self._count, data, self._prefix, self._payload_base)
-                else:
-                    return _PATTERN_BBI.pack(
-                        self._count, data, self._payload_base)
-        else:
+        if self._payload_base is None:
             if self._prefix is not None:
                 return _PATTERN_BBH.pack(self._count, data, self._prefix)
-            else:
-                return _PATTERN_BB.pack(self._count, data)
+            return _PATTERN_BB.pack(self._count, data)
+        if (self._eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT or
+                self._eieio_type == EIEIOType.KEY_16_BIT):
+            if self._prefix is not None:
+                return _PATTERN_BBHH.pack(
+                    self._count, data, self._prefix, self._payload_base)
+            return _PATTERN_BBH.pack(self._count, data, self._payload_base)
+        if (self._eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT or
+                self._eieio_type == EIEIOType.KEY_32_BIT):
+            if self._prefix is not None:
+                return _PATTERN_BBHI.pack(
+                    self._count, data, self._prefix, self._payload_base)
+            return _PATTERN_BBI.pack(self._count, data, self._payload_base)
+        raise SpinnmanInvalidPacketException("unexpected EIEIO type")
 
     @staticmethod
     def from_bytestring(data, offset):
@@ -179,7 +174,7 @@ class EIEIODataHeader(object):
         :type offset: int
         :return: an EIEIO header
         :rtype:\
-                    :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
+            :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
         """
 
         (count, header_data) = _PATTERN_BB.unpack_from(data, offset)

@@ -1,6 +1,9 @@
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .application_run_process import ApplicationRunProcess
 from .de_alloc_sdram_process import DeAllocSDRAMProcess
+from .fill_process import FillDataType
+from .fill_process import FillProcess
+from .get_heap_process import GetHeapProcess
 from .get_cpu_info_process import GetCPUInfoProcess
 from .get_machine_process import GetMachineProcess
 from .get_routes_process import GetMultiCastRoutesProcess
@@ -20,21 +23,14 @@ from .round_robin_connection_selector import RoundRobinConnectionSelector
 from .send_single_command_process import SendSingleCommandProcess
 from .write_memory_flood_process import WriteMemoryFloodProcess
 from .write_memory_process import WriteMemoryProcess
-from .fill_process import FillProcess
-from .fill_process import FillDataType
-from .get_heap_process import GetHeapProcess
 
 __all__ = ["AbstractMultiConnectionProcess", "ApplicationRunProcess",
-           "DeAllocSDRAMProcess", "ExitDPRIProcess", "GetCPUInfoProcess",
-           "GetHeapProcess", "GetMachineProcess", "GetMultiCastRoutesProcess",
-           "GetTagsProcess", "GetVersionProcess", "FillProcess",
-           "FillDataType",
-           "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
-           "MostDirectConnectionSelector", "ReadDPRIStatusProcess",
-           "ReadIOBufProcess", "ReadMemoryProcess",
-           "ReadRouterDiagnosticsProcess", "ResetDPRICountersProcess",
+           "DeAllocSDRAMProcess", "GetCPUInfoProcess", "GetHeapProcess",
+           "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
+           "GetVersionProcess", "FillDataType", "FillProcess",
+           "LoadFixedRouteRoutingEntryProcess", "LoadMultiCastRoutesProcess",
+           "MallocSDRAMProcess", "MostDirectConnectionSelector",
+           "ReadFixedRouteRoutingEntryProcess", "ReadIOBufProcess",
+           "ReadMemoryProcess", "ReadRouterDiagnosticsProcess",
            "RoundRobinConnectionSelector", "SendSingleCommandProcess",
-           "SetDPRIPacketTypesProcess", "SetDPRIRouterTimeoutProcess",
-           "SetDPRIRouterEmergencyTimeoutProcess", "WriteMemoryFloodProcess",
-           "WriteMemoryProcess", "ReadFixedRouteRoutingEntryProcess",
-           "LoadFixedRouteRoutingEntryProcess"]
+           "WriteMemoryFloodProcess", "WriteMemoryProcess"]

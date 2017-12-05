@@ -9,7 +9,6 @@ from spinnman.messages.scp.impl \
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_process import AbstractProcess
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +19,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
                  ignore_links, max_core_id, max_sdram_size=None):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(GetMachineProcess, self).__init__(connection_selector)
 
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
@@ -36,10 +35,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _make_chip(self, width, height, chip_info):
         """ Creates a chip from a ChipSummaryInfo structure
 
-        :param chip_info: The ChipSummaryInfo structure to create the chip\
-                    from
+        :param chip_info: \
+            The ChipSummaryInfo structure to create the chip from
         :type chip_info: \
-                    :py:class:`spinnman.model.ChipSummaryInfo`
+            :py:class:`spinnman.model.ChipSummaryInfo`
         :return: The created chip
         :rtype: :py:class:`spinn_machine.Chip`
         """
@@ -51,7 +50,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if self._max_core_id is not None and max_core_id > self._max_core_id:
             max_core_id = self._max_core_id
         for virtual_core_id in range(max_core_id + 1):
-
             # Add the core provided it is not to be ignored
             if ((chip_info.x, chip_info.y, virtual_core_id) not in
                     self._ignore_cores):
@@ -61,18 +59,20 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 elif core_states[virtual_core_id] == CPUState.IDLE:
                     processors.append(Processor(virtual_core_id))
                 else:
-                    logger.warn("Not using core {}, {}, {} in state {}".format(
+                    logger.warn(
+                        "Not using core %d,%d,%d in state %s",
                         chip_info.x, chip_info.y, virtual_core_id,
-                        core_states[virtual_core_id]))
+                        core_states[virtual_core_id])
 
         # Create the router
         links = list()
         for link in chip_info.working_links:
-            dest_x, dest_y = Machine.get_chip_over_link(
+            dest = Machine.get_chip_over_link(
                 chip_info.x, chip_info.y, link, width, height)
-            if ((chip_info.x, chip_info.y, link) not in self._ignore_links and
-                    (dest_x, dest_y) not in self._ignore_chips and
-                    (dest_x, dest_y) in self._chip_info):
+            if ((chip_info.x, chip_info.y, link) not in self._ignore_links
+                    and dest not in self._ignore_chips
+                    and dest in self._chip_info):
+                dest_x, dest_y = dest
                 opposite_link_id = (link + 3) % 6
                 links.append(Link(
                     chip_info.x, chip_info.y, link, dest_x, dest_y,
@@ -114,7 +114,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if isinstance(request, ReadLink):
             if isinstance(exception, SpinnmanUnexpectedResponseCodeException):
                 return
-        AbstractProcess._receive_error(self, request, exception, tb)
+        super(GetMachineProcess, self)._receive_error(request, exception, tb)
 
     def get_machine_details(self, boot_x, boot_y, width, height):
         # Get the P2P table - 8 entries are packed into each 32-bit word
@@ -133,8 +133,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Get the chip information for each chip
         for (x, y) in p2p_table.iterchips():
-            self._send_request(
-                GetChipInfo(x, y), self._receive_chip_info)
+            self._send_request(GetChipInfo(x, y), self._receive_chip_info)
         self._finish()
         try:
             self.check_for_error()
@@ -146,8 +145,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Warn about unexpected missing chips
         for (x, y) in p2p_table.iterchips():
             if (x, y) not in self._chip_info:
-                logger.warn("Chip {}, {} was expected but didn't reply".format(
-                    x, y))
+                logger.warn(
+                    "Chip %d,%d was expected but didn't reply", x, y)
 
         # Build a Machine
         def chip_xy(chip):

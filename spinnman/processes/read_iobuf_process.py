@@ -68,8 +68,8 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         packet_bytes = response.length - 16
         if packet_bytes > bytes_to_read:
             packet_bytes = bytes_to_read
-        offset = response.offset + 16
         if packet_bytes > 0:
+            offset = response.offset + 16
             view[0:packet_bytes] = response.data[
                 offset:(offset + packet_bytes)]
 
@@ -123,7 +123,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         self.check_for_error()
 
         # Run rounds of the process until reading is complete
-        while len(self._extra_reads) > 0 or len(self._next_reads) > 0:
+        while self._extra_reads or self._next_reads:
             # Process the extra iobuf reads needed
             while self._extra_reads:
                 self._request_iobuf_region_tail(self._extra_reads.pop())

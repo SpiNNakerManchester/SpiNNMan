@@ -50,6 +50,6 @@ def generate_machine_report(report_directory, machine, connections):
                             f.write("\t{}\n".format(link))
                         f.write("\t\t==========================\n\n")
     except IOError:
-        logger.error("Generate_placement_reports: Can't open file {} for "
-                     "writing.".format(file_name))
+        logger.error("Generate_placement_reports: Can't open file %s for "
+                     "writing.", file_name)
         raise

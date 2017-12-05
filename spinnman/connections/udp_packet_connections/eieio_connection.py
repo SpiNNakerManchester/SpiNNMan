@@ -45,8 +45,7 @@ class EIEIOConnection(
         header = _ONE_SHORT.unpack_from(data)[0]
         if header & 0xC000 == 0x4000:
             return read_eieio_command_message(data, 0)
-        else:
-            return read_eieio_data_message(data, 0)
+        return read_eieio_data_message(data, 0)
 
     def send_eieio_message(self, eieio_message):
         self.send(eieio_message.bytestring)

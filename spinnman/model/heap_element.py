@@ -76,7 +76,5 @@ class HeapElement(object):
         if self._is_free:
             return "FREE  0x{:8X} SIZE: {:9d}".format(
                 self._block_address, self.size)
-        else:
-            return "BLOCK 0x{:8X} SIZE: {:9d} TAG: {:3d} APP_ID: {:3d}"\
-                .format(
-                    self._block_address, self.size, self._tag, self._app_id)
+        return "BLOCK 0x{:8X} SIZE: {:9d} TAG: {:3d} APP_ID: {:3d}".format(
+            self._block_address, self.size, self._tag, self._app_id)

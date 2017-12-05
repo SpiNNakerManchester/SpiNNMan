@@ -25,7 +25,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
         :param eieio_header: The header of the message
         :type eieio_header:\
-                    :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
+            :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
         :param data: Optional data contained within the packet
         :type data: str
         :param offset: Optional offset where the valid data starts
@@ -81,11 +81,11 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
         :param eieio_type: the type of message
         :type eieio_type:\
-                    :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
+            :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
         :param is_prefix: True if there is a prefix, False otherwise
         :type is_prefix: bool
-        :param is_payload_base: True if there is a payload base, False\
-                    otherwise
+        :param is_payload_base: \
+            True if there is a payload base, False otherwise
         :type is_payload_base: bool
         :param is_timestamp: True if there is a timestamp, False otherwise
         :return: The minimum size of the packet in bytes
@@ -111,9 +111,10 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
         :rtype: int
         """
-        return int(math.floor((UDP_MESSAGE_MAX_SIZE - self._header.size) /
-                              (self._header.eieio_type.key_bytes +
-                               self._header.eieio_type.payload_bytes)))
+        ty = self._header.eieio_type
+        return int(math.floor(
+            (UDP_MESSAGE_MAX_SIZE - self._header.size) /
+            (ty.key_bytes + ty.payload_bytes)))
 
     @property
     def n_elements(self):
@@ -125,10 +126,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     def size(self):
         """ The size of the packet with the current contents
         """
+        ty = self._header.eieio_type
         return (self._header.size +
-                ((self._header.eieio_type.key_bytes +
-                 self._header.eieio_type.payload_bytes) *
-                 self._header.count))
+                (ty.key_bytes + ty.payload_bytes) * self._header.count)
 
     def add_key_and_payload(self, key, payload):
         """ Adds a key and payload to the packet
@@ -178,11 +178,11 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
         :param element: The element to be added
         :type element:\
-                    :py:class:`spinnman.messages.eieio.data_messages.abstract_eieio_data_element.AbstractEIEIODataElement`
-        :raise SpinnmanInvalidParameterException: If the element is not\
-                    compatible with the header
-        :raise SpinnmanInvalidPacketException: If the message was created to\
-                    read data
+            :py:class:`spinnman.messages.eieio.data_messages.abstract_eieio_data_element.AbstractEIEIODataElement`
+        :raise SpinnmanInvalidParameterException: \
+            If the element is not compatible with the header
+        :raise SpinnmanInvalidPacketException: \
+            If the message was created to read data
         """
         if self._data is not None:
             raise SpinnmanInvalidPacketException(
@@ -196,7 +196,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """ Determine if there is another element to be read
 
         :return: True if the message was created with data, and there are more\
-                    elements to be read
+            elements to be read
         :rtype: bool
         """
         return (self._data is not None and
@@ -208,7 +208,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             exact type of element returned depends on the packet type
 
         :rtype:\
-                    :py:class:`spinnman.messages.eieio.data_messages.abstract_eieio_data_element.AbstractEIEIODataElement`
+            :py:class:`spinnman.messages.eieio.data_messages.abstract_eieio_data_element.AbstractEIEIODataElement`
         """
         if not self.is_next_element:
             return None

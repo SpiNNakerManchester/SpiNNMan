@@ -27,10 +27,10 @@ class SCPRequestPipeLine(object):
 
     def __init__(self, connection, n_channels=1,
                  intermediate_channel_waits=0,
-                 retry_codes=set([SCPResult.RC_TIMEOUT,
-                                  SCPResult.RC_P2P_TIMEOUT,
-                                  SCPResult.RC_LEN,
-                                  SCPResult.RC_P2P_NOREPLY]),
+                 retry_codes=frozenset([SCPResult.RC_TIMEOUT,
+                                        SCPResult.RC_P2P_TIMEOUT,
+                                        SCPResult.RC_LEN,
+                                        SCPResult.RC_P2P_NOREPLY]),
                  n_retries=3, packet_timeout=0.5):
         """
         :param connection: The connection over which the communication is to\

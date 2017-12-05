@@ -12,6 +12,7 @@ class FillDataType(Enum):
     BYTE = (1, "<4B")
 
     def __new__(cls, value, struct_type, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         obj._struct_type = struct_type
@@ -80,9 +81,8 @@ class FillProcess(AbstractMultiConnectionProcess):
         # data if the size is correct - note that pre_bytes[:size] will
         # return all of pre_bytes if size >= len(pre_bytes)
         pre_data = pre_bytes[:size]
-        if len(pre_data) > 0:
-            self._send_request(WriteMemory(
-                x, y, base_address, pre_bytes[:size]))
+        if pre_data:
+            self._send_request(WriteMemory(x, y, base_address, pre_data))
             bytes_to_write -= extra_bytes
             address += extra_bytes
 

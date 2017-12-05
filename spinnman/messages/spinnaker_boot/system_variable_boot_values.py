@@ -15,6 +15,7 @@ class _DataType(Enum):
     BYTE_ARRAY = (16, "s")
 
     def __new__(cls, value, struct_code, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         obj._struct_code = struct_code

@@ -215,7 +215,7 @@ class SpinnmanGenericProcessException(SpinnmanException):
     """Encapsulates exceptions from processes which communicate with some
     core/chip
     """
-    def __init__(self, exception, tb, x, y, p):
+    def __init__(self, exception, tb, x, y, p, tb2=None):
         problem = \
             "\n     Received exception class: {} \n" \
             "     With message: {} \n" \
@@ -226,6 +226,8 @@ class SpinnmanGenericProcessException(SpinnmanException):
         SpinnmanException.__init__(self, problem)
 
         self._stored_exception = exception
+        if tb2 is not None:
+            self.__traceback__ = tb2
 
     @property
     def exception(self):

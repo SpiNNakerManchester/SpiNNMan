@@ -50,7 +50,7 @@ class _FixedRouteResponse(AbstractSCPResponse):
     """
     __slots__ = (
         # the fixed route router entry
-        "_route"
+        "_route",
     )
 
     def __init__(self):

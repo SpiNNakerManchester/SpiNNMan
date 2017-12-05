@@ -20,7 +20,7 @@ def _set_flags_in_word(word, enum_list, enum_type, offset):
         enum_values = list()
     else:
         enum_values = list(enum_list)
-    if len(enum_values) == 0:
+    if not enum_values:
         enum_values = [value for value in enum_type]
     for enum_value in enum_values:
         word |= 1 << (enum_value.value + offset)

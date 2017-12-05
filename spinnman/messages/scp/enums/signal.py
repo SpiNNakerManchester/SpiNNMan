@@ -28,6 +28,7 @@ class Signal(Enum):
     USER_3 = (13, SignalType.MULTICAST)
 
     def __new__(cls, value, signal_type, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
