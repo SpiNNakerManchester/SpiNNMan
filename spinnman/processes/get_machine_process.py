@@ -19,6 +19,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
                  ignore_links, max_core_id, max_sdram_size=None):
+        # pylint: disable=too-many-arguments
         super(GetMachineProcess, self).__init__(connection_selector)
 
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
@@ -65,6 +66,24 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                         core_states[virtual_core_id])
 
         # Create the router
+        router = self._make_router(chip_info, width, height)
+
+        # Create the chip's SDRAM object
+        sdram_size = chip_info.largest_free_sdram_block
+        if (self._max_sdram_size is not None and
+                sdram_size > self._max_sdram_size):
+            sdram_size = self._max_sdram_size
+        sdram = SDRAM(size=sdram_size)
+
+        # Create the chip
+        return Chip(
+            x=chip_info.x, y=chip_info.y, processors=processors,
+            router=router, sdram=sdram,
+            ip_address=chip_info.ethernet_ip_address,
+            nearest_ethernet_x=chip_info.nearest_ethernet_x,
+            nearest_ethernet_y=chip_info.nearest_ethernet_y)
+
+    def _make_router(self, chip_info, width, height):
         links = list()
         for link in chip_info.working_links:
             dest = Machine.get_chip_over_link(
@@ -77,27 +96,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 links.append(Link(
                     chip_info.x, chip_info.y, link, dest_x, dest_y,
                     opposite_link_id, opposite_link_id))
-        router = Router(
+        return Router(
             links=links,
             n_available_multicast_entries=(
                 chip_info.n_free_multicast_routing_entries))
-
-        # Create the chip's SDRAM object
-        sdram_size = chip_info.largest_free_sdram_block
-        if (self._max_sdram_size is not None and
-                sdram_size > self._max_sdram_size):
-            sdram_size = self._max_sdram_size
-        sdram = SDRAM(size=sdram_size)
-
-        # Create the chip
-        chip = Chip(
-            x=chip_info.x, y=chip_info.y, processors=processors,
-            router=router, sdram=sdram,
-            ip_address=chip_info.ethernet_ip_address,
-            nearest_ethernet_x=chip_info.nearest_ethernet_x,
-            nearest_ethernet_y=chip_info.nearest_ethernet_y)
-
-        return chip
 
     def _receive_p2p_data(self, scp_read_response):
         self._p2p_column_data.append(

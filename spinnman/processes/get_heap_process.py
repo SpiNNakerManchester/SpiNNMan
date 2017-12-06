@@ -1,5 +1,5 @@
 from spinnman.processes import AbstractMultiConnectionProcess
-from spinnman import constants
+from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.model import HeapElement
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.messages.scp.impl import ReadMemory
@@ -34,25 +34,25 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
             self._blocks.append(HeapElement(
                 block_address, self._next_block_address, free))
 
-    def _read_address(self, x, y, address, size, callback):
+    def _read_address(self, chip_address, address, size, callback):
+        (x, y) = chip_address
         self._send_request(
             ReadMemory(x, y, address, size), callback)
         self._finish()
         self.check_for_error()
 
-    def get_heap(self, x, y, pointer=HEAP_ADDRESS):
+    def get_heap(self, chip_address, pointer=HEAP_ADDRESS):
         self._read_address(
-            x, y, constants.SYSTEM_VARIABLE_BASE_ADDRESS + pointer.offset,
+            chip_address, SYSTEM_VARIABLE_BASE_ADDRESS + pointer.offset,
             pointer.data_type.value, self._read_heap_address_response)
 
         self._read_address(
-            x, y, self._heap_address, 8, self._read_heap_pointer)
+            chip_address, self._heap_address, 8, self._read_heap_pointer)
 
         while self._next_block_address != 0:
             self._read_address(
-                x, y, self._next_block_address, 8,
+                chip_address, self._next_block_address, 8,
                 functools.partial(
-                    self._read_next_block, self._next_block_address)
-            )
+                    self._read_next_block, self._next_block_address))
 
         return self._blocks

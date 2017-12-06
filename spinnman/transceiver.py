@@ -1721,27 +1721,26 @@ class Transceiver(object):
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
-                x, y, cpu, base_address, data, n_bytes)
+                (x, y, cpu), base_address, data, n_bytes)
         elif isinstance(data, str) and is_filename:
-            reader = FileDataReader(data)
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
-            process.write_memory_from_reader(
-                x, y, cpu, base_address, reader, n_bytes)
-            reader.close()
+            with FileDataReader(data) as reader:
+                process.write_memory_from_reader(
+                    (x, y, cpu), base_address, reader, n_bytes)
         elif isinstance(data, int):
             data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data_to_write, 0, 4)
+                (x, y, cpu), base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
             data_to_write = _ONE_LONG.pack(data)
             process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data_to_write, 0, 8)
+                (x, y, cpu), base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
             process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data, offset, n_bytes)
+                (x, y, cpu), base_address, data, offset, n_bytes)
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
                                n_bytes=None, offset=0, cpu=0):
@@ -1800,28 +1799,28 @@ class Transceiver(object):
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, AbstractDataReader):
             process.write_link_memory_from_reader(
-                x, y, cpu, link, base_address, data, n_bytes)
+                (x, y, cpu), link, base_address, data, n_bytes)
         elif isinstance(data, int):
             data_to_write = _ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 4)
+                (x, y, cpu), link, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
             data_to_write = _ONE_LONG.pack(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 8)
+                (x, y, cpu), link, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data, offset, n_bytes)
+                (x, y, cpu), link, base_address, data, offset, n_bytes)
 
     def write_memory_flood(
             self, base_address, data, n_bytes=None, offset=0,
             is_filename=False):
         """ Write to the SDRAM of all chips.
 
-        :param base_address: The address in SDRAM where the region of memory\
-            is to be written
+        :param base_address: \
+            The address in SDRAM where the region of memory is to be written
         :type base_address: int
         :param data: \
             The data that is to be written.  Should be one of the following:
@@ -1843,22 +1842,22 @@ class Transceiver(object):
         :param offset: The offset where the valid data starts, if the data is \
             a int, then the offset will be ignored and 0 is used.
         :type offset: int
-        :param is_filename: True if the data should be interpreted as a file \
-            name
+        :param is_filename: \
+            True if the data should be interpreted as a file name
         :type is_filename: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If one of the specified chips is not valid
             * If app_id is an invalid application id
             * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
 
         # Ensure only one flood fill occurs at any one time
@@ -1871,23 +1870,20 @@ class Transceiver(object):
             process.write_memory_from_reader(
                 nearest_neighbour_id, base_address, data, n_bytes)
         elif isinstance(data, str) and is_filename:
-            reader = FileDataReader(data)
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
-            process.write_memory_from_reader(
-                nearest_neighbour_id, base_address, reader, n_bytes)
-            reader.close()
+            with FileDataReader(data) as reader:
+                process.write_memory_from_reader(
+                    nearest_neighbour_id, base_address, reader, n_bytes)
         elif isinstance(data, int):
             data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data_to_write, 0, 4)
+                nearest_neighbour_id, base_address, data_to_write, 0)
         elif isinstance(data, long):
             data_to_write = _ONE_LONG.pack(data)
             process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data_to_write, 0, 8)
+                nearest_neighbour_id, base_address, data_to_write, 0)
         else:
-            if n_bytes is None:
-                n_bytes = len(data)
             process.write_memory_from_bytearray(
                 nearest_neighbour_id, base_address, data, offset, n_bytes)
 
@@ -1897,14 +1893,14 @@ class Transceiver(object):
     def read_memory(self, x, y, base_address, length, cpu=0):
         """ Read some areas of SDRAM from the board
 
-        :param x: The x-coordinate of the chip where the memory is to be\
-            read from
+        :param x: \
+            The x-coordinate of the chip where the memory is to be read from
         :type x: int
-        :param y: The y-coordinate of the chip where the memory is to be\
-            read from
+        :param y: \
+            The y-coordinate of the chip where the memory is to be read from
         :type y: int
-        :param base_address: The address in SDRAM where the region of memory\
-            to be read starts
+        :param base_address: \
+            The address in SDRAM where the region of memory to be read starts
         :type base_address: int
         :param length: The length of the data to be read in bytes
         :type length: int
@@ -1912,71 +1908,72 @@ class Transceiver(object):
         :type cpu: int
         :return: A bytearray of data read
         :rtype: bytearray
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If one of x, y, p, base_address or length is invalid
             * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
 
         process = ReadMemoryProcess(self._scamp_connection_selector)
-        return process.read_memory(x, y, cpu, base_address, length)
+        return process.read_memory((x, y, cpu), base_address, length)
 
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
         """ Read some areas of memory on a neighbouring chip using a LINK_READ
             SCP command. If sent to a BMP, this command can be used to\
             communicate with the FPGAs' debug registers.
 
-        :param x: The x-coordinate of the chip whose neighbour is to be\
-            read from
+        :param x: \
+            The x-coordinate of the chip whose neighbour is to be read from
         :type x: int
-        :param y: The y-coordinate of the chip whose neighbour is to be\
-            read from
+        :param y: \
+            The y-coordinate of the chip whose neighbour is to be read from
         :type y: int
         :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
         :type cpu: int
-        :param link: The link index to send the request to (or if BMP, the\
-            FPGA number)
+        :param link: \
+            The link index to send the request to (or if BMP, the FPGA number)
         :type link: int
-        :param base_address: The address in SDRAM where the region of memory\
-            to be read starts
+        :param base_address: \
+            The address in SDRAM where the region of memory to be read starts
         :type base_address: int
         :param length: The length of the data to be read in bytes
         :type length: int
         :return: An iterable of chunks of data read in order
         :rtype: iterable of bytearray
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If one of x, y, p, base_address or length is invalid
             * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
 
         process = ReadMemoryProcess(self._scamp_connection_selector)
-        return process.read_link_memory(x, y, cpu, link, base_address, length)
+        return process.read_link_memory(
+            (x, y, cpu), link, base_address, length)
 
     def stop_application(self, app_id):
         """ Sends a stop request for an app_id
 
         :param app_id: The id of the application to send to
         :type app_id: int
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If app_id is not a valid application id
             * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
 
         if not self._machine_off:
@@ -2010,6 +2007,8 @@ class Transceiver(object):
         :param counts_between_full_check:\
             The number of times to use the count signal before instead using\
             the full CPU state check
+        :raise spinnman.exceptions.SpinnmanTimeoutException: \
+            If a timeout is specified and exceeded.
         """
 
         # check that the right number of processors are in the states
@@ -2068,12 +2067,13 @@ class Transceiver(object):
 
         :param all_core_subsets: The cores to filter
         :type all_core_subsets:\
-                    :py:class:`spinn_machine.CoreSubsets`
+            :py:class:`spinn_machine.CoreSubsets`
         :param states: The state or states to filter on
         :type states:\
-                    :py:class:`spinnman.model.enums.cpu_state.CPUState` or\
-                    set of :py:class:`spinnman.model.enums.cpu_state.CPUState`
-        :return: Core subsets object containing cores in the
+            :py:class:`spinnman.model.enums.cpu_state.CPUState` \
+            or set of \
+            :py:class:`spinnman.model.enums.cpu_state.CPUState`
+        :return: Core subsets object containing cores in the given state(s)
         """
         core_infos = self.get_cpu_information(all_core_subsets)
         cores_in_state = CoreSubsets()
@@ -2091,9 +2091,15 @@ class Transceiver(object):
     def get_cores_not_in_state(self, all_core_subsets, states):
         """ Get all cores that are not in a given state or set of states
 
-        :param all_core_subsets:
-        :param states:
-        :return:
+        :param all_core_subsets: The cores to filter
+        :type all_core_subsets:\
+            :py:class:`spinn_machine.CoreSubsets`
+        :param states: The state or states to filter on
+        :type states:\
+            :py:class:`spinnman.model.enums.cpu_state.CPUState` \
+            or set of \
+            :py:class:`spinnman.model.enums.cpu_state.CPUState`
+        :return: Core subsets object containing cores not in the given state(s)
         """
         core_infos = self.get_cpu_information(all_core_subsets)
         cores_not_in_state = CPUInfos()
@@ -2111,7 +2117,8 @@ class Transceiver(object):
         """ Get a string indicating the status of the given cores
 
         :param cpu_infos: A CPUInfos objects
-        :type cpu_infos: :py:class:`spinnman.model.cpu_infos.CPUInfos`
+        :type cpu_infos: \
+            :py:class:`spinnman.model.cpu_infos.CPUInfos`
         """
         break_down = "\n"
         for ((x, y, p), core_info) in cpu_infos.cpu_infos:
@@ -2142,16 +2149,16 @@ class Transceiver(object):
         :type signal: :py:class:`spinnman.messages.scp.Signal`
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If signal is not a valid signal
-                    * If app_id is not a valid application id
-                    * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
+            * If signal is not a valid signal
+            * If app_id is not a valid application id
+            * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(SendSignal(app_id, signal))
@@ -2166,18 +2173,18 @@ class Transceiver(object):
         :param cpu: The CPU of the chip on which to set the LEDs
         :type cpu: int
         :param led_states: A dictionary mapping SetLED index to state with\
-                           0 being off, 1 on and 2 inverted.
+            0 being off, 1 on and 2 inverted.
         :type led_states: dict
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-                    packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
 
@@ -2186,13 +2193,13 @@ class Transceiver(object):
     def locate_spinnaker_connection_for_board_address(self, board_address):
         """ Find a connection that matches the given board IP address
 
-        :param board_address: The IP address of the Ethernet connection on the\
-                    board
+        :param board_address: \
+            The IP address of the Ethernet connection on the board
         :type board_address: str
         :return: A connection for the given IP address, or None if no such\
-                    connection exists
+            connection exists
         :rtype:\
-                    :py:class:`spinnman.connections.udp_packet_connections.udp_scamp_connection.SCAMPConnection`
+            :py:class:`spinnman.connections.udp_packet_connections.scamp_connection.SCAMPConnection`
         """
         if board_address in self._udp_scamp_connections:
             return self._udp_scamp_connections[board_address]
@@ -2202,19 +2209,19 @@ class Transceiver(object):
         """ Set up an ip tag
 
         :param ip_tag: The tag to set up; note board_address can be None, in\
-                    which case, the tag will be assigned to all boards
+            which case, the tag will be assigned to all boards
         :type ip_tag: :py:class:`spinn_machine.tags.IPTag`
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the ip tag fields are incorrect
-                    * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
+            * If the ip tag fields are incorrect
+            * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
 
         # Check that the tag has a port assigned
@@ -2256,23 +2263,22 @@ class Transceiver(object):
         """ Set up a reverse ip tag
 
         :param reverse_ip_tag: The reverse tag to set up; note board_address\
-                    can be None, in which case, the tag will be assigned to\
-                    all boards
+            can be None, in which case, the tag will be assigned to all boards
         :type reverse_ip_tag:\
-                    :py:class:`spinn_machine.tags.ReverseIPTag`
+            :py:class:`spinn_machine.tags.ReverseIPTag`
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-                    is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the reverse ip tag fields are incorrect
-                    * If a packet is received that has invalid parameters
-                    * If the UDP port is one that is already used by\
-                      spiNNaker for system functions
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-                    a response indicates an error during the exchange
+            * If the reverse ip tag fields are incorrect
+            * If a packet is received that has invalid parameters
+            * If the UDP port is one that is already used by SpiNNaker for \
+                system functions
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
 
         if reverse_ip_tag.port is None:
@@ -2318,7 +2324,7 @@ class Transceiver(object):
 
         :param tag: The tag id
         :type tag: int
-        :param connection: Connection where the tag should be cleared.  If not\
+        :param connection: Connection where the tag should be cleared. If not\
             specified, all SCPSender connections will send the message to\
             clear the tag
         :type connection:\
@@ -2328,16 +2334,16 @@ class Transceiver(object):
             to clear the tag
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If the tag is not a valid tag
             * If the connection cannot send SDP messages
             * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         if connection is not None:
             connections = [connection]
@@ -2362,15 +2368,15 @@ class Transceiver(object):
         :return: An iterable of tags
         :rtype: iterable of\
             :py:class:`spinn_machine.tags.AbstractTag`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If the connection cannot send SDP messages
             * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         if connection is not None:
             conns = [connection]
@@ -2452,15 +2458,15 @@ class Transceiver(object):
         :type app_id: int
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If any of the routes are invalid
             * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
 
         process = LoadMultiCastRoutesProcess(self._scamp_connection_selector)
@@ -2481,15 +2487,15 @@ class Transceiver(object):
         :type app_id: int
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If any of the routes are invalid
             * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         process = LoadFixedRouteRoutingEntryProcess(
             self._scamp_connection_selector)
@@ -2888,7 +2894,7 @@ class Transceiver(object):
         :type heap: SystemVariableDefinition
         """
         process = GetHeapProcess(self._scamp_connection_selector)
-        return process.get_heap(x, y, heap)
+        return process.get_heap((x, y), heap)
 
     def fill_memory(
             self, x, y, base_address, repeat_value, bytes_to_fill,

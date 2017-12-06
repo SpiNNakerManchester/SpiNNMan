@@ -37,22 +37,48 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         # read = list of (x, y, p, n, next_address, first_read_size)
         self._next_reads = list()
 
-    def handle_iobuf_address_response(self, iobuf_size, x, y, p, response):
+    def _request_iobuf_address(self, iobuf_size, processor_address):
+        (x, y, p) = processor_address
+        base_address = get_vcpu_address(p) + CPU_IOBUF_ADDRESS_OFFSET
+        self._send_request(
+            ReadMemory(x, y, base_address, 4),
+            functools.partial(self._handle_iobuf_address_response,
+                              iobuf_size, processor_address))
+
+    def _handle_iobuf_address_response(
+            self, iobuf_size, processor_address, response):
         iobuf_address, = _ONE_WORD.unpack_from(response.data, response.offset)
         if iobuf_address != 0:
             first_read_size = min((iobuf_size + 16, UDP_MESSAGE_MAX_SIZE))
             self._next_reads.append((
-                x, y, p, 0, iobuf_address, first_read_size))
+                processor_address, 0, iobuf_address, first_read_size))
+
+    def _request_iobuf_region_tail(self, extra_region):
+        (processor_address, n, base_address, size, offset) = extra_region
+        (x, y, _p) = processor_address
+        self._send_request(
+            ReadMemory(x, y, base_address, size),
+            functools.partial(self._handle_extra_iobuf_response,
+                              processor_address, n, offset))
+
+    def _handle_extra_iobuf_response(
+            self, processor_address, n, offset, response):
+        view = self._iobuf_view[processor_address][n]
+        view[offset:offset + response.length] = response.data[
+            response.offset:response.offset + response.length]
 
     def _request_iobuf_region(self, region):
-        (x, y, p, n, next_address, first_read_size) = region
+        (processor_address, n, next_address, first_read_size) = region
+        (x, y, _p) = processor_address
         self._send_request(
             ReadMemory(x, y, next_address, first_read_size),
-            functools.partial(self.handle_first_iobuf_response,
-                              x, y, p, n, next_address, first_read_size))
+            functools.partial(self._handle_first_iobuf_response,
+                              processor_address, n, next_address,
+                              first_read_size))
 
-    def handle_first_iobuf_response(self, x, y, p, n, base_address,
-                                    first_read_size, response):
+    def _handle_first_iobuf_response(self, processor_address, n, base_address,
+                                     first_read_size, response):
+        # pylint: disable=too-many-arguments
 
         # Unpack the iobuf header
         (next_address, bytes_to_read) = _FIRST_IOBUF.unpack_from(
@@ -61,8 +87,8 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         # Create a buffer for the data
         data = bytearray(bytes_to_read)
         view = memoryview(data)
-        self._iobuf[(x, y, p)][n] = data
-        self._iobuf_view[(x, y, p)][n] = view
+        self._iobuf[processor_address][n] = data
+        self._iobuf_view[processor_address][n] = view
 
         # Put the data from this packet into the buffer
         packet_bytes = response.length - 16
@@ -82,35 +108,17 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
 
             # Read the next bit of memory making up the buffer
             next_bytes_to_read = min((bytes_to_read, UDP_MESSAGE_MAX_SIZE))
-            self._extra_reads.append((x, y, p, n, base_address,
-                                      next_bytes_to_read, read_offset))
+            self._extra_reads.append(
+                (processor_address, n, base_address, next_bytes_to_read,
+                 read_offset))
             base_address += next_bytes_to_read
             read_offset += next_bytes_to_read
             bytes_to_read -= next_bytes_to_read
 
         # If there is another IOBuf buffer, read this next
         if next_address != 0:
-            self._next_reads.append((x, y, p, n + 1, next_address,
-                                     first_read_size))
-
-    def _request_iobuf_region_tail(self, extra_region):
-        (x, y, p, n, base_address, size, offset) = extra_region
-        self._send_request(
-            ReadMemory(x, y, base_address, size),
-            functools.partial(self.handle_extra_iobuf_response,
-                              x, y, p, n, offset))
-
-    def handle_extra_iobuf_response(self, x, y, p, n, offset, response):
-        view = self._iobuf_view[(x, y, p)][n]
-        view[offset:offset + response.length] = response.data[
-            response.offset:response.offset + response.length]
-
-    def _request_iobuf_address(self, iobuf_size, x, y, p):
-        base_address = get_vcpu_address(p) + CPU_IOBUF_ADDRESS_OFFSET
-        self._send_request(
-            ReadMemory(x, y, base_address, 4),
-            functools.partial(self.handle_iobuf_address_response,
-                              iobuf_size, x, y, p))
+            self._next_reads.append(
+                (processor_address, n + 1, next_address, first_read_size))
 
     def read_iobuf(self, iobuf_size, core_subsets):
         # Get the iobuf address for each core
@@ -118,7 +126,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
             x = core_subset.x
             y = core_subset.y
             for p in core_subset.processor_ids:
-                self._request_iobuf_address(iobuf_size, x, y, p)
+                self._request_iobuf_address(iobuf_size, (x, y, p))
         self._finish()
         self.check_for_error()
 
@@ -134,16 +142,14 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
 
             # Finish this round
             self._finish()
-
-        self.check_for_error()
+            self.check_for_error()
 
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
             for p in core_subset.processor_ids:
-                iobufs = self._iobuf[(x, y, p)]
                 iobuf = ""
-                for item in iobufs.itervalues():
+                for item in self._iobuf[x, y, p].itervalues():
                     iobuf += item.decode(_ENCODING)
 
                 yield IOBuffer(x, y, p, iobuf)

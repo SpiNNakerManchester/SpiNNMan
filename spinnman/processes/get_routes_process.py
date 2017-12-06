@@ -19,26 +19,22 @@ _ROUTE_ENTRY_PATTERN = struct.Struct("<2xBxIII")
 
 
 class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
-
     def __init__(self, connection_selector, app_id=None):
         AbstractMultiConnectionProcess.__init__(self, connection_selector)
         self._entries = [None] * _N_ENTRIES
         self._app_id = app_id
 
     def _add_routing_entry(self, route_no, offset, app_id, route, key, mask):
+        # pylint: disable=too-many-arguments
         if route >= 0xFF000000:
             return
         if self._app_id is not None and self._app_id != app_id:
             return
 
-        processor_ids = list()
-        for processor_id in range(0, 26):
-            if route & (1 << (6 + processor_id)) != 0:
-                processor_ids.append(processor_id)
-        link_ids = list()
-        for link_id in range(0, 6):
-            if route & (1 << link_id) != 0:
-                link_ids.append(link_id)
+        # Convert bit-set into list of (set) IDs
+        processor_ids = [pi for pi in range(0, 26) if route & 1 << (6 + pi)]
+        link_ids = [li for li in range(0, 6) if route & 1 << li]
+
         self._entries[route_no + offset] = MulticastRoutingEntry(
             key, mask, processor_ids, link_ids, False)
 

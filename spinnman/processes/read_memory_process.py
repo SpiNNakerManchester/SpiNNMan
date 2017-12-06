@@ -1,6 +1,5 @@
 import functools
-from spinnman.messages.scp.impl \
-    import ReadLink, ReadMemory
+from spinnman.messages.scp.impl import ReadLink, ReadMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
@@ -17,12 +16,14 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
         self._view[offset:offset + response.length] = response.data[
             response.offset:response.offset + response.length]
 
-    def read_memory(self, x, y, p, base_address, length):
+    def read_memory(self, processor_address, base_address, length):
+        (x, y, p) = processor_address
         return self._read_memory(
             base_address, length,
             functools.partial(ReadMemory, x=x, y=y, cpu=p))
 
-    def read_link_memory(self, x, y, p, link, base_address, length):
+    def read_link_memory(self, processor_address, link, base_address, length):
+        (x, y, p) = processor_address
         return self._read_memory(
             base_address, length,
             functools.partial(ReadLink, x=x, y=y, cpu=p, link=link))

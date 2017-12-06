@@ -27,17 +27,17 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
         self.check_for_error()
 
     def write_memory_from_bytearray(self, nearest_neighbour_id, base_address,
-                                    data, offset, n_bytes):
+                                    data, offset, n_bytes=None):
+        # pylint: disable=too-many-arguments
+        if n_bytes is None:
+            n_bytes = len(data)
         self._start_flood_fill(n_bytes, nearest_neighbour_id)
 
         data_offset = offset
         offset = base_address
         block_no = 0
         while n_bytes > 0:
-
-            bytes_to_send = int(n_bytes)
-            if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = UDP_MESSAGE_MAX_SIZE
+            bytes_to_send = min((int(n_bytes), UDP_MESSAGE_MAX_SIZE))
 
             self._send_request(FloodFillData(
                 nearest_neighbour_id, block_no, offset,
@@ -53,17 +53,14 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
         self._end_flood_fill(nearest_neighbour_id)
 
     def write_memory_from_reader(self, nearest_neighbour_id, base_address,
-                                 data, n_bytes):
+                                 reader, n_bytes):
         self._start_flood_fill(n_bytes, nearest_neighbour_id)
 
         offset = base_address
         block_no = 0
         while n_bytes > 0:
-
-            bytes_to_send = int(n_bytes)
-            if bytes_to_send > UDP_MESSAGE_MAX_SIZE:
-                bytes_to_send = UDP_MESSAGE_MAX_SIZE
-            data_array = data.read(bytes_to_send)
+            bytes_to_send = min((int(n_bytes), UDP_MESSAGE_MAX_SIZE))
+            data_array = reader.read(bytes_to_send)
 
             self._send_request(FloodFillData(
                 nearest_neighbour_id, block_no, offset,
