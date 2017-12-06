@@ -27,6 +27,7 @@ class ReadMemory(AbstractSCPRequest):
                     * If the base address is not a positive number
                     * If the size is out of range
         """
+        # pylint: disable=too-many-arguments
         super(ReadMemory, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

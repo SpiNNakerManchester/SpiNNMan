@@ -26,6 +26,7 @@ class FloodFillData(AbstractSCPRequest):
                     must be divisible by 4
         :type data: bytearray
         """
+        # pylint: disable=too-many-arguments
         self._size = length
         self._offset = offset
         self._data_to_write = data

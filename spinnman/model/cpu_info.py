@@ -24,6 +24,7 @@ class CPUInfo(object):
         :param cpu_data: A bytestring received from SDRAM on the board
         :type cpu_data: str
         """
+        # pylint: disable=too-many-arguments
         self._x = x
         self._y = y
         self._p = p

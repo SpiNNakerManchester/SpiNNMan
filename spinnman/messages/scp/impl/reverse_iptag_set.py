@@ -32,6 +32,7 @@ class ReverseIPTagSet(AbstractSCPRequest):
         :param tag: The tag, between 0 and 7
         :type tag: int
         """
+        # pylint: disable=too-many-arguments
         strip_value = 1
         reverse_value = 1
 

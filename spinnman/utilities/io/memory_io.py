@@ -61,7 +61,7 @@ class _ChipMemoryIO(object):
         :param base_address: The lowest address that can be written
         :param buffer_size: The size of the write buffer to improve efficiency
         """
-
+        # pylint: disable=too-many-arguments
         self._transceiver = transceiver
         self._x = x
         self._y = y
@@ -208,6 +208,7 @@ class MemoryIO(AbstractIO):
             The end address of the region to write to.  This is the first\
             address just outside the region
         """
+        # pylint: disable=too-many-arguments
         if start_address >= end_address:
             raise ValueError("Start address must be less than end address")
 

@@ -27,6 +27,7 @@ class ReadLink(AbstractSCPRequest):
         :param size: The number of bytes to read, between 1 and 256
         :type size: int
         """
+        # pylint: disable=too-many-arguments
         super(ReadLink, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

@@ -12,6 +12,7 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         to inject during the simulation
     """
     def __init__(self, x, y, p, region_id, sequence_no, space_available):
+        # pylint: disable=too-many-arguments
         EIEIOCommandMessage.__init__(
             self, EIEIOCommandHeader(
                 EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS.value))

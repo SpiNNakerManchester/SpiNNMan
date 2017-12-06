@@ -23,6 +23,7 @@ class FillRequest(AbstractSCPRequest):
         :param size: The number of bytes to fill in
         :type size: int
         """
+        # pylint: disable=too-many-arguments
         AbstractSCPRequest.__init__(
             self,
             SDPHeader(

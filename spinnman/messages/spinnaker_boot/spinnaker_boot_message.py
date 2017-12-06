@@ -17,7 +17,7 @@ class SpinnakerBootMessage(object):
         """
         :param opcode: The operation of this packet
         :type opcode:\
-                    :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_op_code.SpinnakerBootOpCode`
+            :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_op_code.SpinnakerBootOpCode`
         :param operand_1: The first operand
         :type operand_1: int
         :param operand_2: The second operand
@@ -28,9 +28,10 @@ class SpinnakerBootMessage(object):
         :type data: str
         :param offset: The offset of the valid data
         :type offset: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
-                    opcode is not a valid value
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If the opcode is not a valid value
         """
+        # pylint: disable=too-many-arguments
         if data is not None and len(data) > (256 * 4):
             raise SpinnmanInvalidParameterException(
                 "len(data)", str(len(data)),
@@ -49,7 +50,7 @@ class SpinnakerBootMessage(object):
 
         :return: The operation code
         :rtype:\
-                :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_op_code.SpinnakerBootOpCode`
+            :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_op_code.SpinnakerBootOpCode`
         """
         return self._opcode
 

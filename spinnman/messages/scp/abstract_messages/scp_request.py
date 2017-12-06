@@ -34,6 +34,7 @@ class AbstractSCPRequest(object):
         :type data: bytearray
         :raise None: No known exceptions are raised
         """
+        # pylint: disable=too-many-arguments
         self._sdp_header = sdp_header
         self._scp_request_header = scp_request_header
         self._argument_1 = argument_1

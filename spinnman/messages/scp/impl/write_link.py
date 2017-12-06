@@ -13,22 +13,23 @@ class WriteLink(AbstractSCPRequest):
         """
 
         :param x: The x-coordinate of the chip whose neighbour will be written\
-                    to, between 0 and 255
+            to, between 0 and 255
         :type x: int
         :param y: The y-coordinate of the chip whose neighbour will be written\
-                    to, between 0 and 255
+            to, between 0 and 255
         :type y: int
         :param cpu: The CPU core to use, normally 0 (or if a BMP, the board \
-                      slot number)
+            slot number)
         :type cpu: int
         :param link: The link number to write to between 0 and 5 (or if a BMP,\
-                       the FPGA between 0 and 2)
+            the FPGA between 0 and 2)
         :type link: int
         :param base_address: The base_address to start writing to
         :type base_address: int
         :param data: Up to 256 bytes of data to write
         :type data: bytearray
         """
+        # pylint: disable=too-many-arguments
         super(WriteLink, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

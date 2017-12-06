@@ -216,6 +216,7 @@ class SpinnmanGenericProcessException(SpinnmanException):
     core/chip
     """
     def __init__(self, exception, tb, x, y, p, tb2=None):
+        # pylint: disable=too-many-arguments
         problem = \
             "\n     Received exception class: {} \n" \
             "     With message: {} \n" \

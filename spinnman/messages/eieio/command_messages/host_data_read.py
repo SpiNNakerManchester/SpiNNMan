@@ -17,6 +17,7 @@ class HostDataRead(EIEIOCommandMessage):
     """
     def __init__(
             self, n_requests, sequence_no, channel, region_id, space_read):
+        # pylint: disable=too-many-arguments
         if not isinstance(channel, list):
             channel = [channel]
 

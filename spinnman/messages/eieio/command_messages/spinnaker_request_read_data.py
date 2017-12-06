@@ -19,6 +19,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
     """
     def __init__(self, x, y, p, region_id, sequence_no, n_requests,
                  channel, start_address, space_to_be_read):
+        # pylint: disable=too-many-arguments
         if not isinstance(channel, list):
             channel = [channel]
 
@@ -143,6 +144,7 @@ class _SpinnakerRequestReadDataHeader(object):
         of requests and a sequence number
     """
     def __init__(self, x, y, p, n_requests, sequence_no):
+        # pylint: disable=too-many-arguments
         self._x = x
         self._y = y
         self._p = p

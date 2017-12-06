@@ -23,7 +23,7 @@ class BMPRequest(AbstractSCPRequest):
         :param argument_3: The optional third argument
         :param data: The optional data to be sent
         """
-
+        # pylint: disable=too-many-arguments
         sdp_header = SDPHeader(
             flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
             destination_cpu=BMPRequest.get_first_board(boards),

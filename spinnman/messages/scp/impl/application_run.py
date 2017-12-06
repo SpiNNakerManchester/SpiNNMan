@@ -20,13 +20,15 @@ class ApplicationRun(AbstractSCPRequest):
         :type x: int
         :param y: The y-coordinate of the chip to run on, between 0 and 255
         :type y: int
-        :param processors: The processors on the chip where the executable\
-                    should be started, between 1 and 17
+        :param processors: \
+            The processors on the chip where the executable should be \
+            started, between 1 and 17
         :type processors: list of int
-        :param wait: True if the processors should enter a "wait" state on\
-                    starting
+        :param wait: \
+            True if the processors should enter a "wait" state on starting
         :type wait: bool
         """
+        # pylint: disable=too-many-arguments
         processor_mask = 0
         if processors is not None:
             for processor in processors:

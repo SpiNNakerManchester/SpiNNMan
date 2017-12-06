@@ -26,19 +26,19 @@ class RouterInit(AbstractSCPRequest):
         :param base_address: The base_address containing the entries
         :type base_address: int
         :param app_id: The id of the application with which to associate the\
-                    routes.  If not specified, defaults to 0.
+            routes.  If not specified, defaults to 0.
         :type app_id: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
-                    * If x is out of range
-                    * If y is out of range
-                    * If n_entries is 0 or less
-                    * If table_address is not positive
-                    * If base_address is not positive
+            * If x is out of range
+            * If y is out of range
+            * If n_entries is 0 or less
+            * If table_address is not positive
+            * If base_address is not positive
         """
+        # pylint: disable=too-many-arguments
         if n_entries < 1:
             raise SpinnmanInvalidParameterException(
-                "n_entries", str(n_entries),
-                "Must be more than 0")
+                "n_entries", str(n_entries), "Must be more than 0")
         if base_address < 0:
             raise SpinnmanInvalidParameterException(
                 "base_address", str(base_address),
