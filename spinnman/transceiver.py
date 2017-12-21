@@ -66,8 +66,9 @@ import logging
 import socket
 import time
 import os
+from spinn_utilities.log import FormatAdapter
 
-logger = logging.getLogger(__name__)
+logger = FormatAdapter(logging.getLogger(__name__))
 
 _SCAMP_NAME = "SC&MP"
 _SCAMP_VERSION = (3, 0, 1)
@@ -146,7 +147,7 @@ def create_transceiver_from_hostname(
         If a response indicates an error during the exchange
     """
     if hostname is not None:
-        logger.info("Creating transceiver for %s", hostname)
+        logger.info("Creating transceiver for {}", hostname)
     connections = list()
 
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
@@ -165,7 +166,7 @@ def create_transceiver_from_hostname(
             bmp_connection = BMPConnection(conn_data)
             connections.append(bmp_connection)
             bmp_ip_list.append(bmp_connection.remote_ip_address)
-        logger.info("Transceiver using BMPs: %s", bmp_ip_list)
+        logger.info("Transceiver using BMPs: {}", bmp_ip_list)
 
     # handle the spinnaker connection
     if scamp_connections is None:
@@ -440,7 +441,7 @@ class Transceiver(object):
                             version_info.version_string,
                             _BMP_NAME, _BMP_MAJOR_VERSIONS))
 
-                logger.info("Using BMP at %s with version %s %s",
+                logger.info("Using BMP at {} with version {} {}",
                             connection.remote_ip_address, version_info.name,
                             version_info.version_string)
 
@@ -452,7 +453,7 @@ class Transceiver(object):
                         connection.remote_ip_address))
 
             except Exception:
-                logger.exception("Failed to speak to BMP at %s",
+                logger.exception("Failed to speak to BMP at {}",
                                  connection.remote_ip_address)
                 raise
 
@@ -670,7 +671,7 @@ class Transceiver(object):
         # TODO: Actually get the existing APP_IDs in use
         self._app_id_tracker = AppIdTracker()
 
-        logger.info("Detected a machine on ip address %s which has %s",
+        logger.info("Detected a machine on ip address {} which has {}",
                     self._boot_send_connection.remote_ip_address,
                     self._machine.cores_and_link_output_string())
 
@@ -731,7 +732,7 @@ class Transceiver(object):
                 self._all_connections.add(conn)
             else:
                 logger.warn(
-                    "Additional Ethernet connection on %s at chip %d, %d "
+                    "Additional Ethernet connection on {} at chip {}, {} "
                     "cannot be contacted", chip.ip_address, chip.x, chip.y)
 
         # Update the connection queues after finding new connections
@@ -1055,7 +1056,7 @@ class Transceiver(object):
             except SpinnmanException:
                 pass
         if version_info is not None:
-            logger.info("Found board with version %s", version_info)
+            logger.info("Found board with version {}", version_info)
         return version_info
 
     def get_cpu_information(self, core_subsets=None):

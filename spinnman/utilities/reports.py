@@ -1,8 +1,9 @@
 import os
 import time
 import logging
+from spinn_utilities.log import FormatAdapter
 
-logger = logging.getLogger(__name__)
+logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def generate_machine_report(report_directory, machine, connections):
@@ -50,6 +51,6 @@ def generate_machine_report(report_directory, machine, connections):
                             f.write("\t{}\n".format(link))
                         f.write("\t\t==========================\n\n")
     except IOError:
-        logger.error("Generate_placement_reports: Can't open file %s for "
+        logger.error("Generate_placement_reports: Can't open file {} for "
                      "writing.", file_name)
         raise
