@@ -78,7 +78,7 @@ class FillProcess(AbstractMultiConnectionProcess):
             self, x, y, address, base, data_to_fill, bytes_to_write):
         # Post bytes is the last part of the data from the end of the last
         # aligned word; the number of bytes to write here is exactly the
-        # number of bytes later than a word boundary the initial address is.  
+        # number of bytes later than a word boundary the initial address is.
         n_bytes = base % ALIGNMENT
         if not n_bytes or not bytes_to_write:
             return
