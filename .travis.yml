@@ -3,8 +3,11 @@ python: "2.7"
 dist: trusty
 
 before_install:
-  - pip install --upgrade pip setuptools wheel
+  # Work around ludicrous Travis bug
   - git clone https://github.com/SpiNNakerManchester/SupportScripts.git support
+  - python support/travis_blocking_stdout.py
+  # Bring pip up to date 
+  - pip install --upgrade pip setuptools wheel
   # SpiNNakerManchester internal dependencies; development mode
   - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNUtils.git
   - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNMachine.git
