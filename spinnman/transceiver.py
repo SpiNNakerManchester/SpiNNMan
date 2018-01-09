@@ -1197,7 +1197,7 @@ class Transceiver(object):
 
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        return next(self.get_cpu_information(core_subsets))
+        return next(iter(self.get_cpu_information(core_subsets)))
 
     def get_iobuf(self, core_subsets=None):
         """ Get the contents of the IOBUF buffer for a number of processors
