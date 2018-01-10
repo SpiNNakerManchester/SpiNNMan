@@ -80,7 +80,7 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x0b,
         doc="Indicates if Ethernet is available on this chip")
     p2p_b_repeats = _Definition(
-        _DataType.BYTE, offset=0x0c,
+        _DataType.BYTE, offset=0x0c, default=4,
         doc="Number of times to send out P2PB packets")
     log_peer_to_peer_sequence_length = _Definition(
         _DataType.BYTE, offset=0x0d, default=4,
@@ -128,22 +128,22 @@ class SystemVariableDefinition(Enum):
         doc="The time to wait after last BC during network initialisation"
             " in 10 ms units")
     netinit_phase = _Definition(
-        _DataType.BYTE, offset=0x2d, default=0,
+        _DataType.BYTE, offset=0x2d,
         doc="The phase of boot process (see enum netinit_phase_e)")
     p2p_root_y = _Definition(
-        _DataType.BYTE, offset=0x2e, default=0,
+        _DataType.BYTE, offset=0x2e,
         doc="The y-coordinate of the chip from which the system was booted")
     p2p_root_x = _Definition(
-        _DataType.BYTE, offset=0x2f, default=0,
+        _DataType.BYTE, offset=0x2f,
         doc="The x-coordinate of the chip from which the system was booted")
     led_0 = _Definition(
         _DataType.INT, offset=0x30, default=0x1,
         doc="The first part of the LED definitions")
     led_1 = _Definition(
-        _DataType.INT, offset=0x34, default=0,
+        _DataType.INT, offset=0x34,
         doc="The last part of the LED definitions")
     padding_1 = _Definition(
-        _DataType.INT, offset=0x38, default=0,
+        _DataType.INT, offset=0x38,
         doc="A word of padding")
     random_seed = _Definition(
         _DataType.INT, offset=0x3c,
@@ -158,10 +158,10 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x42, default=10,
         doc="The delay between nearest-neighbour packets in microseconds")
     software_watchdog_count = _Definition(
-        _DataType.BYTE, offset=0x43, default=0,
+        _DataType.BYTE, offset=0x43, default=3,
         doc="The number of watch dog timeouts before an error is raised")
     padding_2 = _Definition(
-        _DataType.INT, offset=0x44, default=0,
+        _DataType.INT, offset=0x44,
         doc="A word of padding")
     system_ram_heap_address = _Definition(
         _DataType.INT, offset=0x48, default=1024,
@@ -185,13 +185,13 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0x60,
         doc="The memory pointer for nearest neighbour global operations")
     lock = _Definition(
-        _DataType.BYTE, offset=0x64, default=0,
+        _DataType.BYTE, offset=0x64,
         doc="The lock")
     links_available = _Definition(
         _DataType.BYTE, offset=0x65, default=0x3f,
         doc="Bit mask (6 bits) of links enabled")
     last_biff_id = _Definition(
-        _DataType.BYTE, offset=0x66, default=0,
+        _DataType.BYTE, offset=0x66,
         doc="Last ID used in BIFF packet")
     board_test_flags = _Definition(
         _DataType.BYTE, offset=0x67,
