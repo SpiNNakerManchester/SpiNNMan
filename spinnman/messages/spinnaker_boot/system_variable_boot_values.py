@@ -155,7 +155,7 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x41, default=7,
         doc="The number of shared message buffers")
     nearest_neighbour_delay_us = _Definition(
-        _DataType.BYTE, offset=0x42, default=10,
+        _DataType.BYTE, offset=0x42, default=20,
         doc="The delay between nearest-neighbour packets in microseconds")
     software_watchdog_count = _Definition(
         _DataType.BYTE, offset=0x43, default=3,
