@@ -12,33 +12,10 @@ _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
 
 
 class EIEIOConnection(
-        UDPConnection, EIEIOReceiver, EIEIOSender,
-        Listenable):
+        UDPConnection, EIEIOReceiver, EIEIOSender, Listenable):
     """ A UDP connection for sending and receiving raw EIEIO messages
     """
-
-    def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=None):
-        """
-
-        :param local_host: The optional ip address or host name of the local\
-                interface to listen on
-        :type local_host: str
-        :param local_port: The optional local port to listen on
-        :type local_port: int
-        :param remote_host: The optional remote host name or ip address to\
-                send messages to.  If not specified, sending will not be\
-                possible using this connection
-        :type remote_host: str
-        :param remote_port: The optional remote port number to send messages\
-                to.  If not specified, sending will not be possible using this\
-                connection
-        """
-        UDPConnection.__init__(
-            self, local_host, local_port, remote_host, remote_port)
-        EIEIOReceiver.__init__(self)
-        EIEIOSender.__init__(self)
-        Listenable.__init__(self)
+    __slots__ = []
 
     def receive_eieio_message(self, timeout=None):
         data = self.receive(timeout)

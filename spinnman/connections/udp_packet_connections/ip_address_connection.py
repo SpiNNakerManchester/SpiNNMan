@@ -1,30 +1,33 @@
 from .udp_connection import UDPConnection
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 
+_SPECIAL_PORT = 54321
+
 
 class IPAddressesConnection(UDPConnection):
     """ A connection that detects any UDP packet that is transmitted by \
         spinnaker boards prior to boot
     """
+    __slots__ = []
 
     def __init__(self, local_host=None,
                  local_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
-        UDPConnection.__init__(self, local_host=local_host,
-                               local_port=local_port)
+        super(IPAddressesConnection, self).__init__(
+            local_host=local_host, local_port=local_port)
 
     def supports_sends_message(self, message):  # @UnusedVariable
+        # pylint: disable=unused-argument
         return False
 
     def receive_ip_address(self, timeout=None):
         try:
             (_, (ip_address, port)) = self.receive_with_address(timeout)
-            if port == 54321:
+            if port == _SPECIAL_PORT:
                 return ip_address
         except Exception:
             pass
         return None
 
     def __repr__(self):
-        return \
-            "IPAddressesConnection(local_host={}, local_port={})".format(
-                self.local_ip_address, self.local_port)
+        return "IPAddressesConnection(local_host={}, local_port={})".format(
+            self.local_ip_address, self.local_port)

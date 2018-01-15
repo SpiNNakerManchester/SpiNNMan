@@ -12,6 +12,10 @@ _REPR_TEMPLATE = "SDPConnection(chip_x={}, chip_y={}, local_host={},"\
 
 
 class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
+    __slots__ = [
+        "_chip_x",
+        "_chip_y"]
+
     def __init__(self, chip_x=None, chip_y=None, local_host=None,
                  local_port=None, remote_host=None, remote_port=None):
         """
@@ -25,12 +29,12 @@ class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
                 possible to send SDP messages that require a response with\
                 this connection.
         :type chip_y: int
-        :param local_host: The optional ip address or host name of the local\
+        :param local_host: The optional IP address or host name of the local\
                 interface to listen on
         :type local_host: str
         :param local_port: The optional local port to listen on
         :type local_port: int
-        :param remote_host: The optional remote host name or ip address to\
+        :param remote_host: The optional remote host name or IP address to\
                 send messages to.  If not specified, sending will not be\
                 possible using this connection
         :type remote_host: str

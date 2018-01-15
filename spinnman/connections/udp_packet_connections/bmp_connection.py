@@ -18,6 +18,10 @@ class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
     """ A BMP connection which supports queries to the BMP of a SpiNNaker\
         machine
     """
+    __slots__ = [
+        "_boards",
+        "_cabinet",
+        "_frame"]
 
     def __init__(self, connection_data):
         """
@@ -27,8 +31,8 @@ class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
         """
         port = SCP_SCAMP_PORT if connection_data.port_num \
             else connection_data.port_num
-        UDPConnection.__init__(
-            self, remote_host=connection_data.ip_address, remote_port=port)
+        super(BMPConnection, self).__init__(
+            remote_host=connection_data.ip_address, remote_port=port)
         self._cabinet = connection_data.cabinet
         self._frame = connection_data.frame
         self._boards = connection_data.boards

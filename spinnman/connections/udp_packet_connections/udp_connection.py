@@ -1,83 +1,28 @@
+from spinn_utilities.overrides import overrides
 from spinnman.exceptions \
     import SpinnmanIOException, SpinnmanTimeoutException
 from spinnman.connections.abstract_classes import Connection
+from .utils import bind_socket, connect_socket, get_socket, \
+    get_socket_address, ping, set_receive_buffer_size
 
 import logging
-import platform
-import subprocess
 import socket
 import select
 
 logger = logging.getLogger(__name__)
 _RECEIVE_BUFFER_SIZE = 1048576
+_PING_COUNT = 5
+_REPR_TEMPLATE = "UDPConnection(local={}:{}, remote={}:{})"
 
 
 class UDPConnection(Connection):
-    @staticmethod
-    def __get_socket():
-        """Wrapper round socket() system call"""
-        try:
-            # Create a UDP Socket
-            return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        except Exception as exception:
-            raise SpinnmanIOException(
-                "Error setting up socket: {}".format(exception))
-
-    @staticmethod
-    def __set_receive_buffer_size(sock, size):
-        """Wrapper round setsockopt() system call"""
-        try:
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, size)
-        except Exception:
-            # The OS said no, but we might still be able to work right with
-            # the defaults. Just warn and hope...
-            logger.warn("failed to configure UDP socket to have a large "
-                        "receive buffer", exc_info=True)
-
-    @staticmethod
-    def __bind_socket(sock, host, port):
-        """Wrapper round bind() system call"""
-        try:
-            # Bind the socket
-            sock.bind((str(host), int(port)))
-        except Exception as exception:
-            raise SpinnmanIOException(
-                "Error binding socket to {}:{}: {}".format(
-                    host, port, exception))
-
-    @staticmethod
-    def __resolve_host(host):
-        """Wrapper round gethostbyname() system call"""
-        try:
-            return socket.gethostbyname(host)
-        except Exception as exception:
-            raise SpinnmanIOException(
-                "Error getting ip address for {}: {}".format(
-                    host, exception))
-
-    @staticmethod
-    def __connect_socket(sock, remote_address, remote_port):
-        """Wrapper round connect() system call"""
-        try:
-            sock.connect((str(remote_address), int(remote_port)))
-        except Exception as exception:
-            raise SpinnmanIOException(
-                "Error connecting to {}:{}: {}".format(
-                    remote_address, remote_port, exception))
-
-    @staticmethod
-    def __get_socket_address(sock):
-        """Wrapper round getsockname() system call"""
-        try:
-            addr, port = sock.getsockname()
-            # Ensure that a standard address is used for the INADDR_ANY
-            # hostname
-            if addr is None or addr == "":
-                addr = "0.0.0.0"
-            return addr, port
-        except Exception as exception:
-            raise SpinnmanIOException("Error querying socket: {}".format(
-                exception))
+    __slots__ = [
+        "_can_send",
+        "_local_ip_address",
+        "_local_port",
+        "_remote_ip_address",
+        "_remote_port",
+        "_socket"]
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
@@ -102,13 +47,13 @@ class UDPConnection(Connection):
             If there is an error setting up the communication channel
         """
 
-        self._socket = self.__get_socket()
-        self.__set_receive_buffer_size(self._socket, _RECEIVE_BUFFER_SIZE)
+        self._socket = get_socket()
+        set_receive_buffer_size(self._socket, _RECEIVE_BUFFER_SIZE)
 
         # Get the host and port to bind to locally
         local_bind_host = "" if local_host is None else local_host
         local_bind_port = 0 if local_port is None else local_port
-        self.__bind_socket(self._socket, local_bind_host, local_bind_port)
+        bind_socket(self._socket, local_bind_host, local_bind_port)
 
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
@@ -120,49 +65,30 @@ class UDPConnection(Connection):
         if remote_host is not None and remote_port is not None:
             self._remote_port = remote_port
             self._remote_ip_address = self.__resolve_host(remote_host)
-            self.__connect_socket(self._socket, self._remote_ip_address,
-                                  remote_port)
+            connect_socket(self._socket, self._remote_ip_address, remote_port)
             self._can_send = True
 
         # Get the details of where the socket is connected
         self._local_ip_address, self._local_port = \
-            self.__get_socket_address(self._socket)
+            get_socket_address(self._socket)
 
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
 
+    @overrides(Connection.is_connected)
     def is_connected(self):
-        """ See\
-            :py:meth:`spinnman.connections.abstract_classes.connection.Connection.is_connected`
-        """
-
         # If this is not a sending socket, it is not connected
         if not self._can_send:
             return False
 
         # check if machine is active and on the network
-        pingtimeout = 5
-        while pingtimeout > 0:
-            # Start a ping process
-            process = self._do_single_ping(self._remote_ip_address)
-            if process.returncode == 0:
-                # ping worked
+        for _ in range(_PING_COUNT):
+            # Assume connected if ping works
+            if ping(self._remote_ip_address).returncode == 0:
                 return True
-            pingtimeout -= 1
 
         # If the ping fails this number of times, the host cannot be contacted
         return False
-
-    @staticmethod
-    def _do_single_ping(address):
-        if platform.platform().lower().startswith("windows"):
-            process = subprocess.Popen("ping -n 1 -w 1 " + address,
-                                       shell=True, stdout=subprocess.PIPE)
-        else:
-            process = subprocess.Popen("ping -c 1 -W 1 " + address,
-                                       shell=True, stdout=subprocess.PIPE)
-        process.wait()
-        return process
 
     @property
     def local_ip_address(self):
@@ -189,7 +115,7 @@ class UDPConnection(Connection):
         """ The remote ip address to which the connection is connected.
 
         :return: The remote ip address as a dotted string, or None if not\
-                    connected remotely
+            connected remotely
         :rtype: str
         """
         return self._remote_ip_address
@@ -229,7 +155,7 @@ class UDPConnection(Connection):
         :param timeout: The timeout, or None to wait forever
         :type timeout: None
         :return: A tuple of the data received and a tuple of the\
-                (address, port) received from
+            (address, port) received from
         :rtype: str, (str, int)
         :raise SpinnmanTimeoutException: \
             If a timeout occurs before any data is received
@@ -273,10 +199,8 @@ class UDPConnection(Connection):
         except Exception as e:
             raise SpinnmanIOException(str(e))
 
+    @overrides(Connection.close)
     def close(self):
-        """ See\
-            :py:meth:`spinnman.connections.abstract_classes.connection.Connection.close`
-        """
         try:
             self._socket.shutdown(socket.SHUT_WR)
         except Exception:
@@ -287,8 +211,6 @@ class UDPConnection(Connection):
         return len(select.select([self._socket], [], [], timeout)[0]) == 1
 
     def __repr__(self):
-        return \
-            "UDPConnection(local_host={}, local_port={}, remote_host={},"\
-            "remote_port={})".format(
-                self.local_ip_address, self.local_port,
-                self.remote_ip_address, self.remote_port)
+        return _REPR_TEMPLATE.format(
+            self.local_ip_address, self.local_port,
+            self.remote_ip_address, self.remote_port)
