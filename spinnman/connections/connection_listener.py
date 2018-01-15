@@ -3,40 +3,43 @@ from threading import Thread
 from multiprocessing.pool import ThreadPool
 
 logger = logging.getLogger(__name__)
+_POOL_SIZE = 4
+_TIMEOUT = 1
 
 
 class ConnectionListener(Thread):
-    """ Listens to a connection and calls callbacks with new messages when \
-        they arrive
+    """ Thread that listens to a connection and calls callbacks with new\
+        messages when they arrive.
     """
 
-    def __init__(self, connection, n_processes=4):
+    def __init__(self, connection, n_processes=_POOL_SIZE, timeout=_TIMEOUT):
         """
 
         :param connection: An AbstractListenable connection to listen to
-        :param n_processes: The number of threads to use when calling\
-                callbacks
+        :param n_processes: \
+            The number of threads to use when calling callbacks
         """
         Thread.__init__(
             self,
             name="Connection listener for connection {}".format(connection))
+        self.daemon = True
         self._connection = connection
-        self._get_message_call = connection.get_receive_method()
+        self._timeout = timeout
         self._callback_pool = ThreadPool(processes=n_processes)
         self._done = False
         self._callbacks = set()
-        self.setDaemon(True)
 
-    def _run_step(self):
-        if self._connection.is_ready_to_receive(timeout=1):
-            message = self._get_message_call()
+    def _run_step(self, handler):
+        if self._connection.is_ready_to_receive(timeout=self._timeout):
+            message = handler()
             for callback in self._callbacks:
                 self._callback_pool.apply_async(callback, [message])
 
     def run(self):
+        handler = self._connection.get_receive_method()
         while not self._done:
             try:
-                self._run_step()
+                self._run_step(handler)
             except Exception:
                 if not self._done:
                     logger.warn("problem when dispatching message",
@@ -49,6 +52,7 @@ class ConnectionListener(Thread):
 
         :param callback: A callable which takes a single parameter, which is\
                 the message received
+        :type callback: callable (connection message type -> None)
         """
         self._callbacks.add(callback)
 
