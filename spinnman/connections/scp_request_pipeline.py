@@ -4,7 +4,6 @@ from threading import RLock
 
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
-import traceback
 
 MAX_SEQUENCE = 65536
 
