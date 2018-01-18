@@ -191,8 +191,13 @@ class SCPRequestPipeLine(object):
 
             # If the response can be retried, retry it
             if (result in self._retry_codes):
-                self._resend(seq, request_sent, str(result))
-                self._n_retry_code_resent += 1
+                try:
+                    self._resend(seq, request_sent, str(result))
+                    self._n_retry_code_resent += 1
+                except Exception as e:
+                    self._error_callbacks[seq](
+                        request_sent, e, sys.exc_info()[2])
+                    self._remove_record(seq)
             else:
 
                 # No retry is possible - try constructing the result
@@ -244,11 +249,12 @@ class SCPRequestPipeLine(object):
 
             # Report any other exception
             raise SpinnmanIOException(
-                "Errors sending request to {}, {}, {} over {} retries: {}"
+                "Errors sending request {} to {}, {}, {} over {} retries: {}"
                 .format(
-                    request_sent.scp_request_header.destination_chip_x,
-                    request_sent.scp_request_header.destination_chip_y,
-                    request_sent.scp_request_header.destination_cpu,
+                    request_sent.scp_request_header.command,
+                    request_sent.sdp_header.destination_chip_x,
+                    request_sent.sdp_header.destination_chip_y,
+                    request_sent.sdp_header.destination_cpu,
                     self._n_retries, self._retry_reason[seq]))
 
     def _do_retrieve(self, n_packets, timeout):
