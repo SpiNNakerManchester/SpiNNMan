@@ -125,8 +125,6 @@ transceiver = create_transceiver_from_hostname(
     bmp_connection_data=board_config.bmp_names,
     auto_detect_bmp=board_config.auto_detect_bmp)
 
-app_id = transceiver.app_id_tracker.get_new_id()
-
 try:
 
     print "Version Information"
@@ -134,6 +132,8 @@ try:
     version_info = transceiver.ensure_board_is_ready()
     print version_info
     print ""
+
+    app_id = transceiver.app_id_tracker.get_new_id()
 
     print "Discovering other connections to the machine"
     print "==================="
