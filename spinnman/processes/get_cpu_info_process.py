@@ -8,8 +8,11 @@ import functools
 
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_cpu_info"]
+
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(GetCPUInfoProcess, self).__init__(connection_selector)
         self._cpu_info = list()
 
     def handle_response(self, x, y, p, response):

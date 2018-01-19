@@ -12,6 +12,28 @@ _REGISTERS_PATTERN = struct.Struct("<IIIIIIII")
 class CPUInfo(object):
     """ Represents information about the state of a CPU
     """
+    __slots__ = [
+        "_application_id",
+        "_application_mailbox_command",
+        "_application_mailbox_data_address",
+        "_application_name",
+        "_iobuf_address",
+        "_link_register",
+        "_monitor_mailbox_command",
+        "_monitor_mailbox_data_address",
+        "_physical_cpu_id",
+        "_processor_state_register",
+        "_registers",
+        "_run_time_error",
+        "_software_error_count",
+        "_software_source_filename_address",
+        "_software_source_line_number",
+        "_software_version",
+        "_stack_pointer",
+        "_state",
+        "_time",
+        "_user",
+        "_x", "_y", "_p"]
 
     def __init__(self, x, y, p, cpu_data, offset):
         """

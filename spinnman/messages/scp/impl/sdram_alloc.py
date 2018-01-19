@@ -15,6 +15,8 @@ _ONE_WORD = struct.Struct("<I")
 class SDRAMAlloc(AbstractSCPRequest):
     """ An SCP Request to allocate space in the SDRAM space
     """
+    __slots__ = [
+        "_size"]
 
     def __init__(self, x, y, app_id, size, tag=None):
         """
@@ -43,8 +45,7 @@ class SDRAMAlloc(AbstractSCPRequest):
                 "The tag param needs to be between 0 and 255, or None (in "
                 "which case 0 will be used by default)", str(tag))
 
-        AbstractSCPRequest.__init__(
-            self,
+        super(SDRAMAlloc, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -63,10 +64,11 @@ class SDRAMAlloc(AbstractSCPRequest):
 class _SCPSDRAMAllocResponse(AbstractSCPResponse):
     """ An SCP response to a request to allocate space in SDRAM
     """
+    __slots__ = [
+        "_base_address",
+        "_size"]
 
     def __init__(self, size):
-        """
-        """
         AbstractSCPResponse.__init__(self)
         self._size = size
         self._base_address = None

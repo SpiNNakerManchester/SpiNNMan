@@ -4,8 +4,11 @@ from .abstract_multi_connection_process \
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_base_address"]
+
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(MallocSDRAMProcess, self).__init__(connection_selector)
         self._base_address = None
 
     def _handle_sdram_alloc_response(self, response):

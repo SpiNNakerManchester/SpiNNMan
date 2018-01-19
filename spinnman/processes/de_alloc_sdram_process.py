@@ -3,8 +3,11 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_no_blocks_freed"]
+
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(DeAllocSDRAMProcess, self).__init__(connection_selector)
         self._no_blocks_freed = None
 
     def de_alloc_sdram(self, x, y, app_id, base_address=None):

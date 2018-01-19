@@ -7,8 +7,8 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def generate_machine_report(report_directory, machine, connections):
-    """Generate report on the physical structure of the target SpiNNaker \
-    machine.
+    """ Generate report on the physical structure of the target SpiNNaker \
+        machine.
 
     :param report_directory: the directory to which reports are stored
     :param machine: the machine python object
@@ -40,17 +40,19 @@ def generate_machine_report(report_directory, machine, connections):
             f.write("\t\t==========================\n\n")
             for x in range(machine.max_chip_x + 1):
                 for y in range(machine.max_chip_y + 1):
-                    chip = machine.get_chip_at(x, y)
-                    if chip:
-                        f.write("Information for chip {}:{}\n".format(
-                            chip.x, chip.y))
-                        f.write("Neighbouring chips \n{}\n".format(
-                            chip.router.get_neighbouring_chips_coords()))
-                        f.write("Router list of links for this chip are: \n")
-                        for link in chip.router.links:
-                            f.write("\t{}\n".format(link))
-                        f.write("\t\t==========================\n\n")
+                    _write_chip_router_report(f, machine, x, y)
     except IOError:
         logger.error("Generate_placement_reports: Can't open file {} for "
                      "writing.", file_name)
         raise
+
+def _write_chip_router_report(f, machine, x, y):
+    chip = machine.get_chip_at(x, y)
+    if chip:
+        f.write("Information for chip {}:{}\n".format(chip.x, chip.y))
+        f.write("Neighbouring chips \n{}\n".format(
+            chip.router.get_neighbouring_chips_coords()))
+        f.write("Router list of links for this chip are: \n")
+        for link in chip.router.links:
+            f.write("\t{}\n".format(link))
+        f.write("\t\t==========================\n\n")

@@ -8,7 +8,8 @@ class StartRequests(EIEIOCommandMessage):
         signal to the SpiNNaker system that, if needed, it is possible to\
         send more "SpinnakerRequestBuffers" packet
     """
+    __slots__ = []
+
     def __init__(self):
-        EIEIOCommandMessage.__init__(
-            self, EIEIOCommandHeader(
-                EIEIO_COMMAND_IDS.START_SENDING_REQUESTS.value))
+        super(StartRequests, self).__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.START_SENDING_REQUESTS))

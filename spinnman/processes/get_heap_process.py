@@ -8,28 +8,35 @@ import struct
 import functools
 
 HEAP_ADDRESS = SystemVariableDefinition.sdram_heap_address
+_ADDRESS = struct.Struct("<I")
+_HEAP_POINTER = struct.Struct("<4xI")
+_ELEMENT_HEADER = struct.Struct("<II")
 
 
 class GetHeapProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_blocks",
+        "_heap_address",
+        "_next_block_address"]
 
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(GetHeapProcess, self).__init__(connection_selector)
 
         self._heap_address = None
         self._next_block_address = None
         self._blocks = list()
 
     def _read_heap_address_response(self, response):
-        self._heap_address = struct.unpack_from(
-            "<I", response.data, response.offset)[0]
+        self._heap_address = _ADDRESS.unpack_from(
+            response.data, response.offset)[0]
 
     def _read_heap_pointer(self, response):
-        self._next_block_address = struct.unpack_from(
-            "<4xI", response.data, response.offset)[0]
+        self._next_block_address = _HEAP_POINTER.unpack_from(
+            response.data, response.offset)[0]
 
     def _read_next_block(self, block_address, response):
-        self._next_block_address, free = struct.unpack_from(
-            "<II", response.data, response.offset)
+        self._next_block_address, free = _ELEMENT_HEADER.unpack_from(
+            response.data, response.offset)
         if self._next_block_address != 0:
             self._blocks.append(HeapElement(
                 block_address, self._next_block_address, free))

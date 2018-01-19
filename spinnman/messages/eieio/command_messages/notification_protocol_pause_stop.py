@@ -7,10 +7,11 @@ from spinnman.constants import EIEIO_COMMAND_IDS
 class NotificationProtocolPauseStop(EIEIOCommandMessage):
     """ Packet which indicates that the toolchain has paused or stopped
     """
+    __slots__ = []
+
     def __init__(self):
-        EIEIOCommandMessage.__init__(
-            self, EIEIOCommandHeader(
-                EIEIO_COMMAND_IDS.STOP_PAUSE_NOTIFICATION.value))
+        super(NotificationProtocolPauseStop, self).__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.STOP_PAUSE_NOTIFICATION))
 
     @property
     def bytestring(self):

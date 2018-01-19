@@ -1,6 +1,3 @@
-"""
-ScpReadAdcRequest
-"""
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages \
     import BMPRequest, BMPResponse
@@ -14,6 +11,7 @@ class ReadADC(BMPRequest):
     """ SCP Request for the data from the BMP including voltages and\
         temperature.
     """
+    __slots__ = []
 
     def __init__(self, board):
         """
@@ -21,25 +19,23 @@ class ReadADC(BMPRequest):
         :param board: which board to request the adc register from
         :rtype: None
         """
-        BMPRequest.__init__(
-            self, board,
+        super(ReadADC, self).__init__(
+            board,
             SCPRequestHeader(command=SCPCommand.CMD_BMP_INFO),
             argument_1=BMPInfo.ADC)
 
     def get_scp_response(self):
-        """
-        """
         return _SCPReadADCResponse()
 
 
 class _SCPReadADCResponse(BMPResponse):
     """ An SCP response to a request for ADC information
     """
+    __slots__ = [
+        "_adc_info"]
 
     def __init__(self):
-        """
-        """
-        BMPResponse.__init__(self)
+        super(_SCPReadADCResponse, self).__init__()
         self._adc_info = None
 
     def read_data_bytestring(self, data, offset):

@@ -19,8 +19,12 @@ _ROUTE_ENTRY_PATTERN = struct.Struct("<2xBxIII")
 
 
 class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_app_id",
+        "_entries"]
+
     def __init__(self, connection_selector, app_id=None):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(GetMultiCastRoutesProcess, self).__init__(connection_selector)
         self._entries = [None] * _N_ENTRIES
         self._app_id = app_id
 

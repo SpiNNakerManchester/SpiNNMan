@@ -17,6 +17,10 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         sent from the SpiNNaker system to the host computer to signal that\
         some data is available to be read
     """
+    __slots__ = [
+        "_header",
+        "_requests"]
+
     def __init__(self, x, y, p, region_id, sequence_no, n_requests,
                  channel, start_address, space_to_be_read):
         # pylint: disable=too-many-arguments
@@ -44,9 +48,9 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
                 "defined, {4:d} channel(s) defined".format(
                     n_requests, len(start_address), len(space_to_be_read),
                     len(region_id), len(channel)))
-        EIEIOCommandMessage.__init__(
-            self, EIEIOCommandHeader(
-                EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA.value))
+
+        super(SpinnakerRequestReadData, self).__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA))
         self._header = _SpinnakerRequestReadDataHeader(
             x, y, p, n_requests, sequence_no)
         self._requests = _SpinnakerRequestReadDataRequest(
@@ -143,6 +147,11 @@ class _SpinnakerRequestReadDataHeader(object):
     """ Contains the position of the core in the machine (x, y, p), the number\
         of requests and a sequence number
     """
+    __slots__ = [
+        "_n_requests",
+        "_sequence_no",
+        "_p", "_x", "_y"]
+
     def __init__(self, x, y, p, n_requests, sequence_no):
         # pylint: disable=too-many-arguments
         self._x = x
@@ -175,6 +184,12 @@ class _SpinnakerRequestReadDataHeader(object):
 class _SpinnakerRequestReadDataRequest(object):
     """ Contains a set of requests which refer to the channels used
     """
+    __slots__ = [
+        "_channel",
+        "_region_id",
+        "_start_address",
+        "_space_to_be_read"]
+
     def __init__(self, channel, region_id, start_address, space_to_be_read):
         if not isinstance(channel, list):
             self._channel = [channel]
@@ -199,35 +214,31 @@ class _SpinnakerRequestReadDataRequest(object):
     def channel(self, request_id):
         if len(self._channel) > request_id:
             return self._channel[request_id]
-        else:
-            SpinnmanInvalidParameterTypeException(
-                "request_id", "integer", "channel request needs to be"
-                "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._channel) - 1, request_id))
+        raise SpinnmanInvalidParameterTypeException(
+            "request_id", "integer", "channel request needs to be"
+            "comprised between 0 and {0:d}; current value: {1:d}".format(
+                len(self._channel) - 1, request_id))
 
     def region_id(self, request_id):
         if len(self._region_id) > request_id:
             return self._region_id[request_id]
-        else:
-            SpinnmanInvalidParameterTypeException(
-                "request_id", "integer", "region id request needs to be"
-                "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._region_id) - 1, request_id))
+        raise SpinnmanInvalidParameterTypeException(
+            "request_id", "integer", "region id request needs to be"
+            "comprised between 0 and {0:d}; current value: {1:d}".format(
+                len(self._region_id) - 1, request_id))
 
     def start_address(self, request_id):
         if len(self._start_address) > request_id:
             return self._start_address[request_id]
-        else:
-            SpinnmanInvalidParameterTypeException(
-                "request_id", "integer", "start address request needs to be"
-                "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._start_address) - 1, request_id))
+        raise SpinnmanInvalidParameterTypeException(
+            "request_id", "integer", "start address request needs to be"
+            "comprised between 0 and {0:d}; current value: {1:d}".format(
+                len(self._start_address) - 1, request_id))
 
     def space_to_be_read(self, request_id):
         if len(self._space_to_be_read) > request_id:
             return self._space_to_be_read[request_id]
-        else:
-            SpinnmanInvalidParameterTypeException(
-                "request_id", "integer", "space to be read request needs to be"
-                "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._space_to_be_read) - 1, request_id))
+        raise SpinnmanInvalidParameterTypeException(
+            "request_id", "integer", "space to be read request needs to be"
+            "comprised between 0 and {0:d}; current value: {1:d}".format(
+                len(self._space_to_be_read) - 1, request_id))

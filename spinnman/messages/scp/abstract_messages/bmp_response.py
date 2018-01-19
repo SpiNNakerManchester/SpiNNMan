@@ -1,17 +1,9 @@
-"""
-BMPResponse
-"""
-
 # spinnman imports
 from .scp_response import AbstractSCPResponse
 
 
 class BMPResponse(AbstractSCPResponse):
-    """
-    represents a scp request thats tialored for the bmp connection
+    """ Represents an SCP request thats tailored for the BMP connection.
     """
 
     __slots__ = ()
-
-    def __init__(self):
-        AbstractSCPResponse.__init__(self)

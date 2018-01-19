@@ -58,13 +58,13 @@ def get_vcpu_address(p):
 
 
 def send_port_trigger_message(connection, board_address):
-    """Sends a port trigger message using a connection to (hopefully) open \
-    a port in a NAT and/or firewall to allow incoming packets to be received.
+    """ Sends a port trigger message using a connection to (hopefully) open a\
+        port in a NAT and/or firewall to allow incoming packets to be received.
 
-    :param connection: The UDP connection down which the trigger message\
-        should be sent
-    :param board_address: The address of the SpiNNaker board to which the\
-        message should be sent
+    :param connection: \
+        The UDP connection down which the trigger message should be sent
+    :param board_address: \
+        The address of the SpiNNaker board to which the message should be sent
     """
 
     # Set up the message so that no reply is expected and it is sent to an

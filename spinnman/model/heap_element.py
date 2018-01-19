@@ -3,26 +3,20 @@ class HeapElement(object):
     """
 
     __slots__ = [
-
         # A pointer to the block
         "_block_address",
-
         # A pointer to the next block
         "_next_address",
-
         # True if the block is free
         "_is_free",
-
         # The tag of the block
         "_tag",
-
         # The app id of the block
         "_app_id"
     ]
 
     def __init__(self, block_address, next_address, free):
         """
-
         :param block_address: The address of this element on the heap
         :param next_address: The address of the next element on the heap
         :param free: The "free" element of the block as read from the heap

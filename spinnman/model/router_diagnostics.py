@@ -5,6 +5,12 @@ from spinnman.constants import ROUTER_REGISTER_REGISTERS
 class RouterDiagnostics(object):
     """ Represents a set of diagnostic information available from a chip router
     """
+    __slots__ = [
+        "_error_status",
+        "_mon",
+        "_register_values",
+        "_wait_1",
+        "_wait_2"]
 
     def __init__(self, control_register, error_status, register_values):
         """

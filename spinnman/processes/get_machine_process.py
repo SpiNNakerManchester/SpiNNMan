@@ -18,6 +18,14 @@ logger = FormatAdapter(logging.getLogger(__name__))
 class GetMachineProcess(AbstractMultiConnectionProcess):
     """ A process for getting the machine details over a set of connections
     """
+    __slots__ = [
+        "_chip_info",
+        "_ignore_chips",
+        "_ignore_cores",
+        "_ignore_links",
+        "_max_core_id",
+        "_max_sdram_size",
+        "_p2p_column_data"]
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
                  ignore_links, max_core_id, max_sdram_size=None):

@@ -14,6 +14,14 @@ _PATTERN_I = struct.Struct("<I")
 
 
 class EIEIODataHeader(object):
+    __slots__ = [
+        "_count",
+        "_eieio_type",
+        "_is_time",
+        "_payload_base",
+        "_prefix",
+        "_prefix_type",
+        "_tag"]
 
     def __init__(self, eieio_type, tag=0, prefix=None,
                  prefix_type=EIEIOPrefix.LOWER_HALF_WORD,

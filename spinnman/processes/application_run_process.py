@@ -3,10 +3,7 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class ApplicationRunProcess(AbstractMultiConnectionProcess):
-
-    def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(
-            self, connection_selector)
+    __slots__ = []
 
     def run(self, app_id, core_subsets, wait):
         for core_subset in core_subsets:

@@ -8,10 +8,8 @@ import functools
 class WriteMemoryProcess(AbstractMultiConnectionProcess):
     """ A process for writing memory
     """
+    __slots__ = []
     # pylint: disable=too-many-arguments
-
-    def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
     def write_memory_from_bytearray(
             self, processor_address, base_address, data, offset, n_bytes):

@@ -368,9 +368,8 @@ class MemoryIO(AbstractIO):
 
         return n_bytes
 
-    def fill(
-            self, repeat_value, bytes_to_fill=None,
-            data_type=FillDataType.WORD):
+    def fill(self, repeat_value, bytes_to_fill=None,
+             data_type=FillDataType.WORD):
         """ Fill the next part of the region with repeated data
 
         :param repeat_value: The value to repeat

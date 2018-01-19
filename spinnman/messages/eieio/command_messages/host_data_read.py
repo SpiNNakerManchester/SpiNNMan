@@ -15,6 +15,10 @@ class HostDataRead(EIEIOCommandMessage):
         completed reading data from the output buffer, and that such space can\
         be considered free to use again
     """
+    __slots__ = [
+        "_acks",
+        "_header"]
+
     def __init__(
             self, n_requests, sequence_no, channel, region_id, space_read):
         # pylint: disable=too-many-arguments
@@ -37,8 +41,8 @@ class HostDataRead(EIEIOCommandMessage):
                 "defined, {2:d} region(s) defined, {3:d} channel(s) "
                 "defined".format(
                     n_requests, len(space_read), len(region_id), len(channel)))
-        cmd_header = EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ.value)
-        EIEIOCommandMessage.__init__(self, cmd_header)
+        super(HostDataRead, self).__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.HOST_DATA_READ))
         self._header = _HostDataReadHeader(n_requests, sequence_no)
         self._acks = _HostDataReadAck(channel, region_id, space_read)
 
@@ -95,10 +99,13 @@ class HostDataRead(EIEIOCommandMessage):
 
 
 class _HostDataReadHeader(object):
+    """ The HostDataRead contains itself on header with the number of requests\
+        and a sequence number
     """
-    The HostDataRead contains itself on header with the number of requests
-    and a sequence number
-    """
+    __slots__ = [
+        "_n_requests",
+        "_sequence_no"]
+
     def __init__(self, n_requests, sequence_no):
         self._n_requests = n_requests
         self._sequence_no = sequence_no
@@ -115,6 +122,11 @@ class _HostDataReadHeader(object):
 class _HostDataReadAck(object):
     """ Contains a set of acks which refer to each of the channels read
     """
+    __slots__ = [
+        "_channel",
+        "_region_id",
+        "_space_read"]
+
     def __init__(self, channel, region_id, space_read):
         if not isinstance(channel, list):
             self._channel = [channel]
@@ -134,26 +146,23 @@ class _HostDataReadAck(object):
     def channel(self, ack_id):
         if len(self._channel) > ack_id:
             return self._channel[ack_id]
-        else:
-            SpinnmanInvalidParameterTypeException(
-                "request_id", "integer", "channel ack_id needs to be"
-                "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._channel) - 1, ack_id))
+        raise SpinnmanInvalidParameterTypeException(
+            "request_id", "integer", "channel ack_id needs to be"
+            "comprised between 0 and {0:d}; current value: {1:d}".format(
+                len(self._channel) - 1, ack_id))
 
     def region_id(self, ack_id):
         if len(self._region_id) > ack_id:
             return self._region_id[ack_id]
-        else:
-            SpinnmanInvalidParameterTypeException(
-                "request_id", "integer", "region id ack_id needs to be"
-                "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._region_id) - 1, ack_id))
+        raise SpinnmanInvalidParameterTypeException(
+            "request_id", "integer", "region id ack_id needs to be"
+            "comprised between 0 and {0:d}; current value: {1:d}".format(
+                len(self._region_id) - 1, ack_id))
 
     def space_read(self, ack_id):
         if len(self._space_read) > ack_id:
             return self._space_read[ack_id]
-        else:
-            SpinnmanInvalidParameterTypeException(
-                "request_id", "integer", "start address ack_id needs to be"
-                "comprised between 0 and {0:d}; current value: "
-                "{1:d}".format(len(self._space_read) - 1, ack_id))
+        raise SpinnmanInvalidParameterTypeException(
+            "request_id", "integer", "start address ack_id needs to be"
+            "comprised between 0 and {0:d}; current value: {1:d}".format(
+                len(self._space_read) - 1, ack_id))

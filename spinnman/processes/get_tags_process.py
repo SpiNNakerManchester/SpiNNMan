@@ -7,9 +7,12 @@ import functools
 
 
 class GetTagsProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_tags",
+        "_tag_info"]
 
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(GetTagsProcess, self).__init__(connection_selector)
         self._tag_info = None
         self._tags = None
 
@@ -34,7 +37,6 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
                     response.port, response.strip_sdp)
 
     def get_tags(self, connection):
-
         # Get the tag information, without which we cannot continue
         self._send_request(IPTagGetInfo(
             connection.chip_x, connection.chip_y),

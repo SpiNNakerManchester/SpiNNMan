@@ -7,9 +7,11 @@ from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 class ReadMemoryProcess(AbstractMultiConnectionProcess):
     """ A process for reading memory
     """
+    __slots__ = [
+        "_view"]
 
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(ReadMemoryProcess, self).__init__(connection_selector)
         self._view = None
 
     def handle_response(self, offset, response):

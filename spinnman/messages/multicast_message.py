@@ -1,6 +1,9 @@
 class MulticastMessage(object):
     """ A SpiNNaker Multicast message
     """
+    __slots__ = [
+        "_key",
+        "_payload"]
 
     def __init__(self, key, payload=None):
         """A multicast message has a key (determining the target locations) and

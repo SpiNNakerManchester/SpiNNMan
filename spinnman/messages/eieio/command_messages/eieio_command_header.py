@@ -1,4 +1,5 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
+from enum import Enum
 import struct
 
 _ONE_SHORT = struct.Struct("<H")
@@ -7,8 +8,12 @@ _ONE_SHORT = struct.Struct("<H")
 class EIEIOCommandHeader(object):
     """ EIEIO header for command packets
     """
+    __slots__ = [
+        "_command"]
 
     def __init__(self, command):
+        if isinstance(command, Enum):
+            command = command.value
         if command < 0 or command >= 16384:
             raise SpinnmanInvalidParameterException(
                 "command", command,

@@ -8,16 +8,15 @@ from .get_chip_info_response import GetChipInfoResponse
 class GetChipInfo(AbstractSCPRequest):
     """ An SCP request to read the chip information from a core
     """
+    __slots__ = []
 
     def __init__(self, x, y, with_size=False):
         """
-
         :param x: The x-coordinate of the chip to read from, between 0 and 255
         :type x: int
         :param y: The y-coordinate of the chip to read from, between 0 and 255
         :type y: int
-        :param with_size: True if the size should be included in the response,\
-                    False if not
+        :param with_size: Whether the size should be included in the response
         :type with_size: bool
         """
         # Bits 0-4 + bit 6 = all information except size
@@ -27,8 +26,8 @@ class GetChipInfo(AbstractSCPRequest):
             # Bits 0-6 = all information including size
             argument_1 = 0x7F
 
-        AbstractSCPRequest.__init__(
-            self, SDPHeader(
+        super(GetChipInfo, self).__init__(
+            SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),

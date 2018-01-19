@@ -21,28 +21,45 @@ class SCPRequestPipeLine(object):
         across a number of channels for a given connection.
 
         This class implements an SCP windowing, first suggested by Andrew\
-        Mundy.  This extends the idea by having both send and receive windows.\
+        Mundy. This extends the idea by having both send and receive windows.\
         These are represented by the n_channels and the\
         intermediate_channel_waits parameters respectively.  This seems to\
         help with the timeout issue; when a timeout is received, all requests\
         for which a reply has not been received can also timeout.
     """
+    __slots__ = [
+        "_callbacks",
+        "_connection",
+        "_error_callbacks",
+        "_in_progress",
+        "_intermediate_channel_waits",
+        "_n_channels",
+        "_n_resent",
+        "_n_retries",
+        "_n_retry_code_resent",
+        "_n_timeouts",
+        "_packet_timeout",
+        "_request_data",
+        "_requests",
+        "_retries",
+        "_send_time",
+        "_times_sent"]
 
     def __init__(self, connection, n_channels=1,
                  intermediate_channel_waits=0,
                  n_retries=3, packet_timeout=0.5):
         """
-        :param connection: The connection over which the communication is to\
-                    take place
+        :param connection: \
+            The connection over which the communication is to take place
         :param n_channels: The number of requests to send before checking for\
-                    responses.  If None, this will be determined automatically
+            responses.  If None, this will be determined automatically
         :param intermediate_channel_waits: The number of outstanding responses\
-                    to wait for before continuing sending requests.  If None,\
-                    this will be determined automatically
+            to wait for before continuing sending requests. If None, this will\
+            be determined automatically
         :param n_retries: The number of times to resend any packet for any\
-                    reason before an error is triggered
+            reason before an error is triggered
         :param packet_timeout: The number of elapsed seconds after sending a\
-                    packet before it is considered a timeout.
+            packet before it is considered a timeout.
         """
         self._connection = connection
         self._n_channels = n_channels
@@ -88,8 +105,8 @@ class SCPRequestPipeLine(object):
         # self._token_bucket = TokenBucket(3408, 700000)
 
     def _get_next_sequence_number(self):
-        """Get the next number from the global sequence, applying appropriate\
-        wrapping rules as the sequence numbers have a fixed number of bits.
+        """ Get the next number from the global sequence, applying appropriate\
+            wrapping rules as the sequence numbers have a fixed number of bits.
 
         :return: The next number in the sequence.
         :rtype: int
@@ -105,12 +122,12 @@ class SCPRequestPipeLine(object):
 
         :param request: The SCP request to be sent
         :param callback: A callback function to call when the response has\
-                    been received; takes SCPResponse as a parameter, or None\
-                    if the response doesn't need to be processed
-        :param error_callback: A callback function to call when an error is
-                    found when processing the message; takes original\
-                    SCPRequest, exception caught and a list of tuples of\
-                    (filename, line number, function name, text) as a traceback
+            been received; takes SCPResponse as a parameter, or None if the\
+            response doesn't need to be processed
+        :param error_callback: A callback function to call when an error is\
+            found when processing the message; takes original SCPRequest,\
+            exception caught and a list of tuples of (filename, line number,\
+            function name, text) as a traceback
         """
 
         # Get the next sequence to be used

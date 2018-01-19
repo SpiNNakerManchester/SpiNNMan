@@ -183,7 +183,7 @@ def create_transceiver_from_hostname(
 
 
 class Transceiver(object):
-    """ An encapsulation of various communications with the spinnaker board.
+    """ An encapsulation of various communications with the SpiNNaker board.
 
         The methods of this class are designed to be thread-safe;\
         thus you can make multiple calls to the same (or different) methods\
@@ -194,6 +194,39 @@ class Transceiver(object):
         operation, since the multiple calls may be made separately over the\
         set of given connections.
     """
+    __slots__ = [
+        "_all_connections",
+        "_app_id_tracker",
+        "_bmp_connection_selectors",
+        "_bmp_connections",
+        "_boot_receive_connections",
+        "_boot_send_connection",
+        "_chip_execute_lock_condition",
+        "_chip_execute_locks",
+        "_flood_write_lock",
+        "_height",
+        "_ignore_chips",
+        "_ignore_cores",
+        "_ignore_links",
+        "_iobuf_size",
+        "_machine",
+        "_machine_off",
+        "_max_core_id",
+        "_max_sdram_size",
+        "_multicast_sender_connections",
+        "_n_chip_execute_locks",
+        "_next_nearest_neighbour_condition",
+        "_next_nearest_neighbour_id",
+        "_original_connections",
+        "_scamp_connection_selector",
+        "_scamp_connections",
+        "_scp_sender_connections",
+        "_sdp_sender_connections",
+        "_udp_listenable_connections_by_class",
+        "_udp_receive_connections_by_port",
+        "_udp_scamp_connections",
+        "_version",
+        "_width"]
 
     def __init__(
             self, version, connections=None, ignore_chips=None,

@@ -10,6 +10,10 @@ logger = logging.getLogger(__name__)
 class AbstractProcess(object):
     """ An abstract process for talking to SpiNNaker efficiently
     """
+    __slots__ = [
+        "_error_request",
+        "_exception",
+        "_traceback"]
 
     def __init__(self):
         self._exception = None

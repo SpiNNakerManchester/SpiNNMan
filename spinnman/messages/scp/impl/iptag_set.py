@@ -10,6 +10,7 @@ _IPTAG_SET = 1
 class IPTagSet(AbstractSCPRequest):
     """ An SCP Request to set an IP Tag
     """
+    __slots__ = []
 
     def __init__(self, x, y, host, port, tag, strip):
         """

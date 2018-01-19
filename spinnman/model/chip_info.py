@@ -13,16 +13,26 @@ class ChipInfo(object):
     """ Represents the system variables for a chip, received from the chip\
         SDRAM
     """
+    __slots__ = [
+        "_ip_address",
+        "_led_flash_period_ms",
+        "_leds",
+        "_links_available",
+        "_offset",
+        "_physical_to_virtual_core_map",
+        "_status_map",
+        "_system_data",
+        "_virtual_core_ids",
+        "_virtual_to_physical_core_map"]
 
     def __init__(self, system_data, offset):
         """
-
         :param system_data: An bytestring retrieved from SDRAM on the board
         :type system_data: str
         :param offset: The offset into the bytestring where the actual data\
-                starts
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
-                    the data doesn't contain valid system data information
+            starts
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If the data doesn't contain valid system data information
         """
         self._system_data = system_data
         self._offset = offset

@@ -4,6 +4,10 @@ from spinnman.constants import SCP_SCAMP_PORT
 class SocketAddressWithChip(object):
     """ The address of a socket and an associated chip
     """
+    __slots__ = [
+        "_chip_x", "_chip_y",
+        "_hostname",
+        "_port_num"]
 
     def __init__(self, hostname, chip_x, chip_y, port_num=SCP_SCAMP_PORT):
         self._hostname = hostname

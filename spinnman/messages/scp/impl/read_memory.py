@@ -10,10 +10,10 @@ from spinnman.constants import address_length_dtype
 class ReadMemory(AbstractSCPRequest):
     """ An SCP request to read a region of memory on a chip
     """
+    __slots__ = []
 
     def __init__(self, x, y, base_address, size, cpu=0):
         """
-
         :param x: The x-coordinate of the chip to read from, between 0 and 255
         :type x: int
         :param y: The y-coordinate of the chip to read from, between 0 and 255
@@ -23,9 +23,9 @@ class ReadMemory(AbstractSCPRequest):
         :param size: The number of bytes to read, between 1 and 256
         :type size: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the chip coordinates are out of range
-                    * If the base address is not a positive number
-                    * If the size is out of range
+            * If the chip coordinates are out of range
+            * If the base address is not a positive number
+            * If the size is out of range
         """
         # pylint: disable=too-many-arguments
         super(ReadMemory, self).__init__(
@@ -48,12 +48,15 @@ class ReadMemory(AbstractSCPRequest):
 class _SCPReadMemoryResponse(AbstractSCPResponse):
     """ An SCP response to a request to read a region of memory on a chip
     """
+    __slots__ = [
+        "_data",
+        "_length",
+        "_offset"]
 
     def __init__(self):
-        """
-        """
         super(_SCPReadMemoryResponse, self).__init__()
         self._data = None
+        self._length = None
         self._offset = None
 
     def read_data_bytestring(self, data, offset):

@@ -8,10 +8,10 @@ from spinnman.messages.scp.impl import CheckOKResponse
 class FillRequest(AbstractSCPRequest):
     """ An SCP request to fill a region of memory on a chip with repeated data
     """
+    __slots__ = []
 
     def __init__(self, x, y, base_address, data, size):
         """
-
         :param x: The x-coordinate of the chip to read from, between 0 and 255
         :type x: int
         :param y: The y-coordinate of the chip to read from, between 0 and 255

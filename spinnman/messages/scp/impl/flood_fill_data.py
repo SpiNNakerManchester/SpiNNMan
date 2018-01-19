@@ -11,11 +11,14 @@ _NNP_FLOOD_FILL_START = 6
 class FloodFillData(AbstractSCPRequest):
     """ A request to start a flood fill of data
     """
+    __slots__ = [
+        "_data_to_write",
+        "_offset",
+        "_size"]
 
     def __init__(self, nearest_neighbour_id, block_no, base_address, data,
                  offset=0, length=None):
         """
-
         :param nearest_neighbour_id: The id of the packet, between 0 and 127
         :type nearest_neighbour_id: int
         :param block_no: Which block this block is, between 0 and 255
@@ -23,7 +26,7 @@ class FloodFillData(AbstractSCPRequest):
         :param base_address: The base address where the data is to be loaded
         :type base_address: int
         :param data: The data to load, between 4 and 256 bytes and the size\
-                    must be divisible by 4
+            must be divisible by 4
         :type data: bytearray
         """
         # pylint: disable=too-many-arguments

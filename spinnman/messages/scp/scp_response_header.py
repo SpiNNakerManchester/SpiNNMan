@@ -8,6 +8,9 @@ _TWO_SHORTS = struct.Struct("<2H")
 class SCPResponseHeader(object):
     """ Represents the header of an SCP Response
     """
+    __slots__ = [
+        "_result",
+        "_sequence"]
 
     def __init__(self, result=None, sequence=None):
         """

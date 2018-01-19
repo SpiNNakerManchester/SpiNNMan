@@ -11,6 +11,12 @@ class ConnectionListener(Thread):
     """ Thread that listens to a connection and calls callbacks with new\
         messages when they arrive.
     """
+    __slots__ = [
+        "_callback_pool",
+        "_callbacks",
+        "_connection",
+        "_done",
+        "_timeout"]
 
     def __init__(self, connection, n_processes=_POOL_SIZE, timeout=_TIMEOUT):
         """
@@ -19,8 +25,7 @@ class ConnectionListener(Thread):
         :param n_processes: \
             The number of threads to use when calling callbacks
         """
-        Thread.__init__(
-            self,
+        super(ConnectionListener, self).__init__(
             name="Connection listener for connection {}".format(connection))
         self.daemon = True
         self._connection = connection

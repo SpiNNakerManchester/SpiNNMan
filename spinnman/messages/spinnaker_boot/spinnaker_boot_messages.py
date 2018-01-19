@@ -29,6 +29,10 @@ _BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES / 4) - 1) << 8
 class SpinnakerBootMessages(object):
     """ Represents a set of boot messages to be sent to boot the board
     """
+    __slots__ = [
+        "_boot_data",
+        "_n_bytes_to_read",
+        "_no_data_packets"]
 
     def __init__(self, board_version=None, extra_boot_values=None):
         """

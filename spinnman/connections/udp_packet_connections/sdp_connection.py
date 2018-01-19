@@ -20,31 +20,29 @@ class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
                  local_port=None, remote_host=None, remote_port=None):
         """
         :param chip_x: The optional x-coordinate of the chip at the remote\
-                end of the connection.  If not specified, it will not be\
-                possible to send SDP messages that require a response with\
-                this connection.
+            end of the connection. If not specified, it will not be possible\
+            to send SDP messages that require a response with this connection.
         :type chip_x: int
         :param chip_y: The optional y-coordinate of the chip at the remote\
-                end of the connection.  If not specified, it will not be\
-                possible to send SDP messages that require a response with\
-                this connection.
+            end of the connection. If not specified, it will not be possible\
+            to send SDP messages that require a response with this connection.
         :type chip_y: int
         :param local_host: The optional IP address or host name of the local\
-                interface to listen on
+            interface to listen on
         :type local_host: str
         :param local_port: The optional local port to listen on
         :type local_port: int
         :param remote_host: The optional remote host name or IP address to\
-                send messages to.  If not specified, sending will not be\
-                possible using this connection
+            send messages to. If not specified, sending will not be possible\
+            using this connection
         :type remote_host: str
         :param remote_port: The optional remote port number to send messages\
-                to.  If not specified, sending will not be possible using this\
-                connection
+            to. If not specified, sending will not be possible using this\
+            connection
         """
         # pylint: disable=too-many-arguments
-        UDPConnection.__init__(
-            self, local_host, local_port, remote_host, remote_port)
+        super(SDPConnection, self).__init__(
+            local_host, local_port, remote_host, remote_port)
         self._chip_x = chip_x
         self._chip_y = chip_y
 

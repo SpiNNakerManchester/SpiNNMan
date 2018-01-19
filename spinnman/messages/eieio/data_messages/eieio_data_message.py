@@ -19,6 +19,12 @@ _TWO_WORDS = struct.Struct("<II")
 class EIEIODataMessage(AbstractEIEIOMessage):
     """ An EIEIO Data message
     """
+    __slots__ = [
+        "_data",
+        "_elements",
+        "_elements_read",
+        "_header",
+        "_offset"]
 
     def __init__(self, eieio_header, data=None, offset=0):
         """

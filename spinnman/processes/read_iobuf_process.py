@@ -16,9 +16,15 @@ _FIRST_IOBUF = struct.Struct("<I8xI")
 class ReadIOBufProcess(AbstractMultiConnectionProcess):
     """ A process for reading memory
     """
+    __slots__ = [
+        "_extra_reads",
+        "_iobuf",
+        "_iobuf_address",
+        "_iobuf_view",
+        "_next_reads"]
 
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(ReadIOBufProcess, self).__init__(connection_selector)
 
         # A dictionary of (x, y, p) -> iobuf address
         self._iobuf_address = dict()
@@ -121,6 +127,9 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
                 (processor_address, n + 1, next_address, first_read_size))
 
     def read_iobuf(self, iobuf_size, core_subsets):
+        """
+        :rtype: iterable of IOBuffer
+        """
         # Get the iobuf address for each core
         for core_subset in core_subsets:
             x = core_subset.x

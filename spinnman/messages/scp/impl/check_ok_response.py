@@ -6,10 +6,12 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 class CheckOKResponse(AbstractSCPResponse):
     """ An SCP response to a request which returns nothing other than OK
     """
+    __slots__ = [
+        "_command",
+        "_operation"]
 
     def __init__(self, operation, command):
         """
-
         :param operation: The operation being performed
         :type operation: str
         :param command: The command that was sent

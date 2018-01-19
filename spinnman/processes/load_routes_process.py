@@ -12,8 +12,11 @@ _END_PATTERN = struct.Struct("<IIII")
 
 
 class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_base_address"]
+
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(LoadMultiCastRoutesProcess, self).__init__(connection_selector)
         self._base_address = None
 
     def handle_router_alloc_response(self, response):

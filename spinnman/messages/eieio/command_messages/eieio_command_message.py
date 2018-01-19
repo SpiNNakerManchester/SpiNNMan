@@ -4,20 +4,21 @@ from spinnman.messages.eieio.abstract_messages import AbstractEIEIOMessage
 class EIEIOCommandMessage(AbstractEIEIOMessage):
     """ An EIEIO command message
     """
+    __slots__ = [
+        "_data",
+        "_eieio_command_header",
+        "_offset"]
 
     def __init__(self, eieio_command_header, data=None, offset=0):
         """
-
         :param eieio_command_header: The header of the message
         :type eieio_command_header:\
-                    :py:class:`spinnman.messages.eieio.command_messages.eieio_command_header.EIEIOCommandHeader`
+            :py:class:`spinnman.messages.eieio.command_messages.eieio_command_header.EIEIOCommandHeader`
         :param data: Optional incoming data
         :type data: str
         :param offset: Offset into the data where valid data begins
         :type offset: int
         """
-        AbstractEIEIOMessage.__init__(self)
-
         # The header
         self._eieio_command_header = eieio_command_header
 

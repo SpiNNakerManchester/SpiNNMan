@@ -36,13 +36,11 @@ class FillDataType(Enum):
 class FillProcess(AbstractMultiConnectionProcess):
     """ A process for filling memory
     """
+    __slots__ = []
 
     PACKS = [struct.Struct("<{}B".format(i)) for i in range(ALIGNMENT)]
 
     # pylint: disable=too-many-arguments
-
-    def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
 
     def _write_pre_bytes(self, x, y, base, data_to_fill, size):
         extra_bytes = (ALIGNMENT - base % ALIGNMENT) % ALIGNMENT
