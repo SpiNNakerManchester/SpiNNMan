@@ -24,8 +24,7 @@ class FillRequest(AbstractSCPRequest):
         :type size: int
         """
         # pylint: disable=too-many-arguments
-        AbstractSCPRequest.__init__(
-            self,
+        super(FillRequest, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,

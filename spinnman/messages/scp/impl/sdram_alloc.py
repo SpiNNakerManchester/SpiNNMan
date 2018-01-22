@@ -20,7 +20,6 @@ class SDRAMAlloc(AbstractSCPRequest):
 
     def __init__(self, x, y, app_id, size, tag=None):
         """
-
         :param x: \
             The x-coordinate of the chip to allocate on, between 0 and 255
         :type x: int
@@ -69,7 +68,7 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         "_size"]
 
     def __init__(self, size):
-        AbstractSCPResponse.__init__(self)
+        super(_SCPSDRAMAllocResponse, self).__init__()
         self._size = size
         self._base_address = None
 
