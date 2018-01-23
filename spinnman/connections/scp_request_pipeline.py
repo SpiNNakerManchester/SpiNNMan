@@ -127,7 +127,8 @@ class SCPRequestPipeLine(object):
         # If all the channels are used, start to receive packets
         while (self._n_channels is not None and
                 self._in_progress >= self._n_channels):
-            self._do_retrieve(self._intermediate_channel_waits, 0.1)
+            self._do_retrieve(
+                self._intermediate_channel_waits, self._packet_timeout)
 
         # Get the next sequence to be used
         sequence = self._get_next_sequence_number()
