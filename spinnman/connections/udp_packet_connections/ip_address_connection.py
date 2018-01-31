@@ -1,7 +1,7 @@
 from .udp_connection import UDPConnection
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 
-_SPECIAL_PORT = 54321
+_BOOTROM_SPINN_PORT = 54321  # Matches SPINN_PORT in spinnaker_bootROM
 
 
 class IPAddressesConnection(UDPConnection):
@@ -22,7 +22,7 @@ class IPAddressesConnection(UDPConnection):
     def receive_ip_address(self, timeout=None):
         try:
             (_, (ip_address, port)) = self.receive_with_address(timeout)
-            if port == _SPECIAL_PORT:
+            if port == _BOOTROM_SPINN_PORT:
                 return ip_address
         except Exception:
             pass
