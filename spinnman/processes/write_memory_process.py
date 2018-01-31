@@ -12,9 +12,15 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
     # pylint: disable=too-many-arguments
 
     def write_memory_from_bytearray(
-            self, processor_address, base_address, data, offset, n_bytes):
+            self, x, y, p, base_address, data, offset, n_bytes):
         """ Writes memory onto a spinnaker chip from a bytearray
 
+        :param x: \
+            The x-coordinate of the chip where the memory is to be written to
+        :param y: \
+            The y-coordinate of the chip where the memory is to be written to
+        :param p: \
+            The processor of the chip where the memory is to be written to
         :param processor_address: the (x, y, p) coords of the chip in question
         :param base_address: the address in sdram to start writing
         :param data: the data to write
@@ -22,43 +28,43 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :param n_bytes: how much data to write
         :rtype: None
         """
-        (x, y, p) = processor_address
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
             functools.partial(WriteMemory, x=x, y=y, cpu=p))
 
     def write_link_memory_from_bytearray(
-            self, processor_address, link, base_address, data, offset,
-            n_bytes):
-        (x, y, p) = processor_address
+            self, x, y, p, link, base_address, data, offset, n_bytes):
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
             functools.partial(WriteLink, x=x, y=y, cpu=p, link=link))
 
     def write_memory_from_reader(
-            self, processor_address, base_address, reader, n_bytes):
+            self, x, y, p, base_address, reader, n_bytes):
         """ Writes memory onto a spinnaker chip from a reader
 
-        :param processor_address: the (x, y, p) coords of the chip in question
+        :param x: \
+            The x-coordinate of the chip where the memory is to be written to
+        :param y: \
+            The y-coordinate of the chip where the memory is to be written to
+        :param p: \
+            The processor of the chip where the memory is to be written to
         :param base_address: the address in sdram to start writing
         :param reader: the reader containing the data to write
         :param n_bytes: how much data to write
         :rtype: None
         """
-        (x, y, p) = processor_address
         self._write_memory_from_reader(
             base_address, reader, n_bytes,
             functools.partial(WriteMemory, x=x, y=y, cpu=p))
 
     def write_link_memory_from_reader(
-            self, processor_address, link, base_address, reader, n_bytes):
-        (x, y, p) = processor_address
+            self, x, y, p, link, base_address, reader, n_bytes):
         self._write_memory_from_reader(
             base_address, reader, n_bytes,
             functools.partial(WriteLink, x=x, y=y, cpu=p, link=link))
 
-    def _write_memory_from_bytearray(self, base_address, data, data_offset,
-                                     n_bytes, packet_class):
+    def _write_memory_from_bytearray(
+            self, base_address, data, data_offset, n_bytes, packet_class):
         offset = 0
         n_bytes_to_write = int(n_bytes)
         while n_bytes_to_write > 0:
@@ -66,8 +72,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             data_array = data[data_offset:data_offset + bytes_to_send]
 
             self._send_request(packet_class(
-                base_address=base_address + offset,
-                data=data_array))
+                base_address=base_address + offset, data=data_array))
 
             n_bytes_to_write -= bytes_to_send
             offset += bytes_to_send
@@ -75,18 +80,17 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         self._finish()
         self.check_for_error()
 
-    def _write_memory_from_reader(self, base_address, reader, n_bytes,
-                                  packet_class):
+    def _write_memory_from_reader(
+            self, base_address, reader, n_bytes, packet_class):
         offset = 0
         n_bytes_to_write = int(n_bytes)
         while n_bytes_to_write > 0:
-            bytes_to_send = min((n_bytes_to_write, UDP_MESSAGE_MAX_SIZE))
-            data_array = reader.read(bytes_to_send)
+            data_array = reader.read(
+                min((n_bytes_to_write, UDP_MESSAGE_MAX_SIZE)))
             bytes_to_send = len(data_array)
 
             self._send_request(packet_class(
-                base_address=base_address + offset,
-                data=data_array))
+                base_address=base_address + offset, data=data_array))
 
             n_bytes_to_write -= bytes_to_send
             offset += bytes_to_send

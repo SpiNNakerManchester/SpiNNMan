@@ -1,6 +1,13 @@
 # pylint: disable=too-many-arguments
 # local imports
-from spinnman import constants
+from spinnman.constants import \
+    BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT, \
+    CPU_USER_0_START_ADDRESS, CPU_USER_1_START_ADDRESS, \
+    CPU_USER_2_START_ADDRESS, IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, \
+    SYSTEM_VARIABLE_BASE_ADDRESS, UDP_BOOT_CONNECTION_DEFAULT_PORT, \
+    NO_ROUTER_DIAGNOSTIC_FILTERS, ROUTER_REGISTER_BASE_ADDRESS, \
+    ROUTER_DEFAULT_FILTERS_MAX_POSITION, ROUTER_FILTER_CONTROLS_OFFSET, \
+    ROUTER_DIAGNOSTIC_FILTER_SIZE
 from spinnman.exceptions import SpinnmanInvalidParameterException, \
     SpinnmanException, SpinnmanIOException, SpinnmanTimeoutException, \
     SpinnmanGenericProcessException, SpinnmanUnexpectedResponseCodeException,\
@@ -105,15 +112,15 @@ def create_transceiver_from_hostname(
     :param ignore_chips: An optional set of chips to ignore in the machine.\
         Requests for a "machine" will have these chips excluded, as if they \
         never existed. The processor_ids of the specified chips are ignored.
-    :type ignore_chips: set of (int, int) of chips to ignore
+    :type ignore_chips: set of (int, int)
     :param ignore_cores: An optional set of cores to ignore in the machine. \
         Requests for a "machine" will have these cores excluded, as if they \
         never existed.
-    :type ignore_cores: set of (int, int, int) of cores to ignore
+    :type ignore_cores: set of (int, int, int)
     :param ignored_links: An optional set of links to ignore in the machine.\
         Requests for a "machine" will have these links excluded, as if they \
         never existed.
-    :type ignored_links: set of (int, int, int) of links to ignore
+    :type ignored_links: set of (int, int, int)
     :param max_core_id: The maximum core id in any discovered machine.\
         Requests for a "machine" will only have core ids up to this value.
     :type max_core_id: int
@@ -122,7 +129,7 @@ def create_transceiver_from_hostname(
         spinn-3 would equal 3 and so on.
     :param bmp_connection_data: the details of the BMP connections used to\
         boot multi-board systems
-    :type bmp_connection_data: iterable\
+    :type bmp_connection_data: iterable of\
         :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
     :param auto_detect_bmp: True if the BMP of version 4 or 5 boards should be\
         automatically determined from the board IP address
@@ -245,15 +252,15 @@ class Transceiver(object):
             machine. Requests for a "machine" will have these chips excluded,\
             as if they never existed. The processor_ids of the specified chips\
             are ignored.
-        :type ignore_chips: set of (int, int of chips to ignore
+        :type ignore_chips: set of (int, int)
         :param ignore_cores: An optional set of cores to ignore in the\
             machine. Requests for a "machine" will have these cores excluded,\
             as if they never existed.
-        :type ignore_cores: set of (int, int, int) of cores to ignore
+        :type ignore_cores: set of (int, int, int)
         :param ignore_links: An optional set of links to ignore in the\
             machine. Requests for a "machine" will have these links excluded,\
             as if they never existed.
-        :type ignore_links: set of (int, int, int) of links to ignore
+        :type ignore_links: set of (int, int, int)
         :param max_core_id: The maximum core id in any discovered machine.\
             Requests for a "machine" will only have core ids up to and\
             including this value.
@@ -812,12 +819,11 @@ class Transceiver(object):
         """
         if self._width is None or self._height is None:
             height_item = SystemVariableDefinition.y_size
-            self._height, self._width = _TWO_BYTES.unpack_from(
-                str(self.read_memory(
+            self._height, self._width = _TWO_BYTES.unpack_from(str(
+                self.read_memory(
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-                    (constants.SYSTEM_VARIABLE_BASE_ADDRESS +
-                        height_item.offset),
+                    SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
                     2)))
         return MachineDimensions(self._width, self._height)
 
@@ -872,7 +878,7 @@ class Transceiver(object):
             connection_selector=None):
         """ Get the version of scamp which is running on the board
 
-        :param connection_selector: the connection to send the scamp
+        :param connection_selector: the connection to send the scamp\
             version or none (if none then a random scamp connection is used)
         :type connection_selector: \
             :py:class:'spinnman.processes.abstract_multi_connection_process_connection_selector.AbstractMultiConnectionProcessConnectionSelector'
@@ -1027,7 +1033,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
-                constants.IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms.value))
+                IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms.value))
 
         return version_info
 
@@ -1037,8 +1043,8 @@ class Transceiver(object):
         """ Try to detect if SCAMP is running, and if not, boot the machine
 
         :param tries_to_go: how many attempts should be supported
-        :param number_of_boards: the number of boards that this machine \
-            is built out of
+        :param number_of_boards: \
+            the number of boards that this machine is built out of
         :param width: The width of the machine in chips
         :param height: The height of the machine in chips
         :param extra_boot_values: Any additional values to set during boot
@@ -1134,7 +1140,7 @@ class Transceiver(object):
             data_item.data_type.struct_code,
             str(self.read_memory(
                 x, y,
-                constants.SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
+                SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
                 data_item.data_type.value)))[0]
 
     def get_user_0_register_address_from_core(self, x, y, p):
@@ -1156,9 +1162,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        return (
-            utility_functions.get_vcpu_address(p) +
-            constants.CPU_USER_0_START_ADDRESS)
+        return utility_functions.get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
     def get_user_1_register_address_from_core(self, x, y, p):
         """ Get the address of user 1 for a given processor on the board
@@ -1179,9 +1183,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        return (
-            utility_functions.get_vcpu_address(p) +
-            constants.CPU_USER_1_START_ADDRESS)
+        return utility_functions.get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
     def get_user_2_register_address_from_core(self, x, y, p):
         """ Get the address of user 2 for a given processor on the board
@@ -1202,9 +1204,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        return (
-            utility_functions.get_vcpu_address(p) +
-            constants.CPU_USER_2_START_ADDRESS)
+        return utility_functions.get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
@@ -1290,7 +1290,7 @@ class Transceiver(object):
         data = _ONE_BYTE.pack(value_to_set)
 
         # write data
-        address = constants.SYSTEM_VARIABLE_BASE_ADDRESS + WATCHDOG.offset
+        address = SYSTEM_VARIABLE_BASE_ADDRESS + WATCHDOG.offset
         self.write_memory(x=x, y=y, base_address=address, data=data)
 
     def set_watch_dog(self, watch_dog):
@@ -1591,9 +1591,9 @@ class Transceiver(object):
         """
         connection_selector = self._bmp_connection(cabinet, frame)
         timeout = (
-            constants.BMP_POWER_ON_TIMEOUT
+            BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
-            else constants.BMP_TIMEOUT)
+            else BMP_TIMEOUT)
         process = SendSingleCommandProcess(
             connection_selector, timeout=timeout, n_retries=0)
         process.execute(SetPower(power_command, boards))
@@ -1601,7 +1601,7 @@ class Transceiver(object):
 
         # Sleep for 5 seconds if the machine has just been powered on
         if not self._machine_off:
-            time.sleep(constants.BMP_POST_POWER_ON_SLEEP_TIME)
+            time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
@@ -1755,26 +1755,26 @@ class Transceiver(object):
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
-                (x, y, cpu), base_address, data, n_bytes)
+                x, y, cpu, base_address, data, n_bytes)
         elif isinstance(data, str) and is_filename:
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
             with FileDataReader(data) as reader:
                 process.write_memory_from_reader(
-                    (x, y, cpu), base_address, reader, n_bytes)
+                    x, y, cpu, base_address, reader, n_bytes)
         elif isinstance(data, int):
             data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
-                (x, y, cpu), base_address, data_to_write, 0, 4)
+                x, y, cpu, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
             data_to_write = _ONE_LONG.pack(data)
             process.write_memory_from_bytearray(
-                (x, y, cpu), base_address, data_to_write, 0, 8)
+                x, y, cpu, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
             process.write_memory_from_bytearray(
-                (x, y, cpu), base_address, data, offset, n_bytes)
+                x, y, cpu, base_address, data, offset, n_bytes)
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
                                n_bytes=None, offset=0, cpu=0):
@@ -1833,20 +1833,20 @@ class Transceiver(object):
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, AbstractDataReader):
             process.write_link_memory_from_reader(
-                (x, y, cpu), link, base_address, data, n_bytes)
+                x, y, cpu, link, base_address, data, n_bytes)
         elif isinstance(data, int):
             data_to_write = _ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
-                (x, y, cpu), link, base_address, data_to_write, 0, 4)
+                x, y, cpu, link, base_address, data_to_write, 0, 4)
         elif isinstance(data, long):
             data_to_write = _ONE_LONG.pack(data)
             process.write_link_memory_from_bytearray(
-                (x, y, cpu), link, base_address, data_to_write, 0, 8)
+                x, y, cpu, link, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
             process.write_link_memory_from_bytearray(
-                (x, y, cpu), link, base_address, data, offset, n_bytes)
+                x, y, cpu, link, base_address, data, offset, n_bytes)
 
     def write_memory_flood(
             self, base_address, data, n_bytes=None, offset=0,
@@ -1954,7 +1954,7 @@ class Transceiver(object):
         """
 
         process = ReadMemoryProcess(self._scamp_connection_selector)
-        return process.read_memory((x, y, cpu), base_address, length)
+        return process.read_memory(x, y, cpu, base_address, length)
 
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
         """ Read some areas of memory on a neighbouring chip using a LINK_READ
@@ -1991,8 +1991,7 @@ class Transceiver(object):
         """
 
         process = ReadMemoryProcess(self._scamp_connection_selector)
-        return process.read_link_memory(
-            (x, y, cpu), link, base_address, length)
+        return process.read_link_memory(x, y, cpu, link, base_address, length)
 
     def stop_application(self, app_id):
         """ Sends a stop request for an app_id
@@ -2320,15 +2319,14 @@ class Transceiver(object):
                 "reverse_ip_tag.port", "None",
                 "The tag port must have been set!")
 
-        if (reverse_ip_tag.port == constants.SCP_SCAMP_PORT or
-                reverse_ip_tag.port ==
-                constants.UDP_BOOT_CONNECTION_DEFAULT_PORT):
+        if (reverse_ip_tag.port == SCP_SCAMP_PORT or
+                reverse_ip_tag.port == UDP_BOOT_CONNECTION_DEFAULT_PORT):
             raise SpinnmanInvalidParameterException(
                 "reverse_ip_tag.port", reverse_ip_tag.port,
                 "The port number for the reverse ip tag conflicts with"
                 " the spiNNaker system ports ({} and {})".format(
-                    constants.SCP_SCAMP_PORT,
-                    constants.UDP_BOOT_CONNECTION_DEFAULT_PORT))
+                    SCP_SCAMP_PORT,
+                    UDP_BOOT_CONNECTION_DEFAULT_PORT))
 
         # Get the connections - if the tag specifies a connection, use that,
         # otherwise apply the tag to all connections
@@ -2654,11 +2652,11 @@ class Transceiver(object):
             a response indicates an error during the exchange
         """
         data_to_send = diagnostic_filter.filter_word
-        if position > constants.NO_ROUTER_DIAGNOSTIC_FILTERS:
+        if position > NO_ROUTER_DIAGNOSTIC_FILTERS:
             raise SpinnmanInvalidParameterException(
                 "position", str(position), "the range of the position of a "
                                            "router filter is 0 and 16.")
-        if position <= constants.ROUTER_DEFAULT_FILTERS_MAX_POSITION:
+        if position <= ROUTER_DEFAULT_FILTERS_MAX_POSITION:
             logger.warn(
                 " You are planning to change a filter which is set by default."
                 " By doing this, other runs occurring on this machine will be "
@@ -2667,10 +2665,9 @@ class Transceiver(object):
                 " the reports from ybug not correct."
                 "This has been executed and is trusted that the end user knows"
                 " what they are doing")
-        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS +
-                           constants.ROUTER_FILTER_CONTROLS_OFFSET +
-                           (position *
-                            constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
+        memory_position = (ROUTER_REGISTER_BASE_ADDRESS +
+                           ROUTER_FILTER_CONTROLS_OFFSET +
+                           position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(WriteMemory(
@@ -2702,10 +2699,9 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
             a response indicates an error during the exchange
         """
-        memory_position = (constants.ROUTER_REGISTER_BASE_ADDRESS +
-                           constants.ROUTER_FILTER_CONTROLS_OFFSET +
-                           (position *
-                            constants.ROUTER_DIAGNOSTIC_FILTER_SIZE))
+        memory_position = (ROUTER_REGISTER_BASE_ADDRESS +
+                           ROUTER_FILTER_CONTROLS_OFFSET +
+                           position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(
             ReadMemory(x, y, memory_position, 4))
