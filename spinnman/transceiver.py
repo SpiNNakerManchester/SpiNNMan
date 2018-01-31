@@ -2921,7 +2921,8 @@ class Transceiver(object):
         :param y: The y-coordinate of the chip
         :type y: int
         :param heap: The SystemVariableDefinition which is the heap to read
-        :type heap: SystemVariableDefinition
+        :type heap: \
+            :py:class:`spinnman.messages.spinnaker_boot.SystemVariableDefinition`
         """
         process = GetHeapProcess(self._scamp_connection_selector)
         return process.get_heap((x, y), heap)
