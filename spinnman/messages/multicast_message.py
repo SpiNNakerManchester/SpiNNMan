@@ -6,8 +6,8 @@ class MulticastMessage(object):
         "_payload"]
 
     def __init__(self, key, payload=None):
-        """A multicast message has a key (determining the target locations) and
-        an optional payload.
+        """ A multicast message has a key (determining the target locations) \
+            and an optional payload.
 
         :param key: The key of the packet
         :type key: int
