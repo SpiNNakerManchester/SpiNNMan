@@ -3,7 +3,7 @@ from spinnman.exceptions \
     import SpinnmanIOException, SpinnmanTimeoutException
 from spinnman.connections.abstract_classes import Connection
 from .utils import bind_socket, connect_socket, get_socket, \
-    get_socket_address, ping, set_receive_buffer_size
+    get_socket_address, ping, resolve_host, set_receive_buffer_size
 
 import logging
 import socket
@@ -64,7 +64,7 @@ class UDPConnection(Connection):
         # Get the host to connect to remotely
         if remote_host is not None and remote_port is not None:
             self._remote_port = remote_port
-            self._remote_ip_address = self.__resolve_host(remote_host)
+            self._remote_ip_address = resolve_host(remote_host)
             connect_socket(self._socket, self._remote_ip_address, remote_port)
             self._can_send = True
 
