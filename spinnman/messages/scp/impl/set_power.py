@@ -16,6 +16,11 @@ class SetPower(BMPRequest):
 
     def __init__(self, power_command, boards, delay=0.0, board_to_send_to=0):
         """
+        .. note::
+            There is currently a bug in the BMP that means some boards don't\
+            respond to power commands not sent to BMP 0. Thus changing the\
+            board_to_send_to parameter is not recommended!
+
         :param power_command: The power command being sent
         :type power_command:\
             :py:class:`spinnman.messages.scp.scp_power_command.SCPPowerCommand`
@@ -25,10 +30,7 @@ class SetPower(BMPRequest):
             the different boards.
         :type delay: int
         :param board_to_send_to: The optional board to send the command to if\
-            this is to be sent to a frame of boards.  NOTE: There is currently\
-            a bug in the BMP that means some boards don't respond to power\
-            commands not sent to BMP 0.  Thus changing this parameter is\
-            not recommended!
+            this is to be sent to a frame of boards.
         :type: board_to_send_to: 0
         :rtype: None
         """
