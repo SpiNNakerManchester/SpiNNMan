@@ -65,7 +65,20 @@ class ExecutableTargets(object):
         self._total_processors += 1
 
         # add to binary to executable type
-        self._binary_to_executable_types_map[executable_type].append(binary)
+        if binary not in self._binary_to_executable_types_map[executable_type]:
+            self._binary_to_executable_types_map[executable_type].append(
+                binary)
+
+    def get_n_cores_for_executable_type(self, executable_type):
+        """ returns the number of cores that the executable type is using
+        
+        :param executable_type: the executable type for locating n cores of
+        :return:  the number of cores using this executable type
+        """
+        count = 0
+        for binary in self._binary_to_executable_types_map[executable_type]:
+            count += len(self.get_cores_for_binary(binary))
+        return count
 
     def get_cores_for_binary(self, binary):
         """ Get the cores that a binary is to run on
