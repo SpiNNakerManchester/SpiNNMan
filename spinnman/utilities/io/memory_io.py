@@ -10,10 +10,10 @@ import struct
 _chip_memory_io_objects = dict()
 
 
-def _get_chip_memory_io(transceiver, x, y):
+def _get_chip_memory_io(transceiver, x, y, write_memory_function):
     if (transceiver, x, y) not in _chip_memory_io_objects:
         _chip_memory_io_objects[transceiver, x, y] = _ChipMemoryIO(
-            transceiver, x, y)
+            transceiver, x, y, write_memory_function)
     return _chip_memory_io_objects[transceiver, x, y]
 
 
@@ -48,11 +48,15 @@ class _ChipMemoryIO(object):
         "_write_memory_view",
 
         # The write buffer pointer
-        "_write_buffer_offset"
+        "_write_buffer_offset",
+
+        # the function used to write memory on spinnaker
+        "_write_memory_function"
     ]
 
     def __init__(
-            self, transceiver, x, y, base_address=0x60000000, buffer_size=256):
+            self, transceiver, x, y, write_memory_function,
+            base_address=0x60000000, buffer_size=256):
         """
 
         :param transceiver: The transceiver to read and write with
@@ -63,6 +67,7 @@ class _ChipMemoryIO(object):
         """
 
         self._transceiver = transceiver
+        self._write_memory_function = write_memory_function
         self._x = x
         self._y = y
         self._current_address = base_address
@@ -88,7 +93,7 @@ class _ChipMemoryIO(object):
         """ Force the writing of the current write buffer
         """
         if self._write_buffer_offset > 0:
-            self._transceiver.write_memory(
+            self._write_memory_function(
                 self._x, self._y, self._write_address, self._write_buffer,
                 n_bytes=self._write_buffer_offset)
             self._write_address += self._write_buffer_offset
@@ -135,7 +140,7 @@ class _ChipMemoryIO(object):
 
         if n_bytes >= self._buffer_size:
             self.flush_write_buffer()
-            self._transceiver.write_memory(
+            self._write_memory_function(
                 self._x, self._y, self._current_address, data)
             self._current_address += n_bytes
             self._write_address = self._current_address
@@ -197,7 +202,8 @@ class MemoryIO(AbstractIO):
     # ensure they are written before a read occurs
     __write_cache__ = dict()
 
-    def __init__(self, transceiver, x, y, start_address, end_address):
+    def __init__(self, transceiver, x, y, memory_write_function, start_address,
+                 end_address):
         """
 
         :param transceiver: The transceiver to read and write with
@@ -211,7 +217,8 @@ class MemoryIO(AbstractIO):
         if start_address >= end_address:
             raise ValueError("Start address must be less than end address")
 
-        self._chip_memory_io = _get_chip_memory_io(transceiver, x, y)
+        self._chip_memory_io = _get_chip_memory_io(
+            transceiver, x, y, memory_write_function)
         self._start_address = start_address
         self._current_address = start_address
         self._end_address = end_address
