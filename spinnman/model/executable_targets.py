@@ -24,7 +24,7 @@ class ExecutableTargets(object):
         self._targets = dict()
         self._total_processors = 0
         self._all_core_subsets = CoreSubsets()
-        self._binary_to_executable_types_map = defaultdict(list)
+        self._binary_to_executable_types_map = defaultdict(set)
 
     def add_subsets(self, binary, subsets, executable_type):
         """ Add core subsets to a binary
@@ -46,7 +46,7 @@ class ExecutableTargets(object):
                 self._all_core_subsets.add_processor(subset.x, subset.y, p)
 
         # add to binary to executable type
-        self._binary_to_executable_types_map[executable_type].append(binary)
+        self._binary_to_executable_types_map[executable_type].add(binary)
 
     def add_processor(self, binary, chip_x, chip_y, chip_p, executable_type):
         """ Add a processor to the executable targets
@@ -65,9 +65,7 @@ class ExecutableTargets(object):
         self._total_processors += 1
 
         # add to binary to executable type
-        if binary not in self._binary_to_executable_types_map[executable_type]:
-            self._binary_to_executable_types_map[executable_type].append(
-                binary)
+        self._binary_to_executable_types_map[executable_type].add(binary)
 
     def get_n_cores_for_executable_type(self, executable_type):
         """ returns the number of cores that the executable type is using
