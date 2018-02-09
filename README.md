@@ -1,4 +1,5 @@
 [![Build Status](https://api.travis-ci.org/SpiNNakerManchester/SpiNNMan.svg?branch=master)](https://travis-ci.org/SpiNNakerManchester/SpiNNMan)
+[![Coverage Status](https://coveralls.io/repos/github/SpiNNakerManchester/SpiNNMan/badge.svg?branch=master)](https://coveralls.io/github/SpiNNakerManchester/SpiNNMan?branch=master)
 
 
 This package provides utilities for interacting with a SpiNNaker machine.
