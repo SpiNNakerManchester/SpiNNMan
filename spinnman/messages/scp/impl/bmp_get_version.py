@@ -1,7 +1,3 @@
-"""
-BMPGetVersion
-"""
-
 # spinnman imports
 from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp import SCPRequestHeader
@@ -18,11 +14,10 @@ class BMPGetVersion(BMPRequest):
         :param board: The board to get the version from
         :type board: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the chip coordinates are out of range
-                    * If the processor is out of range
+            * If the chip coordinates are out of range
+            * If the processor is out of range
         """
-        BMPRequest.__init__(
-            self, board,
+        super(BMPGetVersion, self).__init__(
             SCPRequestHeader(command=SCPCommand.CMD_VER))
 
     def get_scp_response(self):

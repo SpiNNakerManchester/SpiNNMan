@@ -12,6 +12,7 @@ class EIEIOType(Enum):
         3, 4, 4, "Indicates that data is keys and payloads of 32 bits")
 
     def __new__(cls, value, key_bytes, payload_bytes, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         return obj

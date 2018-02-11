@@ -11,6 +11,18 @@ _EIGHTEEN_BYTES = struct.Struct("<18B")
 class ChipSummaryInfo(object):
     """ Represents the chip summary information read via an SCP command
     """
+    __slots__ = [
+        "_core_states",
+        "_ethernet_ip_address",
+        "_is_ethernet_available",
+        "_largest_free_sdram_block",
+        "_largest_free_sram_block",
+        "_n_cores",
+        "_n_free_multicast_routing_entries",
+        "_nearest_ethernet_x",
+        "_nearest_ethernet_y",
+        "_working_links",
+        "_x", "_y"]
 
     def __init__(self, chip_summary_data, offset, x, y):
         """

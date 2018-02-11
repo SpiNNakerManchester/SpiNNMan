@@ -22,7 +22,8 @@ if __name__ == "__main__":
         :param frame:
         :return: Never returns as it causes a sys.exit()
         """
-        "Exiting"
+        # pylint: disable=unused-argument
+        print "Exiting"
         sys.exit()
 
     signal.signal(signal.SIGINT, ctrlc_handler)

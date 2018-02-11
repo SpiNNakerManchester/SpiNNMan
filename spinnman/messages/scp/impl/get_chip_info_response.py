@@ -7,11 +7,11 @@ from spinnman.model import ChipSummaryInfo
 class GetChipInfoResponse(AbstractSCPResponse):
     """ An SCP response to a request for the version of software running
     """
+    __slots__ = [
+        "_chip_info"]
 
     def __init__(self):
-        """
-        """
-        AbstractSCPResponse.__init__(self)
+        super(GetChipInfoResponse, self).__init__()
         self._chip_info = None
 
     def read_data_bytestring(self, data, offset):

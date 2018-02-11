@@ -8,6 +8,7 @@ from spinnman.processes.fill_process import FillDataType
 
 @add_metaclass(ABCMeta)
 class AbstractIO(object):
+    __slots__ = []
 
     @abstractmethod
     def __len__(self):
@@ -60,7 +61,6 @@ class AbstractIO(object):
     def tell(self):
         """ Return the current position within the region relative to the start
         """
-        return self._current_address - self._start_address
 
     @abstractproperty
     def address(self):

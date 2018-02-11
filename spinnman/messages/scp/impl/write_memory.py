@@ -9,23 +9,26 @@ from .check_ok_response import CheckOKResponse
 class WriteMemory(AbstractSCPRequest):
     """ A request to write memory on a chip
     """
+    __slots__ = [
+        "_data_to_write"]
 
     def __init__(self, x, y, base_address, data, cpu=0):
         """
 
-        :param x: The x-coordinate of the chip, between 0 and 255\
-        this is not checked due to speed restrictions
+        :param x: The x-coordinate of the chip, between 0 and 255;\
+            this is not checked due to speed restrictions
         :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255\
-        this is not checked due to speed restrictions
+        :param y: The y-coordinate of the chip, between 0 and 255;\
+            this is not checked due to speed restrictions
         :type y: int
         :param base_address: The base_address to start writing to \
-        the base address is not checked to see if its not valid
+            the base address is not checked to see if its not valid
         :type base_address: int
-        :param data: between 1 and 256 bytes of data to write\
-        this is not checked due to speed restrictions
+        :param data: between 1 and 256 bytes of data to write;\
+            this is not checked due to speed restrictions
         :type data: bytearray or string
         """
+        # pylint: disable=too-many-arguments
         size = len(data)
         super(WriteMemory, self).__init__(
             SDPHeader(

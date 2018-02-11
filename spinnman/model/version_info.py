@@ -9,16 +9,24 @@ _VERSION_PATTERN = struct.Struct("<BBBBHHI")
 class VersionInfo(object):
     """ Decodes SC&MP/SARK version information as returned by the SVER command
     """
+    __slots__ = [
+        "_build_date",
+        "_hardware",
+        "_name",
+        "_physical_cpu_id",
+        "_version_number",
+        "_version_string",
+        "_x", "_y", "_p"]
 
     def __init__(self, version_data, offset=0):
         """
-        :param version_data: bytes from an SCP packet containing version\
-                    information
-        :param offset: the offset in the bytes from an SCP packet containing
-                       version information
+        :param version_data: \
+            bytes from an SCP packet containing version information
+        :param offset: the offset in the bytes from an SCP packet containing\
+            version information
         :type version_data: bytearray
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
-                    message does not contain valid version information
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If the message does not contain valid version information
         """
         (self._p, self._physical_cpu_id, self._y, self._x, _,
             version_no, self._build_date) = _VERSION_PATTERN.unpack_from(

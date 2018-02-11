@@ -8,10 +8,10 @@ from .check_ok_response import CheckOKResponse
 class SetLED(AbstractSCPRequest):
     """ A request to change the state of an SetLED
     """
+    __slots__ = []
 
     def __init__(self, x, y, cpu, led_states):
         """
-
         :param x: The x-coordinate of the chip, between 0 and 255
         :type x: int
         :param y: The y-coordinate of the chip, between 0 and 255

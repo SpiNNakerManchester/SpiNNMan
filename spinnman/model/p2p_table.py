@@ -8,6 +8,10 @@ _ONE_WORD = struct.Struct("<I")
 class P2PTable(object):
     """ Represents a P2P table read from the machine
     """
+    __slots__ = [
+        "_height",
+        "_routes",
+        "_width"]
 
     def __init__(self, width, height, column_data):
         self._routes = dict()

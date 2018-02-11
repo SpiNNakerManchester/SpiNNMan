@@ -20,7 +20,7 @@ def _set_flags_in_word(word, enum_list, enum_type, offset):
         enum_values = list()
     else:
         enum_values = list(enum_list)
-    if len(enum_values) == 0:
+    if not enum_values:
         enum_values = [value for value in enum_type]
     for enum_value in enum_values:
         word |= 1 << (enum_value.value + offset)
@@ -37,12 +37,21 @@ def _read_flags_from_word(word, enum_list, offset):
 
 
 class DiagnosticFilter(object):
-    """ A router diagnostic counter filter, which counts packets passing
+    """ A router diagnostic counter filter, which counts packets passing\
         through the router with certain properties.  The counter will be\
         incremented so long as the packet matches one of the values in each\
         field i.e. one of each of the destinations, sources, payload_statuses,\
         default_routing_statuses, emergency_routing_statuses and packet_types
     """
+    __slots__ = [
+        "_default_routing_statuses",
+        "_destinations",
+        "_emergency_routing_statuses",
+        "_enable_interrupt_on_counter_event",
+        "_match_emergency_routing_status_to_incoming_packet",
+        "_packet_types",
+        "_payload_statuses",
+        "_sources"]
 
     def __init__(self, enable_interrupt_on_counter_event,
                  match_emergency_routing_status_to_incoming_packet,
@@ -51,45 +60,42 @@ class DiagnosticFilter(object):
                  packet_types):
         """
         :param enable_interrupt_on_counter_event: Indicates whether\
-                    an interrupt should be raised when this rule matches
+            an interrupt should be raised when this rule matches
         :type enable_interrupt_on_counter_event: bool
         :param match_emergency_routing_status_to_incoming_packet: Indicates\
-                    whether the emergency routing statuses should be matched\
-                    against packets arriving at this router (if True), or if\
-                    they should be matched against packets leaving this router\
-                    (if False)
+            whether the emergency routing statuses should be matched against\
+            packets arriving at this router (if True), or if they should be\
+            matched against packets leaving this router (if False)
         :type match_emergency_routing_status_to_incoming_packet: bool
         :param destinations: Increment the counter if one or more of the given\
-                    destinations match
+            destinations match
         :type destinations: iterable of\
-                    :py:class:`spinnman.model.diagnostic_filter_destination.DiagnosticFilterDestination`
+            :py:class:`spinnman.model.diagnostic_filter_destination.DiagnosticFilterDestination`
 
         :param sources: Increment the counter if one or more of the given\
-                    sources match (or None or empty list to match all)
+            sources match (or None or empty list to match all)
         :type sources: iterable of\
-                    :py:class:`spinnman.model.diagnostic_filter_source.DiagnosticFilterSource`
+            :py:class:`spinnman.model.diagnostic_filter_source.DiagnosticFilterSource`
         :param payload_statuses: Increment the counter if one or more of the\
-                    given payload statuses match  (or None or empty list to \
-                    match all)
+            given payload statuses match  (or None or empty list to match all)
         :type payload_statuses: iterable of\
-                    :py:class:`spinnman.model.diagnostic_filter_payload_status.DiagnosticFilterPayloadStatus`
+            :py:class:`spinnman.model.diagnostic_filter_payload_status.DiagnosticFilterPayloadStatus`
         :param default_routing_statuses: Increment the counter if one or more\
-                    of the given default routing statuses match  (or None or \
-                    empty list to match all)
+            of the given default routing statuses match  (or None or empty\
+            list to match all)
         :type default_routing_statuses: iterable of\
-                    :py:class:`spinnman.model.diagnostic_filter_default_routing_status.DiagnosticFilterDefaultRoutingStatus`
+            :py:class:`spinnman.model.diagnostic_filter_default_routing_status.DiagnosticFilterDefaultRoutingStatus`
         :param emergency_routing_statuses: Increment the counter if one or\
-                    more of the given emergency routing statuses match  (or \
-                    None or empty list to match all)
+            more of the given emergency routing statuses match (or None or\
+            empty list to match all)
         :type emergency_routing_statuses: iterable of\
-                    :py:class:`spinnman.model.diagnostic_filter_emergency_routing_status.DiagnosticFilterEmergencyRoutingStatus`
-        :param packet_types: Increment the counter if one or more\
-                    of the given packet types match  (or None or empty list to\
-                    match all)
+            :py:class:`spinnman.model.diagnostic_filter_emergency_routing_status.DiagnosticFilterEmergencyRoutingStatus`
+        :param packet_types: Increment the counter if one or more of the\
+            given packet types match (or None or empty list to match all)
         :type packet_types: iterable of\
-                    :py:class:`spinnman.model.diagnostic_filter_packet_type.DiagnosticFilterPacketType`
+            :py:class:`spinnman.model.diagnostic_filter_packet_type.DiagnosticFilterPacketType`
         """
-
+        # pylint: disable=too-many-arguments
         self._enable_interrupt_on_counter_event = \
             enable_interrupt_on_counter_event
         self._match_emergency_routing_status_to_incoming_packet = \

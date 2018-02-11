@@ -14,15 +14,15 @@ _ONE_WORD = struct.Struct("<I")
 class RouterAlloc(AbstractSCPRequest):
     """ An SCP Request to allocate space for routing entries
     """
+    __slots__ = []
 
     def __init__(self, x, y, app_id, n_entries):
         """
-
-        :param x: The x-coordinate of the chip to allocate on, between 0 and\
-                    255
+        :param x: \
+            The x-coordinate of the chip to allocate on, between 0 and 255
         :type x: int
-        :param y: The y-coordinate of the chip to allocate on, between 0 and\
-                    255
+        :param y: \
+            The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
         :param app_id: The id of the application, between 0 and 255
         :type app_id: int
@@ -47,6 +47,8 @@ class RouterAlloc(AbstractSCPRequest):
 class _SCPRouterAllocResponse(AbstractSCPResponse):
     """ An SCP response to a request to allocate router entries
     """
+    __slots__ = [
+        "_base_address"]
 
     def __init__(self):
         """

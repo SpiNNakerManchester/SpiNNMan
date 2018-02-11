@@ -1,6 +1,9 @@
 class MachineDimensions(object):
     """ Represents the size of a machine in chips
     """
+    __slots__ = [
+        "_height",
+        "_width"]
 
     def __init__(self, width, height):
         """

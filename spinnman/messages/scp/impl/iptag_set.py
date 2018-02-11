@@ -10,6 +10,7 @@ _IPTAG_SET = 1
 class IPTagSet(AbstractSCPRequest):
     """ An SCP Request to set an IP Tag
     """
+    __slots__ = []
 
     def __init__(self, x, y, host, port, tag, strip):
         """
@@ -26,10 +27,8 @@ class IPTagSet(AbstractSCPRequest):
         :param strip: if the SDP header should be striped from the packet.
         :type strip: bool
         """
-        strip_value = 0
-        if strip:
-            strip_value = 1
-
+        # pylint: disable=too-many-arguments
+        strip_value = int(bool(strip))
         super(IPTagSet, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

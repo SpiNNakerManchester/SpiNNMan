@@ -10,6 +10,7 @@ _IPTAG_SET = 1
 class ReverseIPTagSet(AbstractSCPRequest):
     """ An SCP Request to set an IP Tag
     """
+    __slots__ = []
 
     def __init__(self, x, y, destination_x, destination_y, destination_p, port,
                  tag, sdp_port):
@@ -18,20 +19,21 @@ class ReverseIPTagSet(AbstractSCPRequest):
         :type x: int
         :param y: The y-coordinate of a chip, between 0 and 255
         :type y: int
-        :param destination_x: The x-coordinate of the destination chip,\
-                    between 0 and 255
+        :param destination_x: \
+            The x-coordinate of the destination chip, between 0 and 255
         :type destination_x: int
-        :param destination_y: The y-coordinate of the destination chip,\
-                    between 0 and 255
+        :param destination_y: \
+            The y-coordinate of the destination chip, between 0 and 255
         :type destination_y: int
-        :param destination_p: the id of the destination processor, between\
-                    0 and 17
+        :param destination_p: \
+            The id of the destination processor, between 0 and 17
         :type destination_p: int
         :param port: The port, between 0 and 65535
         :type port: int
         :param tag: The tag, between 0 and 7
         :type tag: int
         """
+        # pylint: disable=too-many-arguments
         strip_value = 1
         reverse_value = 1
 

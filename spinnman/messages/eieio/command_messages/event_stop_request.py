@@ -7,6 +7,8 @@ class EventStopRequest(EIEIOCommandMessage):
     """ Packet used for the buffering input technique which causes the parser\
         of the input packet to terminate its execution
     """
+    __slots__ = []
+
     def __init__(self):
-        EIEIOCommandMessage.__init__(
-            self, EIEIOCommandHeader(EIEIO_COMMAND_IDS.EVENT_STOP.value))
+        super(EventStopRequest, self).__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.EVENT_STOP))

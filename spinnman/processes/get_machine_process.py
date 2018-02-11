@@ -1,5 +1,7 @@
 import logging
 
+from spinn_utilities.log import FormatAdapter
+
 from spinn_machine import Processor, Router, Chip, SDRAM, Machine, Link
 
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
@@ -9,18 +11,26 @@ from spinnman.messages.scp.impl \
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_process import AbstractProcess
 
-logger = logging.getLogger(__name__)
+logger = FormatAdapter(logging.getLogger(__name__))
 
 
 class GetMachineProcess(AbstractMultiConnectionProcess):
     """ A process for getting the machine details over a set of connections
     """
+    __slots__ = [
+        "_chip_info",
+        "_ignore_chips",
+        "_ignore_cores",
+        "_ignore_links",
+        "_max_core_id",
+        "_max_sdram_size",
+        "_p2p_column_data"]
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
                  ignore_links, max_core_id, max_sdram_size=None):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        # pylint: disable=too-many-arguments
+        super(GetMachineProcess, self).__init__(connection_selector)
 
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
@@ -36,10 +46,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _make_chip(self, width, height, chip_info):
         """ Creates a chip from a ChipSummaryInfo structure
 
-        :param chip_info: The ChipSummaryInfo structure to create the chip\
-                    from
+        :param chip_info: \
+            The ChipSummaryInfo structure to create the chip from
         :type chip_info: \
-                    :py:class:`spinnman.model.ChipSummaryInfo`
+            :py:class:`spinnman.model.ChipSummaryInfo`
         :return: The created chip
         :rtype: :py:class:`spinn_machine.Chip`
         """
@@ -51,7 +61,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if self._max_core_id is not None and max_core_id > self._max_core_id:
             max_core_id = self._max_core_id
         for virtual_core_id in range(max_core_id + 1):
-
             # Add the core provided it is not to be ignored
             if ((chip_info.x, chip_info.y, virtual_core_id) not in
                     self._ignore_cores):
@@ -61,26 +70,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 elif core_states[virtual_core_id] == CPUState.IDLE:
                     processors.append(Processor(virtual_core_id))
                 else:
-                    logger.warn("Not using core {}, {}, {} in state {}".format(
+                    logger.warn(
+                        "Not using core {}, {}, {} in state {}",
                         chip_info.x, chip_info.y, virtual_core_id,
-                        core_states[virtual_core_id]))
+                        core_states[virtual_core_id])
 
         # Create the router
-        links = list()
-        for link in chip_info.working_links:
-            dest_x, dest_y = Machine.get_chip_over_link(
-                chip_info.x, chip_info.y, link, width, height)
-            if ((chip_info.x, chip_info.y, link) not in self._ignore_links and
-                    (dest_x, dest_y) not in self._ignore_chips and
-                    (dest_x, dest_y) in self._chip_info):
-                opposite_link_id = (link + 3) % 6
-                links.append(Link(
-                    chip_info.x, chip_info.y, link, dest_x, dest_y,
-                    opposite_link_id, opposite_link_id))
-        router = Router(
-            links=links,
-            n_available_multicast_entries=(
-                chip_info.n_free_multicast_routing_entries))
+        router = self._make_router(chip_info, width, height)
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
@@ -90,14 +86,30 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         sdram = SDRAM(size=sdram_size)
 
         # Create the chip
-        chip = Chip(
+        return Chip(
             x=chip_info.x, y=chip_info.y, processors=processors,
             router=router, sdram=sdram,
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y)
 
-        return chip
+    def _make_router(self, chip_info, width, height):
+        links = list()
+        for link in chip_info.working_links:
+            dest = Machine.get_chip_over_link(
+                chip_info.x, chip_info.y, link, width, height)
+            if ((chip_info.x, chip_info.y, link) not in self._ignore_links
+                    and dest not in self._ignore_chips
+                    and dest in self._chip_info):
+                dest_x, dest_y = dest
+                opposite_link_id = (link + 3) % 6
+                links.append(Link(
+                    chip_info.x, chip_info.y, link, dest_x, dest_y,
+                    opposite_link_id, opposite_link_id))
+        return Router(
+            links=links,
+            n_available_multicast_entries=(
+                chip_info.n_free_multicast_routing_entries))
 
     def _receive_p2p_data(self, scp_read_response):
         self._p2p_column_data.append(
@@ -114,7 +126,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if isinstance(request, ReadLink):
             if isinstance(exception, SpinnmanUnexpectedResponseCodeException):
                 return
-        AbstractProcess._receive_error(self, request, exception, tb)
+        super(GetMachineProcess, self)._receive_error(request, exception, tb)
 
     def get_machine_details(self, boot_x, boot_y, width, height):
         # Get the P2P table - 8 entries are packed into each 32-bit word
@@ -133,8 +145,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Get the chip information for each chip
         for (x, y) in p2p_table.iterchips():
-            self._send_request(
-                GetChipInfo(x, y), self._receive_chip_info)
+            self._send_request(GetChipInfo(x, y), self._receive_chip_info)
         self._finish()
         try:
             self.check_for_error()
@@ -146,8 +157,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Warn about unexpected missing chips
         for (x, y) in p2p_table.iterchips():
             if (x, y) not in self._chip_info:
-                logger.warn("Chip {}, {} was expected but didn't reply".format(
-                    x, y))
+                logger.warn(
+                    "Chip {}, {} was expected but didn't reply", x, y)
 
         # Build a Machine
         def chip_xy(chip):

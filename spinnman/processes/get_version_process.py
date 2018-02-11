@@ -5,9 +5,11 @@ from .abstract_single_connection_process import AbstractSingleConnectionProcess
 class GetVersionProcess(AbstractSingleConnectionProcess):
     """ A process for getting the version of the machine
     """
+    __slots__ = [
+        "_version_info"]
 
     def __init__(self, connection_selector):
-        AbstractSingleConnectionProcess.__init__(self, connection_selector)
+        super(GetVersionProcess, self).__init__(connection_selector)
         self._version_info = None
 
     def _get_response(self, version_response):

@@ -17,6 +17,9 @@ _SCP_DATA_OFFSET = 12
 class AbstractSCPResponse(object):
     """ Represents an abstract SCP Response
     """
+    __slots__ = [
+        "_scp_response_header",
+        "_sdp_header"]
 
     def __init__(self):
         """

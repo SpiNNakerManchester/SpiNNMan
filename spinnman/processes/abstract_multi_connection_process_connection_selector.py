@@ -7,6 +7,7 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 class AbstractMultiConnectionProcessConnectionSelector(object):
     """ A connection selector for multi-connection processes
     """
+    __slots__ = []
 
     # connections will be used when worked out how
 
