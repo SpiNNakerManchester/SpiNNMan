@@ -9,15 +9,15 @@ from .check_ok_response import CheckOKResponse
 class RouterInit(AbstractSCPRequest):
     """ A request to initialize the router on a chip
     """
+    __slots__ = []
 
     def __init__(self, x, y, n_entries, table_address, base_address, app_id):
         """
-
-        :param x: The x-coordinate of the chip, between 0 and 255, \
-        this is not checked due to speed restrictions
+        :param x: The x-coordinate of the chip, between 0 and 255,\
+            this is not checked due to speed restrictions
         :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255\
-        this is not checked due to speed restrictions
+        :param y: The y-coordinate of the chip, between 0 and 255,\
+            this is not checked due to speed restrictions
         :type y: int
         :param n_entries: The number of entries in the table, more than 0
         :type n_entries: int
@@ -26,19 +26,19 @@ class RouterInit(AbstractSCPRequest):
         :param base_address: The base_address containing the entries
         :type base_address: int
         :param app_id: The id of the application with which to associate the\
-                    routes.  If not specified, defaults to 0.
+            routes.  If not specified, defaults to 0.
         :type app_id: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
-                    * If x is out of range
-                    * If y is out of range
-                    * If n_entries is 0 or less
-                    * If table_address is not positive
-                    * If base_address is not positive
+            * If x is out of range
+            * If y is out of range
+            * If n_entries is 0 or less
+            * If table_address is not positive
+            * If base_address is not positive
         """
+        # pylint: disable=too-many-arguments
         if n_entries < 1:
             raise SpinnmanInvalidParameterException(
-                "n_entries", str(n_entries),
-                "Must be more than 0")
+                "n_entries", str(n_entries), "Must be more than 0")
         if base_address < 0:
             raise SpinnmanInvalidParameterException(
                 "base_address", str(base_address),

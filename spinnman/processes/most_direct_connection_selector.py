@@ -4,14 +4,15 @@ from .abstract_multi_connection_process_connection_selector \
 
 class MostDirectConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
+    """ A selector that goes for the most direct connection for the message.
     """
-    MostDirectConnectionSelector: selector that goes for the most direct \
-    connection for the message
-    """
+    __slots__ = [
+        "_connections",
+        "_first_connection",
+        "_machine"]
 
     def __init__(self, machine, connections):
-        AbstractMultiConnectionProcessConnectionSelector.__init__(
-            self, connections)
+        super(MostDirectConnectionSelector, self).__init__(connections)
         self._machine = machine
         self._connections = dict()
         self._first_connection = None

@@ -24,8 +24,8 @@ class MockWriteTransceiver(Transceiver):
             self, version, connections=None, ignore_chips=None,
             ignore_cores=None, ignore_links=None, max_core_id=None,
             scamp_connections=None, max_sdram_size=None):
-        Transceiver.__init__(
-            self, version, connections=connections, ignore_chips=ignore_chips,
+        super(MockWriteTransceiver, self).__init__(
+            version, connections=connections, ignore_chips=ignore_chips,
             ignore_cores=ignore_cores, ignore_links=ignore_links,
             max_core_id=max_core_id, scamp_connections=scamp_connections,
             max_sdram_size=max_sdram_size)

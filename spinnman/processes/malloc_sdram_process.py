@@ -4,17 +4,21 @@ from .abstract_multi_connection_process \
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_base_address"]
+
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(MallocSDRAMProcess, self).__init__(connection_selector)
         self._base_address = None
 
-    def handle_sdram_alloc_response(self, response):
+    def _handle_sdram_alloc_response(self, response):
         self._base_address = response.base_address
 
     def malloc_sdram(self, x, y, size, app_id, tag):
+        # pylint: disable=too-many-arguments
         # Allocate space in the sdram space
         self._send_request(SDRAMAlloc(x, y, app_id, size, tag),
-                           self.handle_sdram_alloc_response)
+                           self._handle_sdram_alloc_response)
         self._finish()
         self.check_for_error()
 

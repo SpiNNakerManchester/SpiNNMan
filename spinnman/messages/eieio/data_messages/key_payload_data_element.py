@@ -11,6 +11,10 @@ _TWO_WORDS = struct.Struct("<II")
 class KeyPayloadDataElement(AbstractDataElement):
     """ A data element that contains a key and a payload
     """
+    __slots__ = [
+        "_key",
+        "_payload",
+        "_payload_is_timestamp"]
 
     def __init__(self, key, payload, payload_is_timestamp=False):
         self._key = key
@@ -33,8 +37,8 @@ class KeyPayloadDataElement(AbstractDataElement):
         if eieio_type.payload_bytes == 0:
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type,
-                "The type specifies no payload, but this element has a"
-                " payload")
+                "The type specifies no payload, but this element has a "
+                "payload")
         if eieio_type == EIEIOType.KEY_PAYLOAD_16_BIT:
             return _TWO_SHORTS.pack(self._key, self._payload)
         elif eieio_type == EIEIOType.KEY_PAYLOAD_32_BIT:

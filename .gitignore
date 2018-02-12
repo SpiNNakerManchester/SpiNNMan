@@ -12,3 +12,5 @@ dist/
 SpiNNMan.egg-info
 *build/
 -hello.aplx
+.coverage
+.cache/

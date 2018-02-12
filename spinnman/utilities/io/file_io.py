@@ -25,7 +25,6 @@ class FileIO(AbstractIO):
 
     def __init__(self, file_obj, start_offset, end_offset):
         """
-
         :param file_obj: The file handle or file name to write to
         :type file_obj: str or file
         :param start_offset: The start offset into the file
@@ -185,9 +184,8 @@ class FileIO(AbstractIO):
         self._current_offset += n_bytes
         return n_bytes
 
-    def fill(
-            self, repeat_value, bytes_to_fill=None,
-            data_type=FillDataType.WORD):
+    def fill(self, repeat_value, bytes_to_fill=None,
+             data_type=FillDataType.WORD):
         """ Fill the next part of the region with repeated data
 
         :param repeat_value: The value to repeat
@@ -210,7 +208,7 @@ class FileIO(AbstractIO):
                 "The size of {} bytes to fill is not divisible by the size of"
                 " the data of {} bytes".format(bytes_to_fill, data_type.value))
         data_to_fill = struct.pack(
-            "{}".format(data_type.struct_type[-1]), repeat_value
+            str(data_type.struct_type[-1]), repeat_value
         )
         self._file.seek(self._current_offset)
         for _ in range(bytes_to_fill / data_type.value):

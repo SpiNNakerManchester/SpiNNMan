@@ -12,8 +12,11 @@ _END_PATTERN = struct.Struct("<IIII")
 
 
 class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_base_address"]
+
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(LoadMultiCastRoutesProcess, self).__init__(connection_selector)
         self._base_address = None
 
     def handle_router_alloc_response(self, response):
@@ -42,7 +45,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         table_address = 0x67800000
         process = WriteMemoryProcess(self._next_connection_selector)
         process.write_memory_from_bytearray(
-            x, y, 0, table_address, routing_data, 0, len(routing_data))
+            (x, y, 0), table_address, routing_data, 0, len(routing_data))
 
         # Allocate space in the router table
         self._send_request(RouterAlloc(x, y, app_id, n_entries),

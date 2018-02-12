@@ -6,12 +6,14 @@ from spinnman.constants import EIEIO_COMMAND_IDS
 class DatabaseConfirmation(EIEIOCommandMessage):
     """ Packet which contains the path to the database created by the\
         toolchain which is to be used by any software which interfaces with\
-        SpiNNaker
+        SpiNNaker.
     """
+    __slots__ = [
+        "_database_path"]
+
     def __init__(self, database_path=None):
-        EIEIOCommandMessage.__init__(
-            self, EIEIOCommandHeader(
-                EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value))
+        super(DatabaseConfirmation, self).__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION))
         self._database_path = database_path
 
     @property

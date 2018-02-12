@@ -16,6 +16,7 @@ _IPTAG_FORMAT = struct.Struct("<4s6s3HIH3B")
 class IPTagGet(AbstractSCPRequest):
     """ An SCP Request to get an IP tag
     """
+    __slots__ = []
 
     def __init__(self, x, y, tag):
         """
@@ -44,6 +45,18 @@ class IPTagGet(AbstractSCPRequest):
 class _SCPIPTagGetResponse(AbstractSCPResponse):
     """ An SCP response to a request for an IP tags
     """
+    __slots__ = [
+        "_count",
+        "_flags",
+        "_ip_address",
+        "_mac_address",
+        "_port",
+        "_rx_port",
+        "_spin_chip_x",
+        "_spin_chip_y",
+        "_spin_cpu",
+        "_spin_port",
+        "_timeout"]
 
     def __init__(self):
         """
@@ -58,6 +71,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         self._rx_port = None
         self._spin_chip_y = None
         self._spin_chip_x = None
+        self._spin_cpu = None
         self._spin_port = None
 
     def read_data_bytestring(self, data, offset):

@@ -28,14 +28,14 @@ class TestSCPVersionResponse(unittest.TestCase):
         flags = SDPFlag.REPLY_NOT_EXPECTED.value
         tag = 5
         dest_port_cpu = 0x4f
-        srce_port_cpu = 0x6a
+        src_port_cpu = 0x6a
         dest_x = 0x11
         dest_y = 0xab
-        srce_x = 0x7
-        srce_y = 0x0
+        src_x = 0x7
+        src_y = 0x0
         data = pack(
-            '<8BHHHBBHHI15s', flags, tag, dest_port_cpu, srce_port_cpu, dest_y,
-            dest_x, srce_y, srce_x, rc, seq, p2p_addr, phys_cpu, virt_cpu,
+            '<8BHHHBBHHI15s', flags, tag, dest_port_cpu, src_port_cpu, dest_y,
+            dest_x, src_y, src_x, rc, seq, p2p_addr, phys_cpu, virt_cpu,
             version, buffer, build_date, ver_string)
         self.assertEqual(response.version_info, None)
         response.read_bytestring(data, 0)

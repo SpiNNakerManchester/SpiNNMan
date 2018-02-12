@@ -2,10 +2,12 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class SendSingleCommandProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_response"]
+
     def __init__(self, connection_selector, n_retries=3, timeout=0.5):
-        AbstractMultiConnectionProcess.__init__(
-            self, connection_selector, n_retries=n_retries,
-            timeout=timeout)
+        super(SendSingleCommandProcess, self).__init__(
+            connection_selector, n_retries=n_retries, timeout=timeout)
         self._response = None
 
     def handle_response(self, response):
