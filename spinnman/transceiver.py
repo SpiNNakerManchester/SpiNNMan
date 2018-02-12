@@ -122,7 +122,7 @@ def create_transceiver_from_hostname(
         never existed.
     :type ignored_links: set of (int, int, int)
     :param max_core_id: The maximum core id in any discovered machine.\
-        Requests for a "machine" will only have core ids up to this value.
+        Requests for a "machine" will only have core IDs up to this value.
     :type max_core_id: int
     :param version: the type of spinnaker board used within the spinnaker\
         machine being used. If a spinn-5 board, then the version will be 5,\
@@ -222,7 +222,7 @@ class Transceiver(object):
         "_multicast_sender_connections",
         "_n_chip_execute_locks",
         "_nearest_neighbour_id",
-        "_next_nearest_neighbour_condition",
+        "_nearest_neighbour_lock",
         "_original_connections",
         "_scamp_connection_selector",
         "_scamp_connections",
@@ -260,7 +260,7 @@ class Transceiver(object):
             as if they never existed.
         :type ignore_links: set of (int, int, int)
         :param max_core_id: The maximum core id in any discovered machine.\
-            Requests for a "machine" will only have core ids up to and\
+            Requests for a "machine" will only have core IDs up to and\
             including this value.
         :type max_core_id: int
         :param max_sdram_size: the max size each chip can say it has for SDRAM\
