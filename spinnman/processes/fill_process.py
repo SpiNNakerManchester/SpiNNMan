@@ -104,7 +104,7 @@ class FillProcess(AbstractMultiConnectionProcess):
                 "The size of {} bytes to fill is not divisible by the size of"
                 " the data of {} bytes".format(size, data_type.value))
         if base_address % ALIGNMENT:
-            logger.warn(
+            logger.warning(
                 "Unaligned fill starting at %d; please use aligned fills",
                 base_address)
 

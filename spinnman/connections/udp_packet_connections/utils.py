@@ -42,8 +42,8 @@ def set_receive_buffer_size(sock, size):
     except Exception:
         # The OS said no, but we might still be able to work right with
         # the defaults. Just warn and hope...
-        logger.warn("failed to configure UDP socket to have a large "
-                    "receive buffer", exc_info=True)
+        logger.warning("failed to configure UDP socket to have a large "
+                       "receive buffer", exc_info=True)
 
 
 def bind_socket(sock, host, port):

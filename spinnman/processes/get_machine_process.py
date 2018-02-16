@@ -70,7 +70,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 elif core_states[virtual_core_id] == CPUState.IDLE:
                     processors.append(Processor(virtual_core_id))
                 else:
-                    logger.warn(
+                    logger.warning(
                         "Not using core {}, {}, {} in state {}",
                         chip_info.x, chip_info.y, virtual_core_id,
                         core_states[virtual_core_id])
@@ -157,7 +157,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Warn about unexpected missing chips
         for (x, y) in p2p_table.iterchips():
             if (x, y) not in self._chip_info:
-                logger.warn(
+                logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
         # Build a Machine
