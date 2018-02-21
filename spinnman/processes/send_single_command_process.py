@@ -5,7 +5,7 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess):
     __slots__ = [
         "_response"]
 
-    def __init__(self, connection_selector, n_retries=3, timeout=0.5):
+    def __init__(self, connection_selector, n_retries=3, timeout=1.0):
         super(SendSingleCommandProcess, self).__init__(
             connection_selector, n_retries=n_retries, timeout=timeout)
         self._response = None
