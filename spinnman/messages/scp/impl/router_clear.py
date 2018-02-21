@@ -8,19 +8,19 @@ from .check_ok_response import CheckOKResponse
 class RouterClear(AbstractSCPRequest):
     """ A request to clear the router on a chip
     """
+    __slots__ = []
 
     def __init__(self, x, y):
         """
-
-        :param x: The x-coordinate of the chip, between 0 and 255 \
-        this is not checked due to speed restrictions
+        :param x: The x-coordinate of the chip, between 0 and 255; \
+            this is not checked due to speed restrictions
         :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255 \
-        this is not checked due to speed restrictions
+        :param y: The y-coordinate of the chip, between 0 and 255; \
+            this is not checked due to speed restrictions
         :type y: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
-                    * If x is out of range
-                    * If y is out of range
+            * If x is out of range
+            * If y is out of range
         """
         super(RouterClear, self).__init__(
             SDPHeader(

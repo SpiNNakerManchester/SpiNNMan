@@ -5,9 +5,12 @@ from spinnman.connections import SCPRequestPipeLine
 class AbstractSingleConnectionProcess(AbstractProcess):
     """ A process that uses a single connection in communication
     """
+    __slots__ = [
+        "_connection_selector",
+        "_scp_request_pipeline"]
 
     def __init__(self, connection_selector):
-        AbstractProcess.__init__(self)
+        super(AbstractSingleConnectionProcess, self).__init__()
         self._scp_request_pipeline = None
         self._connection_selector = connection_selector
 

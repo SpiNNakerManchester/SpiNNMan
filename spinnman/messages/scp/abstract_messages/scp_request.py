@@ -10,6 +10,13 @@ _THREE_WORDS = struct.Struct("<III")
 class AbstractSCPRequest(object):
     """ Represents an Abstract SCP Request
     """
+    __slots__ = [
+        "_argument_1",
+        "_argument_2",
+        "_argument_3",
+        "_data",
+        "_scp_request_header",
+        "_sdp_header"]
 
     DEFAULT_DEST_X_COORD = 255
     DEFAULT_DEST_Y_COORD = 255
@@ -34,6 +41,7 @@ class AbstractSCPRequest(object):
         :type data: bytearray
         :raise None: No known exceptions are raised
         """
+        # pylint: disable=too-many-arguments
         self._sdp_header = sdp_header
         self._scp_request_header = scp_request_header
         self._argument_1 = argument_1

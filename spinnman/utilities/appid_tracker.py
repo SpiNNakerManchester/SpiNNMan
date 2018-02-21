@@ -5,6 +5,10 @@ _MAX_APP_ID = 254
 class AppIdTracker(object):
     """ A tracker of AppId to make it easier to allocate new ids
     """
+    __slots__ = [
+        "_free_ids",
+        "_max_app_id",
+        "_min_app_id"]
 
     # Keep a class-global reference to the free id range, so ids are
     # allocated globally

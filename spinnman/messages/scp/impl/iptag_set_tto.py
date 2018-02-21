@@ -10,6 +10,7 @@ _IPTAG_TTO = (4 << 16)
 class IPTagSetTTO(AbstractSCPRequest):
     """ An SCP request to set the transient timeout for future SCP requests
     """
+    __slots__ = []
 
     def __init__(self, x, y, tag_timeout):
         """
@@ -18,7 +19,7 @@ class IPTagSetTTO(AbstractSCPRequest):
         :type x: int
         :param y: The y-coordinate of the chip to run on, between 0 and 255
         :type y: int
-        :param tag_timeout: The timeout value, via the
+        :param tag_timeout: The timeout value, via the\
             IPTAG_TIME_OUT_WAIT_TIMES enum located in spinnman.constants
         """
 

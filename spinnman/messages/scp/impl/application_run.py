@@ -10,23 +10,25 @@ _WAIT_FLAG = 0x1 << 18
 class ApplicationRun(AbstractSCPRequest):
     """ An SCP request to run an application loaded on a chip
     """
+    __slots__ = []
 
     def __init__(self, app_id, x, y, processors, wait=False):
         """
-
         :param app_id: The id of the application to run, between 16 and 255
         :type app_id: int
         :param x: The x-coordinate of the chip to run on, between 0 and 255
         :type x: int
         :param y: The y-coordinate of the chip to run on, between 0 and 255
         :type y: int
-        :param processors: The processors on the chip where the executable\
-                    should be started, between 1 and 17
+        :param processors: \
+            The processors on the chip where the executable should be \
+            started, between 1 and 17
         :type processors: list of int
-        :param wait: True if the processors should enter a "wait" state on\
-                    starting
+        :param wait: \
+            True if the processors should enter a "wait" state on starting
         :type wait: bool
         """
+        # pylint: disable=too-many-arguments
         processor_mask = 0
         if processors is not None:
             for processor in processors:

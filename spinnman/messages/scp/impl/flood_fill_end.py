@@ -12,6 +12,7 @@ _WAIT_FLAG = 0x1 << 18
 class FloodFillEnd(AbstractSCPRequest):
     """ A request to start a flood fill of data
     """
+    __slots__ = []
 
     def __init__(
             self, nearest_neighbour_id, app_id=0, processors=None, wait=False):

@@ -21,6 +21,7 @@ def _get_data(app_id, state):
 class CountState(AbstractSCPRequest):
     """ An SCP Request to get a count of the cores in a particular state
     """
+    __slots__ = []
 
     def __init__(self, app_id, state):
         """

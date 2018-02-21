@@ -8,6 +8,7 @@ from .get_version_response import GetVersionResponse
 class GetVersion(AbstractSCPRequest):
     """ An SCP request to read the version of software running on a core
     """
+    __slots__ = []
 
     def __init__(self, x, y, p):
         """
@@ -17,11 +18,11 @@ class GetVersion(AbstractSCPRequest):
         :param y: The y-coordinate of the chip to read from, between 0 and 255
         :type y: int
         :param p: The id of the processor to read the version from,\
-                    between 0 and 31
+            between 0 and 31
         :type p: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-                    * If the chip coordinates are out of range
-                    * If the processor is out of range
+            * If the chip coordinates are out of range
+            * If the processor is out of range
         """
         super(GetVersion, self).__init__(
             SDPHeader(

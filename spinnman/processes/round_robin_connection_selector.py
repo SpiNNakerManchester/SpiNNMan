@@ -4,13 +4,12 @@ from .abstract_multi_connection_process_connection_selector \
 
 class RoundRobinConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
-    """
-    RoundRobinConnectionSelector: selector
-    """
+    __slots__ = [
+        "_connections",
+        "_next_connection_index"]
 
     def __init__(self, connections):
-        AbstractMultiConnectionProcessConnectionSelector.__init__(
-            self, connections)
+        super(RoundRobinConnectionSelector, self).__init__(connections)
         self._connections = connections
         self._next_connection_index = 0
 

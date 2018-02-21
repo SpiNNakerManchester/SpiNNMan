@@ -16,6 +16,7 @@ class DiagnosticFilterDestination(Enum):
     LINK_5 = (8, "Destination is link 5")
 
     def __new__(cls, value, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         return obj

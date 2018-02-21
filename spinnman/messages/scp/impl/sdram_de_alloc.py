@@ -14,26 +14,26 @@ _ONE_WORD = struct.Struct("<I")
 class SDRAMDeAlloc(AbstractSCPRequest):
     """ An SCP Request to free space in the SDRAM
     """
+    __slots__ = [
+        "_read_n_blocks_freed"]
 
     def __init__(self, x, y, app_id, base_address=None):
         """
-
-        :param x: The x-coordinate of the chip to allocate on, between 0 and\
-                    255
+        :param x: \
+            The x-coordinate of the chip to allocate on, between 0 and 255
         :type x: int
-        :param y: The y-coordinate of the chip to allocate on, between 0 and\
-                    255
+        :param y: \
+            The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
         :param app_id: The id of the application, between 0 and 255
         :type app_id: int
         :param base_address: The start address in SDRAM to which the block\
-                needs to be deallocated, or none if deallocating via app_id
+            needs to be deallocated, or none if deallocating via app_id
         :type base_address: int or None
         """
 
         if base_address is not None:
-            AbstractSCPRequest.__init__(
-                self,
+            super(SDRAMDeAlloc, self).__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                     destination_cpu=0, destination_chip_x=x,
@@ -45,8 +45,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
                 argument_2=base_address)
             self._read_n_blocks_freed = False
         else:
-            AbstractSCPRequest.__init__(
-                self,
+            super(SDRAMDeAlloc, self).__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                     destination_cpu=0, destination_chip_x=x,
@@ -65,11 +64,14 @@ class SDRAMDeAlloc(AbstractSCPRequest):
 class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
     """ An SCP response to a request to deallocate SDRAM
     """
+    __slots__ = [
+        "_number_of_blocks_freed",
+        "_read_n_blocks_freed"]
 
     def __init__(self, read_n_blocks_freed=False):
         """
         """
-        AbstractSCPResponse.__init__(self)
+        super(_SCPSDRAMDeAllocResponse, self).__init__()
         self._number_of_blocks_freed = None
         self._read_n_blocks_freed = read_n_blocks_freed
 

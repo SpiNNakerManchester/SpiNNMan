@@ -9,8 +9,13 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
+    __slots__ = [
+        "_control_register",
+        "_error_status",
+        "_register_values"]
+
     def __init__(self, connection_selector):
-        AbstractMultiConnectionProcess.__init__(self, connection_selector)
+        super(ReadRouterDiagnosticsProcess, self).__init__(connection_selector)
         self._control_register = None
         self._error_status = None
         self._register_values = [0] * _N_REGISTERS

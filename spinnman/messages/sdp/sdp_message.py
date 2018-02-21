@@ -4,12 +4,16 @@ from .sdp_header import SDPHeader
 class SDPMessage(object):
     """ Wraps up an SDP message with a header and optional data.
     """
+    __slots__ = [
+        "_data",
+        "_offset",
+        "_sdp_header"]
 
     def __init__(self, sdp_header, data=None, offset=0):
         """
         :param sdp_header: The header of the message
         :type sdp_header:\
-                    :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
+            :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
         :param data: The data of the SDP packet, or None if no data
         :type data: str
         :param offset: The offset where the valid data starts
