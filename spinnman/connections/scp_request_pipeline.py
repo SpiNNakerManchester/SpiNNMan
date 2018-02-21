@@ -38,6 +38,7 @@ class SCPRequestPipeLine(object):
         "_n_retry_code_resent",
         "_n_timeouts",
         "_packet_timeout",
+        "_retry_reason",
         "_request_data",
         "_requests",
         "_retries",
