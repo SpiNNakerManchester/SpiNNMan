@@ -1,4 +1,5 @@
 import sys
+import time
 
 from threading import RLock
 
@@ -208,6 +209,7 @@ class SCPRequestPipeLine(object):
             # If the response can be retried, retry it
             if (result in RETRY_CODES):
                 try:
+                    time.sleep(0.1)
                     self._resend(seq, request_sent, str(result))
                     self._n_retry_code_resent += 1
                 except Exception as e:
