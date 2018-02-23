@@ -47,8 +47,8 @@ class ConnectionListener(Thread):
                 self._run_step(handler)
             except Exception:
                 if not self._done:
-                    logger.warn("problem when dispatching message",
-                                exc_info=True)
+                    logger.warning("problem when dispatching message",
+                                   exc_info=True)
         self._callback_pool.close()
         self._callback_pool.join()
 

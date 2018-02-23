@@ -747,7 +747,7 @@ class Transceiver(object):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
             else:
-                logger.warn(
+                logger.warning(
                     "Additional Ethernet connection on {} at chip {}, {} "
                     "cannot be contacted", chip.ip_address, chip.x, chip.y)
 
@@ -1506,7 +1506,7 @@ class Transceiver(object):
         """ Power on the whole machine
         """
         if not self._bmp_connections:
-            logger.warn("No BMP connections, so can't power on")
+            logger.warning("No BMP connections, so can't power on")
         for bmp_connection in self._bmp_connections:
             self.power_on(bmp_connection.boards, bmp_connection.cabinet,
                           bmp_connection.frame)
@@ -1526,7 +1526,7 @@ class Transceiver(object):
         """ Power off the whole machine
         """
         if not self._bmp_connections:
-            logger.warn("No BMP connections, so can't power off")
+            logger.warning("No BMP connections, so can't power off")
         for bmp_connection in self._bmp_connections:
             self.power_off(bmp_connection.boards, bmp_connection.cabinet,
                            bmp_connection.frame)
@@ -1987,7 +1987,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(AppStop(app_id))
         else:
-            logger.warn(
+            logger.warning(
                 "You are calling a app stop on a turned off machine. "
                 "Please fix and try again")
 
@@ -2624,7 +2624,7 @@ class Transceiver(object):
                 "position", str(position),
                 "the range of the position of a router filter is 0 and 16.")
         if position <= ROUTER_DEFAULT_FILTERS_MAX_POSITION:
-            logger.warn(
+            logger.warning(
                 "You are planning to change a filter which is set by default. "
                 "By doing this, other runs occurring on this machine will be "
                 "forced to use this new configuration until the machine is "
