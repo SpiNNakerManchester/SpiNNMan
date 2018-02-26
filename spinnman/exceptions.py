@@ -228,7 +228,7 @@ class SpinnmanGroupedProcessException(SpinnmanException):
                     exception.__class__.__name__, exception.message,
                     store[exception]["chip_core"],
                     traceback.format_exc(store[exception]["trace_back"]))
-            SpinnmanException.__init__(self, problem)
+        SpinnmanException.__init__(self, problem)
 
     @staticmethod
     def _group_exceptions(error_requests, exceptions, tracebacks):
@@ -261,12 +261,11 @@ class SpinnmanGroupedProcessException(SpinnmanException):
                         found_exception = stored_exception
                 if found_exception is None:
                     data[exception] = dict()
-                data[found_exception]["trace_back"] = trace_back
-                data[found_exception]["chip_core"] = list()
-                data[found_exception]["chip_core"].append(
-                    (error_request.sdp_header.destination_chip_x,
-                     error_request.sdp_header.destination_chip_y,
-                     error_request.sdp_header.destination_cpu))
+                    data[found_exception]["trace_back"] = trace_back
+                data[found_exception]["chip_core"] += "[{}:{}:{}]".format(
+                    error_request.sdp_header.destination_chip_x,
+                    error_request.sdp_header.destination_chip_y,
+                    error_request.sdp_header.destination_cpu)
         for exception in data:
             data[exception]["chip_core"] += "]"
         return data
