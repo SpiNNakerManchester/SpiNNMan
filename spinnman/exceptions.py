@@ -211,6 +211,67 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         return self._response
 
 
+class SpinnmanGroupedProcessException(SpinnmanException):
+    """Encapsulates exceptions from processes which communicate with a \
+    collection of cores/chips
+    """
+    def __init__(self, error_requests, exceptions, tracebacks):
+
+        store = self._group_exceptions(error_requests, exceptions, tracebacks)
+        problem = "Exceptions found were: \n"
+        for exception in store:
+            problem += \
+                "   Received exception class : {} \n" \
+                "       With message {} \n" \
+                "       When sending to {} \n" \
+                "       Stack trace: {} \n".format(
+                    exception.__class__.__name__, exception.message,
+                    store[exception]["chip_core"],
+                    traceback.format_exc(store[exception]["trace_back"]))
+            SpinnmanException.__init__(self, problem)
+
+    @staticmethod
+    def _group_exceptions(error_requests, exceptions, tracebacks):
+        """  groups exceptions into a form usable by the exception
+        
+        :param error_requests: the error requests
+        :param exceptions: the exceptions
+        :param tracebacks: the tracebacks
+        :return: a sorted exception pile
+        """
+        exception_types = list()
+        data = dict()
+        first = True
+        for error_request, exception, trace_back in zip(
+                error_requests, exceptions, tracebacks):
+            if first:
+                exception_types.append(exception)
+                data[exception] = dict()
+                data[exception]["trace_back"] = trace_back
+                data[exception]["chip_core"] = "["
+                data[exception]["chip_core"] += "[{}:{}:{}]".format(
+                    error_request.sdp_header.destination_chip_x,
+                    error_request.sdp_header.destination_chip_y,
+                    error_request.sdp_header.destination_cpu)
+                first = False
+            else:
+                found_exception = None
+                for stored_exception in exception_types:
+                    if isinstance(exception, type(stored_exception)):
+                        found_exception = stored_exception
+                if found_exception is None:
+                    data[exception] = dict()
+                data[found_exception]["trace_back"] = trace_back
+                data[found_exception]["chip_core"] = list()
+                data[found_exception]["chip_core"].append(
+                    (error_request.sdp_header.destination_chip_x,
+                     error_request.sdp_header.destination_chip_y,
+                     error_request.sdp_header.destination_cpu))
+        for exception in data:
+            data[exception]["chip_core"] += "]"
+        return data
+
+
 class SpinnmanGenericProcessException(SpinnmanException):
     """Encapsulates exceptions from processes which communicate with some
     core/chip
