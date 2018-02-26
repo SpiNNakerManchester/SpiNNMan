@@ -11,10 +11,12 @@ class HostDataReadAck(EIEIOCommandMessage):
         context of the buffering output technique to signal that the host has\
         received a request to read data
     """
+    __slots__ = [
+        "_sequence_no"]
+
     def __init__(self, sequence_no):
-        cmd_header = EIEIOCommandHeader(
-            EIEIO_COMMAND_IDS.HOST_DATA_READ_ACK.value)
-        EIEIOCommandMessage.__init__(self, cmd_header)
+        super(HostDataReadAck, self).__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.HOST_DATA_READ_ACK))
         self._sequence_no = sequence_no
 
     @property

@@ -13,6 +13,7 @@ class AllocFree(Enum):
     FREE_ROUTING_BY_APP_ID = (5, "Free Routing Entries by APP ID")
 
     def __new__(cls, value, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         return obj

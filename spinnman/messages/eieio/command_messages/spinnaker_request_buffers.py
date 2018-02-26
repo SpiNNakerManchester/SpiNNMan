@@ -11,10 +11,16 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         sent by the SpiNNaker system to the host computer to ask for more data\
         to inject during the simulation
     """
+    __slots__ = [
+        "_region_id",
+        "_sequence_no",
+        "_space_available",
+        "_p", "_x", "_y"]
+
     def __init__(self, x, y, p, region_id, sequence_no, space_available):
-        EIEIOCommandMessage.__init__(
-            self, EIEIOCommandHeader(
-                EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS.value))
+        # pylint: disable=too-many-arguments
+        super(SpinnakerRequestBuffers, self).__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS))
         self._x = x
         self._y = y
         self._p = p
@@ -55,8 +61,8 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         y, x, processor, region_id, sequence_no, space = \
             _PATTERN_BBBxBBI.unpack_from(data, offset)
         p = (processor >> 3) & 0x1F
-        return SpinnakerRequestBuffers(x, y, p, region_id & 0xF, sequence_no,
-                                       space)
+        return SpinnakerRequestBuffers(
+            x, y, p, region_id & 0xF, sequence_no, space)
 
     @property
     def bytestring(self):

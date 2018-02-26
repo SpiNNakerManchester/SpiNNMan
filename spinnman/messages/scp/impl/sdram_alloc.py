@@ -15,26 +15,27 @@ _ONE_WORD = struct.Struct("<I")
 class SDRAMAlloc(AbstractSCPRequest):
     """ An SCP Request to allocate space in the SDRAM space
     """
+    __slots__ = [
+        "_size"]
 
     def __init__(self, x, y, app_id, size, tag=None):
         """
-
-        :param x: The x-coordinate of the chip to allocate on, between 0 and\
-                    255
+        :param x: \
+            The x-coordinate of the chip to allocate on, between 0 and 255
         :type x: int
-        :param y: The y-coordinate of the chip to allocate on, between 0 and\
-                    255
+        :param y: \
+            The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
         :param app_id: The id of the application, between 0 and 255
         :type app_id: int
         :param size: The size in bytes of memory to be allocated
         :type size: int
         :param tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can be\
-                looked up by a SpiNNaker application to discover the address\
-                of the allocated block. If `0` then no tag is applied.
+            looked up by a SpiNNaker application to discover the address of\
+            the allocated block. If `0` then no tag is applied.
         :type tag: int
         """
-
+        # pylint: disable=too-many-arguments
         if tag is None:
             tag = 0
         elif not(0 <= tag < 256):
@@ -43,8 +44,7 @@ class SDRAMAlloc(AbstractSCPRequest):
                 "The tag param needs to be between 0 and 255, or None (in "
                 "which case 0 will be used by default)", str(tag))
 
-        AbstractSCPRequest.__init__(
-            self,
+        super(SDRAMAlloc, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -63,11 +63,12 @@ class SDRAMAlloc(AbstractSCPRequest):
 class _SCPSDRAMAllocResponse(AbstractSCPResponse):
     """ An SCP response to a request to allocate space in SDRAM
     """
+    __slots__ = [
+        "_base_address",
+        "_size"]
 
     def __init__(self, size):
-        """
-        """
-        AbstractSCPResponse.__init__(self)
+        super(_SCPSDRAMAllocResponse, self).__init__()
         self._size = size
         self._base_address = None
 

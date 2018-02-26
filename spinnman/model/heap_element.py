@@ -3,26 +3,20 @@ class HeapElement(object):
     """
 
     __slots__ = [
-
         # A pointer to the block
         "_block_address",
-
         # A pointer to the next block
         "_next_address",
-
         # True if the block is free
         "_is_free",
-
         # The tag of the block
         "_tag",
-
         # The app id of the block
         "_app_id"
     ]
 
     def __init__(self, block_address, next_address, free):
         """
-
         :param block_address: The address of this element on the heap
         :param next_address: The address of the next element on the heap
         :param free: The "free" element of the block as read from the heap
@@ -76,7 +70,5 @@ class HeapElement(object):
         if self._is_free:
             return "FREE  0x{:8X} SIZE: {:9d}".format(
                 self._block_address, self.size)
-        else:
-            return "BLOCK 0x{:8X} SIZE: {:9d} TAG: {:3d} APP_ID: {:3d}"\
-                .format(
-                    self._block_address, self.size, self._tag, self._app_id)
+        return "BLOCK 0x{:8X} SIZE: {:9d} TAG: {:3d} APP_ID: {:3d}".format(
+            self._block_address, self.size, self._tag, self._app_id)

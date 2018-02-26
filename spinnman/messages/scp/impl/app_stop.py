@@ -16,6 +16,7 @@ def _get_data(app_id, signal):
 class AppStop(AbstractSCPRequest):
     """ An SCP Request to stop an application
     """
+    __slots__ = []
 
     def __init__(self, app_id):
         """

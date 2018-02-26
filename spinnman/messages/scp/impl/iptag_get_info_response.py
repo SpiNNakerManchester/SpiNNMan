@@ -10,10 +10,12 @@ _BYTE_SKIP_BYTE_BYTE = struct.Struct("<Bx2B")
 class IPTagGetInfoResponse(AbstractSCPResponse):
     """ An SCP response to a request for information about IP tags
     """
+    __slots__ = [
+        "_fixed_size",
+        "_pool_size",
+        "_tto"]
 
     def __init__(self):
-        """
-        """
         super(IPTagGetInfoResponse, self).__init__()
         self._tto = None
         self._pool_size = None

@@ -1,6 +1,9 @@
 class IOBuffer(object):
     """ The contents of IOBUF for a core
     """
+    __slots__ = [
+        "_iobuf",
+        "_x", "_y", "_p"]
 
     def __init__(self, x, y, p, iobuf):
         """

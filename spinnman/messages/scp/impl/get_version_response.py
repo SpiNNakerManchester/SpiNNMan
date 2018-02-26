@@ -7,10 +7,10 @@ from spinnman.model import VersionInfo
 class GetVersionResponse(AbstractSCPResponse):
     """ An SCP response to a request for the version of software running
     """
+    __slots__ = [
+        "_version_info"]
 
     def __init__(self):
-        """
-        """
         super(GetVersionResponse, self).__init__()
         self._version_info = None
 

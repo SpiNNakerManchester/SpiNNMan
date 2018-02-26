@@ -65,7 +65,7 @@ class _ChipMemoryIO(object):
         :param base_address: The lowest address that can be written
         :param buffer_size: The size of the write buffer to improve efficiency
         """
-
+        # pylint: disable=too-many-arguments
         self._transceiver = transceiver
         self._write_memory_function = write_memory_function
         self._x = x
@@ -214,6 +214,7 @@ class MemoryIO(AbstractIO):
             The end address of the region to write to.  This is the first\
             address just outside the region
         """
+        # pylint: disable=too-many-arguments
         if start_address >= end_address:
             raise ValueError("Start address must be less than end address")
 
@@ -374,9 +375,8 @@ class MemoryIO(AbstractIO):
 
         return n_bytes
 
-    def fill(
-            self, repeat_value, bytes_to_fill=None,
-            data_type=FillDataType.WORD):
+    def fill(self, repeat_value, bytes_to_fill=None,
+             data_type=FillDataType.WORD):
         """ Fill the next part of the region with repeated data
 
         :param repeat_value: The value to repeat

@@ -4,6 +4,8 @@ from collections import OrderedDict
 class CPUInfos(object):
     """ A set of CPU information objects
     """
+    __slots__ = [
+        "_cpu_infos"]
 
     def __init__(self):
         self._cpu_infos = OrderedDict()

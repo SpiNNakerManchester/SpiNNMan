@@ -1,7 +1,3 @@
-"""
-ScpWriteFPGARegisterRequest
-"""
-
 # spinnman imports
 import struct
 
@@ -16,6 +12,7 @@ _ONE_WORD = struct.Struct("<I")
 class WriteFPGARegister(BMPRequest):
     """ A request for writing data to a FPGA register
     """
+    __slots__ = []
 
     def __init__(self, fpga_num, addr, value, board):
         """ Write the value of an FPGA (SPI) register.
@@ -30,14 +27,14 @@ class WriteFPGARegister(BMPRequest):
         :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
         :type fpga_num: int
         :param addr: Register address to read or write to (will be rounded
-                    down to the nearest 32-bit word boundary).
+            down to the nearest 32-bit word boundary).
         :type addr: int
         :param value: A 32-bit int value to write to the register
         :type value: int
         """
 
-        BMPRequest.__init__(
-            self, board,
+        super(WriteFPGARegister, self).__init__(
+            board,
             SCPRequestHeader(command=SCPCommand.CMD_LINK_WRITE),
             argument_1=addr & (~0x3), argument_2=4, argument_3=fpga_num,
             data=_ONE_WORD.pack(value))

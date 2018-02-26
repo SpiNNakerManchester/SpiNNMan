@@ -272,10 +272,11 @@ class SpinnmanGroupedProcessException(SpinnmanException):
 
 
 class SpinnmanGenericProcessException(SpinnmanException):
-    """Encapsulates exceptions from processes which communicate with some
-    core/chip
+    """ Encapsulates exceptions from processes which communicate with some\
+        core/chip
     """
-    def __init__(self, exception, tb, x, y, p):
+    def __init__(self, exception, tb, x, y, p, tb2=None):
+        # pylint: disable=too-many-arguments
         problem = \
             "\n     Received exception class: {} \n" \
             "     With message: {} \n" \
@@ -283,9 +284,11 @@ class SpinnmanGenericProcessException(SpinnmanException):
             "     Stack trace: {}\n".format(
                 exception.__class__.__name__, exception.message, x, y, p,
                 traceback.format_exc(tb))
-        SpinnmanException.__init__(self, problem)
+        super(SpinnmanGenericProcessException, self).__init__(problem)
 
         self._stored_exception = exception
+        if tb2 is not None:
+            self.__traceback__ = tb2
 
     @property
     def exception(self):

@@ -15,6 +15,7 @@ class _DataType(Enum):
     BYTE_ARRAY = (16, "s")
 
     def __new__(cls, value, struct_code, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         obj._struct_code = struct_code
@@ -37,6 +38,7 @@ class _Definition(namedtuple("_Definition",
     """
 
     def __new__(cls, data_type, offset, default=0, array_size=None, doc=""):
+        # pylint: disable=too-many-arguments
         return super(_Definition, cls).__new__(
             cls, offset, data_type, default, array_size, doc)
 
@@ -80,7 +82,7 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x0b,
         doc="Indicates if Ethernet is available on this chip")
     p2p_b_repeats = _Definition(
-        _DataType.BYTE, offset=0x0c,
+        _DataType.BYTE, offset=0x0c, default=4,
         doc="Number of times to send out P2PB packets")
     log_peer_to_peer_sequence_length = _Definition(
         _DataType.BYTE, offset=0x0d, default=4,
@@ -128,22 +130,22 @@ class SystemVariableDefinition(Enum):
         doc="The time to wait after last BC during network initialisation"
             " in 10 ms units")
     netinit_phase = _Definition(
-        _DataType.BYTE, offset=0x2d, default=0,
+        _DataType.BYTE, offset=0x2d,
         doc="The phase of boot process (see enum netinit_phase_e)")
     p2p_root_y = _Definition(
-        _DataType.BYTE, offset=0x2e, default=0,
+        _DataType.BYTE, offset=0x2e,
         doc="The y-coordinate of the chip from which the system was booted")
     p2p_root_x = _Definition(
-        _DataType.BYTE, offset=0x2f, default=0,
+        _DataType.BYTE, offset=0x2f,
         doc="The x-coordinate of the chip from which the system was booted")
     led_0 = _Definition(
         _DataType.INT, offset=0x30, default=0x1,
         doc="The first part of the LED definitions")
     led_1 = _Definition(
-        _DataType.INT, offset=0x34, default=0,
+        _DataType.INT, offset=0x34,
         doc="The last part of the LED definitions")
     padding_1 = _Definition(
-        _DataType.INT, offset=0x38, default=0,
+        _DataType.INT, offset=0x38,
         doc="A word of padding")
     random_seed = _Definition(
         _DataType.INT, offset=0x3c,
@@ -155,13 +157,13 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x41, default=7,
         doc="The number of shared message buffers")
     nearest_neighbour_delay_us = _Definition(
-        _DataType.BYTE, offset=0x42, default=10,
+        _DataType.BYTE, offset=0x42, default=20,
         doc="The delay between nearest-neighbour packets in microseconds")
     software_watchdog_count = _Definition(
-        _DataType.BYTE, offset=0x43, default=0,
+        _DataType.BYTE, offset=0x43,
         doc="The number of watch dog timeouts before an error is raised")
     padding_2 = _Definition(
-        _DataType.INT, offset=0x44, default=0,
+        _DataType.INT, offset=0x44,
         doc="A word of padding")
     system_ram_heap_address = _Definition(
         _DataType.INT, offset=0x48, default=1024,
@@ -185,13 +187,13 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0x60,
         doc="The memory pointer for nearest neighbour global operations")
     lock = _Definition(
-        _DataType.BYTE, offset=0x64, default=0,
+        _DataType.BYTE, offset=0x64,
         doc="The lock")
     links_available = _Definition(
         _DataType.BYTE, offset=0x65, default=0x3f,
         doc="Bit mask (6 bits) of links enabled")
     last_biff_id = _Definition(
-        _DataType.BYTE, offset=0x66, default=0,
+        _DataType.BYTE, offset=0x66,
         doc="Last ID used in BIFF packet")
     board_test_flags = _Definition(
         _DataType.BYTE, offset=0x67,
@@ -297,14 +299,15 @@ class SystemVariableDefinition(Enum):
         :param data_type: The data type of the variable
         :type data_type: :py:class:`_DataType`
         :param offset: The offset from the start of the system variable\
-                    structure where the variable is found
+            structure where the variable is found
         :type offset: int
-        :param default: The default value assigned to the variable\
-                    if not overridden
+        :param default: \
+            The default value assigned to the variable if not overridden
         :type default: int
         :param array_size: The length of the array, or None if not an array
         :type array_size: int
         """
+        # pylint: disable=too-many-arguments
         self._data_type = data_type
         self._offset = offset
         self._default = default
@@ -332,9 +335,10 @@ class SystemVariableBootValues(object):
     """ Default values of the system variables that get passed to SpiNNaker\
         during boot
     """
+    __slot__ = [
+        "_values"]
 
     def __init__(self, hardware_version=None, led_0=None):
-
         # Create a dict of variable values
         self._values = dict()
         for variable in SystemVariableDefinition:

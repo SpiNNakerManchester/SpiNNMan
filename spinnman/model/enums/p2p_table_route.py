@@ -14,6 +14,7 @@ class P2PTableRoute(Enum):
     MONITOR = (0b111, "Route to the monitor on the current chip")
 
     def __new__(cls, value, doc=""):
+        # pylint: disable=protected-access, unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         return obj

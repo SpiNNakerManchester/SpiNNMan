@@ -1,7 +1,3 @@
-"""
-ADCInfo
-"""
-
 # spinnman imports
 from spinnman import constants
 
@@ -19,17 +15,28 @@ _PATTERN = struct.Struct(
 
 
 class ADCInfo(object):
+    """ Container for the ADC data thats been retrieved from a fpga
     """
-    container for the ADC data thats been retrieved from a fpga
-    """
+    __slots__ = [
+        "_fan_0",
+        "_fan_1",
+        "_temp_btm",
+        "_temp_ext_0",
+        "_temp_ext_1",
+        "_temp_top",
+        "_voltage_1_2a",
+        "_voltage_1_2b",
+        "_voltage_1_2c",
+        "_voltage_1_8",
+        "_voltage_3_3",
+        "_voltage_supply"]
 
     def __init__(self, adc_data, offset):
         """
-        :param adc_data: bytes from an SCP packet containing adc\
-                    information
+        :param adc_data: bytes from an SCP packet containing ADC information
         :type adc_data: str
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
-                    message does not contain valid adc information
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If the message does not contain valid ADC information
         """
         data = _PATTERN.unpack_from(adc_data, offset)
 
@@ -103,14 +110,14 @@ class ADCInfo(object):
     @property
     def temp_top(self):
         """
-        property for temp_top
+        property for temp top
         """
         return self._temp_top
 
     @property
     def temp_btm(self):
         """
-        property for temp btm
+        property for temp bottom
         """
         return self._temp_btm
 
@@ -124,7 +131,7 @@ class ADCInfo(object):
     @property
     def temp_ext_1(self):
         """
-        property for temp_ext_1
+        property for temp ext 1
         """
         return self._temp_ext_1
 

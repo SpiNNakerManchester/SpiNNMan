@@ -10,10 +10,10 @@ _ONE_WORD = struct.Struct("<I")
 class CountStateResponse(AbstractSCPResponse):
     """ An SCP response to a request for the number of cores in a given state
     """
+    __slots__ = [
+        "_count"]
 
     def __init__(self):
-        """
-        """
         super(CountStateResponse, self).__init__()
         self._count = None
 

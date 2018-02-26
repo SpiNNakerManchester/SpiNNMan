@@ -6,15 +6,12 @@ from spinnman.constants import EIEIO_COMMAND_IDS
 class NotificationProtocolStartResume(EIEIOCommandMessage):
     """ Packet which indicates that the toolchain has started or resumed
     """
-    def __init__(self):
-        EIEIOCommandMessage.__init__(
-            self, EIEIOCommandHeader(
-                EIEIO_COMMAND_IDS.START_RESUME_NOTIFICATION.value))
+    __slots__ = []
 
-    @property
-    def bytestring(self):
-        data = super(NotificationProtocolStartResume, self).bytestring
-        return data
+    def __init__(self):
+        super(NotificationProtocolStartResume, self).__init__(
+            EIEIOCommandHeader(
+                EIEIO_COMMAND_IDS.START_RESUME_NOTIFICATION))
 
     @staticmethod
     def from_bytestring(command_header, data, offset):
