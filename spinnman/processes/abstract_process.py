@@ -12,9 +12,9 @@ class AbstractProcess(object):
     """ An abstract process for talking to SpiNNaker efficiently
     """
     __slots__ = [
-        "_error_request",
-        "_exception",
-        "_traceback"]
+        "_error_requests",
+        "_exceptions",
+        "_tracebacks"]
 
     def __init__(self):
         self._exceptions = list()
