@@ -15,47 +15,47 @@ from spinnman.exceptions import SpinnmanInvalidParameterException, \
 
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
+
+from spinnman.messages.spinnaker_boot \
+    import SystemVariableDefinition, SpinnakerBootMessages
+
+from spinnman.messages.scp.enums import Signal, PowerCommand
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import BMPSetLed, BMPGetVersion, SetPower
 from spinnman.messages.scp.impl import ReadADC, ReadFPGARegister
 from spinnman.messages.scp.impl import WriteFPGARegister, IPTagSetTTO
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
 from spinnman.messages.scp.impl import ReverseIPTagSet, ReadMemory
 from spinnman.messages.scp.impl import CountState, WriteMemory, SetLED
 from spinnman.messages.scp.impl import ApplicationRun, SendSignal, AppStop
 from spinnman.messages.scp.impl import IPTagSet, IPTagClear, RouterClear
+
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes \
     import SpinnakerBootReceiver, SpinnakerBootSender
-from spinnman.connections.udp_packet_connections \
-    import BMPConnection, UDPConnection
 from spinnman.connections.abstract_classes \
     import SCPSender, SDPSender, MulticastSender
-from spinnman.connections.abstract_classes \
-    import SCPReceiver, Listenable
+from spinnman.connections.abstract_classes import SCPReceiver, Listenable
 from spinnman.connections.udp_packet_connections \
-    import BootConnection, SCAMPConnection
+    import BMPConnection, UDPConnection, BootConnection, SCAMPConnection
+
 from spinnman.processes import DeAllocSDRAMProcess, GetMachineProcess
 from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
 from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
 from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
-from spinnman.processes import ApplicationRunProcess
-from spinnman.processes import GetHeapProcess
+from spinnman.processes import ApplicationRunProcess, GetHeapProcess
 from spinnman.processes import FillProcess, FillDataType
 from spinnman.processes import LoadFixedRouteRoutingEntryProcess
 from spinnman.processes import ReadFixedRouteRoutingEntryProcess
-from spinnman.utilities.appid_tracker import AppIdTracker
-from spinnman.messages.scp.enums import Signal
-from spinnman.messages.scp.enums import PowerCommand
 from spinnman.processes import WriteMemoryFloodProcess
-from spinnman.processes import GetTagsProcess
-from spinnman.processes import LoadMultiCastRoutesProcess
+from spinnman.processes import LoadMultiCastRoutesProcess, GetTagsProcess
 from spinnman.processes import GetMultiCastRoutesProcess
 from spinnman.processes import SendSingleCommandProcess
 from spinnman.processes import ReadRouterDiagnosticsProcess
 from spinnman.processes import MostDirectConnectionSelector
-from spinnman.utilities import utility_functions
+
+from spinnman.utilities.utility_functions \
+    import get_vcpu_address, work_out_bmp_from_machine_details
+from spinnman.utilities.appid_tracker import AppIdTracker
 
 # storage handlers imports
 from spinn_storage_handlers.abstract_classes import AbstractDataReader
@@ -67,7 +67,7 @@ from spinn_machine import CoreSubsets
 # general imports
 import random
 import struct
-from threading import Condition
+from threading import Condition, RLock
 from collections import defaultdict
 import logging
 import socket
@@ -122,7 +122,7 @@ def create_transceiver_from_hostname(
         never existed.
     :type ignored_links: set of (int, int, int)
     :param max_core_id: The maximum core id in any discovered machine.\
-        Requests for a "machine" will only have core ids up to this value.
+        Requests for a "machine" will only have core IDs up to this value.
     :type max_core_id: int
     :param version: the type of spinnaker board used within the spinnaker\
         machine being used. If a spinn-5 board, then the version will be 5,\
@@ -137,7 +137,7 @@ def create_transceiver_from_hostname(
     :param boot_port_no: the port number used to boot the machine
     :type boot_port_no: int
     :param scamp_connections: \
-        the list of connections used for scamp communications
+        the list of connections used for SCAMP communications
     :type scamp_connections: iterable of UDPScampConnections
     :param max_sdram_size: the max size each chip can say it has for SDRAM \
         (mainly used in debugging purposes)
@@ -163,8 +163,7 @@ def create_transceiver_from_hostname(
     if (version >= 4 and auto_detect_bmp is True and
             (bmp_connection_data is None or not bmp_connection_data)):
         bmp_connection_data = [
-            utility_functions.work_out_bmp_from_machine_details(
-                hostname, number_of_boards)]
+            work_out_bmp_from_machine_details(hostname, number_of_boards)]
 
     # handle BMP connections
     if bmp_connection_data is not None:
@@ -222,8 +221,8 @@ class Transceiver(object):
         "_max_sdram_size",
         "_multicast_sender_connections",
         "_n_chip_execute_locks",
-        "_next_nearest_neighbour_condition",
-        "_next_nearest_neighbour_id",
+        "_nearest_neighbour_id",
+        "_nearest_neighbour_lock",
         "_original_connections",
         "_scamp_connection_selector",
         "_scamp_connections",
@@ -240,14 +239,13 @@ class Transceiver(object):
             ignore_cores=None, ignore_links=None, max_core_id=None,
             scamp_connections=None, max_sdram_size=None):
         """
-
         :param version: The version of the board being connected to
         :type version: int
         :param connections: An iterable of connections to the board.  If not\
             specified, no communication will be possible until connections\
             are found.
         :type connections: iterable of\
-            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
+            :py:class:`spinnman.connections.abstract_classes.Connection`
         :param ignore_chips: An optional set of chips to ignore in the\
             machine. Requests for a "machine" will have these chips excluded,\
             as if they never existed. The processor_ids of the specified chips\
@@ -262,15 +260,15 @@ class Transceiver(object):
             as if they never existed.
         :type ignore_links: set of (int, int, int)
         :param max_core_id: The maximum core id in any discovered machine.\
-            Requests for a "machine" will only have core ids up to and\
+            Requests for a "machine" will only have core IDs up to and\
             including this value.
         :type max_core_id: int
         :param max_sdram_size: the max size each chip can say it has for SDRAM\
             (mainly used in debugging purposes)
         :type max_sdram_size: int or None
-        :param scamp_connections: a list of scamp connection data or None
+        :param scamp_connections: a list of SCAMP connection data or None
         :type scamp_connections: list of \
-            :py:class:`spinnman.connections.socket_address_with_chip.SocketAddress_With_Chip`
+            :py:class:`spinnman.connections.SocketAddress_With_Chip`
             or None
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board, or if no \
@@ -315,7 +313,7 @@ class Transceiver(object):
         # listen for the pre-boot board identifiers
         self._boot_receive_connections = list()
 
-        # A dict of port -> dict of ip address -> (connection, listener)
+        # A dict of port -> dict of IP address -> (connection, listener)
         # for UDP connections.  Note listener might be None if the connection
         # has not been listened to before.
         # Used to keep track of what connection is listening on what port
@@ -340,7 +338,7 @@ class Transceiver(object):
         # A list of all connections that can be used to send Multicast messages
         self._multicast_sender_connections = list()
 
-        # A dict of ip address -> SCAMP connection
+        # A dict of IP address -> SCAMP connection
         # These are those that can be used for setting up IP Tags
         self._udp_scamp_connections = dict()
 
@@ -348,29 +346,26 @@ class Transceiver(object):
         # messages for SCAMP interaction
         self._scamp_connections = list()
 
-        # if there has been scamp connections given, build them
+        # if there has been SCAMP connections given, build them
         if scamp_connections is not None:
             for socket_address in scamp_connections:
-                new_connection = SCAMPConnection(
+                connections.append(SCAMPConnection(
                     remote_host=socket_address.hostname,
                     remote_port=socket_address.port_num,
                     chip_x=socket_address.chip_x,
-                    chip_y=socket_address.chip_y)
-                connections.append(new_connection)
+                    chip_y=socket_address.chip_y))
 
         # The BMP connections
         self._bmp_connections = list()
 
         # build connection selectors for the processes.
         self._bmp_connection_selectors = dict()
-        self._scamp_connection_selector = None
-
-        # filter connections and build connection selectors.
-        self._sort_out_connections(connections)
+        self._scamp_connection_selector = \
+            self._identify_connections(connections)
 
         # The nearest neighbour start id and lock
-        self._next_nearest_neighbour_id = 2
-        self._next_nearest_neighbour_condition = Condition()
+        self._nearest_neighbour_id = 1
+        self._nearest_neighbour_lock = RLock()
 
         # A lock against multiple flood fill writes - needed as SCAMP cannot
         # cope with this
@@ -390,99 +385,92 @@ class Transceiver(object):
 
         self._machine_off = False
 
-    def _sort_out_connections(self, connections):
+    def _identify_connections(self, connections):
+        for conn in connections:
 
-        for connection in connections:
-
-            # locate the only boot send connection
-            if isinstance(connection, SpinnakerBootSender):
+            # locate the only boot send conn
+            if isinstance(conn, SpinnakerBootSender):
                 if self._boot_send_connection is not None:
                     raise SpinnmanInvalidParameterException(
-                        "connections", "[... {} ...]".format(connection),
+                        "connections", "[... {} ...]".format(conn),
                         "Only a single SpinnakerBootSender can be"
                         " specified")
-                else:
-                    self._boot_send_connection = connection
+                self._boot_send_connection = conn
 
             # locate any boot receiver connections
-            if isinstance(connection, SpinnakerBootReceiver):
-                self._boot_receive_connections.append(connection)
+            if isinstance(conn, SpinnakerBootReceiver):
+                self._boot_receive_connections.append(conn)
 
             # Locate any connections listening on a UDP port
-            if isinstance(connection, UDPConnection):
-                self._udp_receive_connections_by_port[connection.local_port][
-                    connection.local_ip_address] = (connection, None)
-                if isinstance(connection, Listenable):
+            if isinstance(conn, UDPConnection):
+                self._udp_receive_connections_by_port[conn.local_port][
+                    conn.local_ip_address] = (conn, None)
+                if isinstance(conn, Listenable):
                     self._udp_listenable_connections_by_class[
-                        connection.__class__].append((connection, None))
+                        conn.__class__].append((conn, None))
 
             # Locate any connections that can send SCP
             # (that are not BMP connections)
-            if (isinstance(connection, SCPSender) and
-                    not isinstance(connection, BMPConnection)):
-                self._scp_sender_connections.append(connection)
+            if (isinstance(conn, SCPSender) and
+                    not isinstance(conn, BMPConnection)):
+                self._scp_sender_connections.append(conn)
 
             # Locate any connections that can send SDP
-            if isinstance(connection, SDPSender):
-                self._sdp_sender_connections.append(connection)
+            if isinstance(conn, SDPSender):
+                self._sdp_sender_connections.append(conn)
 
             # Locate any connections that can send Multicast
-            if isinstance(connection, MulticastSender):
-                self._multicast_sender_connections.append(connection)
+            if isinstance(conn, MulticastSender):
+                self._multicast_sender_connections.append(conn)
 
             # Locate any connections that can send and receive SCP
-            if (isinstance(connection, SCPSender) and
-                    isinstance(connection, SCPReceiver)):
-
-                # If it is a BMP connection, add it here
-                if isinstance(connection, BMPConnection):
-                    self._bmp_connections.append(connection)
-                    self._bmp_connection_selectors[
-                        (connection.cabinet, connection.frame)] = \
-                        MostDirectConnectionSelector(None, [connection])
+            if isinstance(conn, SCPSender) and isinstance(conn, SCPReceiver):
+                # If it is a BMP conn, add it here
+                if isinstance(conn, BMPConnection):
+                    self._bmp_connections.append(conn)
+                    self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
+                        MostDirectConnectionSelector(None, [conn])
                 else:
-                    self._scamp_connections.append(connection)
+                    self._scamp_connections.append(conn)
 
-                    # If also a UDP connection, add it here (for IP tags)
-                    if isinstance(connection, UDPConnection):
-                        board_address = connection.remote_ip_address
-                        self._udp_scamp_connections[board_address] = connection
+                    # If also a UDP conn, add it here (for IP tags)
+                    if isinstance(conn, UDPConnection):
+                        board_address = conn.remote_ip_address
+                        self._udp_scamp_connections[board_address] = conn
 
-        # update the transceiver with the connection selectors.
-        self._scamp_connection_selector = MostDirectConnectionSelector(
+        # update the transceiver with the conn selectors.
+        return MostDirectConnectionSelector(
             self._machine, self._scamp_connections)
 
     def _check_bmp_connections(self):
         """ Check that the BMP connections are actually connected to valid BMPs
 
         :rtype: None
-        :raise SpinnmanIOException: when the connection is not linked to a BMP
+        :raise SpinnmanIOException: when the conn is not linked to a BMP s
         """
-        # check that the UDP BMP connection is actually connected to a BMP
-        #  via the sver command
-        for connection in self._bmp_connections:
+        # check that the UDP BMP conn is actually connected to a BMP
+        # via the sver command
+        for conn in self._bmp_connections:
 
             # try to send a BMP sver to check if it responds as expected
             try:
                 version_info = self.get_scamp_version(
-                    connection.chip_x, connection.chip_y,
-                    self._bmp_connection_selectors[(connection.cabinet,
-                                                    connection.frame)])
+                    conn.chip_x, conn.chip_y,
+                    self._bmp_connection_selectors[conn.cabinet, conn.frame])
                 fail_version_name = version_info.name != _BMP_NAME
                 fail_version_num = \
                     version_info.version_number[0] not in _BMP_MAJOR_VERSIONS
                 if fail_version_name or fail_version_num:
                     raise SpinnmanIOException(
-                        "The BMP at {} is running {}"
-                        " {} which is incompatible with this transceiver, "
-                        "required version is {} {}".format(
-                            connection.remote_ip_address,
-                            version_info.name,
-                            version_info.version_string,
+                        "The BMP at {} is running {} {} which is incompatible "
+                        "with this transceiver, required version is {} {}"
+                        .format(
+                            conn.remote_ip_address,
+                            version_info.name, version_info.version_string,
                             _BMP_NAME, _BMP_MAJOR_VERSIONS))
 
                 logger.info("Using BMP at {} with version {} {}",
-                            connection.remote_ip_address, version_info.name,
+                            conn.remote_ip_address, version_info.name,
                             version_info.version_string)
 
             # If it fails to respond due to timeout, maybe that the connection
@@ -490,11 +478,10 @@ class Transceiver(object):
             except SpinnmanTimeoutException:
                 raise SpinnmanException(
                     "BMP connection to {} is not responding".format(
-                        connection.remote_ip_address))
-
+                        conn.remote_ip_address))
             except Exception:
                 logger.exception("Failed to speak to BMP at {}",
-                                 connection.remote_ip_address)
+                                 conn.remote_ip_address)
                 raise
 
     def _try_sver_though_scamp_connection(self, connection_selector, retries):
@@ -504,58 +491,51 @@ class Transceiver(object):
         :param retries: how many attempts to do before giving up
         :return: True if a valid response is received, False otherwise
         """
-        current_retries = retries
-        while current_retries > 0:
+        for _ in xrange(retries):
             try:
                 self.get_scamp_version(connection_selector=connection_selector)
                 return True
-            except SpinnmanGenericProcessException:
-                current_retries -= 1
-            except SpinnmanTimeoutException:
-                current_retries -= 1
-            except SpinnmanUnexpectedResponseCodeException:
-                current_retries -= 1
+            except (SpinnmanGenericProcessException, SpinnmanTimeoutException,
+                    SpinnmanUnexpectedResponseCodeException):
+                pass
             except SpinnmanIOException:
-                return False
+                break
         return False
 
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
         """
 
-        # Check if there is a lock for the given chip
-        self._chip_execute_lock_condition.acquire()
         key = (x, y)
-        if key not in self._chip_execute_locks:
-            chip_lock = Condition()
-            self._chip_execute_locks[key] = chip_lock
-        else:
-            chip_lock = self._chip_execute_locks[key]
-        self._chip_execute_lock_condition.release()
+        # Check if there is a lock for the given chip
+        with self._chip_execute_lock_condition:
+            if key not in self._chip_execute_locks:
+                chip_lock = Condition()
+                self._chip_execute_locks[key] = chip_lock
+            else:
+                chip_lock = self._chip_execute_locks[key]
 
         # Get the lock for the chip
         chip_lock.acquire()
 
         # Increment the lock counter (used for the flood lock)
-        self._chip_execute_lock_condition.acquire()
-        self._n_chip_execute_locks += 1
-        self._chip_execute_lock_condition.release()
+        with self._chip_execute_lock_condition:
+            self._n_chip_execute_locks += 1
 
     def _release_chip_execute_lock(self, x, y):
         """ Release the lock for executing on a chip
         """
 
         # Get the chip lock
-        self._chip_execute_lock_condition.acquire()
-        chip_lock = self._chip_execute_locks[x, y]
+        with self._chip_execute_lock_condition:
+            chip_lock = self._chip_execute_locks[x, y]
 
-        # Release the chip lock
-        chip_lock.release()
+            # Release the chip lock
+            chip_lock.release()
 
-        # Decrement the lock and notify
-        self._n_chip_execute_locks -= 1
-        self._chip_execute_lock_condition.notify_all()
-        self._chip_execute_lock_condition.release()
+            # Decrement the lock and notify
+            self._n_chip_execute_locks -= 1
+            self._chip_execute_lock_condition.notify_all()
 
     def _get_flood_execute_lock(self):
         """ Get a lock for executing a flood fill of an executable
@@ -568,7 +548,7 @@ class Transceiver(object):
         while self._n_chip_execute_locks > 0:
             self._chip_execute_lock_condition.wait()
 
-            # When nothing is executing, we can return here
+        # When nothing is executing, we can return here
 
     def _release_flood_execute_lock(self):
         """ Release the lock for executing a flood fill
@@ -583,28 +563,27 @@ class Transceiver(object):
 
         :param connections: the list of connections to locate a random one from
         :type connections: list of \
-            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
+            :py:class:`spinnman.connections.abstract_classes.Connection`
         :return: a connection object
         :rtype: \
-            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
+            :py:class:`spinnman.connections.abstract_classes.Connection`
         """
         if not connections:
             return None
         return connections[random.randint(0, len(connections) - 1)]
 
-    def send_scp_message(
-            self, message, connection=None):
+    def send_scp_message(self, message, connection=None):
         """ Sends an SCP message, without expecting a response
 
         :param message: The message to send
         :type message:\
-            :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
-        :param connection: The connection to use
+            :py:class:`spinnman.messages.scp.abstract_messages.AbstractSCPRequest`
+        :param connection: The connection to use (omit to pick a random one)
         :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
+            :py:class:`spinnman.connections.abstract_classes.Connection`
         :return: The received response, or the callback if get_callback is True
         :rtype:\
-            :py:class:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse`
+            :py:class:`spinnman.messages.scp.abstract_messages.AbstractSCPResponse`
         :raise spinnman.exceptions.SpinnmanTimeoutException: \
             If there is a timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
@@ -620,20 +599,19 @@ class Transceiver(object):
             If the response is not one of the expected codes
         """
         if connection is None:
-            connection_to_use = self._get_random_connection(
+            connection = self._get_random_connection(
                 self._scp_sender_connections)
-        else:
-            connection_to_use = connection
-        connection_to_use.send_scp_request(message)
+        connection.send_scp_request(message)
 
     def send_sdp_message(self, message, connection=None):
         """ Sends an SDP message using one of the connections.
 
         :param message: The message to send
-        :type message: spinnman.messages.sdp.SDPMessage
+        :type message: \
+            :py:class:`spinnman.messages.sdp.SDPMessage`
         :param connection: An optional connection to use
         :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
+            :py:class:`spinnman.connections.abstract_classes.Connection`
         :rtype: None
         """
         if connection is None:
@@ -659,7 +637,7 @@ class Transceiver(object):
             message. If not specified, an appropriate connection is chosen\
             automatically.
         :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.multicast_sender.MulticastSender`
+            :py:class:`spinnman.connections.abstract_classes.MulticastSender`
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: \
@@ -693,17 +671,15 @@ class Transceiver(object):
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height)
 
-        # update the scamp selector with the machine
+        # update the SCAMP selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # update the scamp connections replacing any x and y with the default
+        # update the SCAMP connections replacing any x and y with the default
         # SCP request params with the boot chip coordinates
-        for connection in self._scamp_connections:
-            if (connection.chip_x ==
-                    AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
-                    (connection.chip_y ==
-                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
-                connection.update_chip_coordinates(
+        for sc in self._scamp_connections:
+            if (sc.chip_x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
+                    and sc.chip_y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
+                sc.update_chip_coordinates(
                     self._machine.boot_x, self._machine.boot_y)
 
         # Work out and add the spinnaker links and FPGA links
@@ -713,7 +689,7 @@ class Transceiver(object):
         # TODO: Actually get the existing APP_IDs in use
         self._app_id_tracker = AppIdTracker()
 
-        logger.info("Detected a machine on ip address {} which has {}",
+        logger.info("Detected a machine on IP address {} which has {}",
                     self._boot_send_connection.remote_ip_address,
                     self._machine.cores_and_link_output_string())
 
@@ -726,7 +702,7 @@ class Transceiver(object):
         :return: An iterable of discovered connections, not including the\
             initially given connections in the constructor
         :rtype: iterable of\
-            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
+            :py:class:`spinnman.connections.abstract_classes.Connection`
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
@@ -781,7 +757,7 @@ class Transceiver(object):
         return new_connections
 
     def _search_for_proxies(self, chip):
-        """ Looks for an entry within the UDP scamp connections which is\
+        """ Looks for an entry within the UDP SCAMP connections which is\
             linked to a given chip
 
         :param chip: the chip to locate
@@ -799,7 +775,7 @@ class Transceiver(object):
 
         :return: An iterable of connections known to the transceiver
         :rtype: iterable of\
-            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
+            :py:class:`spinnman.connections.abstract_classes.Connection`
         :raise None: No known exceptions are raised
         """
         return self._all_connections
@@ -865,7 +841,7 @@ class Transceiver(object):
             all connections will be tested, and the board will be considered\
             to be connected if any one connection works.
         :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.connection.Connection`
+            :py:class:`spinnman.connections.abstract_classes.Connection`
         :return: True if the board can be contacted, False otherwise
         :rtype: bool
         :raise None: No known exceptions are raised
@@ -878,15 +854,15 @@ class Transceiver(object):
             self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
             connection_selector=None):
-        """ Get the version of scamp which is running on the board
+        """ Get the version of SCAMP which is running on the board
 
-        :param connection_selector: the connection to send the scamp\
-            version or none (if none then a random scamp connection is used)
+        :param connection_selector: the connection to send the SCAMP\
+            version or none (if none then a random SCAMP connection is used)
         :type connection_selector: \
-            :py:class:'spinnman.processes.abstract_multi_connection_process_connection_selector.AbstractMultiConnectionProcessConnectionSelector'
-        :param chip_x: the chip's x coordinate to query for scamp version
+            :py:class:'spinnman.processes.AbstractMultiConnectionProcessConnectionSelector'
+        :param chip_x: the chip's x coordinate to query for SCAMP version
         :type chip_x: int
-        :param chip_y: the chip's y coordinate to query for scamp version
+        :param chip_y: the chip's y coordinate to query for SCAMP version
         :type chip_y: int
         :return: The version identifier
         :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
@@ -906,7 +882,7 @@ class Transceiver(object):
     def boot_board(
             self, number_of_boards=None, width=None, height=None,
             extra_boot_values=None):
-        """ Attempt to boot the board.  No check is performed to see if the\
+        """ Attempt to boot the board. No check is performed to see if the\
             board is already booted.
 
         :param number_of_boards: this parameter is deprecated
@@ -943,23 +919,23 @@ class Transceiver(object):
         """
 
         # The major version must match exactly
-        if (version[0] != _SCAMP_VERSION[0]):
+        if version[0] != _SCAMP_VERSION[0]:
             return False
 
         # If the minor version matches, the patch version must be >= the
         # required version
-        if (version[1] == _SCAMP_VERSION[1]):
+        if version[1] == _SCAMP_VERSION[1]:
             return version[2] >= _SCAMP_VERSION[2]
 
         # If the minor version is > than the required version, the patch
         # version is irrelevant
-        return (version[1] > _SCAMP_VERSION[1])
+        return version[1] > _SCAMP_VERSION[1]
 
     def ensure_board_is_ready(
             self, number_of_boards=None, width=None, height=None,
             n_retries=5, extra_boot_values=None):
         """ Ensure that the board is ready to interact with this version\
-            of the transceiver.  Boots the board if not already booted and\
+            of the transceiver. Boots the board if not already booted and\
             verifies that the version of SCAMP running is compatible with\
             this transceiver.
 
@@ -989,7 +965,7 @@ class Transceiver(object):
                 "The width, height and number_of_boards are no longer"
                 " supported, and might be removed in a future version")
 
-        # try to get a scamp version once
+        # try to get a SCAMP version once
         logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None
@@ -1009,7 +985,7 @@ class Transceiver(object):
             time.sleep(2.0)
             logger.info("Attempting to boot machine")
 
-            # retry to get a scamp version, this time trying multiple times
+            # retry to get a SCAMP version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
                 n_retries, number_of_boards, width, height, extra_boot_values)
 
@@ -1039,6 +1015,10 @@ class Transceiver(object):
 
         return version_info
 
+    def __is_default_destination(self, version_info):
+        return (version_info.x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
+                and version_info.y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD)
+
     def _try_to_find_scamp_and_boot(
             self, tries_to_go, number_of_boards, width, height,
             extra_boot_values):
@@ -1059,10 +1039,7 @@ class Transceiver(object):
         while version_info is None and current_tries_to_go > 0:
             try:
                 version_info = self.get_scamp_version()
-                if (version_info.x ==
-                        AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
-                        (version_info.y ==
-                         AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
+                if self.__is_default_destination(version_info):
                     version_info = None
                     time.sleep(0.1)
             except SpinnmanGenericProcessException as e:
@@ -1089,10 +1066,7 @@ class Transceiver(object):
         if version_info is None:
             try:
                 version_info = self.get_scamp_version()
-                if (version_info.x ==
-                        AbstractSCPRequest.DEFAULT_DEST_X_COORD) and \
-                        (version_info.y ==
-                         AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
+                if self.__is_default_destination(version_info):
                     version_info = None
             except SpinnmanException:
                 pass
@@ -1141,8 +1115,7 @@ class Transceiver(object):
         return struct.unpack_from(
             data_item.data_type.struct_code,
             str(self.read_memory(
-                x, y,
-                SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
+                x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
                 data_item.data_type.value)))[0]
 
     def get_user_0_register_address_from_core(self, x, y, p):
@@ -1164,7 +1137,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        return utility_functions.get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
+        return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
     def get_user_1_register_address_from_core(self, x, y, p):
         """ Get the address of user 1 for a given processor on the board
@@ -1185,7 +1158,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        return utility_functions.get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
+        return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
     def get_user_2_register_address_from_core(self, x, y, p):
         """ Get the address of user 2 for a given processor on the board
@@ -1206,7 +1179,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        return utility_functions.get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
+        return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
@@ -1378,7 +1351,7 @@ class Transceiver(object):
             * A filename of a file containing the executable (in which case\
                 is_filename must be set to True)
         :type executable:\
-            :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+            :py:class:`spinn_storage_handlers.abstract_classes.AbstractDataReader`\
             or bytearray or str
         :param app_id: \
             The id of the application with which to associate the executable
@@ -1427,11 +1400,9 @@ class Transceiver(object):
         self._release_chip_execute_lock(x, y)
 
     def _get_next_nearest_neighbour_id(self):
-        self._next_nearest_neighbour_condition.acquire()
-        next_nearest_neighbour_id = self._next_nearest_neighbour_id
-        self._next_nearest_neighbour_id = \
-            (self._next_nearest_neighbour_id + 1) % 127
-        self._next_nearest_neighbour_condition.release()
+        with self._nearest_neighbour_lock:
+            next_nearest_neighbour_id = (self._nearest_neighbour_id + 1) % 127
+            self._nearest_neighbour_id = next_nearest_neighbour_id
         return next_nearest_neighbour_id
 
     def execute_flood(
@@ -1451,7 +1422,7 @@ class Transceiver(object):
             * A filename of an executable (in which case is_filename must be\
                 set to True)
         :type executable:\
-            :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+            :py:class:`spinn_storage_handlers.abstract_classes.AbstractDataReader`\
             or bytearray or str
         :param app_id: \
             The id of the application with which to associate the executable
@@ -1506,8 +1477,8 @@ class Transceiver(object):
             all of the binaries.  Note this will get the binaries into c_main\
             but will not signal the barrier.
 
-        :param executable_targets: The binaries to be executed and the cores\
-            to execute them on
+        :param executable_targets: \
+            The binaries to be executed and the cores to execute them on
         :type executable_targets:\
             :py:class:`spinnman.model.executable_targets.ExecutableTargets`
         :param app_id: The app_id to give this application
@@ -1574,11 +1545,12 @@ class Transceiver(object):
         self._power(PowerCommand.POWER_OFF, boards, cabinet, frame)
 
     def _bmp_connection(self, cabinet, frame):
-        if (cabinet, frame) not in self._bmp_connection_selectors:
+        key = (cabinet, frame)
+        if key not in self._bmp_connection_selectors:
             raise SpinnmanInvalidParameterException(
                 "cabinet and frame", "{} and {}".format(cabinet, frame),
                 "Unknown combination")
-        return self._bmp_connection_selectors[(cabinet, frame)]
+        return self._bmp_connection_selectors[key]
 
     def _power(self, power_command, boards=0, cabinet=0, frame=0):
         """ Send a power request to the machine
@@ -1608,8 +1580,8 @@ class Transceiver(object):
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
 
-        :param led:  Number of the LED or an iterable of LEDs to set the\
-            state of (0-7)
+        :param led: \
+            Number of the LED or an iterable of LEDs to set the state of (0-7)
         :type led: int or iterable of int
         :param action: State to set the LED to, either on, off or toggle
         :type action:\
@@ -1629,7 +1601,8 @@ class Transceiver(object):
         process.execute(BMPSetLed(led, action, board))
 
     def read_fpga_register(self, fpga_num, register, cabinet, frame, board):
-        """
+        """ Read a register on a FPGA of a board. The meaning of the\
+            register's contents will depend on the FPGA's configuration.
 
         :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
         :type fpga_num: int
@@ -1651,7 +1624,8 @@ class Transceiver(object):
 
     def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
                             board):
-        """
+        """ Write a register on a FPGA of a board. The meaning of setting the\
+            register's contents will depend on the FPGA's configuration.
 
         :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
         :type fpga_num: int
@@ -1722,7 +1696,7 @@ class Transceiver(object):
             * A filename of a data file (in which case is_filename must be\
                 set to True)
         :type data:\
-            :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+            :py:class:`spinn_storage_handlers.abstract_classes.AbstractDataReader`\
             or bytearray or int or str
         :param n_bytes: \
             The amount of data to be written in bytes.  If not specified:
@@ -1793,15 +1767,15 @@ class Transceiver(object):
         :param link: \
             The link index to send the request to (or if BMP, the FPGA number)
         :type link: int
-        :param base_address: The address in SDRAM where the region of memory\
-            is to be written
+        :param base_address: \
+            The address in SDRAM where the region of memory is to be written
         :type base_address: int
         :param data: The data to write.  Should be one of the following:
             * An instance of AbstractDataReader
             * A bytearray
             * A single integer; will be written in little-endian byte order
         :type data:\
-            :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
+            :py:class:`spinn_storage_handlers.abstract_classes.AbstractDataReader`\
             or bytearray or int
         :param n_bytes: \
             The amount of data to be written in bytes.  If not specified:
@@ -1866,8 +1840,8 @@ class Transceiver(object):
             * A file name of a file to read (in which case is_filename should\
                 be set to True)
         :type data:\
-            :py:class:`spinnman.data.abstract_data_reader.AbstractDataReader`\
-            or bytearray or int
+            :py:class:`spinn_storage_handlers.abstract_classes.AbstractDataReader`\
+            or bytearray or int or str
         :param n_bytes: \
             The amount of data to be written in bytes.  If not specified:
             * If data is an AbstractDataReader, an error is raised
@@ -2025,7 +1999,8 @@ class Transceiver(object):
             error_states=frozenset({
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),
             counts_between_full_check=100):
-        """
+        """ Waits for the specified cores running the given application to be\
+            in some target state or states. Handles failures.
 
         :param all_core_subsets: the cores to check are in a given sync state
         :param app_id: the app id that being used by the simulation
@@ -2048,9 +2023,7 @@ class Transceiver(object):
 
         # check that the right number of processors are in the states
         processors_ready = 0
-        timeout_time = None
-        if timeout is not None:
-            timeout_time = time.time() + timeout
+        timeout_time = None if timeout is None else time.time() + timeout
         tries = 0
         while (processors_ready < len(all_core_subsets) and
                (timeout_time is None or time.time() < timeout_time)):
@@ -2064,8 +2037,7 @@ class Transceiver(object):
             # If the count is too small, check for error states
             if processors_ready < len(all_core_subsets):
                 for cpu_state in error_states:
-                    error_cores = self.get_core_state_count(
-                        app_id, cpu_state)
+                    error_cores = self.get_core_state_count(app_id, cpu_state)
                     if error_cores > 0:
                         raise SpinnmanException(
                             "{} cores have reached an error state {}:".format(
@@ -2156,7 +2128,7 @@ class Transceiver(object):
             :py:class:`spinnman.model.cpu_infos.CPUInfos`
         """
         break_down = "\n"
-        for ((x, y, p), core_info) in cpu_infos.cpu_infos:
+        for (x, y, p), core_info in cpu_infos.cpu_infos:
             if core_info.state == CPUState.RUN_TIME_EXCEPTION:
                 break_down += "    {}:{}:{} in state {}:{}\n".format(
                     x, y, p, core_info.state.name,
@@ -2222,7 +2194,6 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
-
         process.execute(SetLED(x, y, cpu, led_states))
 
     def locate_spinnaker_connection_for_board_address(self, board_address):
@@ -2234,14 +2205,12 @@ class Transceiver(object):
         :return: A connection for the given IP address, or None if no such\
             connection exists
         :rtype:\
-            :py:class:`spinnman.connections.udp_packet_connections.scamp_connection.SCAMPConnection`
+            :py:class:`spinnman.connections.udp_packet_connections.SCAMPConnection`
         """
-        if board_address in self._udp_scamp_connections:
-            return self._udp_scamp_connections[board_address]
-        return None
+        return self._udp_scamp_connections.get(board_address, None)
 
     def set_ip_tag(self, ip_tag):
-        """ Set up an ip tag
+        """ Set up an IP tag
 
         :param ip_tag: The tag to set up; note board_address can be None, in\
             which case, the tag will be assigned to all boards
@@ -2253,7 +2222,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
             If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If the ip tag fields are incorrect
+            * If the IP tag fields are incorrect
             * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
@@ -2262,29 +2231,21 @@ class Transceiver(object):
         # Check that the tag has a port assigned
         if ip_tag.port is None:
             raise SpinnmanInvalidParameterException(
-                "ip_tag.port", "None",
-                "The tag port must have been set")
+                "ip_tag.port", "None", "The tag port must have been set")
 
         # Get the connections - if the tag specifies a connection, use that,
         # otherwise apply the tag to all connections
-        connections = list()
-        if ip_tag.board_address is not None:
-            connection = self.locate_spinnaker_connection_for_board_address(
-                ip_tag.board_address)
-            if connection is None:
-                raise SpinnmanInvalidParameterException(
-                    "ip_tag", str(ip_tag),
-                    "The given board address is not recognised")
-            connections.append(connection)
-        else:
-            connections = self._scamp_connections
+        connections = self.__get_connection_list(None, ip_tag.board_address)
+        if not connections:
+            raise SpinnmanInvalidParameterException(
+                "ip_tag", str(ip_tag),
+                "The given board address is not recognised")
 
         for connection in connections:
 
             # Convert the host string
             host_string = ip_tag.ip_address
-            if (host_string == "localhost" or host_string == "." or
-                    host_string == "0.0.0.0"):
+            if host_string in ("localhost", ".", "0.0.0.0"):
                 host_string = connection.local_ip_address
             ip_string = socket.gethostbyname(host_string)
             ip_address = bytearray(socket.inet_aton(ip_string))
@@ -2294,8 +2255,34 @@ class Transceiver(object):
                 connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
                 ip_tag.tag, strip=ip_tag.strip_sdp))
 
+    def __get_connection_list(self, connection=None, board_address=None):
+        """Get the connections for talking to a board.
+
+        :param connection: \
+            Optional param that directly gives the connection to use.
+        :type connection: \
+            :py:class:`spinnman.connections.abstract_classes.SCPSender`
+        :param board_address: \
+            Optional param that gives the address of the board to talk to.
+        :type board_address: str
+        :return: List of length 1 or 0 (the latter only if the search for \
+            the given board address fails).
+        :rtype: list of \
+            :py:class:`spinnman.connections.abstract_classes.SCPSender`
+        """
+        if connection is not None:
+            return [connection]
+        elif board_address is None:
+            return self._scamp_connections
+
+        connection = self.locate_spinnaker_connection_for_board_address(
+            board_address)
+        if connection is None:
+            return []
+        return [connection]
+
     def set_reverse_ip_tag(self, reverse_ip_tag):
-        """ Set up a reverse ip tag
+        """ Set up a reverse IP tag
 
         :param reverse_ip_tag: The reverse tag to set up; note board_address\
             can be None, in which case, the tag will be assigned to all boards
@@ -2308,7 +2295,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
             If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If the reverse ip tag fields are incorrect
+            * If the reverse IP tag fields are incorrect
             * If a packet is received that has invalid parameters
             * If the UDP port is one that is already used by SpiNNaker for \
                 system functions
@@ -2325,24 +2312,18 @@ class Transceiver(object):
                 reverse_ip_tag.port == UDP_BOOT_CONNECTION_DEFAULT_PORT):
             raise SpinnmanInvalidParameterException(
                 "reverse_ip_tag.port", reverse_ip_tag.port,
-                "The port number for the reverse ip tag conflicts with"
+                "The port number for the reverse IP tag conflicts with"
                 " the spiNNaker system ports ({} and {})".format(
-                    SCP_SCAMP_PORT,
-                    UDP_BOOT_CONNECTION_DEFAULT_PORT))
+                    SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT))
 
         # Get the connections - if the tag specifies a connection, use that,
         # otherwise apply the tag to all connections
-        connections = list()
-        if reverse_ip_tag.board_address is not None:
-            connection = self.locate_spinnaker_connection_for_board_address(
-                reverse_ip_tag.board_address)
-            if connection is None:
-                raise SpinnmanInvalidParameterException(
-                    "reverse_ip_tag", str(reverse_ip_tag),
-                    "The given board address is not recognised")
-            connections.append(connection)
-        else:
-            connections = self._scamp_connections
+        connections = self.__get_connection_list(
+            None, reverse_ip_tag.board_address)
+        if not connections:
+            raise SpinnmanInvalidParameterException(
+                "reverse_ip_tag", str(reverse_ip_tag),
+                "The given board address is not recognised")
 
         for connection in connections:
             process = SendSingleCommandProcess(self._scamp_connection_selector)
@@ -2354,7 +2335,7 @@ class Transceiver(object):
                 reverse_ip_tag.sdp_port))
 
     def clear_ip_tag(self, tag, connection=None, board_address=None):
-        """ Clear the setting of an ip tag
+        """ Clear the setting of an IP tag
 
         :param tag: The tag id
         :type tag: int
@@ -2379,15 +2360,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        if connection is not None:
-            connections = [connection]
-        elif board_address is not None:
-            connections = [self.locate_spinnaker_connection_for_board_address(
-                board_address)]
-        else:
-            connections = self._scamp_connections
-
-        for conn in connections:
+        for conn in self.__get_connection_list(connection, board_address):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
@@ -2412,15 +2385,10 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        if connection is not None:
-            conns = [connection]
-        else:
-            conns = self._scamp_connections
-
         all_tags = list()
-        for c in conns:
+        for conn in self.__get_connection_list(connection):
             process = GetTagsProcess(self._scamp_connection_selector)
-            all_tags.extend(process.get_tags(c))
+            all_tags.extend(process.get_tags(conn))
         return all_tags
 
     def malloc_sdram(self, x, y, size, app_id, tag=None):
@@ -2504,7 +2472,6 @@ class Transceiver(object):
         """
 
         process = LoadMultiCastRoutesProcess(self._scamp_connection_selector)
-
         process.load_routes(x, y, routes, app_id)
 
     def load_fixed_route(self, x, y, fixed_route, app_id):
@@ -2558,20 +2525,20 @@ class Transceiver(object):
         :type x: int
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
-        :param app_id: The id of the application to filter the routes for.  If\
+        :param app_id: The id of the application to filter the routes for. If\
             not specified, will return all routes
         :type app_id: int
         :return: An iterable of multicast routes
         :rtype: iterable of\
             :py:class:`spinnman.model.multicast_routing_entry.MulticastRoute`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-            packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         base_address = self._get_sv_data(
             x, y, SystemVariableDefinition.router_table_copy_address)
@@ -2588,14 +2555,14 @@ class Transceiver(object):
         :type y: int
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-            packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(RouterClear(x, y))
@@ -2603,22 +2570,22 @@ class Transceiver(object):
     def get_router_diagnostics(self, x, y):
         """ Get router diagnostic information from a chip
 
-        :param x: The x-coordinate of the chip from which to get the\
-            information
+        :param x: \
+            The x-coordinate of the chip from which to get the information
         :type x: int
-        :param y: The y-coordinate of the chip from which to get the\
-            information
+        :param y: \
+            The y-coordinate of the chip from which to get the information
         :type y: int
         :return: The router diagnostic information
         :rtype: :py:class:`spinnman.model.router_diagnostics.RouterDiagnostics`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-            packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         process = ReadRouterDiagnosticsProcess(self._scamp_connection_selector)
         return process.get_router_diagnostics(x, y)
@@ -2626,11 +2593,11 @@ class Transceiver(object):
     def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
         """ Sets a router diagnostic filter in a router
 
-        :param x: the X address of the router in which this filter is being\
-            set
+        :param x: \
+            the X address of the router in which this filter is being set
         :type x: int
-        :param y: the Y address of the router in which this filter is being\
-            set
+        :param y: \
+            the Y address of the router in which this filter is being set
         :type y: int
         :param position: the position in the list of filters where this filter\
             is to be added
@@ -2645,31 +2612,30 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If x, y does not lead to a valid chip
             * If position is less than 0 or more than 15
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         data_to_send = diagnostic_filter.filter_word
         if position > NO_ROUTER_DIAGNOSTIC_FILTERS:
             raise SpinnmanInvalidParameterException(
-                "position", str(position), "the range of the position of a "
-                                           "router filter is 0 and 16.")
+                "position", str(position),
+                "the range of the position of a router filter is 0 and 16.")
         if position <= ROUTER_DEFAULT_FILTERS_MAX_POSITION:
             logger.warning(
-                " You are planning to change a filter which is set by default."
-                " By doing this, other runs occurring on this machine will be "
+                "You are planning to change a filter which is set by default. "
+                "By doing this, other runs occurring on this machine will be "
                 "forced to use this new configuration until the machine is "
-                "reset. Please also note that these changes will make the"
-                " the reports from ybug not correct."
-                "This has been executed and is trusted that the end user knows"
-                " what they are doing")
-        memory_position = (ROUTER_REGISTER_BASE_ADDRESS +
-                           ROUTER_FILTER_CONTROLS_OFFSET +
-                           position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
+                "reset. Please also note that these changes will make the "
+                "the reports from ybug not correct. This has been executed "
+                "and is trusted that the end user knows what they are doing.")
+        memory_position = (
+            ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
+            position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(WriteMemory(
@@ -2692,21 +2658,21 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If x, y does not lead to a valid chip
             * If a packet is received that has invalid parameters
             * If position is less than 0 or more than 15
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
-        memory_position = (ROUTER_REGISTER_BASE_ADDRESS +
-                           ROUTER_FILTER_CONTROLS_OFFSET +
-                           position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
+        memory_position = (
+            ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
+            position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
+
         process = SendSingleCommandProcess(self._scamp_connection_selector)
-        response = process.execute(
-            ReadMemory(x, y, memory_position, 4))
+        response = process.execute(ReadMemory(x, y, memory_position, 4))
         return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
             response.data, response.offset)[0])
 
@@ -2720,26 +2686,26 @@ class Transceiver(object):
         :type y: int
         :param enable: True (default) if the counters should be enabled
         :type enable: bool
-        :param counter_ids: The ids of the counters to reset (all by default)\
+        :param counter_ids: The IDs of the counters to reset (all by default)\
             and enable if enable is True; each must be between 0 and 15
         :type counter_ids: array-like of int
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-            communicating with the board
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: If a packet\
-            is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If a\
-            packet is received that has invalid parameters or a counter ID is\
-            out of range
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: If\
-            a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error communicating with the board
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If a packet is received that has invalid parameters or a counter\
+            ID is out of range
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
         """
         clear_data = 0
         for counter_id in counter_ids:
             if counter_id < 0 or counter_id > 15:
                 raise SpinnmanInvalidParameterException(
                     "counter_id", counter_id,
-                    "Diagnostic counter ids must be between 0 and 15")
+                    "Diagnostic counter IDs must be between 0 and 15")
             clear_data |= 1 << counter_id
         if enable:
             for counter_id in counter_ids:
@@ -2757,9 +2723,7 @@ class Transceiver(object):
             boards += len(bmp_connection.boards)
 
         # if no BMPs are available, then there's still at least one board
-        if boards == 0:
-            boards = 1
-        return boards
+        return max((1, boards))
 
     def close(self, close_original_connections=True, power_off_machine=False):
         """ Close the transceiver and any threads that are running
@@ -2778,9 +2742,8 @@ class Transceiver(object):
         if power_off_machine and self._bmp_connections:
             self.power_off_machine()
 
-        for receiving_connections in \
-                self._udp_receive_connections_by_port.values():
-            for (_, listener) in receiving_connections.values():
+        for connections in self._udp_receive_connections_by_port.values():
+            for (_, listener) in connections.values():
                 if listener is not None:
                     listener.close()
 
@@ -2799,6 +2762,8 @@ class Transceiver(object):
         :param callback: Function to be called when a packet is received
         :type callback: function(packet)
         :param connection_class: The class of connection to receive using
+        :type connection_class: subclass of\
+            :py:class:`spinnman.connections.abstract_classes.Listenable`
         :param local_port: The optional port number to listen on; if not\
             specified, an existing connection will be used if possible,\
             otherwise a random free port number will be used
@@ -2853,7 +2818,7 @@ class Transceiver(object):
                 # If the type of an existing connection is wrong, this is an
                 # error
                 if local_host in receiving_connections:
-                    (connection, listener) = receiving_connections[local_host]
+                    connection, listener = receiving_connections[local_host]
                     if not isinstance(connection, connection_class):
                         raise SpinnmanInvalidParameterException(
                             "connection_class", connection_class,
@@ -2885,11 +2850,10 @@ class Transceiver(object):
             if local_host is None:
                 local_host = "0.0.0.0"
 
-            for (a_connection, a_listener) in connections_of_class:
-
-                # Find a connection that matches the local host
+            # Find a connection that matches the local host
+            for a_connection, a_listener in connections_of_class:
                 if a_connection.local_ip_address == local_host:
-                    (connection, listener) = (a_connection, a_listener)
+                    connection, listener = (a_connection, a_listener)
                     break
 
         # Create a connection if there isn't already one, and a listener
@@ -2943,7 +2907,7 @@ class Transceiver(object):
         :param repeat_value: The data to repeat
         :type repeat_value: int
         :param bytes_to_fill:\
-            The number of bytes to fill - must be compatible with the data\
+            The number of bytes to fill. Must be compatible with the data\
             type i.e. if the data type is WORD, the number of bytes must\
             be divisible by 4
         :type bytes_to_fill: int
