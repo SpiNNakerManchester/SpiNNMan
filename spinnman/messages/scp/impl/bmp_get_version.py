@@ -18,7 +18,7 @@ class BMPGetVersion(BMPRequest):
             * If the processor is out of range
         """
         super(BMPGetVersion, self).__init__(
-            SCPRequestHeader(command=SCPCommand.CMD_VER))
+            board, SCPRequestHeader(command=SCPCommand.CMD_VER))
 
     def get_scp_response(self):
         """ See\
