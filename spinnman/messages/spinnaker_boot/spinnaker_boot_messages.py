@@ -17,9 +17,9 @@ _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4
 _BOOT_IMAGE_MAX_BYTES = 32 * 1024
 _BOOT_DATA_FILE_NAME = "scamp.boot"
-_BOOT_STRUCT_REPLACE_OFFSET = 384 / 4
-_BOOT_STRUCT_REPLACE_LENGTH = 128 / 4
-_BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES / 4) - 1) << 8
+_BOOT_STRUCT_REPLACE_OFFSET = 384 // 4
+_BOOT_STRUCT_REPLACE_LENGTH = 128 // 4
+_BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES // 4) - 1) << 8
 
 
 class SpinnakerBootMessages(object):
@@ -73,9 +73,9 @@ class SpinnakerBootMessages(object):
         boot_data_file, boot_data_size = self._get_boot_image_file()
 
         # Compute how many packets to send
-        n_words_to_read = boot_data_size / 4
+        n_words_to_read = boot_data_size // 4
         self._no_data_packets = int(math.ceil(
-            float(boot_data_size) / float(_BOOT_MESSAGE_DATA_BYTES)))
+            float(boot_data_size) / _BOOT_MESSAGE_DATA_BYTES))
 
         # Read the data
         boot_data = array.array("I")
