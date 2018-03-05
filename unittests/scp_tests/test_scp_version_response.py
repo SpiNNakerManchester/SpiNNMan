@@ -22,7 +22,7 @@ class TestSCPVersionResponse(unittest.TestCase):
         version = 234
         buffer = 250
         build_date = 103117
-        ver_string = "sark/spinnaker"
+        ver_string = b"sark/spinnaker"
 
         # SDP stuff
         flags = SDPFlag.REPLY_NOT_EXPECTED.value

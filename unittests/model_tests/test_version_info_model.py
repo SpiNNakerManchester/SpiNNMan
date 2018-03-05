@@ -15,14 +15,14 @@ class TestVersionInfo(unittest.TestCase):
         arg2 = ((ver_number << 16) | buffer_size)
         build_date = 0x1000
         arg3 = build_date
-        data = "my/spinnaker"
+        data = b"my/spinnaker"
 
         version_data = struct.pack('<III13s', arg1, arg2, arg3, data)
         version_data = bytearray(version_data)
         vi = VersionInfo(version_data)
-        self.assertEqual(vi.name, 'my')
+        self.assertEqual(vi.name, b'my')
         self.assertEqual(vi.version_number, (2, 55, 0))
-        self.assertEqual(vi.hardware, 'spinnaker')
+        self.assertEqual(vi.hardware, b'spinnaker')
         self.assertEqual(vi.x, 0xf0)
         self.assertEqual(vi.y, 0xa1)
         self.assertEqual(vi.p, 0x3b)
@@ -40,7 +40,7 @@ class TestVersionInfo(unittest.TestCase):
             arg2 = ((ver_number << 16) | buffer_size)
             build_date = 0x1000
             arg3 = build_date
-            data = "my.spinnaker"
+            data = b"my.spinnaker"
 
             version_data = struct.pack('<III13s', arg1, arg2, arg3, data)
             version_data = bytearray(version_data)
@@ -59,7 +59,7 @@ class TestVersionInfo(unittest.TestCase):
             arg2 = ((ver_number << 16) | buffer_size)
             # build_date = 0x1000
             # arg3 = build_date
-            data = "my/spinnaker"
+            data = b"my/spinnaker"
 
             version_data = struct.pack('<II13s', arg1, arg2, data)
             version_data = bytearray(version_data)

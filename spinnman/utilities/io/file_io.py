@@ -211,6 +211,6 @@ class FileIO(AbstractIO):
             str(data_type.struct_type[-1]), repeat_value
         )
         self._file.seek(self._current_offset)
-        for _ in range(bytes_to_fill / data_type.value):
+        for _ in range(bytes_to_fill // data_type.value):
             self._file.write(data_to_fill)
         self._current_offset += bytes_to_fill
