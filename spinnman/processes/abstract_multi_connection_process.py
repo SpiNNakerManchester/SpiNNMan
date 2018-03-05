@@ -1,5 +1,6 @@
 from .abstract_process import AbstractProcess
 from spinnman.connections import SCPRequestPipeLine
+from six import itervalues
 
 
 class AbstractMultiConnectionProcess(AbstractProcess):
@@ -40,5 +41,5 @@ class AbstractMultiConnectionProcess(AbstractProcess):
             request, callback, error_callback)
 
     def _finish(self):
-        for request_pipeline in self._scp_request_pipelines.itervalues():
+        for request_pipeline in itervalues(self._scp_request_pipelines):
             request_pipeline.finish()

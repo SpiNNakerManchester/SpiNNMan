@@ -39,7 +39,7 @@ class TestSCPVersionResponse(unittest.TestCase):
             version, buffer, build_date, ver_string)
         self.assertEqual(response.version_info, None)
         response.read_bytestring(data, 0)
-        print response.version_info
+        print(response.version_info)
 
 
 if __name__ == '__main__':

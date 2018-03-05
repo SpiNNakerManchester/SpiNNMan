@@ -1,6 +1,6 @@
+from __future__ import print_function
 import unittest
 import struct
-
 from spinn_machine.virtual_machine import VirtualMachine
 
 from spinnman.transceiver import Transceiver
@@ -40,7 +40,7 @@ class MockWriteTransceiver(Transceiver):
     def write_memory(
             self, x, y, base_address, data, n_bytes=None, offset=0,
             cpu=0, is_filename=False):
-        print "Doing write to", x, y
+        print("Doing write to", x, y)
         self.written_memory.append(
             (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
 
@@ -100,11 +100,11 @@ class TestTransceiver(unittest.TestCase):
             assert trans.get_machine_dimensions().height == 8
         else:
             size = trans.get_machine_dimensions()
-            print "Unknown board with x size {0:d} and y size {1:d}".format(
-                size.width, size.height)
+            print("Unknown board with x size {0:d} and y size {1:d}".format(
+                size.width, size.height))
         assert trans.is_connected()
-        print trans.get_scamp_version()
-        print trans.get_cpu_information()
+        print(trans.get_scamp_version())
+        print(trans.get_cpu_information())
         trans.close()
 
     def test_boot_board(self):

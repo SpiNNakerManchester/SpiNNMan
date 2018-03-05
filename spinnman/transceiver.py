@@ -73,6 +73,7 @@ import logging
 import socket
 import time
 import os
+from past.builtins import xrange
 from spinn_utilities.log import FormatAdapter
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -1304,7 +1305,7 @@ class Transceiver(object):
         """
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        return self.get_iobuf(core_subsets).next()
+        return next(self.get_iobuf(core_subsets))
 
     def get_core_state_count(self, app_id, state):
         """ Get a count of the number of cores which have a given state
@@ -2675,7 +2676,7 @@ class Transceiver(object):
             response.data, response.offset)[0])
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
-                                         counter_ids=range(0, 16)):
+                                         counter_ids=None):
         """ Clear router diagnostic information on a chip
 
         :param x: The x-coordinate of the chip
@@ -2698,6 +2699,8 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
+        if counter_ids is None:
+            counter_ids = range(0, 16)
         clear_data = 0
         for counter_id in counter_ids:
             if counter_id < 0 or counter_id > 15:

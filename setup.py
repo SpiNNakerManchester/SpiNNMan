@@ -42,5 +42,6 @@ setup(
         'SpiNNStorageHandlers >= 1!4.0.1, < 1!5.0.0',
         'SpiNNMachine >= 1!4.0.1, < 1!5.0.0',
         'enum34',
+        'future',
         'six']
 )
