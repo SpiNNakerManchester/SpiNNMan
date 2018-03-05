@@ -1,20 +1,30 @@
-"""
-Locates any spinnaker machines IP addresses from the auto-transmitted packets\
-from non-booted spinnaker machines.
-"""
-
-# spinnman imports
-from spinnman.connections.udp_packet_connections \
-    import IPAddressesConnection
-
-# general imports
 from __future__ import print_function
 import time
 import sys
 import signal
 import socket
+from spinnman.connections.udp_packet_connections import IPAddressesConnection
 
-# main entrance
+
+def locate_connected_machine(handler):
+    """ Locates any spinnaker machines IP addresses from the auto-transmitted\
+        packets from non-booted spinnaker machines.
+
+    :param handler: A callback that decides whether to stop searching.
+    :type handler: (ipaddr, time) --> bool
+    """
+
+    connection = IPAddressesConnection()
+    seen_boards = set()
+    while True:
+        ip_address = connection.receive_ip_address()
+        now = time.time()
+        if ip_address is not None and ip_address not in seen_boards:
+            seen_boards.add(ip_address)
+            if handler(ip_address, now):
+                break
+
+
 if __name__ == "__main__":
     def ctrlc_handler(signal, frame):  # @UnusedVariable
         """
@@ -26,15 +36,12 @@ if __name__ == "__main__":
         print("Exiting")
         sys.exit()
 
-    signal.signal(signal.SIGINT, ctrlc_handler)
+    def print_connected(ip_address, timestamp):
+        print(ip_address, "({})".format(
+            socket.gethostbyaddr(ip_address)[0]), "at", timestamp)
+        return False
+
     print("The following addresses might be SpiNNaker boards "
           "(press Ctrl-C to quit):")
-    connection = IPAddressesConnection()
-    seen_boards = set()
-    while True:
-        ip_address = connection.receive_ip_address()
-        now = time.time()
-        if ip_address is not None and ip_address not in seen_boards:
-            seen_boards.add(ip_address)
-            print(ip_address, "({})".format(
-                socket.gethostbyaddr(ip_address)[0]))
+    signal.signal(signal.SIGINT, ctrlc_handler)
+    locate_connected_machine(handler=print_connected)
