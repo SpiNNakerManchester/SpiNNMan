@@ -1,5 +1,8 @@
 import socket
-import ConfigParser
+try:
+    from ConfigParser import RawConfigParser  # @UnresolvedImport @UnusedImport
+except:
+    from configparser import RawConfigParser  # @Reimport
 import os
 from spinnman.model import BMPConnectionData
 import platform
@@ -23,7 +26,7 @@ class BoardTestConfiguration(object):
         self.bmp_names = None
         self.auto_detect_bmp = None
 
-        self._config = ConfigParser.RawConfigParser()
+        self._config = RawConfigParser()
         config_file = os.path.join(os.path.dirname(__file__), "test.cfg")
         self._config.read(config_file)
 

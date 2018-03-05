@@ -2,7 +2,6 @@ import logging
 from random import randint
 import struct
 import time
-import sys
 from __future__ import print_function
 
 from spinnman.transceiver import create_transceiver_from_hostname
@@ -280,61 +279,52 @@ def print_transceiver_tests(transceiver):
             print_filter(current_filter)
             print("")
 
-    with Section(
-            "Test writing longs and ints to write memory and extracting them"):
-        transceiver.write_memory(
-            0, 0, 0x70000000, data=long(123456789123456789))
-        data = struct.unpack("<Q", str(memoryview(transceiver.read_memory(
-            0, 0, 0x70000000, 8))))[0]
-        if data != long(123456789123456789):
+    # 8-byte numbers have to be converted into bytearrays to be written
+    inputdata = struct.pack("<Q", 123456789123456789)
+
+    with Section("Test writing bytearrays and ints to write memory and "
+                 "extracting them"):
+        transceiver.write_memory(0, 0, 0x70000000, data=inputdata)
+        data = struct.unpack(
+            "<Q", transceiver.read_memory(0, 0, 0x70000000, 8))[0]
+        if data != 123456789123456789:
             raise Exception("values are not identical")
         transceiver.write_memory(0, 0, 0x70000000, data=int(123456789))
-        data = struct.unpack("<I", str(memoryview(transceiver.read_memory(
-            0, 0, 0x70000000, 4))))[0]
+        data = struct.unpack(
+            "<I", transceiver.read_memory(0, 0, 0x70000000, 4))[0]
         if data != 123456789:
             raise Exception("values are not identical")
 
-    with Section("Test writing longs and ints to write_neighbour_memory and "
+    with Section("Test writing bytearrays and ints to write_neighbour_memory "
+                 "and extracting them"):
+        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=inputdata)
+        data = struct.unpack(
+            "<Q", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 8))[0]
+        if data != 123456789123456789:
+            raise Exception("values are not identical")
+
+        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=123456789)
+        data = struct.unpack(
+            "<I", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 4))[0]
+        if data != 123456789:
+            raise Exception("values are not identical")
+
+    with Section("Test writing bytearrays and ints to write_memory_flood and "
                  "extracting them"):
-        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000,
-                                           data=long(123456789123456789))
+        transceiver.write_memory_flood(0x70000000, data=inputdata)
         data = struct.unpack(
-            "<Q", str(memoryview(transceiver.read_neighbour_memory(
-                0, 0, 0, 0x70000000, 8))))[0]
-        if data != long(123456789123456789):
-            raise Exception("values are not identical")
-
-        transceiver.write_neighbour_memory(
-            0, 0, 0, 0x70000000, data=int(123456789))
-        data = struct.unpack(
-            "<I", str(memoryview(transceiver.read_neighbour_memory(
-                0, 0, 0, 0x70000000, 4))))[0]
-        if data != 123456789:
-            raise Exception("values are not identical")
-
-    with Section(
-            "Test writing longs and ints to write_memory_flood and "
-            "extracting them"):
-        transceiver.write_memory_flood(0x70000000,
-                                       data=long(123456789123456789))
-        data = struct.unpack(
-            "<Q", str(memoryview(
-                transceiver.read_memory(0, 0, 0x70000000, 8))))[0]
+            "<Q", transceiver.read_memory(0, 0, 0x70000000, 8))[0]
         data2 = struct.unpack(
-            "<Q", str(memoryview(
-                transceiver.read_memory(1, 1, 0x70000000, 8))))[0]
-        if data != long(123456789123456789) or data2 != long(
-                123456789123456789):
+            "<Q", transceiver.read_memory(1, 1, 0x70000000, 8))[0]
+        if data != 123456789123456789 or data2 != 123456789123456789:
             raise Exception("values are not identical")
 
-        transceiver.write_memory_flood(0x70000000, data=long(123456789))
+        transceiver.write_memory_flood(0x70000000, data=123456789)
         data = struct.unpack(
-            "<I", str(memoryview(
-                transceiver.read_memory(0, 0, 0x70000000, 4))))[0]
+            "<I", transceiver.read_memory(0, 0, 0x70000000, 4))[0]
         data2 = struct.unpack(
-            "<I", str(memoryview(
-                transceiver.read_memory(1, 1, 0x70000000, 4))))[0]
-        if data != long(123456789) or data2 != long(123456789):
+            "<I", transceiver.read_memory(1, 1, 0x70000000, 4))[0]
+        if data != 123456789 or data2 != 123456789:
             raise Exception("values are not identical")
 
     with Section("Get Heap"):

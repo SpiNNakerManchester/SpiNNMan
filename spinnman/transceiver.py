@@ -1741,10 +1741,6 @@ class Transceiver(object):
             data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
                 x, y, cpu, base_address, data_to_write, 0, 4)
-        elif isinstance(data, long):
-            data_to_write = _ONE_LONG.pack(data)
-            process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
@@ -1804,7 +1800,6 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, AbstractDataReader):
             process.write_link_memory_from_reader(
@@ -1813,10 +1808,6 @@ class Transceiver(object):
             data_to_write = _ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 4)
-        elif isinstance(data, long):
-            data_to_write = _ONE_LONG.pack(data)
-            process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
@@ -1868,36 +1859,29 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-
-        # Ensure only one flood fill occurs at any one time
-        self._flood_write_lock.acquire()
-
-        # Start the flood fill
-        nearest_neighbour_id = self._get_next_nearest_neighbour_id()
         process = WriteMemoryFloodProcess(self._scamp_connection_selector)
-        if isinstance(data, AbstractDataReader):
-            process.write_memory_from_reader(
-                nearest_neighbour_id, base_address, data, n_bytes)
-        elif isinstance(data, str) and is_filename:
-            if n_bytes is None:
-                n_bytes = os.stat(data).st_size
-            with FileDataReader(data) as reader:
+        # Ensure only one flood fill occurs at any one time
+        with self._flood_write_lock:
+            # Start the flood fill
+            nearest_neighbour_id = self._get_next_nearest_neighbour_id()
+            if isinstance(data, AbstractDataReader):
                 process.write_memory_from_reader(
-                    nearest_neighbour_id, base_address, reader, n_bytes)
-        elif isinstance(data, int):
-            data_to_write = _ONE_WORD.pack(data)
-            process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data_to_write, 0)
-        elif isinstance(data, long):
-            data_to_write = _ONE_LONG.pack(data)
-            process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data_to_write, 0)
-        else:
-            process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data, offset, n_bytes)
-
-        # Release the lock to allow others to proceed
-        self._flood_write_lock.release()
+                    nearest_neighbour_id, base_address, data, n_bytes)
+            elif isinstance(data, str) and is_filename:
+                if n_bytes is None:
+                    n_bytes = os.stat(data).st_size
+                with FileDataReader(data) as reader:
+                    process.write_memory_from_reader(
+                        nearest_neighbour_id, base_address, reader, n_bytes)
+            elif isinstance(data, int):
+                data_to_write = _ONE_WORD.pack(data)
+                process.write_memory_from_bytearray(
+                    nearest_neighbour_id, base_address, data_to_write, 0)
+            else:
+                if n_bytes is None:
+                    n_bytes = len(data)
+                process.write_memory_from_bytearray(
+                    nearest_neighbour_id, base_address, data, offset, n_bytes)
 
     def read_memory(self, x, y, base_address, length, cpu=0):
         """ Read some areas of SDRAM from the board
