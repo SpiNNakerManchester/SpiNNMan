@@ -29,7 +29,7 @@ class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
         :type connection_data: \
             :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
         """
-        port = SCP_SCAMP_PORT if connection_data.port_num \
+        port = SCP_SCAMP_PORT if connection_data.port_num is None\
             else connection_data.port_num
         super(BMPConnection, self).__init__(
             remote_host=connection_data.ip_address, remote_port=port)
