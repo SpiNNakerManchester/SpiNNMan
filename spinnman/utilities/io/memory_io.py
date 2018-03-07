@@ -100,6 +100,12 @@ class _ChipMemoryIO(object):
             self._write_buffer_offset = 0
 
     @property
+    def write_memory_function(self):
+        """ Returns the function for writing
+        """
+        return self._write_memory_function
+
+    @property
     def current_address(self):
         """ Return the current absolute address within the region
         """
@@ -245,6 +251,7 @@ class MemoryIO(AbstractIO):
             return MemoryIO(
                 self._chip_memory_io.transceiver, self._chip_memory_io.x,
                 self._chip_memory_io.y,
+                self._chip_memory_io.write_memory_function,
                 self._start_address + new_slice,
                 self._start_address + new_slice + 1)
         elif isinstance(new_slice, slice):
@@ -275,6 +282,7 @@ class MemoryIO(AbstractIO):
             return MemoryIO(
                 self._chip_memory_io.transceiver, self._chip_memory_io.x,
                 self._chip_memory_io.y,
+                self._chip_memory_io.write_memory_function,
                 start_address, end_address)
 
     def __enter__(self):
