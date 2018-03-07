@@ -47,10 +47,10 @@ class AbstractProcess(object):
                     self._exceptions[0], exc_info[2],
                     sdp_header.destination_chip_x,
                     sdp_header.destination_chip_y, sdp_header.destination_cpu)
-                raise this_exception, None, self._tracebacks[0]
+                raise this_exception
             else:
                 this_exception = SpinnmanGroupedProcessException(
                     self._error_requests, self._exceptions, self._tracebacks)
                 if print_exception:
                     logger.error(this_exception.message, this_exception.args)
-                raise this_exception, None, None
+                raise this_exception

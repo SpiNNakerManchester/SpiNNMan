@@ -233,7 +233,7 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     @staticmethod
     def _group_exceptions(error_requests, exceptions, tracebacks):
         """  groups exceptions into a form usable by the exception
-        
+
         :param error_requests: the error requests
         :param exceptions: the exceptions
         :param tracebacks: the tracebacks

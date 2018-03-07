@@ -73,7 +73,7 @@ class ExecutableTargets(object):
 
     def get_n_cores_for_executable_type(self, executable_type):
         """ returns the number of cores that the executable type is using
-        
+
         :param executable_type: the executable type for locating n cores of
         :return:  the number of cores using this executable type
         """
@@ -97,8 +97,8 @@ class ExecutableTargets(object):
 
     def get_binaries_of_executable_type(self, execute_type):
         """ method for extracting the binaries of a given a executable type
-        
-        :param execute_type: 
+
+        :param execute_type: the executable type enum value
         :return: a list of binaries with that executable type
         """
         return self._binary_to_executable_types_map[execute_type]
@@ -106,8 +106,8 @@ class ExecutableTargets(object):
     def executable_types_in_binary_set(self):
         """ method for getting the executable types that are in the set of\
          binaries
-        
-        :return: list of the executable types in this binary set. 
+
+        :return: list of the executable types in this binary set.
         """
         return self._binary_to_executable_types_map.keys()
 
