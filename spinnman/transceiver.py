@@ -2040,7 +2040,7 @@ class Transceiver(object):
                     time.sleep(time_between_polls)
 
         # If we haven't reached the final state, do a final full check
-        if processors_ready != len(all_core_subsets):
+        if processors_ready < len(all_core_subsets):
             cores_in_state = self.get_cores_in_state(
                 all_core_subsets, cpu_states)
 
