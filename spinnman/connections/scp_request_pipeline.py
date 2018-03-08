@@ -5,6 +5,7 @@ from threading import RLock
 
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
+from spinnman.constants import SCP_TIMEOUT
 
 MAX_SEQUENCE = 65536
 RETRY_CODES = frozenset([
@@ -48,7 +49,7 @@ class SCPRequestPipeLine(object):
 
     def __init__(self, connection, n_channels=1,
                  intermediate_channel_waits=0,
-                 n_retries=3, packet_timeout=1.0):
+                 n_retries=3, packet_timeout=SCP_TIMEOUT):
         """
         :param connection: \
             The connection over which the communication is to take place
@@ -207,7 +208,7 @@ class SCPRequestPipeLine(object):
             request_sent = self._requests[seq]
 
             # If the response can be retried, retry it
-            if (result in RETRY_CODES):
+            if result in RETRY_CODES:
                 try:
                     time.sleep(0.1)
                     self._resend(seq, request_sent, str(result))

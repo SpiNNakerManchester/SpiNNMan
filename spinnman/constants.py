@@ -207,3 +207,6 @@ address_length_dtype = {
     (3, 1): READ_TYPES.BYTE,
     (3, 2): READ_TYPES.BYTE,
     (3, 3): READ_TYPES.BYTE}
+
+# This is the default timeout when using SCP
+SCP_TIMEOUT = 1.0
