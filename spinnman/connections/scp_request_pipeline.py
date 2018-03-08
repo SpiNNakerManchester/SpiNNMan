@@ -250,16 +250,7 @@ class SCPRequestPipeLine(object):
             self._remove_record(seq)
 
     def _resend(self, seq, request_sent, reason):
-        if self._retries[seq] > 0:
-
-            # If the request can be retried, retry it
-            self._retries[seq] -= 1
-            self._in_progress += 1
-            self._requests[seq] = request_sent
-            self._retry_reason[seq].append(reason)
-            self._connection.send(self._request_data[seq])
-            self._n_resent += 1
-        else:
+        if self._retries[seq] <= 0:
             # Report timeouts as timeout exception
             if all(reason == "timeout" for reason in self._retry_reason[seq]):
                 raise SpinnmanTimeoutException(
@@ -275,6 +266,14 @@ class SCPRequestPipeLine(object):
                     request_sent.sdp_header.destination_chip_y,
                     request_sent.sdp_header.destination_cpu,
                     self._n_retries, self._retry_reason[seq]))
+
+        # If the request can be retried, retry it
+        self._retries[seq] -= 1
+        self._in_progress += 1
+        self._requests[seq] = request_sent
+        self._retry_reason[seq].append(reason)
+        self._connection.send(self._request_data[seq])
+        self._n_resent += 1
 
     def _do_retrieve(self, n_packets, timeout):
         """ Receives responses until there are only n_packets responses left
