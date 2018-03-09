@@ -1,7 +1,6 @@
 import sys
 import time
 
-from collections import defaultdict
 from threading import RLock
 
 from spinnman.messages.scp.enums import SCPResult
@@ -93,7 +92,7 @@ class SCPRequestPipeLine(object):
         self._error_callbacks = dict()
 
         # A dictionary of sequence number -> retry reason
-        self._retry_reason = defaultdict(list)
+        self._retry_reason = dict()
 
         # The number of responses outstanding
         self._in_progress = 0
@@ -159,6 +158,7 @@ class SCPRequestPipeLine(object):
         self._retries[sequence] = self._n_retries
         self._callbacks[sequence] = callback
         self._error_callbacks[sequence] = error_callback
+        self._retry_reason[sequence] = list()
 
         # Send the request, keeping track of how many are sent
         # self._token_bucket.consume(284)
