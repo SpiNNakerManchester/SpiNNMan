@@ -74,6 +74,7 @@ import socket
 import time
 import os
 from past.builtins import xrange
+from six import raise_from
 from spinn_utilities.log import FormatAdapter
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -476,10 +477,10 @@ class Transceiver(object):
 
             # If it fails to respond due to timeout, maybe that the connection
             # isn't valid
-            except SpinnmanTimeoutException:
-                raise SpinnmanException(
+            except SpinnmanTimeoutException as e:
+                raise_from(SpinnmanException(
                     "BMP connection to {} is not responding".format(
-                        conn.remote_ip_address))
+                        conn.remote_ip_address)), e)
             except Exception:
                 logger.exception("Failed to speak to BMP at {}",
                                  conn.remote_ip_address)
@@ -1048,8 +1049,8 @@ class Transceiver(object):
                         number_of_boards, width, height, extra_boot_values)
                     current_tries_to_go -= 1
                 elif isinstance(e.exception, SpinnmanIOException):
-                    raise SpinnmanIOException(
-                        "Failed to communicate with the machine")
+                    raise_from(SpinnmanIOException(
+                        "Failed to communicate with the machine"), e)
                 else:
                     raise
             except SpinnmanTimeoutException:
@@ -1057,9 +1058,9 @@ class Transceiver(object):
                 self.boot_board(
                     number_of_boards, width, height, extra_boot_values)
                 current_tries_to_go -= 1
-            except SpinnmanIOException:
-                raise SpinnmanIOException(
-                    "Failed to communicate with the machine")
+            except SpinnmanIOException as e:
+                raise_from(SpinnmanIOException(
+                    "Failed to communicate with the machine"), e)
 
         # The last thing we tried was booting, so try again to get the version
         if version_info is None:

@@ -1,6 +1,7 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from time import localtime, asctime
 import struct
+from six import raise_from
 import re
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
@@ -40,9 +41,9 @@ class VersionInfo(object):
                 self._name, self._hardware = version_data.split("/")
                 self._version_string = version_data
             except ValueError as exception:
-                raise SpinnmanInvalidParameterException(
+                raise_from(SpinnmanInvalidParameterException(
                     "version_data", version_data,
-                    "Incorrect format: {}".format(exception))
+                    "Incorrect format: {}".format(exception)), exception)
         else:
             name_hardware, _, version = version_data.partition("\0")
             self._version_string = version
