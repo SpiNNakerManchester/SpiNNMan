@@ -114,7 +114,7 @@ class VersionInfo(object):
         """ The build date of the software
 
         :return: The number of seconds since 1st January 1970
-        :rtype: long
+        :rtype: int
         """
         return self._build_date
 

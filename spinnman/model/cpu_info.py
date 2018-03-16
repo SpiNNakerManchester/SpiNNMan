@@ -150,7 +150,7 @@ class CPUInfo(object):
         """ The time at which the application started
 
         :return: The time in seconds since 00:00:00 on the 1st January 1970
-        :rtype: long
+        :rtype: int
         """
         return self._time
 
