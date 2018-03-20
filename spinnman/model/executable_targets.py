@@ -5,10 +5,6 @@ from spinn_machine import CoreSubsets
 class ExecutableTargets(object):
     """ Encapsulate the binaries and cores on which to execute them
     """
-    __slots__ = [
-        "_all_core_subsets",
-        "_targets",
-        "_total_processors"]
 
     __slots__ = (
         # the targets
