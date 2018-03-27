@@ -1513,7 +1513,6 @@ class Transceiver(object):
         """
 
         # Execute each of the binaries and get them in to a "wait" state
-        all_core_subsets = CoreSubsets()
         for binary in executable_targets.binaries:
             core_subsets = executable_targets.get_cores_for_binary(binary)
             self.execute_flood(
@@ -1530,7 +1529,7 @@ class Transceiver(object):
             if len(cores_ready) > 0:
                 raise SpinnmanException(
                     "Only {} of {} cores reached ready state: {}".format(
-                        count, executable_targets.total_processors, 
+                        count, executable_targets.total_processors,
                         self.get_core_status_string(cores_ready)))
 
         # Send a signal telling the application to start
