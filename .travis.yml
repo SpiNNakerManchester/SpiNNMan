@@ -1,6 +1,9 @@
 language: python
-python: "2.7"
+python:
+  - 2.7
+  - 3.6
 dist: trusty
+cache: pip
 
 before_install:
   # Work around ludicrous Travis bug
@@ -20,9 +23,9 @@ install:
   - pip install spinnaker_proxy
 
 script:
-  - py.test . --cov spinnman
+  - py.test unittests integration_tests --cov spinnman
   # Code quality check
-  - flake8 spinnman unittests
+  - flake8 spinnman unittests integration_tests
   - cd doc/source
   - sphinx-build -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
   - sphinx-build -T -b json -d _build/doctrees-json -D language=en . _build/json

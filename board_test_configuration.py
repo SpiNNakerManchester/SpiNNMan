@@ -1,5 +1,5 @@
 import socket
-import ConfigParser
+from six.moves import configparser
 import os
 from spinnman.model import BMPConnectionData
 import platform
@@ -23,7 +23,7 @@ class BoardTestConfiguration(object):
         self.bmp_names = None
         self.auto_detect_bmp = None
 
-        self._config = ConfigParser.RawConfigParser()
+        self._config = configparser.RawConfigParser()
         config_file = os.path.join(os.path.dirname(__file__), "test.cfg")
         self._config.read(config_file)
 

@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from six import iteritems, iterkeys, itervalues
 
 
 class CPUInfos(object):
@@ -30,25 +31,25 @@ class CPUInfos(object):
 
         :return: iterable of x,y,p core info
         """
-        return self._cpu_infos.iteritems()
+        return iteritems(self._cpu_infos)
 
     def __iter__(self):
-        return self._cpu_infos.__iter__()
+        return iter(self._cpu_infos)
 
     def iteritems(self):
         """ Get an iterable of (x, y, p), cpu_info
         """
-        return self._cpu_infos.iteritems()
+        return iteritems(self._cpu_infos)
 
     def itervalues(self):
         """ Get an iterable of cpu_info
         """
-        return self._cpu_infos.itervalues()
+        return itervalues(self._cpu_infos)
 
     def iterkeys(self):
         """ Get an iterable of (x, y, p)
         """
-        return self._cpu_infos.iterkeys()
+        return iterkeys(self._cpu_infos)
 
     def __len__(self):
         """ The total number of processors that are in these core subsets

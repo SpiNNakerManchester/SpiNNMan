@@ -1,6 +1,7 @@
 import functools
 import struct
 from collections import defaultdict, OrderedDict
+from six import itervalues
 
 from spinnman.model import IOBuffer
 from spinnman.utilities.utility_functions import get_vcpu_address
@@ -152,7 +153,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
             y = core_subset.y
             for p in core_subset.processor_ids:
                 iobuf = ""
-                for item in self._iobuf[x, y, p].itervalues():
+                for item in itervalues(self._iobuf[x, y, p]):
                     iobuf += item.decode(_ENCODING)
 
                 yield IOBuffer(x, y, p, iobuf)

@@ -30,7 +30,7 @@ def generate_machine_report(report_directory, machine, connections):
                 for y in range(machine.max_chip_y + 1):
                     _write_chip_router_report(f, machine, x, y)
     except IOError:
-        logger.error(
+        logger.exception(
             "Generate_placement_reports: Can't open file {} for writing.",
             file_name)
         raise

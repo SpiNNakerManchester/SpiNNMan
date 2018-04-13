@@ -68,9 +68,10 @@ class CPUInfo(object):
          user0, user1, user2, user3                                  # 4I  112
          ) = _INFO_PATTERN.unpack_from(cpu_data, offset)
 
-        index = self._application_name.find('\0')
+        index = self._application_name.find(b'\0')
         if index != -1:
             self._application_name = self._application_name[0:index]
+        self._application_name = self._application_name.decode('ascii')
 
         self._registers = _REGISTERS_PATTERN.unpack_from(registers)
         self._run_time_error = RunTimeError(run_time_error)
@@ -150,7 +151,7 @@ class CPUInfo(object):
         """ The time at which the application started
 
         :return: The time in seconds since 00:00:00 on the 1st January 1970
-        :rtype: long
+        :rtype: int
         """
         return self._time
 

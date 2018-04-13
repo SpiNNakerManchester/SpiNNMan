@@ -8,6 +8,7 @@ from .utils import bind_socket, connect_socket, get_socket, \
 import logging
 import socket
 import select
+from six import raise_from
 
 logger = logging.getLogger(__name__)
 _RECEIVE_BUFFER_SIZE = 1048576
@@ -143,10 +144,10 @@ class UDPConnection(Connection):
         try:
             self._socket.settimeout(timeout)
             return self._socket.recv(300)
-        except socket.timeout:
-            raise SpinnmanTimeoutException("receive", timeout)
+        except socket.timeout as e:
+            raise_from(SpinnmanTimeoutException("receive", timeout), e)
         except Exception as e:
-            raise SpinnmanIOException(str(e))
+            raise_from(SpinnmanIOException(str(e)), e)
 
     def receive_with_address(self, timeout=None):
         """ Receive data from the connection along with the address where the\
@@ -164,10 +165,10 @@ class UDPConnection(Connection):
         try:
             self._socket.settimeout(timeout)
             return self._socket.recvfrom(300)
-        except socket.timeout:
-            raise SpinnmanTimeoutException("receive", timeout)
+        except socket.timeout as e:
+            raise_from(SpinnmanTimeoutException("receive", timeout), e)
         except Exception as e:
-            raise SpinnmanIOException(str(e))
+            raise_from(SpinnmanIOException(str(e)), e)
 
     def send(self, data):
         """ Send data down this connection
@@ -183,7 +184,7 @@ class UDPConnection(Connection):
         try:
             self._socket.send(data)
         except Exception as e:
-            raise SpinnmanIOException(str(e))
+            raise_from(SpinnmanIOException(str(e)), e)
 
     def send_to(self, data, address):
         """ Send data down this connection
@@ -197,7 +198,7 @@ class UDPConnection(Connection):
         try:
             self._socket.sendto(data, address)
         except Exception as e:
-            raise SpinnmanIOException(str(e))
+            raise_from(SpinnmanIOException(str(e)), e)
 
     @overrides(Connection.close)
     def close(self):
