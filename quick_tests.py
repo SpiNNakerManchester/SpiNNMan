@@ -1,8 +1,8 @@
+from __future__ import print_function
 import logging
 from random import randint
 import struct
 import time
-from __future__ import print_function
 
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums import CPUState
@@ -133,11 +133,12 @@ class Section(object):
 
 
 def print_transceiver_tests(transceiver):
-    app_id = transceiver.app_id_tracker.get_new_id()
 
     with Section("Version Information"):
         version_info = transceiver.ensure_board_is_ready()
         print(version_info)
+
+    app_id = transceiver.app_id_tracker.get_new_id()
 
     with Section("Discovering other connections to the machine"):
         connections = transceiver.discover_scamp_connections()
@@ -158,7 +159,7 @@ def print_transceiver_tests(transceiver):
     with Section("Flood Memory Write"):
         transceiver.write_memory_flood(0x70000000, 0x04050607)
         read_data = transceiver.read_memory(1, 1, 0x70000000, 4)
-        print(hex(struct.unpack("<I", str(read_data))[0]))
+        print(hex(struct.unpack("<I", read_data)[0]))
 
     with Section("Execute Flood"):
         transceiver.execute_flood(

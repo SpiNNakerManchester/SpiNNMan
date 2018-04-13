@@ -797,12 +797,12 @@ class Transceiver(object):
         """
         if self._width is None or self._height is None:
             height_item = SystemVariableDefinition.y_size
-            self._height, self._width = _TWO_BYTES.unpack_from(str(
+            self._height, self._width = _TWO_BYTES.unpack_from(
                 self.read_memory(
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
-                    2)))
+                    2))
         return MachineDimensions(self._width, self._height)
 
     def get_machine_details(self):
@@ -1114,9 +1114,9 @@ class Transceiver(object):
     def _get_sv_data(self, x, y, data_item):
         return struct.unpack_from(
             data_item.data_type.struct_code,
-            str(self.read_memory(
+            self.read_memory(
                 x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
-                data_item.data_type.value)))[0]
+                data_item.data_type.value))[0]
 
     def get_user_0_register_address_from_core(self, x, y, p):
         """ Get the address of user 0 for a given processor on the board

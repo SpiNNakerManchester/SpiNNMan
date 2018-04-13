@@ -101,7 +101,7 @@ class SpinnakerBootMessage(object):
     def bytestring(self):
         """ The message as a bytestring
         """
-        data = ""
+        data = b""
         if self._data is not None:
             data = self._data[self._offset:]
         return _PATTERN_HIIII.pack(
