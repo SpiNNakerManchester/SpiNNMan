@@ -1,34 +1,19 @@
-"""
-locates any spinnaker machines ip address from the auto transmitted packet from
-non-booted spinnaker machines
-"""
-
-# spinnman imports
-from spinnman.connections.udp_packet_connections \
-    import IPAddressesConnection
-
-# general imports
+from __future__ import print_function
 import time
 import sys
 import signal
 import socket
+from spinnman.connections.udp_packet_connections import IPAddressesConnection
 
-# main entrance
-if __name__ == "__main__":
-    def ctrlc_handler(signal, frame):  # @UnusedVariable
-        """
 
-        :param signal:
-        :param frame:
-        :return: Never returns as it causes a sys.exit()
-        """
-        # pylint: disable=unused-argument
-        print "Exiting"
-        sys.exit()
+def locate_connected_machine(handler):
+    """ Locates any spinnaker machines IP addresses from the auto-transmitted\
+        packets from non-booted spinnaker machines.
 
-    signal.signal(signal.SIGINT, ctrlc_handler)
-    print ("The following addresses might be SpiNNaker boards "
-           "(press Ctrl-C to quit):")
+    :param handler: A callback that decides whether to stop searching.
+    :type handler: (ipaddr, time) --> bool
+    """
+
     connection = IPAddressesConnection()
     seen_boards = set()
     while True:
@@ -36,5 +21,27 @@ if __name__ == "__main__":
         now = time.time()
         if ip_address is not None and ip_address not in seen_boards:
             seen_boards.add(ip_address)
-            print ip_address, "({})".format(
-                socket.gethostbyaddr(ip_address)[0])
+            if handler(ip_address, now):
+                break
+
+
+if __name__ == "__main__":
+    def ctrlc_handler(signal, frame):  # @UnusedVariable
+        """
+        :param signal:
+        :param frame:
+        :return: Never returns as it causes a sys.exit()
+        """
+        # pylint: disable=unused-argument
+        print("Exiting")
+        sys.exit()
+
+    def print_connected(ip_address, timestamp):
+        print(ip_address, "({})".format(
+            socket.gethostbyaddr(ip_address)[0]), "at", timestamp)
+        return False
+
+    print("The following addresses might be SpiNNaker boards "
+          "(press Ctrl-C to quit):")
+    signal.signal(signal.SIGINT, ctrlc_handler)
+    locate_connected_machine(handler=print_connected)

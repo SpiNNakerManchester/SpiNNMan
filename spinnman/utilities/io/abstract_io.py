@@ -101,6 +101,6 @@ class AbstractIO(object):
             to fill to the end
         :type bytes_to_fill: int
         :param data_type: The type of the repeat value
-        :type data_type: :py:class:`spinnman.process.fill_process.FillProcess`
+        :type data_type: :py:class:`spinnman.process.fill_process.FillDataType`
         :raise EOFError: If the amount of data to fill is more than the region
         """

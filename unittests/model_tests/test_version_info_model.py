@@ -15,7 +15,7 @@ class TestVersionInfo(unittest.TestCase):
         arg2 = ((ver_number << 16) | buffer_size)
         build_date = 0x1000
         arg3 = build_date
-        data = "my/spinnaker"
+        data = b"my/spinnaker"
 
         version_data = struct.pack('<III13s', arg1, arg2, arg3, data)
         version_data = bytearray(version_data)
@@ -27,7 +27,7 @@ class TestVersionInfo(unittest.TestCase):
         self.assertEqual(vi.y, 0xa1)
         self.assertEqual(vi.p, 0x3b)
         self.assertEqual(vi.build_date, build_date)
-        self.assertEqual(vi.version_string, data)
+        self.assertEqual(vi.version_string, "my/spinnaker")
 
     def test_retrieving_bits_from_invalid_version_data_format(self):
         with self.assertRaises(SpinnmanInvalidParameterException):
@@ -40,7 +40,7 @@ class TestVersionInfo(unittest.TestCase):
             arg2 = ((ver_number << 16) | buffer_size)
             build_date = 0x1000
             arg3 = build_date
-            data = "my.spinnaker"
+            data = b"my.spinnaker"
 
             version_data = struct.pack('<III13s', arg1, arg2, arg3, data)
             version_data = bytearray(version_data)
@@ -59,7 +59,7 @@ class TestVersionInfo(unittest.TestCase):
             arg2 = ((ver_number << 16) | buffer_size)
             # build_date = 0x1000
             # arg3 = build_date
-            data = "my/spinnaker"
+            data = b"my/spinnaker"
 
             version_data = struct.pack('<II13s', arg1, arg2, data)
             version_data = bytearray(version_data)

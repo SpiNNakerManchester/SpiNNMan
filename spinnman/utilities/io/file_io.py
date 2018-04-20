@@ -2,6 +2,7 @@ import os
 from spinnman.utilities.io.abstract_io import AbstractIO
 from spinnman.processes.fill_process import FillDataType
 import struct
+from spinn_utilities.overrides import overrides
 
 
 class FileIO(AbstractIO):
@@ -40,21 +41,12 @@ class FileIO(AbstractIO):
         self._start_offset = start_offset
         self._end_offset = end_offset
 
+    @overrides(AbstractIO.__len__)
     def __len__(self):
-        """ The size of the entire region of memory
-        """
         return self._end_offset - self._start_offset
 
+    @overrides(AbstractIO.__getitem__)
     def __getitem__(self, new_slice):
-        """ Get a sub-region of this file object.  The index or slice must\
-            be in range of the current region to be valid.
-
-        :param new_slice:\
-            A single index for a single byte, or a contiguous slice
-        :rtype: :py:class:`~FileIO`
-        :raise ValueError:\
-            If the index or slice is outside of the current region
-        """
         if isinstance(new_slice, int):
             if new_slice >= len(self):
                 raise ValueError("Index {} out of range".format)
@@ -88,33 +80,29 @@ class FileIO(AbstractIO):
 
             return FileIO(self._file, start_offset, end_offset)
 
+    @overrides(AbstractIO.__enter__)
     def __enter__(self):
-        """ Enter a new block which will call :py:meth:`~.close` when exited.
-        """
         return self
 
+    @overrides(AbstractIO.__exit__)
     def __exit__(self, exception_type, exception_value, traceback):
-        """ Exit a block and call :py:meth:`~.close`.
-        """
         self.close()
 
+    @overrides(AbstractIO.close)
     def close(self):
-        """ Close the IO object
-        """
         self._file.close()
 
     @property
+    @overrides(AbstractIO.closed)
     def closed(self):
         return self._file.closed
 
+    @overrides(AbstractIO.flush)
     def flush(self):
-        """ Flush any outstanding written data
-        """
         self._file.flush()
 
+    @overrides(AbstractIO.seek)
     def seek(self, n_bytes, from_what=os.SEEK_SET):
-        """ Seek to a position within the region
-        """
         position = 0
         if from_what == os.SEEK_SET:
             position = self._start_offset + n_bytes
@@ -134,25 +122,17 @@ class FileIO(AbstractIO):
 
         self._current_offset = position
 
+    @overrides(AbstractIO.tell)
     def tell(self):
-        """ Return the current position within the region relative to the start
-        """
         return self._current_offset - self._start_offset
 
     @property
+    @overrides(AbstractIO.address)
     def address(self):
-        """ Return the current absolute address within the region
-        """
         return self._current_offset
 
+    @overrides(AbstractIO.read)
     def read(self, n_bytes=None):
-        """ Read a number of bytes, or the rest of the data if n_bytes is None\
-            or negative
-
-        :param n_bytes: The number of bytes to read
-        :rtype: bytes
-        :raise EOFError: If the read will be beyond the end of the region
-        """
         if n_bytes == 0:
             return b""
         if n_bytes is None or n_bytes < 0:
@@ -165,15 +145,8 @@ class FileIO(AbstractIO):
         self._current_offset += n_bytes
         return data
 
+    @overrides(AbstractIO.write)
     def write(self, data):
-        """ Write some data to the region
-
-        :param data: The data to write
-        :type data: bytes
-        :return: The number of bytes written
-        :rtype: int
-        :raise EOFError: If the write will go over the end of the region
-        """
         n_bytes = len(data)
 
         if self._current_offset + n_bytes > self._end_offset:
@@ -184,21 +157,9 @@ class FileIO(AbstractIO):
         self._current_offset += n_bytes
         return n_bytes
 
+    @overrides(AbstractIO.fill)
     def fill(self, repeat_value, bytes_to_fill=None,
              data_type=FillDataType.WORD):
-        """ Fill the next part of the region with repeated data
-
-        :param repeat_value: The value to repeat
-        :type repeat_value: int
-        :param bytes_to_fill:\
-            Optional number of bytes to fill from current position, or None\
-            to fill to the end
-        :type bytes_to_fill: int
-        :param data_type: The type of the repeat value
-        :type data_type: :py:class:`spinnman.process.fill_process.FillProcess`
-        :raise EOFError: If the amount of data to fill is more than the region
-        """
-
         if bytes_to_fill is None:
             bytes_to_fill = self._end_offset - self._current_offset
         if self._current_offset + bytes_to_fill > self._end_offset:
@@ -211,6 +172,6 @@ class FileIO(AbstractIO):
             str(data_type.struct_type[-1]), repeat_value
         )
         self._file.seek(self._current_offset)
-        for _ in range(bytes_to_fill / data_type.value):
+        for _ in range(bytes_to_fill // data_type.value):
             self._file.write(data_to_fill)
         self._current_offset += bytes_to_fill

@@ -73,6 +73,8 @@ import logging
 import socket
 import time
 import os
+from past.builtins import xrange
+from six import raise_from
 from spinn_utilities.log import FormatAdapter
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -475,10 +477,10 @@ class Transceiver(object):
 
             # If it fails to respond due to timeout, maybe that the connection
             # isn't valid
-            except SpinnmanTimeoutException:
-                raise SpinnmanException(
+            except SpinnmanTimeoutException as e:
+                raise_from(SpinnmanException(
                     "BMP connection to {} is not responding".format(
-                        conn.remote_ip_address))
+                        conn.remote_ip_address)), e)
             except Exception:
                 logger.exception("Failed to speak to BMP at {}",
                                  conn.remote_ip_address)
@@ -795,12 +797,12 @@ class Transceiver(object):
         """
         if self._width is None or self._height is None:
             height_item = SystemVariableDefinition.y_size
-            self._height, self._width = _TWO_BYTES.unpack_from(str(
+            self._height, self._width = _TWO_BYTES.unpack_from(
                 self.read_memory(
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
-                    2)))
+                    2))
         return MachineDimensions(self._width, self._height)
 
     def get_machine_details(self):
@@ -1047,8 +1049,8 @@ class Transceiver(object):
                         number_of_boards, width, height, extra_boot_values)
                     current_tries_to_go -= 1
                 elif isinstance(e.exception, SpinnmanIOException):
-                    raise SpinnmanIOException(
-                        "Failed to communicate with the machine")
+                    raise_from(SpinnmanIOException(
+                        "Failed to communicate with the machine"), e)
                 else:
                     raise
             except SpinnmanTimeoutException:
@@ -1056,9 +1058,9 @@ class Transceiver(object):
                 self.boot_board(
                     number_of_boards, width, height, extra_boot_values)
                 current_tries_to_go -= 1
-            except SpinnmanIOException:
-                raise SpinnmanIOException(
-                    "Failed to communicate with the machine")
+            except SpinnmanIOException as e:
+                raise_from(SpinnmanIOException(
+                    "Failed to communicate with the machine"), e)
 
         # The last thing we tried was booting, so try again to get the version
         if version_info is None:
@@ -1112,9 +1114,9 @@ class Transceiver(object):
     def _get_sv_data(self, x, y, data_item):
         return struct.unpack_from(
             data_item.data_type.struct_code,
-            str(self.read_memory(
+            self.read_memory(
                 x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
-                data_item.data_type.value)))[0]
+                data_item.data_type.value))[0]
 
     def get_user_0_register_address_from_core(self, p):
         """ Get the address of user 0 for a given processor on the board
@@ -1292,7 +1294,7 @@ class Transceiver(object):
         """
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        return self.get_iobuf(core_subsets).next()
+        return next(self.get_iobuf(core_subsets))
 
     def get_core_state_count(self, app_id, state):
         """ Get a count of the number of cores which have a given state
@@ -1732,10 +1734,6 @@ class Transceiver(object):
             data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
                 x, y, cpu, base_address, data_to_write, 0, 4)
-        elif isinstance(data, long):
-            data_to_write = _ONE_LONG.pack(data)
-            process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
@@ -1795,7 +1793,6 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, AbstractDataReader):
             process.write_link_memory_from_reader(
@@ -1804,10 +1801,6 @@ class Transceiver(object):
             data_to_write = _ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 4)
-        elif isinstance(data, long):
-            data_to_write = _ONE_LONG.pack(data)
-            process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 8)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
@@ -1859,36 +1852,29 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-
-        # Ensure only one flood fill occurs at any one time
-        self._flood_write_lock.acquire()
-
-        # Start the flood fill
-        nearest_neighbour_id = self._get_next_nearest_neighbour_id()
         process = WriteMemoryFloodProcess(self._scamp_connection_selector)
-        if isinstance(data, AbstractDataReader):
-            process.write_memory_from_reader(
-                nearest_neighbour_id, base_address, data, n_bytes)
-        elif isinstance(data, str) and is_filename:
-            if n_bytes is None:
-                n_bytes = os.stat(data).st_size
-            with FileDataReader(data) as reader:
+        # Ensure only one flood fill occurs at any one time
+        with self._flood_write_lock:
+            # Start the flood fill
+            nearest_neighbour_id = self._get_next_nearest_neighbour_id()
+            if isinstance(data, AbstractDataReader):
                 process.write_memory_from_reader(
-                    nearest_neighbour_id, base_address, reader, n_bytes)
-        elif isinstance(data, int):
-            data_to_write = _ONE_WORD.pack(data)
-            process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data_to_write, 0)
-        elif isinstance(data, long):
-            data_to_write = _ONE_LONG.pack(data)
-            process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data_to_write, 0)
-        else:
-            process.write_memory_from_bytearray(
-                nearest_neighbour_id, base_address, data, offset, n_bytes)
-
-        # Release the lock to allow others to proceed
-        self._flood_write_lock.release()
+                    nearest_neighbour_id, base_address, data, n_bytes)
+            elif isinstance(data, str) and is_filename:
+                if n_bytes is None:
+                    n_bytes = os.stat(data).st_size
+                with FileDataReader(data) as reader:
+                    process.write_memory_from_reader(
+                        nearest_neighbour_id, base_address, reader, n_bytes)
+            elif isinstance(data, int):
+                data_to_write = _ONE_WORD.pack(data)
+                process.write_memory_from_bytearray(
+                    nearest_neighbour_id, base_address, data_to_write, 0)
+            else:
+                if n_bytes is None:
+                    n_bytes = len(data)
+                process.write_memory_from_bytearray(
+                    nearest_neighbour_id, base_address, data, offset, n_bytes)
 
     def read_memory(self, x, y, base_address, length, cpu=0):
         """ Read some areas of SDRAM from the board
@@ -2667,7 +2653,7 @@ class Transceiver(object):
             response.data, response.offset)[0])
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
-                                         counter_ids=range(0, 16)):
+                                         counter_ids=None):
         """ Clear router diagnostic information on a chip
 
         :param x: The x-coordinate of the chip
@@ -2690,6 +2676,8 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
+        if counter_ids is None:
+            counter_ids = range(0, 16)
         clear_data = 0
         for counter_id in counter_ids:
             if counter_id < 0 or counter_id > 15:
