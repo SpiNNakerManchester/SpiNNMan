@@ -106,3 +106,33 @@ def ping(address):
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     process.wait()
     return process
+
+
+class socketSPI(object):
+    @staticmethod
+    def bind(sock, host, port):
+        bind_socket(sock, host, port)
+
+    @staticmethod
+    def connect(sock, remote_address, remote_port):
+        connect_socket(sock, remote_address, remote_port)
+
+    @staticmethod
+    def create():
+        return get_socket()
+
+    @staticmethod
+    def get_address(sock):
+        return get_socket_address(sock)
+
+    @staticmethod
+    def ping_host(address):
+        return ping(address)
+
+    @staticmethod
+    def resolve(host):
+        return resolve_host(host)
+
+    @staticmethod
+    def set_buffer_size(sock, size):
+        set_receive_buffer_size(sock, size)

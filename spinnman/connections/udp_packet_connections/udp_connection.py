@@ -5,9 +5,7 @@ from six import raise_from
 from spinn_utilities.overrides import overrides
 from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
 from spinnman.connections.abstract_classes import Connection
-from .utils import (
-    bind_socket, connect_socket, get_socket, get_socket_address, ping,
-    resolve_host, set_receive_buffer_size)
+from .utils import socketSPI
 
 logger = logging.getLogger(__name__)
 _RECEIVE_BUFFER_SIZE = 1048576
@@ -23,6 +21,9 @@ class UDPConnection(Connection):
         "_remote_ip_address",
         "_remote_port",
         "_socket"]
+
+    # Allow easy interception and mocking during testing
+    SPI = socketSPI
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
@@ -47,13 +48,13 @@ class UDPConnection(Connection):
             If there is an error setting up the communication channel
         """
 
-        self._socket = get_socket()
-        set_receive_buffer_size(self._socket, _RECEIVE_BUFFER_SIZE)
+        self._socket = self.SPI.create()
+        self.SPI.set_buffer_size(self._socket, _RECEIVE_BUFFER_SIZE)
 
         # Get the host and port to bind to locally
         local_bind_host = "" if local_host is None else local_host
         local_bind_port = 0 if local_port is None else local_port
-        bind_socket(self._socket, local_bind_host, local_bind_port)
+        self.SPI.bind(self._socket, local_bind_host, local_bind_port)
 
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
@@ -64,13 +65,13 @@ class UDPConnection(Connection):
         # Get the host to connect to remotely
         if remote_host is not None and remote_port is not None:
             self._remote_port = remote_port
-            self._remote_ip_address = resolve_host(remote_host)
-            connect_socket(self._socket, self._remote_ip_address, remote_port)
+            self._remote_ip_address = self.SPI.resolve(remote_host)
+            self.SPI.connect(self._socket, self._remote_ip_address, remote_port)
             self._can_send = True
 
         # Get the details of where the socket is connected
         self._local_ip_address, self._local_port = \
-            get_socket_address(self._socket)
+            self.SPI.get_address(self._socket)
 
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
@@ -84,7 +85,7 @@ class UDPConnection(Connection):
         # check if machine is active and on the network
         for _ in range(_PING_COUNT):
             # Assume connected if ping works
-            if ping(self._remote_ip_address).returncode == 0:
+            if self.SPI.ping_host(self._remote_ip_address).returncode == 0:
                 return True
 
         # If the ping fails this number of times, the host cannot be contacted
