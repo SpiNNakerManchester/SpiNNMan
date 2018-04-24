@@ -2,11 +2,12 @@ import time
 
 
 class TokenBucket(object):
-    """ An implementation of the token bucket algorithm.
+    """ An implementation of the token bucket algorithm. Usage::
 
-    >>> bucket = TokenBucket(80, 0.5)
-    >>> print bucket.consume(10)
-    True
+        >>> bucket = TokenBucket(80, 0.5)
+        >>> print(bucket.consume(10))
+        True
+
     Not thread safe.
     """
 
@@ -14,7 +15,6 @@ class TokenBucket(object):
 
     def __init__(self, tokens, fill_rate):
         """
-
         :param tokens: the total tokens in the bucket
         :param fill_rate:\
             the rate in tokens/second that the bucket will be refilled.
@@ -28,13 +28,12 @@ class TokenBucket(object):
         """ Consume tokens from the bucket. Returns True if there were\
             sufficient tokens.
 
-        If there are not enough tokens and block is True, sleeps until the
+        If there are not enough tokens and block is True, sleeps until the\
         bucket is replenished enough to satisfy the deficiency.
 
         If there are not enough tokens and block is False, returns False.
 
         It is an error to consume more tokens than the bucket _capacity.
-
         """
         while block and tokens > self.tokens:
             deficit = tokens - self._tokens

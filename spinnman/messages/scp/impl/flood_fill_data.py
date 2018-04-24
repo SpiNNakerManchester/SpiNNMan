@@ -1,3 +1,4 @@
+from __future__ import division
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
@@ -37,7 +38,7 @@ class FloodFillData(AbstractSCPRequest):
             self._size = len(data)
 
         argument_1 = _NNP_FORWARD_RETRY | nearest_neighbour_id
-        argument_2 = (block_no << 16) | (((self._size / 4) - 1) << 8)
+        argument_2 = (block_no << 16) | (((self._size // 4) - 1) << 8)
 
         super(FloodFillData, self).__init__(
             SDPHeader(

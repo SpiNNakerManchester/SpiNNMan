@@ -222,8 +222,8 @@ class SpinnmanGenericProcessException(SpinnmanException):
             "     With message: {} \n" \
             "     When sending to {}:{}:{}\n" \
             "     Stack trace: {}\n".format(
-                exception.__class__.__name__, exception.message, x, y, p,
-                traceback.format_exc(tb))
+                exception.__class__.__name__, str(exception), x, y, p,
+                traceback.format_tb(tb))
         super(SpinnmanGenericProcessException, self).__init__(problem)
 
         self._stored_exception = exception

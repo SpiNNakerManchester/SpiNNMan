@@ -1,6 +1,7 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from time import localtime, asctime
 import struct
+from six import raise_from
 import re
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
@@ -30,7 +31,7 @@ class VersionInfo(object):
         """
         (self._p, self._physical_cpu_id, self._y, self._x, _,
             version_no, self._build_date) = _VERSION_PATTERN.unpack_from(
-                buffer(version_data), offset)
+                memoryview(version_data), offset)
 
         version_data = version_data[offset + 12:-1].decode("utf-8")
 
@@ -40,9 +41,9 @@ class VersionInfo(object):
                 self._name, self._hardware = version_data.split("/")
                 self._version_string = version_data
             except ValueError as exception:
-                raise SpinnmanInvalidParameterException(
+                raise_from(SpinnmanInvalidParameterException(
                     "version_data", version_data,
-                    "Incorrect format: {}".format(exception))
+                    "Incorrect format: {}".format(exception)), exception)
         else:
             name_hardware, _, version = version_data.partition("\0")
             self._version_string = version
@@ -113,7 +114,7 @@ class VersionInfo(object):
         """ The build date of the software
 
         :return: The number of seconds since 1st January 1970
-        :rtype: long
+        :rtype: int
         """
         return self._build_date
 

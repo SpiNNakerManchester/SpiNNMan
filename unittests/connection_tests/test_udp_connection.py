@@ -22,7 +22,7 @@ class TestUDPConnection(unittest.TestCase):
         connection.send_scp_request(scp_req)
         _, _, data, offset = connection.receive_scp_response()
         scp_response.read_bytestring(data, offset)
-        print scp_response.version_info
+        print(scp_response.version_info)
         self.assertEqual(
             scp_response._scp_response_header._result, SCPResult.RC_OK)
 
