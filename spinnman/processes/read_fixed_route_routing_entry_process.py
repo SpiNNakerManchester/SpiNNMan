@@ -25,7 +25,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         self._route = response.route
 
     def read_fixed_route(self, x, y, app_id=0):
-        """ Deads a fixed route routing table entry
+        """ Reads a fixed route routing table entry
 
         :param x: The x-coordinate of the chip, between 0 and 255, \
             this is not checked due to speed restrictions
