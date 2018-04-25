@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities import overrides
 
 
 class RouterClear(AbstractSCPRequest):
@@ -29,5 +30,6 @@ class RouterClear(AbstractSCPRequest):
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_RTR))
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("RouterClear", "CMD_RTR")

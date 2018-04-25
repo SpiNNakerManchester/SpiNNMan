@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities import overrides
 
 _IPTAG_SET = 1
 
@@ -40,5 +41,6 @@ class IPTagSet(AbstractSCPRequest):
             argument_3=((host[3] << 24) | (host[2] << 16) |
                         (host[1] << 8) | host[0]))
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("Set IP Tag", "CMD_IPTAG")

@@ -1,4 +1,7 @@
 # spinnman imports
+from spinnman.messages.scp.abstract_messages.scp_response import AbstractSCPResponse
+from spinn_utilities import overrides
+from spinnman.messages.scp.abstract_messages.scp_request import AbstractSCPRequest
 from spinnman.messages.scp.abstract_messages \
     import BMPRequest, BMPResponse
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
@@ -34,6 +37,7 @@ class ReadFPGARegister(BMPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_LINK_READ),
             argument_1=arg1, argument_2=4, argument_3=fpga_num)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return _SCPReadFPGARegisterResponse()
 
@@ -48,10 +52,8 @@ class _SCPReadFPGARegisterResponse(BMPResponse):
         super(_SCPReadFPGARegisterResponse, self).__init__()
         self._fpga_register = None
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

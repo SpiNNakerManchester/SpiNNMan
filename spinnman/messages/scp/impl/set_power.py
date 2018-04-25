@@ -5,6 +5,8 @@ from spinnman.messages.scp import SCPRequestHeader
 from .check_ok_response import CheckOKResponse
 
 import logging
+from spinnman.messages.scp.abstract_messages.scp_request import AbstractSCPRequest
+from spinn_utilities import overrides
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +51,7 @@ class SetPower(BMPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_BMP_POWER),
             argument_1=arg1, argument_2=arg2)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         """ Get the response from the powering message
         """

@@ -15,7 +15,7 @@ _PATTERN = struct.Struct(
 
 
 class ADCInfo(object):
-    """ Container for the ADC data thats been retrieved from a fpga
+    """ Container for the ADC data thats been retrieved from an FPGA
     """
     __slots__ = [
         "_fan_0",

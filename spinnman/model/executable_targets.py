@@ -18,8 +18,8 @@ class ExecutableTargets(object):
         """ Add core subsets to a binary
 
         :param binary: the path to the binary needed to be executed
-        :param subsets: the subset of cores that the binary needs to be loaded\
-                    on
+        :param subsets: \
+            the subset of cores that the binary needs to be loaded on
         :return:
         """
         if binary in self._targets:
@@ -38,7 +38,7 @@ class ExecutableTargets(object):
         :param binary: the binary path for executable
         :param chip_x: the coordinate on the machine in terms of x for the chip
         :param chip_y: the coordinate on the machine in terms of y for the chip
-        :param chip_p: the processor id to place this executable on
+        :param chip_p: the processor ID to place this executable on
         :return:
         """
         if binary not in self._targets:

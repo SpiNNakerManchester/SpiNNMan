@@ -18,7 +18,7 @@ class CPUInfos(object):
         :type x: int
         :param y: The y-coordinate of the chip
         :type y: int
-        :param processor_id: A processor id
+        :param processor_id: A processor ID
         :type processor_id: int
         :param cpu_info: The CPU information for the core
         :type cpu_info: :py:class:`spinnman.model.enums.cpu_info.CPUInfo`

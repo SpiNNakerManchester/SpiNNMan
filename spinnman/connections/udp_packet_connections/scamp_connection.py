@@ -14,7 +14,7 @@ _REPR_TEMPLATE = "SCAMPConnection(chip_x={}, chip_y={}, local_host={}," \
 
 
 class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
-    """ A UDP connection to SCAMP on the board
+    """ A UDP connection to SCAMP on the board.
     """
     __slots__ = []
 

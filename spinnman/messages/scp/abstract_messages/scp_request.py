@@ -27,10 +27,10 @@ class AbstractSCPRequest(object):
 
         :param sdp_header: The SDP header of the request
         :type sdp_header:\
-                    :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
+            :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
         :param scp_request_header: The SCP header of the request
         :type scp_request_header:\
-                    :py:class:`spinnman.messages.scp.scp_request_header.SCPRequestHeader`
+            :py:class:`spinnman.messages.scp.SCPRequestHeader`
         :param argument_1: The first argument, or None if no first argument
         :type argument_1: int
         :param argument_2: The second argument, or None if no second argument
@@ -62,7 +62,7 @@ class AbstractSCPRequest(object):
         """ The SCP request header of the message
 
         :rtype:\
-                    :py:class:`spinnman.messages.scp.scp_request_header.SCPRequestHeader`
+            :py:class:`spinnman.messages.scp.SCPRequestHeader`
         """
         return self._scp_request_header
 
@@ -124,4 +124,3 @@ class AbstractSCPRequest(object):
         :rtype: :py:class:`spinnman.messages.scp_response.SCPResponse`
         :raise None: No known exceptions are raised
         """
-        pass

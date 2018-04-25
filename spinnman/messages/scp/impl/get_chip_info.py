@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .get_chip_info_response import GetChipInfoResponse
+from spinn_utilities import overrides
 
 
 class GetChipInfo(AbstractSCPRequest):
@@ -34,8 +35,6 @@ class GetChipInfo(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_INFO),
             argument_1=argument_1)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return GetChipInfoResponse()

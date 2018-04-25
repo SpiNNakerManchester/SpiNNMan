@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .get_version_response import GetVersionResponse
+from spinn_utilities import overrides
 
 
 class GetVersion(AbstractSCPRequest):
@@ -31,8 +32,6 @@ class GetVersion(AbstractSCPRequest):
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_VER))
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return GetVersionResponse()

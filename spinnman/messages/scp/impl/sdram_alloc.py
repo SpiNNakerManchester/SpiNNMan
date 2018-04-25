@@ -1,4 +1,5 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities import overrides
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums \
@@ -56,6 +57,7 @@ class SDRAMAlloc(AbstractSCPRequest):
             argument_2=size, argument_3=tag)
         self._size = size
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return _SCPSDRAMAllocResponse(self._size)
 
@@ -72,10 +74,8 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         self._size = size
         self._base_address = None
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

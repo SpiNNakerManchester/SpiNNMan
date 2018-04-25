@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities import overrides
 
 
 class WriteLink(AbstractSCPRequest):
@@ -46,5 +47,6 @@ class WriteLink(AbstractSCPRequest):
         datastring = super(WriteLink, self).bytestring
         return datastring + bytes(self._data_to_write)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("WriteMemory", "CMD_WRITE")

@@ -4,6 +4,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities import overrides
 
 
 class RouterInit(AbstractSCPRequest):
@@ -57,5 +58,6 @@ class RouterInit(AbstractSCPRequest):
             argument_1=((n_entries << 16) | (app_id << 8) | 2),
             argument_2=table_address, argument_3=base_address)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("RouterInit", "CMD_RTR")

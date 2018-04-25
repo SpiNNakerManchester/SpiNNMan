@@ -4,6 +4,8 @@ from .abstract_multi_connection_process \
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess):
+    """ A process for allocating a block of SDRAM on a SpiNNaker chip.
+    """
     __slots__ = [
         "_base_address"]
 

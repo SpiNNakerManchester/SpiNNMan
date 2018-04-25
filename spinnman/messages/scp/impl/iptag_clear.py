@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities import overrides
 
 _IPTAG_CLEAR = 3
 
@@ -29,5 +30,6 @@ class IPTagClear(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_IPTAG),
             argument_1=(_IPTAG_CLEAR << 16) | tag)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("Clear IP Tag", "CMD_IPTAG")

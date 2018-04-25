@@ -3,6 +3,7 @@ from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.messages.scp import SCPRequestHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities import overrides
 
 _WAIT_FLAG = 0x1 << 18
 
@@ -45,8 +46,6 @@ class ApplicationRun(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_AR),
             argument_1=processor_mask)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return CheckOKResponse("Run Application", "CMD_AR")

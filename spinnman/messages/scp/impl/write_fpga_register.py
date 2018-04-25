@@ -5,6 +5,8 @@ from spinnman.messages.scp.abstract_messages import BMPRequest
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from .check_ok_response import CheckOKResponse
+from spinnman.messages.scp.abstract_messages.scp_request import AbstractSCPRequest
+from spinn_utilities import overrides
 
 _ONE_WORD = struct.Struct("<I")
 
@@ -39,8 +41,6 @@ class WriteFPGARegister(BMPRequest):
             argument_1=addr & (~0x3), argument_2=4, argument_3=fpga_num,
             data=_ONE_WORD.pack(value))
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """
-        :rtype: spinnman.messages.scp.impl.CheckOKResponse
-        """
         return CheckOKResponse("Send FPGA register write", "CMD_LINK_WRITE")

@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .count_state_response import CountStateResponse
+from spinn_utilities import overrides
 
 _ALL_CORE_MASK = 0xFFFF
 _COUNT_OPERATION = 1
@@ -42,5 +43,6 @@ class CountState(AbstractSCPRequest):
             argument_2=_get_data(app_id, state),
             argument_3=_ALL_CORE_MASK)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CountStateResponse()
