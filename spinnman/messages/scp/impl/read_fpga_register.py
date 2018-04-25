@@ -1,6 +1,6 @@
 # spinnman imports
 from spinnman.messages.scp.abstract_messages.scp_response import AbstractSCPResponse
-from spinn_utilities import overrides
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages.scp_request import AbstractSCPRequest
 from spinnman.messages.scp.abstract_messages \
     import BMPRequest, BMPResponse

@@ -4,7 +4,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
-from spinn_utilities import overrides
+from spinn_utilities.overrides import overrides
 
 
 class RouterInit(AbstractSCPRequest):

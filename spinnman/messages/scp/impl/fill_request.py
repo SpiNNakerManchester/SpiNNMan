@@ -3,7 +3,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import CheckOKResponse
-from spinn_utilities import overrides
+from spinn_utilities.overrides import overrides
 
 
 class FillRequest(AbstractSCPRequest):

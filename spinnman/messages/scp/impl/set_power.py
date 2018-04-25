@@ -6,7 +6,7 @@ from .check_ok_response import CheckOKResponse
 
 import logging
 from spinnman.messages.scp.abstract_messages.scp_request import AbstractSCPRequest
-from spinn_utilities import overrides
+from spinn_utilities.overrides import overrides
 
 logger = logging.getLogger(__name__)
 

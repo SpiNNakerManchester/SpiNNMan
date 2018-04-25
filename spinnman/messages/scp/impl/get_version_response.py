@@ -2,7 +2,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.model import VersionInfo
-from spinn_utilities import overrides
+from spinn_utilities.overrides import overrides
 
 
 class GetVersionResponse(AbstractSCPResponse):

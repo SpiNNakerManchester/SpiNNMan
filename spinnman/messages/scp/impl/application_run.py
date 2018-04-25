@@ -3,7 +3,7 @@ from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.messages.scp import SCPRequestHeader
 from .check_ok_response import CheckOKResponse
-from spinn_utilities import overrides
+from spinn_utilities.overrides import overrides
 
 _WAIT_FLAG = 0x1 << 18
 
