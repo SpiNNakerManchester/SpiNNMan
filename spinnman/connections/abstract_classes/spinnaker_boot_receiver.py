@@ -28,7 +28,7 @@ class SpinnakerBootReceiver(Connection):
         :raise spinnman.exceptions.SpinnmanTimeoutException: \
             If there is a timeout before a message is received
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
-            If the received packet is not a valid spinnaker boot message
+            If the received packet is not a valid SpiNNaker boot message
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
-            If one of the fields of the spinnaker boot message is invalid
+            If one of the fields of the SpiNNaker boot message is invalid
         """

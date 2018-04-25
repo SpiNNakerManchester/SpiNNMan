@@ -14,7 +14,7 @@ _END_PATTERN = struct.Struct("<IIII")
 class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
     """ A process for loading the multicast routing table on a SpiNNaker\
         chip.
-    """ 
+    """
     __slots__ = [
         "_base_address"]
 

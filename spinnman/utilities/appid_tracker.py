@@ -3,7 +3,7 @@ _MAX_APP_ID = 254
 
 
 class AppIdTracker(object):
-    """ A tracker of AppId to make it easier to allocate new IDs
+    """ A tracker of application IDs to make it easier to allocate new IDs.
     """
     __slots__ = [
         "_free_ids",
@@ -38,7 +38,7 @@ class AppIdTracker(object):
         return self._free_ids.pop()
 
     def allocate_id(self, allocated_id):
-        """ Allocate a given ID
+        """ Allocate a given ID.
 
         :param allocated_id: The ID to allocate
         :raises KeyError: If the ID is not present
@@ -46,7 +46,7 @@ class AppIdTracker(object):
         self._free_ids.remove(allocated_id)
 
     def free_id(self, id_to_free):
-        """ Free a given ID. 
+        """ Free a given ID.
 
         :param id_to_free: The ID to free
         :raises KeyError: If the ID is out of range

@@ -165,7 +165,8 @@ class _ChipMemoryIO(object):
         :param bytes_to_fill: Number of bytes to fill from current position
         :type bytes_to_fill: int
         :param data_type: The type of the repeat value
-        :type data_type: :py:class:`spinnman.processes.fill_process.FillDataType`
+        :type data_type: \
+            :py:class:`spinnman.processes.fill_process.FillDataType`
         """
         self.flush_write_buffer()
         self._transceiver.fill_memory(

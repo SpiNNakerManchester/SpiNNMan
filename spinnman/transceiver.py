@@ -126,7 +126,7 @@ def create_transceiver_from_hostname(
     :param max_core_id: The maximum core ID in any discovered machine.\
         Requests for a "machine" will only have core IDs up to this value.
     :type max_core_id: int
-    :param version: the type of spinnaker board used within the spinnaker\
+    :param version: the type of SpiNNaker board used within the SpiNNaker\
         machine being used. If a spinn-5 board, then the version will be 5,\
         spinn-3 would equal 3 and so on.
     :param bmp_connection_data: the details of the BMP connections used to\

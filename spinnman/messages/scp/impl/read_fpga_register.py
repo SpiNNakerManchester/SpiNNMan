@@ -1,9 +1,7 @@
 # spinnman imports
-from spinnman.messages.scp.abstract_messages.scp_response import AbstractSCPResponse
 from spinn_utilities.overrides import overrides
-from spinnman.messages.scp.abstract_messages.scp_request import AbstractSCPRequest
 from spinnman.messages.scp.abstract_messages \
-    import BMPRequest, BMPResponse
+    import AbstractSCPRequest, AbstractSCPResponse, BMPRequest, BMPResponse
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException

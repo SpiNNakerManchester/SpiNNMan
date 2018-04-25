@@ -1,8 +1,8 @@
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import BMPRequest
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPRequest, BMPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from .check_ok_response import CheckOKResponse
-from spinnman.messages.scp.abstract_messages.scp_request import AbstractSCPRequest
 from spinn_utilities.overrides import overrides
 
 

@@ -31,7 +31,7 @@ class SpinnakerBootMessages(object):
         "_no_data_packets"]
 
     def __init__(self, board_version=None, extra_boot_values=None):
-        """ Builds the boot messages needed to boot the spinnaker machine
+        """ Builds the boot messages needed to boot the SpiNNaker machine
 
         :param board_version: The version of the board to be booted
         :type board_version: int

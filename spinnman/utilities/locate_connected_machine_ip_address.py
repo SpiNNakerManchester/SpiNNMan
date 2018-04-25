@@ -10,8 +10,10 @@ def locate_connected_machine(handler):
     """ Locates any SpiNNaker machines IP addresses from the auto-transmitted\
         packets from non-booted SpiNNaker machines.
 
-    :param handler: A callback that decides whether to stop searching.
-    :type handler: (ipaddr, time) --> bool
+    :param handler: A callback that decides whether to stop searching. The\
+        callback is given two arguments: the IP address found and the current\
+        time.
+    :type handler: (ipaddr, float) --> bool
     """
 
     connection = IPAddressesConnection()

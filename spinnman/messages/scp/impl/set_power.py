@@ -1,12 +1,10 @@
-# spinnman imports
-from spinnman.messages.scp.abstract_messages import BMPRequest
+import logging
+from spinn_utilities.overrides import overrides
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPRequest, BMPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp import SCPRequestHeader
 from .check_ok_response import CheckOKResponse
-
-import logging
-from spinnman.messages.scp.abstract_messages.scp_request import AbstractSCPRequest
-from spinn_utilities.overrides import overrides
 
 logger = logging.getLogger(__name__)
 

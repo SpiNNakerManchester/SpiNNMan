@@ -10,7 +10,7 @@ _ANTI_FLOOD_DELAY = 0.1
 
 class BootConnection(
         UDPConnection, SpinnakerBootSender, SpinnakerBootReceiver):
-    """ A connection to the spinnaker board that uses UDP to for booting
+    """ A connection to the SpiNNaker board that uses UDP to for booting
     """
     __slots__ = []
 
