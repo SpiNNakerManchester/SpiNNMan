@@ -18,7 +18,7 @@ def test_file_io():
     assert(compare_data == read_data)
 
     memory.seek(20)
-    test_data = bytearray(range(10))
+    test_data = bytearray(list(range(10)))
     memory.write(bytes(test_data))
     memory.write(bytes(test_data))
     memory.seek(-10, os.SEEK_CUR)

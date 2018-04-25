@@ -3,6 +3,7 @@ from spinnman.exceptions import SpinnmanInvalidPacketException, \
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
+from past.builtins import xrange
 import struct
 
 _PATTERN_BBBB = struct.Struct("<BBBB")

@@ -1,6 +1,7 @@
 import struct
-
+from past.builtins import xrange
 from spinnman.model.enums import P2PTableRoute
+from six import iterkeys
 
 _ONE_WORD = struct.Struct("<I")
 
@@ -62,7 +63,7 @@ class P2PTable(object):
     def iterchips(self):
         """ Get an iterator of tuples of (x, y) coordinates in the table
         """
-        return self._routes.iterkeys()
+        return iterkeys(self._routes)
 
     def is_route(self, x, y):
         """ Determines if there is a route in the P2P table to the given chip
