@@ -20,10 +20,11 @@ class ConnectionListener(Thread):
 
     def __init__(self, connection, n_processes=_POOL_SIZE, timeout=_TIMEOUT):
         """
-
         :param connection: An AbstractListenable connection to listen to
         :param n_processes: \
             The number of threads to use when calling callbacks
+        :param timeout: How long to wait for messages before checking to see\
+            if the connection is to be terminated.
         """
         super(ConnectionListener, self).__init__(
             name="Connection listener for connection {}".format(connection))
@@ -56,7 +57,7 @@ class ConnectionListener(Thread):
         """ Add a callback to be called when a message is received
 
         :param callback: A callable which takes a single parameter, which is\
-                the message received
+            the message received
         :type callback: callable (connection message type -> None)
         """
         self._callbacks.add(callback)

@@ -15,7 +15,8 @@ _FIRST_IOBUF = struct.Struct("<I8xI")
 
 
 class ReadIOBufProcess(AbstractMultiConnectionProcess):
-    """ A process for reading memory
+    """ A process for reading IOBUF memory (mostly log messages) from a\
+        SpiNNaker core
     """
     __slots__ = [
         "_extra_reads",

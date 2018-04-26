@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 _IPTAG_SET = 1
 
@@ -52,5 +53,6 @@ class ReverseIPTagSet(AbstractSCPRequest):
             argument_2=arg2,
             argument_3=0)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("Set Reverse IP Tag", "CMD_IPTAG")

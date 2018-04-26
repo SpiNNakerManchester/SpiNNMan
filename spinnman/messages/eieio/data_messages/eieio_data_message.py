@@ -1,6 +1,6 @@
 from spinnman.exceptions import SpinnmanInvalidPacketException,\
     SpinnmanInvalidParameterException
-from spinnman.messages.eieio.abstract_messages import AbstractEIEIOMessage
+from spinnman.messages.eieio import AbstractEIEIOMessage
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 from .eieio_data_header import EIEIODataHeader
@@ -28,10 +28,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     def __init__(self, eieio_header, data=None, offset=0):
         """
-
         :param eieio_header: The header of the message
         :type eieio_header:\
-            :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
+            :py:class:`spinnman.messages.eieio.data_messages.EIEIODataHeader`
         :param data: Optional data contained within the packet
         :type data: str
         :param offset: Optional offset where the valid data starts
@@ -88,7 +87,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
         :param eieio_type: the type of message
         :type eieio_type:\
-            :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
+            :py:class:`spinnman.spinnman.messages.eieio.EIEIOType`
         :param is_prefix: True if there is a prefix, False otherwise
         :type is_prefix: bool
         :param is_payload_base: \
@@ -185,7 +184,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
         :param element: The element to be added
         :type element:\
-            :py:class:`spinnman.messages.eieio.data_messages.abstract_eieio_data_element.AbstractEIEIODataElement`
+            :py:class:`spinnman.messages.eieio.data_messages.AbstractDataElement`
         :raise SpinnmanInvalidParameterException: \
             If the element is not compatible with the header
         :raise SpinnmanInvalidPacketException: \
@@ -215,7 +214,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             exact type of element returned depends on the packet type
 
         :rtype:\
-            :py:class:`spinnman.messages.eieio.data_messages.abstract_eieio_data_element.AbstractEIEIODataElement`
+            :py:class:`spinnman.messages.eieio.data_messages.AbstractDataElement`
         """
         if not self.is_next_element:
             return None

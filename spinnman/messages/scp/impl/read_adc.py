@@ -1,6 +1,7 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages \
-    import BMPRequest, BMPResponse
+    import AbstractSCPRequest, AbstractSCPResponse, BMPRequest, BMPResponse
 from spinnman.messages.scp.enums \
     import BMPInfo, SCPCommand, SCPResult
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -15,8 +16,7 @@ class ReadADC(BMPRequest):
 
     def __init__(self, board):
         """
-
-        :param board: which board to request the adc register from
+        :param board: which board to request the ADC register from
         :rtype: None
         """
         super(ReadADC, self).__init__(
@@ -24,6 +24,7 @@ class ReadADC(BMPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_BMP_INFO),
             argument_1=BMPInfo.ADC)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return _SCPReadADCResponse()
 
@@ -38,10 +39,8 @@ class _SCPReadADCResponse(BMPResponse):
         super(_SCPReadADCResponse, self).__init__()
         self._adc_info = None
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

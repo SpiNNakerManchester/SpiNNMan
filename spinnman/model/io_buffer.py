@@ -42,9 +42,9 @@ class IOBuffer(object):
 
     @property
     def p(self):
-        """ The id of the core on the chip
+        """ The ID of the core on the chip
 
-        :return: The id of the core
+        :return: The ID of the core
         :rtype: int
         """
         return self._p

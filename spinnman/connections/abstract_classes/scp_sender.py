@@ -29,18 +29,18 @@ class SCPSender(Connection):
             * source_chip_x is None or 0
             * source_chip_y is None or 0
 
-        tag in the message is optional - if not set the default set in the\
+        tag in the message is optional; if not set, the default set in the\
         constructor will be used.
-        sequence in the message is optional - if not set (sequence number\
+        sequence in the message is optional; if not set, (sequence number\
         last assigned + 1) % 65536 will be used
 
         :param scp_request: message packet to send
         :type scp_request:\
-                    :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
+            :py:class:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest`
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    sending the message
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error sending the message
         """
 
     @abstractproperty

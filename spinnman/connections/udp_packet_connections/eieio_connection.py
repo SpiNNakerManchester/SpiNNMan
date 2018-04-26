@@ -13,7 +13,7 @@ _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
 
 class EIEIOConnection(
         UDPConnection, EIEIOReceiver, EIEIOSender, Listenable):
-    """ A UDP connection for sending and receiving raw EIEIO messages
+    """ A UDP connection for sending and receiving raw EIEIO messages.
     """
     __slots__ = []
 

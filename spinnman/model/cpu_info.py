@@ -41,7 +41,7 @@ class CPUInfo(object):
         :type x: int
         :param y: The y-coordinate of a chip
         :type y: int
-        :param p: The id of a core on the chip
+        :param p: The ID of a core on the chip
         :type p: int
         :param cpu_data: A bytestring received from SDRAM on the board
         :type cpu_data: str
@@ -103,9 +103,9 @@ class CPUInfo(object):
 
     @property
     def p(self):
-        """ The id of the core on the chip
+        """ The ID of the core on the chip
 
-        :return: The id of the core
+        :return: The ID of the core
         :rtype: int
         """
         return self._p
@@ -121,9 +121,9 @@ class CPUInfo(object):
 
     @property
     def physical_cpu_id(self):
-        """ The physical id of this processor
+        """ The physical ID of this processor
 
-        :return: The physical id of the processor
+        :return: The physical ID of the processor
         :rtype: int
         """
         return self._physical_cpu_id

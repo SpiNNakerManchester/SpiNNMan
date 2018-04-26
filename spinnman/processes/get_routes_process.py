@@ -19,6 +19,8 @@ _ROUTE_ENTRY_PATTERN = struct.Struct("<2xBxIII")
 
 
 class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
+    """ A process for reading the multicast routing table of a SpiNNaker chip.
+    """
     __slots__ = [
         "_app_id",
         "_entries"]

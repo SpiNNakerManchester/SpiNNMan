@@ -1,4 +1,4 @@
-from spinnman.messages.eieio.abstract_messages import AbstractEIEIOMessage
+from spinnman.messages.eieio import AbstractEIEIOMessage
 
 
 class EIEIOCommandMessage(AbstractEIEIOMessage):
@@ -13,7 +13,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         """
         :param eieio_command_header: The header of the message
         :type eieio_command_header:\
-            :py:class:`spinnman.messages.eieio.command_messages.eieio_command_header.EIEIOCommandHeader`
+            :py:class:`spinnman.messages.eieio.command_messages.EIEIOCommandHeader`
         :param data: Optional incoming data
         :type data: str
         :param offset: Offset into the data where valid data begins
