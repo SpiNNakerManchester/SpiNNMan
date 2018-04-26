@@ -1120,7 +1120,7 @@ class Transceiver(object):
                 x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
                 data_item.data_type.value))[0]
 
-    def get_user_0_register_address_from_core(self, p):
+    def get_user_0_register_address_from_core(self, x, y, p):
         """ Get the address of user 0 for a given processor on the board
 
         :param p: The id of the processor to get the user 0 address from
