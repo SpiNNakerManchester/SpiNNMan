@@ -123,10 +123,10 @@ def create_transceiver_from_hostname(
         Requests for a "machine" will have these links excluded, as if they \
         never existed.
     :type ignored_links: set of (int, int, int)
-    :param max_core_id: The maximum core id in any discovered machine.\
+    :param max_core_id: The maximum core ID in any discovered machine.\
         Requests for a "machine" will only have core IDs up to this value.
     :type max_core_id: int
-    :param version: the type of spinnaker board used within the spinnaker\
+    :param version: the type of SpiNNaker board used within the SpiNNaker\
         machine being used. If a spinn-5 board, then the version will be 5,\
         spinn-3 would equal 3 and so on.
     :param bmp_connection_data: the details of the BMP connections used to\
@@ -261,7 +261,7 @@ class Transceiver(object):
             machine. Requests for a "machine" will have these links excluded,\
             as if they never existed.
         :type ignore_links: set of (int, int, int)
-        :param max_core_id: The maximum core id in any discovered machine.\
+        :param max_core_id: The maximum core ID in any discovered machine.\
             Requests for a "machine" will only have core IDs up to and\
             including this value.
         :type max_core_id: int
@@ -828,7 +828,7 @@ class Transceiver(object):
 
     @property
     def app_id_tracker(self):
-        """ Get the app id tracker for this transceiver
+        """ Get the app ID tracker for this transceiver
 
         :rtype: :py:class:`spinnman.utilities.appid_tracker.AppIdTracker`
         """
@@ -1084,7 +1084,7 @@ class Transceiver(object):
             cores on all of the chips on the board are obtained.
         :type core_subsets: \
             :py:class:`spinn_machine.CoreSubsets`
-        :return: An iterable of the cpu information for the selected cores, or\
+        :return: An iterable of the CPU information for the selected cores, or\
             all cores if core_subsets is not specified
         :rtype: iterable of \
             :py:class:`spinnman.model.CPUInfo`
@@ -1123,7 +1123,11 @@ class Transceiver(object):
     def get_user_0_register_address_from_core(self, x, y, p):
         """ Get the address of user 0 for a given processor on the board
 
-        :param p: The id of the processor to get the user 0 address from
+        :param x: the x-coordinate of the chip containing the processor
+        :param y: the y-coordinate of the chip containing the processor
+        :param p: The ID of the processor to get the user 0 address from
+        :type x: int
+        :type y: int
         :type p: int
         :return: The address for user 0 register for this processor
         :rtype: int
@@ -1140,7 +1144,7 @@ class Transceiver(object):
     def get_user_1_register_address_from_core(self, p):
         """ Get the address of user 1 for a given processor on the board
 
-        :param p: The id of the processor to get the user 1 address from
+        :param p: The ID of the processor to get the user 1 address from
         :type p: int
         :return: The address for user 1 register for this processor
         :rtype: int
@@ -1157,7 +1161,7 @@ class Transceiver(object):
     def get_user_2_register_address_from_core(self, p):
         """ Get the address of user 2 for a given processor on the board
 
-        :param p: The id of the processor to get the user 0 address from
+        :param p: The ID of the processor to get the user 0 address from
         :type p: int
         :return: The address for user 0 register for this processor
         :rtype: int
@@ -1178,9 +1182,9 @@ class Transceiver(object):
         :type x: int
         :param y: The y-coordinate of the chip containing the processor
         :type y: int
-        :param p: The id of the processor to get the information about
+        :param p: The ID of the processor to get the information about
         :type p: int
-        :return: The cpu information for the selected core
+        :return: The CPU information for the selected core
         :rtype: :py:class:`spinnman.model.cpu_info.CPUInfo`
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board
@@ -1280,7 +1284,7 @@ class Transceiver(object):
         :type x: int
         :param y: The y-coordinate of the chip containing the processor
         :type y: int
-        :param p: The id of the processor to get the IOBUF for
+        :param p: The ID of the processor to get the IOBUF for
         :type p: int
         :return: An IOBUF buffer
         :rtype: :py:class:`spinnman.model.IOBuffer`
@@ -1301,7 +1305,7 @@ class Transceiver(object):
     def get_core_state_count(self, app_id, state):
         """ Get a count of the number of cores which have a given state
 
-        :param app_id: The id of the application from which to get the count.
+        :param app_id: The ID of the application from which to get the count.
         :type app_id: int
         :param state: The state count to get
         :type state: :py:class:`spinnman.model.CPUState`
@@ -1313,7 +1317,7 @@ class Transceiver(object):
             If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If state is not a valid status
-            * If app_id is not a valid application id
+            * If app_id is not a valid application ID
             * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
@@ -1344,7 +1348,7 @@ class Transceiver(object):
             :py:class:`spinn_storage_handlers.abstract_classes.AbstractDataReader`\
             or bytearray or str
         :param app_id: \
-            The id of the application with which to associate the executable
+            The ID of the application with which to associate the executable
         :type app_id: int
         :param n_bytes: \
             The size of the executable data in bytes. If not specified:
@@ -1367,7 +1371,7 @@ class Transceiver(object):
             If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If x, y, p does not lead to a valid core
-            * If app_id is an invalid application id
+            * If app_id is an invalid application ID
             * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
@@ -1415,7 +1419,7 @@ class Transceiver(object):
             :py:class:`spinn_storage_handlers.abstract_classes.AbstractDataReader`\
             or bytearray or str
         :param app_id: \
-            The id of the application with which to associate the executable
+            The ID of the application with which to associate the executable
         :type app_id: int
         :param n_bytes: \
             The size of the executable data in bytes. If not specified:
@@ -1439,7 +1443,7 @@ class Transceiver(object):
             If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If one of the specified cores is not valid
-            * If app_id is an invalid application id
+            * If app_id is an invalid application ID
             * If a packet is received that has invalid parameters
             * If data is an AbstractDataReader but n_bytes is not specified
             * If data is an int and n_bytes is more than 4
@@ -1511,9 +1515,9 @@ class Transceiver(object):
         """ Power on a set of boards in the machine
 
         :param boards: The board or boards to power on
-        :param cabinet: the id of the cabinet containing the frame, or 0 \
+        :param cabinet: the ID of the cabinet containing the frame, or 0 \
             if the frame is not in a cabinet
-        :param frame: the id of the frame in the cabinet containing the\
+        :param frame: the ID of the frame in the cabinet containing the\
             board(s), or 0 if the board is not in a frame
         """
         self._power(PowerCommand.POWER_ON, boards, cabinet, frame)
@@ -1531,9 +1535,9 @@ class Transceiver(object):
         """ Power off a set of boards in the machine
 
         :param boards: The board or boards to power off
-        :param cabinet: the id of the cabinet containing the frame, or 0 \
+        :param cabinet: the ID of the cabinet containing the frame, or 0 \
             if the frame is not in a cabinet
-        :param frame: the id of the frame in the cabinet containing the\
+        :param frame: the ID of the frame in the cabinet containing the\
             board(s), or 0 if the board is not in a frame
         """
         self._power(PowerCommand.POWER_OFF, boards, cabinet, frame)
@@ -1551,9 +1555,9 @@ class Transceiver(object):
 
         :param power_command: The power command to send
         :param boards: The board or boards to send the command to
-        :param cabinet: the id of the cabinet containing the frame, or 0 \
+        :param cabinet: the ID of the cabinet containing the frame, or 0 \
             if the frame is not in a cabinet
-        :param frame: the id of the frame in the cabinet containing the\
+        :param frame: the ID of the frame in the cabinet containing the\
             board(s), or 0 if the board is not in a frame
         :rtype: None
         """
@@ -1701,7 +1705,7 @@ class Transceiver(object):
         :type n_bytes: int
         :param offset: The offset from which the valid data begins
         :type offset: int
-        :param cpu: The optional cpu to write to
+        :param cpu: The optional CPU to write to
         :type cpu: int
         :param is_filename: True if the data is a filename
         :type is_filename: bool
@@ -1776,7 +1780,7 @@ class Transceiver(object):
         :param offset: The offset where the valid data starts (if the data is \
             an int then offset will be ignored and used 0
         :type offset: int
-        :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
+        :param cpu: The CPU to use, typically 0 (or if a BMP, the slot number)
         :type cpu: int
         :return: Nothing is returned
         :rtype: None
@@ -1849,7 +1853,7 @@ class Transceiver(object):
             If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If one of the specified chips is not valid
-            * If app_id is an invalid application id
+            * If app_id is an invalid application ID
             * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
@@ -1892,7 +1896,7 @@ class Transceiver(object):
         :type base_address: int
         :param length: The length of the data to be read in bytes
         :type length: int
-        :param cpu: the core id used to read the memory of
+        :param cpu: the core ID used to read the memory of
         :type cpu: int
         :return: A bytearray of data read
         :rtype: bytearray
@@ -1921,7 +1925,7 @@ class Transceiver(object):
         :param y: \
             The y-coordinate of the chip whose neighbour is to be read from
         :type y: int
-        :param cpu: The cpu to use, typically 0 (or if a BMP, the slot number)
+        :param cpu: The CPU to use, typically 0 (or if a BMP, the slot number)
         :type cpu: int
         :param link: \
             The link index to send the request to (or if BMP, the FPGA number)
@@ -1950,14 +1954,14 @@ class Transceiver(object):
     def stop_application(self, app_id):
         """ Sends a stop request for an app_id
 
-        :param app_id: The id of the application to send to
+        :param app_id: The ID of the application to send to
         :type app_id: int
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
             If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If app_id is not a valid application id
+            * If app_id is not a valid application ID
             * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
@@ -1981,7 +1985,7 @@ class Transceiver(object):
             in some target state or states. Handles failures.
 
         :param all_core_subsets: the cores to check are in a given sync state
-        :param app_id: the app id that being used by the simulation
+        :param app_id: the application ID that being used by the simulation
         :param cpu_states:\
             The expected states once the applications are ready; success is\
             when each application is in one of these states
@@ -2055,9 +2059,9 @@ class Transceiver(object):
             :py:class:`spinn_machine.CoreSubsets`
         :param states: The state or states to filter on
         :type states:\
-            :py:class:`spinnman.model.enums.cpu_state.CPUState` \
-            or set of \
-            :py:class:`spinnman.model.enums.cpu_state.CPUState`
+            :py:class:`spinnman.model.enums.CPUState` \
+            or\
+            set(:py:class:`spinnman.model.enums.CPUState`)
         :return: Core subsets object containing cores in the given state(s)
         """
         core_infos = self.get_cpu_information(all_core_subsets)
@@ -2081,9 +2085,9 @@ class Transceiver(object):
             :py:class:`spinn_machine.CoreSubsets`
         :param states: The state or states to filter on
         :type states:\
-            :py:class:`spinnman.model.enums.cpu_state.CPUState` \
-            or set of \
-            :py:class:`spinnman.model.enums.cpu_state.CPUState`
+            :py:class:`spinnman.model.enums.CPUState` \
+            or \
+            set(:py:class:`spinnman.model.enums.CPUState`)
         :return: Core subsets object containing cores not in the given state(s)
         """
         core_infos = self.get_cpu_information(all_core_subsets)
@@ -2128,7 +2132,7 @@ class Transceiver(object):
     def send_signal(self, app_id, signal):
         """ Send a signal to an application
 
-        :param app_id: The id of the application to send to
+        :param app_id: The ID of the application to send to
         :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.Signal`
@@ -2140,7 +2144,7 @@ class Transceiver(object):
             If a packet is received that is not in the valid format
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
             * If signal is not a valid signal
-            * If app_id is not a valid application id
+            * If app_id is not a valid application ID
             * If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
@@ -2315,7 +2319,7 @@ class Transceiver(object):
     def clear_ip_tag(self, tag, connection=None, board_address=None):
         """ Clear the setting of an IP tag
 
-        :param tag: The tag id
+        :param tag: The tag ID
         :type tag: int
         :param connection: Connection where the tag should be cleared. If not\
             specified, all SCPSender connections will send the message to\
@@ -2378,7 +2382,7 @@ class Transceiver(object):
         :type y: int
         :param size: the amount of memory to allocate in bytes
         :type size: int
-        :param app_id: The id of the application with which to associate the\
+        :param app_id: The ID of the application with which to associate the\
             routes.  If not specified, defaults to 0.
         :type app_id: int
         :param tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can be\
@@ -2401,20 +2405,20 @@ class Transceiver(object):
         :type y: int
         :param base_address: The base address of the allocated memory
         :type base_address: int
-        :param app_id: The app id of the allocated memory
+        :param app_id: The app ID of the allocated memory
         :type app_id: int
         """
         process = DeAllocSDRAMProcess(self._scamp_connection_selector)
         process.de_alloc_sdram(x, y, app_id, base_address)
 
     def free_sdram_by_app_id(self, x, y, app_id):
-        """ Free all SDRAM allocated to a given app id
+        """ Free all SDRAM allocated to a given app ID
 
         :param x: The x-coordinate of the chip onto which to ask for memory
         :type x: int
         :param y: The y-coordinate of the chip onto which to ask for memory
         :type y: int
-        :param app_id: The app id of the allocated memory
+        :param app_id: The app ID of the allocated memory
         :type app_id: int
         :return: The number of blocks freed
         :rtype: int
@@ -2433,7 +2437,7 @@ class Transceiver(object):
         :param routes: An iterable of multicast routes to load
         :type routes: iterable of\
             :py:class:`spinn_machine.MulticastRoutingEntry`
-        :param app_id: The id of the application with which to associate the\
+        :param app_id: The ID of the application with which to associate the\
             routes.  If not specified, defaults to 0.
         :type app_id: int
         :return: Nothing is returned
@@ -2461,7 +2465,7 @@ class Transceiver(object):
         :type y: int
         :param fixed_route: the route for the fixed route entry on this chip
         :type fixed_route: :py:class:`spinn_machine.fixed_route_routing_entry`
-        :param app_id: The id of the application with which to associate the\
+        :param app_id: The ID of the application with which to associate the\
             routes.  If not specified, defaults to 0.
         :type app_id: int
         :return: Nothing is returned
@@ -2487,7 +2491,7 @@ class Transceiver(object):
         :type x: int
         :param y: The y-coordinate of the chip onto which to load the routes
         :type y: int
-        :param app_id: The id of the application with which to associate the\
+        :param app_id: The ID of the application with which to associate the\
             routes.  If not specified, defaults to 0.
         :type app_id: int
         :return: the route as a fixed route entry
@@ -2503,7 +2507,7 @@ class Transceiver(object):
         :type x: int
         :param y: The y-coordinate of the chip from which to get the routes
         :type y: int
-        :param app_id: The id of the application to filter the routes for. If\
+        :param app_id: The ID of the application to filter the routes for. If\
             not specified, will return all routes
         :type app_id: int
         :return: An iterable of multicast routes

@@ -10,14 +10,14 @@ _ANTI_FLOOD_DELAY = 0.1
 
 class BootConnection(
         UDPConnection, SpinnakerBootSender, SpinnakerBootReceiver):
-    """ A connection to the spinnaker board that uses UDP to for booting
+    """ A connection to the SpiNNaker board that uses UDP to for booting
     """
     __slots__ = []
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
         """
-        :param local_host: The local host name or ip address to bind to.\
+        :param local_host: The local host name or IP address to bind to.\
             If not specified defaults to bind to all interfaces, unless\
             remote_host is specified, in which case binding is done to the\
             IP address that will be used to send packets.
@@ -25,7 +25,7 @@ class BootConnection(
         :param local_port: The local port to bind to, between 1025 and 65535.\
             If not specified, defaults to a random unused local port
         :type local_port: int
-        :param remote_host: The remote host name or ip address to send packets\
+        :param remote_host: The remote host name or IP address to send packets\
             to.  If not specified, the socket will be available for listening\
             only, and will throw and exception if used for sending
         :type remote_host: str

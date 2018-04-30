@@ -62,7 +62,7 @@ class HeapElement(object):
 
     @property
     def app_id(self):
-        """ The app id of the block if allocated, or None if not
+        """ The app ID of the block if allocated, or None if not
         """
         return self._app_id
 

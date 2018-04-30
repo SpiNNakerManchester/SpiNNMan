@@ -1,11 +1,13 @@
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import BMPRequest
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPRequest, BMPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 
 class BMPSetLed(BMPRequest):
-    """ Set the led(s) of a board to either on, off or toggling
+    """ Set the LED(s) of a board to either on, off or toggling
     """
     __slots__ = []
 
@@ -17,7 +19,7 @@ class BMPSetLed(BMPRequest):
         :type led: int or iterable of int
         :param action: State to set the LED to, either on, off or toggle
         :type action:\
-            :py:class:`spinnman.messages.scp.scp_led_action.SCPLEDAction`
+            :py:class:`spinnman.messages.scp.enums.led_action.SCPLEDAction`
         :param boards: Specifies the board to control the LEDs of. This may\
             also be an iterable of multiple boards (in the same frame).
         :type boards: int or iterable of int
@@ -42,7 +44,8 @@ class BMPSetLed(BMPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_LED),
             argument_1=arg1, argument_2=arg2)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ Get the response from the write fpga register request
+        """ Get the response from the write FPGA register request
         """
         return CheckOKResponse("Set the LEDs of a board", "CMD_LED")

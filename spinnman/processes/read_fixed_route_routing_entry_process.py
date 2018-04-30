@@ -3,7 +3,7 @@ from spinnman.processes import AbstractMultiConnectionProcess
 
 
 class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
-    """ supports reading of a chips fixed route routing entry
+    """ A process for reading a chip's fixed route routing entry.
     """
 
     __slots__ = (
@@ -12,10 +12,10 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
     )
 
     def __init__(self, connection_selector):
-        """ Creates the process for writing a fixed route entry to a chips \
+        """ Creates the process for writing a fixed route entry to a chip's\
             router
 
-        :param connection_selector: the scamp connection selector
+        :param connection_selector: the SC&MP connection selector
         """
         super(ReadFixedRouteRoutingEntryProcess, self).__init__(
             connection_selector)
@@ -25,7 +25,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         self._route = response.route
 
     def read_fixed_route(self, x, y, app_id=0):
-        """ reads a fixed route routing table entry
+        """ Reads a fixed route routing table entry
 
         :param x: The x-coordinate of the chip, between 0 and 255, \
             this is not checked due to speed restrictions

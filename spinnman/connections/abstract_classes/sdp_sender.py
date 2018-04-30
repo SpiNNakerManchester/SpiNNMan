@@ -6,7 +6,7 @@ from .connection import Connection
 
 @add_metaclass(AbstractBase)
 class SDPSender(Connection):
-    """ A sender of SDP messages
+    """ A sender of SDP messages.
     """
 
     __slots__ = ()
@@ -17,8 +17,7 @@ class SDPSender(Connection):
 
         :param sdp_message: The SDP message to be sent
         :type sdp_message: spinnman.messages.sdp.sdp_message.SDPMessage
-        :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    sending the message
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error sending the message.
         """

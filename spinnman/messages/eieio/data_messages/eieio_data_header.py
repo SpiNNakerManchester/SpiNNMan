@@ -30,14 +30,14 @@ class EIEIODataHeader(object):
 
         :param eieio_type: the type of message
         :type eieio_type:\
-            :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
+            :py:class:`spinnman.spinnman.messages.eieio.EIEIOType`
         :param tag: the tag of the message (0 by default)
         :type tag: int
         :param prefix: the key prefix of the message or None if not prefixed
         :type prefix: int or None
         :param prefix_type: the position of the prefix (upper or lower)
         :type prefix_type:\
-            :py:class:`spinnman.messages.eieio.eieio_prefix.EIEIOPrefix`
+            :py:class:`spinnman.messages.eieio.EIEIOPrefix`
         :param payload_base: \
             The base payload to be applied, or None if no base payload
         :type payload_base: int or None
@@ -100,7 +100,7 @@ class EIEIODataHeader(object):
 
         :param eieio_type: the type of message
         :type eieio_type:\
-            :py:class:`spinnman.spinnman.messages.eieio.eieio_type.EIEIOType`
+            :py:class:`spinnman.spinnman.messages.eieio.EIEIOType`
         :param is_prefix: True if there is a prefix, False otherwise
         :type is_prefix: bool
         :param is_payload_base: \
@@ -183,7 +183,7 @@ class EIEIODataHeader(object):
         :type offset: int
         :return: an EIEIO header
         :rtype:\
-            :py:class:`spinnman.messages.eieio.data_messages.eieio_data_header.EIEIODataHeader`
+            :py:class:`spinnman.messages.eieio.data_messages.EIEIODataHeader`
         """
 
         (count, header_data) = _PATTERN_BB.unpack_from(data, offset)

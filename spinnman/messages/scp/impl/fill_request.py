@@ -3,6 +3,7 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 
 class FillRequest(AbstractSCPRequest):
@@ -33,8 +34,6 @@ class FillRequest(AbstractSCPRequest):
             argument_1=base_address, argument_2=data,
             argument_3=size)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return CheckOKResponse("Fill", SCPCommand.CMD_FILL)

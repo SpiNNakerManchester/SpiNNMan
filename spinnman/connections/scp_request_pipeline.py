@@ -128,9 +128,9 @@ class SCPRequestPipeLine(object):
             been received; takes SCPResponse as a parameter, or None if the\
             response doesn't need to be processed
         :param error_callback: A callback function to call when an error is\
-            found when processing the message; takes original SCPRequest,\
-            exception caught and a list of tuples of (filename, line number,\
-            function name, text) as a traceback
+            found when processing the message; takes original\
+            AbstractSCPRequest, exception caught and a list of tuples of\
+            (filename, line number, function name, text) as a traceback
         """
 
         # If the connection has not been measured

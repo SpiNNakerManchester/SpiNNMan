@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 
 class SetLED(AbstractSCPRequest):
@@ -35,8 +36,6 @@ class SetLED(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_LED),
             argument_1=encoded_led_states)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return CheckOKResponse("Set SetLED", "CMD_LED")

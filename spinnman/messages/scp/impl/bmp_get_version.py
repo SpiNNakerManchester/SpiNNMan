@@ -1,8 +1,9 @@
-# spinnman imports
-from spinnman.messages.scp.abstract_messages import BMPRequest
+from spinnman.messages.scp.abstract_messages \
+    import AbstractSCPRequest, BMPRequest
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from .get_version_response import GetVersionResponse
+from spinn_utilities.overrides import overrides
 
 
 class BMPGetVersion(BMPRequest):
@@ -20,8 +21,6 @@ class BMPGetVersion(BMPRequest):
         super(BMPGetVersion, self).__init__(
             board, SCPRequestHeader(command=SCPCommand.CMD_VER))
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return GetVersionResponse()

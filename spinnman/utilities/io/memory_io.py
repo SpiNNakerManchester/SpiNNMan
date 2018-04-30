@@ -59,7 +59,6 @@ class _ChipMemoryIO(object):
             self, transceiver, x, y, write_memory_function,
             base_address=0x60000000, buffer_size=256):
         """
-
         :param transceiver: The transceiver to read and write with
         :param x: The x-coordinate of the chip to write to
         :param y: The y-coordinate of the chip to write to
@@ -177,7 +176,8 @@ class _ChipMemoryIO(object):
         :param bytes_to_fill: Number of bytes to fill from current position
         :type bytes_to_fill: int
         :param data_type: The type of the repeat value
-        :type data_type: :py:class:`spinnman.process.fill_process.FillProcess`
+        :type data_type: \
+            :py:class:`spinnman.processes.fill_process.FillDataType`
         """
         self.flush_write_buffer()
         self._transceiver.fill_memory(
@@ -212,7 +212,6 @@ class MemoryIO(AbstractIO):
     def __init__(self, transceiver, x, y, memory_write_function, start_address,
                  end_address):
         """
-
         :param transceiver: The transceiver to read and write with
         :param x: The x-coordinate of the chip to write to
         :param y: The y-coordinate of the chip to write to
@@ -373,8 +372,8 @@ class MemoryIO(AbstractIO):
                 "The size of {} bytes to fill is not divisible by the size of"
                 " the data of {} bytes".format(bytes_to_fill, data_type.value))
         data_to_fill = struct.pack(
-            "{}".format(data_type.struct_type[-1]), repeat_value
-        )
+            "{}".format(data_type.struct_type[-1]),
+            repeat_value)
         self._chip_memory_io.current_address = self._current_address
         for _ in range(bytes_to_fill // data_type.value):
             self._chip_memory_io.write(data_to_fill)

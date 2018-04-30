@@ -11,9 +11,9 @@ def read_eieio_data_message(data, offset):
     :param offset: offset at which the parsing operation should start
     :type offset: int
     :return: an object which inherits from EIEIODataMessage which contains\
-            parsed data received from the network
+        parsed data received from the network
     :rtype:\
-            :py:class:`spinnman.messages.eieio.data_messages.eieio_data_message.EIEIODataMessage`
+        :py:class:`spinnman.messages.eieio.data_messages.EIEIODataMessage`
     """
     eieio_header = EIEIODataHeader.from_bytestring(data, offset)
     offset += eieio_header.size

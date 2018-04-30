@@ -1,4 +1,5 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
@@ -38,10 +39,8 @@ class ReadMemory(AbstractSCPRequest):
             argument_3=address_length_dtype[
                 (base_address % 4, size % 4)].value)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return _SCPReadMemoryResponse()
 
 
@@ -59,6 +58,7 @@ class _SCPReadMemoryResponse(AbstractSCPResponse):
         self._length = None
         self._offset = None
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
         if self._scp_response_header.result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
