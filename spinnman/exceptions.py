@@ -1,4 +1,5 @@
 import traceback
+from collections import OrderedDict
 
 
 class SpinnmanException(Exception):
@@ -211,63 +212,65 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         return self._response
 
 
+class _Group(object):
+    def __init__(self, trace_back):
+        self.trace_back = trace_back
+        self.chip_core = "["
+        self._separator = ""
+
+    def finalise(self):
+        self.chip_core += "]"
+
+    def add_coord(self, sdp_header):
+        self.chip_core += "{}[{}:{}:{}]".format(
+            self._separator,
+            sdp_header.destination_chip_x,
+            sdp_header.destination_chip_y,
+            sdp_header.destination_cpu)
+        self._separator = ","
+
+
 class SpinnmanGroupedProcessException(SpinnmanException):
-    """Encapsulates exceptions from processes which communicate with a \
-    collection of cores/chips
+    """ Encapsulates exceptions from processes which communicate with a\
+        collection of cores/chips
     """
     def __init__(self, error_requests, exceptions, tracebacks):
-
         store = self._group_exceptions(error_requests, exceptions, tracebacks)
-        problem = "Exceptions found were: \n"
+        problem = "Exceptions found were:\n"
         for exception in store:
             problem += \
-                "   Received exception class : {} \n" \
-                "       With message {} \n" \
-                "       When sending to {} \n" \
-                "       Stack trace: {} \n".format(
+                "   Received exception class : {}\n" \
+                "       With message {}\n" \
+                "       When sending to {}\n" \
+                "       Stack trace: {}\n".format(
                     exception.__class__.__name__, exception.message,
-                    store[exception]["chip_core"],
-                    traceback.format_exc(store[exception]["trace_back"]))
-        SpinnmanException.__init__(self, problem)
+                    store[exception].chip_core,
+                    traceback.format_exc(store[exception].trace_back))
+        super(SpinnmanGroupedProcessException, self).__init__(problem)
 
     @staticmethod
     def _group_exceptions(error_requests, exceptions, tracebacks):
-        """  groups exceptions into a form usable by the exception
+        """ Groups exceptions into a form usable by the exception
 
         :param error_requests: the error requests
         :param exceptions: the exceptions
         :param tracebacks: the tracebacks
         :return: a sorted exception pile
+        :rtype: dict(Exception,_Group)
         """
-        exception_types = list()
-        data = dict()
-        first = True
+        data = OrderedDict()
         for error_request, exception, trace_back in zip(
                 error_requests, exceptions, tracebacks):
-            if first:
-                exception_types.append(exception)
-                data[exception] = dict()
-                data[exception]["trace_back"] = trace_back
-                data[exception]["chip_core"] = "["
-                data[exception]["chip_core"] += "[{}:{}:{}]".format(
-                    error_request.sdp_header.destination_chip_x,
-                    error_request.sdp_header.destination_chip_y,
-                    error_request.sdp_header.destination_cpu)
-                first = False
+            for stored_exception in data.keys():
+                if isinstance(exception, type(stored_exception)):
+                    found_exception = stored_exception
+                    break
             else:
-                found_exception = None
-                for stored_exception in exception_types:
-                    if isinstance(exception, type(stored_exception)):
-                        found_exception = stored_exception
-                if found_exception is None:
-                    data[exception] = dict()
-                    data[found_exception]["trace_back"] = trace_back
-                data[found_exception]["chip_core"] += "[{}:{}:{}]".format(
-                    error_request.sdp_header.destination_chip_x,
-                    error_request.sdp_header.destination_chip_y,
-                    error_request.sdp_header.destination_cpu)
+                data[exception] = _Group(trace_back)
+                found_exception = exception
+            data[found_exception].add_coord(error_request.sdp_header)
         for exception in data:
-            data[exception]["chip_core"] += "]"
+            data[exception].finalise()
         return data
 
 

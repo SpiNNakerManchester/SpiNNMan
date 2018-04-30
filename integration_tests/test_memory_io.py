@@ -46,8 +46,7 @@ def test_memory_io():
     transceiver = _MockTransceiver()
     address = 0
     data = bytearray(numpy.random.randint(0, 256, n_bytes).astype("uint8"))
-    memory = MemoryIO(transceiver, 0, 0, transceiver.write_memory, address,
-                      address + n_bytes)
+    memory = MemoryIO(transceiver, 0, 0, address, address + n_bytes)
     memory.write(bytes(data))
     read_memory = memory[read_start_offset:read_end_offset]
     read_data = bytearray(read_memory.read())

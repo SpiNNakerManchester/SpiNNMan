@@ -209,8 +209,8 @@ class MemoryIO(AbstractIO):
     # ensure they are written before a read occurs
     __write_cache__ = dict()
 
-    def __init__(self, transceiver, x, y, memory_write_function, start_address,
-                 end_address):
+    def __init__(self, transceiver, x, y, start_address,
+                 end_address, memory_write_function=None):
         """
         :param transceiver: The transceiver to read and write with
         :param x: The x-coordinate of the chip to write to
@@ -219,11 +219,16 @@ class MemoryIO(AbstractIO):
         :param end_address:\
             The end address of the region to write to.  This is the first\
             address just outside the region
+        :param memory_write_function: How to write memory. Defaults to the\
+            transceiver's :py:meth:`~spinnman.Transceiver.write_memory`\
+            method.
         """
         # pylint: disable=too-many-arguments
         if start_address >= end_address:
             raise ValueError("Start address must be less than end address")
 
+        if memory_write_function is None:
+            memory_write_function = transceiver.write_memory
         self._chip_memory_io = _get_chip_memory_io(
             transceiver, x, y, memory_write_function)
         self._start_address = start_address
@@ -240,11 +245,11 @@ class MemoryIO(AbstractIO):
             if new_slice >= len(self):
                 raise ValueError("Index {} out of range".format)
             return MemoryIO(
-                self._chip_memory_io.transceiver, self._chip_memory_io.x,
-                self._chip_memory_io.y,
-                self._chip_memory_io.write_memory_function,
+                self._chip_memory_io.transceiver,
+                self._chip_memory_io.x, self._chip_memory_io.y,
                 self._start_address + new_slice,
-                self._start_address + new_slice + 1)
+                self._start_address + new_slice + 1,
+                self._chip_memory_io.write_memory_function)
         elif isinstance(new_slice, slice):
             if new_slice.step is not None and new_slice.step != 1:
                 raise ValueError("Slice must be contiguous")
@@ -271,10 +276,10 @@ class MemoryIO(AbstractIO):
                 raise ValueError("Zero sized regions are not supported")
 
             return MemoryIO(
-                self._chip_memory_io.transceiver, self._chip_memory_io.x,
-                self._chip_memory_io.y,
-                self._chip_memory_io.write_memory_function,
-                start_address, end_address)
+                self._chip_memory_io.transceiver,
+                self._chip_memory_io.x, self._chip_memory_io.y,
+                start_address, end_address,
+                self._chip_memory_io.write_memory_function)
 
     @overrides(AbstractIO.__enter__)
     def __enter__(self):
