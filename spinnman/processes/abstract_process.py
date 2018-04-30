@@ -27,30 +27,27 @@ class AbstractProcess(object):
         self._tracebacks.append(tb)
 
     def is_error(self):
-        return self._exceptions is not None
+        return bool(self._exceptions)
 
     def check_for_error(self, print_exception=False):
+        if len(self._exceptions) == 1:
+            exc_info = sys.exc_info()
+            sdp_header = self._error_requests[0].sdp_header
 
-        if len(self._exceptions) != 0:
-            if len(self._exceptions) == 1:
-                exc_info = sys.exc_info()
+            if print_exception:
+                logger.error("failure in request to (%d, %d, %d)",
+                             sdp_header.destination_chip_x,
+                             sdp_header.destination_chip_y,
+                             sdp_header.destination_cpu, exc_info=exc_info)
 
-                if print_exception:
-                    sdp_header = self._error_requests[0].sdp_header
-                    logger.error("failure in request to (%d, %d, %d)",
-                                 sdp_header.destination_chip_x,
-                                 sdp_header.destination_chip_y,
-                                 sdp_header.destination_cpu, exc_info=exc_info)
-
-                sdp_header = self._error_requests[0].sdp_header
-                this_exception = SpinnmanGenericProcessException(
-                    self._exceptions[0], exc_info[2],
-                    sdp_header.destination_chip_x,
-                    sdp_header.destination_chip_y, sdp_header.destination_cpu)
-                raise this_exception
-            else:
-                this_exception = SpinnmanGroupedProcessException(
-                    self._error_requests, self._exceptions, self._tracebacks)
-                if print_exception:
-                    logger.error(this_exception.message, this_exception.args)
-                raise this_exception
+            this_exception = SpinnmanGenericProcessException(
+                self._exceptions[0], exc_info[2],
+                sdp_header.destination_chip_x, sdp_header.destination_chip_y,
+                sdp_header.destination_cpu)
+            raise this_exception
+        elif self._exceptions:
+            this_exception = SpinnmanGroupedProcessException(
+                self._error_requests, self._exceptions, self._tracebacks)
+            if print_exception:
+                logger.error(this_exception.message, this_exception.args)
+            raise this_exception
