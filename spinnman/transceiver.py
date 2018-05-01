@@ -16,6 +16,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException, \
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
+from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 
 from spinnman.messages.spinnaker_boot \
     import SystemVariableDefinition, SpinnakerBootMessages
@@ -725,14 +726,15 @@ class Transceiver(object):
         if not self._scamp_connections:
             return list()
 
-        # if the machine hasn't been created, create it
-        if self._machine is None:
-            self._update_machine()
+        # Get the machine dimensions
+        dims = self.get_machine_dimensions()
 
         # Find all the new connections via the machine Ethernet-connected chips
         new_connections = list()
         disabled_ethernets = list()
-        for chip in self._machine.ethernet_connected_chips:
+        geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
+        for chip in geometry.get_potential_ethernet_chips(
+                dims.width, dims.height):
             if chip.ip_address in self._udp_scamp_connections:
                 continue
             conn = self._search_for_proxies(chip)
