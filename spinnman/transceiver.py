@@ -731,7 +731,6 @@ class Transceiver(object):
 
         # Find all the new connections via the machine Ethernet-connected chips
         new_connections = list()
-        disabled_ethernets = list()
         geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
         for chip in geometry.get_potential_ethernet_chips(
                 dims.width, dims.height):
@@ -761,9 +760,6 @@ class Transceiver(object):
                 logger.warning(
                     "Additional Ethernet connection on {} at chip {}, {} "
                     "cannot be contacted", chip.ip_address, chip.x, chip.y)
-                disabled_ethernets.append(chip)
-        for chip in disabled_ethernets:
-            self._machine.disable_ethernet_connected_chip(chip)
 
         # Update the connection queues after finding new connections
         return new_connections
