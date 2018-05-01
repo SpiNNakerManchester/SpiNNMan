@@ -15,6 +15,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException, \
 
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
+from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 
 from spinnman.messages.spinnaker_boot \
     import SystemVariableDefinition, SpinnakerBootMessages
@@ -486,8 +487,9 @@ class Transceiver(object):
                                  conn.remote_ip_address)
                 raise
 
-    def _try_sver_though_scamp_connection(self, connection_selector, retries):
-        """ Try to query 0, 0 for SVER through a given connection
+    def _check_connection(
+            self, connection_selector, retries, chip_x, chip_y):
+        """ Check that the given connection to the given chip works
 
         :param connection_selector: the connection selector to use
         :param retries: how many attempts to do before giving up
@@ -495,8 +497,13 @@ class Transceiver(object):
         """
         for _ in xrange(retries):
             try:
-                self.get_scamp_version(connection_selector=connection_selector)
-                return True
+                sender = SendSingleCommandProcess(connection_selector)
+                chip_info = sender.execute(
+                    GetChipInfo(chip_x, chip_y)).chip_info
+                if not chip_info.is_ethernet_available:
+                    time.sleep(0.1)
+                else:
+                    return True
             except (SpinnmanGenericProcessException, SpinnmanTimeoutException,
                     SpinnmanUnexpectedResponseCodeException):
                 pass
@@ -733,21 +740,20 @@ class Transceiver(object):
             if conn is None:
                 conn = SCAMPConnection(
                     remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
-                new_connections.append(conn)
-                self._udp_scamp_connections[chip.ip_address] = conn
-                self._scamp_connections.append(conn)
             else:
                 # proxy, needs an adjustment
                 if conn.remote_ip_address in self._udp_scamp_connections:
                     del self._udp_scamp_connections[conn.remote_ip_address]
-                self._udp_scamp_connections[chip.ip_address] = conn
 
             # check if it works
-            if self._try_sver_though_scamp_connection(
+            if self._check_connection(
                     MostDirectConnectionSelector(None, [conn]),
-                    _STANDARD_RETIRES_NO):
+                    _STANDARD_RETIRES_NO, chip.x, chip.y):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
+                self._udp_scamp_connections[chip.ip_address] = conn
+                self._scamp_connections.append(conn)
+                new_connections.append(conn)
             else:
                 logger.warning(
                     "Additional Ethernet connection on {} at chip {}, {} "

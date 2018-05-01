@@ -64,7 +64,7 @@ class ChipSummaryInfo(object):
         ip_data = _FOUR_BYTES.unpack_from(chip_summary_data, data_offset)
         ethernet_ip_address = "{}.{}.{}.{}".format(
             ip_data[0], ip_data[1], ip_data[2], ip_data[3])
-        if self._is_ethernet_available:
+        if ethernet_ip_address != "0.0.0.0":
             self._ethernet_ip_address = ethernet_ip_address
         data_offset += 4
 
