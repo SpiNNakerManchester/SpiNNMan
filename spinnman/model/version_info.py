@@ -68,7 +68,7 @@ class VersionInfo(object):
         """ The version number of the software
 
         :return: The version
-        :rtype: float
+        :rtype: tuple(int, int, int)
         """
         return self._version_number
 

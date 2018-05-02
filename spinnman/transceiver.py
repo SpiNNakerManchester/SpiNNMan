@@ -189,7 +189,8 @@ def create_transceiver_from_hostname(
     return Transceiver(
         version, connections=connections, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id,
-        scamp_connections=scamp_connections, max_sdram_size=max_sdram_size)
+        ignore_links=ignored_links, scamp_connections=scamp_connections,
+        max_sdram_size=max_sdram_size)
 
 
 class Transceiver(object):
@@ -493,7 +494,12 @@ class Transceiver(object):
         """ Check that the given connection to the given chip works
 
         :param connection_selector: the connection selector to use
+        :param chip_x: the chip x coordinate to try to talk to
+        :type chip_x: int
+        :param chip_y: the chip y coordinate to try to talk to
+        :type chip_y: int
         :param retries: how many attempts to do before giving up
+        :type retries: int
         :return: True if a valid response is received, False otherwise
         """
         for _ in xrange(retries):
@@ -769,7 +775,8 @@ class Transceiver(object):
             linked to a given chip
 
         :param chip: the chip to locate
-        :rtype: None
+        :return: connection or None
+        :rtype: None or SCAMPConnection
         """
         for connection in self._scamp_connections:
             if connection.chip_x == chip.x and connection.chip_y == chip.y:
@@ -2799,7 +2806,7 @@ class Transceiver(object):
                     # is not on all interfaces, this is an error
                     if "0.0.0.0" not in receiving_connections:
                         raise SpinnmanInvalidParameterException(
-                            "local_port", local_port,
+                            "local_port", str(local_port),
                             "Another connection is already listening on this"
                             " port")
 
