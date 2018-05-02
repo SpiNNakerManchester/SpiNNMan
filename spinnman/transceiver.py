@@ -92,6 +92,7 @@ INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
 
 _ONE_BYTE = struct.Struct("B")
 _TWO_BYTES = struct.Struct("<BB")
+_FOUR_BYTES = struct.Struct("<BB")
 _ONE_WORD = struct.Struct("<I")
 _ONE_LONG = struct.Struct("<Q")
 
@@ -738,16 +739,23 @@ class Transceiver(object):
         # Find all the new connections via the machine Ethernet-connected chips
         new_connections = list()
         geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
-        for chip in geometry.get_potential_ethernet_chips(
+        for x, y in geometry.get_potential_ethernet_chips(
                 dims.width, dims.height):
-            if chip.ip_address in self._udp_scamp_connections:
+            ip_addr_item = SystemVariableDefinition.ethernet_ip_address
+            ip_address_data = _FOUR_BYTES.unpack_from(
+                self.read_memory(
+                    x, y,
+                    SYSTEM_VARIABLE_BASE_ADDRESS + ip_addr_item.offset, 4))
+            ip_address = "{}.{}.{}.{}".format(*ip_address_data)
+
+            if ip_address in self._udp_scamp_connections:
                 continue
-            conn = self._search_for_proxies(chip)
+            conn = self._search_for_proxies(x, y)
 
             # if no data, no proxy
             if conn is None:
                 conn = SCAMPConnection(
-                    remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
+                    remote_host=ip_address, chip_x=x, chip_y=y)
             else:
                 # proxy, needs an adjustment
                 if conn.remote_ip_address in self._udp_scamp_connections:
@@ -756,30 +764,31 @@ class Transceiver(object):
             # check if it works
             if self._check_connection(
                     MostDirectConnectionSelector(None, [conn]),
-                    _STANDARD_RETIRES_NO, chip.x, chip.y):
+                    _STANDARD_RETIRES_NO, x, y):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
-                self._udp_scamp_connections[chip.ip_address] = conn
+                self._udp_scamp_connections[ip_address] = conn
                 self._scamp_connections.append(conn)
                 new_connections.append(conn)
             else:
                 logger.warning(
                     "Additional Ethernet connection on {} at chip {}, {} "
-                    "cannot be contacted", chip.ip_address, chip.x, chip.y)
+                    "cannot be contacted", ip_address, x, y)
 
         # Update the connection queues after finding new connections
         return new_connections
 
-    def _search_for_proxies(self, chip):
+    def _search_for_proxies(self, x, y):
         """ Looks for an entry within the UDP SCAMP connections which is\
             linked to a given chip
 
-        :param chip: the chip to locate
+        :param x: The x-coordinate of the chip
+        :param y: The y-coordinate of the chip
         :return: connection or None
         :rtype: None or SCAMPConnection
         """
         for connection in self._scamp_connections:
-            if connection.chip_x == chip.x and connection.chip_y == chip.y:
+            if connection.chip_x == x and connection.chip_y == y:
                 return connection
         return None
 
