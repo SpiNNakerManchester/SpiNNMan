@@ -92,7 +92,7 @@ INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
 
 _ONE_BYTE = struct.Struct("B")
 _TWO_BYTES = struct.Struct("<BB")
-_FOUR_BYTES = struct.Struct("<BB")
+_FOUR_BYTES = struct.Struct("<BBBB")
 _ONE_WORD = struct.Struct("<I")
 _ONE_LONG = struct.Struct("<Q")
 
