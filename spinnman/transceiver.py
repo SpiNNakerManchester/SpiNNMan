@@ -15,6 +15,8 @@ from spinnman.exceptions import SpinnmanInvalidParameterException, \
 
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
+from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
+from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 
 from spinnman.messages.spinnaker_boot \
     import SystemVariableDefinition, SpinnakerBootMessages
@@ -90,6 +92,7 @@ INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
 
 _ONE_BYTE = struct.Struct("B")
 _TWO_BYTES = struct.Struct("<BB")
+_FOUR_BYTES = struct.Struct("<BBBB")
 _ONE_WORD = struct.Struct("<I")
 _ONE_LONG = struct.Struct("<Q")
 
@@ -187,7 +190,8 @@ def create_transceiver_from_hostname(
     return Transceiver(
         version, connections=connections, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id,
-        scamp_connections=scamp_connections, max_sdram_size=max_sdram_size)
+        ignore_links=ignored_links, scamp_connections=scamp_connections,
+        max_sdram_size=max_sdram_size)
 
 
 class Transceiver(object):
@@ -486,17 +490,28 @@ class Transceiver(object):
                                  conn.remote_ip_address)
                 raise
 
-    def _try_sver_though_scamp_connection(self, connection_selector, retries):
-        """ Try to query 0, 0 for SVER through a given connection
+    def _check_connection(
+            self, connection_selector, retries, chip_x, chip_y):
+        """ Check that the given connection to the given chip works
 
         :param connection_selector: the connection selector to use
+        :param chip_x: the chip x coordinate to try to talk to
+        :type chip_x: int
+        :param chip_y: the chip y coordinate to try to talk to
+        :type chip_y: int
         :param retries: how many attempts to do before giving up
+        :type retries: int
         :return: True if a valid response is received, False otherwise
         """
         for _ in xrange(retries):
             try:
-                self.get_scamp_version(connection_selector=connection_selector)
-                return True
+                sender = SendSingleCommandProcess(connection_selector)
+                chip_info = sender.execute(
+                    GetChipInfo(chip_x, chip_y)).chip_info
+                if not chip_info.is_ethernet_available:
+                    time.sleep(0.1)
+                else:
+                    return True
             except (SpinnmanGenericProcessException, SpinnmanTimeoutException,
                     SpinnmanUnexpectedResponseCodeException):
                 pass
@@ -718,53 +733,62 @@ class Transceiver(object):
         if not self._scamp_connections:
             return list()
 
-        # if the machine hasn't been created, create it
-        if self._machine is None:
-            self._update_machine()
+        # Get the machine dimensions
+        dims = self.get_machine_dimensions()
 
         # Find all the new connections via the machine Ethernet-connected chips
         new_connections = list()
-        for chip in self._machine.ethernet_connected_chips:
-            if chip.ip_address in self._udp_scamp_connections:
+        geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
+        for x, y in geometry.get_potential_ethernet_chips(
+                dims.width, dims.height):
+            ip_addr_item = SystemVariableDefinition.ethernet_ip_address
+            ip_address_data = _FOUR_BYTES.unpack_from(
+                self.read_memory(
+                    x, y,
+                    SYSTEM_VARIABLE_BASE_ADDRESS + ip_addr_item.offset, 4))
+            ip_address = "{}.{}.{}.{}".format(*ip_address_data)
+
+            if ip_address in self._udp_scamp_connections:
                 continue
-            conn = self._search_for_proxies(chip)
+            conn = self._search_for_proxies(x, y)
 
             # if no data, no proxy
             if conn is None:
                 conn = SCAMPConnection(
-                    remote_host=chip.ip_address, chip_x=chip.x, chip_y=chip.y)
-                new_connections.append(conn)
-                self._udp_scamp_connections[chip.ip_address] = conn
-                self._scamp_connections.append(conn)
+                    remote_host=ip_address, chip_x=x, chip_y=y)
             else:
                 # proxy, needs an adjustment
                 if conn.remote_ip_address in self._udp_scamp_connections:
                     del self._udp_scamp_connections[conn.remote_ip_address]
-                self._udp_scamp_connections[chip.ip_address] = conn
 
             # check if it works
-            if self._try_sver_though_scamp_connection(
+            if self._check_connection(
                     MostDirectConnectionSelector(None, [conn]),
-                    _STANDARD_RETIRES_NO):
+                    _STANDARD_RETIRES_NO, x, y):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
+                self._udp_scamp_connections[ip_address] = conn
+                self._scamp_connections.append(conn)
+                new_connections.append(conn)
             else:
                 logger.warning(
                     "Additional Ethernet connection on {} at chip {}, {} "
-                    "cannot be contacted", chip.ip_address, chip.x, chip.y)
+                    "cannot be contacted", ip_address, x, y)
 
         # Update the connection queues after finding new connections
         return new_connections
 
-    def _search_for_proxies(self, chip):
+    def _search_for_proxies(self, x, y):
         """ Looks for an entry within the UDP SCAMP connections which is\
             linked to a given chip
 
-        :param chip: the chip to locate
-        :rtype: None
+        :param x: The x-coordinate of the chip
+        :param y: The y-coordinate of the chip
+        :return: connection or None
+        :rtype: None or SCAMPConnection
         """
         for connection in self._scamp_connections:
-            if connection.chip_x == chip.x and connection.chip_y == chip.y:
+            if connection.chip_x == x and connection.chip_y == y:
                 return connection
         return None
 
@@ -2791,7 +2815,7 @@ class Transceiver(object):
                     # is not on all interfaces, this is an error
                     if "0.0.0.0" not in receiving_connections:
                         raise SpinnmanInvalidParameterException(
-                            "local_port", local_port,
+                            "local_port", str(local_port),
                             "Another connection is already listening on this"
                             " port")
 
