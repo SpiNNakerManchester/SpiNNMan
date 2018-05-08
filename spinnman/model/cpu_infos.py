@@ -44,10 +44,16 @@ class CPUInfos(object):
     def items(self):
         return self._cpu_infos.items()
 
+    def values(self):
+        return self._cpu_infos.values()
+
     def itervalues(self):
         """ Get an iterable of cpu_info
         """
         return itervalues(self._cpu_infos)
+
+    def keys(self):
+        return self._cpu_infos.keys()
 
     def iterkeys(self):
         """ Get an iterable of (x, y, p)
