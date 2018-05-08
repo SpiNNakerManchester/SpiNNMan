@@ -41,6 +41,9 @@ class CPUInfos(object):
         """
         return iteritems(self._cpu_infos)
 
+    def items(self):
+        return self._cpu_infos.items()
+
     def itervalues(self):
         """ Get an iterable of cpu_info
         """
