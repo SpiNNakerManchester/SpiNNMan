@@ -4,6 +4,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 
 class WriteMemory(AbstractSCPRequest):
@@ -14,7 +15,6 @@ class WriteMemory(AbstractSCPRequest):
 
     def __init__(self, x, y, base_address, data, cpu=0):
         """
-
         :param x: The x-coordinate of the chip, between 0 and 255;\
             this is not checked due to speed restrictions
         :type x: int
@@ -47,5 +47,6 @@ class WriteMemory(AbstractSCPRequest):
         datastring = super(WriteMemory, self).bytestring
         return datastring + bytes(self._data_to_write)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("WriteMemory", "CMD_WRITE")

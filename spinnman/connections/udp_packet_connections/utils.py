@@ -12,7 +12,7 @@ _SDP_TAG = 0xFF
 
 
 def update_sdp_header_for_udp_send(sdp_header, source_x, source_y):
-    """ Apply defaults to the sdp header for sending over UDP
+    """ Apply defaults to the SDP header for sending over UDP
 
     :param sdp_header: The SDP header values
     :type sdp_header:\

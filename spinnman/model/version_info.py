@@ -68,7 +68,7 @@ class VersionInfo(object):
         """ The version number of the software
 
         :return: The version
-        :rtype: float
+        :rtype: tuple(int, int, int)
         """
         return self._version_number
 
@@ -101,10 +101,10 @@ class VersionInfo(object):
 
     @property
     def p(self):
-        """ The processor id of the processor where the information was\
-                    obtained
+        """ The processor ID of the processor where the information was\
+            obtained
 
-        :return: the processor id
+        :return: the processor ID
         :rtype: int
         """
         return self._p

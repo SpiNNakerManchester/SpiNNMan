@@ -26,19 +26,19 @@ class EIEIOCommandHeader(object):
 
     @staticmethod
     def from_bytestring(data, offset):
-        """ Read an eieio command header from a bytestring
+        """ Read an EIEIO command header from a bytestring
 
         :param data: The bytestring to read the data from
-        :type data: str
+        :type data: str or bytes
         :param offset: The offset where the valid data starts
         :type offset: int
         :return: an EIEIO command header
         :rtype:\
-                    :py:class:`spinnman.messages.eieio.command_messages.eieio_command_header.EIEIOCommandHeader`
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    reading from the reader
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If there\
-                    is an error setting any of the values
+            :py:class:`EIEIOCommandHeader`
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error reading from the reader
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If there is an error setting any of the values
         """
         command_header = _ONE_SHORT.unpack_from(data, offset)[0]
         command = command_header & 0x3FFF
@@ -49,6 +49,6 @@ class EIEIOCommandHeader(object):
     def bytestring(self):
         """ Get a bytestring of the header
 
-        :rtype: str
+        :rtype: bytes
         """
         return _ONE_SHORT.pack(0 << 15 | 1 << 14 | self._command)

@@ -30,7 +30,7 @@ class BMPRequest(AbstractSCPRequest):
 
     @staticmethod
     def get_first_board(boards):
-        """ Get the first board id given an int or iterable of ints
+        """ Get the first board ID given a board ID or collection of board IDs
         """
         if isinstance(boards, int):
             return boards
@@ -38,7 +38,7 @@ class BMPRequest(AbstractSCPRequest):
 
     @staticmethod
     def get_board_mask(boards):
-        """ Get the board mask given an int or iterable of ints of board ids
+        """ Get the board mask given a board ID or collection of board IDs
         """
         if isinstance(boards, int):
             return 1 << boards

@@ -15,7 +15,7 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
         from the final part e.g. if the machine IP address is 192.168.0.5, the\
         BMP IP address is assumed to be 192.168.0.4
 
-    :param hostname: the spinnaker machine main hostname or IP address
+    :param hostname: the SpiNNaker machine main hostname or IP address
     :param number_of_boards: the number of boards in the machine
     :return: The BMP connection data
     """

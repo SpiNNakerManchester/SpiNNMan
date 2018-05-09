@@ -1,4 +1,5 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums \
@@ -57,6 +58,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
                     FREE_SDRAM_BY_APP_ID.value))  # @UndefinedVariable
             self._read_n_blocks_freed = True
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return _SCPSDRAMDeAllocResponse(self._read_n_blocks_freed)
 
@@ -75,10 +77,8 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         self._number_of_blocks_freed = None
         self._read_n_blocks_freed = read_n_blocks_freed
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

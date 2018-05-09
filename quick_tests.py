@@ -125,7 +125,7 @@ class Section(object):
 
     def __enter__(self):
         print(self.msg)
-        print("=" *  len(self.msg))
+        print("=" * len(self.msg))
 
     def __exit__(self, *_ignored):
         print("")

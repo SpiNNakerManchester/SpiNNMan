@@ -5,8 +5,8 @@ _BOOTROM_SPINN_PORT = 54321  # Matches SPINN_PORT in spinnaker_bootROM
 
 
 class IPAddressesConnection(UDPConnection):
-    """ A connection that detects any UDP packet that is transmitted by \
-        spinnaker boards prior to boot
+    """ A connection that detects any UDP packet that is transmitted by\
+        SpiNNaker boards prior to boot
     """
     __slots__ = []
 

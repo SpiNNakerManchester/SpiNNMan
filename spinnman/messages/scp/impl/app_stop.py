@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand, Signal
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 _APP_MASK = 0xFF
 
@@ -20,7 +21,6 @@ class AppStop(AbstractSCPRequest):
 
     def __init__(self, app_id):
         """
-
         :param app_id: The id of the application, between 0 and 255
         :type app_id: int
         """
@@ -35,5 +35,6 @@ class AppStop(AbstractSCPRequest):
             argument_2=(5 << 28) | _get_data(app_id, Signal.STOP),
             argument_3=(1 << 31) + (0x3f << 8))
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("Send Stop", "CMD_NNP")

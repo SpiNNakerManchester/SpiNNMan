@@ -18,7 +18,7 @@ class CPUInfos(object):
         :type x: int
         :param y: The y-coordinate of the chip
         :type y: int
-        :param processor_id: A processor id
+        :param processor_id: A processor ID
         :type processor_id: int
         :param cpu_info: The CPU information for the core
         :type cpu_info: :py:class:`spinnman.model.enums.cpu_info.CPUInfo`
@@ -41,10 +41,19 @@ class CPUInfos(object):
         """
         return iteritems(self._cpu_infos)
 
+    def items(self):
+        return self._cpu_infos.items()
+
+    def values(self):
+        return self._cpu_infos.values()
+
     def itervalues(self):
         """ Get an iterable of cpu_info
         """
         return itervalues(self._cpu_infos)
+
+    def keys(self):
+        return self._cpu_infos.keys()
 
     def iterkeys(self):
         """ Get an iterable of (x, y, p)

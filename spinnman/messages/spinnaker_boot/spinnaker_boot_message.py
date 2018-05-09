@@ -24,7 +24,7 @@ class SpinnakerBootMessage(object):
         """
         :param opcode: The operation of this packet
         :type opcode:\
-            :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_op_code.SpinnakerBootOpCode`
+            :py:class:`spinnman.messages.spinnaker_boot.SpinnakerBootOpCode`
         :param operand_1: The first operand
         :type operand_1: int
         :param operand_2: The second operand
@@ -57,7 +57,7 @@ class SpinnakerBootMessage(object):
 
         :return: The operation code
         :rtype:\
-            :py:class:`spinnman.messages.spinnaker_boot.spinnaker_boot_op_code.SpinnakerBootOpCode`
+            :py:class:`spinnman.messages.spinnaker_boot.SpinnakerBootOpCode`
         """
         return self._opcode
 

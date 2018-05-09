@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .iptag_get_info_response import IPTagGetInfoResponse
+from spinn_utilities.overrides import overrides
 
 _IPTAG_TTO = (4 << 16)
 
@@ -30,8 +31,6 @@ class IPTagSetTTO(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_IPTAG),
             argument_1=_IPTAG_TTO, argument_2=tag_timeout)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return IPTagGetInfoResponse()
