@@ -1,7 +1,6 @@
 from __future__ import print_function
 import logging
 import sys
-
 from spinnman.exceptions import SpinnmanGenericProcessException
 
 logger = logging.getLogger(__name__)

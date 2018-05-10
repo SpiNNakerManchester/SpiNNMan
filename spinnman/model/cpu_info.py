@@ -1,5 +1,4 @@
 import struct
-
 from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
 CPU_INFO_BYTES = 128

@@ -1,11 +1,10 @@
 import struct
-
-from spinn_machine import FixedRouteEntry
 from spinn_utilities.overrides import overrides
+from spinn_machine import FixedRouteEntry
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest, \
-    AbstractSCPResponse
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest, AbstractSCPResponse)
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPHeader, SDPFlag
 

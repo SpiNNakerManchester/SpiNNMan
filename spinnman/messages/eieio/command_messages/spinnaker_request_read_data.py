@@ -1,10 +1,10 @@
-from spinnman.exceptions import SpinnmanInvalidPacketException, \
-    SpinnmanInvalidParameterTypeException
+import struct
+from past.builtins import xrange
+from spinnman.exceptions import (
+    SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
-from past.builtins import xrange
-import struct
 
 _PATTERN_BBBB = struct.Struct("<BBBB")
 _PATTERN_BBII = struct.Struct("<BBII")

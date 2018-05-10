@@ -2,19 +2,16 @@ from __future__ import print_function
 import unittest
 import struct
 from spinn_machine.virtual_machine import VirtualMachine
-
 from spinnman.transceiver import Transceiver
 from spinnman import constants
-from spinnman.messages.spinnaker_boot.system_variable_boot_values \
-    import SystemVariableDefinition
-from spinnman.connections.udp_packet_connections \
-    import BootConnection, EIEIOConnection, SCAMPConnection
+from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
+    SystemVariableDefinition)
+from spinnman.connections.udp_packet_connections import (
+    BootConnection, EIEIOConnection, SCAMPConnection)
 import spinnman.transceiver as transceiver
-
 from board_test_configuration import BoardTestConfiguration
 
 board_config = BoardTestConfiguration()
-
 ver = 5  # Guess?
 
 

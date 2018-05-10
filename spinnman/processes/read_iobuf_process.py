@@ -2,7 +2,6 @@ import functools
 import struct
 from collections import defaultdict, OrderedDict
 from six import itervalues
-
 from spinnman.model import IOBuffer
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl import ReadMemory

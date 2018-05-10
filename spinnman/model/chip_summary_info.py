@@ -1,5 +1,4 @@
 import struct
-
 from spinnman.model.enums import CPUState
 
 _THREE_WORDS = struct.Struct("<3I")

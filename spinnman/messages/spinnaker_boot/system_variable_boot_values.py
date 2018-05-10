@@ -1,6 +1,6 @@
-from enum import Enum
 from collections import namedtuple
 import struct
+from enum import Enum
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
 

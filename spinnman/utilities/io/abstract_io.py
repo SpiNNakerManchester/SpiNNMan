@@ -1,8 +1,6 @@
-from six import add_metaclass
-from abc import ABCMeta
 import os
-from abc import abstractmethod
-from abc import abstractproperty
+from abc import (ABCMeta, abstractmethod, abstractproperty)
+from six import add_metaclass
 from spinnman.processes.fill_process import FillDataType
 
 

@@ -1,5 +1,5 @@
 from spinnman.messages.scp.impl.fixed_route_read import FixedRouteRead
-from spinnman.processes import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):

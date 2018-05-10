@@ -1,12 +1,10 @@
 import struct
-
+from spinn_utilities.overrides import overrides
 from .udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
-from spinn_utilities.overrides import overrides
-from spinnman.connections.abstract_classes \
-    import SCPReceiver, SCPSender
+from spinnman.connections.abstract_classes import SCPReceiver, SCPSender
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")

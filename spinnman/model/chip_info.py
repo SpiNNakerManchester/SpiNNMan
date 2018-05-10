@@ -1,6 +1,5 @@
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-
 import struct
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 
 # The base address of the system variable structure in System ram
 _SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00

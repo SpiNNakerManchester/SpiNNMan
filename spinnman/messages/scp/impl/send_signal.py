@@ -1,10 +1,10 @@
+from spinn_utilities.overrides import overrides
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
-from spinn_utilities.overrides import overrides
 
 _ALL_CORE_MASK = 0xFFFF
 _APP_MASK = 0xFF

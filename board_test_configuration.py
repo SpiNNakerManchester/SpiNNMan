@@ -1,11 +1,11 @@
 import socket
-from six.moves import configparser
 import os
-from spinnman.model import BMPConnectionData
 import platform
 import subprocess
 import unittest
 import time
+from six.moves import configparser
+from spinnman.model import BMPConnectionData
 
 _LOCALHOST = "127.0.0.1"
 # Microsoft invalid IP address. For more details see:

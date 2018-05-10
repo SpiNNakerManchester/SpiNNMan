@@ -16,7 +16,7 @@ def update_sdp_header_for_udp_send(sdp_header, source_x, source_y):
 
     :param sdp_header: The SDP header values
     :type sdp_header:\
-                :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
+        :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
     :return: Nothing is returned
     """
     sdp_header.tag = _SDP_TAG

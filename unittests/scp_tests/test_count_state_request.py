@@ -1,5 +1,4 @@
 import unittest
-
 from spinnman.messages.scp.impl import CountState
 from spinnman.model.enums import CPUState
 

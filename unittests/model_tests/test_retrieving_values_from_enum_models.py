@@ -1,5 +1,4 @@
 import unittest
-
 from spinnman.model.enums import MailboxCommand, CPUState, RunTimeError
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
 

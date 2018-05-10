@@ -1,7 +1,7 @@
 import struct
 from past.builtins import xrange
-from spinnman.model.enums import P2PTableRoute
 from six import iterkeys
+from spinnman.model.enums import P2PTableRoute
 
 _ONE_WORD = struct.Struct("<I")
 

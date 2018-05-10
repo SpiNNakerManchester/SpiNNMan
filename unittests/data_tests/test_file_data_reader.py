@@ -1,7 +1,6 @@
 import unittest
 import tempfile
 import os
-
 from spinn_storage_handlers import FileDataReader
 
 
