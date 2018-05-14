@@ -1,6 +1,6 @@
 import unittest
 from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.exceptions import SpinnmanTimeoutException 
+from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.scp.impl import GetVersion, ReadLink, ReadMemory
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
