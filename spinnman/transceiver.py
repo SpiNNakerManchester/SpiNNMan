@@ -678,8 +678,6 @@ class Transceiver(object):
         # Get the coordinates of the boot chip
         version_info = self.get_scamp_version()
 
-        time.sleep(5)
-
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
