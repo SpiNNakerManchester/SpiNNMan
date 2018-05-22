@@ -38,7 +38,8 @@ class ExecutableTargets(object):
         """
         for subset in subsets.core_subsets:
             for p in subset.processor_ids:
-                self.add_processor(binary, subset.x, subset.y, p)
+                self.add_processor(
+                    binary, subset.x, subset.y, p, executable_type)
 
         # add to binary to executable type
         self._binary_to_executable_types_map[executable_type].add(binary)
