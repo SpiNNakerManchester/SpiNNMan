@@ -1,5 +1,6 @@
 from collections import defaultdict
 from spinn_machine import CoreSubsets
+from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class ExecutableTargets(object):
@@ -35,15 +36,9 @@ class ExecutableTargets(object):
         :param executable_type: the executable type of the binary
         :rtype: None
         """
-        if binary in self._targets:
-            self._targets[binary].add_core_subset(subsets)
-        else:
-            self._targets[binary] = subsets
-
         for subset in subsets.core_subsets:
             for p in subset.processor_ids:
-                self._total_processors += 1
-                self._all_core_subsets.add_processor(subset.x, subset.y, p)
+                self.add_processor(binary, subset.x, subset.y, p)
 
         # add to binary to executable type
         self._binary_to_executable_types_map[executable_type].add(binary)
@@ -58,6 +53,8 @@ class ExecutableTargets(object):
         :param executable_type: the executable type of the binary
         :rtype: None
         """
+        if self.known(binary, chip_x, chip_y, chip_p):
+            return
         if binary not in self._targets:
             self._targets[binary] = CoreSubsets()
         self._targets[binary].add_processor(chip_x, chip_y, chip_p)
@@ -118,3 +115,15 @@ class ExecutableTargets(object):
         """ All the core subsets for all the binaries
         """
         return self._all_core_subsets
+
+    def known(self, binary, chip_x, chip_y, chip_p):
+        if self._all_core_subsets.is_core(chip_x, chip_y, chip_p):
+            # OK if and only if the chip is in this binary already
+            if binary in self._targets:
+                if self._targets[binary].is_core(chip_x, chip_y, chip_p):
+                    return True
+            parameter = "x:{} y:{} p:{}".format(chip_x, chip_y, chip_p)
+            problem = "Already associated with a different binary"
+            raise SpinnmanInvalidParameterException(parameter, binary, problem)
+        else:
+            return False
