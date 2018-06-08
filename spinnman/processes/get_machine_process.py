@@ -163,8 +163,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Build a Machine
         def chip_xy(chip):
             return chip.x, chip.y
-
-        import time
+ 
         chips = [
             self._make_chip(width, height, chip_info)
             for chip_info in sorted(self._chip_info.values(), key=chip_xy)
