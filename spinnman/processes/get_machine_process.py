@@ -165,13 +165,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             return chip.x, chip.y
 
         import time
-        t1 = time.time()
         chips = [
             self._make_chip(width, height, chip_info)
             for chip_info in sorted(self._chip_info.values(), key=chip_xy)
             if (chip_info.x, chip_info.y) not in self._ignore_chips]
-        t2 = time.time()
-        print("chips :", (t2 - t1))
         machine = Machine(chips, boot_x, boot_y)
 
         return machine
