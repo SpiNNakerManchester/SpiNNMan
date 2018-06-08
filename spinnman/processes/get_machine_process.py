@@ -65,10 +65,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if ((chip_info.x, chip_info.y, virtual_core_id) not in
                     self._ignore_cores):
                 if virtual_core_id == 0:
-                    processors.append(Processor(
+                    processors.append(Processor.factory(
                         virtual_core_id, is_monitor=True))
                 elif core_states[virtual_core_id] == CPUState.IDLE:
-                    processors.append(Processor(virtual_core_id))
+                    processors.append(Processor.factory(virtual_core_id))
                 else:
                     logger.warning(
                         "Not using core {}, {}, {} in state {}",
@@ -164,10 +164,14 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         def chip_xy(chip):
             return chip.x, chip.y
 
+        import time
+        t1 = time.time()
         chips = [
             self._make_chip(width, height, chip_info)
             for chip_info in sorted(self._chip_info.values(), key=chip_xy)
             if (chip_info.x, chip_info.y) not in self._ignore_chips]
+        t2 = time.time()
+        print("chips :", (t2 - t1))
         machine = Machine(chips, boot_x, boot_y)
 
         return machine
