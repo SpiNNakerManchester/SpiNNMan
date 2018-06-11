@@ -2051,9 +2051,14 @@ class Transceiver(object):
                 for cpu_state in error_states:
                     error_cores = self.get_core_state_count(app_id, cpu_state)
                     if error_cores > 0:
-                        raise SpinnmanException(
-                            "{} cores have reached an error state {}:".format(
-                                error_cores, cpu_state))
+                        # Double-check that a core can be found in this error
+                        # state; if not, then carry on
+                        cores_in_error_state = self.get_cores_in_state(
+                            all_core_subsets, cpu_state)
+                        if len(cores_in_error_state) > 0:
+                            raise SpinnmanException(
+                                "Cores in error state {}: {}".format(
+                                    cpu_state, cores_in_error_state))
 
                 # If we haven't seen an error, increase the tries, and
                 # do a full check if required
