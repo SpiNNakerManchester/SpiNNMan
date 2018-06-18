@@ -7,7 +7,7 @@ class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
     __slots__ = []
 
     def load_fixed_route(self, x, y, fixed_route, app_id=0):
-        """ loads a fixed route routing entry onto a chip
+        """ Load a fixed route routing entry onto a chip
 
         :param x: The x-coordinate of the chip, between 0 and 255, \
             this is not checked due to speed restrictions

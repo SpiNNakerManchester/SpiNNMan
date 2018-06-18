@@ -27,7 +27,7 @@ class CPUInfos(object):
 
     @property
     def cpu_infos(self):
-        """ the one per core core info
+        """ The one per core core info
 
         :return: iterable of x,y,p core info
         """

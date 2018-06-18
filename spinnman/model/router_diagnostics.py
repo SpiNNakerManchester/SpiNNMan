@@ -184,7 +184,7 @@ class RouterDiagnostics(object):
 
     @property
     def user_0(self):
-        """ the data gained from the user 0 router diagnostic filter
+        """ The data gained from the user 0 router diagnostic filter
 
         :return: the number of packets captured by this filter.
         """
@@ -192,7 +192,7 @@ class RouterDiagnostics(object):
 
     @property
     def user_1(self):
-        """ the data gained from the user 1 router diagnostic filter
+        """ The data gained from the user 1 router diagnostic filter
 
         :return: the number of packets captured by this filter.
         """
@@ -200,7 +200,7 @@ class RouterDiagnostics(object):
 
     @property
     def user_2(self):
-        """ the data gained from the user 2 router diagnostic filter
+        """ The data gained from the user 2 router diagnostic filter
 
         :return: the number of packets captured by this filter.
         """
@@ -208,7 +208,7 @@ class RouterDiagnostics(object):
 
     @property
     def user_3(self):
-        """ the data gained from the user 3 router diagnostic filter
+        """ The data gained from the user 3 router diagnostic filter
 
         :return: the number of packets captured by this filter.
         """
