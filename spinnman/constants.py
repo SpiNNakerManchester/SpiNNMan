@@ -42,7 +42,7 @@ EIEIO_DATA_HEADER_SIZE = 2
 # the address of the start of the VCPU structure (copied from sark.h)
 CPU_INFO_OFFSET = 0xe5007000
 
-# how many bytes the cpu info data takes up
+# how many bytes the CPU info data takes up
 CPU_INFO_BYTES = 128
 
 # the address at which user0 register starts

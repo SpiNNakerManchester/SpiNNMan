@@ -23,7 +23,7 @@ class SendSignal(AbstractSCPRequest):
 
     def __init__(self, app_id, signal):
         """
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         :param signal: The signal to send
         :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`

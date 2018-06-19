@@ -11,7 +11,7 @@ class HeapElement(object):
         "_is_free",
         # The tag of the block
         "_tag",
-        # The app id of the block
+        # The app ID of the block
         "_app_id"
     ]
 

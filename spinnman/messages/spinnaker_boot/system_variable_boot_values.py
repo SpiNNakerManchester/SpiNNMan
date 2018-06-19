@@ -68,7 +68,7 @@ class SystemVariableDefinition(Enum):
         doc="Indicates if peer-to-peer is working on the chip")
     nearest_neighbour_last_id = _Definition(
         _DataType.BYTE, offset=0x07,
-        doc="The last id used in nearest neighbour transaction")
+        doc="The last ID used in nearest neighbour transaction")
     nearest_ethernet_y = _Definition(
         _DataType.BYTE, offset=0x08,
         doc="The x-coordinate of the nearest chip with Ethernet")
@@ -226,11 +226,11 @@ class SystemVariableDefinition(Enum):
     physical_to_virtual_core_map = _Definition(
         _DataType.BYTE_ARRAY, offset=0x94, array_size=20,
         default=bytes(bytearray(20)),
-        doc="The physical core id to virtual core id map")
+        doc="The physical core ID to virtual core ID map")
     virtual_to_physical_core_map = _Definition(
         _DataType.BYTE_ARRAY, offset=0xa8, array_size=20,
         default=bytes(bytearray(20)),
-        doc="The virtual core id to physical core id map")
+        doc="The virtual core ID to physical core ID map")
     n_working_cores = _Definition(
         _DataType.BYTE, offset=0xbc,
         doc="The number of working cores")
@@ -251,7 +251,7 @@ class SystemVariableDefinition(Enum):
         doc="The base address of System SDRAM")
     cpu_information_base_address = _Definition(
         _DataType.INT, offset=0xcc,
-        doc="The base address of the cpu information blocks")
+        doc="The base address of the CPU information blocks")
     system_sdram_heap_address = _Definition(
         _DataType.INT, offset=0xd0,
         doc="The base address of the system SDRAM heap")
@@ -266,7 +266,7 @@ class SystemVariableDefinition(Enum):
         doc="The address of the allocated tag table")
     first_free_router_entry = _Definition(
         _DataType.SHORT, offset=0xe0,
-        doc="The id of the first free router entry")
+        doc="The ID of the first free router entry")
     n_active_peer_to_peer_addresses = _Definition(
         _DataType.SHORT, offset=0xe2,
         doc="The number of active peer-to-peer addresses")

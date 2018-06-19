@@ -26,7 +26,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
         :param y: \
             The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         :param base_address: The start address in SDRAM to which the block\
             needs to be deallocated, or none if deallocating via app_id

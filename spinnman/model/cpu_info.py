@@ -139,9 +139,9 @@ class CPUInfo(object):
 
     @property
     def application_id(self):
-        """ The id of the application running on the core
+        """ The ID of the application running on the core
 
-        :return: The id of the application
+        :return: The ID of the application
         :rtype: int
         """
         return self._application_id

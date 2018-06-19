@@ -27,7 +27,7 @@ class SDRAMAlloc(AbstractSCPRequest):
         :param y: \
             The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         :param size: The size in bytes of memory to be allocated
         :type size: int

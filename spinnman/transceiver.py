@@ -369,7 +369,7 @@ class Transceiver(object):
         self._scamp_connection_selector = \
             self._identify_connections(connections)
 
-        # The nearest neighbour start id and lock
+        # The nearest neighbour start ID and lock
         self._nearest_neighbour_id = 1
         self._nearest_neighbour_lock = RLock()
 

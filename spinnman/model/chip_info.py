@@ -152,7 +152,7 @@ class ChipInfo(object):
 
     @property
     def physical_to_virtual_core_map(self):
-        """ The physical core id to virtual core id map; entries with a value\
+        """ The physical core ID to virtual core ID map; entries with a value\
             of 0xFF are non-operational cores
 
         :rtype: bytearray
@@ -161,7 +161,7 @@ class ChipInfo(object):
 
     @property
     def virtual_core_ids(self):
-        """ A list of available cores by virtual core id (including the\
+        """ A list of available cores by virtual core ID (including the\
             monitor)
 
         :rtype: iterable of int
@@ -186,7 +186,7 @@ class ChipInfo(object):
 
     @property
     def cpu_information_base_address(self):
-        """ The base address of the cpu information structure
+        """ The base address of the CPU information structure
 
         :rtype: int
         """
@@ -194,7 +194,7 @@ class ChipInfo(object):
 
     @property
     def first_free_router_entry(self):
-        """ The id of the first free routing entry on the chip
+        """ The ID of the first free routing entry on the chip
 
         :rtype: int
         """
