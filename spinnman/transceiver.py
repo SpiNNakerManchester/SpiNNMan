@@ -2268,7 +2268,7 @@ class Transceiver(object):
                 ip_tag.tag, strip=ip_tag.strip_sdp))
 
     def __get_connection_list(self, connection=None, board_address=None):
-        """Get the connections for talking to a board.
+        """ Get the connections for talking to a board.
 
         :param connection: \
             Optional param that directly gives the connection to use.
