@@ -202,7 +202,7 @@ class ChipInfo(object):
 
     @property
     def ip_address(self):
-        """ The ip address of the chip, or None if no Ethernet
+        """ The IP address of the chip, or None if no Ethernet
 
         :rtype: str
         """

@@ -282,7 +282,7 @@ class SystemVariableDefinition(Enum):
     ethernet_ip_address = _Definition(
         _DataType.BYTE_ARRAY, offset=0xf0, array_size=4,
         default=bytes(bytearray(4)),
-        doc="The ip address of the chip")
+        doc="The IP address of the chip")
     fixed_route_copy = _Definition(
         _DataType.INT, offset=0xf4,
         doc="A (virtual) copy of the router FR register")

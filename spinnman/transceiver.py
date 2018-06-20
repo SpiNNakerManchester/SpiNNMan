@@ -179,7 +179,7 @@ def create_transceiver_from_hostname(
             bmp_ip_list.append(bmp_connection.remote_ip_address)
         logger.info("Transceiver using BMPs: {}", bmp_ip_list)
 
-    # handle the spinnaker connection
+    # handle the SpiNNaker connection
     if scamp_connections is None:
         connections.append(SCAMPConnection(remote_host=hostname))
 
@@ -697,7 +697,7 @@ class Transceiver(object):
                 sc.update_chip_coordinates(
                     self._machine.boot_x, self._machine.boot_y)
 
-        # Work out and add the spinnaker links and FPGA links
+        # Work out and add the SpiNNaker links and FPGA links
         self._machine.add_spinnaker_links(self._version)
         self._machine.add_fpga_links(self._version)
 
@@ -2325,7 +2325,7 @@ class Transceiver(object):
             raise SpinnmanInvalidParameterException(
                 "reverse_ip_tag.port", reverse_ip_tag.port,
                 "The port number for the reverse IP tag conflicts with"
-                " the spiNNaker system ports ({} and {})".format(
+                " the SpiNNaker system ports ({} and {})".format(
                     SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT))
 
         # Get the connections - if the tag specifies a connection, use that,

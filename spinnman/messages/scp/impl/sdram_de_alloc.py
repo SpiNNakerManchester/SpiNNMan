@@ -88,7 +88,7 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
                 data, offset)[0]
 
             # check that the base address is not null (0 in python case) as
-            # this reflects a issue in command on spinnaker side
+            # this reflects a issue in command on SpiNNaker side
             if self._number_of_blocks_freed == 0:
                 raise SpinnmanUnexpectedResponseCodeException(
                     "SDRAM deallocation response base address", "CMD_DEALLOC",

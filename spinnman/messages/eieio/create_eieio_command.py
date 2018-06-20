@@ -41,7 +41,7 @@ def read_eieio_command_message(data, offset):
     # Start complaining that there is SDRAM free space for buffers
     elif command_number == EIEIO_COMMAND_IDS.START_SENDING_REQUESTS.value:
         return StartRequests()
-    # Spinnaker requesting new buffers for spike source population
+    # SpiNNaker requesting new buffers for spike source population
     elif command_number == EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS.value:
         return SpinnakerRequestBuffers.from_bytestring(
             command_header, data, offset + 2)

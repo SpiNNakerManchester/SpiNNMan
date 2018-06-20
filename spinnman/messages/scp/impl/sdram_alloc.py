@@ -83,7 +83,7 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         self._base_address = _ONE_WORD.unpack_from(data, offset)[0]
 
         # check that the base address is not null (0 in python case) as
-        # this reflects a issue in the command on spinnaker side
+        # this reflects a issue in the command on SpiNNaker side
         if self._base_address == 0:
             raise SpinnmanInvalidParameterException(
                 "SDRAM Allocation response base address", self._base_address,

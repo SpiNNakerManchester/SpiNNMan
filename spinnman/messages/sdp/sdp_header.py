@@ -31,7 +31,7 @@ class SDPHeader(object):
         """
         :param flags: Any flags for the packet
         :type flags: :py:class:`spinnman.messages.sdp.sdp_flag.SDPFlag`
-        :param tag: The ip tag of the packet between 0 and 255, or None if it\
+        :param tag: The IP tag of the packet between 0 and 255, or None if it\
             is to be set later
         :type tag: int
         :param destination_port: \
