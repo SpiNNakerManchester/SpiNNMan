@@ -42,7 +42,7 @@ EIEIO_DATA_HEADER_SIZE = 2
 # the address of the start of the VCPU structure (copied from sark.h)
 CPU_INFO_OFFSET = 0xe5007000
 
-# how many bytes the cpu info data takes up
+# how many bytes the CPU info data takes up
 CPU_INFO_BYTES = 128
 
 # the address at which user0 register starts
@@ -96,7 +96,7 @@ BMP_POST_POWER_ON_SLEEP_TIME = 5.0
 # number of chips to check are booted fully from the middle
 NO_MIDDLE_CHIPS_TO_CHECK = 8
 
-# a listing of what spinnaker specific EIEIO commands there are.
+# a listing of what SpiNNaker specific EIEIO commands there are.
 EIEIO_COMMAND_IDS = Enum(
     value="EIEIO_COMMAND_IDS",
     names=[
@@ -141,7 +141,7 @@ EIEIO_COMMAND_IDS = Enum(
     ]
 )
 
-# the values used by the SCP iptag time outs. These control how long to wait
+# the values used by the SCP IP tag time outs. These control how long to wait
 # for any message request which requires a response, before raising an error.
 # The value is calculated via the following formulae
 # 10ms * 2^(tag_timeout_value - 1)
