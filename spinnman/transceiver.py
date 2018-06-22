@@ -883,7 +883,7 @@ class Transceiver(object):
         :param connection_selector: the connection to send the SCAMP\
             version or none (if none then a random SCAMP connection is used)
         :type connection_selector: \
-            :py:class:'spinnman.processes.AbstractMultiConnectionProcessConnectionSelector'
+            :py:class:`spinnman.processes.AbstractMultiConnectionProcessConnectionSelector'
         :param chip_x: the chip's x coordinate to query for SCAMP version
         :type chip_x: int
         :param chip_y: the chip's y coordinate to query for SCAMP version
