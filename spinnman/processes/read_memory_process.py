@@ -5,7 +5,7 @@ from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 
 class ReadMemoryProcess(AbstractMultiConnectionProcess):
-    """ A process for reading memory on a SpiNNaker chip
+    """ A process for reading memory on a SpiNNaker chip.
     """
     __slots__ = [
         "_view"]

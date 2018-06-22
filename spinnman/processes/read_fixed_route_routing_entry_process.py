@@ -13,7 +13,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector):
         """ Creates the process for writing a fixed route entry to a chip's\
-            router
+            router.
 
         :param connection_selector: the SC&MP connection selector
         """
@@ -25,12 +25,12 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         self._route = response.route
 
     def read_fixed_route(self, x, y, app_id=0):
-        """ Reads a fixed route routing table entry
+        """ Reads a fixed route routing table entry.
 
-        :param x: The x-coordinate of the chip, between 0 and 255, \
+        :param x: The x-coordinate of the chip, between 0 and 255; \
             this is not checked due to speed restrictions
         :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255\
+        :param y: The y-coordinate of the chip, between 0 and 255; \
             this is not checked due to speed restrictions
         :type y: int
         :param app_id: The ID of the application with which to associate the\

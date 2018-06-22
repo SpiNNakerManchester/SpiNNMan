@@ -164,7 +164,7 @@ class ChipInfo(object):
         """ A list of available cores by virtual core ID (including the\
             monitor)
 
-        :rtype: iterable of int
+        :rtype: iterable(int)
         """
         return self._virtual_core_ids
 

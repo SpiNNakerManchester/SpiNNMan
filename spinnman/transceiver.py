@@ -878,18 +878,18 @@ class Transceiver(object):
             self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
             connection_selector=None):
-        """ Get the version of SCAMP which is running on the board
+        """ Get the version of SCAMP which is running on the board.
 
         :param connection_selector: the connection to send the SCAMP\
-            version or none (if none then a random SCAMP connection is used)
+            version or none (if none then a random SCAMP connection is used).
         :type connection_selector: \
-            :py:class:`spinnman.processes.AbstractMultiConnectionProcessConnectionSelector'
+            :py:class:`AbstractMultiConnectionProcessConnectionSelector`
         :param chip_x: the chip's x coordinate to query for SCAMP version
         :type chip_x: int
         :param chip_y: the chip's y coordinate to query for SCAMP version
         :type chip_y: int
         :return: The version identifier
-        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
+        :rtype: :py:class:`VersionInfo`
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: \

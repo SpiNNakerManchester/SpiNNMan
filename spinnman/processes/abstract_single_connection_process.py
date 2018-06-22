@@ -3,7 +3,7 @@ from spinnman.connections import SCPRequestPipeLine
 
 
 class AbstractSingleConnectionProcess(AbstractProcess):
-    """ A process that uses a single connection in communication
+    """ A process that uses a single connection in communication.
     """
     __slots__ = [
         "_connection_selector",
