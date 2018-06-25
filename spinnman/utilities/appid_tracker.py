@@ -10,7 +10,7 @@ class AppIdTracker(object):
         "_max_app_id",
         "_min_app_id"]
 
-    # Keep a class-global reference to the free id range, so ids are
+    # Keep a class-global reference to the free ID range, so IDs are
     # allocated globally
 
     def __init__(

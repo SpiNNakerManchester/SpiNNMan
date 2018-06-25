@@ -18,7 +18,7 @@ class GetVersion(AbstractSCPRequest):
         :type x: int
         :param y: The y-coordinate of the chip to read from, between 0 and 255
         :type y: int
-        :param p: The id of the processor to read the version from,\
+        :param p: The ID of the processor to read the version from,\
             between 0 and 31
         :type p: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:
