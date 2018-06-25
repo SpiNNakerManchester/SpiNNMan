@@ -65,10 +65,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if ((chip_info.x, chip_info.y, virtual_core_id) not in
                     self._ignore_cores):
                 if virtual_core_id == 0:
-                    processors.append(Processor(
+                    processors.append(Processor.factory(
                         virtual_core_id, is_monitor=True))
                 elif core_states[virtual_core_id] == CPUState.IDLE:
-                    processors.append(Processor(virtual_core_id))
+                    processors.append(Processor.factory(virtual_core_id))
                 else:
                     logger.warning(
                         "Not using core {}, {}, {} in state {}",
