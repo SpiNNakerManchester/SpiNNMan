@@ -49,7 +49,7 @@ class SCPRequestPipeLine(object):
 
     def __init__(self, connection, n_channels=1,
                  intermediate_channel_waits=0,
-                 n_retries=3, packet_timeout=SCP_TIMEOUT):
+                 n_retries=10, packet_timeout=SCP_TIMEOUT):
         """
         :param connection: \
             The connection over which the communication is to take place
