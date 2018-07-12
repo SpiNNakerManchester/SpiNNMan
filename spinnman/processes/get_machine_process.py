@@ -16,7 +16,7 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 class GetMachineProcess(AbstractMultiConnectionProcess):
-    """ A process for getting the machine details over a set of connections
+    """ A process for getting the machine details over a set of connections.
     """
     __slots__ = [
         "_chip_info",
@@ -44,7 +44,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._chip_info = dict()
 
     def _make_chip(self, width, height, chip_info):
-        """ Creates a chip from a ChipSummaryInfo structure
+        """ Creates a chip from a ChipSummaryInfo structure.
 
         :param chip_info: \
             The ChipSummaryInfo structure to create the chip from
@@ -65,10 +65,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if ((chip_info.x, chip_info.y, virtual_core_id) not in
                     self._ignore_cores):
                 if virtual_core_id == 0:
-                    processors.append(Processor(
+                    processors.append(Processor.factory(
                         virtual_core_id, is_monitor=True))
                 elif core_states[virtual_core_id] == CPUState.IDLE:
-                    processors.append(Processor(virtual_core_id))
+                    processors.append(Processor.factory(virtual_core_id))
                 else:
                     logger.warning(
                         "Not using core {}, {}, {} in state {}",
@@ -173,7 +173,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         return machine
 
     def get_chip_info(self):
-        """ Get the chip information for the machine.  Note that\
-            get_machine_details must have been called first
+        """ Get the chip information for the machine.
+
+        .. note::
+            :py:meth:`get_machine_details` must have been called first.
         """
         return self._chip_info

@@ -18,7 +18,7 @@ class BMPConnectionData(object):
 
     @property
     def cabinet(self):
-        """ Get the cabinet number
+        """ Get the cabinet number.
 
         :rtype: int
         """
@@ -26,7 +26,7 @@ class BMPConnectionData(object):
 
     @property
     def frame(self):
-        """ Get the frame number
+        """ Get the frame number.
 
         :rtype: int
         """
@@ -34,7 +34,7 @@ class BMPConnectionData(object):
 
     @property
     def ip_address(self):
-        """ Get the IP address of the BMP
+        """ Get the IP address of the BMP.
 
         :rtype: str
         """
@@ -42,15 +42,15 @@ class BMPConnectionData(object):
 
     @property
     def boards(self):
-        """ Iterable of integers for the boards to be addressed
+        """ The boards to be addressed.
 
-        :rtype: iterable of int
+        :rtype: iterable(int)
         """
         return self._boards
 
     @property
     def port_num(self):
-        """ The port number associated with this BMP connection
+        """ The port number associated with this BMP connection.
 
         :return: The port number
         """

@@ -27,7 +27,7 @@ class CountState(AbstractSCPRequest):
     def __init__(self, app_id, state):
         """
 
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         :param state: The state to count
         :type state: :py:class:`spinnman.model.cpu_state.CPUState`
