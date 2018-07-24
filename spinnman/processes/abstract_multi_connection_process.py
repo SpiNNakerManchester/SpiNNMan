@@ -5,7 +5,7 @@ from spinnman.constants import SCP_TIMEOUT
 
 
 class AbstractMultiConnectionProcess(AbstractProcess):
-    """ A process that uses multiple connections in communication
+    """ A process that uses multiple connections in communication.
     """
     __slots__ = [
         "_intermediate_channel_waits",

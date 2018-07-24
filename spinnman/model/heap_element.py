@@ -1,5 +1,5 @@
 class HeapElement(object):
-    """ An element of one of the heaps on SpiNNaker
+    """ An element of one of the heaps on SpiNNaker.
     """
 
     __slots__ = [
@@ -11,7 +11,7 @@ class HeapElement(object):
         "_is_free",
         # The tag of the block
         "_tag",
-        # The app id of the block
+        # The app ID of the block
         "_app_id"
     ]
 
@@ -62,7 +62,7 @@ class HeapElement(object):
 
     @property
     def app_id(self):
-        """ The app ID of the block if allocated, or None if not
+        """ The application ID of the block if allocated, or None if not
         """
         return self._app_id
 

@@ -10,7 +10,7 @@ class FixedRouteInit(AbstractSCPRequest):
     __slots__ = []
 
     def __init__(self, x, y, entry, app_id):
-        """ sets a fixed route entry
+        """ Sets a fixed route entry
 
         :param x: The x-coordinate of the chip, between 0 and 255,\
             this is not checked due to speed restrictions
@@ -19,7 +19,7 @@ class FixedRouteInit(AbstractSCPRequest):
             this is not checked due to speed restrictions
         :type y: int
         :param entry: the fixed route entry converted for writing
-        :param app_id: The id of the application with which to associate the\
+        :param app_id: The ID of the application with which to associate the\
             routes.  If not specified, defaults to 0.
         :type app_id: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
