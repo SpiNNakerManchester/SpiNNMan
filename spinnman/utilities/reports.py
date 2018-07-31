@@ -14,9 +14,9 @@ def generate_machine_report(report_directory, machine, connections):
     :param machine: the machine python object
     :param connections: the list of connections to the machine
     :type report_directory: str
-    :type machine: spinnmachine.machine.Machine object
-    :type connections: iterable of implementations of \
-        spinnman.connections.abstract_classes.connection.AbstractConnection
+    :type machine: :py:class:`spinn_machine.Machine`
+    :type connections: \
+        iterable(:py:class:`spinnman.connections.abstract_classes.AbstractConnection`)
     :rtype: None
     :raise IOError: when a file cannot be opened for some reason
     """

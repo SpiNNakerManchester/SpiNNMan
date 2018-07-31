@@ -7,7 +7,7 @@ import math
 
 
 class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
-    """ A process for writing memory
+    """ A process for writing memory on multiple SpiNNaker chips at once.
     """
     __slots__ = []
 

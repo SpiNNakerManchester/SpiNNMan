@@ -1,6 +1,6 @@
 import logging
 from threading import Thread
-from multiprocessing.pool import ThreadPool
+from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
 _POOL_SIZE = 4
@@ -20,17 +20,18 @@ class ConnectionListener(Thread):
 
     def __init__(self, connection, n_processes=_POOL_SIZE, timeout=_TIMEOUT):
         """
-
         :param connection: An AbstractListenable connection to listen to
         :param n_processes: \
             The number of threads to use when calling callbacks
+        :param timeout: How long to wait for messages before checking to see\
+            if the connection is to be terminated.
         """
         super(ConnectionListener, self).__init__(
             name="Connection listener for connection {}".format(connection))
         self.daemon = True
         self._connection = connection
         self._timeout = timeout
-        self._callback_pool = ThreadPool(processes=n_processes)
+        self._callback_pool = ThreadPoolExecutor(max_workers=n_processes)
         self._done = False
         self._callbacks = set()
 
@@ -38,25 +39,27 @@ class ConnectionListener(Thread):
         if self._connection.is_ready_to_receive(timeout=self._timeout):
             message = handler()
             for callback in self._callbacks:
-                self._callback_pool.apply_async(callback, [message])
+                self._callback_pool.submit(callback, message)
 
     def run(self):
-        handler = self._connection.get_receive_method()
-        while not self._done:
-            try:
-                self._run_step(handler)
-            except Exception:
-                if not self._done:
-                    logger.warning("problem when dispatching message",
-                                   exc_info=True)
-        self._callback_pool.close()
-        self._callback_pool.join()
+        try:
+            handler = self._connection.get_receive_method()
+            while not self._done:
+                try:
+                    self._run_step(handler)
+                except Exception:
+                    if not self._done:
+                        logger.warning("problem when dispatching message",
+                                       exc_info=True)
+        finally:
+            self._callback_pool.shutdown()
+            self._callback_pool = None
 
     def add_callback(self, callback):
         """ Add a callback to be called when a message is received
 
         :param callback: A callable which takes a single parameter, which is\
-                the message received
+            the message received
         :type callback: callable (connection message type -> None)
         """
         self._callbacks.add(callback)

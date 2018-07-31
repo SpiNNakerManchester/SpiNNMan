@@ -12,11 +12,11 @@ _SDP_TAG = 0xFF
 
 
 def update_sdp_header_for_udp_send(sdp_header, source_x, source_y):
-    """ Apply defaults to the sdp header for sending over UDP
+    """ Apply defaults to the SDP header for sending over UDP
 
     :param sdp_header: The SDP header values
     :type sdp_header:\
-                :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
+        :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
     :return: Nothing is returned
     """
     sdp_header.tag = _SDP_TAG
@@ -27,7 +27,8 @@ def update_sdp_header_for_udp_send(sdp_header, source_x, source_y):
 
 
 def get_socket():
-    """Wrapper round socket() system call"""
+    """ Wrapper round socket() system call.
+    """
     try:
         # Create a UDP Socket
         return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -37,7 +38,8 @@ def get_socket():
 
 
 def set_receive_buffer_size(sock, size):
-    """Wrapper round setsockopt() system call"""
+    """ Wrapper round setsockopt() system call.
+    """
     try:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, size)
     except Exception:
@@ -48,7 +50,8 @@ def set_receive_buffer_size(sock, size):
 
 
 def bind_socket(sock, host, port):
-    """Wrapper round bind() system call"""
+    """ Wrapper round bind() system call.
+    """
     try:
         # Bind the socket
         sock.bind((str(host), int(port)))
@@ -59,7 +62,8 @@ def bind_socket(sock, host, port):
 
 
 def resolve_host(host):
-    """Wrapper round gethostbyname() system call"""
+    """ Wrapper round gethostbyname() system call.
+    """
     try:
         return socket.gethostbyname(host)
     except Exception as exception:
@@ -69,7 +73,8 @@ def resolve_host(host):
 
 
 def connect_socket(sock, remote_address, remote_port):
-    """Wrapper round connect() system call"""
+    """ Wrapper round connect() system call.
+    """
     try:
         sock.connect((str(remote_address), int(remote_port)))
     except Exception as exception:
@@ -79,7 +84,8 @@ def connect_socket(sock, remote_address, remote_port):
 
 
 def get_socket_address(sock):
-    """Wrapper round getsockname() system call"""
+    """ Wrapper round getsockname() system call.
+    """
     try:
         addr, port = sock.getsockname()
         # Ensure that a standard address is used for the INADDR_ANY

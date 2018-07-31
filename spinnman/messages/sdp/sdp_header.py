@@ -31,14 +31,14 @@ class SDPHeader(object):
         """
         :param flags: Any flags for the packet
         :type flags: :py:class:`spinnman.messages.sdp.sdp_flag.SDPFlag`
-        :param tag: The ip tag of the packet between 0 and 255, or None if it\
+        :param tag: The IP tag of the packet between 0 and 255, or None if it\
             is to be set later
         :type tag: int
         :param destination_port: \
             The destination port of the packet between 0 and 7
         :type destination_port: int
         :param destination_cpu: \
-            The destination processor id within the chip between 0 and 31
+            The destination processor ID within the chip between 0 and 31
         :type destination_cpu: int
         :param destination_chip_x: \
             The x-coordinate of the destination chip between 0 and 255
@@ -49,7 +49,7 @@ class SDPHeader(object):
         :param source_port: The source port of the packet between 0 and 7, or\
             None if it is to be set later
         :type source_port: int
-        :param source_cpu: The source processor id within the chip between 0\
+        :param source_cpu: The source processor ID within the chip between 0\
             and 31, or None if it is to be set later
         :type source_cpu: int
         :param source_chip_x: The x-coordinate of the source chip between 0\
@@ -135,9 +135,9 @@ class SDPHeader(object):
 
     @destination_cpu.setter
     def destination_cpu(self, destination_cpu):
-        """ Set the id of the destination processor of the packet
+        """ Set the ID of the destination processor of the packet
 
-        :param destination_cpu: The processor id to set, between 0 and 31
+        :param destination_cpu: The processor ID to set, between 0 and 31
         :type destination_cpu: int
         """
         self._destination_cpu = destination_cpu
@@ -207,9 +207,9 @@ class SDPHeader(object):
 
     @source_cpu.setter
     def source_cpu(self, source_cpu):
-        """ Set the id of the source processor of the packet
+        """ Set the ID of the source processor of the packet
 
-        :param source_cpu: The processor id to set, between 0 and 31
+        :param source_cpu: The processor ID to set, between 0 and 31
         :type source_cpu: int
         """
         self._source_cpu = source_cpu

@@ -19,9 +19,9 @@ def read_eieio_command_message(data, offset):
     :param offset: offset at which the parsing operation should start
     :type offset: int
     :return: an object which inherits from EIEIOCommandMessage which contains\
-            parsed data received from the network
+        parsed data received from the network
     :rtype: \
-            :py:class:`spinnman.messages.eieio.command_messages.eieio_command_message.EIEIOCommandMessage`
+        :py:class:`spinnman.messages.eieio.command_messages.EIEIOCommandMessage`
     """
     command_header = EIEIOCommandHeader.from_bytestring(data, offset)
     command_number = command_header.command
@@ -35,13 +35,13 @@ def read_eieio_command_message(data, offset):
     # End of all buffers, stop execution
     elif command_number == EIEIO_COMMAND_IDS.EVENT_STOP.value:
         return EventStopRequest()
-    # Stop complaining that there is sdram free space for buffers
+    # Stop complaining that there is SDRAM free space for buffers
     elif command_number == EIEIO_COMMAND_IDS.STOP_SENDING_REQUESTS.value:
         return StopRequests()
-    # Start complaining that there is sdram free space for buffers
+    # Start complaining that there is SDRAM free space for buffers
     elif command_number == EIEIO_COMMAND_IDS.START_SENDING_REQUESTS.value:
         return StartRequests()
-    # Spinnaker requesting new buffers for spike source population
+    # SpiNNaker requesting new buffers for spike source population
     elif command_number == EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS.value:
         return SpinnakerRequestBuffers.from_bytestring(
             command_header, data, offset + 2)

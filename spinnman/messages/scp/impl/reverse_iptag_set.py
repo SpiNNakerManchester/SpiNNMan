@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 _IPTAG_SET = 1
 
@@ -26,7 +27,7 @@ class ReverseIPTagSet(AbstractSCPRequest):
             The y-coordinate of the destination chip, between 0 and 255
         :type destination_y: int
         :param destination_p: \
-            The id of the destination processor, between 0 and 17
+            The ID of the destination processor, between 0 and 17
         :type destination_p: int
         :param port: The port, between 0 and 65535
         :type port: int
@@ -52,5 +53,6 @@ class ReverseIPTagSet(AbstractSCPRequest):
             argument_2=arg2,
             argument_3=0)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("Set Reverse IP Tag", "CMD_IPTAG")

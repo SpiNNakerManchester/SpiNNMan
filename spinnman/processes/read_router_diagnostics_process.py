@@ -9,6 +9,9 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
+    """ A process for reading the diagnostic data block from a SpiNNaker\
+        router.
+    """
     __slots__ = [
         "_control_register",
         "_error_status",

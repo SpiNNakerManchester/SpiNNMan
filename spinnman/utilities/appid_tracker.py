@@ -3,26 +3,25 @@ _MAX_APP_ID = 254
 
 
 class AppIdTracker(object):
-    """ A tracker of AppId to make it easier to allocate new ids
+    """ A tracker of application IDs to make it easier to allocate new IDs.
     """
     __slots__ = [
         "_free_ids",
         "_max_app_id",
         "_min_app_id"]
 
-    # Keep a class-global reference to the free id range, so ids are
+    # Keep a class-global reference to the free ID range, so IDs are
     # allocated globally
 
     def __init__(
             self, app_ids_in_use=None, min_app_id=_MIN_APP_ID,
             max_app_id=_MAX_APP_ID):
         """
-
-        :param app_ids_in_use: The ids that are already in use
-        :type app_ids_in_use: list of int or None
-        :param min_app_id: The smallest app id to use
+        :param app_ids_in_use: The IDs that are already in use
+        :type app_ids_in_use: list[int] or None
+        :param min_app_id: The smallest application ID to use
         :type min_app_id: int
-        :param max_app_id: The largest app id to use
+        :param max_app_id: The largest application ID to use
         :type max_app_id: int
         """
         self._free_ids = set(range(min_app_id, max_app_id))
@@ -32,23 +31,25 @@ class AppIdTracker(object):
         self._max_app_id = max_app_id
 
     def get_new_id(self):
-        """ Get a new unallocated id
+        """ Get a new unallocated ID
 
         :rtype: int
         """
         return self._free_ids.pop()
 
     def allocate_id(self, allocated_id):
-        """ Allocate a given id - raises KeyError if the id is not present
+        """ Allocate a given ID.
 
-        :param allocated_id: The id to allocate
+        :param allocated_id: The ID to allocate
+        :raises KeyError: If the ID is not present
         """
         self._free_ids.remove(allocated_id)
 
     def free_id(self, id_to_free):
-        """ Free a given id - raises KeyError if the id is out of range
+        """ Free a given ID.
 
-        :param id_to_free: The id to free
+        :param id_to_free: The ID to free
+        :raises KeyError: If the ID is out of range
         """
         if id_to_free < self._min_app_id or id_to_free > self._max_app_id:
             raise KeyError("ID {} out of allowed range of {} to {}".format(

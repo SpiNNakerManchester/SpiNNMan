@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 _NNP_FORWARD_RETRY = (0x3f << 8) | 0x18
 _NNP_FLOOD_FILL_END = 15
@@ -18,17 +19,17 @@ class FloodFillEnd(AbstractSCPRequest):
             self, nearest_neighbour_id, app_id=0, processors=None, wait=False):
         """
 
-        :param nearest_neighbour_id: The id of the packet, between 0 and 127
+        :param nearest_neighbour_id: The ID of the packet, between 0 and 127
         :type nearest_neighbour_id: int
-        :param app_id: The application id to start using the data, between 16\
-                    and 255.  If not specified, no application is started
+        :param app_id: The application ID to start using the data, between 16\
+            and 255.  If not specified, no application is started
         :type app_id: int
         :param processors: A list of processors on which to start the\
-                    application, each between 1 and 17.  If not specified,\
-                    no application is started.
+            application, each between 1 and 17. If not specified, no\
+            application is started.
         :type processors: iterable of int
-        :param wait: True if the binary should go into a "wait" state before\
-                    executing
+        :param wait: \
+            True if the binary should go into a "wait" state before executing
         :type wait: bool
         """
         processor_mask = 0
@@ -49,5 +50,6 @@ class FloodFillEnd(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_NNP),
             argument_1=key, argument_2=data, argument_3=_NNP_FORWARD_RETRY)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("Flood Fill", "CMD_NNP:NNP_FFS")

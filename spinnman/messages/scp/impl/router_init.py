@@ -4,6 +4,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 
 class RouterInit(AbstractSCPRequest):
@@ -25,7 +26,7 @@ class RouterInit(AbstractSCPRequest):
         :type table_address: int
         :param base_address: The base_address containing the entries
         :type base_address: int
-        :param app_id: The id of the application with which to associate the\
+        :param app_id: The ID of the application with which to associate the\
             routes.  If not specified, defaults to 0.
         :type app_id: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
@@ -57,5 +58,6 @@ class RouterInit(AbstractSCPRequest):
             argument_1=((n_entries << 16) | (app_id << 8) | 2),
             argument_2=table_address, argument_3=base_address)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("RouterInit", "CMD_RTR")

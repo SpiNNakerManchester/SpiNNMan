@@ -1,4 +1,5 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums \
@@ -24,7 +25,7 @@ class RouterAlloc(AbstractSCPRequest):
         :param y: \
             The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         :param n_entries: The number of entries to allocate
         :type n_entries: int
@@ -40,6 +41,7 @@ class RouterAlloc(AbstractSCPRequest):
                 AllocFree.ALLOC_ROUTING.value),  # @UndefinedVariable
             argument_2=n_entries)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return _SCPRouterAllocResponse()
 
@@ -56,10 +58,8 @@ class _SCPRouterAllocResponse(AbstractSCPResponse):
         super(_SCPRouterAllocResponse, self).__init__()
         self._base_address = None
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

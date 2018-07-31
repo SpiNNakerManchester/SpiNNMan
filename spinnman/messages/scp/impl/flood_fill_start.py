@@ -3,6 +3,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
+from spinn_utilities.overrides import overrides
 
 _NNP_FORWARD_RETRY = (1 << 31) | (0x3f << 8) | 0x18
 _NNP_FLOOD_FILL_START = 6
@@ -15,12 +16,12 @@ class FloodFillStart(AbstractSCPRequest):
 
     def __init__(self, nearest_neighbour_id, n_blocks, x=None, y=None):
         """
-        :param nearest_neighbour_id: The id of the packet, between 0 and 127
+        :param nearest_neighbour_id: The ID of the packet, between 0 and 127
         :type nearest_neighbour_id: int
         :param n_blocks: The number of blocks of data that will be sent,\
             between 0 and 255
         :type n_blocks: int
-        :param x: The x-coordindate of the chip to load the data on to. If not\
+        :param x: The x-coordinate of the chip to load the data on to. If not\
             specified, the data will be loaded on to all chips
         :type x: int
         :param y: The y-coordinate of the chip to load the data on to. If not\
@@ -44,5 +45,6 @@ class FloodFillStart(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_NNP),
             argument_1=key, argument_2=data, argument_3=_NNP_FORWARD_RETRY)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse("Flood Fill", "CMD_NNP:NNP_FFS")

@@ -16,10 +16,10 @@ class Connection(object):
 
         :return: True if the medium is connected, False otherwise
         :rtype: bool
-        :raise spinnman.exceptions.SpinnmanIOException: If there is an error\
-                    when determining the connectivity of the medium
+        :raise spinnman.exceptions.SpinnmanIOException: \
+            If there is an error when determining the connectivity of the\
+            medium.
         """
-        pass
 
     @abstractmethod
     def close(self):
@@ -29,4 +29,3 @@ class Connection(object):
         :rtype: None
         :raise None: No known exceptions are raised
         """
-        pass

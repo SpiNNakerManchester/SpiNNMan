@@ -1,4 +1,5 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums \
@@ -26,7 +27,7 @@ class SDRAMAlloc(AbstractSCPRequest):
         :param y: \
             The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         :param size: The size in bytes of memory to be allocated
         :type size: int
@@ -56,6 +57,7 @@ class SDRAMAlloc(AbstractSCPRequest):
             argument_2=size, argument_3=tag)
         self._size = size
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return _SCPSDRAMAllocResponse(self._size)
 
@@ -72,10 +74,8 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         self._size = size
         self._base_address = None
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -83,7 +83,7 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         self._base_address = _ONE_WORD.unpack_from(data, offset)[0]
 
         # check that the base address is not null (0 in python case) as
-        # this reflects a issue in the command on spinnaker side
+        # this reflects a issue in the command on SpiNNaker side
         if self._base_address == 0:
             raise SpinnmanInvalidParameterException(
                 "SDRAM Allocation response base address", self._base_address,

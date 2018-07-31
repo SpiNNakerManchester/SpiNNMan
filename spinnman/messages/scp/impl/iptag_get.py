@@ -1,4 +1,5 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
@@ -38,6 +39,7 @@ class IPTagGet(AbstractSCPRequest):
             argument_1=(_IPTAG_GET << 16) | tag,
             argument_2=1)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return _SCPIPTagGetResponse()
 
@@ -74,10 +76,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         self._spin_cpu = None
         self._spin_port = None
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -166,7 +166,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def strip_sdp(self):
-        """ True if the tag is to strip sdp
+        """ True if the tag is to strip the SDP header
 
         :rtype: bool
         """
@@ -206,7 +206,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def spin_port(self):
-        """ The spin-port of the ip tag
+        """ The spin-port of the IP tag
 
         :rtype: int
         """
@@ -214,7 +214,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def spin_cpu(self):
-        """ The cpu id of the ip tag
+        """ The CPU ID of the IP tag
 
         :rtype: int
         """

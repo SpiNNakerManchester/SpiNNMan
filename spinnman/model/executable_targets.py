@@ -1,8 +1,9 @@
 from spinn_machine import CoreSubsets
+from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class ExecutableTargets(object):
-    """ Encapsulate the binaries and cores on which to execute them
+    """ Encapsulate the binaries and cores on which to execute them.
     """
     __slots__ = [
         "_all_core_subsets",
@@ -18,19 +19,13 @@ class ExecutableTargets(object):
         """ Add core subsets to a binary
 
         :param binary: the path to the binary needed to be executed
-        :param subsets: the subset of cores that the binary needs to be loaded\
-                    on
+        :param subsets: \
+            the subset of cores that the binary needs to be loaded on
         :return:
         """
-        if binary in self._targets:
-            self._targets[binary].add_core_subset(subsets)
-        else:
-            self._targets[binary] = subsets
-
         for subset in subsets.core_subsets:
             for p in subset.processor_ids:
-                self._total_processors += 1
-                self._all_core_subsets.add_processor(subset.x, subset.y, p)
+                self.add_processor(binary, subset.x, subset.y, p)
 
     def add_processor(self, binary, chip_x, chip_y, chip_p):
         """ Add a processor to the executable targets
@@ -38,9 +33,11 @@ class ExecutableTargets(object):
         :param binary: the binary path for executable
         :param chip_x: the coordinate on the machine in terms of x for the chip
         :param chip_y: the coordinate on the machine in terms of y for the chip
-        :param chip_p: the processor id to place this executable on
+        :param chip_p: the processor ID to place this executable on
         :return:
         """
+        if self.known(binary, chip_x, chip_y, chip_p):
+            return
         if binary not in self._targets:
             self._targets[binary] = CoreSubsets()
         self._targets[binary].add_processor(chip_x, chip_y, chip_p)
@@ -71,3 +68,15 @@ class ExecutableTargets(object):
         """ All the core subsets for all the binaries
         """
         return self._all_core_subsets
+
+    def known(self, binary, chip_x, chip_y, chip_p):
+        if self._all_core_subsets.is_core(chip_x, chip_y, chip_p):
+            # OK if and only if the chip is in this binary already
+            if binary in self._targets:
+                if self._targets[binary].is_core(chip_x, chip_y, chip_p):
+                    return True
+            parameter = "x:{} y:{} p:{}".format(chip_x, chip_y, chip_p)
+            problem = "Already associated with a different binary"
+            raise SpinnmanInvalidParameterException(parameter, binary, problem)
+        else:
+            return False

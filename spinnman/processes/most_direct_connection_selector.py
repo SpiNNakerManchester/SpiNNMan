@@ -1,3 +1,4 @@
+from spinn_utilities.overrides import overrides
 from .abstract_multi_connection_process_connection_selector \
     import AbstractMultiConnectionProcessConnectionSelector
 
@@ -11,8 +12,8 @@ class MostDirectConnectionSelector(
         "_first_connection",
         "_machine"]
 
+    @overrides(AbstractMultiConnectionProcessConnectionSelector.__init__)
     def __init__(self, machine, connections):
-        super(MostDirectConnectionSelector, self).__init__(connections)
         self._machine = machine
         self._connections = dict()
         self._first_connection = None
@@ -27,6 +28,8 @@ class MostDirectConnectionSelector(
     def set_machine(self, new_machine):
         self._machine = new_machine
 
+    @overrides(
+        AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
     def get_next_connection(self, message):
         if self._machine is None or len(self._connections) == 1:
             return self._first_connection

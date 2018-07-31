@@ -32,8 +32,8 @@ class AbstractSCPResponse(object):
 
         :param data: The bytestring to be read
         :type data: str
-        :param offset: The offset in the data from which the response should\
-                    be read
+        :param offset: \
+            The offset in the data from which the response should be read
         :type offset: int
         """
         self._sdp_header = SDPHeader.from_bytestring(data, offset)
@@ -50,7 +50,6 @@ class AbstractSCPResponse(object):
         :param offset: The offset into the data after the headers
         :type offset: int
         """
-        pass
 
     @property
     def sdp_header(self):
@@ -68,7 +67,7 @@ class AbstractSCPResponse(object):
 
         :return: The SCP header
         :rtype:\
-                    :py:class:`spinnman.messages.scp.scp_response_header.SCPResponseHeader`
+            :py:class:`spinnman.messages.scp.SCPResponseHeader`
         :raise None: No known exceptions are raised
         """
         return self._scp_response_header

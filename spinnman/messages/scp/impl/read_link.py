@@ -1,4 +1,5 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
@@ -20,7 +21,7 @@ class ReadLink(AbstractSCPRequest):
         :param cpu: The CPU core to use, normally 0 (or if a BMP, the board \
             slot number)
         :type cpu: int
-        :param link: The id of the link down which to send the query
+        :param link: The ID of the link down which to send the query
         :type link: int
         :param base_address: The positive base address to start the read from
         :type base_address: int
@@ -36,10 +37,8 @@ class ReadLink(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_LINK_READ),
             argument_1=base_address, argument_2=size, argument_3=link)
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_request.AbstractSCPRequest.get_scp_response`
-        """
         return _SCPReadLinkResponse()
 
 
@@ -58,10 +57,8 @@ class _SCPReadLinkResponse(AbstractSCPResponse):
         self._offset = None
         self._length = None
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

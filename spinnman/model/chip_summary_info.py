@@ -64,7 +64,7 @@ class ChipSummaryInfo(object):
         ip_data = _FOUR_BYTES.unpack_from(chip_summary_data, data_offset)
         ethernet_ip_address = "{}.{}.{}.{}".format(
             ip_data[0], ip_data[1], ip_data[2], ip_data[3])
-        if self._is_ethernet_available:
+        if ethernet_ip_address != "0.0.0.0":
             self._ethernet_ip_address = ethernet_ip_address
         data_offset += 4
 
@@ -96,15 +96,15 @@ class ChipSummaryInfo(object):
     def core_states(self):
         """ The state of the cores on the chip (list of one per core)
 
-        :rtype: list of `py:class:spinnman.model.cpu_state.CPUState`
+        :rtype: list(:py:class:`spinnman.model.enums.CPUState`)
         """
         return self._core_states
 
     @property
     def working_links(self):
-        """ The ids of the working links outgoing from this chip
+        """ The IDs of the working links outgoing from this chip
 
-        :rtype: list of int
+        :rtype: list(int)
         """
         return self._working_links
 

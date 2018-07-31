@@ -8,7 +8,7 @@ _VERSION_PATTERN = struct.Struct("<BBBBHHI")
 
 
 class VersionInfo(object):
-    """ Decodes SC&MP/SARK version information as returned by the SVER command
+    """ Decodes SC&MP/SARK version information as returned by the SVER command.
     """
     __slots__ = [
         "_build_date",
@@ -56,7 +56,7 @@ class VersionInfo(object):
 
     @property
     def name(self):
-        """ The name of the software
+        """ The name of the software.
 
         :return: The name
         :rtype: str
@@ -65,16 +65,16 @@ class VersionInfo(object):
 
     @property
     def version_number(self):
-        """ The version number of the software
+        """ The version number of the software.
 
         :return: The version
-        :rtype: float
+        :rtype: tuple(int, int, int)
         """
         return self._version_number
 
     @property
     def hardware(self):
-        """ The hardware being run on
+        """ The hardware being run on.
 
         :return: The hardware
         :rtype: str
@@ -83,7 +83,7 @@ class VersionInfo(object):
 
     @property
     def x(self):
-        """ The x-coordinate of the chip where the information was obtained
+        """ The x-coordinate of the chip where the information was obtained.
 
         :return: the x-coordinate
         :rtype: int
@@ -92,7 +92,7 @@ class VersionInfo(object):
 
     @property
     def y(self):
-        """ The y-coordinate of the chip where the information was obtained
+        """ The y-coordinate of the chip where the information was obtained.
 
         :return: The y-coordinate
         :rtype: int
@@ -101,17 +101,17 @@ class VersionInfo(object):
 
     @property
     def p(self):
-        """ The processor id of the processor where the information was\
-                    obtained
+        """ The processor ID of the processor where the information was\
+            obtained.
 
-        :return: the processor id
+        :return: the processor ID
         :rtype: int
         """
         return self._p
 
     @property
     def build_date(self):
-        """ The build date of the software
+        """ The build date of the software.
 
         :return: The number of seconds since 1st January 1970
         :rtype: int
@@ -120,7 +120,7 @@ class VersionInfo(object):
 
     @property
     def version_string(self):
-        """ The version information as text
+        """ The version information as text.
 
         :return: The version information
         :rtype: str

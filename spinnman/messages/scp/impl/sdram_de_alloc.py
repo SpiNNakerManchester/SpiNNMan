@@ -1,4 +1,5 @@
 from spinnman.messages.scp import SCPRequestHeader
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages \
     import AbstractSCPRequest, AbstractSCPResponse
 from spinnman.messages.scp.enums \
@@ -25,7 +26,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
         :param y: \
             The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         :param base_address: The start address in SDRAM to which the block\
             needs to be deallocated, or none if deallocating via app_id
@@ -57,6 +58,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
                     FREE_SDRAM_BY_APP_ID.value))  # @UndefinedVariable
             self._read_n_blocks_freed = True
 
+    @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return _SCPSDRAMDeAllocResponse(self._read_n_blocks_freed)
 
@@ -75,10 +77,8 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         self._number_of_blocks_freed = None
         self._read_n_blocks_freed = read_n_blocks_freed
 
+    @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data, offset):
-        """ See\
-            :py:meth:`spinnman.messages.scp.abstract_scp_response.AbstractSCPResponse.read_data_bytestring`
-        """
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -88,7 +88,7 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
                 data, offset)[0]
 
             # check that the base address is not null (0 in python case) as
-            # this reflects a issue in command on spinnaker side
+            # this reflects a issue in command on SpiNNaker side
             if self._number_of_blocks_freed == 0:
                 raise SpinnmanUnexpectedResponseCodeException(
                     "SDRAM deallocation response base address", "CMD_DEALLOC",

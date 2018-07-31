@@ -28,7 +28,7 @@ class UDPConnection(Connection):
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
         """
-        :param local_host: The local host name or ip address to bind to.\
+        :param local_host: The local host name or IP address to bind to.\
             If not specified defaults to bind to all interfaces, unless\
             remote_host is specified, in which case binding is done to the\
             IP address that will be used to send packets
@@ -36,7 +36,7 @@ class UDPConnection(Connection):
         :param local_port: The local port to bind to, between 1025 and 65535.\
             If not specified, defaults to a random unused local port
         :type local_port: int
-        :param remote_host: The remote host name or ip address to send packets\
+        :param remote_host: The remote host name or IP address to send packets\
             to. If not specified, the socket will be available for listening\
             only, and will throw and exception if used for sending
         :type remote_host: str or None
@@ -95,7 +95,7 @@ class UDPConnection(Connection):
     def local_ip_address(self):
         """ The local IP address to which the connection is bound.
 
-        :return: The local ip address as a dotted string e.g. 0.0.0.0
+        :return: The local IP address as a dotted string, e.g., 0.0.0.0
         :rtype: str
         :raise None: No known exceptions are thrown
         """
@@ -113,9 +113,9 @@ class UDPConnection(Connection):
 
     @property
     def remote_ip_address(self):
-        """ The remote ip address to which the connection is connected.
+        """ The remote IP address to which the connection is connected.
 
-        :return: The remote ip address as a dotted string, or None if not\
+        :return: The remote IP address as a dotted string, or None if not\
             connected remotely
         :rtype: str
         """
