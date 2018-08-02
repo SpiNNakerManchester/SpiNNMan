@@ -32,7 +32,7 @@ class RouterDiagnostics(object):
 
         self._mon = (control_register >> 8) & 0x1F
         self._wait_1 = (control_register >> 16) & 0xFF
-        self._wait_2 = (control_register >> 8) & 0xFF
+        self._wait_2 = (control_register >> 24) & 0xFF
 
         self._error_status = error_status
 
