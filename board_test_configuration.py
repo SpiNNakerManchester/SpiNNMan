@@ -46,10 +46,10 @@ class BoardTestConfiguration(object):
                 0, 0, self.bmp_names, [0], None)]
         self.auto_detect_bmp = \
             self._config.getboolean("Machine", "auto_detect_bmp")
-        self.localport = 54321
+        self.localport = _PORT
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
-            s.connect((self.remotehost, 0))
+            s.connect((self.remotehost, _PORT))
             self.localhost = s.getsockname()[0]
         finally:
             s.close()
