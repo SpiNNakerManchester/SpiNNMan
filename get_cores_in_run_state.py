@@ -35,7 +35,7 @@ try:
     cores_finished = ()
     all_core_subsets = []
     for chip in machine.chips:
-        all_core_subsets.append(CoreSubset(chip.x, chip.y, range(17)))
+        all_core_subsets.append(CoreSubset(chip.x, chip.y, range(1, 16)))
 
     all_core_subset = CoreSubsets(
         core_subsets=all_core_subsets)
