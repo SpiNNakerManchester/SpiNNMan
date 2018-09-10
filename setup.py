@@ -44,5 +44,7 @@ setup(
         'enum34',
         'future',
         'futures; python_version == "2.7"',
-        'six']
+        'six'],
+    maintainer="SpiNNakerTeam",
+    maintainer_email="spinnakerusers@googlegroups.com"
 )
