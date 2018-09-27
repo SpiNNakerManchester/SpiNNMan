@@ -1142,14 +1142,10 @@ class Transceiver(object):
                 x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
                 data_item.data_type.value))[0]
 
-    def get_user_0_register_address_from_core(self, x, y, p):
+    def get_user_0_register_address_from_core(self, p):
         """ Get the address of user 0 for a given processor on the board
 
-        :param x: the x-coordinate of the chip containing the processor
-        :param y: the y-coordinate of the chip containing the processor
         :param p: The ID of the processor to get the user 0 address from
-        :type x: int
-        :type y: int
         :type p: int
         :return: The address for user 0 register for this processor
         :rtype: int
@@ -1163,14 +1159,10 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
-    def get_user_1_register_address_from_core(self, x, y, p):
+    def get_user_1_register_address_from_core(self, p):
         """ Get the address of user 1 for a given processor on the board
 
-        :param x: the x-coordinate of the chip containing the processor
-        :param y: the y-coordinate of the chip containing the processor
         :param p: The ID of the processor to get the user 1 address from
-        :type x: int
-        :type y: int
         :type p: int
         :return: The address for user 1 register for this processor
         :rtype: int
@@ -1184,14 +1176,10 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
-    def get_user_2_register_address_from_core(self, x, y, p):
+    def get_user_2_register_address_from_core(self, p):
         """ Get the address of user 2 for a given processor on the board
 
-        :param x: the x-coordinate of the chip containing the processor
-        :param y: the y-coordinate of the chip containing the processor
         :param p: The ID of the processor to get the user 0 address from
-        :type x: int
-        :type y: int
         :type p: int
         :return: The address for user 0 register for this processor
         :rtype: int

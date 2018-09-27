@@ -19,7 +19,7 @@ before_install:
 install:
   - python ./setup.py install
   - pip install -r requirements-test.txt
-  - pip install python-coveralls
+  - pip install python-coveralls 'coverage>=4.4'
   - pip install spinnaker_proxy
 
 script:
