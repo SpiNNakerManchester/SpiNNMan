@@ -15,6 +15,9 @@ _PORT = 54321
 
 
 class BoardTestConfiguration(object):
+
+    unreachable = set()
+
     def __init__(self):
         self.localhost = None
         self.localport = None
@@ -61,7 +64,7 @@ class BoardTestConfiguration(object):
         self.board_version = self._config.getint("Machine", "version")
 
     @staticmethod
-    def host_is_reachable(ipaddr):
+    def ping(ipaddr):
         if platform.platform().lower().startswith("windows"):
             cmd = "ping -n 1 -w 1 "
         else:
@@ -71,4 +74,17 @@ class BoardTestConfiguration(object):
         time.sleep(1.2)
         process.stdout.close()
         process.wait()
-        return process.returncode == 0
+        return process.returncode
+
+    @staticmethod
+    def host_is_reachable(ipaddr):
+        if ipaddr in BoardTestConfiguration.unreachable:
+            return False
+        tries = 0
+        while (True):
+            if BoardTestConfiguration.ping(ipaddr) == 0:
+                return True
+            tries += 1
+            if tries > 10:
+                BoardTestConfiguration.unreachable.add(ipaddr)
+                return False
