@@ -1,4 +1,5 @@
 import logging
+import functools
 
 from spinn_utilities.log import FormatAdapter
 
@@ -111,9 +112,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             n_available_multicast_entries=(
                 chip_info.n_free_multicast_routing_entries))
 
-    def _receive_p2p_data(self, scp_read_response):
-        self._p2p_column_data.append(
-            (scp_read_response.data, scp_read_response.offset))
+    def _receive_p2p_data(self, column, scp_read_response):
+        self._p2p_column_data[column] = (
+            scp_read_response.data, scp_read_response.offset)
 
     def _receive_chip_info(self, scp_read_chip_info_response):
         chip_info = scp_read_chip_info_response.chip_info
@@ -131,6 +132,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def get_machine_details(self, boot_x, boot_y, width, height):
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
+        self._p2p_column_data = [None] * width
         for column in range(width):
             offset = P2PTable.get_column_offset(column)
             self._send_request(
@@ -138,7 +140,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     x=boot_x, y=boot_y,
                     base_address=(ROUTER_REGISTER_P2P_ADDRESS + offset),
                     size=p2p_column_bytes),
-                self._receive_p2p_data)
+                functools.partial(self._receive_p2p_data, column))
         self._finish()
         self.check_for_error()
         p2p_table = P2PTable(width, height, self._p2p_column_data)
