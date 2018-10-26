@@ -15,7 +15,7 @@ class ApplicationRun(AbstractSCPRequest):
 
     def __init__(self, app_id, x, y, processors, wait=False):
         """
-        :param app_id: The id of the application to run, between 16 and 255
+        :param app_id: The ID of the application to run, between 16 and 255
         :type app_id: int
         :param x: The x-coordinate of the chip to run on, between 0 and 255
         :type x: int

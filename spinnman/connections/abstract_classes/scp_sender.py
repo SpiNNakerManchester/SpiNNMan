@@ -22,7 +22,7 @@ class SCPSender(Connection):
     def send_scp_request(self, scp_request):
         """ Sends an SCP request down this connection
 
-         Messages must have the following properties:
+        Messages must have the following properties:
 
             * source_port is None or 7
             * source_cpu is None or 31

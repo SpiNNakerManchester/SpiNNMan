@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractProcess(object):
-    """ An abstract process for talking to SpiNNaker efficiently
+    """ An abstract process for talking to SpiNNaker efficiently.
     """
     __slots__ = [
         "_error_requests",

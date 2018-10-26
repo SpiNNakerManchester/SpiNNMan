@@ -156,7 +156,7 @@ class _HostDataReadAck(object):
         if len(self._region_id) > ack_id:
             return self._region_id[ack_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "region id ack_id needs to be"
+            "request_id", "integer", "region ID ack_id needs to be"
             "comprised between 0 and {0:d}; current value: {1:d}".format(
                 len(self._region_id) - 1, ack_id))
 

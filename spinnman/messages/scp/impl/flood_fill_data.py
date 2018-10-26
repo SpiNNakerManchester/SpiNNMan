@@ -21,7 +21,7 @@ class FloodFillData(AbstractSCPRequest):
     def __init__(self, nearest_neighbour_id, block_no, base_address, data,
                  offset=0, length=None):
         """
-        :param nearest_neighbour_id: The id of the packet, between 0 and 127
+        :param nearest_neighbour_id: The ID of the packet, between 0 and 127
         :type nearest_neighbour_id: int
         :param block_no: Which block this block is, between 0 and 255
         :type block_no: int

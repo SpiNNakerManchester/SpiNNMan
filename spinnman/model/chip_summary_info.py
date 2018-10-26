@@ -96,7 +96,7 @@ class ChipSummaryInfo(object):
     def core_states(self):
         """ The state of the cores on the chip (list of one per core)
 
-        :rtype: list of `py:class:spinnman.model.enums.CPUState`
+        :rtype: list(:py:class:`spinnman.model.enums.CPUState`)
         """
         return self._core_states
 
@@ -104,7 +104,7 @@ class ChipSummaryInfo(object):
     def working_links(self):
         """ The IDs of the working links outgoing from this chip
 
-        :rtype: list of int
+        :rtype: list(int)
         """
         return self._working_links
 

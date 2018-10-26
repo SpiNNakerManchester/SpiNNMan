@@ -4,7 +4,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class ExecutableTargets(object):
-    """ Encapsulate the binaries and cores on which to execute them
+    """ Encapsulate the binaries and cores on which to execute them.
     """
 
     __slots__ = (
