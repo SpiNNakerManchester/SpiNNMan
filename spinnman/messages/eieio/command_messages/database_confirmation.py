@@ -14,11 +14,16 @@ class DatabaseConfirmation(EIEIOCommandMessage):
     def __init__(self, database_path=None):
         super(DatabaseConfirmation, self).__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION))
-        self._database_path = database_path
+        self._database_path = None
+        if database_path is not None:
+            self._database_path = database_path.encode()
 
     @property
     def database_path(self):
-        return self._database_path
+        if self._database_path is not None:
+            return self._database_path.decode()
+        else:
+            return None
 
     @property
     def bytestring(self):
