@@ -12,6 +12,7 @@ import os
 import math
 import time
 import array
+from six import iteritems
 
 _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4
@@ -63,7 +64,7 @@ class SpinnakerBootMessages(object):
 
         # Set any additional values
         if extra_boot_values is not None:
-            for variable, value in extra_boot_values.iter_items():
+            for variable, value in iteritems(extra_boot_values):
                 spinnaker_boot_value.set_value(variable, value)
 
         # Get the data as an array, to be used later
