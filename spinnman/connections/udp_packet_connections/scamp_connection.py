@@ -61,9 +61,12 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
         self._chip_x = x
         self._chip_y = y
 
-    def get_scp_data(self, scp_request):
-        update_sdp_header_for_udp_send(
-            scp_request.sdp_header, self._chip_x, self._chip_y)
+    def get_scp_data(self, scp_request, x=None, y=None):
+        if x is None:
+            x = self._chip_x
+        if y is None:
+            y = self._chip_y
+        update_sdp_header_for_udp_send(scp_request.sdp_header, x, y)
         return _TWO_SKIP.pack() + scp_request.bytestring
 
     def receive_scp_response(self, timeout=1.0):
@@ -71,8 +74,18 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
+    def receive_scp_response_with_address(self, timeout=1.0):
+        data, (addr, port) = self.receive_with_address(timeout)
+        result, sequence = _TWO_SHORTS.unpack_from(data, 10)
+        return SCPResult(result), sequence, data, 2, addr, port
+
     def send_scp_request(self, scp_request):
         self.send(self.get_scp_data(scp_request))
+
+    def send_scp_request_to(self, scp_request, x, y, ip_address):
+        self.send_to(
+            self.get_scp_data(scp_request, x, y),
+            (str(ip_address), SCP_SCAMP_PORT))
 
     def __repr__(self):
         return _REPR_TEMPLATE.format(
