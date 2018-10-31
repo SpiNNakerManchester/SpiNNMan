@@ -52,7 +52,7 @@ class _ChipMemoryIO(object):
         "_write_buffer_offset",
 
         # the function used to write memory on spinnaker
-        "_write_memory_function"
+        "_write_memory"
     ]
 
     def __init__(
@@ -67,7 +67,7 @@ class _ChipMemoryIO(object):
         """
         # pylint: disable=too-many-arguments
         self._transceiver = transceiver
-        self._write_memory_function = write_memory_function
+        self._write_memory = write_memory_function
         self._x = x
         self._y = y
         self._current_address = base_address
@@ -93,7 +93,7 @@ class _ChipMemoryIO(object):
         """ Force the writing of the current write buffer
         """
         if self._write_buffer_offset > 0:
-            self._write_memory_function(
+            self._write_memory(
                 self._x, self._y, self._write_address, self._write_buffer,
                 n_bytes=self._write_buffer_offset)
             self._write_address += self._write_buffer_offset
@@ -103,7 +103,7 @@ class _ChipMemoryIO(object):
     def write_memory_function(self):
         """ Returns the function for writing
         """
-        return self._write_memory_function
+        return self._write_memory
 
     @property
     def current_address(self):
@@ -146,8 +146,7 @@ class _ChipMemoryIO(object):
 
         if n_bytes >= self._buffer_size:
             self.flush_write_buffer()
-            self._write_memory_function(
-                self._x, self._y, self._current_address, data)
+            self._write_memory(self._x, self._y, self._current_address, data)
             self._current_address += n_bytes
             self._write_address = self._current_address
 
@@ -210,7 +209,7 @@ class MemoryIO(AbstractIO):
     __write_cache__ = dict()
 
     def __init__(self, transceiver, x, y, start_address,
-                 end_address, memory_write_function=None):
+                 end_address, write_memory_function=None):
         """
         :param transceiver: The transceiver to read and write with
         :param x: The x-coordinate of the chip to write to
@@ -219,7 +218,7 @@ class MemoryIO(AbstractIO):
         :param end_address:\
             The end address of the region to write to.  This is the first\
             address just outside the region
-        :param memory_write_function: How to write memory. Defaults to the\
+        :param write_memory_function: How to write memory. Defaults to the\
             transceiver's :py:meth:`~spinnman.Transceiver.write_memory`\
             method.
         """
@@ -227,10 +226,10 @@ class MemoryIO(AbstractIO):
         if start_address >= end_address:
             raise ValueError("Start address must be less than end address")
 
-        if memory_write_function is None:
-            memory_write_function = transceiver.write_memory
+        if write_memory_function is None:
+            write_memory_function = transceiver.write_memory
         self._chip_memory_io = _get_chip_memory_io(
-            transceiver, x, y, memory_write_function)
+            transceiver, x, y, write_memory_function)
         self._start_address = start_address
         self._current_address = start_address
         self._end_address = end_address
