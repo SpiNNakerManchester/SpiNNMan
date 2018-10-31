@@ -47,7 +47,7 @@ class VersionInfo(object):
         else:
             name_hardware, _, version = version_data.partition("\0")
             self._version_string = version
-            matches = re.match("(\d+)\.(\d+)\.(\d+)", version)
+            matches = re.match(r"(\d+)\.(\d+)\.(\d+)", version)
             if matches is None:
                 raise SpinnmanInvalidParameterException(
                     "version", version, "Cannot be parsed")
