@@ -7,7 +7,7 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class P2PTable(object):
-    """ Represents a P2P table read from the machine
+    """ Represents a P2P routing table read from the machine.
     """
     __slots__ = [
         "_height",
@@ -33,7 +33,7 @@ class P2PTable(object):
 
     @staticmethod
     def get_n_column_bytes(height):
-        """ Get the number of bytes to be read for each column of the table
+        """ Get the number of bytes to be read for each column of the table.
 
         :param height: The height of the machine
         """
@@ -42,7 +42,7 @@ class P2PTable(object):
     @staticmethod
     def get_column_offset(column):
         """ Get the offset of the next column in the table from the P2P base\
-            address
+            address.
 
         :param column: The column to be read
         """
@@ -50,13 +50,13 @@ class P2PTable(object):
 
     @property
     def width(self):
-        """ The width of the machine that this table represents
+        """ The width of the machine that this table represents.
         """
         return self._width
 
     @property
     def height(self):
-        """ The height of the machine that this table represents
+        """ The height of the machine that this table represents.
         """
         return self._height
 
@@ -66,7 +66,7 @@ class P2PTable(object):
         return iterkeys(self._routes)
 
     def is_route(self, x, y):
-        """ Determines if there is a route in the P2P table to the given chip
+        """ Determines if there is a route in the P2P table to the given chip.
 
         :param x: The x-coordinate of the chip to look up
         :param y: The y-coordinate of the chip to look up
@@ -76,7 +76,7 @@ class P2PTable(object):
             self._routes[(x, y)] != P2PTableRoute.NONE)
 
     def get_route(self, x, y):
-        """ Get the route to follow from this chip to the given chip
+        """ Get the route to follow from this chip to the given chip.
 
         :param x: The x-coordinate of the chip to find the route to
         :param y: The y-coordinate of the chip to find the route to

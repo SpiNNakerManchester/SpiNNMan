@@ -166,7 +166,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def strip_sdp(self):
-        """ True if the tag is to strip sdp
+        """ True if the tag is to strip the SDP header
 
         :rtype: bool
         """
@@ -206,7 +206,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def spin_port(self):
-        """ The spin-port of the ip tag
+        """ The spin-port of the IP tag
 
         :rtype: int
         """
@@ -214,7 +214,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def spin_cpu(self):
-        """ The cpu id of the ip tag
+        """ The CPU ID of the IP tag
 
         :rtype: int
         """

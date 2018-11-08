@@ -37,7 +37,7 @@ class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
 
     @property
     def cabinet(self):
-        """ The cabinet id of the BMP
+        """ The cabinet ID of the BMP
 
         :rtype: int
         """
@@ -45,7 +45,7 @@ class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
 
     @property
     def frame(self):
-        """ The frame id of the BMP
+        """ The frame ID of the BMP
 
         :rtype: int
         """

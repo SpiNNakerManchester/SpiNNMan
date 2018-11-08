@@ -5,7 +5,7 @@ from .connection import Connection
 
 @add_metaclass(AbstractBase)
 class SpinnakerBootReceiver(Connection):
-    """ A receiver of Spinnaker boot messages
+    """ A receiver of SpiNNaker boot messages
     """
 
     __slots__ = ()

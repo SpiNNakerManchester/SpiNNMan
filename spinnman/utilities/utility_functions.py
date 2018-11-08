@@ -16,7 +16,7 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
     :param number_of_boards: the number of boards in the machine
     :return: The BMP connection data
     """
-    # take the ip address, split by dots, and subtract 1 off last bit
+    # take the IP address, split by dots, and subtract 1 off last bit
     ip_bits = socket.gethostbyname(hostname).split(".")
     ip_bits[-1] = str(int(ip_bits[-1]) - 1)
     bmp_ip_address = ".".join(ip_bits)

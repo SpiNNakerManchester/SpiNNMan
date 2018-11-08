@@ -19,7 +19,7 @@ class AbstractMultiConnectionProcessConnectionSelector(object):
     @abstractmethod
     def get_next_connection(self, message):
         """ Get the index of the  next connection for the process from a list\
-            of connections
+            of connections.
 
         :param message: The SCP message to be sent
         :rtype: int

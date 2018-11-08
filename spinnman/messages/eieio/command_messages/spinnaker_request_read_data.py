@@ -224,7 +224,7 @@ class _SpinnakerRequestReadDataRequest(object):
         if len(self._region_id) > request_id:
             return self._region_id[request_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "region id request needs to be"
+            "request_id", "integer", "region ID request needs to be"
             "comprised between 0 and {0:d}; current value: {1:d}".format(
                 len(self._region_id) - 1, request_id))
 

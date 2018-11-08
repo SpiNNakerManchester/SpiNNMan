@@ -16,8 +16,9 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
         self._base_address = response.base_address
 
     def malloc_sdram(self, x, y, size, app_id, tag):
+        """ Allocate space in the SDRAM space.
+        """
         # pylint: disable=too-many-arguments
-        # Allocate space in the sdram space
         self._send_request(SDRAMAlloc(x, y, app_id, size, tag),
                            self._handle_sdram_alloc_response)
         self._finish()

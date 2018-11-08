@@ -12,7 +12,7 @@ _PATTERN = struct.Struct(
 
 
 class ADCInfo(object):
-    """ Container for the ADC data thats been retrieved from an FPGA
+    """ Container for the ADC data thats been retrieved from an FPGA.
     """
     __slots__ = [
         "_fan_0",
@@ -64,84 +64,96 @@ class ADCInfo(object):
 
     @property
     def voltage_1_2c(self):
-        """
-        property for voltage 1 2c
+        """ Actual voltage of the 1.2V c supply rail
+
+        :rtype: float
         """
         return self._voltage_1_2c
 
     @property
     def voltage_1_2b(self):
-        """
-        property for voltage 1 2b
+        """ Actual voltage of the 1.2V b supply rail
+
+        :rtype: float
         """
         return self._voltage_1_2b
 
     @property
     def voltage_1_2a(self):
-        """
-        property for voltage 1 2a
+        """ Actual voltage of the 1.2V a supply rail
+
+        :rtype: float
         """
         return self._voltage_1_2a
 
     @property
     def voltage_1_8(self):
-        """
-        property for voltage 1 8
+        """ Actual voltage of the 1.8V supply rail
+
+        :rtype: float
         """
         return self._voltage_1_8
 
     @property
     def voltage_3_3(self):
-        """
-        property for voltage 3 3
+        """ Actual voltage of the 3.3V supply rail
+
+        :rtype: float
         """
         return self._voltage_3_3
 
     @property
     def voltage_supply(self):
-        """
-        property for voltage supply
+        """ Actual voltage of the main power supply (nominally 12V).
+
+        :rtype: float
         """
         return self._voltage_supply
 
     @property
     def temp_top(self):
-        """
-        property for temp top
+        """ temperature top
+
+        :rtype: float
         """
         return self._temp_top
 
     @property
     def temp_btm(self):
-        """
-        property for temp bottom
+        """ temperature bottom
+
+        :rtype: float
         """
         return self._temp_btm
 
     @property
     def temp_ext_0(self):
-        """
-        property for temp ext 0
+        """ temperature external 0
+
+        :rtype: float or None
         """
         return self._temp_ext_0
 
     @property
     def temp_ext_1(self):
-        """
-        property for temp ext 1
+        """ temperature external 1
+
+        :rtype: float or None
         """
         return self._temp_ext_1
 
     @property
     def fan_0(self):
-        """
-        property for fan 0
+        """ fan 0
+
+        :rtype: float or None
         """
         return self._fan_0
 
     @property
     def fan_1(self):
-        """
-        property for fan 1
+        """ fan 1
+
+        :rtype: float or None
         """
         return self._fan_1

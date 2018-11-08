@@ -158,7 +158,7 @@ def create_transceiver_from_hostname(
             bmp_ip_list.append(bmp_connection.remote_ip_address)
         logger.info("Transceiver using BMPs: {}", bmp_ip_list)
 
-    # handle the spinnaker connection
+    # handle the SpiNNaker connection
     if scamp_connections is None:
         connections.append(SCAMPConnection(remote_host=hostname))
 
@@ -348,7 +348,7 @@ class Transceiver(object):
         self._scamp_connection_selector = \
             self._identify_connections(connections)
 
-        # The nearest neighbour start id and lock
+        # The nearest neighbour start ID and lock
         self._nearest_neighbour_id = 1
         self._nearest_neighbour_lock = RLock()
 
@@ -676,7 +676,10 @@ class Transceiver(object):
                 sc.update_chip_coordinates(
                     self._machine.boot_x, self._machine.boot_y)
 
-        # Work out and add the spinnaker links and FPGA links
+        # Remove any chips that are unreachable
+        self._machine.remove_unreachable_chips()
+
+        # Work out and add the SpiNNaker links and FPGA links
         self._machine.add_spinnaker_links(self._version)
         self._machine.add_fpga_links(self._version)
 
@@ -857,18 +860,18 @@ class Transceiver(object):
             self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
             connection_selector=None):
-        """ Get the version of SCAMP which is running on the board
+        """ Get the version of SCAMP which is running on the board.
 
         :param connection_selector: the connection to send the SCAMP\
-            version or none (if none then a random SCAMP connection is used)
+            version or none (if none then a random SCAMP connection is used).
         :type connection_selector: \
-            :py:class:'spinnman.processes.AbstractMultiConnectionProcessConnectionSelector'
+            :py:class:`AbstractMultiConnectionProcessConnectionSelector`
         :param chip_x: the chip's x coordinate to query for SCAMP version
         :type chip_x: int
         :param chip_y: the chip's y coordinate to query for SCAMP version
         :type chip_y: int
         :return: The version identifier
-        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
+        :rtype: :py:class:`VersionInfo`
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board
         :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
@@ -1121,14 +1124,10 @@ class Transceiver(object):
                 x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
                 data_item.data_type.value))[0]
 
-    def get_user_0_register_address_from_core(self, x, y, p):
+    def get_user_0_register_address_from_core(self, p):
         """ Get the address of user 0 for a given processor on the board
 
-        :param x: the x-coordinate of the chip containing the processor
-        :param y: the y-coordinate of the chip containing the processor
         :param p: The ID of the processor to get the user 0 address from
-        :type x: int
-        :type y: int
         :type p: int
         :return: The address for user 0 register for this processor
         :rtype: int
@@ -1142,14 +1141,10 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
-    def get_user_1_register_address_from_core(self, x, y, p):
+    def get_user_1_register_address_from_core(self, p):
         """ Get the address of user 1 for a given processor on the board
 
-        :param x: the x-coordinate of the chip containing the processor
-        :param y: the y-coordinate of the chip containing the processor
         :param p: The ID of the processor to get the user 1 address from
-        :type x: int
-        :type y: int
         :type p: int
         :return: The address for user 1 register for this processor
         :rtype: int
@@ -1163,14 +1158,10 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
-    def get_user_2_register_address_from_core(self, x, y, p):
+    def get_user_2_register_address_from_core(self, p):
         """ Get the address of user 2 for a given processor on the board
 
-        :param x: the x-coordinate of the chip containing the processor
-        :param y: the y-coordinate of the chip containing the processor
         :param p: The ID of the processor to get the user 0 address from
-        :type x: int
-        :type y: int
         :type p: int
         :return: The address for user 0 register for this processor
         :rtype: int
@@ -2247,7 +2238,7 @@ class Transceiver(object):
                 ip_tag.tag, strip=ip_tag.strip_sdp))
 
     def __get_connection_list(self, connection=None, board_address=None):
-        """Get the connections for talking to a board.
+        """ Get the connections for talking to a board.
 
         :param connection: \
             Optional param that directly gives the connection to use.
@@ -2304,7 +2295,7 @@ class Transceiver(object):
             raise SpinnmanInvalidParameterException(
                 "reverse_ip_tag.port", reverse_ip_tag.port,
                 "The port number for the reverse IP tag conflicts with"
-                " the spiNNaker system ports ({} and {})".format(
+                " the SpiNNaker system ports ({} and {})".format(
                     SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT))
 
         # Get the connections - if the tag specifies a connection, use that,

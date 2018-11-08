@@ -20,24 +20,39 @@ class FillDataType(Enum):
         obj = object.__new__(cls)
         obj._value_ = value
         obj._struct_type = struct_type
+        obj._struct = struct.Struct(struct_type)
         return obj
 
     def __init__(self, value, struct_type, doc=""):
         self._value_ = value
         self._struct_type = struct_type
+        self._struct = struct.Struct(struct_type)
         self.__doc__ = doc
 
     @property
     def struct_type(self):
+        """ The struct descriptor for packing and unpacking 4 bytes-worth of\
+            this type.
+
+        :rtype: str
+        """
         return self._struct_type
+
+    @property
+    def struct(self):
+        """ An object that can pack and unpack 4 bytes-worth of this type.
+
+        :rtype: struct.Struct
+        """
+        return self._struct
 
 
 class FillProcess(AbstractMultiConnectionProcess):
-    """ A process for filling memory
+    """ A process for filling memory.
     """
     __slots__ = []
 
-    PACKS = [struct.Struct("<{}B".format(i)) for i in range(ALIGNMENT)]
+    _PACKS = [struct.Struct("<{}B".format(i)) for i in range(ALIGNMENT)]
 
     # pylint: disable=too-many-arguments
 
@@ -47,7 +62,7 @@ class FillProcess(AbstractMultiConnectionProcess):
             return 0
         # Pre_bytes is the first part of the data up to the first aligned
         # word
-        pre_bytes = self.PACKS[extra_bytes].pack(*data_to_fill[:extra_bytes])
+        pre_bytes = self._PACKS[extra_bytes].pack(*data_to_fill[:extra_bytes])
         # Send the pre-data to make the memory aligned (or all the
         # data if the size is correct - note that pre_bytes[:size] will
         # return all of pre_bytes if size >= len(pre_bytes)
@@ -66,8 +81,8 @@ class FillProcess(AbstractMultiConnectionProcess):
         # pre-data circling round to the start of the post-data; we double
         # it up so that we don't need to use mod (it's pretty small).
         data = data_to_fill + data_to_fill
-        fill_word = struct.unpack(
-            "<I", data[extra_bytes:extra_bytes + ALIGNMENT - 1])[0]
+        fill_word = FillDataType.WORD.unpack(
+            data[extra_bytes:extra_bytes + ALIGNMENT - 1])[0]
         self._send_request(FillRequest(x, y, address, fill_word, size))
         return size
 
@@ -80,7 +95,7 @@ class FillProcess(AbstractMultiConnectionProcess):
         if not n_bytes or not bytes_to_write:
             return
 
-        post_bytes = self.PACKS[n_bytes].pack(*data_to_fill[-n_bytes:])
+        post_bytes = self._PACKS[n_bytes].pack(*data_to_fill[-n_bytes:])
         self._send_request(WriteMemory(
             x, y, address, post_bytes[:bytes_to_write]))
 
@@ -108,8 +123,7 @@ class FillProcess(AbstractMultiConnectionProcess):
                 base_address)
 
         # Get a word of data regardless of the type
-        data_to_fill = bytearray(struct.pack(
-            str(data_type.struct_type),
+        data_to_fill = bytearray(data_type.struct.pack(
             *([data] * (ALIGNMENT / data_type.value))))
 
         written = 0

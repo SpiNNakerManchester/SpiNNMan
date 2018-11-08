@@ -9,7 +9,7 @@ _REGISTERS_PATTERN = struct.Struct("<IIIIIIII")
 
 
 class CPUInfo(object):
-    """ Represents information about the state of a CPU
+    """ Represents information about the state of a CPU.
     """
     __slots__ = [
         "_application_id",
@@ -84,7 +84,7 @@ class CPUInfo(object):
 
     @property
     def x(self):
-        """ The x-coordinate of the chip containing the core
+        """ The x-coordinate of the chip containing the core.
 
         :return: The x-coordinate of the chip
         :rtype: int
@@ -93,7 +93,7 @@ class CPUInfo(object):
 
     @property
     def y(self):
-        """ The y-coordinate of the chip containing the core
+        """ The y-coordinate of the chip containing the core.
 
         :return: The y-coordinate of the chip
         :rtype: int
@@ -102,7 +102,7 @@ class CPUInfo(object):
 
     @property
     def p(self):
-        """ The ID of the core on the chip
+        """ The ID of the core on the chip.
 
         :return: The ID of the core
         :rtype: int
@@ -111,7 +111,7 @@ class CPUInfo(object):
 
     @property
     def state(self):
-        """ The current state of the core
+        """ The current state of the core.
 
         :return: The state of the core
         :rtype: :py:class:`spinnman.model.enums.cpu_state.CPUState`
@@ -120,7 +120,7 @@ class CPUInfo(object):
 
     @property
     def physical_cpu_id(self):
-        """ The physical ID of this processor
+        """ The physical ID of this processor.
 
         :return: The physical ID of the processor
         :rtype: int
@@ -129,7 +129,7 @@ class CPUInfo(object):
 
     @property
     def application_name(self):
-        """ The name of the application running on the core
+        """ The name of the application running on the core.
 
         :return: The name of the application
         :rtype: str
@@ -138,16 +138,16 @@ class CPUInfo(object):
 
     @property
     def application_id(self):
-        """ The id of the application running on the core
+        """ The ID of the application running on the core.
 
-        :return: The id of the application
+        :return: The ID of the application
         :rtype: int
         """
         return self._application_id
 
     @property
     def time(self):
-        """ The time at which the application started
+        """ The time at which the application started.
 
         :return: The time in seconds since 00:00:00 on the 1st January 1970
         :rtype: int
@@ -156,7 +156,7 @@ class CPUInfo(object):
 
     @property
     def run_time_error(self):
-        """ The reason for a run time error
+        """ The reason for a run time error.
 
         :return: The run time error
         :rtype: :py:class:`spinnman.model.enums.run_time_error.RunTimeError`
@@ -166,7 +166,7 @@ class CPUInfo(object):
     @property
     def application_mailbox_command(self):
         """ The command currently in the mailbox being sent from the monitor\
-            processor to the application
+            processor to the application.
 
         :return: The command
         :rtype: :py:class:`spinnman.model.enums.mailbox_command.MailboxCommand`
@@ -175,7 +175,7 @@ class CPUInfo(object):
 
     @property
     def application_mailbox_data_address(self):
-        """ The address of the data in SDRAM for the application mailbox
+        """ The address of the data in SDRAM for the application mailbox.
 
         :return: The address of the data
         :rtype: int
@@ -185,7 +185,7 @@ class CPUInfo(object):
     @property
     def monitor_mailbox_command(self):
         """ The command currently in the mailbox being sent from the\
-            application to the monitor processor
+            application to the monitor processor.
 
         :return: The command
         :rtype: :py:class:`spinnman.model.mailbox_command.MailboxCommand`
@@ -194,7 +194,7 @@ class CPUInfo(object):
 
     @property
     def monitor_mailbox_data_address(self):
-        """ The address of the data in SDRAM of the monitor mailbox
+        """ The address of the data in SDRAM of the monitor mailbox.
 
         :return: The address of the data
         :rtype: int
@@ -203,7 +203,7 @@ class CPUInfo(object):
 
     @property
     def software_error_count(self):
-        """ The number of software errors counted
+        """ The number of software errors counted.
 
         :return: The number of software errors
         :rtype: int
@@ -212,7 +212,7 @@ class CPUInfo(object):
 
     @property
     def software_source_filename_address(self):
-        """ The address of the filename of the software source
+        """ The address of the filename of the software source.
 
         :return: The filename
         :rtype: str
@@ -221,7 +221,7 @@ class CPUInfo(object):
 
     @property
     def software_source_line_number(self):
-        """ The line number of the software source
+        """ The line number of the software source.
 
         :return: The line number
         :rtype: int
@@ -230,7 +230,7 @@ class CPUInfo(object):
 
     @property
     def processor_state_register(self):
-        """ The value in the processor state register (PSR)
+        """ The value in the processor state register (PSR).
 
         :return: The PSR value
         :rtype: int
@@ -239,7 +239,7 @@ class CPUInfo(object):
 
     @property
     def stack_pointer(self):
-        """ The current stack pointer value (SP)
+        """ The current stack pointer value (SP).
 
         :return: The SP value
         :rtype: int
@@ -248,7 +248,7 @@ class CPUInfo(object):
 
     @property
     def link_register(self):
-        """ The current link register value (LR)
+        """ The current link register value (LR).
 
         :return: The LR value
         :rtype: int
@@ -257,7 +257,7 @@ class CPUInfo(object):
 
     @property
     def registers(self):
-        """ The current register values (r0 - r7)
+        """ The current register values (r0 - r7).
 
         :return: An array of 8 values, one for each register
         :rtype: array of int
@@ -266,7 +266,7 @@ class CPUInfo(object):
 
     @property
     def user(self):
-        """ The current user values (user0 - user3)
+        """ The current user values (user0 - user3).
 
         :return: An array of 4 values, one for each user value
         :rtype: array of int
@@ -275,7 +275,7 @@ class CPUInfo(object):
 
     @property
     def iobuf_address(self):
-        """ The address of the IOBUF buffer in SDRAM
+        """ The address of the IOBUF buffer in SDRAM.
 
         :return: The address
         :rtype: int
@@ -284,7 +284,7 @@ class CPUInfo(object):
 
     @property
     def software_version(self):
-        """ The software version
+        """ The software version.
 
         :return: The software version
         :rtype: int

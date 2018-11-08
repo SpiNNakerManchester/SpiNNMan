@@ -27,7 +27,7 @@ class ReverseIPTagSet(AbstractSCPRequest):
             The y-coordinate of the destination chip, between 0 and 255
         :type destination_y: int
         :param destination_p: \
-            The id of the destination processor, between 0 and 17
+            The ID of the destination processor, between 0 and 17
         :type destination_p: int
         :param port: The port, between 0 and 65535
         :type port: int

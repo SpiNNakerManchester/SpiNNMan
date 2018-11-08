@@ -19,10 +19,10 @@ class SCPRequestHeader(object):
         :param command: The SCP command
         :type command: :py:class:`spinnman.messages.scp.scp_command.SCPCommand`
         :param sequence: The number of the SCP packet in order of all packets\
-                    sent or received, between 0 and 65535
+            sent or received, between 0 and 65535
         :type sequence: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If one\
-                    of the parameters is incorrect
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If one of the parameters is incorrect
         """
         self._command = command
         self._sequence = sequence
@@ -53,8 +53,8 @@ class SCPRequestHeader(object):
         :type sequence: int
         :return: Nothing is returned
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If the\
-                    sequence is out of range, or if it has already been set
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+            If the sequence is out of range, or if it has already been set
         """
         self._sequence = sequence
 

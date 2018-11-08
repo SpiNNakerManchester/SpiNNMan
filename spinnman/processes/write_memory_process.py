@@ -5,14 +5,14 @@ from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 
 class WriteMemoryProcess(AbstractMultiConnectionProcess):
-    """ A process for writing memory on a SpiNNaker chip
+    """ A process for writing memory on a SpiNNaker chip.
     """
     __slots__ = []
     # pylint: disable=too-many-arguments
 
     def write_memory_from_bytearray(
             self, x, y, p, base_address, data, offset, n_bytes):
-        """ Writes memory onto a SpiNNaker chip from a bytearray
+        """ Writes memory onto a SpiNNaker chip from a bytearray.
 
         :param x: \
             The x-coordinate of the chip where the memory is to be written to
@@ -23,6 +23,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :param processor_address: the (x, y, p) coords of the chip in question
         :param base_address: the address in SDRAM to start writing
         :param data: the data to write
+        :type data: bytearray or bytes
         :param offset: where in the data to start writing from
         :param n_bytes: how much data to write
         :rtype: None
@@ -39,7 +40,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
 
     def write_memory_from_reader(
             self, x, y, p, base_address, reader, n_bytes):
-        """ Writes memory onto a SpiNNaker chip from a reader
+        """ Writes memory onto a SpiNNaker chip from a reader.
 
         :param x: \
             The x-coordinate of the chip where the memory is to be written to
@@ -48,7 +49,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :param p: \
             The processor of the chip where the memory is to be written to
         :param base_address: the address in SDRAM to start writing
-        :param reader: the reader containing the data to write
+        :param reader: the readable object containing the data to write
+        :type reader: :py:class:`io.RawIOBase` or :py:class:`io.BufferedIOBase`
         :param n_bytes: how much data to write
         :rtype: None
         """

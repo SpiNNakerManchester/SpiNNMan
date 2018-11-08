@@ -21,7 +21,7 @@ class AppStop(AbstractSCPRequest):
 
     def __init__(self, app_id):
         """
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         """
         super(AppStop, self).__init__(

@@ -41,7 +41,7 @@ class DiagnosticFilter(object):
         through the router with certain properties.  The counter will be\
         incremented so long as the packet matches one of the values in each\
         field i.e. one of each of the destinations, sources, payload_statuses,\
-        default_routing_statuses, emergency_routing_statuses and packet_types
+        default_routing_statuses, emergency_routing_statuses and packet_types.
     """
     __slots__ = [
         "_default_routing_statuses",
@@ -69,30 +69,30 @@ class DiagnosticFilter(object):
         :type match_emergency_routing_status_to_incoming_packet: bool
         :param destinations: Increment the counter if one or more of the given\
             destinations match
-        :type destinations: iterable of\
-            :py:class:`spinnman.model.enums.DiagnosticFilterDestination`
+        :type destinations: \
+            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterDestination`)
         :param sources: Increment the counter if one or more of the given\
             sources match (or None or empty list to match all)
-        :type sources: iterable of\
-            :py:class:`spinnman.model.enums.DiagnosticFilterSource`
+        :type sources: \
+            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterSource`)
         :param payload_statuses: Increment the counter if one or more of the\
             given payload statuses match  (or None or empty list to match all)
-        :type payload_statuses: iterable of\
-            :py:class:`spinnman.model.enums.DiagnosticFilterPayloadStatus`
+        :type payload_statuses: \
+            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterPayloadStatus`)
         :param default_routing_statuses: Increment the counter if one or more\
             of the given default routing statuses match  (or None or empty\
             list to match all)
-        :type default_routing_statuses: iterable of\
-            :py:class:`spinnman.model.enums.DiagnosticFilterDefaultRoutingStatus`
+        :type default_routing_statuses: \
+            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterDefaultRoutingStatus`)
         :param emergency_routing_statuses: Increment the counter if one or\
             more of the given emergency routing statuses match (or None or\
             empty list to match all)
-        :type emergency_routing_statuses: iterable of\
-            :py:class:`spinnman.model.enums.DiagnosticFilterEmergencyRoutingStatus`
+        :type emergency_routing_statuses: \
+            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterEmergencyRoutingStatus`)
         :param packet_types: Increment the counter if one or more of the\
             given packet types match (or None or empty list to match all)
-        :type packet_types: iterable of\
-            :py:class:`spinnman.model.enums.DiagnosticFilterPacketType`
+        :type packet_types: \
+            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterPacketType`)
         """
         # pylint: disable=too-many-arguments
         self._enable_interrupt_on_counter_event = \

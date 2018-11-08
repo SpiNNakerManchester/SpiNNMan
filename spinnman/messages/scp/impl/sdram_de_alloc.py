@@ -24,7 +24,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
         :param y: \
             The y-coordinate of the chip to allocate on, between 0 and 255
         :type y: int
-        :param app_id: The id of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :type app_id: int
         :param base_address: The start address in SDRAM to which the block\
             needs to be deallocated, or none if deallocating via app_id
@@ -86,7 +86,7 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
                 data, offset)[0]
 
             # check that the base address is not null (0 in python case) as
-            # this reflects a issue in command on spinnaker side
+            # this reflects a issue in command on SpiNNaker side
             if self._number_of_blocks_freed == 0:
                 raise SpinnmanUnexpectedResponseCodeException(
                     "SDRAM deallocation response base address", "CMD_DEALLOC",

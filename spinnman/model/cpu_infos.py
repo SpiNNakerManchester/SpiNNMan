@@ -3,7 +3,7 @@ from six import iteritems, iterkeys, itervalues
 
 
 class CPUInfos(object):
-    """ A set of CPU information objects
+    """ A set of CPU information objects.
     """
     __slots__ = [
         "_cpu_infos"]
@@ -12,7 +12,7 @@ class CPUInfos(object):
         self._cpu_infos = OrderedDict()
 
     def add_processor(self, x, y, processor_id, cpu_info):
-        """ Add a processor on a given chip to the set
+        """ Add a processor on a given chip to the set.
 
         :param x: The x-coordinate of the chip
         :type x: int
@@ -27,7 +27,7 @@ class CPUInfos(object):
 
     @property
     def cpu_infos(self):
-        """ the one per core core info
+        """ The one per core core info.
 
         :return: iterable of x,y,p core info
         """
@@ -48,7 +48,7 @@ class CPUInfos(object):
         return self._cpu_infos.values()
 
     def itervalues(self):
-        """ Get an iterable of cpu_info
+        """ Get an iterable of cpu_info.
         """
         return itervalues(self._cpu_infos)
 
@@ -56,11 +56,11 @@ class CPUInfos(object):
         return self._cpu_infos.keys()
 
     def iterkeys(self):
-        """ Get an iterable of (x, y, p)
+        """ Get an iterable of (x, y, p).
         """
         return iterkeys(self._cpu_infos)
 
     def __len__(self):
-        """ The total number of processors that are in these core subsets
+        """ The total number of processors that are in these core subsets.
         """
         return len(self._cpu_infos)

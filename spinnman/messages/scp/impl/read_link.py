@@ -21,7 +21,7 @@ class ReadLink(AbstractSCPRequest):
         :param cpu: The CPU core to use, normally 0 (or if a BMP, the board \
             slot number)
         :type cpu: int
-        :param link: The id of the link down which to send the query
+        :param link: The ID of the link down which to send the query
         :type link: int
         :param base_address: The positive base address to start the read from
         :type base_address: int

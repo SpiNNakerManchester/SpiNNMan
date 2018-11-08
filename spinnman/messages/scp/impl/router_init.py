@@ -26,7 +26,7 @@ class RouterInit(AbstractSCPRequest):
         :type table_address: int
         :param base_address: The base_address containing the entries
         :type base_address: int
-        :param app_id: The id of the application with which to associate the\
+        :param app_id: The ID of the application with which to associate the\
             routes.  If not specified, defaults to 0.
         :type app_id: int
         :raise spinnman.exceptions.SpinnmanInvalidParameterException:\

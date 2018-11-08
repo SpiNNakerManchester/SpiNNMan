@@ -3,7 +3,7 @@ from .abstract_single_connection_process import AbstractSingleConnectionProcess
 
 
 class GetVersionProcess(AbstractSingleConnectionProcess):
-    """ A process for getting the version of the machine
+    """ A process for getting the version of the machine.
     """
     __slots__ = [
         "_version_info"]
