@@ -1,9 +1,9 @@
-import socket
-from six.moves import configparser
 import os
+import socket
+import unittest
+from six.moves import configparser
 from spinn_utilities.ping import Ping
 from spinnman.model import BMPConnectionData
-import unittest
 
 _LOCALHOST = "127.0.0.1"
 # Microsoft invalid IP address. For more details see:

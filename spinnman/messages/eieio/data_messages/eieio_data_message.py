@@ -1,14 +1,13 @@
-from spinnman.exceptions import SpinnmanInvalidPacketException,\
-    SpinnmanInvalidParameterException
-from spinnman.messages.eieio import AbstractEIEIOMessage
-from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
+import math
+import struct
+from spinnman.exceptions import (
+    SpinnmanInvalidPacketException, SpinnmanInvalidParameterException)
+from spinnman.messages.eieio import (
+    AbstractEIEIOMessage, EIEIOType, EIEIOPrefix)
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 from .eieio_data_header import EIEIODataHeader
 from .key_data_element import KeyDataElement
 from .key_payload_data_element import KeyPayloadDataElement
-
-import math
-import struct
 
 _ONE_SHORT = struct.Struct("<H")
 _TWO_SHORTS = struct.Struct("<HH")

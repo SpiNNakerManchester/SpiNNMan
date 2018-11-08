@@ -1,7 +1,7 @@
-from spinnman.messages.scp import SCPRequestHeader
 from spinn_utilities.overrides import overrides
-from spinnman.messages.scp.abstract_messages \
-    import AbstractSCPRequest, AbstractSCPResponse
+from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest, AbstractSCPResponse)
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException

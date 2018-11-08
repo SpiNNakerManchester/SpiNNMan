@@ -1,8 +1,8 @@
-from spinnman.exceptions import SpinnmanInvalidParameterException
-from time import localtime, asctime
-import struct
-from six import raise_from
 import re
+import struct
+from time import localtime, asctime
+from six import raise_from
+from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
 

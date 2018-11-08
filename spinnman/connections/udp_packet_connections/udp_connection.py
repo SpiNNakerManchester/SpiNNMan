@@ -1,14 +1,13 @@
-from spinn_utilities.overrides import overrides
-from spinnman.exceptions \
-    import SpinnmanIOException, SpinnmanTimeoutException
-from spinnman.connections.abstract_classes import Connection
-from .utils import bind_socket, connect_socket, get_socket, \
-    get_socket_address, ping, resolve_host, set_receive_buffer_size
-
 import logging
 import socket
 import select
 from six import raise_from
+from spinn_utilities.overrides import overrides
+from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
+from spinnman.connections.abstract_classes import Connection
+from .utils import (
+    bind_socket, connect_socket, get_socket, get_socket_address, ping,
+    resolve_host, set_receive_buffer_size)
 
 logger = logging.getLogger(__name__)
 _RECEIVE_BUFFER_SIZE = 1048576

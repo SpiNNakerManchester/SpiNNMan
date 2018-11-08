@@ -1,10 +1,9 @@
+import struct
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from .udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
-from spinnman.connections.abstract_classes \
-    import SDPReceiver, SDPSender, Listenable
-
-import struct
+from spinnman.connections.abstract_classes import (
+    SDPReceiver, SDPSender, Listenable)
 
 _TWO_SKIP = struct.Struct("<2x")
 _REPR_TEMPLATE = "SDPConnection(chip_x={}, chip_y={}, local_host={},"\

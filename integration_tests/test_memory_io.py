@@ -1,7 +1,7 @@
-from spinnman.utilities.io.memory_io import MemoryIO
-import numpy
 import os
 import struct
+import numpy
+from spinnman.utilities.io.memory_io import MemoryIO
 
 
 class _MockTransceiver(object):

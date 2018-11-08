@@ -1,5 +1,5 @@
-from spinnman.messages.eieio.data_messages \
-    import EIEIODataMessage, EIEIODataHeader
+from spinnman.messages.eieio.data_messages import (
+    EIEIODataMessage, EIEIODataHeader)
 
 
 def read_eieio_data_message(data, offset):

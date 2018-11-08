@@ -1,9 +1,8 @@
+import functools
+from past.builtins import xrange
+from spinn_machine.tags import ReverseIPTag, IPTag
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.messages.scp.impl import IPTagGetInfo, IPTagGet
-
-from spinn_machine.tags import ReverseIPTag, IPTag
-from past.builtins import xrange
-import functools
 
 
 class GetTagsProcess(AbstractMultiConnectionProcess):

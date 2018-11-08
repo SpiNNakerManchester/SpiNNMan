@@ -1,9 +1,8 @@
 import os
-from spinnman.utilities.io.abstract_io import AbstractIO
-from spinnman.processes.fill_process import FillDataType
 import struct
 from spinn_utilities.overrides import overrides
-
+from spinnman.utilities.io.abstract_io import AbstractIO
+from spinnman.processes.fill_process import FillDataType
 
 # A set of ChipMemoryIO objects that have been created,
 # indexed by transceiver, x and y (thus two transceivers might not see the

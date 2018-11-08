@@ -1,4 +1,3 @@
-# spinnman imports
 from .scp_request import AbstractSCPRequest
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 

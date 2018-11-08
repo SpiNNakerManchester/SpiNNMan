@@ -1,14 +1,10 @@
 import logging
 import functools
-
 from spinn_utilities.log import FormatAdapter
-
 from spinn_machine import Processor, Router, Chip, SDRAM, Machine, Link
-
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.impl \
-    import ReadMemory, ReadLink, GetChipInfo
+from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess

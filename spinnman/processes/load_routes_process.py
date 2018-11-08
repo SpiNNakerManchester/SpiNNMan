@@ -1,11 +1,9 @@
+import struct
 from spinn_machine import Router
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.scp.impl \
-    import RouterInit, RouterAlloc
+from spinnman.messages.scp.impl import RouterInit, RouterAlloc
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .write_memory_process import WriteMemoryProcess
-
-import struct
 
 _ROUTE_PATTERN = struct.Struct("<H2xIII")
 _END_PATTERN = struct.Struct("<IIII")

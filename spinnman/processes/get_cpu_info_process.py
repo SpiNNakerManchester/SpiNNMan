@@ -1,10 +1,9 @@
+import functools
 from spinnman.model import CPUInfo
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl import ReadMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-
-import functools
 
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess):

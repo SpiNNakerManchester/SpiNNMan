@@ -1,9 +1,8 @@
-from spinnman.messages.scp.impl import \
-    FloodFillEnd, FloodFillStart, FloodFillData
+import math
+from spinnman.messages.scp.impl import (
+    FloodFillEnd, FloodFillStart, FloodFillData)
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
-
-import math
 
 
 class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
