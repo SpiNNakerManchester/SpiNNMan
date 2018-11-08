@@ -697,6 +697,9 @@ class Transceiver(object):
                 sc.update_chip_coordinates(
                     self._machine.boot_x, self._machine.boot_y)
 
+        # Remove any chips that are unreachable
+        self._machine.remove_unreachable_chips()
+
         # Work out and add the SpiNNaker links and FPGA links
         self._machine.add_spinnaker_links(self._version)
         self._machine.add_fpga_links(self._version)
