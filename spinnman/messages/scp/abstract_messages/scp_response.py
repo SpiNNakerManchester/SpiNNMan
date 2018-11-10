@@ -1,5 +1,4 @@
 from six import add_metaclass
-
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.scp import SCPResponseHeader

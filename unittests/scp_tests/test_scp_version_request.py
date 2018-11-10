@@ -1,5 +1,4 @@
 import unittest
-
 from spinnman.messages.scp.impl import GetVersion
 from spinnman.messages.scp.enums import SCPCommand
 

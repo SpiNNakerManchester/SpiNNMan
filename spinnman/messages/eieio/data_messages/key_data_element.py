@@ -1,8 +1,7 @@
+import struct
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.eieio import EIEIOType
 from .abstract_data_element import AbstractDataElement
-
-import struct
 
 _ONE_SHORT = struct.Struct("<H")
 _ONE_WORD = struct.Struct("<I")

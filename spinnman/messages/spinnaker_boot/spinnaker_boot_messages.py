@@ -1,18 +1,14 @@
-# spinnman imports
-from .system_variable_boot_values import \
-    SystemVariableBootValues, spinnaker_boot_values, SystemVariableDefinition
-from .spinnaker_boot_message import SpinnakerBootMessage
-from .spinnaker_boot_op_code import SpinnakerBootOpCode
-
-from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.exceptions import SpinnmanIOException
-
-# general imports
 import os
 import math
 import time
 import array
 from six import iteritems
+from .system_variable_boot_values import (
+    SystemVariableBootValues, spinnaker_boot_values, SystemVariableDefinition)
+from .spinnaker_boot_message import SpinnakerBootMessage
+from .spinnaker_boot_op_code import SpinnakerBootOpCode
+from spinnman.exceptions import (
+    SpinnmanInvalidParameterException, SpinnmanIOException)
 
 _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4

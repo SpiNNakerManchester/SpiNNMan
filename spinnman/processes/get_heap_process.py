@@ -1,11 +1,11 @@
+import struct
+import functools
 from spinnman.processes import AbstractMultiConnectionProcess
 from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.model import HeapElement
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.messages.scp.impl import ReadMemory
 
-import struct
-import functools
 
 HEAP_ADDRESS = SystemVariableDefinition.sdram_heap_address
 _ADDRESS = struct.Struct("<I")

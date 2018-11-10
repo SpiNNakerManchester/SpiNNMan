@@ -1,12 +1,10 @@
-# spinnman imports
+import struct
 from spinn_utilities.overrides import overrides
-from spinnman.messages.scp.abstract_messages \
-    import AbstractSCPRequest, AbstractSCPResponse, BMPRequest, BMPResponse
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest, AbstractSCPResponse, BMPRequest, BMPResponse)
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-
-import struct
 
 _ONE_WORD = struct.Struct("<I")
 

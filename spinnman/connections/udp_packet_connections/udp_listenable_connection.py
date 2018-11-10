@@ -1,6 +1,6 @@
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import Listenable
-from spinnman.connections.udp_packet_connections import UDPConnection
+from .udp_connection import UDPConnection
 
 
 class UDPListenableConnection(UDPConnection, Listenable):

@@ -1,11 +1,9 @@
 import struct
-
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
 from .utils import update_sdp_header_for_udp_send
 from .sdp_connection import SDPConnection
-from spinnman.connections.abstract_classes \
-    import SCPSender, SCPReceiver
+from spinnman.connections.abstract_classes import SCPSender, SCPReceiver
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")
