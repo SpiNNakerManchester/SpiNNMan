@@ -1,6 +1,5 @@
 import struct
 import unittest
-
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl import CheckOKResponse
 from spinnman.messages.scp.enums import SCPResult

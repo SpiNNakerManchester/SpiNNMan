@@ -1,7 +1,7 @@
+import struct
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
-import struct
 
 _PATTERN_BBBxBBI = struct.Struct("<BBBxBBI")
 

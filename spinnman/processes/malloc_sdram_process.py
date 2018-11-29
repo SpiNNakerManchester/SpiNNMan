@@ -1,6 +1,5 @@
 from spinnman.messages.scp.impl import SDRAMAlloc
-from .abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess):

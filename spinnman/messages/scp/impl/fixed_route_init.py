@@ -2,7 +2,7 @@ from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
-from spinnman.messages.scp.impl import CheckOKResponse
+from .check_ok_response import CheckOKResponse
 from spinnman.messages.sdp import SDPHeader, SDPFlag
 
 

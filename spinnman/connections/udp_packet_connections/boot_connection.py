@@ -1,6 +1,6 @@
 import time
-from spinnman.connections.abstract_classes \
-    import SpinnakerBootSender, SpinnakerBootReceiver
+from spinnman.connections.abstract_classes import (
+    SpinnakerBootSender, SpinnakerBootReceiver)
 from .udp_connection import UDPConnection
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT

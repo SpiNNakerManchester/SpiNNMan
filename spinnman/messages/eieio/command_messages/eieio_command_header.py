@@ -1,6 +1,6 @@
-from spinnman.exceptions import SpinnmanInvalidParameterException
-from enum import Enum
 import struct
+from enum import Enum
+from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _ONE_SHORT = struct.Struct("<H")
 

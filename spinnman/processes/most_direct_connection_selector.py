@@ -1,6 +1,6 @@
 from spinn_utilities.overrides import overrides
-from .abstract_multi_connection_process_connection_selector \
-    import AbstractMultiConnectionProcessConnectionSelector
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 
 
 class MostDirectConnectionSelector(

@@ -1,8 +1,8 @@
+import struct
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
 from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
-import struct
 
 _PATTERN_BB = struct.Struct("<BB")
 

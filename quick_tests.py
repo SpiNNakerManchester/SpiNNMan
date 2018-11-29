@@ -3,22 +3,20 @@ import logging
 from random import randint
 import struct
 import time
-
+from spinn_machine import CoreSubsets, CoreSubset, MulticastRoutingEntry
+from spinn_machine.tags import IPTag, ReverseIPTag
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.enums import Signal
 from spinnman.model import DiagnosticFilter
 from spinnman.messages.scp.impl import ReadMemory
-from spinnman.model.enums \
-    import DiagnosticFilterDestination, DiagnosticFilterPacketType
+from spinnman.model.enums import (
+    DiagnosticFilterDestination, DiagnosticFilterPacketType)
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
-from spinn_machine import CoreSubsets, CoreSubset, MulticastRoutingEntry
-from spinn_machine.tags import IPTag, ReverseIPTag
 from board_test_configuration import BoardTestConfiguration
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
-
 
 board_config = BoardTestConfiguration()
 board_config.set_up_remote_board()

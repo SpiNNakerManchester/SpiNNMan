@@ -5,7 +5,6 @@ class SpinnmanException(Exception):
     """ Superclass of exceptions that occur when dealing with communication\
         with SpiNNaker
     """
-    pass
 
 
 class SpinnmanInvalidPacketException(SpinnmanException):

@@ -1,7 +1,6 @@
+import struct
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from .spinnaker_boot_op_code import SpinnakerBootOpCode
-
-import struct
 
 _PATTERN_HIIII = struct.Struct(">HIIII")
 _PATTERN_2xIIII = struct.Struct("2xIIII")

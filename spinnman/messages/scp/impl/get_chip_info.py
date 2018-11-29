@@ -1,9 +1,9 @@
+from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .get_chip_info_response import GetChipInfoResponse
-from spinn_utilities.overrides import overrides
 
 
 class GetChipInfo(AbstractSCPRequest):
