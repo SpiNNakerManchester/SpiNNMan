@@ -9,7 +9,6 @@ class IPTagCommand(Enum):
     GET = 2
     CLR = 3
     TTO = 4
-    LKP = 5
 
     def __new__(cls, value, doc=""):
         # pylint: disable=protected-access, unused-argument
