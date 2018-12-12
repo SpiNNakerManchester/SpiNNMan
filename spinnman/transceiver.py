@@ -2304,16 +2304,11 @@ class Transceiver(object):
                 reverse_ip_tag.port, reverse_ip_tag.tag,
                 reverse_ip_tag.sdp_port))
 
-    def clear_ip_tag(self, tag, connection=None, board_address=None):
+    def clear_ip_tag(self, tag, board_address=None):
         """ Clear the setting of an IP tag
 
         :param tag: The tag ID
         :type tag: int
-        :param connection: Connection where the tag should be cleared. If not\
-            specified, all SCPSender connections will send the message to\
-            clear the tag
-        :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.SCPSender`
         :param board_address: Board address where the tag should be cleared.\
             If not specified, all SCPSender connections will send the message\
             to clear the tag
@@ -2330,7 +2325,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        for conn in self.__get_connection_list(connection, board_address):
+        for conn in self.__get_connection_list(board_address=board_address):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
