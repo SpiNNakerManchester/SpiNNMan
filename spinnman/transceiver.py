@@ -657,14 +657,6 @@ class Transceiver(object):
         # update the SCAMP selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # update the SCAMP connections replacing any x and y with the default
-        # SCP request params with the boot chip coordinates
-        for sc in self._scamp_connections:
-            if (sc.chip_x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
-                    and sc.chip_y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
-                sc.update_chip_coordinates(
-                    self._machine.boot_x, self._machine.boot_y)
-
         # Remove any chips that are unreachable
         self._machine.remove_unreachable_chips()
 
