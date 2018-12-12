@@ -66,7 +66,7 @@ _SCAMP_VERSION = (3, 0, 1)
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
 
-_STANDARD_RETIRES_NO = 3
+_CONNECTION_CHECK_RETRIES = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
 
 _ONE_BYTE = struct.Struct("B")
@@ -461,7 +461,7 @@ class Transceiver(object):
                 raise
 
     def _check_connection(
-            self, connection_selector, retries, chip_x, chip_y):
+            self, connection_selector, chip_x, chip_y):
         """ Check that the given connection to the given chip works
 
         :param connection_selector: the connection selector to use
@@ -469,11 +469,9 @@ class Transceiver(object):
         :type chip_x: int
         :param chip_y: the chip y coordinate to try to talk to
         :type chip_y: int
-        :param retries: how many attempts to do before giving up
-        :type retries: int
         :return: True if a valid response is received, False otherwise
         """
-        for _ in xrange(retries):
+        for _ in xrange(_CONNECTION_CHECK_RETRIES):
             try:
                 sender = SendSingleCommandProcess(connection_selector)
                 chip_info = sender.execute(
@@ -736,8 +734,7 @@ class Transceiver(object):
 
             # check if it works
             if self._check_connection(
-                    MostDirectConnectionSelector(None, [conn]),
-                    _STANDARD_RETIRES_NO, x, y):
+                    MostDirectConnectionSelector(None, [conn]), x, y):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
                 self._udp_scamp_connections[ip_address] = conn
