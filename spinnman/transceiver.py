@@ -377,7 +377,7 @@ class Transceiver(object):
                         " specified")
                 self._boot_send_connection = conn
 
-             # Locate any connections listening on a UDP port
+            # Locate any connections listening on a UDP port
             if isinstance(conn, UDPConnection):
                 self._udp_receive_connections_by_port[conn.local_port][
                     conn.local_ip_address] = (conn, None)
