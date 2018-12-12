@@ -41,7 +41,7 @@ from spinnman.messages.scp.impl import (
     IPTagSet, IPTagClear, RouterClear)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
-    SpinnakerBootReceiver, SpinnakerBootSender, SCPSender, SDPSender,
+    SpinnakerBootSender, SCPSender, SDPSender,
     MulticastSender, SCPReceiver, Listenable)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, UDPConnection, BootConnection, SCAMPConnection)
@@ -190,7 +190,6 @@ class Transceiver(object):
         "_app_id_tracker",
         "_bmp_connection_selectors",
         "_bmp_connections",
-        "_boot_receive_connections",
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
@@ -294,10 +293,6 @@ class Transceiver(object):
         # or otherwise bad things can happen!
         self._boot_send_connection = None
 
-        # A list of boot receive connections - these are used to
-        # listen for the pre-boot board identifiers
-        self._boot_receive_connections = list()
-
         # A dict of port -> dict of IP address -> (connection, listener)
         # for UDP connections.  Note listener might be None if the connection
         # has not been listened to before.
@@ -382,11 +377,7 @@ class Transceiver(object):
                         " specified")
                 self._boot_send_connection = conn
 
-            # locate any boot receiver connections
-            if isinstance(conn, SpinnakerBootReceiver):
-                self._boot_receive_connections.append(conn)
-
-            # Locate any connections listening on a UDP port
+             # Locate any connections listening on a UDP port
             if isinstance(conn, UDPConnection):
                 self._udp_receive_connections_by_port[conn.local_port][
                     conn.local_ip_address] = (conn, None)
