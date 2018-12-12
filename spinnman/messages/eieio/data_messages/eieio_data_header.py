@@ -171,7 +171,8 @@ class EIEIODataHeader(object):
                 return _PATTERN_BBHI.pack(
                     self._count, data, self._prefix, self._payload_base)
             return _PATTERN_BBI.pack(self._count, data, self._payload_base)
-        raise SpinnmanInvalidPacketException("unexpected EIEIO type")
+        raise SpinnmanInvalidPacketException(
+            "EIEIODataMessage", "unexpected EIEIO type code")
 
     @staticmethod
     def from_bytestring(data, offset):
@@ -238,7 +239,7 @@ class EIEIODataHeader(object):
         return ("EIEIODataHeader:prefix={}:prefix_type={}:payload_base={}:"
                 "is_time={}:type={}:tag={}:count={}".format(
                     self._prefix, self._prefix_type, self._payload_base,
-                    self._is_time, self._type.value, self._tag,
+                    self._is_time, self._eieio_type.value, self._tag,
                     self._count))
 
     def __repr__(self):
