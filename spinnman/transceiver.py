@@ -41,7 +41,7 @@ from spinnman.messages.scp.impl import (
     IPTagSet, IPTagClear, RouterClear)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
-    SpinnakerBootReceiver, SpinnakerBootSender, SCPSender, SDPSender,
+    SpinnakerBootSender, SCPSender, SDPSender,
     MulticastSender, SCPReceiver, Listenable)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, UDPConnection, BootConnection, SCAMPConnection)
@@ -66,7 +66,7 @@ _SCAMP_VERSION = (3, 0, 1)
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
 
-_STANDARD_RETIRES_NO = 3
+_CONNECTION_CHECK_RETRIES = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
 
 _ONE_BYTE = struct.Struct("B")
@@ -190,7 +190,6 @@ class Transceiver(object):
         "_app_id_tracker",
         "_bmp_connection_selectors",
         "_bmp_connections",
-        "_boot_receive_connections",
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
@@ -294,10 +293,6 @@ class Transceiver(object):
         # or otherwise bad things can happen!
         self._boot_send_connection = None
 
-        # A list of boot receive connections - these are used to
-        # listen for the pre-boot board identifiers
-        self._boot_receive_connections = list()
-
         # A dict of port -> dict of IP address -> (connection, listener)
         # for UDP connections.  Note listener might be None if the connection
         # has not been listened to before.
@@ -381,10 +376,6 @@ class Transceiver(object):
                         "Only a single SpinnakerBootSender can be"
                         " specified")
                 self._boot_send_connection = conn
-
-            # locate any boot receiver connections
-            if isinstance(conn, SpinnakerBootReceiver):
-                self._boot_receive_connections.append(conn)
 
             # Locate any connections listening on a UDP port
             if isinstance(conn, UDPConnection):
@@ -470,7 +461,7 @@ class Transceiver(object):
                 raise
 
     def _check_connection(
-            self, connection_selector, retries, chip_x, chip_y):
+            self, connection_selector, chip_x, chip_y):
         """ Check that the given connection to the given chip works
 
         :param connection_selector: the connection selector to use
@@ -478,11 +469,9 @@ class Transceiver(object):
         :type chip_x: int
         :param chip_y: the chip y coordinate to try to talk to
         :type chip_y: int
-        :param retries: how many attempts to do before giving up
-        :type retries: int
         :return: True if a valid response is received, False otherwise
         """
-        for _ in xrange(retries):
+        for _ in xrange(_CONNECTION_CHECK_RETRIES):
             try:
                 sender = SendSingleCommandProcess(connection_selector)
                 chip_info = sender.execute(
@@ -668,14 +657,6 @@ class Transceiver(object):
         # update the SCAMP selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # update the SCAMP connections replacing any x and y with the default
-        # SCP request params with the boot chip coordinates
-        for sc in self._scamp_connections:
-            if (sc.chip_x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
-                    and sc.chip_y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
-                sc.update_chip_coordinates(
-                    self._machine.boot_x, self._machine.boot_y)
-
         # Remove any chips that are unreachable
         self._machine.remove_unreachable_chips()
 
@@ -745,8 +726,7 @@ class Transceiver(object):
 
             # check if it works
             if self._check_connection(
-                    MostDirectConnectionSelector(None, [conn]),
-                    _STANDARD_RETIRES_NO, x, y):
+                    MostDirectConnectionSelector(None, [conn]), x, y):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
                 self._udp_scamp_connections[ip_address] = conn
@@ -2316,16 +2296,11 @@ class Transceiver(object):
                 reverse_ip_tag.port, reverse_ip_tag.tag,
                 reverse_ip_tag.sdp_port))
 
-    def clear_ip_tag(self, tag, connection=None, board_address=None):
+    def clear_ip_tag(self, tag, board_address=None):
         """ Clear the setting of an IP tag
 
         :param tag: The tag ID
         :type tag: int
-        :param connection: Connection where the tag should be cleared. If not\
-            specified, all SCPSender connections will send the message to\
-            clear the tag
-        :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.SCPSender`
         :param board_address: Board address where the tag should be cleared.\
             If not specified, all SCPSender connections will send the message\
             to clear the tag
@@ -2342,7 +2317,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        for conn in self.__get_connection_list(connection, board_address):
+        for conn in self.__get_connection_list(board_address=board_address):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagClear(conn.chip_x, conn.chip_y, tag))
 

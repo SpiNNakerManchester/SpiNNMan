@@ -9,6 +9,9 @@ from spinnman.processes.fill_process import FillDataType
 # same buffered memory)
 _chip_memory_io_objects = dict()
 
+# Start of SDRAM, using *unbuffered* memory access protocol.
+UNBUFFERED_SDRAM_START = 0x60000000
+
 
 def _get_chip_memory_io(transceiver, x, y):
     if (transceiver, x, y) not in _chip_memory_io_objects:
@@ -52,7 +55,8 @@ class _ChipMemoryIO(object):
     ]
 
     def __init__(
-            self, transceiver, x, y, base_address=0x60000000, buffer_size=256):
+            self, transceiver, x, y, base_address=UNBUFFERED_SDRAM_START,
+            buffer_size=256):
         """
         :param transceiver: The transceiver to read and write with
         :param x: The x-coordinate of the chip to write to
