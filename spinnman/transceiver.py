@@ -2171,12 +2171,15 @@ class Transceiver(object):
         """
         return self._udp_scamp_connections.get(board_address, None)
 
-    def set_ip_tag(self, ip_tag):
+    def set_ip_tag(self, ip_tag, use_sender=False):
         """ Set up an IP tag
 
         :param ip_tag: The tag to set up; note board_address can be None, in\
             which case, the tag will be assigned to all boards
         :type ip_tag: :py:class:`spinn_machine.tags.IPTag`
+        :param use_sender: Optionally use the sender host and port instead of\
+            the given host and port in the tag
+        :param use_sender: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: \
@@ -2215,7 +2218,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagSet(
                 connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
-                ip_tag.tag, strip=ip_tag.strip_sdp))
+                ip_tag.tag, strip=ip_tag.strip_sdp, use_sender=use_sender))
 
     def __get_connection_list(self, connection=None, board_address=None):
         """ Get the connections for talking to a board.

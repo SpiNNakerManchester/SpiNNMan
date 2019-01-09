@@ -13,7 +13,7 @@ class IPTagSet(AbstractSCPRequest):
     """
     __slots__ = []
 
-    def __init__(self, x, y, host, port, tag, strip):
+    def __init__(self, x, y, host, port, tag, strip, use_sender=False):
         """
         :param x: The x-coordinate of a chip, between 0 and 255
         :type x: int
@@ -27,16 +27,20 @@ class IPTagSet(AbstractSCPRequest):
         :type tag: int
         :param strip: if the SDP header should be striped from the packet.
         :type strip: bool
+        :param use_sender: if the sender ip address and port should be used
+        :type: bool
         """
         # pylint: disable=too-many-arguments
         strip_value = int(bool(strip))
+        sender_value = int(bool(use_sender))
         super(IPTagSet, self).__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_IPTAG),
-            argument_1=(strip_value << 28) | (_IPTAG_SET << 16) | tag,
+            argument_1=(strip_value << 28) | (sender_value << 30) |
+                       (_IPTAG_SET << 16) | tag,
             argument_2=port,
             argument_3=((host[3] << 24) | (host[2] << 16) |
                         (host[1] << 8) | host[0]))
