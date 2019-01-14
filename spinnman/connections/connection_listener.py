@@ -39,7 +39,14 @@ class ConnectionListener(Thread):
         if self._connection.is_ready_to_receive(timeout=self._timeout):
             message = handler()
             for callback in self._callbacks:
-                self._callback_pool.submit(callback, message)
+                future = self._callback_pool.submit(callback, message)
+                future.add_done_callback(self._done_callback)
+
+    def _done_callback(self, future):
+        try:
+            future.result()
+        except Exception:
+            logger.exception("Error in listener call")
 
     def run(self):
         try:
