@@ -268,3 +268,25 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
     @property
     def packet(self):
         return self._packet
+
+
+class SpinnmanMissingEthernetException(SpinnmanException):
+    """ Called if a Encpected Ethernet chip does not have an IP Address
+    """
+
+
+def __init__(self, parsing_format, x, y):
+    super(SpinnmanMissingEthernetException, self).__init__(
+        "Expected Ethernet chip {} {} does npot have an ipaddress".format(x, y))
+    self._x = x
+
+    self._y = y
+
+    @property
+    def x(self):
+        return self._x
+
+    @property
+    def y(self):
+        return self._y
+

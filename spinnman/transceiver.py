@@ -636,8 +636,22 @@ class Transceiver(object):
         raise SpinnmanUnsupportedOperationException(
             "This operation is currently not supported in spinnman.")
 
-    def _update_machine(self):
+    def _update_machine(self, enforceOnBoardEthernet):
         """ Get the current machine status and store it
+
+        :param enforceOnBoardEthernet: If True will enforce that every chip
+            which is declared as an Ethernet Chip exists and has an IpAddress.
+            If False and a Chip's reported Ethernet CHip either does not exists
+            or does not have an IpAdddress an attempt will be made to replace
+            it with another valid Ethernet. See GetMachineProcess
+
+            Warning: enforceOnBoardEthernet param only used if the machine has
+            not previously been discovered.
+
+        :raise spinnman.exceptions.SpinnmanMissingEthernetException: \
+            If the GetMachineProcess would have resulted in a Chip \
+            without a valid Ethernet.
+
         """
 
         # Get the width and height of the machine
@@ -650,7 +664,7 @@ class Transceiver(object):
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
             self._ignore_cores, self._ignore_links, self._max_core_id,
-            self._max_sdram_size)
+            self._max_sdram_size, )
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height)
 
@@ -791,10 +805,14 @@ class Transceiver(object):
                     2))
         return MachineDimensions(self._width, self._height)
 
-    def get_machine_details(self):
+    def get_machine_details(self, enforceOnBoardEthernet=True):
         """ Get the details of the machine made up of chips on a board and how\
             they are connected to each other.
-
+        :param enforceOnBoardEthernet: If True will enforce that every chip
+            which is declared as an Ethernet Chip exists and has an IpAddress.
+            If False and a Chip's reported Ethernet CHip either does not exists
+            or does not have an IpAdddress an attempt will be made to replace
+            it with another valid Ethernet. See _find_Alternative_ethernet
         :return: A machine description
         :rtype: :py:class:`spinn_machine.Machine`
         :raise spinnman.exceptions.SpinnmanIOException: \
@@ -805,9 +823,13 @@ class Transceiver(object):
             If a packet is received that has invalid parameters
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
+        :raise spinnman.exceptions.SpinnmanMissingEthernetException: \
+            If the update_machine_process would have resulted in a Chip \
+            without a valid Ethernet.
+
         """
         if self._machine is None:
-            self._update_machine()
+            self._update_machine(enforceOnBoardEthernet)
         return self._machine
 
     @property

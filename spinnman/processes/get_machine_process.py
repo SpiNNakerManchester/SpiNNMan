@@ -3,7 +3,8 @@ import functools
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import Processor, Router, Chip, SDRAM, Machine, Link
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.exceptions import (SpinnmanMissingEthernetException,
+                                 SpinnmanUnexpectedResponseCodeException)
 from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
@@ -125,7 +126,25 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return
         super(GetMachineProcess, self)._receive_error(request, exception, tb)
 
-    def get_machine_details(self, boot_x, boot_y, width, height):
+    def get_machine_details(
+            self, boot_x, boot_y, width, height, enforceOnBoardEthernet=True):
+        """
+        Gets the machine details .
+
+        :param boot_x:
+        :param boot_y:
+        :param width:
+        :param height:
+        :param enforceOnBoardEthernet: If True will enforce that every chip
+            which is declared as an Ethernet Chip exists and has an IpAddress.
+            If False and a Chip's reported Ethernet Chip either does not exists
+            or does not have an IpAdddress an attempt will be made to replace
+            it with another valid Ethernet. See GetMachineProcess
+        :return: The discovered Machine
+        :raise spinnman.exceptions.SpinnmanMissingEthernetException: \
+            If the GetMachineProcess would have resulted in a Chip \
+            without a valid Ethernet.
+        """
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         self._p2p_column_data = [None] * width
@@ -157,6 +176,27 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if (x, y) not in self._chip_info:
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
+
+        if not enforceOnBoardEthernet:
+            if self._chip_info[(0, 0)]._ethernet_ip_address is not None:
+                default_ethernet = (0,0)
+            else:
+                for info in self._chip_info.values():
+                    if info._ethernet_ip_address is not None:
+                        default_ethernet = (info.x, info.y)
+                        break
+
+        for (x, y) in self._chip_info:
+            info = self._chip_info[(x, y)]
+            ethernet = self._chip_info[
+                (info.nearest_ethernet_x ,info.nearest_ethernet_y)]
+            if ethernet is None or ethernet._ethernet_ip_address is None:
+                if enforceOnBoardEthernet:
+                    raise SpinnmanMissingEthernetException(
+                        info.nearest_ethernet_x ,info.nearest_ethernet_y)
+                else:
+                    info._nearest_ethernet_x = default_ethernet[0]
+                    info._nearest_ethernet_y = default_ethernet[1]
 
         # Build a Machine
         def chip_xy(chip):
