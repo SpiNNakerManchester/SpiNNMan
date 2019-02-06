@@ -42,11 +42,14 @@ CPU_INFO_BYTES = 128
 # the address at which user0 register starts
 CPU_USER_0_START_ADDRESS = 112
 
-# the address at which user0 register starts
+# the address at which user1 register starts
 CPU_USER_1_START_ADDRESS = 116
 
-# the address at which user0 register starts
+# the address at which user2 register starts
 CPU_USER_2_START_ADDRESS = 120
+
+# the address at which user3 register starts
+CPU_USER_3_START_ADDRESS = 124
 
 # the address at which the iobuf address starts
 CPU_IOBUF_ADDRESS_OFFSET = 88

@@ -16,7 +16,8 @@ from spinn_storage_handlers import FileDataReader
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
     CPU_USER_0_START_ADDRESS, CPU_USER_1_START_ADDRESS,
-    CPU_USER_2_START_ADDRESS, IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT,
+    CPU_USER_2_START_ADDRESS, CPU_USER_3_START_ADDRESS,
+    IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT,
     SYSTEM_VARIABLE_BASE_ADDRESS, UDP_BOOT_CONNECTION_DEFAULT_PORT,
     NO_ROUTER_DIAGNOSTIC_FILTERS, ROUTER_REGISTER_BASE_ADDRESS,
     ROUTER_DEFAULT_FILTERS_MAX_POSITION, ROUTER_FILTER_CONTROLS_OFFSET,
@@ -1104,7 +1105,8 @@ class Transceiver(object):
                 x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
                 data_item.data_type.value))[0]
 
-    def get_user_0_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_0_register_address_from_core(p):
         """ Get the address of user 0 for a given processor on the board
 
         :param p: The ID of the processor to get the user 0 address from
@@ -1121,7 +1123,8 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
-    def get_user_1_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_1_register_address_from_core(p):
         """ Get the address of user 1 for a given processor on the board
 
         :param p: The ID of the processor to get the user 1 address from
@@ -1138,12 +1141,13 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
-    def get_user_2_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_2_register_address_from_core(p):
         """ Get the address of user 2 for a given processor on the board
 
-        :param p: The ID of the processor to get the user 0 address from
+        :param p: The ID of the processor to get the user 2 address from
         :type p: int
-        :return: The address for user 0 register for this processor
+        :return: The address for user 2 register for this processor
         :rtype: int
         :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
             If a packet is received that is not in the valid format
@@ -1154,6 +1158,24 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
+
+    @staticmethod
+    def get_user3_register_address_from_core(p):
+        """ Get the address of user 2 for a given processor on the board
+
+        :param p: The ID of the processor to get the user 3 address from
+        :type p: int
+        :return: The address for user 3 register for this processor
+        :rtype: int
+        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+            If a packet is received that is not in the valid format
+        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+            * If x, y, p is not a valid processor
+            * If a packet is received that has invalid parameters
+        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
+            If a response indicates an error during the exchange
+        """
+        return get_vcpu_address(p) + CPU_USER_3_START_ADDRESS
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
