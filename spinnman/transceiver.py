@@ -1160,7 +1160,7 @@ class Transceiver(object):
         return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
 
     @staticmethod
-    def get_user3_register_address_from_core(p):
+    def get_user_3_register_address_from_core(p):
         """ Get the address of user 2 for a given processor on the board
 
         :param p: The ID of the processor to get the user 3 address from
