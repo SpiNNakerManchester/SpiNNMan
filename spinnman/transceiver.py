@@ -1107,7 +1107,8 @@ class Transceiver(object):
                 x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
                 data_item.data_type.value))[0]
 
-    def get_user_0_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_0_register_address_from_core(p):
         """ Get the address of user 0 for a given processor on the board
 
         :param p: The ID of the processor to get the user 0 address from
@@ -1117,7 +1118,8 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
-    def get_user_1_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_1_register_address_from_core(p):
         """ Get the address of user 1 for a given processor on the board
 
         :param p: The ID of the processor to get the user 1 address from
@@ -1127,7 +1129,8 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
-    def get_user_2_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_2_register_address_from_core(p):
         """ Get the address of user 2 for a given processor on the board
 
         :param p: The ID of the processor to get the user 2 address from
@@ -1137,7 +1140,8 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
 
-    def get_user_3_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_3_register_address_from_core(p):
         """ Get the address of user 3 for a given processor on the board
 
         :param p: The ID of the processor to get the user 3 address from
