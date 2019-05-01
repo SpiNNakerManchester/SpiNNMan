@@ -4,7 +4,7 @@ import time
 from six import iteritems
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
-from spinnman.constants import SCP_TIMEOUT
+from spinnman.constants import SCP_TIMEOUT, N_RETRIES
 
 MAX_SEQUENCE = 65536
 RETRY_CODES = frozenset([
@@ -48,7 +48,7 @@ class SCPRequestPipeLine(object):
 
     def __init__(self, connection, n_channels=1,
                  intermediate_channel_waits=0,
-                 n_retries=10, packet_timeout=SCP_TIMEOUT):
+                 n_retries=N_RETRIES, packet_timeout=SCP_TIMEOUT):
         """
         :param connection: \
             The connection over which the communication is to take place
