@@ -1,6 +1,7 @@
 import time
-from spinnman.connections.abstract_classes \
-    import SpinnakerBootSender, SpinnakerBootReceiver
+from spinn_utilities.overrides import overrides
+from spinnman.connections.abstract_classes import (
+    SpinnakerBootSender, SpinnakerBootReceiver)
 from .udp_connection import UDPConnection
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
@@ -42,19 +43,15 @@ class BootConnection(
         super(BootConnection, self).__init__(
             local_host, local_port, remote_host, remote_port)
 
+    @overrides(SpinnakerBootSender.send_boot_message)
     def send_boot_message(self, boot_message):
-        """ See\
-            :py:meth:`spinnman.connections.abstract_classes.spinnaker_boot_sender.SpinnakerBootSender.send_boot_message`
-        """
         self.send(boot_message.bytestring)
 
         # Sleep between messages to avoid flooding the machine
         time.sleep(_ANTI_FLOOD_DELAY)
 
+    @overrides(SpinnakerBootReceiver.receive_boot_message)
     def receive_boot_message(self, timeout=None):
-        """ See\
-            :py:meth:`spinnman.connections.abstract_classes.spinnaker_boot_receiver.SpinnakerBootReceiver.receive_boot_message`
-        """
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)
 

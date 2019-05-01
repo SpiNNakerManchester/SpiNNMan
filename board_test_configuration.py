@@ -1,11 +1,9 @@
-import socket
-from six.moves import configparser
 import os
-from spinnman.model import BMPConnectionData
-import platform
-import subprocess
+import socket
 import unittest
-import time
+from six.moves import configparser
+from spinn_utilities.ping import Ping
+from spinnman.model import BMPConnectionData
 
 _LOCALHOST = "127.0.0.1"
 # Microsoft invalid IP address. For more details see:
@@ -15,6 +13,7 @@ _PORT = 54321
 
 
 class BoardTestConfiguration(object):
+
     def __init__(self):
         self.localhost = None
         self.localport = None
@@ -35,7 +34,7 @@ class BoardTestConfiguration(object):
 
     def set_up_remote_board(self):
         self.remotehost = self._config.get("Machine", "machineName")
-        if not self.host_is_reachable(self.remotehost):
+        if not Ping.host_is_reachable(self.remotehost):
             raise unittest.SkipTest("test board appears to be down")
         self.board_version = self._config.getint("Machine", "version")
         self.bmp_names = self._config.get("Machine", "bmp_names")
@@ -59,16 +58,3 @@ class BoardTestConfiguration(object):
         self.localport = _PORT
         self.remotehost = _NOHOST
         self.board_version = self._config.getint("Machine", "version")
-
-    @staticmethod
-    def host_is_reachable(ipaddr):
-        if platform.platform().lower().startswith("windows"):
-            cmd = "ping -n 1 -w 1 "
-        else:
-            cmd = "ping -c 1 -W 1 "
-        process = subprocess.Popen(
-            cmd + ipaddr, shell=True, stdout=subprocess.PIPE)
-        time.sleep(1.2)
-        process.stdout.close()
-        process.wait()
-        return process.returncode == 0

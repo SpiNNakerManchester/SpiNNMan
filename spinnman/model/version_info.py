@@ -1,8 +1,8 @@
-from spinnman.exceptions import SpinnmanInvalidParameterException
-from time import localtime, asctime
-import struct
-from six import raise_from
 import re
+import struct
+from time import localtime, asctime
+from six import raise_from
+from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
 
@@ -47,7 +47,7 @@ class VersionInfo(object):
         else:
             name_hardware, _, version = version_data.partition("\0")
             self._version_string = version
-            matches = re.match("(\d+)\.(\d+)\.(\d+)", version)
+            matches = re.match(r"(\d+)\.(\d+)\.(\d+)", version)
             if matches is None:
                 raise SpinnmanInvalidParameterException(
                     "version", version, "Cannot be parsed")

@@ -1,14 +1,16 @@
 import os
-from spinnman.utilities.io.abstract_io import AbstractIO
-from spinnman.processes.fill_process import FillDataType
 import struct
 from spinn_utilities.overrides import overrides
-
+from spinnman.utilities.io.abstract_io import AbstractIO
+from spinnman.processes.fill_process import FillDataType
 
 # A set of ChipMemoryIO objects that have been created,
 # indexed by transceiver, x and y (thus two transceivers might not see the
 # same buffered memory)
 _chip_memory_io_objects = dict()
+
+# Start of SDRAM, using *unbuffered* memory access protocol.
+UNBUFFERED_SDRAM_START = 0x60000000
 
 
 def _get_chip_memory_io(transceiver, x, y):
@@ -53,7 +55,8 @@ class _ChipMemoryIO(object):
     ]
 
     def __init__(
-            self, transceiver, x, y, base_address=0x60000000, buffer_size=256):
+            self, transceiver, x, y, base_address=UNBUFFERED_SDRAM_START,
+            buffer_size=256):
         """
         :param transceiver: The transceiver to read and write with
         :param x: The x-coordinate of the chip to write to

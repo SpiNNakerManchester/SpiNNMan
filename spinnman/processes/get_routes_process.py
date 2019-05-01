@@ -1,10 +1,9 @@
+import struct
+import functools
 from spinnman.messages.scp.impl import ReadMemory
-from spinn_machine import MulticastRoutingEntry
+from spinn_machine import MulticastRoutingEntry, Router
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
-
-import functools
-import struct
 
 # There are 1024 entries in a routing table
 _N_ENTRIES = 1024
@@ -38,8 +37,8 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             return
 
         # Convert bit-set into list of (set) IDs
-        processor_ids = [pi for pi in range(0, 26) if route & 1 << (6 + pi)]
-        link_ids = [li for li in range(0, 6) if route & 1 << li]
+        processor_ids, link_ids = \
+            Router.convert_spinnaker_route_to_routing_ids(route)
 
         self._entries[route_no + offset] = MulticastRoutingEntry(
             key, mask, processor_ids, link_ids, False)

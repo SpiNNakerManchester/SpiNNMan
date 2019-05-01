@@ -1,8 +1,7 @@
-from six import iteritems
 import sys
 from threading import RLock
 import time
-
+from six import iteritems
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.constants import SCP_TIMEOUT

@@ -1,10 +1,9 @@
-from .udp_connection import UDPConnection
-from spinnman.connections.abstract_classes \
-    import EIEIOReceiver, EIEIOSender, Listenable
-from spinnman.messages.eieio \
-    import read_eieio_command_message, read_eieio_data_message
-
 import struct
+from .udp_connection import UDPConnection
+from spinnman.connections.abstract_classes import (
+    EIEIOReceiver, EIEIOSender, Listenable)
+from spinnman.messages.eieio import (
+    read_eieio_command_message, read_eieio_data_message)
 
 _ONE_SHORT = struct.Struct("<H")
 _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\

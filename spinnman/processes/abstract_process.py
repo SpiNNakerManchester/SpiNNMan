@@ -1,7 +1,6 @@
 from __future__ import print_function
 import logging
 import sys
-
 from spinnman.exceptions import SpinnmanGenericProcessException
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,9 @@ class AbstractProcess(object):
                 logger.error("failure in request to (%d, %d, %d)",
                              sdp_header.destination_chip_x,
                              sdp_header.destination_chip_y,
-                             sdp_header.destination_cpu, exc_info=exc_info)
+                             sdp_header.destination_cpu,
+                             exc_info=(Exception, self._exception,
+                                       self._traceback))
 
             sdp_header = self._error_request.sdp_header
             self._exception = ex = SpinnmanGenericProcessException(

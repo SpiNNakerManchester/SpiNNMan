@@ -1,6 +1,5 @@
-from six import add_metaclass
 import struct
-
+from six import add_metaclass
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 _THREE_WORDS = struct.Struct("<III")

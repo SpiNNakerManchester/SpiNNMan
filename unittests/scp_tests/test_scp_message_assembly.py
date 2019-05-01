@@ -1,9 +1,7 @@
 import unittest
-
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
-from spinnman.messages.scp.impl \
-    import GetVersion, ReadLink, ReadMemory
+from spinnman.messages.scp.impl import GetVersion, ReadLink, ReadMemory
 
 
 class TestSCPMessageAssembly(unittest.TestCase):

@@ -33,12 +33,6 @@ SYSTEM_VARIABLE_BYTES = 256
 # The max size a UDP packet can be
 UDP_MESSAGE_MAX_SIZE = 256
 
-# the amount of size in bytes that the EIEIO command header is
-EIEIO_COMMAND_HEADER_SIZE = 3
-
-# The amount of size in bytes the EIEIO data header is
-EIEIO_DATA_HEADER_SIZE = 2
-
 # the address of the start of the VCPU structure (copied from sark.h)
 CPU_INFO_OFFSET = 0xe5007000
 
@@ -48,17 +42,17 @@ CPU_INFO_BYTES = 128
 # the address at which user0 register starts
 CPU_USER_0_START_ADDRESS = 112
 
-# the address at which user0 register starts
+# the address at which user1 register starts
 CPU_USER_1_START_ADDRESS = 116
 
-# the address at which user0 register starts
+# the address at which user2 register starts
 CPU_USER_2_START_ADDRESS = 120
+
+# the address at which user3 register starts
+CPU_USER_3_START_ADDRESS = 124
 
 # the address at which the iobuf address starts
 CPU_IOBUF_ADDRESS_OFFSET = 88
-
-# default UDP tag
-DEFAULT_SDP_TAG = 0xFF
 
 # max user requested tag value
 MAX_TAG_ID = 7
@@ -92,9 +86,6 @@ BMP_TIMEOUT = 0.5
 
 # Time to sleep after powering on boards
 BMP_POST_POWER_ON_SLEEP_TIME = 5.0
-
-# number of chips to check are booted fully from the middle
-NO_MIDDLE_CHIPS_TO_CHECK = 8
 
 # a listing of what SpiNNaker specific EIEIO commands there are.
 EIEIO_COMMAND_IDS = Enum(

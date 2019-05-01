@@ -1,8 +1,7 @@
+import struct
 from spinnman.messages.scp.impl import ReadMemory
 from spinnman.model import RouterDiagnostics
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-
-import struct
 
 _N_REGISTERS = 16
 _ONE_WORD = struct.Struct("<I")
