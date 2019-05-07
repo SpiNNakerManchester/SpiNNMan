@@ -15,7 +15,7 @@ class SDPMessage(object):
         :type sdp_header:\
             :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
         :param data: The data of the SDP packet, or None if no data
-        :type data: str or None
+        :type data: bytes or bytearray or None
         :param offset: The offset where the valid data starts
         :type offset: int
         :raise None: No known exceptions are thrown
@@ -54,7 +54,7 @@ class SDPMessage(object):
     def data(self):
         """ The data in the packet
 
-        :rtype: str
+        :rtype: bytes or bytearray or None
         """
         return self._data
 
