@@ -1,7 +1,7 @@
 from __future__ import print_function
 import unittest
 import struct
-from spinn_machine.virtual_machine import VirtualMachine
+from spinn_machine import virtual_machine
 from spinnman.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
@@ -29,7 +29,7 @@ class MockWriteTransceiver(Transceiver):
         self.written_memory = list()
 
     def get_machine_details(self):
-        return VirtualMachine(2, 2)
+        return virtual_machine(2, 2)
 
     def _update_machine(self):
         self._machine = self.get_machine_details()
