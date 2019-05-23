@@ -162,7 +162,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         def chip_xy(chip):
             return chip.x, chip.y
 
-        machine = machine_from_size(width, heigth)
+        machine = machine_from_size(width, height)
         for chip_info in sorted(self._chip_info.values(), key=chip_xy):
             if (chip_info.x, chip_info.y) not in self._ignore_chips:
                 machine.add_chip(self._make_chip(chip_info, machine))
