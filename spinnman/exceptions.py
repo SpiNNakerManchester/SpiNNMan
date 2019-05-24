@@ -270,9 +270,9 @@ class SpinnmanGroupedProcessException(SpinnmanException):
                 "       With message {}\n" \
                 "       When sending to {}\n" \
                 "       Stack trace: {}\n".format(
-                    exception.__class__.__name__, exception.message,
+                    exception.__class__.__name__, str(exception),
                     description.chip_core,
-                    traceback.format_exc(description.trace_back))
+                    traceback.format_tb(description.trace_back))
         super(SpinnmanGroupedProcessException, self).__init__(problem)
 
 
