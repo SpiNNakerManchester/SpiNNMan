@@ -94,7 +94,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _make_router(self, chip_info, machine):
         links = list()
         for link in chip_info.working_links:
-            dest = machine.x_y_over_link(chip_info.x, chip_info.y, link)
+            dest = machine.xy_over_link(chip_info.x, chip_info.y, link)
             if ((chip_info.x, chip_info.y, link) not in self._ignore_links
                     and dest not in self._ignore_chips
                     and dest in self._chip_info):
