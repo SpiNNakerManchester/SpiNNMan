@@ -167,6 +167,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if (chip_info.x, chip_info.y) not in self._ignore_chips:
                 machine.add_chip(self._make_chip(chip_info, machine))
 
+        machine.validate()
         return machine
 
     def get_chip_info(self):
