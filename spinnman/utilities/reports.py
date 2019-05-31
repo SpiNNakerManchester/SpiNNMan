@@ -41,7 +41,7 @@ def _write_header(f, timestamp, machine, connections):
     f.write("\nGenerated: {} for target machine '{}'\n\n".format(
         timestamp, connections))
     f.write("Machine dimensions (in chips) x : {}  y : {}\n\n".format(
-        machine.max_chip_x + 1, machine.max_chip_y + 1))
+        machine.width, machine.height))
     f.write("\t\tMachine router information\n")
     f.write("\t\t==========================\n")
 
