@@ -99,10 +99,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     and dest not in self._ignore_chips
                     and dest in self._chip_info):
                 dest_x, dest_y = dest
-                opposite_link_id = (link + 3) % 6
                 links.append(Link(
-                    chip_info.x, chip_info.y, link, dest_x, dest_y,
-                    opposite_link_id, opposite_link_id))
+                    chip_info.x, chip_info.y, link, dest_x, dest_y))
         return Router(
             links=links,
             n_available_multicast_entries=(
