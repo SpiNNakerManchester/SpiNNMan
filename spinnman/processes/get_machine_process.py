@@ -1,8 +1,8 @@
 import logging
 import functools
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import Processor, Router, Chip, SDRAM, Link
-from spinn_machine.machine_factory import machine_from_size
+from spinn_machine import (
+    Processor, Router, Chip, SDRAM, Link, machine_from_size)
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
@@ -147,7 +147,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._finish()
         try:
             self.check_for_error()
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             # Ignore errors so far, as any error here just means that a chip
             # is down that wasn't marked as down
             pass
