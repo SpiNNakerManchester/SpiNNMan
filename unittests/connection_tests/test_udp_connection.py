@@ -21,7 +21,7 @@ class TestUDPConnection(unittest.TestCase):
         _, _, data, offset = connection.receive_scp_response()
         scp_response.read_bytestring(data, offset)
         print(scp_response.version_info)
-        self.assertEqual(
+        self.assertEquals(
             scp_response._scp_response_header._result, SCPResult.RC_OK)
 
     def test_scp_read_link_request_and_response_board(self):
@@ -31,7 +31,7 @@ class TestUDPConnection(unittest.TestCase):
         scp_link = ReadLink(0, 0, 0, 0x70000000, 250)
         connection.send_scp_request(scp_link)
         result, _, _, _ = connection.receive_scp_response()
-        self.assertEqual(result, SCPResult.RC_OK)
+        self.assertEquals(result, SCPResult.RC_OK)
 
     def test_scp_read_memory_request_and_response_board(self):
         board_config.set_up_remote_board()
@@ -40,7 +40,7 @@ class TestUDPConnection(unittest.TestCase):
         scp_link = ReadMemory(0, 0, 0x70000000, 256)
         connection.send_scp_request(scp_link)
         result, _, _, _ = connection.receive_scp_response()
-        self.assertEqual(result, SCPResult.RC_OK)
+        self.assertEquals(result, SCPResult.RC_OK)
 
     def test_send_scp_request_to_nonexistent_host(self):
         with self.assertRaises(SpinnmanTimeoutException):

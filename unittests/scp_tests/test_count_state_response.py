@@ -27,7 +27,7 @@ class TestCPUStateResponse(unittest.TestCase):
         data = pack('<8BHHI', flags, tag, dest_port_cpu, src_port_cpu, dest_y,
                     dest_x, src_y, src_x, rc, seq, argument_count)
         response.read_bytestring(data, 0)
-        self.assertEqual(response.count, 5)
+        self.assertEquals(response.count, 5)
 
     def test_new_count_state_response_response_not_ok(self):
         with self.assertRaises(SpinnmanUnexpectedResponseCodeException):

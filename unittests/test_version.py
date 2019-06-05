@@ -45,12 +45,12 @@ class Test(unittest.TestCase):
             split('.')
         spinnman_parts = spinnman.__version__.split('.')
 
-        self.assertEqual(spinn_utilities_parts[0], spinnman_parts[0])
+        self.assertEquals(spinn_utilities_parts[0], spinnman_parts[0])
         self.assertLessEqual(spinn_utilities_parts[1], spinnman_parts[1])
 
-        self.assertEqual(spinn_machine_parts[0], spinnman_parts[0])
+        self.assertEquals(spinn_machine_parts[0], spinnman_parts[0])
         self.assertLessEqual(spinn_machine_parts[1], spinnman_parts[1])
 
-        self.assertEqual(spinn_storage_handlers_parts[0], spinnman_parts[0])
+        self.assertEquals(spinn_storage_handlers_parts[0], spinnman_parts[0])
         self.assertLessEqual(spinn_storage_handlers_parts[1],
                              spinnman_parts[1])

@@ -14,9 +14,9 @@ class TestIptag(unittest.TestCase):
         tag = 255
         board_address = board_config.remotehost
         iptag = IPTag(board_address, 0, 0, tag, ip, port)
-        self.assertEqual(ip, iptag.ip_address)
-        self.assertEqual(port, iptag.port)
-        self.assertEqual(tag, iptag.tag)
+        self.assertEquals(ip, iptag.ip_address)
+        self.assertEquals(port, iptag.port)
+        self.assertEquals(tag, iptag.tag)
 
 
 if __name__ == '__main__':
