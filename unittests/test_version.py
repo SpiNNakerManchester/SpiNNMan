@@ -2,8 +2,7 @@ import unittest
 import spinn_utilities
 import spinn_machine
 import spinn_storage_handlers
-from spinnman.transceiver import Transceiver
-from spinnman.transceiver import _SCAMP_VERSION
+from spinnman.transceiver import Transceiver, _SCAMP_VERSION
 import spinnman
 
 

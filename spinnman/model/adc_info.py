@@ -1,8 +1,5 @@
-# spinnman imports
-from spinnman import constants
-
-# general imports
 import struct
+from spinnman import constants
 
 _PATTERN = struct.Struct(
     "<"   # Little-endian

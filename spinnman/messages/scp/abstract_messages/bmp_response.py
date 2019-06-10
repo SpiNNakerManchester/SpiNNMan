@@ -1,4 +1,3 @@
-# spinnman imports
 from .scp_response import AbstractSCPResponse
 
 

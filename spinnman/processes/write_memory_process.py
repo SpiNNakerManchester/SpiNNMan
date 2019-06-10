@@ -1,8 +1,7 @@
+import functools
 from spinnman.messages.scp.impl import WriteLink, WriteMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
-
-import functools
 
 
 class WriteMemoryProcess(AbstractMultiConnectionProcess):

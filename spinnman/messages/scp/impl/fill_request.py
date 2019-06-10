@@ -1,9 +1,9 @@
+from spinn_utilities.overrides import overrides
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl import CheckOKResponse
-from spinn_utilities.overrides import overrides
+from .check_ok_response import CheckOKResponse
 
 
 class FillRequest(AbstractSCPRequest):

@@ -1,14 +1,11 @@
 import logging
 import functools
-
 from spinn_utilities.log import FormatAdapter
-
-from spinn_machine import Processor, Router, Chip, SDRAM, Machine, Link
-
+from spinn_machine import (
+    Processor, Router, Chip, SDRAM, Link, machine_from_size)
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.impl \
-    import ReadMemory, ReadLink, GetChipInfo
+from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
@@ -44,7 +41,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
 
-    def _make_chip(self, width, height, chip_info):
+    def _make_chip(self, chip_info, machine):
         """ Creates a chip from a ChipSummaryInfo structure.
 
         :param chip_info: \
@@ -77,7 +74,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                         core_states[virtual_core_id])
 
         # Create the router
-        router = self._make_router(chip_info, width, height)
+        router = self._make_router(chip_info, machine)
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
@@ -94,11 +91,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y)
 
-    def _make_router(self, chip_info, width, height):
+    def _make_router(self, chip_info, machine):
         links = list()
         for link in chip_info.working_links:
-            dest = Machine.get_chip_over_link(
-                chip_info.x, chip_info.y, link, width, height)
+            dest = machine.xy_over_link(chip_info.x, chip_info.y, link)
             if ((chip_info.x, chip_info.y, link) not in self._ignore_links
                     and dest not in self._ignore_chips
                     and dest in self._chip_info):
@@ -151,7 +147,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._finish()
         try:
             self.check_for_error()
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             # Ignore errors so far, as any error here just means that a chip
             # is down that wasn't marked as down
             pass
@@ -166,12 +162,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         def chip_xy(chip):
             return chip.x, chip.y
 
-        chips = [
-            self._make_chip(width, height, chip_info)
-            for chip_info in sorted(self._chip_info.values(), key=chip_xy)
-            if (chip_info.x, chip_info.y) not in self._ignore_chips]
-        machine = Machine(chips, boot_x, boot_y)
+        machine = machine_from_size(width, height)
+        for chip_info in sorted(self._chip_info.values(), key=chip_xy):
+            if (chip_info.x, chip_info.y) not in self._ignore_chips:
+                machine.add_chip(self._make_chip(chip_info, machine))
 
+        machine.validate()
         return machine
 
     def get_chip_info(self):

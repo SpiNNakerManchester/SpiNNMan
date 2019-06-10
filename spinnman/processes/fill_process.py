@@ -1,10 +1,9 @@
-from enum import Enum
 import logging
 import struct
-
+from enum import Enum
 from spinnman.messages.scp.impl import FillRequest, WriteMemory
-from spinnman.processes.abstract_multi_connection_process \
-    import AbstractMultiConnectionProcess
+from spinnman.processes.abstract_multi_connection_process import (
+    AbstractMultiConnectionProcess)
 
 logger = logging.getLogger(__name__)
 ALIGNMENT = 4

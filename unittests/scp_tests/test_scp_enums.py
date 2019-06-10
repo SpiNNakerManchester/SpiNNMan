@@ -1,5 +1,4 @@
 import unittest
-
 from spinnman.messages.scp.enums import IPTagCommand
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp.enums import SCPResult

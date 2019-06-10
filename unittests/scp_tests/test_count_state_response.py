@@ -1,9 +1,8 @@
 import unittest
 from struct import pack
-
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.impl.count_state_response \
-    import CountStateResponse
+from spinnman.messages.scp.impl.count_state_response import (
+    CountStateResponse)
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.messages.sdp import SDPFlag
 

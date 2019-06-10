@@ -1,7 +1,7 @@
-import numpy
 import os
-from spinnman.utilities.io.file_io import FileIO
 import struct
+import numpy
+from spinnman.utilities.io.file_io import FileIO
 
 
 def test_file_io():

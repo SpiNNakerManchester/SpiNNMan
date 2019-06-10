@@ -1,12 +1,5 @@
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-
 import struct
-
-# The base address of the system variable structure in System ram
-_SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
-
-# The size of the system variable structure in bytes
-_SYSTEM_VARIABLE_BYTES = 256
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 
 
 class ChipInfo(object):

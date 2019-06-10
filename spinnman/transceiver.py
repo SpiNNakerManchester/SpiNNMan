@@ -1,76 +1,11 @@
 # pylint: disable=too-many-arguments
-# local imports
-from spinnman.constants import \
-    BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT, \
-    CPU_USER_0_START_ADDRESS, CPU_USER_1_START_ADDRESS, \
-    CPU_USER_2_START_ADDRESS, IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, \
-    SYSTEM_VARIABLE_BASE_ADDRESS, UDP_BOOT_CONNECTION_DEFAULT_PORT, \
-    NO_ROUTER_DIAGNOSTIC_FILTERS, ROUTER_REGISTER_BASE_ADDRESS, \
-    ROUTER_DEFAULT_FILTERS_MAX_POSITION, ROUTER_FILTER_CONTROLS_OFFSET, \
-    ROUTER_DIAGNOSTIC_FILTER_SIZE
-from spinnman.exceptions import SpinnmanInvalidParameterException, \
-    SpinnmanException, SpinnmanIOException, SpinnmanTimeoutException, \
-    SpinnmanGenericProcessException, SpinnmanUnexpectedResponseCodeException,\
-    SpinnmanUnsupportedOperationException, SpinnmanInvalidPacketException
-
-from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
-from spinnman.model.enums import CPUState
-from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
-from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
-
-from spinnman.messages.spinnaker_boot \
-    import SystemVariableDefinition, SpinnakerBootMessages
-
-from spinnman.messages.scp.enums import Signal, PowerCommand
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl import BMPSetLed, BMPGetVersion, SetPower
-from spinnman.messages.scp.impl import ReadADC, ReadFPGARegister
-from spinnman.messages.scp.impl import WriteFPGARegister, IPTagSetTTO
-from spinnman.messages.scp.impl import ReverseIPTagSet, ReadMemory
-from spinnman.messages.scp.impl import CountState, WriteMemory, SetLED
-from spinnman.messages.scp.impl import ApplicationRun, SendSignal, AppStop
-from spinnman.messages.scp.impl import IPTagSet, IPTagClear, RouterClear
-
-from spinnman.connections import ConnectionListener
-from spinnman.connections.abstract_classes \
-    import SpinnakerBootReceiver, SpinnakerBootSender
-from spinnman.connections.abstract_classes \
-    import SCPSender, SDPSender, MulticastSender
-from spinnman.connections.abstract_classes import SCPReceiver, Listenable
-from spinnman.connections.udp_packet_connections \
-    import BMPConnection, UDPConnection, BootConnection, SCAMPConnection
-
-from spinnman.processes import DeAllocSDRAMProcess, GetMachineProcess
-from spinnman.processes import GetVersionProcess, MallocSDRAMProcess
-from spinnman.processes import WriteMemoryProcess, ReadMemoryProcess
-from spinnman.processes import GetCPUInfoProcess, ReadIOBufProcess
-from spinnman.processes import ApplicationRunProcess, GetHeapProcess
-from spinnman.processes import FillProcess, FillDataType
-from spinnman.processes import LoadFixedRouteRoutingEntryProcess
-from spinnman.processes import ReadFixedRouteRoutingEntryProcess
-from spinnman.processes import WriteMemoryFloodProcess
-from spinnman.processes import LoadMultiCastRoutesProcess, GetTagsProcess
-from spinnman.processes import GetMultiCastRoutesProcess
-from spinnman.processes import SendSingleCommandProcess
-from spinnman.processes import ReadRouterDiagnosticsProcess
-from spinnman.processes import MostDirectConnectionSelector
-
-from spinnman.utilities.utility_functions \
-    import get_vcpu_address, work_out_bmp_from_machine_details
-from spinnman.utilities.appid_tracker import AppIdTracker
-
-# storage handlers imports
-from spinn_storage_handlers.abstract_classes import AbstractDataReader
-from spinn_storage_handlers import FileDataReader
-
-# spinnmachine imports
-from spinn_machine import CoreSubsets
-
-# general imports
 import random
 import struct
 from threading import Condition, RLock
-from collections import defaultdict
+try:
+    from collections.abc import defaultdict
+except ImportError:
+    from collections import defaultdict
 import logging
 import socket
 import time
@@ -78,6 +13,53 @@ import os
 from past.builtins import xrange
 from six import raise_from
 from spinn_utilities.log import FormatAdapter
+from spinn_machine import CoreSubsets
+from spinn_storage_handlers.abstract_classes import AbstractDataReader
+from spinn_storage_handlers import FileDataReader
+from spinnman.constants import (
+    BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
+    CPU_USER_0_START_ADDRESS, CPU_USER_1_START_ADDRESS,
+    CPU_USER_2_START_ADDRESS, CPU_USER_3_START_ADDRESS,
+    IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, SYSTEM_VARIABLE_BASE_ADDRESS,
+    UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
+    ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
+    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE)
+from spinnman.exceptions import (
+    SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
+    SpinnmanTimeoutException, SpinnmanGenericProcessException,
+    SpinnmanUnexpectedResponseCodeException,
+    SpinnmanUnsupportedOperationException, SpinnmanInvalidPacketException)
+from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
+from spinnman.model.enums import CPUState
+from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
+from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
+from spinnman.messages.spinnaker_boot import (
+    SystemVariableDefinition, SpinnakerBootMessages)
+from spinnman.messages.scp.enums import Signal, PowerCommand
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.impl import (
+    BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
+    WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
+    CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
+    IPTagSet, IPTagClear, RouterClear)
+from spinnman.connections import ConnectionListener
+from spinnman.connections.abstract_classes import (
+    SpinnakerBootSender, SCPSender, SDPSender,
+    MulticastSender, SCPReceiver, Listenable)
+from spinnman.connections.udp_packet_connections import (
+    BMPConnection, UDPConnection, BootConnection, SCAMPConnection)
+from spinnman.processes import (
+    DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
+    MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
+    GetCPUInfoProcess, ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
+    FillProcess, FillDataType, LoadFixedRouteRoutingEntryProcess,
+    ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
+    LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
+    SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
+    MostDirectConnectionSelector)
+from spinnman.utilities.utility_functions import (
+    get_vcpu_address, work_out_bmp_from_machine_details)
+from spinnman.utilities.appid_tracker import AppIdTracker
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -87,7 +69,7 @@ _SCAMP_VERSION = (3, 0, 1)
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
 
-_STANDARD_RETIRES_NO = 3
+_CONNECTION_CHECK_RETRIES = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
 
 _ONE_BYTE = struct.Struct("B")
@@ -211,7 +193,6 @@ class Transceiver(object):
         "_app_id_tracker",
         "_bmp_connection_selectors",
         "_bmp_connections",
-        "_boot_receive_connections",
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
@@ -315,10 +296,6 @@ class Transceiver(object):
         # or otherwise bad things can happen!
         self._boot_send_connection = None
 
-        # A list of boot receive connections - these are used to
-        # listen for the pre-boot board identifiers
-        self._boot_receive_connections = list()
-
         # A dict of port -> dict of IP address -> (connection, listener)
         # for UDP connections.  Note listener might be None if the connection
         # has not been listened to before.
@@ -402,10 +379,6 @@ class Transceiver(object):
                         "Only a single SpinnakerBootSender can be"
                         " specified")
                 self._boot_send_connection = conn
-
-            # locate any boot receiver connections
-            if isinstance(conn, SpinnakerBootReceiver):
-                self._boot_receive_connections.append(conn)
 
             # Locate any connections listening on a UDP port
             if isinstance(conn, UDPConnection):
@@ -491,7 +464,7 @@ class Transceiver(object):
                 raise
 
     def _check_connection(
-            self, connection_selector, retries, chip_x, chip_y):
+            self, connection_selector, chip_x, chip_y):
         """ Check that the given connection to the given chip works
 
         :param connection_selector: the connection selector to use
@@ -499,11 +472,9 @@ class Transceiver(object):
         :type chip_x: int
         :param chip_y: the chip y coordinate to try to talk to
         :type chip_y: int
-        :param retries: how many attempts to do before giving up
-        :type retries: int
         :return: True if a valid response is received, False otherwise
         """
-        for _ in xrange(retries):
+        for _ in xrange(_CONNECTION_CHECK_RETRIES):
             try:
                 sender = SendSingleCommandProcess(connection_selector)
                 chip_info = sender.execute(
@@ -689,13 +660,8 @@ class Transceiver(object):
         # update the SCAMP selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # update the SCAMP connections replacing any x and y with the default
-        # SCP request params with the boot chip coordinates
-        for sc in self._scamp_connections:
-            if (sc.chip_x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
-                    and sc.chip_y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD):
-                sc.update_chip_coordinates(
-                    self._machine.boot_x, self._machine.boot_y)
+        # Remove any chips that are unreachable
+        self._machine.remove_unreachable_chips()
 
         # Work out and add the SpiNNaker links and FPGA links
         self._machine.add_spinnaker_links(self._version)
@@ -763,8 +729,7 @@ class Transceiver(object):
 
             # check if it works
             if self._check_connection(
-                    MostDirectConnectionSelector(None, [conn]),
-                    _STANDARD_RETIRES_NO, x, y):
+                    MostDirectConnectionSelector(None, [conn]), x, y):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
                 self._udp_scamp_connections[ip_address] = conn
@@ -1142,56 +1107,49 @@ class Transceiver(object):
                 x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
                 data_item.data_type.value))[0]
 
-    def get_user_0_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_0_register_address_from_core(p):
         """ Get the address of user 0 for a given processor on the board
 
         :param p: The ID of the processor to get the user 0 address from
         :type p: int
         :return: The address for user 0 register for this processor
         :rtype: int
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
-            If a packet is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If x, y, p is not a valid processor
-            * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
-            If a response indicates an error during the exchange
         """
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
-    def get_user_1_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_1_register_address_from_core(p):
         """ Get the address of user 1 for a given processor on the board
 
         :param p: The ID of the processor to get the user 1 address from
         :type p: int
         :return: The address for user 1 register for this processor
         :rtype: int
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
-            If a packet is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If x, y, p is not a valid processor
-            * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
-            If a response indicates an error during the exchange
         """
         return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
-    def get_user_2_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_2_register_address_from_core(p):
         """ Get the address of user 2 for a given processor on the board
 
-        :param p: The ID of the processor to get the user 0 address from
+        :param p: The ID of the processor to get the user 2 address from
         :type p: int
-        :return: The address for user 0 register for this processor
+        :return: The address for user 2 register for this processor
         :rtype: int
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
-            If a packet is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If x, y, p is not a valid processor
-            * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
-            If a response indicates an error during the exchange
         """
         return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
+
+    @staticmethod
+    def get_user_3_register_address_from_core(p):
+        """ Get the address of user 3 for a given processor on the board
+
+        :param p: The ID of the processor to get the user 3 address from
+        :type p: int
+        :return: The address for user 3 register for this processor
+        :rtype: int
+        """
+        return get_vcpu_address(p) + CPU_USER_3_START_ADDRESS
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
@@ -2209,12 +2167,15 @@ class Transceiver(object):
         """
         return self._udp_scamp_connections.get(board_address, None)
 
-    def set_ip_tag(self, ip_tag):
+    def set_ip_tag(self, ip_tag, use_sender=False):
         """ Set up an IP tag
 
         :param ip_tag: The tag to set up; note board_address can be None, in\
             which case, the tag will be assigned to all boards
         :type ip_tag: :py:class:`spinn_machine.tags.IPTag`
+        :param use_sender: Optionally use the sender host and port instead of\
+            the given host and port in the tag
+        :param use_sender: bool
         :return: Nothing is returned
         :rtype: None
         :raise spinnman.exceptions.SpinnmanIOException: \
@@ -2253,7 +2214,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagSet(
                 connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
-                ip_tag.tag, strip=ip_tag.strip_sdp))
+                ip_tag.tag, strip=ip_tag.strip_sdp, use_sender=use_sender))
 
     def __get_connection_list(self, connection=None, board_address=None):
         """ Get the connections for talking to a board.
@@ -2334,16 +2295,11 @@ class Transceiver(object):
                 reverse_ip_tag.port, reverse_ip_tag.tag,
                 reverse_ip_tag.sdp_port))
 
-    def clear_ip_tag(self, tag, connection=None, board_address=None):
+    def clear_ip_tag(self, tag, board_address=None):
         """ Clear the setting of an IP tag
 
         :param tag: The tag ID
         :type tag: int
-        :param connection: Connection where the tag should be cleared. If not\
-            specified, all SCPSender connections will send the message to\
-            clear the tag
-        :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.SCPSender`
         :param board_address: Board address where the tag should be cleared.\
             If not specified, all SCPSender connections will send the message\
             to clear the tag
@@ -2360,7 +2316,7 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        for conn in self.__get_connection_list(connection, board_address):
+        for conn in self.__get_connection_list(board_address=board_address):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
