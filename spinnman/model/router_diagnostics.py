@@ -1,5 +1,6 @@
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
+from spinnman.model.enums.router_error import RouterError
 
 
 class RouterDiagnostics(object):
@@ -73,6 +74,25 @@ class RouterDiagnostics(object):
         :rtype: int
         """
         return self._error_status
+
+    @property
+    def error_count(self):
+        """ The count of errors
+
+        :return: The count of errors
+        :rtype: int
+        """
+        return self._error_status & 0xFF
+
+    @property
+    def errors_set(self):
+        """ A list of errors that have been detected
+
+        :return: A list of errors
+        :rtype: list of \
+            :py:class:`spinnman.model.enums.router_error.RouterError`
+        """
+        [error for error in RouterError if error.value & self._error_status]
 
     @property
     def n_local_multicast_packets(self):
