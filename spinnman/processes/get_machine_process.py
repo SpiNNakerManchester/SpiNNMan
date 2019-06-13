@@ -83,11 +83,16 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             sdram_size = self._max_sdram_size
         sdram = SDRAM(size=sdram_size)
 
-        # Create the chip
+        if (chip_info.nearest_ethernet_x == chip_info.x and
+                    chip_info.nearest_ethernet_y == chip_info.y):
+            ethernet_ip_address = chip_info.ethernet_ip_address
+        else:
+            ethernet_ip_address = None
+            # Create the chip
         return Chip(
             x=chip_info.x, y=chip_info.y, processors=processors,
             router=router, sdram=sdram,
-            ip_address=chip_info.ethernet_ip_address,
+            ip_address=ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y)
 
