@@ -92,7 +92,8 @@ class RouterDiagnostics(object):
         :rtype: list of \
             :py:class:`spinnman.model.enums.router_error.RouterError`
         """
-        [error for error in RouterError if error.value & self._error_status]
+        return [
+            error for error in RouterError if error.value & self._error_status]
 
     @property
     def n_local_multicast_packets(self):
