@@ -33,6 +33,7 @@ from spinnman.exceptions import (
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
+from spinnman.messages.scp.impl.wait_for_state import WaitForState
 from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
@@ -2893,6 +2894,10 @@ class Transceiver(object):
         process = FillProcess(self._scamp_connection_selector)
         return process.fill_memory(
             x, y, base_address, repeat_value, bytes_to_fill, data_type)
+
+    def wait_for_state(self, app_id, states, tag):
+        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process.execute(WaitForState(app_id, states, tag))
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\

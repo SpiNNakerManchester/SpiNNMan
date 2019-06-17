@@ -26,6 +26,7 @@ class SCPCommand(Enum):
     CMD_RTR = (29, "Initialise the router")
     CMD_DPRI = (30, "Dropped Packet Reinjection setup")
     CMD_INFO = (31, "Get Chip Summary Information")
+    CMD_WAIT = (32, "Wait for processors to reach a given state")
     CMD_BMP_INFO = (48, "Get BMP info structures")
     CMD_FLASH_COPY = 49
     CMD_FLASH_ERASE = 50
