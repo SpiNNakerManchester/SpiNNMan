@@ -14,7 +14,6 @@ from past.builtins import xrange
 from six import raise_from
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import CoreSubsets
-from spinn_machine.machine_factory import machine_repair
 from spinn_storage_handlers.abstract_classes import AbstractDataReader
 from spinn_storage_handlers import FileDataReader
 from spinnman.constants import (
@@ -84,7 +83,8 @@ def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, ignored_links=None,
         max_core_id=None, auto_detect_bmp=False, scamp_connections=None,
-        boot_port_no=None, max_sdram_size=None, repair_machine=False):
+        boot_port_no=None, max_sdram_size=None, repair_machine=False,
+        ignore_bad_ethernets=True):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         BootConnection on port 54321 (the default boot port), optionally\
@@ -137,6 +137,14 @@ def create_transceiver_from_hostname(
         If False get machine will raise an Exception if a problamatic
         machine is discovered.
     :type repair_machine: bool
+    :param ignore_bad_ethernets: Flag to say that ip_address information
+        on none ethernet chips should be ignored.
+        None_ethernet chips are defined here as ones that do not report
+        themselves their nearest ethernet.
+        The bad ipaddress is always logged
+        If True the ipaddress is ignored
+        If False the chip with the bad ipaddress is removed.
+    :type ignore_bad_ethernets: bool
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: \
@@ -181,7 +189,8 @@ def create_transceiver_from_hostname(
         version, connections=connections, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id,
         ignore_links=ignored_links, scamp_connections=scamp_connections,
-        max_sdram_size=max_sdram_size, repair_machine=repair_machine)
+        max_sdram_size=max_sdram_size, repair_machine=repair_machine,
+        ignore_bad_ethernets=ignore_bad_ethernets)
 
 
 class Transceiver(object):
@@ -206,6 +215,7 @@ class Transceiver(object):
         "_chip_execute_locks",
         "_flood_write_lock",
         "_height",
+        "_ignore_bad_ethernets",
         "_ignore_chips",
         "_ignore_cores",
         "_ignore_links",
@@ -233,7 +243,8 @@ class Transceiver(object):
     def __init__(
             self, version, connections=None, ignore_chips=None,
             ignore_cores=None, ignore_links=None, max_core_id=None,
-            scamp_connections=None, max_sdram_size=None, repair_machine=False):
+            scamp_connections=None, max_sdram_size=None, repair_machine=False,
+            ignore_bad_ethernets=True):
         """
         :param version: The version of the board being connected to
         :type version: int
@@ -273,6 +284,14 @@ class Transceiver(object):
             If False get machine will raise an Exception if a problamatic
             machine is discovered.
         :type repair_machine: bool
+        :param ignore_bad_ethernets: Flag to say that ip_address information
+            on none ethernet chips should be ignored.
+            None_ethernet chips are defined here as ones that do not report
+            themselves their nearest ethernet.
+            The bad ipaddress is always logged
+            If True the ipaddress is ignored
+            If False the chip with the bad ipaddress is removed.
+        :type ignore_bad_ethernets: bool
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board, or if no \
             connections to the board can be found (if connections is None)
@@ -297,6 +316,7 @@ class Transceiver(object):
         self._iobuf_size = None
         self._app_id_tracker = None
         self._repair_machine = repair_machine
+        self._ignore_bad_ethernets = ignore_bad_ethernets
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -672,13 +692,11 @@ class Transceiver(object):
             self._ignore_cores, self._ignore_links, self._max_core_id,
             self._max_sdram_size)
         self._machine = get_machine_process.get_machine_details(
-            version_info.x, version_info.y, self._width, self._height)
+            version_info.x, version_info.y, self._width, self._height,
+            self._repair_machine, self._ignore_bad_ethernets)
 
         # update the SCAMP selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
-
-        # Remove any chips that are unreachable
-        self._machine = machine_repair(self._machine, self._repair_machine)
 
         # Work out and add the SpiNNaker links and FPGA links
         self._machine.add_spinnaker_links()

@@ -3,6 +3,8 @@ import functools
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Processor, Router, Chip, SDRAM, Link, machine_from_size)
+from spinn_machine.machine_factory import machine_repair
+from spinn_machine.exceptions import SpinnMachineException
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
@@ -123,7 +125,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return
         super(GetMachineProcess, self)._receive_error(request, exception, tb)
 
-    def get_machine_details(self, boot_x, boot_y, width, height):
+    def get_machine_details(self, boot_x, boot_y, width, height,
+                            repair_machine, ignore_bad_ethernets):
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         self._p2p_column_data = [None] * width
@@ -156,17 +159,46 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
-        # Build a Machine
-        def chip_xy(chip):
-            return chip.x, chip.y
+        return self.create_machine(
+            width, height, repair_machine, ignore_bad_ethernets)
 
+    def create_machine(
+            self, width, height, repair_machine, ignore_bad_ethernets):
+        bad_ethernets = []
         machine = machine_from_size(width, height)
-        for chip_info in sorted(self._chip_info.values(), key=chip_xy):
+        for chip_info in sorted(
+                self._chip_info.values(), key=lambda chip: (chip.x, chip.y)):
             if (chip_info.x, chip_info.y) not in self._ignore_chips:
-                machine.add_chip(self._make_chip(chip_info, machine))
+                if (chip_info.ethernet_ip_address is not None and
+                    (chip_info.x != chip_info.nearest_ethernet_x
+                     or chip_info.y != chip_info.nearest_ethernet_y)):
+                        bad_ethernets.append(
+                            (chip_info, chip_info.ethernet_ip_address))
+                        if ignore_bad_ethernets:
+                            chip_info._ethernet_ip_address = None
+                            machine.add_chip(
+                                self._make_chip(chip_info, machine))
+                else:
+                    machine.add_chip(self._make_chip(chip_info, machine))
 
+        removed_chips = []
+        if len(bad_ethernets) > 0:
+            msg = ""
+            for chip_info, claim in bad_ethernets:
+                chip = self._make_chip(chip_info, machine)
+                local_x, local_y = machine.get_local_xy(chip)
+                ethernet = machine.get_chip_at(
+                    chip.nearest_ethernet_x, chip.nearest_ethernet_y)
+                msg += "x:{} y:{} on board:{} claims it has ethernet {} " \
+                       "".format(local_x, local_y, ethernet.ip_address, claim)
+                removed_chips.append((chip.x, chip.y))
+            logger.warning(msg)
+
+            if ignore_bad_ethernets:
+                # No chips actually removed
+                removed_chips = []
         machine.validate()
-        return machine
+        return machine_repair(machine, repair_machine, removed_chips)
 
     def get_chip_info(self):
         """ Get the chip information for the machine.
