@@ -4,7 +4,6 @@ from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Processor, Router, Chip, SDRAM, Link, machine_from_size)
 from spinn_machine.machine_factory import machine_repair
-from spinn_machine.exceptions import SpinnMachineException
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
@@ -172,12 +171,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 if (chip_info.ethernet_ip_address is not None and
                     (chip_info.x != chip_info.nearest_ethernet_x
                      or chip_info.y != chip_info.nearest_ethernet_y)):
-                        bad_ethernets.append(
-                            (chip_info, chip_info.ethernet_ip_address))
-                        if ignore_bad_ethernets:
-                            chip_info._ethernet_ip_address = None
-                            machine.add_chip(
-                                self._make_chip(chip_info, machine))
+                    bad_ethernets.append(
+                        (chip_info, chip_info.ethernet_ip_address))
+                    if ignore_bad_ethernets:
+                        chip_info._ethernet_ip_address = None
+                        machine.add_chip(
+                            self._make_chip(chip_info, machine))
                 else:
                     machine.add_chip(self._make_chip(chip_info, machine))
 
