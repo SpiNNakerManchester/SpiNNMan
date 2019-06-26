@@ -30,6 +30,10 @@ class MostDirectConnectionSelector(
         if self._first_connection is None:
             self._first_connection = next(iter(connections))
 
+    def set_dims(self, width, height):
+        self._width = width
+        self._height = height
+
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
     def get_next_connection(self, message):
