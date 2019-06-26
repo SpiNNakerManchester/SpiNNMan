@@ -425,7 +425,7 @@ class Transceiver(object):
                 if isinstance(conn, BMPConnection):
                     self._bmp_connections.append(conn)
                     self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
-                        MostDirectConnectionSelector(None, [conn])
+                        MostDirectConnectionSelector(None, None, [conn])
                 else:
                     self._scamp_connections.append(conn)
 
@@ -436,7 +436,7 @@ class Transceiver(object):
 
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(
-            self._machine, self._scamp_connections)
+            None, None, self._scamp_connections)
 
     def _check_bmp_connections(self):
         """ Check that the BMP connections are actually connected to valid BMPs
@@ -674,9 +674,6 @@ class Transceiver(object):
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height)
 
-        # update the SCAMP selector with the machine
-        self._scamp_connection_selector.set_machine(self._machine)
-
         # Remove any chips that are unreachable
         self._machine = machine_repair(self._machine, self._repair_machine)
 
@@ -746,7 +743,7 @@ class Transceiver(object):
 
             # check if it works
             if self._check_connection(
-                    MostDirectConnectionSelector(None, [conn]), x, y):
+                    MostDirectConnectionSelector(None, None, [conn]), x, y):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
                 self._udp_scamp_connections[ip_address] = conn
@@ -758,6 +755,8 @@ class Transceiver(object):
                     "cannot be contacted", ip_address, x, y)
 
         # Update the connection queues after finding new connections
+        self._scamp_connection_selector = MostDirectConnectionSelector(
+            dims.width, dims.height, self._scamp_connections)
         return new_connections
 
     def _search_for_proxies(self, x, y):
@@ -809,6 +808,10 @@ class Transceiver(object):
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
                     2))
+
+            # Update the scamp connection selector
+            self._scamp_connection_selector.set_dims(self._width, self._height)
+
         return MachineDimensions(self._width, self._height)
 
     def get_machine_details(self):
