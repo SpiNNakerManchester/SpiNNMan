@@ -1,9 +1,13 @@
 import socket
+import sys
+from six import reraise
 from spinnman.model import BMPConnectionData
 from spinnman.messages.sdp import SDPMessage, SDPHeader, SDPFlag
 from spinnman.constants import SCP_SCAMP_PORT, CPU_INFO_BYTES, CPU_INFO_OFFSET
 from spinnman.connections.udp_packet_connections.utils import (
     update_sdp_header_for_udp_send)
+from spinnman.messages.scp.impl import IPTagSet
+from spinnman.exceptions import SpinnmanTimeoutException
 
 
 def work_out_bmp_from_machine_details(hostname, number_of_boards):
@@ -63,3 +67,27 @@ def send_port_trigger_message(connection, board_address):
     update_sdp_header_for_udp_send(trigger_message.sdp_header, 0, 0)
     connection.send_to(
         trigger_message.bytestring, (board_address, SCP_SCAMP_PORT))
+
+
+def reprogram_tag(connection, tag, strip=True):
+    """ Reprogram an IP Tag to send responses to a given SCAMPConnection
+
+    :param connection: The connection to target the tag at
+    :param tag: The id of the tag to set
+    :param strip: True if
+    """
+    request = IPTagSet(
+        connection.chip_x, connection.chip_y, [0, 0, 0, 0], 0, tag,
+        strip=strip, use_sender=True)
+    data = connection.get_scp_data(request)
+    einfo = None
+    for _ in range(3):
+        try:
+            connection.send(data)
+            _, _, response, offset = \
+                connection.receive_scp_response()
+            request.get_scp_response().read_bytestring(response, offset)
+            return
+        except SpinnmanTimeoutException:
+            einfo = sys.exc_info()
+    reraise(*einfo)
