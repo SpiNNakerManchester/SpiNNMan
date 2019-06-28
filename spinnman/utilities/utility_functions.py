@@ -70,7 +70,7 @@ def send_port_trigger_message(connection, board_address):
 
 
 def reprogram_tag(connection, tag, strip=True):
-    """ Reprogramme an IP Tag to send responses to a given SCAMPConnection
+    """ Reprogram an IP Tag to send responses to a given SCAMPConnection
 
     :param connection: The connection to target the tag at
     :param tag: The id of the tag to set
