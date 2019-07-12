@@ -14,11 +14,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .cpu_state import CPUState
-from .diagnostic_filter_default_routing_status \
-    import DiagnosticFilterDefaultRoutingStatus
+from .diagnostic_filter_default_routing_status import (
+    DiagnosticFilterDefaultRoutingStatus)
 from .diagnostic_filter_destination import DiagnosticFilterDestination
-from .diagnostic_filter_emergency_routing_status \
-    import DiagnosticFilterEmergencyRoutingStatus
+from .diagnostic_filter_emergency_routing_status import (
+    DiagnosticFilterEmergencyRoutingStatus)
 from .diagnostic_filter_packet_type import DiagnosticFilterPacketType
 from .diagnostic_filter_payload_status import DiagnosticFilterPayloadStatus
 from .diagnostic_filter_source import DiagnosticFilterSource
