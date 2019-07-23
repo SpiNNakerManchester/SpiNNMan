@@ -18,6 +18,7 @@ import functools
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Processor, Router, Chip, SDRAM, Link, machine_from_size)
+from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -74,6 +75,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         core_states = chip_info.core_states
         if self._max_core_id is not None and max_core_id > self._max_core_id:
             max_core_id = self._max_core_id
+        if max_core_id >= Machine.MAX_CORES_PER_CHIP:
+            max_core_id = Machine.MAX_CORES_PER_CHIP - 1
         for virtual_core_id in range(max_core_id + 1):
             # Add the core provided it is not to be ignored
             if ((chip_info.x, chip_info.y, virtual_core_id) not in
