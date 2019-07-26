@@ -43,7 +43,8 @@ from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
     SpinnmanUnexpectedResponseCodeException,
-    SpinnmanUnsupportedOperationException, SpinnmanInvalidPacketException)
+    SpinnmanUnsupportedOperationException, SpinnmanInvalidPacketException,
+    SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
@@ -2044,12 +2045,17 @@ class Transceiver(object):
 
             # If the count is too small, check for error states
             if processors_ready < len(all_core_subsets):
+                is_error = False
                 for cpu_state in error_states:
                     error_cores = self.get_core_state_count(app_id, cpu_state)
                     if error_cores > 0:
-                        raise SpinnmanException(
-                            "{} cores have reached an error state {}:".format(
-                                error_cores, cpu_state))
+                        is_error = True
+                if is_error:
+                    error_core_states = self.get_cores_in_state(
+                        all_core_subsets, error_states)
+                    if len(error_states) > 0:
+                        raise SpiNNManCoresNotInStateException(
+                            timeout, cpu_states, error_core_states)
 
                 # If we haven't seen an error, increase the tries, and
                 # do a full check if required
@@ -2066,16 +2072,14 @@ class Transceiver(object):
 
         # If we haven't reached the final state, do a final full check
         if processors_ready < len(all_core_subsets):
-            cores_in_state = self.get_cores_in_state(
+            cores_not_in_state = self.get_cores_not_in_state(
                 all_core_subsets, cpu_states)
 
             # If we are sure we haven't reached the final state,
             # report a timeout error
-            if len(cores_in_state) != len(all_core_subsets):
-                raise SpinnmanTimeoutException(
-                    "waiting for cores {} to reach one of {}".format(
-                        all_core_subsets, cpu_states),
-                    timeout)
+            if len(cores_not_in_state) != 0:
+                raise SpiNNManCoresNotInStateException(
+                    timeout, cpu_states, cores_not_in_state)
 
     def get_cores_in_state(self, all_core_subsets, states):
         """ Get all cores that are in a given state or set of states
