@@ -38,7 +38,8 @@ from spinnman.constants import (
     IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, SYSTEM_VARIABLE_BASE_ADDRESS,
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
-    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES)
+    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
+    BOOT_RETRIES)
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
@@ -1077,7 +1078,7 @@ class Transceiver(object):
         current_tries_to_go = tries_to_go
         while version_info is None and current_tries_to_go > 0:
             try:
-                version_info = self.get_scamp_version(n_retries=3)
+                version_info = self.get_scamp_version(n_retries=BOOT_RETRIES)
                 if self.__is_default_destination(version_info):
                     version_info = None
                     time.sleep(0.1)
