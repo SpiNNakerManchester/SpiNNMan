@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 # pylint: disable=too-many-arguments
 import random
 import struct
@@ -83,7 +98,8 @@ def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, ignored_links=None,
         max_core_id=None, auto_detect_bmp=False, scamp_connections=None,
-        boot_port_no=None, max_sdram_size=None):
+        boot_port_no=None, max_sdram_size=None, repair_machine=False,
+        ignore_bad_ethernets=True):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         BootConnection on port 54321 (the default boot port), optionally\
@@ -129,6 +145,21 @@ def create_transceiver_from_hostname(
     :param max_sdram_size: the max size each chip can say it has for SDRAM \
         (mainly used in debugging purposes)
     :type max_sdram_size: int or None
+    :param repair_machine: Flag to set the behaviour if a repairable error
+        is found on the machine.
+        If true will create a machine without the problamatic bits.
+        (See machine_factory.machine_repair)
+        If False get machine will raise an Exception if a problamatic
+        machine is discovered.
+    :type repair_machine: bool
+    :param ignore_bad_ethernets: Flag to say that ip_address information
+        on none ethernet chips should be ignored.
+        None_ethernet chips are defined here as ones that do not report
+        themselves their nearest ethernet.
+        The bad ipaddress is always logged
+        If True the ipaddress is ignored
+        If False the chip with the bad ipaddress is removed.
+    :type ignore_bad_ethernets: bool
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: \
@@ -173,7 +204,8 @@ def create_transceiver_from_hostname(
         version, connections=connections, ignore_chips=ignore_chips,
         ignore_cores=ignore_cores, max_core_id=max_core_id,
         ignore_links=ignored_links, scamp_connections=scamp_connections,
-        max_sdram_size=max_sdram_size)
+        max_sdram_size=max_sdram_size, repair_machine=repair_machine,
+        ignore_bad_ethernets=ignore_bad_ethernets)
 
 
 class Transceiver(object):
@@ -198,6 +230,7 @@ class Transceiver(object):
         "_chip_execute_locks",
         "_flood_write_lock",
         "_height",
+        "_ignore_bad_ethernets",
         "_ignore_chips",
         "_ignore_cores",
         "_ignore_links",
@@ -211,6 +244,7 @@ class Transceiver(object):
         "_nearest_neighbour_id",
         "_nearest_neighbour_lock",
         "_original_connections",
+        "_repair_machine",
         "_scamp_connection_selector",
         "_scamp_connections",
         "_scp_sender_connections",
@@ -224,7 +258,8 @@ class Transceiver(object):
     def __init__(
             self, version, connections=None, ignore_chips=None,
             ignore_cores=None, ignore_links=None, max_core_id=None,
-            scamp_connections=None, max_sdram_size=None):
+            scamp_connections=None, max_sdram_size=None, repair_machine=False,
+            ignore_bad_ethernets=True):
         """
         :param version: The version of the board being connected to
         :type version: int
@@ -257,6 +292,21 @@ class Transceiver(object):
         :type scamp_connections: list of \
             :py:class:`spinnman.connections.SocketAddress_With_Chip`
             or None
+        :param repair_machine: Flag to set the behaviour if a repairable error
+            is found on the machine.
+            If true will create a machine without the problamatic bits.
+            (See machine_factory.machine_repair)
+            If False get machine will raise an Exception if a problamatic
+            machine is discovered.
+        :type repair_machine: bool
+        :param ignore_bad_ethernets: Flag to say that ip_address information
+            on none ethernet chips should be ignored.
+            None_ethernet chips are defined here as ones that do not report
+            themselves their nearest ethernet.
+            The bad ipaddress is always logged
+            If True the ipaddress is ignored
+            If False the chip with the bad ipaddress is removed.
+        :type ignore_bad_ethernets: bool
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board, or if no \
             connections to the board can be found (if connections is None)
@@ -280,6 +330,8 @@ class Transceiver(object):
         self._max_sdram_size = max_sdram_size
         self._iobuf_size = None
         self._app_id_tracker = None
+        self._repair_machine = repair_machine
+        self._ignore_bad_ethernets = ignore_bad_ethernets
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -655,17 +707,15 @@ class Transceiver(object):
             self._ignore_cores, self._ignore_links, self._max_core_id,
             self._max_sdram_size)
         self._machine = get_machine_process.get_machine_details(
-            version_info.x, version_info.y, self._width, self._height)
+            version_info.x, version_info.y, self._width, self._height,
+            self._repair_machine, self._ignore_bad_ethernets)
 
         # update the SCAMP selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # Remove any chips that are unreachable
-        self._machine.remove_unreachable_chips()
-
         # Work out and add the SpiNNaker links and FPGA links
-        self._machine.add_spinnaker_links(self._version)
-        self._machine.add_fpga_links(self._version)
+        self._machine.add_spinnaker_links()
+        self._machine.add_fpga_links()
 
         # TODO: Actually get the existing APP_IDs in use
         self._app_id_tracker = AppIdTracker()

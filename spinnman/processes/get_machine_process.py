@@ -1,7 +1,24 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import logging
 import functools
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import Processor, Router, Chip, SDRAM, Machine, Link
+from spinn_machine import (
+    Processor, Router, Chip, SDRAM, Link, machine_from_size)
+from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
@@ -40,7 +57,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
 
-    def _make_chip(self, width, height, chip_info):
+    def _make_chip(self, chip_info, machine):
         """ Creates a chip from a ChipSummaryInfo structure.
 
         :param chip_info: \
@@ -73,7 +90,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                         core_states[virtual_core_id])
 
         # Create the router
-        router = self._make_router(chip_info, width, height)
+        router = self._make_router(chip_info, machine)
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
@@ -90,19 +107,16 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y)
 
-    def _make_router(self, chip_info, width, height):
+    def _make_router(self, chip_info, machine):
         links = list()
         for link in chip_info.working_links:
-            dest = Machine.get_chip_over_link(
-                chip_info.x, chip_info.y, link, width, height)
+            dest = machine.xy_over_link(chip_info.x, chip_info.y, link)
             if ((chip_info.x, chip_info.y, link) not in self._ignore_links
                     and dest not in self._ignore_chips
                     and dest in self._chip_info):
                 dest_x, dest_y = dest
-                opposite_link_id = (link + 3) % 6
                 links.append(Link(
-                    chip_info.x, chip_info.y, link, dest_x, dest_y,
-                    opposite_link_id, opposite_link_id))
+                    chip_info.x, chip_info.y, link, dest_x, dest_y))
         return Router(
             links=links,
             n_available_multicast_entries=(
@@ -125,7 +139,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return
         super(GetMachineProcess, self)._receive_error(request, exception, tb)
 
-    def get_machine_details(self, boot_x, boot_y, width, height):
+    def get_machine_details(self, boot_x, boot_y, width, height,
+                            repair_machine, ignore_bad_ethernets):
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         self._p2p_column_data = [None] * width
@@ -147,7 +162,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._finish()
         try:
             self.check_for_error()
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             # Ignore errors so far, as any error here just means that a chip
             # is down that wasn't marked as down
             pass
@@ -158,17 +173,47 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
-        # Build a Machine
-        def chip_xy(chip):
-            return chip.x, chip.y
+        return self.create_machine(
+            width, height, repair_machine, ignore_bad_ethernets)
 
-        chips = [
-            self._make_chip(width, height, chip_info)
-            for chip_info in sorted(self._chip_info.values(), key=chip_xy)
-            if (chip_info.x, chip_info.y) not in self._ignore_chips]
-        machine = Machine(chips, boot_x, boot_y)
+    def create_machine(
+            self, width, height, repair_machine, ignore_bad_ethernets):
+        bad_ethernets = []
+        machine = machine_from_size(width, height)
+        for chip_info in sorted(
+                self._chip_info.values(), key=lambda chip: (chip.x, chip.y)):
+            if (chip_info.x, chip_info.y) not in self._ignore_chips:
+                if (chip_info.ethernet_ip_address is not None and
+                    (chip_info.x != chip_info.nearest_ethernet_x
+                     or chip_info.y != chip_info.nearest_ethernet_y)):
+                    bad_ethernets.append(
+                        (chip_info, chip_info.ethernet_ip_address))
+                    if ignore_bad_ethernets:
+                        # pylint: disable=protected-access
+                        chip_info._ethernet_ip_address = None
+                        machine.add_chip(
+                            self._make_chip(chip_info, machine))
+                else:
+                    machine.add_chip(self._make_chip(chip_info, machine))
 
-        return machine
+        removed_chips = []
+        if len(bad_ethernets) > 0:
+            msg = ""
+            for chip_info, claim in bad_ethernets:
+                chip = self._make_chip(chip_info, machine)
+                local_x, local_y = machine.get_local_xy(chip)
+                ethernet = machine.get_chip_at(
+                    chip.nearest_ethernet_x, chip.nearest_ethernet_y)
+                msg += "x:{} y:{} on board:{} claims it has ethernet {} " \
+                       "".format(local_x, local_y, ethernet.ip_address, claim)
+                removed_chips.append((chip.x, chip.y))
+            logger.warning(msg)
+
+            if ignore_bad_ethernets:
+                # No chips actually removed
+                removed_chips = []
+        machine.validate()
+        return machine_repair(machine, repair_machine, removed_chips)
 
     def get_chip_info(self):
         """ Get the chip information for the machine.

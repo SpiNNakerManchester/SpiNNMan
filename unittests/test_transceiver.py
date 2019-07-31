@@ -1,7 +1,22 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import print_function
 import unittest
 import struct
-from spinn_machine.virtual_machine import VirtualMachine
+from spinn_machine import virtual_machine
 from spinnman.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
@@ -29,7 +44,7 @@ class MockWriteTransceiver(Transceiver):
         self.written_memory = list()
 
     def get_machine_details(self):
-        return VirtualMachine(2, 2)
+        return virtual_machine(2, 2)
 
     def _update_machine(self):
         self._machine = self.get_machine_details()
