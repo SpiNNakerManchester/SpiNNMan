@@ -216,3 +216,11 @@ address_length_dtype = {
 
 # This is the default timeout when using SCP
 SCP_TIMEOUT = 1.0
+
+# This is the default number of retries when using SCP
+N_RETRIES = 10
+
+# This is the number of retries during boot - this is different because
+# otherwise boot takes too long (retrying on a non-booted machine will never
+# work)
+BOOT_RETRIES = 3
