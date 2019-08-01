@@ -15,6 +15,7 @@
 
 from spinnman.messages.scp.impl import GetVersion
 from .abstract_single_connection_process import AbstractSingleConnectionProcess
+from spinnman.constants import N_RETRIES
 
 
 class GetVersionProcess(AbstractSingleConnectionProcess):
@@ -23,8 +24,8 @@ class GetVersionProcess(AbstractSingleConnectionProcess):
     __slots__ = [
         "_version_info"]
 
-    def __init__(self, connection_selector):
-        super(GetVersionProcess, self).__init__(connection_selector)
+    def __init__(self, connection_selector, n_retries=N_RETRIES):
+        super(GetVersionProcess, self).__init__(connection_selector, n_retries)
         self._version_info = None
 
     def _get_response(self, version_response):

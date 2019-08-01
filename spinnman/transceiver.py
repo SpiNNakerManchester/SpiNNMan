@@ -38,7 +38,8 @@ from spinnman.constants import (
     IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, SYSTEM_VARIABLE_BASE_ADDRESS,
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
-    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE)
+    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
+    BOOT_RETRIES)
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
@@ -892,7 +893,7 @@ class Transceiver(object):
     def get_scamp_version(
             self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-            connection_selector=None):
+            connection_selector=None, n_retries=N_RETRIES):
         """ Get the version of SCAMP which is running on the board.
 
         :param connection_selector: the connection to send the SCAMP\
@@ -915,7 +916,7 @@ class Transceiver(object):
         """
         if connection_selector is None:
             connection_selector = self._scamp_connection_selector
-        process = GetVersionProcess(connection_selector)
+        process = GetVersionProcess(connection_selector, n_retries)
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
     def boot_board(
@@ -1077,7 +1078,7 @@ class Transceiver(object):
         current_tries_to_go = tries_to_go
         while version_info is None and current_tries_to_go > 0:
             try:
-                version_info = self.get_scamp_version()
+                version_info = self.get_scamp_version(n_retries=BOOT_RETRIES)
                 if self.__is_default_destination(version_info):
                     version_info = None
                     time.sleep(0.1)
