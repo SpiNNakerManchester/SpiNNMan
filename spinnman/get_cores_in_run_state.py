@@ -32,7 +32,7 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
     print('machine max x: {} max y: {}'.format(
         machine.max_chip_x, machine.max_chip_y))
     if print_all_chips:
-        print('machine chips: {}'.format(machine.chips))
+        print('machine chips: {}'.format(list(machine.chips)))
 
     all_cores = []
     for chip in machine.chips:
@@ -84,7 +84,7 @@ def main():
         help=("don't print all the chips out; avoids a great deal of "
               "output for large machines"))
     ap.add_argument(
-        "host", default=None,
+        "host", default=None, nargs='?',
         help="the hostname or IP address of the SpiNNaker machine to inspect")
     args = ap.parse_args()
     # These ought to be parsed from command line arguments
