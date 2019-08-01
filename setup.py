@@ -84,6 +84,10 @@ setup(
         'future',
         'futures; python_version == "2.7"',
         'six'],
+    entry_points={
+        "console_scripts": [
+            "get_cores_in_run_state = spinnman.get_cores_in_run_state:main"]
+    },
     maintainer="SpiNNakerTeam",
     maintainer_email="spinnakerusers@googlegroups.com"
 )
