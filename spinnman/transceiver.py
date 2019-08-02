@@ -1170,6 +1170,10 @@ class Transceiver(object):
         """
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
+    def read_user_0(self, x, y, p):
+        addr = self.get_user_0_register_address_from_core(p)
+        return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
+
     @staticmethod
     def get_user_1_register_address_from_core(p):
         """ Get the address of user 1 for a given processor on the board
