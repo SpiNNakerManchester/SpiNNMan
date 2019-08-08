@@ -44,18 +44,15 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
     cores_running = txrx.get_cores_in_state(all_cores, CPUState.RUNNING)
     cores_watchdog = txrx.get_cores_in_state(all_cores, CPUState.WATCHDOG)
 
-    for chip in cores_running:
-        for pid in chip.processor_ids:
-            if pid not in IGNORED_IDS:
-                print('run core: {} {} {}'.format(chip.x, chip.y, pid))
+    for (x, y, p), _ in cores_running:
+        if p not in IGNORED_IDS:
+            print('run core: {} {} {}'.format(x, y, p))
 
-    for chip in cores_finished:
-        for pid in chip.processor_ids:
-            print('finished core: {} {} {}'.format(chip.x, chip.y, pid))
+    for (x, y, p), _ in cores_finished:
+        print('finished core: {} {} {}'.format(x, y, p))
 
-    for chip in cores_watchdog:
-        for pid in chip.processor_ids:
-            print('watchdog core: {} {} {}'.format(chip.x, chip.y, pid))
+    for (x, y, p), _ in cores_watchdog:
+        print('watchdog core: {} {} {}'.format(x, y, p))
 
 
 def make_transceiver(host=None):
