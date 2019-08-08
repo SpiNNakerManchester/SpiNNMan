@@ -2096,15 +2096,15 @@ class Transceiver(object):
         :return: Core subsets object containing cores in the given state(s)
         """
         core_infos = self.get_cpu_information(all_core_subsets)
-        cores_in_state = CoreSubsets()
+        cores_in_state = CPUInfos()
         for core_info in core_infos:
             if hasattr(states, "__iter__"):
                 if core_info.state in states:
                     cores_in_state.add_processor(
-                        core_info.x, core_info.y, core_info.p)
+                        core_info.x, core_info.y, core_info.p, core_info)
             elif core_info.state == states:
                 cores_in_state.add_processor(
-                    core_info.x, core_info.y, core_info.p)
+                    core_info.x, core_info.y, core_info.p, core_info)
 
         return cores_in_state
 
