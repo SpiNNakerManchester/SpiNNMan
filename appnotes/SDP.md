@@ -1,5 +1,5 @@
 # SpiNNaker Datagram Protocol (SDP) Specification
-Steve Temple - 07 Nov 2011 - Version 1.01
+Steve Temple — 07 Nov 2011 — Version 1.01
 
 _(This document is also available as [PDF](http://spinnakermanchester.github.io/docs/spinn-app-4.pdf).)_
 
@@ -7,7 +7,7 @@ _(This document is also available as [PDF](http://spinnakermanchester.github.io/
 
 SDP is a protocol for moving blocks of data in a SpiNNaker system. It provides a basic, non-guaranteed point-to-point communication method which may be used as-is, or with additional control mechanisms to provide more reliable data transport.
 
-Data is sent in packets or datagrams which can contain up to ˜64 kbytes of data. The current implementation limits the amount of data to ˜256 bytes in order to mimimise the size of buffers in the SpiNNaker chips.
+Data is sent in packets or datagrams which can contain up to ~64 kbytes of data. The current implementation limits the amount of data to ~256 bytes in order to mimimise the size of buffers in the SpiNNaker chips.
 
 Each SDP packet contains an SDP header which controls the addressing of the packet and a data field which holds the payload. It is necessary to be aware of the length of the packet but this is considered the responsibility of the agent conveying the packet and does not occupy a specific field in the packet.
 
