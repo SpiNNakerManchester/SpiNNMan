@@ -173,5 +173,4 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
                 iobuf = ""
                 for item in itervalues(self._iobuf[x, y, p]):
                     iobuf += item.decode(_ENCODING)
-
                 yield IOBuffer(x, y, p, iobuf)
