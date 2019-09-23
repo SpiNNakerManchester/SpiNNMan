@@ -82,3 +82,19 @@ class CPUInfos(object):
         """ The total number of processors that are in these core subsets.
         """
         return len(self._cpu_infos)
+
+    def is_core(self, x, y, p):
+        """ Determine if there is a CPU Info for x, y, p
+        """
+        return (x, y, p) in self._cpu_infos
+
+    def get_cpu_info(self, x, y, p):
+        """ Get the information for the given core on the given chip
+        """
+        return self._cpu_infos[x, y, p]
+
+    def __str__(self):
+        return self._cpu_infos.keys()
+
+    def __repr__(self):
+        return self.__str__()

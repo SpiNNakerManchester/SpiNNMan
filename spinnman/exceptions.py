@@ -348,3 +348,17 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
     @property
     def packet(self):
         return self._packet
+
+
+class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
+    """ Cores failed to reach a given state within a timeout
+    """
+
+    def __init__(self, timeout, expected_states, failed_core_states):
+        msg = "waiting for cores to reach one of {}".format(
+            expected_states)
+        super(SpiNNManCoresNotInStateException, self).__init__(msg, timeout)
+        self._failed_core_states = failed_core_states
+
+    def failed_core_states(self):
+        return self._failed_core_states

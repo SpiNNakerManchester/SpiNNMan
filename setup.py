@@ -53,16 +53,39 @@ setup(
     description="Interaction with a SpiNNaker Machine",
     url="https://github.com/SpiNNakerManchester/SpiNNMan",
     license="GNU GPLv3.0",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+
+        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+
+        "Natural Language :: English",
+
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+    ],
     packages=packages,
     package_data=package_data,
     install_requires=[
-        'SpiNNUtilities >= 1!4.0.1, < 1!5.0.0',
-        'SpiNNStorageHandlers >= 1!4.0.1, < 1!5.0.0',
-        'SpiNNMachine >= 1!4.0.1, < 1!5.0.0',
+        'SpiNNUtilities >= 1!5.0.1, < 1!6.0.0',
+        'SpiNNStorageHandlers >= 1!5.0.1, < 1!6.0.0',
+        'SpiNNMachine >= 1!5.0.1, < 1!6.0.0',
         'enum34',
         'future',
         'futures; python_version == "2.7"',
         'six'],
+    entry_points={
+        "console_scripts": [
+            "get_cores_in_run_state = spinnman.get_cores_in_run_state:main"]
+    },
     maintainer="SpiNNakerTeam",
     maintainer_email="spinnakerusers@googlegroups.com"
 )

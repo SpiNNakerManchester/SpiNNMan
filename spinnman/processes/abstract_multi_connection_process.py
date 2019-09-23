@@ -16,7 +16,7 @@
 from six import itervalues
 from .abstract_process import AbstractProcess
 from spinnman.connections import SCPRequestPipeLine
-from spinnman.constants import SCP_TIMEOUT
+from spinnman.constants import SCP_TIMEOUT, N_RETRIES
 
 
 class AbstractMultiConnectionProcess(AbstractProcess):
@@ -31,7 +31,7 @@ class AbstractMultiConnectionProcess(AbstractProcess):
         "_timeout"]
 
     def __init__(self, next_connection_selector,
-                 n_retries=3, timeout=SCP_TIMEOUT, n_channels=8,
+                 n_retries=N_RETRIES, timeout=SCP_TIMEOUT, n_channels=8,
                  intermediate_channel_waits=7):
         super(AbstractMultiConnectionProcess, self).__init__()
         self._scp_request_pipelines = dict()
