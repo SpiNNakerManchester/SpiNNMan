@@ -18,6 +18,7 @@ import functools
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Processor, Router, Chip, SDRAM, Link, machine_from_size)
+from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -49,7 +50,19 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
         self._ignore_links = ignore_links if ignore_links is not None else {}
-        self._max_core_id = max_core_id
+        if max_core_id is None:
+            self._max_core_id = Machine.MAX_CORES_PER_CHIP
+        elif max_core_id == Machine.MAX_CORES_PER_CHIP:
+            self._max_core_id = Machine.MAX_CORES_PER_CHIP
+        elif max_core_id > Machine.MAX_CORES_PER_CHIP:
+            logger.warning(
+                "Max core id reduced to {} based on "
+                "Machine.MAX_CORES_PER_CHIP".format(
+                    Machine.MAX_CORES_PER_CHIP))
+            self._max_core_id = Machine.MAX_CORES_PER_CHIP
+        else:
+            self._max_core_id = max_core_id
+
         self._max_sdram_size = max_sdram_size
 
         self._p2p_column_data = list()
@@ -72,7 +85,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         processors = list()
         max_core_id = chip_info.n_cores - 1
         core_states = chip_info.core_states
-        if self._max_core_id is not None and max_core_id > self._max_core_id:
+        if max_core_id > self._max_core_id:
             max_core_id = self._max_core_id
         for virtual_core_id in range(max_core_id + 1):
             # Add the core provided it is not to be ignored
