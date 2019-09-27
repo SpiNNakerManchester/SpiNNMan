@@ -50,16 +50,17 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
         self._ignore_links = ignore_links if ignore_links is not None else {}
+
         if max_core_id is None:
-            self._max_core_id = Machine.MAX_CORES_PER_CHIP
-        elif max_core_id == Machine.MAX_CORES_PER_CHIP:
-            self._max_core_id = Machine.MAX_CORES_PER_CHIP
-        elif max_core_id > Machine.MAX_CORES_PER_CHIP:
+            self._max_core_id = Machine.MAX_CORES_PER_CHIP - 1
+        elif max_core_id == Machine.MAX_CORES_PER_CHIP - 1:
+            self._max_core_id = Machine.MAX_CORES_PER_CHIP - 1
+        elif max_core_id >= Machine.MAX_CORES_PER_CHIP:
+            self._max_core_id = Machine.MAX_CORES_PER_CHIP - 1
             logger.warning(
                 "Max core id reduced to {} based on "
                 "Machine.MAX_CORES_PER_CHIP".format(
-                    Machine.MAX_CORES_PER_CHIP))
-            self._max_core_id = Machine.MAX_CORES_PER_CHIP
+                    self._max_core_id))
         else:
             self._max_core_id = max_core_id
 
