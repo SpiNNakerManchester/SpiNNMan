@@ -38,31 +38,17 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         "_ignore_chips",
         "_ignore_cores",
         "_ignore_links",
-        "_max_core_id",
         "_max_sdram_size",
         "_p2p_column_data"]
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
-                 ignore_links, max_core_id, max_sdram_size=None):
+                 ignore_links, max_sdram_size=None):
         # pylint: disable=too-many-arguments
         super(GetMachineProcess, self).__init__(connection_selector)
 
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
         self._ignore_links = ignore_links if ignore_links is not None else {}
-
-        if max_core_id is None:
-            self._max_core_id = Machine.MAX_CORES_PER_CHIP - 1
-        elif max_core_id == Machine.MAX_CORES_PER_CHIP - 1:
-            self._max_core_id = Machine.MAX_CORES_PER_CHIP - 1
-        elif max_core_id >= Machine.MAX_CORES_PER_CHIP:
-            self._max_core_id = Machine.MAX_CORES_PER_CHIP - 1
-            logger.warning(
-                "Max core id reduced to {} based on "
-                "Machine.MAX_CORES_PER_CHIP".format(
-                    self._max_core_id))
-        else:
-            self._max_core_id = max_core_id
 
         self._max_sdram_size = max_sdram_size
 
@@ -84,11 +70,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the processor list
         processors = list()
-        max_core_id = chip_info.n_cores - 1
+        n_cores = min(chip_info.n_cores, Machine.MAX_CORES_PER_CHIP)
         core_states = chip_info.core_states
-        if max_core_id > self._max_core_id:
-            max_core_id = self._max_core_id
-        for virtual_core_id in range(max_core_id + 1):
+        for virtual_core_id in range(n_cores):
             # Add the core provided it is not to be ignored
             if ((chip_info.x, chip_info.y, virtual_core_id) not in
                     self._ignore_cores):
