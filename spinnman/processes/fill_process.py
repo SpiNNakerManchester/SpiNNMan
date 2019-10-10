@@ -96,7 +96,7 @@ class FillProcess(AbstractMultiConnectionProcess):
         # pre-data circling round to the start of the post-data; we double
         # it up so that we don't need to use mod (it's pretty small).
         data = data_to_fill + data_to_fill
-        fill_word = FillDataType.WORD.unpack(
+        fill_word = FillDataType.WORD.struct.unpack(
             data[extra_bytes:extra_bytes + ALIGNMENT - 1])[0]
         self._send_request(FillRequest(x, y, address, fill_word, size))
         return size
