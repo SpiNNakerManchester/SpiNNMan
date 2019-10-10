@@ -43,8 +43,7 @@ from spinnman.constants import (
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
-    SpinnmanUnexpectedResponseCodeException,
-    SpinnmanUnsupportedOperationException, SpinnmanInvalidPacketException,
+    SpinnmanUnexpectedResponseCodeException, SpinnmanInvalidPacketException,
     SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
@@ -662,36 +661,6 @@ class Transceiver(object):
         else:
             connection_to_use = connection
         connection_to_use.send_sdp_message(message)
-
-    def send_multicast_message(self, x, y, multicast_message, connection=None):
-        """ Sends a multicast message to the board (currently unsupported)
-
-        :param x: The x-coordinate of the chip where the message should first\
-            arrive on the board
-        :type x: int
-        :param y: The y-coordinate of the chip where the message should first\
-            arrive on the board
-        :type y: int
-        :param multicast_message: A multicast message to send
-        :type multicast_message:\
-            :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-        :param connection: A specific connection over which to send the\
-            message. If not specified, an appropriate connection is chosen\
-            automatically.
-        :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.MulticastSender`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: \
-            If there is an error communicating with the board
-        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException:
-            * If there is no connection that supports sending over multicast\
-                (or the given connection does not)
-            * If there is no connection that can make the packet arrive at\
-                the selected chip (ignoring routing tables)
-        """
-        raise SpinnmanUnsupportedOperationException(
-            "This operation is currently not supported in spinnman.")
 
     def _update_machine(self):
         """ Get the current machine status and store it
