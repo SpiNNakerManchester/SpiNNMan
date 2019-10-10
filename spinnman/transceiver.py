@@ -531,7 +531,7 @@ class Transceiver(object):
         for _ in xrange(_CONNECTION_CHECK_RETRIES):
             try:
                 sender = SendSingleCommandProcess(connection_selector)
-                chip_info = sender.execute(
+                chip_info = sender.execute(  # pylint: disable=no-member
                     GetChipInfo(chip_x, chip_y)).chip_info
                 if not chip_info.is_ethernet_available:
                     time.sleep(0.1)
@@ -1356,7 +1356,7 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(CountState(app_id, state))
-        return response.count
+        return response.count  # pylint: disable=no-member
 
     def execute(
             self, x, y, processors, executable, app_id, n_bytes=None,
@@ -1650,7 +1650,7 @@ class Transceiver(object):
             self._bmp_connection(cabinet, frame), timeout=1.0)
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
-        return response.fpga_register
+        return response.fpga_register  # pylint: disable=no-member
 
     def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
                             board):
@@ -1689,7 +1689,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(ReadADC(board))
-        return response.adc_info
+        return response.adc_info  # pylint: disable=no-member
 
     def read_bmp_version(self, board, cabinet, frame):
         """ Read the BMP version
@@ -1704,7 +1704,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(BMPGetVersion(board))
-        return response.version_info
+        return response.version_info  # pylint: disable=no-member
 
     def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
@@ -2689,7 +2689,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(ReadMemory(x, y, memory_position, 4))
         return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
-            response.data, response.offset)[0])
+            response.data, response.offset)[0])  # pylint: disable=no-member
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
                                          counter_ids=None):

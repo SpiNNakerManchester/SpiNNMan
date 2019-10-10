@@ -102,6 +102,7 @@ BMP_TIMEOUT = 0.5
 # Time to sleep after powering on boards
 BMP_POST_POWER_ON_SLEEP_TIME = 5.0
 
+
 # a listing of what SpiNNaker specific EIEIO commands there are.
 class EIEIO_COMMAND_IDS(Enum):
     # Database handshake with external program
@@ -131,6 +132,7 @@ class EIEIO_COMMAND_IDS(Enum):
     # Host confirming request to read data received
     HOST_DATA_READ_ACK = 12
 
+
 # the values used by the SCP IP tag time outs. These control how long to wait
 # for any message request which requires a response, before raising an error.
 # The value is calculated via the following formulae
@@ -145,6 +147,7 @@ class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
     TIMEOUT_640_ms = 7
     TIMEOUT_1280_ms = 8
     TIMEOUT_2560_ms = 9
+
 
 class ROUTER_REGISTER_REGISTERS(Enum):
     LOC_MC = 0
@@ -164,12 +167,14 @@ class ROUTER_REGISTER_REGISTERS(Enum):
     USER_2 = 14
     USER_3 = 15
 
+
 # the types of read available from SARK. These values are used to tell SARK how
 # to read the data in a time efficient manner.
 class READ_TYPES(Enum):
     BYTE = 0
     HALF_WORD = 1
     WORD = 2
+
 
 # This is a mapping between read address in the mapping between word byte
 # position, the number of bytes you wish to read, and the type of time

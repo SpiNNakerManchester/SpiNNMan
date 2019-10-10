@@ -43,9 +43,9 @@ def locate_connected_machine(handler):
 
 
 if __name__ == "__main__":
-    def ctrlc_handler(signal, frame):  # @UnusedVariable
+    def ctrlc_handler(sig, frame):  # @UnusedVariable
         """
-        :param signal:
+        :param sig:
         :param frame:
         :return: Never returns as it causes a sys.exit()
         """
