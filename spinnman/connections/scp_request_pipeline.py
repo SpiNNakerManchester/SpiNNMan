@@ -227,7 +227,7 @@ class SCPRequestPipeLine(object):
                     time.sleep(0.1)
                     self._resend(seq, request_sent, str(result))
                     self._n_retry_code_resent += 1
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
                         request_sent, e, sys.exc_info()[2])
                     self._remove_record(seq)
@@ -239,7 +239,7 @@ class SCPRequestPipeLine(object):
                     response.read_bytestring(raw_data, offset)
                     if self._callbacks[seq] is not None:
                         self._callbacks[seq](response)
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
                         request_sent, e, sys.exc_info()[2])
 
@@ -255,7 +255,7 @@ class SCPRequestPipeLine(object):
             self._in_progress -= 1
             try:
                 self._resend(seq, request_sent, "timeout")
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 self._error_callbacks[seq](
                     request_sent, e, sys.exc_info()[2])
                 to_remove.append(seq)

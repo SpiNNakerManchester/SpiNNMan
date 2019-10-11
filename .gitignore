@@ -30,4 +30,3 @@ SpiNNMan.egg-info
 .coverage
 .cache/
 .pytest_cache/
-/.pylintrc

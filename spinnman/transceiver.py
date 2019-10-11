@@ -43,8 +43,7 @@ from spinnman.constants import (
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
-    SpinnmanUnexpectedResponseCodeException,
-    SpinnmanUnsupportedOperationException, SpinnmanInvalidPacketException,
+    SpinnmanUnexpectedResponseCodeException, SpinnmanInvalidPacketException,
     SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
@@ -531,7 +530,7 @@ class Transceiver(object):
         for _ in xrange(_CONNECTION_CHECK_RETRIES):
             try:
                 sender = SendSingleCommandProcess(connection_selector)
-                chip_info = sender.execute(
+                chip_info = sender.execute(  # pylint: disable=no-member
                     GetChipInfo(chip_x, chip_y)).chip_info
                 if not chip_info.is_ethernet_available:
                     time.sleep(0.1)
@@ -662,36 +661,6 @@ class Transceiver(object):
         else:
             connection_to_use = connection
         connection_to_use.send_sdp_message(message)
-
-    def send_multicast_message(self, x, y, multicast_message, connection=None):
-        """ Sends a multicast message to the board (currently unsupported)
-
-        :param x: The x-coordinate of the chip where the message should first\
-            arrive on the board
-        :type x: int
-        :param y: The y-coordinate of the chip where the message should first\
-            arrive on the board
-        :type y: int
-        :param multicast_message: A multicast message to send
-        :type multicast_message:\
-            :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-        :param connection: A specific connection over which to send the\
-            message. If not specified, an appropriate connection is chosen\
-            automatically.
-        :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.MulticastSender`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: \
-            If there is an error communicating with the board
-        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException:
-            * If there is no connection that supports sending over multicast\
-                (or the given connection does not)
-            * If there is no connection that can make the packet arrive at\
-                the selected chip (ignoring routing tables)
-        """
-        raise SpinnmanUnsupportedOperationException(
-            "This operation is currently not supported in spinnman.")
 
     def _update_machine(self):
         """ Get the current machine status and store it
@@ -1356,7 +1325,7 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(CountState(app_id, state))
-        return response.count
+        return response.count  # pylint: disable=no-member
 
     def execute(
             self, x, y, processors, executable, app_id, n_bytes=None,
@@ -1650,7 +1619,7 @@ class Transceiver(object):
             self._bmp_connection(cabinet, frame), timeout=1.0)
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
-        return response.fpga_register
+        return response.fpga_register  # pylint: disable=no-member
 
     def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
                             board):
@@ -1689,7 +1658,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(ReadADC(board))
-        return response.adc_info
+        return response.adc_info  # pylint: disable=no-member
 
     def read_bmp_version(self, board, cabinet, frame):
         """ Read the BMP version
@@ -1704,7 +1673,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(BMPGetVersion(board))
-        return response.version_info
+        return response.version_info  # pylint: disable=no-member
 
     def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
@@ -2689,7 +2658,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(ReadMemory(x, y, memory_position, 4))
         return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
-            response.data, response.offset)[0])
+            response.data, response.offset)[0])  # pylint: disable=no-member
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
                                          counter_ids=None):

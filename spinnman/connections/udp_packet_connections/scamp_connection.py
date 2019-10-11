@@ -74,6 +74,7 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
         self._chip_x = x
         self._chip_y = y
 
+    # pylint: disable=arguments-differ
     def get_scp_data(self, scp_request, x=None, y=None):
         if x is None:
             x = self._chip_x

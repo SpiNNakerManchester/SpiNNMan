@@ -25,7 +25,7 @@ class RoundRobinConnectionSelector(
         "_next_connection_index"]
 
     @overrides(AbstractMultiConnectionProcessConnectionSelector.__init__)
-    def __init__(self, connections):
+    def __init__(self, connections):  # pylint: disable=super-init-not-called
         self._connections = connections
         self._next_connection_index = 0
 
