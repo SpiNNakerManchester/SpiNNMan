@@ -17,10 +17,7 @@
 import random
 import struct
 from threading import Condition, RLock
-try:
-    from collections.abc import defaultdict
-except ImportError:
-    from collections import defaultdict
+from collections import defaultdict
 import logging
 import socket
 import time
