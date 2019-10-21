@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import logging
 import struct
 from enum import Enum
@@ -81,7 +96,7 @@ class FillProcess(AbstractMultiConnectionProcess):
         # pre-data circling round to the start of the post-data; we double
         # it up so that we don't need to use mod (it's pretty small).
         data = data_to_fill + data_to_fill
-        fill_word = FillDataType.WORD.unpack(
+        fill_word = FillDataType.WORD.struct.unpack(
             data[extra_bytes:extra_bytes + ALIGNMENT - 1])[0]
         self._send_request(FillRequest(x, y, address, fill_word, size))
         return size

@@ -1,10 +1,25 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import sys
 from threading import RLock
 import time
 from six import iteritems
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
-from spinnman.constants import SCP_TIMEOUT
+from spinnman.constants import SCP_TIMEOUT, N_RETRIES
 
 MAX_SEQUENCE = 65536
 RETRY_CODES = frozenset([
@@ -48,7 +63,7 @@ class SCPRequestPipeLine(object):
 
     def __init__(self, connection, n_channels=1,
                  intermediate_channel_waits=0,
-                 n_retries=3, packet_timeout=SCP_TIMEOUT):
+                 n_retries=N_RETRIES, packet_timeout=SCP_TIMEOUT):
         """
         :param connection: \
             The connection over which the communication is to take place
@@ -212,7 +227,7 @@ class SCPRequestPipeLine(object):
                     time.sleep(0.1)
                     self._resend(seq, request_sent, str(result))
                     self._n_retry_code_resent += 1
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
                         request_sent, e, sys.exc_info()[2])
                     self._remove_record(seq)
@@ -224,7 +239,7 @@ class SCPRequestPipeLine(object):
                     response.read_bytestring(raw_data, offset)
                     if self._callbacks[seq] is not None:
                         self._callbacks[seq](response)
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
                         request_sent, e, sys.exc_info()[2])
 
@@ -240,7 +255,7 @@ class SCPRequestPipeLine(object):
             self._in_progress -= 1
             try:
                 self._resend(seq, request_sent, "timeout")
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 self._error_callbacks[seq](
                     request_sent, e, sys.exc_info()[2])
                 to_remove.append(seq)

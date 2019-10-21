@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 try:
     from collections.abc import OrderedDict
 except ImportError:
@@ -67,3 +82,19 @@ class CPUInfos(object):
         """ The total number of processors that are in these core subsets.
         """
         return len(self._cpu_infos)
+
+    def is_core(self, x, y, p):
+        """ Determine if there is a CPU Info for x, y, p
+        """
+        return (x, y, p) in self._cpu_infos
+
+    def get_cpu_info(self, x, y, p):
+        """ Get the information for the given core on the given chip
+        """
+        return self._cpu_infos[x, y, p]
+
+    def __str__(self):
+        return self._cpu_infos.keys()
+
+    def __repr__(self):
+        return self.__str__()
