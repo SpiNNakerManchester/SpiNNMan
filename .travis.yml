@@ -41,13 +41,14 @@ before_install:
 install:
   - python ./setup.py install
   - pip install -r requirements-test.txt
-  - pip install python-coveralls 'coverage>=4.4'
+  - pip install pylint python-coveralls 'coverage>=4.4'
   - pip install spinnaker_proxy
 
 script:
   - py.test unittests integration_tests --cov spinnman
   # Code quality check
   - flake8
+  - ( pylint --output-format=colorized --disable=R,C spinnman; exit $(($? & 35)) )
   - support/rat.sh run
   - cd doc/source
   - sphinx-build -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html

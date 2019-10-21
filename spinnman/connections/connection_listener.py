@@ -62,7 +62,7 @@ class ConnectionListener(Thread):
             while not self._done:
                 try:
                     self._run_step(handler)
-                except Exception:
+                except Exception:  # pylint: disable=broad-except
                     if not self._done:
                         logger.warning("problem when dispatching message",
                                        exc_info=True)

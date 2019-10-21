@@ -27,6 +27,7 @@ class MostDirectConnectionSelector(
         "_first_connection",
         "_machine"]
 
+    # pylint: disable=super-init-not-called
     @overrides(AbstractMultiConnectionProcessConnectionSelector.__init__)
     def __init__(self, machine, connections):
         self._machine = machine

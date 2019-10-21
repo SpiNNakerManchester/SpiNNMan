@@ -219,6 +219,7 @@ class EIEIODataHeader(object):
                 "The header indicates that this is a command header")
 
         # Convert the flags into types
+        # pylint: disable=no-value-for-parameter
         eieio_type = EIEIOType(message_type)
         prefix_type = EIEIOPrefix(format_flag)
 
