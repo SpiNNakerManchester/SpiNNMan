@@ -95,7 +95,7 @@ _ONE_LONG = struct.Struct("<Q")
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, ignored_links=None,
-        max_core_id=None, auto_detect_bmp=False, scamp_connections=None,
+        auto_detect_bmp=False, scamp_connections=None,
         boot_port_no=None, max_sdram_size=None, repair_machine=False,
         ignore_bad_ethernets=True):
     """ Create a Transceiver by creating a UDPConnection to the given\
@@ -122,9 +122,6 @@ def create_transceiver_from_hostname(
         Requests for a "machine" will have these links excluded, as if they \
         never existed.
     :type ignored_links: set of (int, int, int)
-    :param max_core_id: The maximum core ID in any discovered machine.\
-        Requests for a "machine" will only have core IDs up to this value.
-    :type max_core_id: int
     :param version: the type of SpiNNaker board used within the SpiNNaker\
         machine being used. If a spinn-5 board, then the version will be 5,\
         spinn-3 would equal 3 and so on.
@@ -200,7 +197,7 @@ def create_transceiver_from_hostname(
 
     return Transceiver(
         version, connections=connections, ignore_chips=ignore_chips,
-        ignore_cores=ignore_cores, max_core_id=max_core_id,
+        ignore_cores=ignore_cores,
         ignore_links=ignored_links, scamp_connections=scamp_connections,
         max_sdram_size=max_sdram_size, repair_machine=repair_machine,
         ignore_bad_ethernets=ignore_bad_ethernets)
@@ -235,7 +232,6 @@ class Transceiver(object):
         "_iobuf_size",
         "_machine",
         "_machine_off",
-        "_max_core_id",
         "_max_sdram_size",
         "_multicast_sender_connections",
         "_n_chip_execute_locks",
@@ -255,7 +251,7 @@ class Transceiver(object):
 
     def __init__(
             self, version, connections=None, ignore_chips=None,
-            ignore_cores=None, ignore_links=None, max_core_id=None,
+            ignore_cores=None, ignore_links=None,
             scamp_connections=None, max_sdram_size=None, repair_machine=False,
             ignore_bad_ethernets=True):
         """
@@ -279,10 +275,6 @@ class Transceiver(object):
             machine. Requests for a "machine" will have these links excluded,\
             as if they never existed.
         :type ignore_links: set of (int, int, int)
-        :param max_core_id: The maximum core ID in any discovered machine.\
-            Requests for a "machine" will only have core IDs up to and\
-            including this value.
-        :type max_core_id: int
         :param max_sdram_size: the max size each chip can say it has for SDRAM\
             (mainly used in debugging purposes)
         :type max_sdram_size: int or None
@@ -324,7 +316,6 @@ class Transceiver(object):
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
         self._ignore_links = ignore_links if ignore_links is not None else {}
-        self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
         self._iobuf_size = None
         self._app_id_tracker = None
@@ -672,8 +663,7 @@ class Transceiver(object):
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
-            self._ignore_cores, self._ignore_links, self._max_core_id,
-            self._max_sdram_size)
+            self._ignore_cores, self._ignore_links, self._max_sdram_size)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height,
             self._repair_machine, self._ignore_bad_ethernets)
