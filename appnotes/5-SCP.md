@@ -59,7 +59,7 @@ The Write command is implemented by all cores. It is used to request that a core
 The write command is used extensively to download code and data to SpiNNaker cores prior to application execution.
 
 ## Run Command (`CMD_RUN`)
-The Run command is implemented by all cores. It is used to start the core executing code at a specific address. This is a very low-level way of starting an application and is not recommended for general use. The command and response packets are shown in the diagram below.
+The Run command is implemented by all cores not actively running application code. It is used to start the core executing code at a specific address. This is a very low-level way of starting an application and is not recommended for general use. The command and response packets are shown in the diagram below.
 
 <div style="text-align:center"><img src="img/SCP_RUN.png" alt="CMD_RUN details" height="250"></div>
 
@@ -68,8 +68,13 @@ The kernel will start the code (at the location specified in `arg1`) executing b
 Because the code is entered as the command packet is processed, the kernel may be unable to send the response packet and the sender of the command packet should be aware of this possibility.
 
 ## APLX Command (`CMD_APLX`)
-The APLX command is implemented by all cores. It provides an alternative way of starting an application executing. In this case, an APLX file will have been placed in SpiNNaker memory and the APLX command causes the kernel’s APLX loader to process the APLX file in memory. This will usually cause program execution to leave the kernel and begin somewhere else, specified in the APLX file. `arg1` is the address of the APLX header block.
+The APLX command is implemented by all cores not actively running application code. It provides an alternative way of starting an application executing. In this case, an APLX file will have been placed in SpiNNaker memory and the APLX command causes the kernel’s APLX loader to process the APLX file in memory. This will usually cause program execution to leave the kernel and begin somewhere else, specified in the APLX file. `arg1` is the address of the APLX header block.
 
 As with the Run command, execution will be transferred while the core is in a privileged state. Refer to the APLX documentation for further details. Again, as with the Run command, the kernel may not be able to generate the response packet and the sender of the command packet should be aware of this. There are other ways of starting an application, initiated by the Monitor Processor, which may be more appropriate than the Run and APLX commands. The command and response packets are shown in the diagram below.
 
 <div style="text-align:center"><img src="img/SCP_APLX.png" alt="CMD_APLX details" height="250"></div>
+
+## Fill Command (`CMD_FILL`)
+The Fill command is implemented by all cores. It requests that a core writes a word into a range of its address space. The starting address is given in `arg1` in the request, the word to write is given in `arg2`, and the number of bytes to write is given in `arg3`; the response packet will only have `cmd_rc` and `seq` fields.
+
+It is _recommended_ that the address and length are both word-aligned.
