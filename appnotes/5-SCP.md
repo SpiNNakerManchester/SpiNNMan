@@ -16,7 +16,7 @@ The following C struct definition describes the layout of SCP data.
         uchar data[SDP_BUF_SIZE]; // User data (256 bytes)
     } sdp_cmd_t;
 
-<div style="text-align:center"><img alt="SCP in SDP" src="SDP_SCP.png" width="50%"></div>
+<div style="text-align:center"><img alt="SCP in SDP" src="img/SDP_SCP.png" width="50%"></div>
 
 The 16-bit `cmd_rc` field is a code indicating the command that is being specified in the case of a packet conveying a command. Where the packet is a response to a command, the `cmd_rc` field indicates a return code following execution of the command.
 
@@ -36,7 +36,7 @@ When a core receives one of the kernel commands it attempts to carry out the req
 ## Version Command (`CMD_VER`)
 The Version command is implemented by all cores. It is a request for the core to return some information about itself and the kernel which is running there. The command and response packets are shown in the diagram below. The command packet contains only the command `CMD_VER` (`0`) in the `cmd_rc` field and a sequence number in the `seq` field. The other fields are unused and may be omitted from the SDP packet if desired.
 
-<div style="text-align:center"><img src="SCP_VER.png" alt="CMD_VER details" height="250"></div>
+<div style="text-align:center"><img src="img/SCP_VER.png" alt="CMD_VER details" height="250"></div>
 
 The response packet contains several pieces of information packed into the `arg1`-`3` fields and a text string in the `data` field. `arg1` contains the point-to-point address of the node (if set) in the top 16 bits. It contains the physical CPU number of the core in bits 15:8 and the virtual CPU number in bits 7:0. `arg2` contains the version number of the kernel software running on the core in the upper 16 bits and the size of the SCP data buffer in the lower 16 bits. The version number is the major number multiplied by 100 plus the minor number (e.g. version 1.29 is represented as 129). The buffer size is the number of bytes that can be carried in the data portion of a packet carrying SCP. An SDP packet can hold this number plus 16 (the size of the SCP header).
 
@@ -45,21 +45,21 @@ The response packet contains several pieces of information packed into the `arg1
 ## Read Command (`CMD_READ`)
 The Read command is implemented by all cores. It is used to request the core to read memory from its address space and return the data which was read. Up to 256 bytes may be requested in current kernels (this size may be obtained via the `CMD_VER` command). The core can be asked to read the memory either as bytes, halfwords (16 bits) or words (32 bits). For halfwords and words, the size should be a multiple of 2 or 4 respectively. The command and response packets are shown in the diagram below.
 
-<div style="text-align:center"><img src="SCP_READ.png" alt="CMD_READ details" height="250"></div>
+<div style="text-align:center"><img src="img/SCP_READ.png" alt="CMD_READ details" height="250"></div>
 
 In the request, `arg1` is the address of the beginning of the read data. It should be correctly aligned for the data type which is being specified. `arg2` is the number of bytes to be read (again, this must be in accordance with the requested alignment) and `arg3` specifies whether bytes, halfwords or words are being read. Note that in the response packet, the data immediately follows the `cmd_rc` and `seq` fields as there is no use for the `arg1`-`3` fields in this case.
 
 ## Write Command (`CMD_WRITE`)
 The Write command is implemented by all cores. It is used to request that a core writes some data to its address space. The parameters are similar to the Read command in that up to 256 bytes may be written as either bytes, halfwords or words. The command packet also carries the data to be written and the response packet carries no data other than the return code and sequence number. The command and response packets are shown in the diagram below.
 
-<div style="text-align:center"><img src="SCP_WRITE.png" alt="CMD_WRITE details" height="250"></div>
+<div style="text-align:center"><img src="img/SCP_WRITE.png" alt="CMD_WRITE details" height="250"></div>
 
 The write command is used extensively to download code and data to SpiNNaker cores prior to application execution.
 
 ## Run Command (`CMD_RUN`)
 The Run command is implemented by all cores. It is used to start the core executing code at a specific address. This is a very low-level way of starting an application and is not recommended for general use. The command and response packets are shown in the diagram below.
 
-<div style="text-align:center"><img src="SCP_RUN.png" alt="CMD_RUN details" height="250"></div>
+<div style="text-align:center"><img src="img/SCP_RUN.png" alt="CMD_RUN details" height="250"></div>
 
 The kernel will start the code (at the location specified in `arg1`) executing by using an ARM _BX_ instruction with the address in a register. This means that either ARM or Thumb code may be entered. The kernel will also ensure that the code is entered in a privileged mode and that there is a valid return address in the link register (_lr_ or _r14_). The latter means that if the code returns in the usual way (by _BX lr_), the kernel will be re-entered.
 
@@ -70,4 +70,4 @@ The APLX command is implemented by all cores. It provides an alternative way of 
 
 As with the Run command, execution will be transferred while the core is in a privileged state. Refer to the APLX documentation for further details. Again, as with the Run command, the kernel may not be able to generate the response packet and the sender of the command packet should be aware of this. There are other ways of starting an application, initiated by the Monitor Processor, which may be more appropriate than the Run and APLX commands. The command and response packets are shown in the diagram below.
 
-<div style="text-align:center"><img src="SCP_APLX.png" alt="CMD_APLX details" height="250"></div>
+<div style="text-align:center"><img src="img/SCP_APLX.png" alt="CMD_APLX details" height="250"></div>

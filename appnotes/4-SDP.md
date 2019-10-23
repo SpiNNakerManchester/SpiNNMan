@@ -15,7 +15,7 @@ SDP packets may be conveyed by a variety of mechanisms. For example, between Spi
 
 An SDP packet embedded in a Ethernet-based UDP packet is shown in the diagram below.
 
-<div style="text-align:center"><img alt="SDP in Ethernet" src="SDP_ethernet.png" width="70%"></div>
+<div style="text-align:center"><img alt="SDP in Ethernet" src="img/SDP_ethernet.png" width="70%"></div>
 
 # SDP Addressing
 
@@ -49,7 +49,7 @@ The SDP header is an 8 byte field which is used to route SDP packets. The compon
 	    ushort srce_addr;      // Source P2P Address
 	} sdp_hdr_t;
 
-<div style="text-align:center"><img alt="Fields in SDP header" src="SDP_contents.png" width="75%"></div>
+<div style="text-align:center"><img alt="Fields in SDP header" src="img/SDP_contents.png" width="75%"></div>
 
 The `Flags` field is used internally by the SDP protocol code. It should be initialised to either 0x87 or 0x07 depending on whether or not a reply packet is expected.
 
@@ -105,7 +105,7 @@ Valid values for the timeout byte are 0 to 16 as follows
 
 SDP packets are used extensively for conveying commands and responses to those commands around a SpiNNaker system. In order to do this, further structure is imposed on the SDP packet by subdividing the SDP data field. The data field is split into 6 fields as shown in the diagram below:
 
-<div style="text-align:center"><img alt="SCP in SDP" src="SDP_SCP.png" width="50%"></div>
+<div style="text-align:center"><img alt="SCP in SDP" src="img/SDP_SCP.png" width="50%"></div>
 
 The `cmd_rc` field is a code indicating the command that is being specified in the case of a packet conveying a command. Where the packet is a response to a command, the `cmd_rc` field indicates a return code following execution of the command.
 
