@@ -1,6 +1,8 @@
 # Spinnaker Command Protocol (SCP) Specification
 Steve Temple — 28 Nov 2011 — Version 1.00
 
+_(This document is also available as [PDF](http://spinnakermanchester.github.io/docs/spinn-app-5.pdf).)_
+
 # Introduction
 The SpiNNaker Command Protocol is a data format imposed on the data field of an SDP packet. It consists of a fixed-length header followed by a variable sized data field. It is used for low-level interactions with SpiNNaker systems for program loading and debugging. It is suggested that it also be used in applications wherever a similar facility is needed in order to facilitate code re-use. It is frequently used to carry a command to a SpiNNaker core and then to convey a response from that command back to the originator.
 

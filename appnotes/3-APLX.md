@@ -1,6 +1,8 @@
 # The APLX File Format
 Steve Temple — 25 Nov 2011 — Version 1.00
 
+_(This document is also available as [PDF](http://spinnakermanchester.github.io/docs/spinn-app-3.pdf).)_
+
 # Introduction
 APLX format is a simple format for binary files which are intended for loading onto SpiNNaker systems. The files may contain programs for execution and/or data to be used by executing programs. An APLX file contains an APLX header block which defines how the data is to be loaded into SpiNNaker memory and also a number of data blocks which will be loaded into memory. Normally, the header will be at the start of the file and the data will follow but this is not compulsory. All data in the APLX header is in Little-Endian format. Since SpiNNaker is a Little-Endian system, it is usually the case that data in any data blocks is also Little-Endian but it need not be so.
 
