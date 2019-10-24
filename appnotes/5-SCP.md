@@ -35,7 +35,7 @@ SpiNNaker is controlled initially by commands sent from a host system using SCP.
 
 When a core receives one of the kernel commands it attempts to carry out the requested command and then send back a response packet. The response may carry some data or it may merely carry a return code, indicating success or failure of the command. The `seq` field from the incoming packet is copied in the reply so that the sender of commands can detect packet loss. The packet is returned by swapping over the `Srce` and `Dest` fields in the SDP header. If an error is detected in the processing of the command, a response packet is sent with an appropriate error code in the `cmd_rc` field. The kernel checks all of the arguments in the command packet for validity and may also detect errors during the execution of the command. The five commands which are currently implemented by all cores are documented below.
 
-## Version Command (`CMD_VER`)
+## Version Command (`CMD_VER`: 0)
 The Version command is implemented by all cores. It is a request for the core to return some information about itself and the kernel which is running there. The command and response packets are shown in the diagram below. The command packet contains only the command `CMD_VER` (`0`) in the `cmd_rc` field and a sequence number in the `seq` field. The other fields are unused and may be omitted from the SDP packet if desired.
 
 <div style="text-align:center"><img src="img/SCP_VER.png" alt="CMD_VER details" height="250"></div>
@@ -44,21 +44,7 @@ The response packet contains several pieces of information packed into the `arg1
 
 `arg3` contains the build date of the kernel software as a Unix time (i.e. seconds since 1970) or zero if this value is not set. The `data` field contains a NULL terminated ASCII string which consists of two fields separated by a “`/`”. The first field is the name of the kernel (e.g. `SC&MP` or `SARK`) and the second field is the name of the hardware platform, currently `SpiNNaker`.
 
-## Read Command (`CMD_READ`)
-The Read command is implemented by all cores. It is used to request the core to read memory from its address space and return the data which was read. Up to 256 bytes may be requested in current kernels (this size may be obtained via the `CMD_VER` command). The core can be asked to read the memory either as bytes, halfwords (16 bits) or words (32 bits). For halfwords and words, the size should be a multiple of 2 or 4 respectively. The command and response packets are shown in the diagram below.
-
-<div style="text-align:center"><img src="img/SCP_READ.png" alt="CMD_READ details" height="250"></div>
-
-In the request, `arg1` is the address of the beginning of the read data. It should be correctly aligned for the data type which is being specified. `arg2` is the number of bytes to be read (again, this must be in accordance with the requested alignment) and `arg3` specifies whether bytes, halfwords or words are being read. Note that in the response packet, the data immediately follows the `cmd_rc` and `seq` fields as there is no use for the `arg1`-`3` fields in this case.
-
-## Write Command (`CMD_WRITE`)
-The Write command is implemented by all cores. It is used to request that a core writes some data to its address space. The parameters are similar to the Read command in that up to 256 bytes may be written as either bytes, halfwords or words. The command packet also carries the data to be written and the response packet carries no data other than the return code and sequence number. The command and response packets are shown in the diagram below.
-
-<div style="text-align:center"><img src="img/SCP_WRITE.png" alt="CMD_WRITE details" height="250"></div>
-
-The write command is used extensively to download code and data to SpiNNaker cores prior to application execution.
-
-## Run Command (`CMD_RUN`)
+## Run Command (`CMD_RUN`: 1)
 The Run command is implemented by all cores not actively running application code. It is used to start the core executing code at a specific address. This is a very low-level way of starting an application and is not recommended for general use. The command and response packets are shown in the diagram below.
 
 <div style="text-align:center"><img src="img/SCP_RUN.png" alt="CMD_RUN details" height="250"></div>
@@ -67,14 +53,28 @@ The kernel will start the code (at the location specified in `arg1`) executing b
 
 Because the code is entered as the command packet is processed, the kernel may be unable to send the response packet and the sender of the command packet should be aware of this possibility.
 
-## APLX Command (`CMD_APLX`)
+## Read Command (`CMD_READ`: 2)
+The Read command is implemented by all cores. It is used to request the core to read memory from its address space and return the data which was read. Up to 256 bytes may be requested in current kernels (this size may be obtained via the `CMD_VER` command). The core can be asked to read the memory either as bytes, halfwords (16 bits) or words (32 bits). For halfwords and words, the size should be a multiple of 2 or 4 respectively. The command and response packets are shown in the diagram below.
+
+<div style="text-align:center"><img src="img/SCP_READ.png" alt="CMD_READ details" height="250"></div>
+
+In the request, `arg1` is the address of the beginning of the read data. It should be correctly aligned for the data type which is being specified. `arg2` is the number of bytes to be read (again, this must be in accordance with the requested alignment) and `arg3` specifies whether bytes, halfwords or words are being read. Note that in the response packet, the data immediately follows the `cmd_rc` and `seq` fields as there is no use for the `arg1`-`3` fields in this case.
+
+## Write Command (`CMD_WRITE`: 3)
+The Write command is implemented by all cores. It is used to request that a core writes some data to its address space. The parameters are similar to the Read command in that up to 256 bytes may be written as either bytes, halfwords or words. The command packet also carries the data to be written and the response packet carries no data other than the return code and sequence number. The command and response packets are shown in the diagram below.
+
+<div style="text-align:center"><img src="img/SCP_WRITE.png" alt="CMD_WRITE details" height="250"></div>
+
+The write command is used extensively to download code and data to SpiNNaker cores prior to application execution.
+
+## APLX Command (`CMD_APLX`: 4)
 The APLX command is implemented by all cores not actively running application code. It provides an alternative way of starting an application executing. In this case, an APLX file will have been placed in SpiNNaker memory and the APLX command causes the kernel’s APLX loader to process the APLX file in memory. This will usually cause program execution to leave the kernel and begin somewhere else, specified in the APLX file. `arg1` is the address of the APLX header block.
 
 As with the Run command, execution will be transferred while the core is in a privileged state. Refer to the APLX documentation for further details. Again, as with the Run command, the kernel may not be able to generate the response packet and the sender of the command packet should be aware of this. There are other ways of starting an application, initiated by the Monitor Processor, which may be more appropriate than the Run and APLX commands. The command and response packets are shown in the diagram below.
 
 <div style="text-align:center"><img src="img/SCP_APLX.png" alt="CMD_APLX details" height="250"></div>
 
-## Fill Command (`CMD_FILL`)
+## Fill Command (`CMD_FILL`: 5)
 The Fill command is implemented by all cores. It requests that a core writes a word into a range of its address space. The starting address is given in `arg1` in the request, the word to write is given in `arg2`, and the number of bytes to write is given in `arg3`; the response packet will only have `cmd_rc` and `seq` fields.
 
 It is _recommended_ that the address and length are both word-aligned.
