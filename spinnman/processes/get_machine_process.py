@@ -70,7 +70,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the processor list
         processors = list()
-        n_cores = min(chip_info.n_cores, Machine.MAX_CORES_PER_CHIP)
+        n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
         core_states = chip_info.core_states
         for virtual_core_id in range(n_cores):
             # Add the core provided it is not to be ignored
