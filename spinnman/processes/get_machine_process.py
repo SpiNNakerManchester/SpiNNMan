@@ -69,23 +69,14 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
 
         # Create the processor list
-        processors = list()
         n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
-        core_states = chip_info.core_states
-        for virtual_core_id in range(n_cores):
-            # Add the core provided it is not to be ignored
-            if ((chip_info.x, chip_info.y, virtual_core_id) not in
-                    self._ignore_cores):
-                if virtual_core_id == 0:
-                    processors.append(Processor.factory(
-                        virtual_core_id, is_monitor=True))
-                elif core_states[virtual_core_id] == CPUState.IDLE:
-                    processors.append(Processor.factory(virtual_core_id))
-                else:
-                    logger.warning(
-                        "Not using core {}, {}, {} in state {}",
-                        chip_info.x, chip_info.y, virtual_core_id,
-                        core_states[virtual_core_id])
+        #core_states = chip_info.core_states
+        if len(self._ignore_cores) > 0:
+            raise NotImplementedError("ignore_cores currently not implemented")
+        #            logger.warning(
+        #                "Not using core {}, {}, {} in state {}",
+        #                chip_info.x, chip_info.y, virtual_core_id,
+        #                core_states[virtual_core_id])
 
         # Create the router
         router = self._make_router(chip_info, machine)
@@ -99,7 +90,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip
         return Chip(
-            x=chip_info.x, y=chip_info.y, processors=processors,
+            x=chip_info.x, y=chip_info.y, n_processors=n_cores,
             router=router, sdram=sdram,
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
