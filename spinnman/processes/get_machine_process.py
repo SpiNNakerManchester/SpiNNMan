@@ -213,8 +213,15 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 ip_address = ignore[3]
                 ethernet = self._ethernet_by_ipaddress(ip_address)
                 if ethernet is not None:
+                    local_x = ignore[0]
+                    local_y = ignore[1]
                     global_x, global_y = temp_machine.get_global_xy(
-                        ignore[0], ignore[1], ethernet[0], ethernet[1])
+                        local_x, local_y, ethernet[0], ethernet[1])
+                    logger.info("Ignores cores local {}:{} on {} "
+                                "Maps to global {}:{} on {}",
+                                local_x, local_y, ip_address,
+                                global_x, global_y,
+                                self._chip_info[(0, 0)].ethernet_ip_address)
                     p = self._get_virtual_p(global_x, global_y, ignore[2])
             else:
                 p = self._get_virtual_p(ignore[0], ignore[1], ignore[2])
