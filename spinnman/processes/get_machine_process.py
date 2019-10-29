@@ -20,7 +20,10 @@ from spinn_machine import (
     Processor, Router, Chip, SDRAM, Link, machine_from_size)
 from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
-from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS
+from spinnman.constants import (
+    ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
+from spinnman.messages.spinnaker_boot import (
+    SystemVariableDefinition)
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
 from spinnman.model import P2PTable
@@ -35,11 +38,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = [
         "_chip_info",
+        "_ethernets",
         "_ignore_chips",
         "_ignore_cores",
         "_ignore_links",
         "_max_sdram_size",
-        "_p2p_column_data"]
+        "_p2p_column_data",
+        "_virtual_map"]
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
                  ignore_links, max_sdram_size=None):
@@ -56,6 +61,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info = dict()
+
+        # Set ethernets to None meaning not computed yet
+        self._ethernets = None
+        self._virtual_map = {}
 
     def _make_chip(self, chip_info, machine):
         """ Creates a chip from a ChipSummaryInfo structure.
@@ -115,6 +124,32 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._p2p_column_data[column] = (
             scp_read_response.data, scp_read_response.offset)
 
+    def _receive_physical_to_virtual_core_map(self, x, y, scp_read_response):
+        chipinfo = self._chip_info[(x, y)]
+        ip_address = self._chip_info[(0, 0)].ethernet_ip_address
+
+        logger.info("Received physical_to_virtual_core_map for {}:{} for {}"
+                    "", x, y, ip_address)
+        p_to_v_map = {}
+
+        for i in range(
+                scp_read_response.offset,
+                scp_read_response.offset + chipinfo.n_cores):
+            p_to_v_map[i-scp_read_response.offset] = \
+                int(scp_read_response.data[i])
+        logger.info("{}", p_to_v_map)  # logger formats so dict as a param
+        self._virtual_map[(x, y)] = p_to_v_map
+
+    def _receive_virtual_to_physical_core_map(self, x, y, scp_read_response):
+        p_to_v_map = self._virtual_map[(x, y)]
+        chipinfo = self._chip_info[(x, y)]
+        for i in range(
+                scp_read_response.offset,
+                scp_read_response.offset + chipinfo.n_cores):
+            assert p_to_v_map[int(scp_read_response.data[i])] == \
+                    i-scp_read_response.offset
+        logger.info("Virtual_to_physical_core_map checks for {}:{}", x, y)
+
     def _receive_chip_info(self, scp_read_chip_info_response):
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
@@ -128,8 +163,70 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return
         super(GetMachineProcess, self)._receive_error(request, exception, tb)
 
+    def _ethernet_by_ipaddress(self, ip_address):
+        if self._ethernets is None:
+            self._ethernets = dict()
+            for chip_info in self._chip_info.values():
+                if chip_info.ethernet_ip_address is not None:
+                    self._ethernets[chip_info.ethernet_ip_address] = \
+                        (chip_info.x, chip_info.y)
+        return self._ethernets.get(ip_address, None)
+
+    def _get_virtual_p(self, x, y, p):
+        if (x, y) not in self._virtual_map:
+            p_to_v = SystemVariableDefinition.physical_to_virtual_core_map
+            self._send_request(
+                ReadMemory(
+                    x=x, y=y,
+                    base_address=(
+                            SYSTEM_VARIABLE_BASE_ADDRESS + p_to_v.offset),
+                    size=p_to_v.array_size),
+                    functools.partial(
+                        self._receive_physical_to_virtual_core_map, x, y))
+            self._finish()
+            # Optional assert the mapping back the other way
+            v_to_p = SystemVariableDefinition.virtual_to_physical_core_map
+            self._send_request(
+                ReadMemory(
+                    x=x, y=y,
+                    base_address=(
+                            SYSTEM_VARIABLE_BASE_ADDRESS + v_to_p.offset),
+                    size=v_to_p.array_size),
+                    functools.partial(
+                        self._receive_virtual_to_physical_core_map, x, y))
+            self._finish()
+
+        return p
+        if p > 0:
+            return p
+        else:
+            return self._virtual_map[(x, y)][0-p]
+
+    def _preprocess_ignore_cores(self, width, height):
+        if len(self._ignore_cores) == 0:
+            return
+        temp_machine = machine_from_size(width, height)
+        new_ignores = []
+        # Convert by ip to global
+        for ignore in self._ignore_cores:
+            if len(ignore) > 3:
+                ip_address = ignore[3]
+                ethernet = self._ethernet_by_ipaddress(ip_address)
+                if ethernet is not None:
+                    global_x, global_y = temp_machine.get_global_xy(
+                        ignore[0], ignore[1], ethernet[0], ethernet[1])
+                    p = self._get_virtual_p(global_x, global_y, ignore[2])
+            else:
+                p = self._get_virtual_p(ignore[0], ignore[1], ignore[2])
+
+        # Get physical virtual map
+
+        # HACK remove ignore cores we can handle
+        self._ignore_cores = []
+
     def get_machine_details(self, boot_x, boot_y, width, height,
                             repair_machine, ignore_bad_ethernets):
+
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         self._p2p_column_data = [None] * width
@@ -161,6 +258,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if (x, y) not in self._chip_info:
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
+
+        self._preprocess_ignore_cores(width, height)
 
         return self.create_machine(
             width, height, repair_machine, ignore_bad_ethernets)
