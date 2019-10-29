@@ -48,6 +48,9 @@ from .write_link import WriteLink
 from .write_memory import WriteMemory
 from .fixed_route_init import FixedRouteInit
 from .fixed_route_read import FixedRouteRead
+from .big_data_init import BigDataInit
+from .big_data_free import BigDataFree
+from .big_data_info import BigDataInfo
 
 __all__ = ["AppStop", "ApplicationRun",
            "BMPSetLed", "BMPGetVersion",
@@ -63,4 +66,5 @@ __all__ = ["AppStop", "ApplicationRun",
            "RouterInit", "SDRAMAlloc",
            "SDRAMDeAlloc", "SendSignal",
            "GetVersion", "WriteFPGARegister", "FixedRouteRead",
-           "WriteLink", "WriteMemory", "FixedRouteInit"]
+           "WriteLink", "WriteMemory", "FixedRouteInit",
+           "BigDataInit", "BigDataFree", "BigDataInfo"]

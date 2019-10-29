@@ -144,11 +144,13 @@ class UDPConnection(Connection):
         """
         return self._remote_port
 
-    def receive(self, timeout=None):
+    def receive(self, timeout=None, max_size=300):
         """ Receive data from the connection
 
         :param timeout: The timeout in seconds, or None to wait forever
         :type timeout: None or float
+        :param max_size: The maximum expected size of the data
+        :type max_size: int
         :return: The data received as a bytestring
         :rtype: str
         :raise SpinnmanTimeoutException: \
@@ -157,7 +159,7 @@ class UDPConnection(Connection):
         """
         try:
             self._socket.settimeout(timeout)
-            return self._socket.recv(300)
+            return self._socket.recv(max_size)
         except socket.timeout as e:
             raise_from(SpinnmanTimeoutException("receive", timeout), e)
         except Exception as e:  # pylint: disable=broad-except

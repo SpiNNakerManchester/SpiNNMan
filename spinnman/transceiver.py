@@ -54,7 +54,7 @@ from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
     CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
-    IPTagSet, IPTagClear, RouterClear)
+    IPTagSet, IPTagClear, RouterClear, BigDataInit, BigDataFree, BigDataInfo)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
     SpinnakerBootSender, SCPSender, SDPSender,
@@ -2891,6 +2891,48 @@ class Transceiver(object):
         process = FillProcess(self._scamp_connection_selector)
         return process.fill_memory(
             x, y, base_address, repeat_value, bytes_to_fill, data_type)
+
+    def setup_big_data(self, x, y, core, port=None, host=None,
+                       use_sender=True):
+        """ Initialise the Big Data process for the given core on the given\
+            chip
+
+        :param x: The x-coordinate of the chip to send the command to
+        :param y: The y-coordinate of the chip to send the command to
+        :param core: The core to set as the big data core
+        :param port: The port to send responses back to
+        :param host: The host to send responses back to
+        :param use_sender:\
+            True if the responses will be sent to the next sender of messages\
+            to the big data port
+        """
+        if host is None:
+            host = "0.0.0.0"
+        if port is None:
+            port = 0
+        ip_address = bytearray(socket.inet_aton(host))
+        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process.execute(BigDataInit(x, y, core, port, ip_address, use_sender))
+
+    def end_big_data(self, x, y):
+        """ Finish the Big Data process on the given chip
+
+        :param x: The x-coordinate of the chip to send the command to
+        :param y: The y-coordinate of the chip to send the command to
+        """
+        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process.execute(BigDataFree(x, y))
+
+    def get_big_data_info(self, x, y):
+        """ Get information on the big data process on the given chip
+
+        :param x: The x-coordinate of the chip to send the command to
+        :param y: The y-coordinate of the chip to send the command to
+        :return: The big data information
+        """
+        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = process.execute(BigDataInfo(x, y))
+        return process.big_data_info
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\

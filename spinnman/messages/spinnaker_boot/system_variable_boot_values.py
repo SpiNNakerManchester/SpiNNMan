@@ -16,6 +16,7 @@
 from collections import namedtuple
 import struct
 from enum import Enum
+from spinnman.constants import BIG_DATA_SCAMP_PORT
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
 
@@ -159,9 +160,9 @@ class SystemVariableDefinition(Enum):
     led_1 = _Definition(
         _DataType.INT, offset=0x34,
         doc="The last part of the LED definitions")
-    padding_1 = _Definition(
-        _DataType.INT, offset=0x38,
-        doc="A word of padding")
+    big_data_port = _Definition(
+        _DataType.INT, offset=0x38, default=BIG_DATA_SCAMP_PORT,
+        doc="Port used for big data")
     random_seed = _Definition(
         _DataType.INT, offset=0x3c,
         doc="The random seed")

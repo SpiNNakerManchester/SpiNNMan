@@ -27,8 +27,9 @@ from .machine_dimensions import MachineDimensions
 from .p2p_table import P2PTable
 from .router_diagnostics import RouterDiagnostics
 from .version_info import VersionInfo
+from .big_data_info import BigDataInfo
 
 __all__ = ["ADCInfo", "BMPConnectionData", "ChipInfo", "ChipSummaryInfo",
            "CPUInfo", "CPUInfos", "DiagnosticFilter",
            "ExecutableTargets", "HeapElement", "IOBuffer", "MachineDimensions",
-           "P2PTable", "RouterDiagnostics", "VersionInfo"]
+           "P2PTable", "RouterDiagnostics", "VersionInfo", "BigDataInfo"]

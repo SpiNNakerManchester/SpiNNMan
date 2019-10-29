@@ -18,6 +18,15 @@ from enum import Enum
 # The default port of the connection
 SCP_SCAMP_PORT = 17893
 
+# The default port for "big data"
+BIG_DATA_SCAMP_PORT = 17894
+
+# The maximum data that can be transmitted in a "Big data" packet.
+# This *excludes* the headers i.e. the UDP length can be up to 1472 bytes,
+# and the IP length can then be up to 1492 bytes.  I have no idea where the
+# other 8 bytes goes... (i.e. why can't it be 1500 bytes?)
+BIG_DATA_MAX_DATA_BYTES = 1464
+
 # The default port of the connection
 UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
 

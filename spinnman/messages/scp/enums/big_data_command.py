@@ -13,17 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .alloc_free import AllocFree
-from .bmp_info import BMPInfo
-from .scp_command import SCPCommand
-from .iptag_command import IPTagCommand
-from .led_action import LEDAction
-from .power_command import PowerCommand
-from .scp_result import SCPResult
-from .signal import Signal
-from .big_data_command import BigDataCommand
+from enum import Enum
 
-__all__ = [
-    "AllocFree", "BMPInfo", "SCPCommand",
-    "IPTagCommand", "LEDAction",
-    "PowerCommand", "SCPResult", "Signal", "BigDataCommand"]
+
+class BigDataCommand(Enum):
+    """ The SCP Big Data commands
+    """
+
+    BIG_DATA_INIT = (0, "Initialise Big Data")
+    BIG_DATA_FREE = (1, "Stop Big Data and free resources")
+    BIG_DATA_INFO = (2, "Get Big Data information")
+
+    def __new__(cls, value, doc=""):
+        # pylint: disable=protected-access, unused-argument
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
+
+    def __init__(self, value, doc=""):
+        self._value_ = value
+        self.__doc__ = doc
