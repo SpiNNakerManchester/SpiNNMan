@@ -45,6 +45,11 @@ class _DataType(Enum):
     def struct_code(self):
         return self._struct_code
 
+    @property
+    def is_byte_array(self):
+        # can't use BYTE_ARRAY.value directly here
+        return self._value_ == 16
+
 
 class _Definition(namedtuple("_Definition",
                              "offset, data_type, default, array_size, doc")):
