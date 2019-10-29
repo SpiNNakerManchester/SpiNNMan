@@ -2931,8 +2931,8 @@ class Transceiver(object):
         :return: The big data information
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process = process.execute(BigDataInfo(x, y))
-        return process.big_data_info
+        response = process.execute(BigDataInfo(x, y))
+        return response.big_data_info
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
