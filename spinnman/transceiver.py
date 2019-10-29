@@ -2932,7 +2932,9 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(BigDataInfo(x, y))
-        return response.big_data_info
+        # PyLint thinks this is a BigDataInfo, but it is actually a
+        # BigDataInfoResponse - hence disable no-member
+        return response.big_data_info  # pylint: disable=no-member
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
