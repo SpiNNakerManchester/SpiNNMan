@@ -13,11 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from collections import defaultdict
 import logging
 import functools
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
-    Processor, Router, Chip, SDRAM, Link, machine_from_size)
+    Router, Chip, SDRAM, Link, machine_from_size)
 from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
@@ -38,12 +39,18 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = [
         "_chip_info",
+        # Used if there are any ignores with ip addresses
+        # Holds a mapping from ip to board root (x,y)
         "_ethernets",
         "_ignore_chips",
         "_ignore_cores",
+        # Holds a map from x,y to a list of virtual cores to ignores
+        "_ignore_cores_map",
         "_ignore_links",
         "_max_sdram_size",
         "_p2p_column_data",
+        # Used if there are any ignore core requests
+        # Holds a mapping from (x,y) to a mapping of phsyical to virtual core
         "_virtual_map"]
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
@@ -77,15 +84,19 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :rtype: :py:class:`spinn_machine.Chip`
         """
 
-        # Create the processor list
+        # Create the down cores set if any
         n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
-        #core_states = chip_info.core_states
-        if len(self._ignore_cores) > 0:
-            raise NotImplementedError("ignore_cores currently not implemented")
-        #            logger.warning(
-        #                "Not using core {}, {}, {} in state {}",
-        #                chip_info.x, chip_info.y, virtual_core_id,
-        #                core_states[virtual_core_id])
+        core_states = chip_info.core_states
+        down_cores = self._ignore_cores_map.get(
+            (chip_info.x, chip_info.y))
+        for i in range(1, n_cores):
+            if core_states[i] != CPUState.IDLE:
+                logger.warning(
+                    "Not using core {}, {}, {} in state {}",
+                    chip_info.x, chip_info.y, i,  core_states[i])
+                if down_cores is None:
+                    down_cores = set()
+                down_cores.add(i)
 
         # Create the router
         router = self._make_router(chip_info, machine)
@@ -103,7 +114,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             router=router, sdram=sdram,
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
-            nearest_ethernet_y=chip_info.nearest_ethernet_y)
+            nearest_ethernet_y=chip_info.nearest_ethernet_y,
+            down_cores=down_cores)
 
     def _make_router(self, chip_info, machine):
         links = list()
@@ -174,46 +186,41 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     "Chip {}, {} was expected but didn't reply", x, y)
 
         self._preprocess_ignore_cores(machine)
+        self._preprocess_ignore_chips(machine)
 
-        return self._fill_machine(machine, repair_machine, ignore_bad_ethernets)
+        return self._fill_machine(
+            machine, repair_machine, ignore_bad_ethernets)
 
     def _fill_machine(
             self, machine, repair_machine, ignore_bad_ethernets):
-        bad_ethernets = []
         for chip_info in sorted(
                 self._chip_info.values(), key=lambda chip: (chip.x, chip.y)):
-            if (chip_info.x, chip_info.y) not in self._ignore_chips:
-                if (chip_info.ethernet_ip_address is not None and
+            if (chip_info.x, chip_info.y) in self._ignore_chips:
+                logger.warning(
+                    "Not using chip {}, {} as in the ignore list",
+                    chip_info.x, chip_info.y)
+                continue
+            if (chip_info.ethernet_ip_address is not None and
                     (chip_info.x != chip_info.nearest_ethernet_x
                      or chip_info.y != chip_info.nearest_ethernet_y)):
-                    bad_ethernets.append(
-                        (chip_info, chip_info.ethernet_ip_address))
-                    if ignore_bad_ethernets:
-                        # pylint: disable=protected-access
-                        chip_info._ethernet_ip_address = None
-                        machine.add_chip(
-                            self._make_chip(chip_info, machine))
+                if ignore_bad_ethernets:
+                    logger.warning(
+                        "Chip {}:{} claimed it has ip address: {}. "
+                        "This ip will not be used.",
+                        chip_info.x, chip_info.y,
+                        chip_info.ethernet_ip_address)
+                    chip_info.ethernet_ip_address = None
                 else:
-                    machine.add_chip(self._make_chip(chip_info, machine))
+                    logger.warning(
+                        "Not using chip {}:{} as it has an unexpected "
+                        "ip address: {}", chip_info.x, chip_info.y,
+                        chip_info.ethernet_ip_address)
+                    continue
+            else:
+                machine.add_chip(self._make_chip(chip_info, machine))
 
-        removed_chips = []
-        if len(bad_ethernets) > 0:
-            msg = ""
-            for chip_info, claim in bad_ethernets:
-                chip = self._make_chip(chip_info, machine)
-                local_x, local_y = machine.get_local_xy(chip)
-                ethernet = machine.get_chip_at(
-                    chip.nearest_ethernet_x, chip.nearest_ethernet_y)
-                msg += "x:{} y:{} on board:{} claims it has ethernet {} " \
-                       "".format(local_x, local_y, ethernet.ip_address, claim)
-                removed_chips.append((chip.x, chip.y))
-            logger.warning(msg)
-
-            if ignore_bad_ethernets:
-                # No chips actually removed
-                removed_chips = []
         machine.validate()
-        return machine_repair(machine, repair_machine, removed_chips)
+        return machine_repair(machine, repair_machine)
 
     def get_chip_info(self):
         """ Get the chip information for the machine.
@@ -226,20 +233,46 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     # Stuff below here is purely for dealing with ignores
 
     def _preprocess_ignore_cores(self, machine):
+        self._ignore_cores_map = defaultdict(set)
         if len(self._ignore_cores) == 0:
             return
-        new_ignores = set()
         # Convert by ip to global
         for ignore in self._ignore_cores:
-            global_xy = self._ignores_local_to_global(ignore[0], ignore[1], ignore[3], machine)
+            local_x = ignore[0]
+            local_y = ignore[0]
+            if len(ignore) > 3:
+                ip = ignore[3]
+            else:
+                ip = None
+            global_xy = self._ignores_local_to_global(
+                local_x, local_y, ip, machine)
             if global_xy is None:
                 continue
             global_x = global_xy[0]
             global_y = global_xy[1]
             p = self._get_virtual_p(global_x, global_y, ignore[2])
             if p is not None:
-                new_ignores.add((global_x, global_y, p))
-        self._ignore_cores = new_ignores
+                self._ignore_cores_map[(global_x, global_y)].add(p)
+
+    def _preprocess_ignore_chips(self, machine):
+        if len(self._ignore_cores) == 0:
+            return
+        new_ignores = set()
+        # Convert by ip to global
+        for ignore in self._ignore_chips:
+            local_x = ignore[0]
+            local_y = ignore[0]
+            if len(ignore) > 2:
+                ip = ignore[2]
+            else:
+                ip = None
+            global_xy = self._ignores_local_to_global(
+                local_x, local_y, ip, machine)
+            if global_xy is None:
+                continue
+            else:
+                new_ignores.add((global_xy[0], global_xy[1]))
+        self._ignore_chips = new_ignores
 
     def _ignores_local_to_global(self, local_x, local_y, ip_address, machine):
         if ip_address is None:
@@ -254,8 +287,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return None
             global_x, global_y = machine.get_global_xy(
                 local_x, local_y, ethernet[0], ethernet[1])
-            logger.info("Ignores for with x:{} y:{} and ip:{} "
-                        "map to global {}:{} with root {}",
+            logger.info("Ignores for local x:{} y:{} and ip:{} "
+                        "map to global x:{} y:{} with root {}",
                         local_x, local_y, ip_address,
                         global_x, global_y,
                         self._chip_info[(0, 0)].ethernet_ip_address)
