@@ -124,32 +124,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._p2p_column_data[column] = (
             scp_read_response.data, scp_read_response.offset)
 
-    def _receive_physical_to_virtual_core_map(self, x, y, scp_read_response):
-        chipinfo = self._chip_info[(x, y)]
-        ip_address = self._chip_info[(0, 0)].ethernet_ip_address
-
-        logger.info("Received physical_to_virtual_core_map for {}:{} for {}"
-                    "", x, y, ip_address)
-        p_to_v_map = {}
-
-        for i in range(
-                scp_read_response.offset,
-                scp_read_response.offset + chipinfo.n_cores):
-            p_to_v_map[i-scp_read_response.offset] = \
-                int(scp_read_response.data[i])
-        logger.info("{}", p_to_v_map)  # logger formats so dict as a param
-        self._virtual_map[(x, y)] = p_to_v_map
-
-    def _receive_virtual_to_physical_core_map(self, x, y, scp_read_response):
-        p_to_v_map = self._virtual_map[(x, y)]
-        chipinfo = self._chip_info[(x, y)]
-        for i in range(
-                scp_read_response.offset,
-                scp_read_response.offset + chipinfo.n_cores):
-            assert p_to_v_map[int(scp_read_response.data[i])] == \
-                    i-scp_read_response.offset
-        logger.info("Virtual_to_physical_core_map checks for {}:{}", x, y)
-
     def _receive_chip_info(self, scp_read_chip_info_response):
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
@@ -163,77 +137,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return
         super(GetMachineProcess, self)._receive_error(request, exception, tb)
 
-    def _ethernet_by_ipaddress(self, ip_address):
-        if self._ethernets is None:
-            self._ethernets = dict()
-            for chip_info in self._chip_info.values():
-                if chip_info.ethernet_ip_address is not None:
-                    self._ethernets[chip_info.ethernet_ip_address] = \
-                        (chip_info.x, chip_info.y)
-        return self._ethernets.get(ip_address, None)
-
-    def _get_virtual_p(self, x, y, p):
-        if (x, y) not in self._virtual_map:
-            p_to_v = SystemVariableDefinition.physical_to_virtual_core_map
-            self._send_request(
-                ReadMemory(
-                    x=x, y=y,
-                    base_address=(
-                            SYSTEM_VARIABLE_BASE_ADDRESS + p_to_v.offset),
-                    size=p_to_v.array_size),
-                    functools.partial(
-                        self._receive_physical_to_virtual_core_map, x, y))
-            self._finish()
-            # Optional assert the mapping back the other way
-            v_to_p = SystemVariableDefinition.virtual_to_physical_core_map
-            self._send_request(
-                ReadMemory(
-                    x=x, y=y,
-                    base_address=(
-                            SYSTEM_VARIABLE_BASE_ADDRESS + v_to_p.offset),
-                    size=v_to_p.array_size),
-                    functools.partial(
-                        self._receive_virtual_to_physical_core_map, x, y))
-            self._finish()
-
-        return p
-        if p > 0:
-            return p
-        else:
-            return self._virtual_map[(x, y)][0-p]
-
-    def _preprocess_ignore_cores(self, width, height):
-        if len(self._ignore_cores) == 0:
-            return
-        temp_machine = machine_from_size(width, height)
-        new_ignores = []
-        # Convert by ip to global
-        for ignore in self._ignore_cores:
-            if len(ignore) > 3:
-                ip_address = ignore[3]
-                ethernet = self._ethernet_by_ipaddress(ip_address)
-                if ethernet is not None:
-                    local_x = ignore[0]
-                    local_y = ignore[1]
-                    global_x, global_y = temp_machine.get_global_xy(
-                        local_x, local_y, ethernet[0], ethernet[1])
-                    logger.info("Ignores cores local {}:{} on {} "
-                                "Maps to global {}:{} on {}",
-                                local_x, local_y, ip_address,
-                                global_x, global_y,
-                                self._chip_info[(0, 0)].ethernet_ip_address)
-                    p = self._get_virtual_p(global_x, global_y, ignore[2])
-            else:
-                p = self._get_virtual_p(ignore[0], ignore[1], ignore[2])
-
-        # Get physical virtual map
-
-        # HACK remove ignore cores we can handle
-        self._ignore_cores = []
-
     def get_machine_details(self, boot_x, boot_y, width, height,
                             repair_machine, ignore_bad_ethernets):
 
+        machine = machine_from_size(width, height)
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         self._p2p_column_data = [None] * width
@@ -266,15 +173,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
-        self._preprocess_ignore_cores(width, height)
+        self._preprocess_ignore_cores(machine)
 
-        return self.create_machine(
-            width, height, repair_machine, ignore_bad_ethernets)
+        return self._fill_machine(machine, repair_machine, ignore_bad_ethernets)
 
-    def create_machine(
-            self, width, height, repair_machine, ignore_bad_ethernets):
+    def _fill_machine(
+            self, machine, repair_machine, ignore_bad_ethernets):
         bad_ethernets = []
-        machine = machine_from_size(width, height)
         for chip_info in sorted(
                 self._chip_info.values(), key=lambda chip: (chip.x, chip.y)):
             if (chip_info.x, chip_info.y) not in self._ignore_chips:
@@ -317,3 +222,132 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             :py:meth:`get_machine_details` must have been called first.
         """
         return self._chip_info
+
+    # Stuff below here is purely for dealing with ignores
+
+    def _preprocess_ignore_cores(self, machine):
+        if len(self._ignore_cores) == 0:
+            return
+        new_ignores = set()
+        # Convert by ip to global
+        for ignore in self._ignore_cores:
+            global_xy = self._ignores_local_to_global(ignore[0], ignore[1], ignore[3], machine)
+            if global_xy is None:
+                continue
+            global_x = global_xy[0]
+            global_y = global_xy[1]
+            p = self._get_virtual_p(global_x, global_y, ignore[2])
+            if p is not None:
+                new_ignores.add((global_x, global_y, p))
+        self._ignore_cores = new_ignores
+
+    def _ignores_local_to_global(self, local_x, local_y, ip_address, machine):
+        if ip_address is None:
+            global_x = local_x
+            global_y = local_y
+        else:
+            ethernet = self._ethernet_by_ipaddress(ip_address)
+            if ethernet is None:
+                logger.info("Ignore with ip:{} will be discarded "
+                            "as board with that ip in this machine",
+                            ip_address)
+                return None
+            global_x, global_y = machine.get_global_xy(
+                local_x, local_y, ethernet[0], ethernet[1])
+            logger.info("Ignores for with x:{} y:{} and ip:{} "
+                        "map to global {}:{} with root {}",
+                        local_x, local_y, ip_address,
+                        global_x, global_y,
+                        self._chip_info[(0, 0)].ethernet_ip_address)
+
+        if (global_x, global_y) in self._chip_info:
+            return (global_x, global_y)
+        else:
+            logger.info("Ignore with x:{} and y:{} will be discarded "
+                        "as no such chip in this machine",
+                        global_x, global_y)
+            return None
+
+    def _ethernet_by_ipaddress(self, ip_address):
+        if self._ethernets is None:
+            self._ethernets = dict()
+            for chip_info in self._chip_info.values():
+                if chip_info.ethernet_ip_address is not None:
+                    self._ethernets[chip_info.ethernet_ip_address] = \
+                        (chip_info.x, chip_info.y)
+        return self._ethernets.get(ip_address, None)
+
+    def _get_virtual_p(self, x, y, p):
+        if (x, y) not in self._virtual_map:
+            if (x, y) not in self._chip_info:
+                # Chip not part of board so ignore
+                return None
+            p_to_v = SystemVariableDefinition.physical_to_virtual_core_map
+            self._send_request(
+                ReadMemory(
+                    x=x, y=y,
+                    base_address=(
+                            SYSTEM_VARIABLE_BASE_ADDRESS + p_to_v.offset),
+                    size=p_to_v.array_size),
+                    functools.partial(
+                        self._receive_physical_to_virtual_core_map, x, y))
+            self._finish()
+
+        if p > 0:
+            return p
+        else:
+            virtual_map = self._virtual_map[(x, y)]
+            if 0-p not in virtual_map:
+                logger.warning(
+                    "Physical core {}:{}:{} was not used "
+                    "so ignore is being discarded.".format(x, y, -p))
+                return None
+            virtual_p = virtual_map[0-p]
+            if virtual_p == 0:
+                logger.warning(
+                    "Physical core {}:{}:{} was used as the monitor "
+                    "so will NOT be ignored".format(x, y, -p))
+                return None
+            logger.info("Ignoring core {}:{}:{} as it maps to physical core {}",
+                        x, y, 0-p, virtual_p)
+            return virtual_p
+
+    def _receive_physical_to_virtual_core_map(self, x, y, scp_read_response):
+        chipinfo = self._chip_info[(x, y)]
+        ip_address = self._chip_info[(0, 0)].ethernet_ip_address
+
+        logger.info("Received physical_to_virtual_core_map for {}:{} for {}"
+                    "", x, y, ip_address)
+        p_to_v_map = {}
+
+        for i in range(
+                scp_read_response.offset,
+                scp_read_response.offset + chipinfo.n_cores):
+            p_to_v_map[i-scp_read_response.offset] = \
+                int(scp_read_response.data[i])
+        logger.info("{}", p_to_v_map)  # logger formats so dict as a param
+        self._virtual_map[(x, y)] = p_to_v_map
+
+    def _verify__virtual_to_physical_core_map(self, x, y):
+        """ Add this method to _get_virtual_p to verify the mappings"""
+        v_to_p = SystemVariableDefinition.virtual_to_physical_core_map
+        self._send_request(
+            ReadMemory(
+            x=x, y=y,
+            base_address=(
+                    SYSTEM_VARIABLE_BASE_ADDRESS + v_to_p.offset),
+            size=v_to_p.array_size),
+            functools.partial(
+                self._receive_virtual_to_physical_core_map, x, y))
+        self._finish()
+
+    def _receive_virtual_to_physical_core_map(self, x, y, scp_read_response):
+        p_to_v_map = self._virtual_map[(x, y)]
+        chipinfo = self._chip_info[(x, y)]
+        for i in range(
+                scp_read_response.offset,
+                scp_read_response.offset + chipinfo.n_cores):
+            assert p_to_v_map[int(scp_read_response.data[i])] == \
+                    i-scp_read_response.offset
+        logger.info("Virtual_to_physical_core_map checks for {}:{}", x, y)
+
