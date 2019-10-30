@@ -238,19 +238,18 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             return
         # Convert by ip to global
         for ignore in self._ignore_cores:
-            local_x = ignore[0]
-            local_y = ignore[0]
-            if len(ignore) > 3:
-                ip = ignore[3]
-            else:
+            if len(ignore) == 3:
+                local_x, local_y, some_p = ignore
                 ip = None
+            else:
+                local_x, local_y, some_p, ip = ignore
             global_xy = self._ignores_local_to_global(
                 local_x, local_y, ip, machine)
             if global_xy is None:
                 continue
             global_x = global_xy[0]
             global_y = global_xy[1]
-            p = self._get_virtual_p(global_x, global_y, ignore[2])
+            p = self._get_virtual_p(global_x, global_y, some_p)
             if p is not None:
                 self._ignore_cores_map[(global_x, global_y)].add(p)
 
@@ -260,12 +259,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         new_ignores = set()
         # Convert by ip to global
         for ignore in self._ignore_chips:
-            local_x = ignore[0]
-            local_y = ignore[0]
-            if len(ignore) > 2:
-                ip = ignore[2]
-            else:
+            if len(ignore) == 2:
+                local_x, local_y = ignore
                 ip = None
+            else:
+                local_x, local_y, ip = ignore
             global_xy = self._ignores_local_to_global(
                 local_x, local_y, ip, machine)
             if global_xy is None:
