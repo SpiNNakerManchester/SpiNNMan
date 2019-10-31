@@ -15,26 +15,27 @@
 
 import struct
 
-_DS = struct.Struct("<3I4B")
+_DS = struct.Struct("<4I4B")
 
 
 class BigDataInfo(object):
     """ Represents the big data information read via an SCP command
     """
     __slots__ = [
-        "_ip_address", "_port", "_n_sent", "_n_received", "_x", "_y"
+        "_ip_address", "_port", "_n_sent", "_n_received",
+        "_n_discard_not_idle", "_x", "_y"
     ]
 
     def __init__(self, big_data_data, offset, x, y):
         """
-        :param chip_summary_data: The data from the SCP response
-        :type chip_summary_data: bytearray
+        :param big_data_data: The data from the SCP response
+        :type big_data_data: bytearray
         :param offset: The offset into the data where the data starts
         :type offset: int
         :param x: The x-coordinate of the chip that this data is from
         :param y: The y-coordinate of the chip that this data is from
         """
-        (self._port, self._n_sent, self._n_received,
+        (self._port, self._n_sent, self._n_received, self._n_discard_not_idle,
          ip_1, ip_2, ip_3, ip_4) = _DS.unpack_from(big_data_data, offset)
 
         self._ip_address = "{}.{}.{}.{}".format(ip_1, ip_2, ip_3, ip_4)
@@ -82,7 +83,15 @@ class BigDataInfo(object):
         """
         return self._n_received
 
+    @property
+    def n_discard_not_idle(self):
+        """ The number of incoming packets discarded because the receiver is\
+            not idle
+        """
+        return self._n_discard_not_idle
+
     def __repr__(self):
-        return "x:{} y:{} ip_address:{} port:{} n_sent:{} n_received:{}"\
-            .format(self.x, self.y, self.ip_address, self.port, self.n_sent,
-                    self.n_received)
+        return ("x:{} y:{} ip_address:{} port:{} n_sent:{} n_received:{}"
+                " n_discard_not_idle:{}".format(
+                    self.x, self.y, self.ip_address, self.port, self.n_sent,
+                    self.n_received, self.n_discard_not_idle))
