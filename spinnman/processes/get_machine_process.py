@@ -377,10 +377,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self._send_request(
                 ReadMemory(
                     x=xy[0], y=xy[1],
-                    base_address=(SYSTEM_VARIABLE_BASE_ADDRESS + p_to_v.offset),
+                    base_address=
+                    SYSTEM_VARIABLE_BASE_ADDRESS + p_to_v.offset,
                     size=p_to_v.array_size),
-                    functools.partial(
-                        self._receive_physical_to_virtual_core_map, xy))
+                functools.partial(
+                    self._receive_physical_to_virtual_core_map, xy))
             self._finish()
 
         if p > 0:
@@ -424,10 +425,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._send_request(
             ReadMemory(
                 x=xy[0], y=xy[1],
-                base_address=(SYSTEM_VARIABLE_BASE_ADDRESS + v_to_p.offset),
+                base_address=SYSTEM_VARIABLE_BASE_ADDRESS + v_to_p.offset,
                 size=v_to_p.array_size),
-                functools.partial(
-                    self._receive_virtual_to_physical_core_map, xy))
+            functools.partial(
+                self._receive_virtual_to_physical_core_map, xy))
         self._finish()
 
     def _receive_virtual_to_physical_core_map(self, xy, scp_read_response):
