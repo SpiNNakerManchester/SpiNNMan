@@ -128,16 +128,14 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             for ignore in self._ignore_links_map[xy]:
                 if ignore in chip_info.working_links:
                     chip_info.working_links.remove(ignore)
-                    dest_xy = machine.xy_over_link(
-                        chip_info.x, chip_info.y, ignore)
-                    if dest_xy not in self._ignore_chips:
-                        logger.warning("Not using link:{},{},{} ",
-                                       chip_info.x, chip_info.y, ignore)
+                    logger.warning("Not using link:{},{},{} ",
+                                   chip_info.x, chip_info.y, ignore)
         for link in chip_info.working_links:
-            dest_x, dest_y = machine.xy_over_link(
+            dest_xy = machine.xy_over_link(
                 chip_info.x, chip_info.y, link)
-            links.append(Link(
-                chip_info.x, chip_info.y, link, dest_x, dest_y))
+            if dest_xy in self._chip_info:
+                links.append(Link(
+                    chip_info.x, chip_info.y, link, dest_xy[0], dest_xy[1]))
 
         return Router(
             links=links,
@@ -333,12 +331,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 continue
             else:
                 new_ignores.add(global_xy)
-                # Ignore the incoming links
-                link_checks = [(0, 3), (1, 4), (2, 5), (3, 0), (4, 1), (5, 2)]
-                for link, inv_link in link_checks:
-                    inv_xy = machine.xy_over_link(
-                        global_xy[0], global_xy[1], link)
-                    self._ignore_links_map[inv_xy].add(inv_link)
         self._ignore_chips = new_ignores
 
     def _ignores_local_to_global(self, local_x, local_y, ip_address, machine):
