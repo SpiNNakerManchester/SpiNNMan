@@ -47,8 +47,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Holds a map from x,y to a set of virtual cores to ignores
         "_ignore_cores_map",
         "_ignore_links",
-        # Holds a map from x,y to a set of links to ignores
-        "_ignore_links_map",
         "_max_sdram_size",
         "_p2p_column_data",
         # Used if there are any ignore core requests
@@ -64,7 +62,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
         self._ignore_cores_map = defaultdict(set)
         self._ignore_links = ignore_links if ignore_links is not None else {}
-        self._ignore_links_map = defaultdict(set)
 
         self._max_sdram_size = max_sdram_size
 
@@ -123,13 +120,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _make_router(self, chip_info, machine):
         links = list()
-        xy = (chip_info.x, chip_info.y)
-        if xy in self._ignore_links_map:
-            for ignore in self._ignore_links_map[xy]:
-                if ignore in chip_info.working_links:
-                    chip_info.working_links.remove(ignore)
-                    logger.warning("Not using link:{},{},{} ",
-                                   chip_info.x, chip_info.y, ignore)
         for link in chip_info.working_links:
             dest_xy = machine.xy_over_link(
                 chip_info.x, chip_info.y, link)
@@ -195,9 +185,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
-        self._preprocess_ignore_cores(machine)
         self._preprocess_ignore_chips(machine)
-        self._preprocess_ignore_links(machine)
+        self._process_ignore_links(machine)
+        self._preprocess_ignore_cores(machine)
 
         return self._fill_machine(
             machine, repair_machine, ignore_bad_ethernets)
@@ -232,32 +222,27 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         machine.validate()
         return machine_repair(machine, repair_machine)
 
-    def get_chip_info(self):
-        """ Get the chip information for the machine.
-
-        .. note::
-            :py:meth:`get_machine_details` must have been called first.
-        """
-        return self._chip_info
-
     # Stuff below here is purely for dealing with ignores
 
-    def _preprocess_ignore_links(self, machine):
+    def _process_ignore_links(self, machine):
         """
-        Converts the collection of ignore links into a map of ignore by xy
+        Processes the collection of ignore links to remove then from chipinfo
 
         Converts any local x, y ipaddress to global xy
 
-        Discards (with log messages) any ignores which are known to have no\
+        Discards any ignores which are known to have no\
         affect based on the already read chip_info
 
-        Adds an ignore for the inverse link
+        Also removes any inverse linka
+
+        Logs all actions except for ignores with unused ip addresses
 
         :param machine: An empty machine to handle wraparrounds
         """
         if len(self._ignore_links) == 0:
             return
 
+        discarded = set()
         for ignore in self._ignore_links:
             if len(ignore) == 3:
                 local_x, local_y, link = ignore
@@ -268,10 +253,28 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 local_x, local_y, ip, machine)
             if global_xy is None:
                 continue
-            self._ignore_links_map[global_xy].add(link)
-            # ignore the inverse link too
-            inv_xy = machine.xy_over_link(global_xy[0], global_xy[1], link)
-            self._ignore_links_map[inv_xy].add((link + 3) % 6)
+            chip_info = self._chip_info[global_xy]
+            if link in chip_info.working_links:
+                chip_info.working_links.remove(link)
+                logger.info("On chip {} ignoring link:{}",
+                               global_xy, link)
+                # ignore the inverse link too
+                inv_xy = machine.xy_over_link(global_xy[0], global_xy[1], link)
+                discarded.add((global_xy, link))
+                if inv_xy in self._chip_info:
+                    inv_chip_info = self._chip_info[inv_xy]
+                    inv_link = (link + 3) % 6
+                    if inv_link in inv_chip_info.working_links:
+                        inv_chip_info.working_links.remove(inv_link)
+                        logger.info("On chip {} ignoring inverse link:{}",
+                                       inv_xy, inv_link)
+                        discarded.add((inv_xy, inv_link))
+                    # No log if the inverse does not exits
+            else:
+                if (global_xy, link) not in discarded:
+                    logger.warning("On chip {} no link:{} found so discarding "
+                                   "the ignore", global_xy, link)
+
 
     def _preprocess_ignore_cores(self, machine):
         """
@@ -306,18 +309,19 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _preprocess_ignore_chips(self, machine):
         """
-        Convert the collection of ignore chips
+        Processes the collection of ignore chips and discards their chipinfo
 
         Converts any local x, y ipaddress to global xy
 
-        Discards (with log messages) any ignores which are known to have no\
+        Discards any ignores which are known to have no\
         affect based on the already read chip_info
+
+        Logs all actions except for ignores with unused ip addresses
 
         :param machine: An empty machine to handle wraparrounds
         """
         if len(self._ignore_cores) == 0:
             return
-        new_ignores = set()
         # Convert by ip to global
         for ignore in self._ignore_chips:
             if len(ignore) == 2:
@@ -327,11 +331,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 local_x, local_y, ip = ignore
             global_xy = self._ignores_local_to_global(
                 local_x, local_y, ip, machine)
-            if global_xy is None:
-                continue
-            else:
-                new_ignores.add(global_xy)
-        self._ignore_chips = new_ignores
+            if global_xy is not None:
+                logger.info("Chip {} will ignored", global_xy)
+                self._chip_info.pop(global_xy, None)
 
     def _ignores_local_to_global(self, local_x, local_y, ip_address, machine):
         if ip_address is None:
@@ -339,7 +341,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         else:
             ethernet = self._ethernet_by_ipaddress(ip_address)
             if ethernet is None:
-                logger.info("Ignore with ip:{} will be discarded "
+                logger.debug("Ignore with ip:{} will be discarded "
                             "as board with that ip in this machine",
                             ip_address)
                 return None
@@ -354,7 +356,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if global_xy in self._chip_info:
             return global_xy
         else:
-            logger.info("Ignore for global chip {} will be discarded "
+            logger.warning("Ignore for global chip {} will be discarded "
                         "as no such chip in this machine",
                         global_xy)
             return None
