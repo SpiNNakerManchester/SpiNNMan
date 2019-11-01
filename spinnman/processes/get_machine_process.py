@@ -257,7 +257,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if link in chip_info.working_links:
                 chip_info.working_links.remove(link)
                 logger.info("On chip {} ignoring link:{}",
-                               global_xy, link)
+                            global_xy, link)
                 # ignore the inverse link too
                 inv_xy = machine.xy_over_link(global_xy[0], global_xy[1], link)
                 discarded.add((global_xy, link))
@@ -267,14 +267,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     if inv_link in inv_chip_info.working_links:
                         inv_chip_info.working_links.remove(inv_link)
                         logger.info("On chip {} ignoring inverse link:{}",
-                                       inv_xy, inv_link)
+                                    inv_xy, inv_link)
                         discarded.add((inv_xy, inv_link))
                     # No log if the inverse does not exits
             else:
                 if (global_xy, link) not in discarded:
                     logger.warning("On chip {} no link:{} found so discarding "
                                    "the ignore", global_xy, link)
-
 
     def _preprocess_ignore_cores(self, machine):
         """
@@ -341,9 +340,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         else:
             ethernet = self._ethernet_by_ipaddress(ip_address)
             if ethernet is None:
-                logger.debug("Ignore with ip:{} will be discarded "
-                            "as board with that ip in this machine",
-                            ip_address)
+                logger.debug (
+                    "Ignore with ip:{} will be discarded as no board with that "
+                    "ip in this machine", ip_address)
                 return None
             global_xy = machine.get_global_xy(
                 local_x, local_y, ethernet[0], ethernet[1])
@@ -356,9 +355,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if global_xy in self._chip_info:
             return global_xy
         else:
-            logger.warning("Ignore for global chip {} will be discarded "
-                        "as no such chip in this machine",
-                        global_xy)
+            logger.warning(
+                "Ignore for global chip {} will be discarded as no such chip "
+                "in this machine", global_xy)
             return None
 
     def _ethernet_by_ipaddress(self, ip_address):
@@ -379,7 +378,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self._send_request(
                 ReadMemory(
                     x=xy[0], y=xy[1],
-                    base_address=
+                    base_address=\
                     SYSTEM_VARIABLE_BASE_ADDRESS + p_to_v.offset,
                     size=p_to_v.array_size),
                 functools.partial(
