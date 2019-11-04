@@ -46,7 +46,6 @@ class SCPRequestPipeLine(object):
         "_callbacks",
         "_connection",
         "_error_callbacks",
-        "_in_progress",
         "_intermediate_channel_waits",
         "_n_channels",
         "_n_resent",
@@ -108,9 +107,6 @@ class SCPRequestPipeLine(object):
         # A dictionary of sequence number -> retry reason
         self._retry_reason = dict()
 
-        # The number of responses outstanding
-        self._in_progress = 0
-
         # The number of timeouts that occurred
         self._n_timeouts = 0
 
@@ -130,8 +126,11 @@ class SCPRequestPipeLine(object):
         """
         global _next_sequence, _next_sequence_lock
         with _next_sequence_lock:
-            sequence = _next_sequence
-            _next_sequence = (sequence + 1) % MAX_SEQUENCE
+            exists = True
+            while exists:
+                sequence = _next_sequence
+                _next_sequence = (sequence + 1) % MAX_SEQUENCE
+                exists = sequence in self._requests
         return sequence
 
     def send_request(self, request, callback, error_callback):
@@ -150,14 +149,14 @@ class SCPRequestPipeLine(object):
         # If the connection has not been measured
         if self._n_channels is None:
             if self._connection.is_ready_to_receive():
-                self._n_channels = self._in_progress + 8
+                self._n_channels = len(self._requests) + 8
                 if self._n_channels < 12:
                     self._n_channels = 12
                 self._intermediate_channel_waits = self._n_channels - 8
 
         # If all the channels are used, start to receive packets
         while (self._n_channels is not None and
-                self._in_progress >= self._n_channels):
+                len(self._requests) >= self._n_channels):
             self._do_retrieve(
                 self._intermediate_channel_waits, self._packet_timeout)
 
@@ -177,13 +176,12 @@ class SCPRequestPipeLine(object):
         # Send the request, keeping track of how many are sent
         # self._token_bucket.consume(284)
         self._connection.send(request_data)
-        self._in_progress += 1
 
     def finish(self):
         """ Indicate the end of the packets to be sent.  This must be called\
             to ensure that all responses are received and handled.
         """
-        while self._in_progress > 0:
+        while len(self._requests) > 0:
             self._do_retrieve(0, self._packet_timeout)
 
     @property
@@ -218,7 +216,6 @@ class SCPRequestPipeLine(object):
 
         # Only process responses which have matching requests
         if seq in self._requests:
-            self._in_progress -= 1
             request_sent = self._requests[seq]
 
             # If the response can be retried, retry it
@@ -252,7 +249,6 @@ class SCPRequestPipeLine(object):
         # If there is a timeout, all packets remaining are resent
         to_remove = list()
         for seq, request_sent in iteritems(self._requests):
-            self._in_progress -= 1
             try:
                 self._resend(seq, request_sent, "timeout")
             except Exception as e:  # pylint: disable=broad-except
@@ -283,7 +279,6 @@ class SCPRequestPipeLine(object):
 
         # If the request can be retried, retry it
         self._retries[seq] -= 1
-        self._in_progress += 1
         self._requests[seq] = request_sent
         self._retry_reason[seq].append(reason)
         self._connection.send(self._request_data[seq])
@@ -296,7 +291,7 @@ class SCPRequestPipeLine(object):
         """
 
         # While there are still more packets in progress than some threshold
-        while self._in_progress > n_packets:
+        while len(self._requests) > n_packets:
             try:
                 # Receive the next response
                 self._single_retrieve(timeout)
