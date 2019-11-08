@@ -89,7 +89,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
         core_states = chip_info.core_states
         down_cores = self._ignore_cores_map.get(
-            (chip_info.x, chip_info.y))
+            (chip_info.x, chip_info.y), None)
         for i in range(1, n_cores):
             if core_states[i] != CPUState.IDLE:
                 logger.warning(
@@ -152,7 +152,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def get_machine_details(self, boot_x, boot_y, width, height,
                             repair_machine, ignore_bad_ethernets):
 
-        machine = machine_from_size(width, height)
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         self._p2p_column_data = [None] * width
@@ -185,6 +184,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
+        machine = machine_from_size(width, height)
         self._preprocess_ignore_chips(machine)
         self._process_ignore_links(machine)
         self._preprocess_ignore_cores(machine)
@@ -196,10 +196,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self, machine, repair_machine, ignore_bad_ethernets):
         for chip_info in sorted(
                 self._chip_info.values(), key=lambda chip: (chip.x, chip.y)):
-            if (chip_info.x, chip_info.y) in self._ignore_chips:
-                logger.warning(
-                    "Not using chip {}, {}", chip_info.x, chip_info.y)
-                continue
             if (chip_info.ethernet_ip_address is not None and
                     (chip_info.x != chip_info.nearest_ethernet_x
                      or chip_info.y != chip_info.nearest_ethernet_y)):
@@ -233,7 +229,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Discards any ignores which are known to have no\
         affect based on the already read chip_info
 
-        Also removes any inverse linka
+        Also removes any inverse links
 
         Logs all actions except for ignores with unused ip addresses
 
