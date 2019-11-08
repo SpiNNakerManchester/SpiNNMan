@@ -121,8 +121,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _make_router(self, chip_info, machine):
         links = list()
         for link in chip_info.working_links:
-            dest_xy = machine.xy_over_link(
-                chip_info.x, chip_info.y, link)
+            dest_xy = machine.xy_over_link(chip_info.x, chip_info.y, link)
             if dest_xy in self._chip_info:
                 links.append(Link(
                     chip_info.x, chip_info.y, link, dest_xy[0], dest_xy[1]))
@@ -238,7 +237,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if len(self._ignore_links) == 0:
             return
 
-        discarded = set()
+        discarded = set()  # control to avoid two log messages
         for ignore in self._ignore_links:
             if len(ignore) == 3:
                 local_x, local_y, link = ignore
@@ -252,8 +251,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             chip_info = self._chip_info[global_xy]
             if link in chip_info.working_links:
                 chip_info.working_links.remove(link)
-                logger.info("On chip {} ignoring link:{}",
-                            global_xy, link)
+                logger.info("On chip {} ignoring link:{}", global_xy, link)
                 # ignore the inverse link too
                 inv_xy = machine.xy_over_link(global_xy[0], global_xy[1], link)
                 discarded.add((global_xy, link))
@@ -262,8 +260,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     inv_link = (link + 3) % 6
                     if inv_link in inv_chip_info.working_links:
                         inv_chip_info.working_links.remove(inv_link)
-                        logger.info("On chip {} ignoring inverse link:{}",
-                                    inv_xy, inv_link)
+                        logger.info(
+                            "On chip {} ignoring link {} as it is the inverse "
+                            "of link {} on chip {}", inv_xy, inv_link, link,
+                            global_xy)
                         discarded.add((inv_xy, inv_link))
                     # No log if the inverse does not exits
             else:
