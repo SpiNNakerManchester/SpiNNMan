@@ -241,16 +241,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         discarded = set()  # control to avoid two log messages
         for ignore in self._ignore_links:
-            if len(ignore) == 3:
-                local_x, local_y, link = ignore
-                ip = None
-            else:
-                local_x, local_y, link, ip = ignore
             global_xy = self._ignores_local_to_global(
-                local_x, local_y, ip, machine)
+                ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
                 continue
             chip_info = self._chip_info[global_xy]
+            link = ignore.link
             if link in chip_info.working_links:
                 chip_info.working_links.remove(link)
                 logger.info("On chip {} ignoring link:{}", global_xy, link)
@@ -291,16 +287,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             return
         # Convert by ip to global
         for ignore in self._ignore_cores:
-            if len(ignore) == 3:
-                local_x, local_y, some_p = ignore
-                ip = None
-            else:
-                local_x, local_y, some_p, ip = ignore
             global_xy = self._ignores_local_to_global(
-                local_x, local_y, ip, machine)
+                ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
                 continue
-            p = self._get_virtual_p(global_xy, some_p)
+            p = self._get_virtual_p(global_xy, ignore.p)
             if p is not None:
                 self._ignore_cores_map[global_xy].add(p)
 
@@ -321,13 +312,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             return
         # Convert by ip to global
         for ignore in self._ignore_chips:
-            if len(ignore) == 2:
-                local_x, local_y = ignore
-                ip = None
-            else:
-                local_x, local_y, ip = ignore
             global_xy = self._ignores_local_to_global(
-                local_x, local_y, ip, machine)
+                ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is not None:
                 logger.info("Chip {} will ignored", global_xy)
                 self._chip_info.pop(global_xy, None)
