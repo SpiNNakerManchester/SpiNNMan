@@ -1109,11 +1109,13 @@ class Transceiver(object):
         return cpu_info
 
     def _get_sv_data(self, x, y, data_item):
+        addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
+        if data_item.data_type.is_byte_array:
+            # Do not need to decode the bytes of a byte array
+            return self.read_memory(x, y, addr, data_item.array_size)
         return struct.unpack_from(
             data_item.data_type.struct_code,
-            self.read_memory(
-                x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
-                data_item.data_type.value))[0]
+            self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
     @staticmethod
     def get_user_0_register_address_from_core(p):
