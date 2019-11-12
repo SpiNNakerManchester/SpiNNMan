@@ -132,11 +132,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         links = list()
         for link in chip_info.working_links:
             dest_xy = machine.xy_over_link(chip_info.x, chip_info.y, link)
-            # if dest_xy in self._chip_info:
-            # above line no longer needed as ignore removes from chipinfo and
-            # scamp should give the correct info. Left for easy fix if not
-            links.append(Link(
-                chip_info.x, chip_info.y, link, dest_xy[0], dest_xy[1]))
+            if dest_xy in self._chip_info:
+                links.append(Link(
+                    chip_info.x, chip_info.y, link, dest_xy[0], dest_xy[1]))
+            else:
+                logger.warn("Link {}{}{} points to Chip {} but that is not "
+                            "included in the info received.",
+                            chip_info.x, chip_info.y, link, dest_xy)
 
         return Router(
             links=links,
