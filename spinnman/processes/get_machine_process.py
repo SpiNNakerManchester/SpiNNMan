@@ -56,13 +56,14 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Holds a mapping from (x,y) to a mapping of phsyical to virtual core
         "_virtual_map",
         # Directory to put the ingore report if required
-        "_report_dir",
+        "_default_report_directory",
         # Ignore report file path for ignre report.
         # Kept as None until first write
         "_report_file"]
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
-                 ignore_links, max_sdram_size=None, report_dir=None):
+                 ignore_links, max_sdram_size=None,
+                 default_report_directory=None):
         # pylint: disable=too-many-arguments
         super(GetMachineProcess, self).__init__(connection_selector)
 
@@ -81,7 +82,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Set ethernets to None meaning not computed yet
         self._ethernets = None
         self._virtual_map = {}
-        self._report_dir = report_dir
+        self._default_report_directory = default_report_directory
         self._report_file = None
 
     def _make_chip(self, chip_info, machine):
@@ -467,10 +468,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         full_message = message.format(*args) + "\n"
         if self._report_file is None:
-            if self._report_dir is None:
+            if self._default_report_directory is None:
                 self._report_file = REPORT_FILE
             else:
-                self._report_file = join(self._report_dir, REPORT_FILE)
+                self._report_file = join(
+                    self._default_report_directory, REPORT_FILE)
             with open(self._report_file, "w") as r_file:
                 r_file.write(full_message)
         else:
