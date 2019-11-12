@@ -16,6 +16,7 @@
 from collections import defaultdict
 import logging
 import functools
+from os.path import join
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Router, Chip, SDRAM, Link, machine_from_size)
@@ -32,6 +33,8 @@ from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 logger = FormatAdapter(logging.getLogger(__name__))
+
+REPORT_FILE = "Ignores_report.rpt"
 
 
 class GetMachineProcess(AbstractMultiConnectionProcess):
@@ -51,10 +54,15 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         "_p2p_column_data",
         # Used if there are any ignore core requests
         # Holds a mapping from (x,y) to a mapping of phsyical to virtual core
-        "_virtual_map"]
+        "_virtual_map",
+        # Directory to put the ingore report if required
+        "_report_dir",
+        # Ignore report file path for ignre report.
+        # Kept as None until first write
+        "_report_file"]
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
-                 ignore_links, max_sdram_size=None):
+                 ignore_links, max_sdram_size=None, report_dir=None):
         # pylint: disable=too-many-arguments
         super(GetMachineProcess, self).__init__(connection_selector)
 
@@ -73,6 +81,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Set ethernets to None meaning not computed yet
         self._ethernets = None
         self._virtual_map = {}
+        self._report_dir = report_dir
+        self._report_file = None
 
     def _make_chip(self, chip_info, machine):
         """ Creates a chip from a ChipSummaryInfo structure.
@@ -92,7 +102,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             (chip_info.x, chip_info.y), None)
         for i in range(1, n_cores):
             if core_states[i] != CPUState.IDLE:
-                logger.warning(
+                self._report_ignore(
                     "Not using core {}, {}, {} in state {}",
                     chip_info.x, chip_info.y, i,  core_states[i])
                 if down_cores is None:
@@ -239,35 +249,37 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if len(self._ignore_links) == 0:
             return
 
-        discarded = set()  # control to avoid two log messages
         for ignore in self._ignore_links:
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
                 continue
-            chip_info = self._chip_info[global_xy]
+            chip_info = self._chip_info.get(global_xy, None)
+            if chip_info is None:
+                self._report_ignore(
+                    "Discarding ignore link on chip {} as it is not/ no longer"
+                    " in info", global_xy)
+                continue
             link = ignore.link
             if link in chip_info.working_links:
                 chip_info.working_links.remove(link)
-                logger.info("On chip {} ignoring link:{}", global_xy, link)
+                self._report_ignore(
+                    "On chip {} ignoring link:{}", global_xy, link)
                 # ignore the inverse link too
                 inv_xy = machine.xy_over_link(global_xy[0], global_xy[1], link)
-                discarded.add((global_xy, link))
                 if inv_xy in self._chip_info:
                     inv_chip_info = self._chip_info[inv_xy]
                     inv_link = (link + 3) % 6
                     if inv_link in inv_chip_info.working_links:
                         inv_chip_info.working_links.remove(inv_link)
-                        logger.info(
+                        self._report_ignore(
                             "On chip {} ignoring link {} as it is the inverse "
                             "of link {} on chip {}", inv_xy, inv_link, link,
                             global_xy)
-                        discarded.add((inv_xy, inv_link))
-                    # No log if the inverse does not exits
             else:
-                if (global_xy, link) not in discarded:
-                    logger.warning("On chip {} no link:{} found so discarding "
-                                   "the ignore", global_xy, link)
+                self._report_ignore(
+                    "Discarding ignore link {} on chip {} as it is not/"
+                    "no longer in info", link, global_xy)
 
     def _preprocess_ignore_cores(self, machine):
         """
@@ -308,15 +320,28 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         :param machine: An empty machine to handle wraparrounds
         """
-        if len(self._ignore_cores) == 0:
-            return
-        # Convert by ip to global
         for ignore in self._ignore_chips:
+            # Convert by ip to global
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
-            if global_xy is not None:
-                logger.info("Chip {} will ignored", global_xy)
-                self._chip_info.pop(global_xy, None)
+            if global_xy is None:
+                continue  # Never on this machine
+            chip_info = self._chip_info.pop(global_xy, None)
+            if chip_info is None:
+                continue  # Already ignored maybe by a dead chip list
+            self._report_ignore("Chip {} will be ignored", global_xy)
+            for link in chip_info.working_links:
+                # ignore the inverse link
+                inv_xy = machine.xy_over_link(global_xy[0], global_xy[1], link)
+                if inv_xy in self._chip_info:
+                    inv_chip_info = self._chip_info[inv_xy]
+                    inv_link = (link + 3) % 6
+                    if inv_link in inv_chip_info.working_links:
+                        inv_chip_info.working_links.remove(inv_link)
+                        self._report_ignore(
+                            "On chip {} ignoring link {} as it points to "
+                            "ignored chip chip {}",
+                            inv_xy, inv_link, global_xy)
 
     def _ignores_local_to_global(self, local_x, local_y, ip_address, machine):
         if ip_address is None:
@@ -324,22 +349,21 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         else:
             ethernet = self._ethernet_by_ipaddress(ip_address)
             if ethernet is None:
-                logger.debug(
+                self._report_ignore(
                     "Ignore with ip:{} will be discarded as no board with "
                     "that ip in this machine", ip_address)
                 return None
             global_xy = machine.get_global_xy(
                 local_x, local_y, ethernet[0], ethernet[1])
-            logger.info("Ignores for local x:{} y:{} and ip:{} "
-                        "map to global {} with root {}",
-                        local_x, local_y, ip_address,
-                        global_xy,
-                        self._chip_info[(0, 0)].ethernet_ip_address)
+            self._report_ignore(
+                "Ignores for local x:{} y:{} and ip:{} map to global {} with "
+                "root {}", local_x, local_y, ip_address, global_xy,
+                self._chip_info[(0, 0)].ethernet_ip_address)
 
         if global_xy in self._chip_info:
             return global_xy
         else:
-            logger.warning(
+            self._report_ignore(
                 "Ignore for global chip {} will be discarded as no such chip "
                 "in this machine", global_xy)
             return None
@@ -370,30 +394,33 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self._finish()
 
         if p > 0:
+            self._report_ignore("On chip {} ignoring core {}", xy, p)
             return p
         else:
             virtual_map = self._virtual_map[xy]
             if 0-p not in virtual_map:
-                logger.warning(
+                self._report_ignore(
                     "On chip {} physical core {} was not used "
                     "so ignore is being discarded.".format(xy, -p))
                 return None
             virtual_p = virtual_map[0-p]
             if virtual_p == 0:
-                logger.warning(
+                self._report_ignore(
                     "On chip {} physical core {} was used as the monitor "
                     "so will NOT be ignored".format(xy, -p))
                 return None
-            logger.info("On chip {} ignoring core {} as it maps to physical "
-                        "core {}", xy, 0-p, virtual_p)
+            self._report_ignore(
+                "On chip {} ignoring core {} as it maps to physical "
+                "core {}", xy, 0-p, virtual_p)
             return virtual_p
 
     def _receive_physical_to_virtual_core_map(self, xy, scp_read_response):
         chipinfo = self._chip_info[xy]
         ip_address = self._chip_info[(0, 0)].ethernet_ip_address
 
-        logger.info("Received physical_to_virtual_core_map for chip {} on {}"
-                    "", xy, ip_address)
+        self._report_ignore(
+            "Received physical_to_virtual_core_map for chip {} on {}",
+            xy, ip_address)
         p_to_v_map = {}
 
         for i in range(
@@ -401,7 +428,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 scp_read_response.offset + chipinfo.n_cores):
             p_to_v_map[i-scp_read_response.offset] = \
                 int(scp_read_response.data[i])
-        logger.info("{}", p_to_v_map)  # logger formats so dict as a param
+        # report_ignore (like logger) formats so dict as a param
+        self._report_ignore("{}", p_to_v_map)
         self._virtual_map[xy] = p_to_v_map
 
     def _verify__virtual_to_physical_core_map(self, xy):
@@ -424,4 +452,25 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 scp_read_response.offset + chipinfo.n_cores):
             assert p_to_v_map[int(scp_read_response.data[i])] == \
                     i-scp_read_response.offset
-        logger.info("Virtual_to_physical_core_map checks for chip {}", xy)
+        self._report_ignore(
+            "Virtual_to_physical_core_map checks for chip {}", xy)
+
+    def _report_ignore(self, message, *args):
+        """
+        Writes the ignore message by either creating or appending the report
+
+        The implemenation choice to reopen the file every time is not the\
+        fastest but is the cleanest and safest for code that in default\
+        conditions is never run.
+        """
+        full_message = message.format(*args) + "\n"
+        if self._report_file is None:
+            if self._report_dir is None:
+                self._report_file = REPORT_FILE
+            else:
+                self._report_file = join(self._report_dir, REPORT_FILE)
+            with open(self._report_file, "w") as r_file:
+                r_file.write(full_message)
+        else:
+            with open(self._report_file, "a") as r_file:
+                r_file.write(full_message)
