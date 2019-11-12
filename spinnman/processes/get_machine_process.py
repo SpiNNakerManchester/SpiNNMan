@@ -137,9 +137,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 links.append(Link(
                     chip_info.x, chip_info.y, link, dest_xy[0], dest_xy[1]))
             else:
-                logger.warn("Link {}{}{} points to Chip {} but that is not "
-                            "included in the info received.",
-                            chip_info.x, chip_info.y, link, dest_xy)
+                logger.warning(
+                    "Link {}{}{} points to Chip {} but that is not included ",
+                    chip_info.x, chip_info.y, link, dest_xy)
 
         return Router(
             links=links,
