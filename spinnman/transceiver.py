@@ -97,7 +97,7 @@ def create_transceiver_from_hostname(
         ignore_chips=None, ignore_cores=None, ignored_links=None,
         auto_detect_bmp=False, scamp_connections=None,
         boot_port_no=None, max_sdram_size=None, repair_machine=False,
-        ignore_bad_ethernets=True):
+        ignore_bad_ethernets=True, default_report_directory=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         BootConnection on port 54321 (the default boot port), optionally\
@@ -155,6 +155,9 @@ def create_transceiver_from_hostname(
         If True the ipaddress is ignored
         If False the chip with the bad ipaddress is removed.
     :type ignore_bad_ethernets: bool
+    :param default_report_directory: Directory to write any reports too. \
+        If None the current directory will be used.
+    :type default_report_directory: str or None
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: \
@@ -200,7 +203,8 @@ def create_transceiver_from_hostname(
         ignore_cores=ignore_cores,
         ignore_links=ignored_links, scamp_connections=scamp_connections,
         max_sdram_size=max_sdram_size, repair_machine=repair_machine,
-        ignore_bad_ethernets=ignore_bad_ethernets)
+        ignore_bad_ethernets=ignore_bad_ethernets,
+        default_report_directory=default_report_directory)
 
 
 class Transceiver(object):
@@ -223,6 +227,7 @@ class Transceiver(object):
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
+        "_default_report_directory",
         "_flood_write_lock",
         "_height",
         "_ignore_bad_ethernets",
@@ -253,7 +258,7 @@ class Transceiver(object):
             self, version, connections=None, ignore_chips=None,
             ignore_cores=None, ignore_links=None,
             scamp_connections=None, max_sdram_size=None, repair_machine=False,
-            ignore_bad_ethernets=True):
+            ignore_bad_ethernets=True, default_report_directory=None):
         """
         :param version: The version of the board being connected to
         :type version: int
@@ -297,6 +302,9 @@ class Transceiver(object):
             If True the ipaddress is ignored
             If False the chip with the bad ipaddress is removed.
         :type ignore_bad_ethernets: bool
+        :param default_report_directory: Directory to write any reports too. \
+            If None the current directory will be used.
+        :type default_report_directory: str or None
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board, or if no \
             connections to the board can be found (if connections is None)
@@ -408,6 +416,7 @@ class Transceiver(object):
         self._check_bmp_connections()
 
         self._machine_off = False
+        self._default_report_directory = default_report_directory
 
     def _identify_connections(self, connections):
         for conn in connections:
@@ -663,7 +672,8 @@ class Transceiver(object):
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
-            self._ignore_cores, self._ignore_links, self._max_sdram_size)
+            self._ignore_cores, self._ignore_links, self._max_sdram_size,
+            self._default_report_directory)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height,
             self._repair_machine, self._ignore_bad_ethernets)
