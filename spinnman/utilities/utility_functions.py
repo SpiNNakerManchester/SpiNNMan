@@ -102,7 +102,10 @@ def reprogram_tag(connection, tag, strip=True):
             _, _, response, offset = \
                 connection.receive_scp_response()
             request.get_scp_response().read_bytestring(response, offset)
+            print("Response received")
             return
         except SpinnmanTimeoutException:
+            print("Timeout waiting for response")
             einfo = sys.exc_info()
-    reraise(*einfo)
+    if einfo is not None:
+        reraise(*einfo)

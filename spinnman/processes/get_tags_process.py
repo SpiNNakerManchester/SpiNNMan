@@ -15,7 +15,6 @@
 
 import functools
 from past.builtins import xrange
-from spinn_machine.tags import ReverseIPTag, IPTag
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.messages.scp.impl import IPTagGetInfo, IPTagGet
 
@@ -33,22 +32,9 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
     def handle_tag_info_response(self, response):
         self._tag_info = response
 
-    def handle_get_tag_response(self, tag, board_address, response):
+    def handle_get_tag_response(self, tag, response):
         if response.in_use:
-            ip_address = response.ip_address
-            host = "{}.{}.{}.{}".format(ip_address[0], ip_address[1],
-                                        ip_address[2], ip_address[3])
-            if response.is_reverse:
-                self._tags[tag] = ReverseIPTag(
-                    board_address, tag,
-                    response.rx_port, response.spin_chip_x,
-                    response.spin_chip_y, response.spin_cpu,
-                    response.spin_port)
-            else:
-                self._tags[tag] = IPTag(
-                    board_address, response.sdp_header.source_chip_x,
-                    response.sdp_header.source_chip_y, tag, host,
-                    response.port, response.strip_sdp)
+            self._tags[tag] = response
 
     def get_tags(self, connection):
         # Get the tag information, without which we cannot continue
@@ -65,10 +51,9 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
             self._send_request(IPTagGet(
                 connection.chip_x, connection.chip_y, tag),
                 functools.partial(
-                    self.handle_get_tag_response, tag,
-                    connection.remote_ip_address))
+                    self.handle_get_tag_response, tag))
         self._finish()
         self.check_for_error()
 
         # Return the tags
-        return [tag for tag in self._tags if tag is not None]
+        return self._tags
