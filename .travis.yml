@@ -41,7 +41,7 @@ before_install:
 install:
   - python ./setup.py install
   - pip install -r requirements-test.txt
-  - pip install pylint python-coveralls 'coverage>=4.4'
+  - pip install pylint python-coveralls 'coverage>=4.4,<5.0'
   - pip install spinnaker_proxy
 
 script:
