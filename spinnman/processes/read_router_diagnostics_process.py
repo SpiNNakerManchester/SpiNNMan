@@ -31,8 +31,11 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
         "_error_status",
         "_register_values"]
 
-    def __init__(self, connection_selector):
-        super(ReadRouterDiagnosticsProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
+        super(ReadRouterDiagnosticsProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._control_register = None
         self._error_status = None
         self._register_values = [0] * _N_REGISTERS

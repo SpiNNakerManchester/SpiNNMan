@@ -25,8 +25,11 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
     __slots__ = [
         "_view"]
 
-    def __init__(self, connection_selector):
-        super(ReadMemoryProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
+        super(ReadMemoryProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._view = None
 
     def handle_response(self, offset, response):

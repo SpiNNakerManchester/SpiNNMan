@@ -25,8 +25,11 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
     __slots__ = [
         "_cpu_info"]
 
-    def __init__(self, connection_selector):
-        super(GetCPUInfoProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
+        super(GetCPUInfoProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._cpu_info = list()
 
     def handle_response(self, x, y, p, response):

@@ -25,8 +25,11 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         "_tags",
         "_tag_info"]
 
-    def __init__(self, connection_selector):
-        super(GetTagsProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
+        super(GetTagsProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._tag_info = None
         self._tags = None
 

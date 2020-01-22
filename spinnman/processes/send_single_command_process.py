@@ -23,7 +23,8 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector, n_retries=3, timeout=SCP_TIMEOUT):
         super(SendSingleCommandProcess, self).__init__(
-            connection_selector, n_retries=n_retries, timeout=timeout)
+            connection_selector, n_retries=n_retries, timeout=timeout,
+            n_channels=1, intermediate_channel_waits=0)
         self._response = None
 
     def handle_response(self, response):

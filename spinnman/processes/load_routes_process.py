@@ -31,8 +31,11 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
     __slots__ = [
         "_base_address"]
 
-    def __init__(self, connection_selector):
-        super(LoadMultiCastRoutesProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
+        super(LoadMultiCastRoutesProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._base_address = None
 
     def handle_router_alloc_response(self, response):
@@ -59,7 +62,9 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
         # Upload the data
         table_address = 0x67800000
-        process = WriteMemoryProcess(self._next_connection_selector)
+        process = WriteMemoryProcess(
+            self._next_connection_selector, n_channels=self._n_channels,
+            intermediate_channel_waits=self._intermediate_channel_waits)
         process.write_memory_from_bytearray(
             x, y, 0, table_address, routing_data, 0, len(routing_data))
 

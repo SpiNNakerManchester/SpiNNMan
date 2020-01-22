@@ -26,14 +26,16 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         "_route",
     )
 
-    def __init__(self, connection_selector):
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
         """ Creates the process for writing a fixed route entry to a chip's\
             router.
 
         :param connection_selector: the SC&MP connection selector
         """
         super(ReadFixedRouteRoutingEntryProcess, self).__init__(
-            connection_selector)
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._route = None
 
     def handle_read_response(self, response):

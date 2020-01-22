@@ -34,8 +34,11 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         "_heap_address",
         "_next_block_address"]
 
-    def __init__(self, connection_selector):
-        super(GetHeapProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
+        super(GetHeapProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
 
         self._heap_address = None
         self._next_block_address = None

@@ -62,10 +62,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         "_report_file"]
 
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
-                 ignore_links, max_sdram_size=None,
+                 ignore_links, n_channels, intermediate_channel_waits,
+                 max_sdram_size=None,
                  default_report_directory=None):
         # pylint: disable=too-many-arguments
-        super(GetMachineProcess, self).__init__(connection_selector)
+        super(GetMachineProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
 
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}

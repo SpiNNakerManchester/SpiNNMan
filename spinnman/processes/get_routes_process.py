@@ -39,8 +39,12 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         "_app_id",
         "_entries"]
 
-    def __init__(self, connection_selector, app_id=None):
-        super(GetMultiCastRoutesProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits,
+            app_id=None):
+        super(GetMultiCastRoutesProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._entries = [None] * _N_ENTRIES
         self._app_id = app_id
 

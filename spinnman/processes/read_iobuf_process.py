@@ -39,8 +39,11 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         "_iobuf_view",
         "_next_reads"]
 
-    def __init__(self, connection_selector):
-        super(ReadIOBufProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
+        super(ReadIOBufProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
 
         # A dictionary of (x, y, p) -> iobuf address
         self._iobuf_address = dict()

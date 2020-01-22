@@ -30,9 +30,10 @@ class AbstractMultiConnectionProcess(AbstractProcess):
         "_scp_request_pipelines",
         "_timeout"]
 
-    def __init__(self, next_connection_selector,
-                 n_retries=N_RETRIES, timeout=SCP_TIMEOUT, n_channels=8,
-                 intermediate_channel_waits=7):
+    def __init__(
+            self, next_connection_selector, n_channels,
+            intermediate_channel_waits, n_retries=N_RETRIES,
+            timeout=SCP_TIMEOUT):
         super(AbstractMultiConnectionProcess, self).__init__()
         self._scp_request_pipelines = dict()
         self._n_retries = n_retries

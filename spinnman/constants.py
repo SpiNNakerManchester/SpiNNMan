@@ -15,6 +15,12 @@
 
 from enum import Enum
 
+# how many channels to stream in parallel.
+MULTI_PACKETS_IN_FLIGHT_N_CHANNELS = 8
+
+# how many packets to still be in flight before transmitting more
+MULTI_PACKETS_IN_FLIGHT_CHANNEL_WAITS = 7
+
 # The default port of the connection
 SCP_SCAMP_PORT = 17893
 

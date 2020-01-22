@@ -21,8 +21,11 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
     __slots__ = [
         "_no_blocks_freed"]
 
-    def __init__(self, connection_selector):
-        super(DeAllocSDRAMProcess, self).__init__(connection_selector)
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits):
+        super(DeAllocSDRAMProcess, self).__init__(
+            connection_selector, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._no_blocks_freed = None
 
     def de_alloc_sdram(self, x, y, app_id, base_address=None):

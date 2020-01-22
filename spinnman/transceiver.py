@@ -36,7 +36,8 @@ from spinnman.constants import (
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
     ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES)
+    BOOT_RETRIES, MULTI_PACKETS_IN_FLIGHT_N_CHANNELS,
+    MULTI_PACKETS_IN_FLIGHT_CHANNEL_WAITS)
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
@@ -97,7 +98,10 @@ def create_transceiver_from_hostname(
         ignore_chips=None, ignore_cores=None, ignored_links=None,
         auto_detect_bmp=False, scamp_connections=None,
         boot_port_no=None, max_sdram_size=None, repair_machine=False,
-        ignore_bad_ethernets=True, default_report_directory=None):
+        ignore_bad_ethernets=True, default_report_directory=None,
+        multi_packets_in_flight_n_channels=MULTI_PACKETS_IN_FLIGHT_N_CHANNELS,
+        multi_packets_in_flight_channel_waits=(
+                MULTI_PACKETS_IN_FLIGHT_CHANNEL_WAITS)):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         BootConnection on port 54321 (the default boot port), optionally\
@@ -107,6 +111,10 @@ def create_transceiver_from_hostname(
 
     :param hostname: The hostname or IP address of the board
     :type hostname: str
+    :param multi_packets_in_flight_n_channels: \
+        how many channels to stream in parallel.
+    :param multi_packets_in_flight_channel_waits: \
+        how many packets to still be in flight before transmitting more
     :param number_of_boards: a number of boards expected to be supported, or\
         None, which defaults to a single board
     :type number_of_boards: int or None
@@ -204,7 +212,11 @@ def create_transceiver_from_hostname(
         ignore_links=ignored_links, scamp_connections=scamp_connections,
         max_sdram_size=max_sdram_size, repair_machine=repair_machine,
         ignore_bad_ethernets=ignore_bad_ethernets,
-        default_report_directory=default_report_directory)
+        default_report_directory=default_report_directory,
+        multi_packets_in_flight_n_channels=multi_packets_in_flight_n_channels,
+        multi_packets_in_flight_channel_waits=(
+            multi_packets_in_flight_channel_waits)
+    )
 
 
 class Transceiver(object):
@@ -252,14 +264,24 @@ class Transceiver(object):
         "_udp_receive_connections_by_port",
         "_udp_scamp_connections",
         "_version",
-        "_width"]
+        "_width",
+        "_multi_packets_in_flight_n_channels",
+        "_multi_packets_in_flight_channel_waits"]
 
     def __init__(
             self, version, connections=None, ignore_chips=None,
             ignore_cores=None, ignore_links=None,
             scamp_connections=None, max_sdram_size=None, repair_machine=False,
-            ignore_bad_ethernets=True, default_report_directory=None):
+            ignore_bad_ethernets=True, default_report_directory=None,
+            multi_packets_in_flight_n_channels=(
+                    MULTI_PACKETS_IN_FLIGHT_N_CHANNELS),
+            multi_packets_in_flight_channel_waits=(
+                    MULTI_PACKETS_IN_FLIGHT_CHANNEL_WAITS)):
         """
+        :param multi_packets_in_flight_n_channels: \
+            how many channels to stream in parallel.
+        :param multi_packets_in_flight_channel_waits: \
+            how many packets to still be in flight before transmitting more
         :param version: The version of the board being connected to
         :type version: int
         :param connections: An iterable of connections to the board.  If not\
@@ -329,6 +351,10 @@ class Transceiver(object):
         self._app_id_tracker = None
         self._repair_machine = repair_machine
         self._ignore_bad_ethernets = ignore_bad_ethernets
+        self._multi_packets_in_flight_n_channels = (
+            multi_packets_in_flight_n_channels)
+        self._multi_packets_in_flight_channel_waits = (
+            multi_packets_in_flight_channel_waits)
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -672,8 +698,10 @@ class Transceiver(object):
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
-            self._ignore_cores, self._ignore_links, self._max_sdram_size,
-            self._default_report_directory)
+            self._ignore_cores, self._ignore_links,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits,
+            self._max_sdram_size, self._default_report_directory)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height,
             self._repair_machine, self._ignore_bad_ethernets)
@@ -1114,7 +1142,11 @@ class Transceiver(object):
                     core_subsets.add_processor(
                         chip.x, chip.y, processor.processor_id)
 
-        process = GetCPUInfoProcess(self._scamp_connection_selector)
+        process = GetCPUInfoProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         cpu_info = process.get_cpu_info(core_subsets)
         return cpu_info
 
@@ -1234,7 +1266,10 @@ class Transceiver(object):
                 SystemVariableDefinition.iobuf_size)
 
         # read iobuf from machine
-        process = ReadIOBufProcess(self._scamp_connection_selector)
+        process = ReadIOBufProcess(
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits)
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
     def set_watch_dog_on_chip(self, x, y, watch_dog):
@@ -1463,7 +1498,11 @@ class Transceiver(object):
             0x67800000, executable, n_bytes, is_filename=is_filename)
 
         # Execute the binary on the cores on the chips where required
-        process = ApplicationRunProcess(self._scamp_connection_selector)
+        process = ApplicationRunProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.run(app_id, core_subsets, wait)
 
         # Release the lock
@@ -1730,7 +1769,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        process = WriteMemoryProcess(self._scamp_connection_selector)
+        process = WriteMemoryProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         if isinstance(data, AbstractDataReader):
             process.write_memory_from_reader(
                 x, y, cpu, base_address, data, n_bytes)
@@ -1803,7 +1846,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        process = WriteMemoryProcess(self._scamp_connection_selector)
+        process = WriteMemoryProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         if isinstance(data, AbstractDataReader):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
@@ -1862,7 +1909,11 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        process = WriteMemoryFloodProcess(self._scamp_connection_selector)
+        process = WriteMemoryFloodProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         # Ensure only one flood fill occurs at any one time
         with self._flood_write_lock:
             # Start the flood fill
@@ -1915,7 +1966,10 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
 
-        process = ReadMemoryProcess(self._scamp_connection_selector)
+        process = ReadMemoryProcess(
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits)
         return process.read_memory(x, y, cpu, base_address, length)
 
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
@@ -1952,7 +2006,10 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
 
-        process = ReadMemoryProcess(self._scamp_connection_selector)
+        process = ReadMemoryProcess(
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits)
         return process.read_link_memory(x, y, cpu, link, base_address, length)
 
     def stop_application(self, app_id):
@@ -2374,7 +2431,10 @@ class Transceiver(object):
         """
         all_tags = list()
         for conn in self.__get_connection_list(connection):
-            process = GetTagsProcess(self._scamp_connection_selector)
+            process = GetTagsProcess(
+                self._scamp_connection_selector,
+                self._multi_packets_in_flight_n_channels,
+                self._multi_packets_in_flight_channel_waits)
             all_tags.extend(process.get_tags(conn))
         return all_tags
 
@@ -2397,7 +2457,10 @@ class Transceiver(object):
         :return: the base address of the allocated memory
         :rtype: int
         """
-        process = MallocSDRAMProcess(self._scamp_connection_selector)
+        process = MallocSDRAMProcess(
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits)
         process.malloc_sdram(x, y, size, app_id, tag)
         return process.base_address
 
@@ -2413,7 +2476,11 @@ class Transceiver(object):
         :param app_id: The app ID of the allocated memory
         :type app_id: int
         """
-        process = DeAllocSDRAMProcess(self._scamp_connection_selector)
+        process = DeAllocSDRAMProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.de_alloc_sdram(x, y, app_id, base_address)
 
     def free_sdram_by_app_id(self, x, y, app_id):
@@ -2428,7 +2495,11 @@ class Transceiver(object):
         :return: The number of blocks freed
         :rtype: int
         """
-        process = DeAllocSDRAMProcess(self._scamp_connection_selector)
+        process = DeAllocSDRAMProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.de_alloc_sdram(x, y, app_id)
         return process.no_blocks_freed
 
@@ -2458,7 +2529,10 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
 
-        process = LoadMultiCastRoutesProcess(self._scamp_connection_selector)
+        process = LoadMultiCastRoutesProcess(
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits)
         process.load_routes(x, y, routes, app_id)
 
     def load_fixed_route(self, x, y, fixed_route, app_id):
@@ -2486,7 +2560,9 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         process = LoadFixedRouteRoutingEntryProcess(
-            self._scamp_connection_selector)
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits)
         process.load_fixed_route(x, y, fixed_route, app_id)
 
     def read_fixed_route(self, x, y, app_id):
@@ -2502,7 +2578,9 @@ class Transceiver(object):
         :return: the route as a fixed route entry
         """
         process = ReadFixedRouteRoutingEntryProcess(
-            self._scamp_connection_selector)
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits)
         return process.read_fixed_route(x, y, app_id)
 
     def get_multicast_routes(self, x, y, app_id=None):
@@ -2530,7 +2608,9 @@ class Transceiver(object):
         base_address = self._get_sv_data(
             x, y, SystemVariableDefinition.router_table_copy_address)
         process = GetMultiCastRoutesProcess(
-            self._scamp_connection_selector, app_id)
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits, app_id)
         return process.get_routes(x, y, base_address)
 
     def clear_multicast_routes(self, x, y):
@@ -2574,7 +2654,10 @@ class Transceiver(object):
         :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
             If a response indicates an error during the exchange
         """
-        process = ReadRouterDiagnosticsProcess(self._scamp_connection_selector)
+        process = ReadRouterDiagnosticsProcess(
+            self._scamp_connection_selector,
+            self._multi_packets_in_flight_n_channels,
+            self._multi_packets_in_flight_channel_waits)
         return process.get_router_diagnostics(x, y)
 
     def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
@@ -2879,7 +2962,11 @@ class Transceiver(object):
         :type heap: \
             :py:class:`spinnman.messages.spinnaker_boot.SystemVariableDefinition`
         """
-        process = GetHeapProcess(self._scamp_connection_selector)
+        process = GetHeapProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         return process.get_heap((x, y), heap)
 
     def fill_memory(
@@ -2904,7 +2991,11 @@ class Transceiver(object):
         :type data_type:\
             :py:class:`spinnman.processes.fill_process.FillDataType`
         """
-        process = FillProcess(self._scamp_connection_selector)
+        process = FillProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         return process.fill_memory(
             x, y, base_address, repeat_value, bytes_to_fill, data_type)
 
