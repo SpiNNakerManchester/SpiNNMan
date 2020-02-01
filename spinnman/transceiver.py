@@ -2030,7 +2030,7 @@ class Transceiver(object):
                 if is_error:
                     error_core_states = self.get_cores_in_state(
                         all_core_subsets, error_states)
-                    if len(error_states) > 0:
+                    if len(error_core_states) > 0:
                         raise SpiNNManCoresNotInStateException(
                             timeout, cpu_states, error_core_states)
 
