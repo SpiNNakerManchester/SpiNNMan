@@ -91,7 +91,7 @@ class CPUInfos(object):
         return self._cpu_infos[x, y, p]
 
     def __str__(self):
-        return self._cpu_infos.keys()
+        return str(self._cpu_infos.keys())
 
     def __repr__(self):
         return self.__str__()
