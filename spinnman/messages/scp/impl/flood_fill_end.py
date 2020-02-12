@@ -20,7 +20,7 @@ from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
 
-_NNP_FORWARD_RETRY = (0x3f << 8) | 0x18
+_NNP_FORWARD_RETRY = (0x3f << 8) | 0x1A
 _NNP_FLOOD_FILL_END = 15
 _WAIT_FLAG = 0x1 << 18
 
