@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os.path
 import time
 import logging
@@ -26,9 +41,8 @@ def generate_machine_report(report_directory, machine, connections):
         with open(file_name, "w") as f:
             _write_header(f, time_date_string, machine, connections)
             # TODO: Add further details on the target machine.
-            for x in range(machine.max_chip_x + 1):
-                for y in range(machine.max_chip_y + 1):
-                    _write_chip_router_report(f, machine, x, y)
+            for chip in machine.chips:
+                _write_chip_router_report(f, chip)
     except IOError:
         logger.exception(
             "Generate_placement_reports: Can't open file {} for writing.",
@@ -42,18 +56,16 @@ def _write_header(f, timestamp, machine, connections):
     f.write("\nGenerated: {} for target machine '{}'\n\n".format(
         timestamp, connections))
     f.write("Machine dimensions (in chips) x : {}  y : {}\n\n".format(
-        machine.max_chip_x + 1, machine.max_chip_y + 1))
+        machine.width, machine.height))
     f.write("\t\tMachine router information\n")
     f.write("\t\t==========================\n")
 
 
-def _write_chip_router_report(f, machine, x, y):
-    chip = machine.get_chip_at(x, y)
-    if chip:
-        f.write("\nInformation for chip {}:{}\n".format(chip.x, chip.y))
-        f.write("Neighbouring chips \n{}\n".format(
-            chip.router.get_neighbouring_chips_coords()))
-        f.write("Router list of links for this chip are: \n")
-        for link in chip.router.links:
-            f.write("\t{}\n".format(link))
-        f.write("\t\t==========================\n")
+def _write_chip_router_report(f, chip):
+    f.write("\nInformation for chip {}:{}\n".format(chip.x, chip.y))
+    f.write("Neighbouring chips \n{}\n".format(
+        chip.router.get_neighbouring_chips_coords()))
+    f.write("Router list of links for this chip are: \n")
+    for link in chip.router.links:
+        f.write("\t{}\n".format(link))
+    f.write("\t\t==========================\n")

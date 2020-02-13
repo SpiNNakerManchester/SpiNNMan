@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import print_function
 import time
 import sys
@@ -28,9 +43,9 @@ def locate_connected_machine(handler):
 
 
 if __name__ == "__main__":
-    def ctrlc_handler(signal, frame):  # @UnusedVariable
+    def ctrlc_handler(sig, frame):  # @UnusedVariable
         """
-        :param signal:
+        :param sig:
         :param frame:
         :return: Never returns as it causes a sys.exit()
         """

@@ -1,4 +1,20 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import traceback
+from collections import OrderedDict
 
 
 class SpinnmanException(Exception):
@@ -210,20 +226,81 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         return self._response
 
 
+class _Group(object):
+    def __init__(self, trace_back):
+        self.trace_back = trace_back
+        self.chip_core = "["
+        self._separator = ""
+
+    def finalise(self):
+        self.chip_core += "]"
+
+    def add_coord(self, sdp_header):
+        self.chip_core += "{}[{}:{}:{}]".format(
+            self._separator,
+            sdp_header.destination_chip_x,
+            sdp_header.destination_chip_y,
+            sdp_header.destination_cpu)
+        self._separator = ","
+
+    @staticmethod
+    def group_exceptions(error_requests, exceptions, tracebacks):
+        """ Groups exceptions into a form usable by an exception.
+
+        :param error_requests: the error requests
+        :param exceptions: the exceptions
+        :param tracebacks: the tracebacks
+        :return: a sorted exception pile
+        :rtype: dict(Exception,_Group)
+        """
+        data = OrderedDict()
+        for error_request, exception, trace_back in zip(
+                error_requests, exceptions, tracebacks):
+            for stored_exception in data.keys():
+                if isinstance(exception, type(stored_exception)):
+                    found_exception = stored_exception
+                    break
+            else:
+                data[exception] = _Group(trace_back)
+                found_exception = exception
+            data[found_exception].add_coord(error_request.sdp_header)
+        for exception in data:
+            data[exception].finalise()
+        return data.items()
+
+
+class SpinnmanGroupedProcessException(SpinnmanException):
+    """ Encapsulates exceptions from processes which communicate with a\
+        collection of cores/chips
+    """
+    def __init__(self, error_requests, exceptions, tracebacks):
+        problem = "Exceptions found were:\n"
+        for exception, description in _Group.group_exceptions(
+                error_requests, exceptions, tracebacks):
+            problem += \
+                "   Received exception class: {}\n" \
+                "       With message {}\n" \
+                "       When sending to {}\n" \
+                "       Stack trace: {}\n".format(
+                    exception.__class__.__name__, str(exception),
+                    description.chip_core,
+                    traceback.format_tb(description.trace_back))
+        super(SpinnmanGroupedProcessException, self).__init__(problem)
+
+
 class SpinnmanGenericProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with some\
         core/chip
     """
     def __init__(self, exception, tb, x, y, p, tb2=None):
         # pylint: disable=too-many-arguments
-        problem = \
-            "\n     Received exception class: {} \n" \
-            "     With message: {} \n" \
-            "     When sending to {}:{}:{}\n" \
+        super(SpinnmanGenericProcessException, self).__init__(
+            "\n     Received exception class: {} \n"
+            "     With message: {} \n"
+            "     When sending to {}:{}:{}\n"
             "     Stack trace: {}\n".format(
                 exception.__class__.__name__, str(exception), x, y, p,
-                traceback.format_tb(tb))
-        super(SpinnmanGenericProcessException, self).__init__(problem)
+                traceback.format_tb(tb)))
 
         self._stored_exception = exception
         if tb2 is not None:
@@ -268,3 +345,17 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
     @property
     def packet(self):
         return self._packet
+
+
+class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
+    """ Cores failed to reach a given state within a timeout
+    """
+
+    def __init__(self, timeout, expected_states, failed_core_states):
+        msg = "waiting for cores to reach one of {}".format(
+            expected_states)
+        super(SpiNNManCoresNotInStateException, self).__init__(msg, timeout)
+        self._failed_core_states = failed_core_states
+
+    def failed_core_states(self):
+        return self._failed_core_states

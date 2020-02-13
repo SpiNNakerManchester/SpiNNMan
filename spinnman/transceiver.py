@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 # pylint: disable=too-many-arguments
 import random
 import struct
@@ -16,16 +31,17 @@ from spinn_storage_handlers import FileDataReader
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
     CPU_USER_0_START_ADDRESS, CPU_USER_1_START_ADDRESS,
-    CPU_USER_2_START_ADDRESS, IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT,
-    SYSTEM_VARIABLE_BASE_ADDRESS, UDP_BOOT_CONNECTION_DEFAULT_PORT,
-    NO_ROUTER_DIAGNOSTIC_FILTERS, ROUTER_REGISTER_BASE_ADDRESS,
-    ROUTER_DEFAULT_FILTERS_MAX_POSITION, ROUTER_FILTER_CONTROLS_OFFSET,
-    ROUTER_DIAGNOSTIC_FILTER_SIZE)
+    CPU_USER_2_START_ADDRESS, CPU_USER_3_START_ADDRESS,
+    IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, SYSTEM_VARIABLE_BASE_ADDRESS,
+    UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
+    ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
+    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
+    BOOT_RETRIES)
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
-    SpinnmanUnexpectedResponseCodeException,
-    SpinnmanUnsupportedOperationException, SpinnmanInvalidPacketException)
+    SpinnmanUnexpectedResponseCodeException, SpinnmanInvalidPacketException,
+    SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
@@ -79,8 +95,9 @@ _ONE_LONG = struct.Struct("<Q")
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, ignored_links=None,
-        max_core_id=None, auto_detect_bmp=False, scamp_connections=None,
-        boot_port_no=None, max_sdram_size=None):
+        auto_detect_bmp=False, scamp_connections=None,
+        boot_port_no=None, max_sdram_size=None, repair_machine=False,
+        ignore_bad_ethernets=True, default_report_directory=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         BootConnection on port 54321 (the default boot port), optionally\
@@ -105,9 +122,6 @@ def create_transceiver_from_hostname(
         Requests for a "machine" will have these links excluded, as if they \
         never existed.
     :type ignored_links: set of (int, int, int)
-    :param max_core_id: The maximum core ID in any discovered machine.\
-        Requests for a "machine" will only have core IDs up to this value.
-    :type max_core_id: int
     :param version: the type of SpiNNaker board used within the SpiNNaker\
         machine being used. If a spinn-5 board, then the version will be 5,\
         spinn-3 would equal 3 and so on.
@@ -126,6 +140,24 @@ def create_transceiver_from_hostname(
     :param max_sdram_size: the max size each chip can say it has for SDRAM \
         (mainly used in debugging purposes)
     :type max_sdram_size: int or None
+    :param repair_machine: Flag to set the behaviour if a repairable error
+        is found on the machine.
+        If true will create a machine without the problamatic bits.
+        (See machine_factory.machine_repair)
+        If False get machine will raise an Exception if a problamatic
+        machine is discovered.
+    :type repair_machine: bool
+    :param ignore_bad_ethernets: Flag to say that ip_address information
+        on none ethernet chips should be ignored.
+        None_ethernet chips are defined here as ones that do not report
+        themselves their nearest ethernet.
+        The bad ipaddress is always logged
+        If True the ipaddress is ignored
+        If False the chip with the bad ipaddress is removed.
+    :type ignore_bad_ethernets: bool
+    :param default_report_directory: Directory to write any reports too. \
+        If None the current directory will be used.
+    :type default_report_directory: str or None
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: \
@@ -168,9 +200,11 @@ def create_transceiver_from_hostname(
 
     return Transceiver(
         version, connections=connections, ignore_chips=ignore_chips,
-        ignore_cores=ignore_cores, max_core_id=max_core_id,
+        ignore_cores=ignore_cores,
         ignore_links=ignored_links, scamp_connections=scamp_connections,
-        max_sdram_size=max_sdram_size)
+        max_sdram_size=max_sdram_size, repair_machine=repair_machine,
+        ignore_bad_ethernets=ignore_bad_ethernets,
+        default_report_directory=default_report_directory)
 
 
 class Transceiver(object):
@@ -193,21 +227,23 @@ class Transceiver(object):
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
+        "_default_report_directory",
         "_flood_write_lock",
         "_height",
+        "_ignore_bad_ethernets",
         "_ignore_chips",
         "_ignore_cores",
         "_ignore_links",
         "_iobuf_size",
         "_machine",
         "_machine_off",
-        "_max_core_id",
         "_max_sdram_size",
         "_multicast_sender_connections",
         "_n_chip_execute_locks",
         "_nearest_neighbour_id",
         "_nearest_neighbour_lock",
         "_original_connections",
+        "_repair_machine",
         "_scamp_connection_selector",
         "_scamp_connections",
         "_scp_sender_connections",
@@ -220,8 +256,9 @@ class Transceiver(object):
 
     def __init__(
             self, version, connections=None, ignore_chips=None,
-            ignore_cores=None, ignore_links=None, max_core_id=None,
-            scamp_connections=None, max_sdram_size=None):
+            ignore_cores=None, ignore_links=None,
+            scamp_connections=None, max_sdram_size=None, repair_machine=False,
+            ignore_bad_ethernets=True, default_report_directory=None):
         """
         :param version: The version of the board being connected to
         :type version: int
@@ -243,10 +280,6 @@ class Transceiver(object):
             machine. Requests for a "machine" will have these links excluded,\
             as if they never existed.
         :type ignore_links: set of (int, int, int)
-        :param max_core_id: The maximum core ID in any discovered machine.\
-            Requests for a "machine" will only have core IDs up to and\
-            including this value.
-        :type max_core_id: int
         :param max_sdram_size: the max size each chip can say it has for SDRAM\
             (mainly used in debugging purposes)
         :type max_sdram_size: int or None
@@ -254,6 +287,24 @@ class Transceiver(object):
         :type scamp_connections: list of \
             :py:class:`spinnman.connections.SocketAddress_With_Chip`
             or None
+        :param repair_machine: Flag to set the behaviour if a repairable error
+            is found on the machine.
+            If true will create a machine without the problamatic bits.
+            (See machine_factory.machine_repair)
+            If False get machine will raise an Exception if a problamatic
+            machine is discovered.
+        :type repair_machine: bool
+        :param ignore_bad_ethernets: Flag to say that ip_address information
+            on none ethernet chips should be ignored.
+            None_ethernet chips are defined here as ones that do not report
+            themselves their nearest ethernet.
+            The bad ipaddress is always logged
+            If True the ipaddress is ignored
+            If False the chip with the bad ipaddress is removed.
+        :type ignore_bad_ethernets: bool
+        :param default_report_directory: Directory to write any reports too. \
+            If None the current directory will be used.
+        :type default_report_directory: str or None
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board, or if no \
             connections to the board can be found (if connections is None)
@@ -273,10 +324,11 @@ class Transceiver(object):
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
         self._ignore_links = ignore_links if ignore_links is not None else {}
-        self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
         self._iobuf_size = None
         self._app_id_tracker = None
+        self._repair_machine = repair_machine
+        self._ignore_bad_ethernets = ignore_bad_ethernets
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -364,6 +416,7 @@ class Transceiver(object):
         self._check_bmp_connections()
 
         self._machine_off = False
+        self._default_report_directory = default_report_directory
 
     def _identify_connections(self, connections):
         for conn in connections:
@@ -474,7 +527,7 @@ class Transceiver(object):
         for _ in xrange(_CONNECTION_CHECK_RETRIES):
             try:
                 sender = SendSingleCommandProcess(connection_selector)
-                chip_info = sender.execute(
+                chip_info = sender.execute(  # pylint: disable=no-member
                     GetChipInfo(chip_x, chip_y)).chip_info
                 if not chip_info.is_ethernet_available:
                     time.sleep(0.1)
@@ -606,36 +659,6 @@ class Transceiver(object):
             connection_to_use = connection
         connection_to_use.send_sdp_message(message)
 
-    def send_multicast_message(self, x, y, multicast_message, connection=None):
-        """ Sends a multicast message to the board (currently unsupported)
-
-        :param x: The x-coordinate of the chip where the message should first\
-            arrive on the board
-        :type x: int
-        :param y: The y-coordinate of the chip where the message should first\
-            arrive on the board
-        :type y: int
-        :param multicast_message: A multicast message to send
-        :type multicast_message:\
-            :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-        :param connection: A specific connection over which to send the\
-            message. If not specified, an appropriate connection is chosen\
-            automatically.
-        :type connection:\
-            :py:class:`spinnman.connections.abstract_classes.MulticastSender`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: \
-            If there is an error communicating with the board
-        :raise spinnman.exceptions.SpinnmanUnsupportedOperationException:
-            * If there is no connection that supports sending over multicast\
-                (or the given connection does not)
-            * If there is no connection that can make the packet arrive at\
-                the selected chip (ignoring routing tables)
-        """
-        raise SpinnmanUnsupportedOperationException(
-            "This operation is currently not supported in spinnman.")
-
     def _update_machine(self):
         """ Get the current machine status and store it
         """
@@ -649,20 +672,18 @@ class Transceiver(object):
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
-            self._ignore_cores, self._ignore_links, self._max_core_id,
-            self._max_sdram_size)
+            self._ignore_cores, self._ignore_links, self._max_sdram_size,
+            self._default_report_directory)
         self._machine = get_machine_process.get_machine_details(
-            version_info.x, version_info.y, self._width, self._height)
+            version_info.x, version_info.y, self._width, self._height,
+            self._repair_machine, self._ignore_bad_ethernets)
 
         # update the SCAMP selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
 
-        # Remove any chips that are unreachable
-        self._machine.remove_unreachable_chips()
-
         # Work out and add the SpiNNaker links and FPGA links
-        self._machine.add_spinnaker_links(self._version)
-        self._machine.add_fpga_links(self._version)
+        self._machine.add_spinnaker_links()
+        self._machine.add_fpga_links()
 
         # TODO: Actually get the existing APP_IDs in use
         self._app_id_tracker = AppIdTracker()
@@ -839,7 +860,7 @@ class Transceiver(object):
     def get_scamp_version(
             self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-            connection_selector=None):
+            connection_selector=None, n_retries=N_RETRIES):
         """ Get the version of SCAMP which is running on the board.
 
         :param connection_selector: the connection to send the SCAMP\
@@ -862,7 +883,7 @@ class Transceiver(object):
         """
         if connection_selector is None:
             connection_selector = self._scamp_connection_selector
-        process = GetVersionProcess(connection_selector)
+        process = GetVersionProcess(connection_selector, n_retries)
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
     def boot_board(
@@ -1024,7 +1045,7 @@ class Transceiver(object):
         current_tries_to_go = tries_to_go
         while version_info is None and current_tries_to_go > 0:
             try:
-                version_info = self.get_scamp_version()
+                version_info = self.get_scamp_version(n_retries=BOOT_RETRIES)
                 if self.__is_default_destination(version_info):
                     version_info = None
                     time.sleep(0.1)
@@ -1098,62 +1119,65 @@ class Transceiver(object):
         return cpu_info
 
     def _get_sv_data(self, x, y, data_item):
+        addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
+        if data_item.data_type.is_byte_array:
+            # Do not need to decode the bytes of a byte array
+            return self.read_memory(x, y, addr, data_item.array_size)
         return struct.unpack_from(
             data_item.data_type.struct_code,
-            self.read_memory(
-                x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
-                data_item.data_type.value))[0]
+            self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
-    def get_user_0_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_0_register_address_from_core(p):
         """ Get the address of user 0 for a given processor on the board
 
         :param p: The ID of the processor to get the user 0 address from
         :type p: int
         :return: The address for user 0 register for this processor
         :rtype: int
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
-            If a packet is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If x, y, p is not a valid processor
-            * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
-            If a response indicates an error during the exchange
         """
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
-    def get_user_1_register_address_from_core(self, p):
+    def read_user_0(self, x, y, p):
+        addr = self.get_user_0_register_address_from_core(p)
+        return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
+
+    def read_user_1(self, x, y, p):
+        addr = self.get_user_1_register_address_from_core(p)
+        return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
+
+    @staticmethod
+    def get_user_1_register_address_from_core(p):
         """ Get the address of user 1 for a given processor on the board
 
         :param p: The ID of the processor to get the user 1 address from
         :type p: int
         :return: The address for user 1 register for this processor
         :rtype: int
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
-            If a packet is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If x, y, p is not a valid processor
-            * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
-            If a response indicates an error during the exchange
         """
         return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
-    def get_user_2_register_address_from_core(self, p):
+    @staticmethod
+    def get_user_2_register_address_from_core(p):
         """ Get the address of user 2 for a given processor on the board
 
-        :param p: The ID of the processor to get the user 0 address from
+        :param p: The ID of the processor to get the user 2 address from
         :type p: int
-        :return: The address for user 0 register for this processor
+        :return: The address for user 2 register for this processor
         :rtype: int
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
-            If a packet is received that is not in the valid format
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
-            * If x, y, p is not a valid processor
-            * If a packet is received that has invalid parameters
-        :raise spinnman.exceptions.SpinnmanUnexpectedResponseCodeException: \
-            If a response indicates an error during the exchange
         """
         return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
+
+    @staticmethod
+    def get_user_3_register_address_from_core(p):
+        """ Get the address of user 3 for a given processor on the board
+
+        :param p: The ID of the processor to get the user 3 address from
+        :type p: int
+        :return: The address for user 3 register for this processor
+        :rtype: int
+        """
+        return get_vcpu_address(p) + CPU_USER_3_START_ADDRESS
 
     def get_cpu_information_from_core(self, x, y, p):
         """ Get information about a specific processor on the board
@@ -1304,7 +1328,7 @@ class Transceiver(object):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(CountState(app_id, state))
-        return response.count
+        return response.count  # pylint: disable=no-member
 
     def execute(
             self, x, y, processors, executable, app_id, n_bytes=None,
@@ -1598,7 +1622,7 @@ class Transceiver(object):
             self._bmp_connection(cabinet, frame), timeout=1.0)
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
-        return response.fpga_register
+        return response.fpga_register  # pylint: disable=no-member
 
     def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
                             board):
@@ -1637,7 +1661,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(ReadADC(board))
-        return response.adc_info
+        return response.adc_info  # pylint: disable=no-member
 
     def read_bmp_version(self, board, cabinet, frame):
         """ Read the BMP version
@@ -1652,7 +1676,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(BMPGetVersion(board))
-        return response.version_info
+        return response.version_info  # pylint: disable=no-member
 
     def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
@@ -1998,12 +2022,17 @@ class Transceiver(object):
 
             # If the count is too small, check for error states
             if processors_ready < len(all_core_subsets):
+                is_error = False
                 for cpu_state in error_states:
                     error_cores = self.get_core_state_count(app_id, cpu_state)
                     if error_cores > 0:
-                        raise SpinnmanException(
-                            "{} cores have reached an error state {}:".format(
-                                error_cores, cpu_state))
+                        is_error = True
+                if is_error:
+                    error_core_states = self.get_cores_in_state(
+                        all_core_subsets, error_states)
+                    if len(error_core_states) > 0:
+                        raise SpiNNManCoresNotInStateException(
+                            timeout, cpu_states, error_core_states)
 
                 # If we haven't seen an error, increase the tries, and
                 # do a full check if required
@@ -2020,16 +2049,14 @@ class Transceiver(object):
 
         # If we haven't reached the final state, do a final full check
         if processors_ready < len(all_core_subsets):
-            cores_in_state = self.get_cores_in_state(
+            cores_not_in_state = self.get_cores_not_in_state(
                 all_core_subsets, cpu_states)
 
             # If we are sure we haven't reached the final state,
             # report a timeout error
-            if len(cores_in_state) != len(all_core_subsets):
-                raise SpinnmanTimeoutException(
-                    "waiting for cores {} to reach one of {}".format(
-                        all_core_subsets, cpu_states),
-                    timeout)
+            if len(cores_not_in_state) != 0:
+                raise SpiNNManCoresNotInStateException(
+                    timeout, cpu_states, cores_not_in_state)
 
     def get_cores_in_state(self, all_core_subsets, states):
         """ Get all cores that are in a given state or set of states
@@ -2045,15 +2072,15 @@ class Transceiver(object):
         :return: Core subsets object containing cores in the given state(s)
         """
         core_infos = self.get_cpu_information(all_core_subsets)
-        cores_in_state = CoreSubsets()
+        cores_in_state = CPUInfos()
         for core_info in core_infos:
             if hasattr(states, "__iter__"):
                 if core_info.state in states:
                     cores_in_state.add_processor(
-                        core_info.x, core_info.y, core_info.p)
+                        core_info.x, core_info.y, core_info.p, core_info)
             elif core_info.state == states:
                 cores_in_state.add_processor(
-                    core_info.x, core_info.y, core_info.p)
+                    core_info.x, core_info.y, core_info.p, core_info)
 
         return cores_in_state
 
@@ -2634,7 +2661,7 @@ class Transceiver(object):
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(ReadMemory(x, y, memory_position, 4))
         return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
-            response.data, response.offset)[0])
+            response.data, response.offset)[0])  # pylint: disable=no-member
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
                                          counter_ids=None):
