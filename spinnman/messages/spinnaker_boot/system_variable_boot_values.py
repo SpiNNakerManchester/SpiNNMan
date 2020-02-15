@@ -1,7 +1,19 @@
-try:
-    from collections.abc import namedtuple
-except ImportError:
-    from collections import namedtuple
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from collections import namedtuple
 import struct
 from enum import Enum
 
@@ -32,6 +44,11 @@ class _DataType(Enum):
     @property
     def struct_code(self):
         return self._struct_code
+
+    @property
+    def is_byte_array(self):
+        # can't use BYTE_ARRAY.value directly here
+        return self._value_ == 16
 
 
 class _Definition(namedtuple("_Definition",

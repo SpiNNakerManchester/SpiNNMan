@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from __future__ import print_function
 import unittest
 import struct
@@ -19,13 +34,12 @@ class MockWriteTransceiver(Transceiver):
 
     def __init__(
             self, version, connections=None, ignore_chips=None,
-            ignore_cores=None, ignore_links=None, max_core_id=None,
+            ignore_cores=None, ignore_links=None,
             scamp_connections=None, max_sdram_size=None):
         super(MockWriteTransceiver, self).__init__(
             version, connections=connections, ignore_chips=ignore_chips,
             ignore_cores=ignore_cores, ignore_links=ignore_links,
-            max_core_id=max_core_id, scamp_connections=scamp_connections,
-            max_sdram_size=max_sdram_size)
+            scamp_connections=scamp_connections, max_sdram_size=max_sdram_size)
         self.written_memory = list()
 
     def get_machine_details(self):

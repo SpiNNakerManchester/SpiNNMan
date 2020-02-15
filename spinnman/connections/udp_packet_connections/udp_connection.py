@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import logging
 import socket
 import select
@@ -145,7 +160,7 @@ class UDPConnection(Connection):
             return self._socket.recv(300)
         except socket.timeout as e:
             raise_from(SpinnmanTimeoutException("receive", timeout), e)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             raise_from(SpinnmanIOException(str(e)), e)
 
     def receive_with_address(self, timeout=None):
@@ -166,7 +181,7 @@ class UDPConnection(Connection):
             return self._socket.recvfrom(300)
         except socket.timeout as e:
             raise_from(SpinnmanTimeoutException("receive", timeout), e)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             raise_from(SpinnmanIOException(str(e)), e)
 
     def send(self, data):
@@ -182,7 +197,7 @@ class UDPConnection(Connection):
                 " this connection")
         try:
             self._socket.send(data)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             raise_from(SpinnmanIOException(str(e)), e)
 
     def send_to(self, data, address):
@@ -196,14 +211,14 @@ class UDPConnection(Connection):
         """
         try:
             self._socket.sendto(data, address)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             raise_from(SpinnmanIOException(str(e)), e)
 
     @overrides(Connection.close)
     def close(self):
         try:
             self._socket.shutdown(socket.SHUT_WR)
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             pass
         self._socket.close()
 
