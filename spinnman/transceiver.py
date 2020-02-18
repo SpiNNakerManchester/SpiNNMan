@@ -751,7 +751,6 @@ class Transceiver(object):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
                 self._udp_scamp_connections[ip_address] = conn
-                self._scamp_connections.append(conn)
                 new_connections.append(conn)
             else:
                 logger.warning(
@@ -759,6 +758,10 @@ class Transceiver(object):
                     "cannot be contacted", ip_address, x, y)
 
         # Update the connection queues after finding new connections
+        self._scamp_connection_selector = self._identify_connections(
+            new_connections)
+        if self._machine is not None:
+            self._scamp_connection_selector.set_machine(self._machine)
         return new_connections
 
     def _search_for_proxies(self, x, y):
