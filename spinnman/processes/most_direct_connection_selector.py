@@ -49,10 +49,14 @@ class MostDirectConnectionSelector(
     def get_next_connection(self, message):
         if self._machine is None or len(self._connections) == 1:
             return self._first_connection
-
-        chip = self._machine.get_chip_at(
-            message.sdp_header.destination_chip_x,
-            message.sdp_header.destination_chip_y)
+        x = message.sdp_header.destination_chip_x
+        y = message.sdp_header.destination_chip_y
+        boot_chip = self._machine.boot_chip
+        if x == message.DEFAULT_DEST_X_COORD:
+            x = boot_chip.x
+        if y == message.DEFAULT_DEST_Y_COORD:
+            y = boot_chip.y
+        chip = self._machine.get_chip_at(x, y)
         key = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
 
         if key not in self._connections:
