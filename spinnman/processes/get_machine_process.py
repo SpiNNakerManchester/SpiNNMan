@@ -16,6 +16,7 @@
 from collections import defaultdict
 import logging
 import functools
+import struct
 from os.path import join
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
@@ -430,7 +431,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 scp_read_response.offset,
                 scp_read_response.offset + chipinfo.n_cores):
             p_to_v_map[i-scp_read_response.offset] = \
-                int(scp_read_response.data[i])
+                struct.unpack_from("b", scp_read_response.data, i)[0]
         # report_ignore (like logger) formats so dict as a param
         self._report_ignore("{}", p_to_v_map)
         self._virtual_map[xy] = p_to_v_map
