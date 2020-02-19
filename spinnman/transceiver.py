@@ -748,9 +748,6 @@ class Transceiver(object):
             # check if it works
             if self._check_connection(
                     MostDirectConnectionSelector(None, [conn]), x, y):
-                self._scp_sender_connections.append(conn)
-                self._all_connections.add(conn)
-                self._udp_scamp_connections[ip_address] = conn
                 new_connections.append(conn)
             else:
                 logger.warning(
