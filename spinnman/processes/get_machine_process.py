@@ -429,8 +429,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         for i in range(
                 scp_read_response.offset,
                 scp_read_response.offset + chipinfo.n_cores):
-            p_to_v_map[i-scp_read_response.offset] = \
-                int(scp_read_response.data[i])
+           p_to_v_map[i-scp_read_response.offset] = \
+                ord(scp_read_response.data[i])
         # report_ignore (like logger) formats so dict as a param
         self._report_ignore("{}", p_to_v_map)
         self._virtual_map[xy] = p_to_v_map
