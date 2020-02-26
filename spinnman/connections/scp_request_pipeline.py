@@ -224,7 +224,6 @@ class SCPRequestPipeLine(object):
             # If the response can be retried, retry it
             if result in RETRY_CODES:
                 try:
-                    time.sleep(0.1)
                     self._resend(seq, request_sent, str(result))
                     self._n_retry_code_resent += 1
                 except Exception as e:  # pylint: disable=broad-except
@@ -239,12 +238,16 @@ class SCPRequestPipeLine(object):
                     response.read_bytestring(raw_data, offset)
                     if self._callbacks[seq] is not None:
                         self._callbacks[seq](response)
-                except Exception as e:  # pylint: disable=broad-except
-                    self._error_callbacks[seq](
-                        request_sent, e, sys.exc_info()[2])
 
-                # Remove the sequence from the outstanding responses
-                self._remove_record(seq)
+                    # Remove the sequence from the outstanding responses
+                    self._remove_record(seq)
+                except Exception:  # pylint: disable=broad-except
+                    try:
+                        # If we don't get a valid response, retry if possible
+                        self._resend(seq, request_sent, str(result))
+                    except Exception as e:  # pylint: disable=broad-except
+                        self._error_callbacks[seq](
+                            request_sent, e, sys.exc_info()[2])
 
     def _handle_receive_timeout(self):
         self._n_timeouts += 1
@@ -281,7 +284,8 @@ class SCPRequestPipeLine(object):
                     request_sent.sdp_header.destination_cpu,
                     self._n_retries, self._retry_reason[seq]))
 
-        # If the request can be retried, retry it
+        # If the request can be retried, retry it (but wait a little first)
+        time.sleep(0.1)
         self._retries[seq] -= 1
         self._in_progress += 1
         self._requests[seq] = request_sent
