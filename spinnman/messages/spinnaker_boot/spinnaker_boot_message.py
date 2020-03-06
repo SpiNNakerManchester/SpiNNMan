@@ -36,20 +36,14 @@ class SpinnakerBootMessage(object):
     def __init__(self, opcode, operand_1, operand_2, operand_3, data=None,
                  offset=0):
         """
-        :param opcode: The operation of this packet
-        :type opcode:\
-            :py:class:`spinnman.messages.spinnaker_boot.SpinnakerBootOpCode`
-        :param operand_1: The first operand
-        :type operand_1: int
-        :param operand_2: The second operand
-        :type operand_2: int
-        :param operand_3: The third operand
-        :type operand_3: int
+        :param SpinnakerBootOpCode opcode: The operation of this packet
+        :param int operand_1: The first operand
+        :param int operand_2: The second operand
+        :param int operand_3: The third operand
         :param data: The optional data, up to 256 words
-        :type data: str
-        :param offset: The offset of the valid data
-        :type offset: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :type data: bytes or bytearray
+        :param int offset: The offset of the valid data
+        :raise SpinnmanInvalidParameterException:
             If the opcode is not a valid value
         """
         # pylint: disable=too-many-arguments
@@ -69,9 +63,7 @@ class SpinnakerBootMessage(object):
     def opcode(self):
         """ The operation of this packet
 
-        :return: The operation code
-        :rtype:\
-            :py:class:`spinnman.messages.spinnaker_boot.SpinnakerBootOpCode`
+        :rtype: SpinnakerBootOpCode
         """
         return self._opcode
 
@@ -79,7 +71,6 @@ class SpinnakerBootMessage(object):
     def operand_1(self):
         """ The first operand
 
-        :return: The operand
         :rtype: int
         """
         return self._operand_1
@@ -88,7 +79,6 @@ class SpinnakerBootMessage(object):
     def operand_2(self):
         """ The second operand
 
-        :return: The second operand
         :rtype: int
         """
         return self._operand_2
@@ -97,23 +87,23 @@ class SpinnakerBootMessage(object):
     def operand_3(self):
         """ The third operand
 
-        :return: The third operand
         :rtype: int
         """
         return self._operand_3
 
     @property
     def data(self):
-        """ The data
+        """ The data, or None if no data
 
-        :return: The data or None if no data
-        :rtype: bytearray
+        :rtype: bytes or bytearray
         """
         return self._data
 
     @property
     def bytestring(self):
         """ The message as a bytestring
+
+        :rtype: bytes
         """
         data = b""
         if self._data is not None:
@@ -124,6 +114,11 @@ class SpinnakerBootMessage(object):
 
     @staticmethod
     def from_bytestring(data, offset):
+        """
+        :param bytes data:
+        :param int offset:
+        :rtype: SpinnakerBootMessage
+        """
         (opcode_value, operand_1, operand_2, operand_3) = \
             _PATTERN_2xIIII.unpack_from(data, offset)
         the_data = None

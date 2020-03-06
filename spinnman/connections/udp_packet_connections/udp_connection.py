@@ -42,23 +42,20 @@ class UDPConnection(Connection):
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
         """
-        :param local_host: The local host name or IP address to bind to.\
-            If not specified defaults to bind to all interfaces, unless\
-            remote_host is specified, in which case binding is done to the\
+        :param str local_host: The local host name or IP address to bind to.
+            If not specified defaults to bind to all interfaces, unless
+            remote_host is specified, in which case binding is done to the
             IP address that will be used to send packets
-        :type local_host: str or None
-        :param local_port: The local port to bind to, between 1025 and 65535.\
-            If not specified, defaults to a random unused local port
-        :type local_port: int
-        :param remote_host: The remote host name or IP address to send packets\
-            to. If not specified, the socket will be available for listening\
-            only, and will throw and exception if used for sending
-        :type remote_host: str or None
-        :param remote_port: The remote port to send packets to.  If\
-            remote_host is None, this is ignored.  If remote_host is specified\
-            specified, this must also be specified for the connection to allow\
+        :param int local_port: The local port to bind to, between 1025 and
+            65535. If not specified, defaults to a random unused local port
+        :param str remote_host: The remote host name or IP address to send
+            packets to. If not specified, the socket will be available for
+            listening only, and will throw and exception if used for sending
+        :param int remote_port: The remote port to send packets to.  If
+            remote_host is None, this is ignored.  If remote_host is specified
+            specified, this must also be specified for the connection to allow
             sending
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :raise SpinnmanIOException:
             If there is an error setting up the communication channel
         """
 

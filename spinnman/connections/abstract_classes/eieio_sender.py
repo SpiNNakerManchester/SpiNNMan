@@ -29,9 +29,8 @@ class EIEIOSender(Connection):
     def send_eieio_message(self, eieio_message):
         """ Sends an EIEIO message down this connection
 
-        :param eieio_message: The EIEIO message to be sent
-        :type eieio_message: \
-            :py:class:`spinnman.messages.eieio.AbstractEIEIOMessage`
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :param AbstractEIEIOMessage eieio_message:
+            The EIEIO message to be sent
+        :raise SpinnmanIOException:
             If there is an error sending the message
         """

@@ -30,8 +30,8 @@ class Connection(object):
 
         :return: True if the medium is connected, False otherwise
         :rtype: bool
-        :raise spinnman.exceptions.SpinnmanIOException: \
-            If there is an error when determining the connectivity of the\
+        :raise SpinnmanIOException:
+            If there is an error when determining the connectivity of the
             medium.
         """
 
@@ -41,5 +41,4 @@ class Connection(object):
 
         :return: Nothing is returned
         :rtype: None
-        :raise None: No known exceptions are raised
         """

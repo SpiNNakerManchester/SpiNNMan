@@ -45,14 +45,12 @@ class EIEIOCommandHeader(object):
 
         :param data: The bytestring to read the data from
         :type data: str or bytes
-        :param offset: The offset where the valid data starts
-        :type offset: int
+        :param int offset: The offset where the valid data starts
         :return: an EIEIO command header
-        :rtype:\
-            :py:class:`EIEIOCommandHeader`
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :rtype: EIEIOCommandHeader
+        :raise SpinnmanIOException:
             If there is an error reading from the reader
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If there is an error setting any of the values
         """
         command_header = _ONE_SHORT.unpack_from(data, offset)[0]

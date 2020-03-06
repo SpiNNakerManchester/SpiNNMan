@@ -31,13 +31,11 @@ class RouterDiagnostics(object):
 
     def __init__(self, control_register, error_status, register_values):
         """
-        :param control_register: The value of the control register
-        :type control_register: int
-        :param error_status: The value of the error_status
-        :type error_status: int
-        :param register_values: The values of the 16 router registers
-        :type register_values: iterable(int)
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :param int control_register: The value of the control register
+        :param int error_status: The value of the error_status
+        :param iterable(int) register_values:
+            The values of the 16 router registers
+        :raise SpinnmanInvalidParameterException:
             If the number of register values is not 16
         """
         if len(register_values) != 16:

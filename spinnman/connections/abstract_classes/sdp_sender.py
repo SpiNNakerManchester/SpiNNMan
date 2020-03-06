@@ -29,9 +29,8 @@ class SDPSender(Connection):
     def send_sdp_message(self, sdp_message):
         """ Sends an SDP message down this connection
 
-        :param sdp_message: The SDP message to be sent
-        :type sdp_message: spinnman.messages.sdp.sdp_message.SDPMessage
+        :param SDPMessage sdp_message: The SDP message to be sent
         :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :raise SpinnmanIOException:
             If there is an error sending the message.
         """
