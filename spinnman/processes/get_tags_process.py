@@ -26,6 +26,11 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         "_tag_info"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetTagsProcess, self).__init__(connection_selector)
         self._tag_info = None
         self._tags = None

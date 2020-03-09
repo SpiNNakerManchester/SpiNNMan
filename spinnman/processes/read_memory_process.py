@@ -26,6 +26,11 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
         "_view"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(ReadMemoryProcess, self).__init__(connection_selector)
         self._view = None
 

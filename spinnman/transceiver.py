@@ -463,7 +463,6 @@ class Transceiver(object):
     def _check_bmp_connections(self):
         """ Check that the BMP connections are actually connected to valid BMPs
 
-        :rtype: None
         :raise SpinnmanIOException: when the conn is not linked to a BMP s
         """
         # check that the UDP BMP conn is actually connected to a BMP
@@ -598,7 +597,7 @@ class Transceiver(object):
         :param list(Connection) connections:
             the list of connections to locate a random one from
         :return: a connection object
-        :rtype: Connection
+        :rtype: Connection or None
         """
         if not connections:
             return None
@@ -681,7 +680,7 @@ class Transceiver(object):
             discovery mechanism will be used.  Note that an exception will be\
             thrown if no initial connections can be found to the board.
 
-        :return: An iterable of discovered connections, not including the\
+        :return: An iterable of discovered connections, not including the
             initially given connections in the constructor
         :rtype: list(SCAMPConnection)
         :raise SpinnmanIOException:
@@ -749,7 +748,7 @@ class Transceiver(object):
 
         :param int x: The x-coordinate of the chip
         :param int y: The y-coordinate of the chip
-        :return: connection or None
+        :return: the connection to use connection
         :rtype: None or SCAMPConnection
         """
         for connection in self._scamp_connections:
@@ -764,7 +763,6 @@ class Transceiver(object):
 
         :return: An iterable of connections known to the transceiver
         :rtype: list(Connection)
-        :raise None: No known exceptions are raised
         """
         return self._all_connections
 
@@ -1007,9 +1005,12 @@ class Transceiver(object):
 
         :param int tries_to_go: how many attempts should be supported
         :param number_of_boards:
-            the number of boards that this machine is built out of
-        :param width: The width of the machine in chips
-        :param height: The height of the machine in chips
+            the number of boards that this machine is built out of;
+            this parameter is deprecated
+        :param width: The width of the machine in chips;
+            this parameter is deprecated
+        :param height: The height of the machine in chips;
+            this parameter is deprecated
         :param dict(SystemVariableDefinition,object) extra_boot_values:
             Any additional values to set during boot
         :return: version info
@@ -1219,7 +1220,6 @@ class Transceiver(object):
             disable (False) the watchdog timer, or an int value to set the
             timer count to
         :type watch_dog: bool or int
-        :rtype: None
         """
         # build what we expect it to be
         value_to_set = watch_dog
@@ -1242,7 +1242,6 @@ class Transceiver(object):
             disable (False) the watch dog timer, or an int value to set the
             timer count to.
         :type watch_dog: bool or int
-        :rtype: None
         """
         if self._machine is None:
             self._update_machine()
@@ -1308,12 +1307,12 @@ class Transceiver(object):
         :param executable:
             The data that is to be executed. Should be one of the following:
             * An instance of AbstractDataReader
-            * A bytearray
+            * A bytearray/bytes
             * A filename of a file containing the executable (in which case
-                is_filename must be set to True)
+                `is_filename` must be set to True)
         :type executable:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader`
-            or bytearray or str
+            or bytes or bytearray or str
         :param int app_id:
             The ID of the application with which to associate the executable
         :param int n_bytes:
@@ -1326,8 +1325,6 @@ class Transceiver(object):
         :param bool wait:
             True if the binary should enter a "wait" state on loading
         :param bool is_filename: True if executable is a filename
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
@@ -1380,7 +1377,7 @@ class Transceiver(object):
                 set to True)
         :type executable:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
-            or bytearray or str
+            or bytes or bytearray or str
         :param int app_id:
             The ID of the application with which to associate the executable
         :param int n_bytes:
@@ -1393,8 +1390,6 @@ class Transceiver(object):
         :param bool wait:
             True if the processors should enter a "wait" state on loading
         :param bool is_filename: True if the data is a filename
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
@@ -1513,13 +1508,12 @@ class Transceiver(object):
     def _power(self, power_command, boards=0, cabinet=0, frame=0):
         """ Send a power request to the machine
 
-        :param power_command: The power command to send
+        :param PowerCommand power_command: The power command to send
         :param boards: The board or boards to send the command to
-        :param cabinet: the ID of the cabinet containing the frame, or 0 \
+        :param int cabinet: the ID of the cabinet containing the frame, or 0
             if the frame is not in a cabinet
-        :param frame: the ID of the frame in the cabinet containing the\
+        :param int frame: the ID of the frame in the cabinet containing the
             board(s), or 0 if the board is not in a frame
-        :rtype: None
         """
         connection_selector = self._bmp_connection(cabinet, frame)
         timeout = (
@@ -1549,7 +1543,6 @@ class Transceiver(object):
         :type board: int or iterable(int)
         :param int cabinet: the cabinet this is targeting
         :param int frame: the frame this is targeting
-        :rtype: None
         """
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
@@ -1588,7 +1581,6 @@ class Transceiver(object):
         :param int cabinet: cabinet: the cabinet this is targeting
         :param int frame: the frame this is targeting
         :param int board: which board to write the FPGA register to
-        :rtype: None
         """
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
@@ -1634,9 +1626,9 @@ class Transceiver(object):
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
             * An instance of AbstractDataReader
-            * A bytearray
+            * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
-            * A filename of a data file (in which case is_filename must be
+            * A filename of a data file (in which case `is_filename` must be
                 set to True)
         :type data:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
@@ -1650,8 +1642,6 @@ class Transceiver(object):
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
         :param bool is_filename: True if the data is a filename
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -1703,7 +1693,7 @@ class Transceiver(object):
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
             * An instance of AbstractDataReader
-            * A bytearray
+            * A bytearray/bytes
             * A single integer; will be written in little-endian byte order
         :type data:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
@@ -1718,8 +1708,6 @@ class Transceiver(object):
             an int then offset will be ignored and used 0)
         :param int cpu:
             The CPU to use, typically 0 (or if a BMP, the slot number)
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -1761,8 +1749,8 @@ class Transceiver(object):
             * An instance of AbstractDataReader
             * A bytearray or bytestring
             * A single integer
-            * A file name of a file to read (in which case is_filename should
-                be set to True)
+            * A file name of a file to read (in which case `is_filename`
+                should be set to True)
         :type data:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
             or bytes or bytearray or int or str
@@ -1777,8 +1765,6 @@ class Transceiver(object):
             a int, then the offset will be ignored and 0 is used.
         :param bool is_filename:
             True if the data should be interpreted as a file name
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
@@ -1827,7 +1813,7 @@ class Transceiver(object):
         :param int length: The length of the data to be read in bytes
         :param int cpu: the core ID used to read the memory of
         :return: A bytearray of data read
-        :rtype: bytearray
+        :rtype: bytes
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -1859,7 +1845,7 @@ class Transceiver(object):
             The address in SDRAM where the region of memory to be read starts
         :param int length: The length of the data to be read in bytes
         :return: An iterable of chunks of data read in order
-        :rtype: iterable of bytearray
+        :rtype: bytes
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2053,8 +2039,6 @@ class Transceiver(object):
 
         :param int app_id: The ID of the application to send to
         :param Signal signal: The signal to send
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2078,8 +2062,6 @@ class Transceiver(object):
         :param dict(int,int) led_states:
             A dictionary mapping SetLED index to state with
             0 being off, 1 on and 2 inverted.
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2112,8 +2094,6 @@ class Transceiver(object):
         :param bool use_sender:
             Optionally use the sender host and port instead of
             the given host and port in the tag
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2180,8 +2160,6 @@ class Transceiver(object):
         :param ~spinn_machine.tags.ReverseIPTag reverse_ip_tag:
             The reverse tag to set up; note `board_address` can be None,
             in which case, the tag will be assigned to all boards
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2234,8 +2212,6 @@ class Transceiver(object):
             Board address where the tag should be cleared.
             If not specified, all SCPSender connections will send the message
             to clear the tag
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2329,8 +2305,6 @@ class Transceiver(object):
             An iterable of multicast routes to load
         :param int app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2356,8 +2330,6 @@ class Transceiver(object):
             the route for the fixed route entry on this chip
         :param int app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2420,8 +2392,6 @@ class Transceiver(object):
 
         :param int x: The x-coordinate of the chip on which to clear the routes
         :param int y: The y-coordinate of the chip on which to clear the routes
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2469,7 +2439,6 @@ class Transceiver(object):
             the diagnostic filter being set in the placed, between 0 and 15
             (note that positions 0 to 11 are used by the default filters,
             and setting these positions will result in a warning).
-        :rtype: None
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -2546,7 +2515,6 @@ class Transceiver(object):
         :param iterable(int) counter_ids:
             The IDs of the counters to reset (all by default)\
             and enable if enable is True; each must be between 0 and 15
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2596,9 +2564,6 @@ class Transceiver(object):
         :param bool power_off_machine:
             if True, the machine is sent a power down
             command via its BMP (if it has one)
-        :return: Nothing is returned
-        :rtype: None
-        :raise None: No known exceptions are raised
         """
 
         if power_off_machine and self._bmp_connections:
@@ -2618,8 +2583,8 @@ class Transceiver(object):
                               local_port=None, local_host=None):
         """ Register a callback for a certain type of traffic to be received\
             via UDP. Note that the connection class must extend\
-            :py:class:`Listenable`\
-            to avoid clashing with the SCAMP and BMP functionality
+            :py:class:`Listenable` to avoid clashing with the SCAMP and BMP\
+            functionality.
 
         :param callable callback:
             Function to be called when a packet is received

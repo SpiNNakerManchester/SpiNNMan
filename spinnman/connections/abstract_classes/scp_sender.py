@@ -49,8 +49,6 @@ class SCPSender(Connection):
         last assigned + 1) % 65536 will be used
 
         :param AbstractSCPRequest scp_request: message packet to send
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error sending the message
         """

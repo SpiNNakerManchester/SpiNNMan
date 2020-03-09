@@ -30,8 +30,7 @@ class ReadADC(BMPRequest):
 
     def __init__(self, board):
         """
-        :param board: which board to request the ADC register from
-        :rtype: None
+        :param int board: which board to request the ADC register from
         """
         super(ReadADC, self).__init__(
             board,

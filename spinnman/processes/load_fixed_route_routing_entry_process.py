@@ -33,7 +33,6 @@ class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
             the fixed route entry
         :param int app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
-        :rtype: None
         """
         route_entry = \
             Router.convert_routing_table_entry_to_spinnaker_route(fixed_route)

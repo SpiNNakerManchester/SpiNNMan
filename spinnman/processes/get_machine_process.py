@@ -65,6 +65,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def __init__(self, connection_selector, ignore_chips, ignore_cores,
                  ignore_links, max_sdram_size=None,
                  default_report_directory=None):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         # pylint: disable=too-many-arguments
         super(GetMachineProcess, self).__init__(connection_selector)
 

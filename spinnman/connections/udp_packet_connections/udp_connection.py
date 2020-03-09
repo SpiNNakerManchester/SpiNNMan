@@ -108,7 +108,6 @@ class UDPConnection(Connection):
 
         :return: The local IP address as a dotted string, e.g., 0.0.0.0
         :rtype: str
-        :raise None: No known exceptions are thrown
         """
         return self._local_ip_address
 
@@ -118,7 +117,6 @@ class UDPConnection(Connection):
 
         :return: The local port number
         :rtype: int
-        :raise None: No known exceptions are thrown
         """
         return self._local_port
 
@@ -126,7 +124,7 @@ class UDPConnection(Connection):
     def remote_ip_address(self):
         """ The remote IP address to which the connection is connected.
 
-        :return: The remote IP address as a dotted string, or None if not\
+        :return: The remote IP address as a dotted string, or None if not
             connected remotely
         :rtype: str
         """

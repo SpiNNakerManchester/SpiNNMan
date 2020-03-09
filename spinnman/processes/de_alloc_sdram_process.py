@@ -22,6 +22,11 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         "_no_blocks_freed"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(DeAllocSDRAMProcess, self).__init__(connection_selector)
         self._no_blocks_freed = None
 

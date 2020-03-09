@@ -24,6 +24,11 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
         "_base_address"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(MallocSDRAMProcess, self).__init__(connection_selector)
         self._base_address = None
 

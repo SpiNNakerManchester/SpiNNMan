@@ -50,7 +50,6 @@ class AbstractSCPRequest(object):
             The third argument, or None if no third argument
         :param data: The optional data, or None if no data
         :type data: bytearray or bytes or None
-        :raise None: No known exceptions are raised
         """
         # pylint: disable=too-many-arguments
         self._sdp_header = sdp_header
@@ -132,5 +131,4 @@ class AbstractSCPRequest(object):
 
         :return: An SCP response, or None if no response is required
         :rtype: SCPResponse
-        :raise None: No known exceptions are raised
         """

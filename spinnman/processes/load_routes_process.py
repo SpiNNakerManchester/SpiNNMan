@@ -32,6 +32,11 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         "_base_address"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(LoadMultiCastRoutesProcess, self).__init__(connection_selector)
         self._base_address = None
 
@@ -59,7 +64,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
         # Upload the data
         table_address = 0x67800000
-        process = WriteMemoryProcess(self._next_connection_selector)
+        process = WriteMemoryProcess(self._conn_selector)
         process.write_memory_from_bytearray(
             x, y, 0, table_address, routing_data, 0, len(routing_data))
 

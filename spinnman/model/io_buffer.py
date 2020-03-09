@@ -27,7 +27,6 @@ class IOBuffer(object):
         :param int y: The y-coordinate of a chip
         :param int p: The p-coordinate of a chip
         :param bytes iobuf: The contents of the buffer for the chip
-        :raise None: No known exceptions are raised
         """
         self._x = x
         self._y = y

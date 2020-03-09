@@ -26,6 +26,11 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
         "_cpu_info"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetCPUInfoProcess, self).__init__(connection_selector)
         self._cpu_info = list()
 

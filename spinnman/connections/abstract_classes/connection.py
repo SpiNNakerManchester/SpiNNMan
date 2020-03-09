@@ -38,7 +38,4 @@ class Connection(object):
     @abstractmethod
     def close(self):
         """ Closes the connection
-
-        :return: Nothing is returned
-        :rtype: None
         """

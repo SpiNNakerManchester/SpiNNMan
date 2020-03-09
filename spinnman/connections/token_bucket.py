@@ -30,8 +30,8 @@ class TokenBucket(object):
 
     def __init__(self, tokens, fill_rate):
         """
-        :param tokens: the total tokens in the bucket
-        :param fill_rate:\
+        :param int tokens: the total tokens in the bucket
+        :param float fill_rate:
             the rate in tokens/second that the bucket will be refilled.
         """
         self._capacity = float(tokens)

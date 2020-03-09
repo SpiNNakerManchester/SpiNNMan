@@ -29,6 +29,8 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
     def __init__(self, connection_selector):
         """
         :param connection_selector: the SC&MP connection selector
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
         """
         super(ReadFixedRouteRoutingEntryProcess, self).__init__(
             connection_selector)

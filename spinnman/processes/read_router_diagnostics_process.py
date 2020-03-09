@@ -32,6 +32,11 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
         "_register_values"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(ReadRouterDiagnosticsProcess, self).__init__(connection_selector)
         self._control_register = None
         self._error_status = None

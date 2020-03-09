@@ -62,8 +62,6 @@ class SCPRequestHeader(object):
         """ Set the sequence number of the SCP packet
 
         :param int sequence: The sequence number to set, between 0 and 65535
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanInvalidParameterException:
             If the sequence is out of range, or if it has already been set
         """

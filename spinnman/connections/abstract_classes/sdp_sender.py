@@ -30,7 +30,6 @@ class SDPSender(Connection):
         """ Sends an SDP message down this connection
 
         :param SDPMessage sdp_message: The SDP message to be sent
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error sending the message.
         """

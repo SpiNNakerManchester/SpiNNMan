@@ -30,7 +30,6 @@ def generate_machine_report(report_directory, machine, connections):
     :param ~spinn_machine.Machine machine: the machine python object
     :param list(Connection) connections:
         the list of connections to the machine
-    :rtype: None
     :raise IOError: when a file cannot be opened for some reason
     """
     file_name = os.path.join(report_directory, _REPORT_NAME)

@@ -30,8 +30,6 @@ class SpinnakerBootSender(Connection):
         """ Sends a SpiNNaker boot message using this connection.
 
         :param SpinnakerBootMessage boot_message: The message to be sent
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error sending the message
         """

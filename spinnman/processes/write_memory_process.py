@@ -40,7 +40,6 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :type data: bytearray or bytes
         :param int offset: where in the data to start writing from
         :param int n_bytes: how much data to write
-        :rtype: None
         """
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
@@ -66,7 +65,6 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :param reader: the readable object containing the data to write
         :type reader: ~io.RawIOBase or ~io.BufferedIOBase
         :param int n_bytes: how much data to write
-        :rtype: None
         """
         self._write_memory_from_reader(
             base_address, reader, n_bytes,

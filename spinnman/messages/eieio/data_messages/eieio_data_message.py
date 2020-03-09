@@ -64,14 +64,15 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             prefix_type=EIEIOPrefix.LOWER_HALF_WORD):
         """ Create a data message
 
-        :param eieio_type: The EIEIOType of the message
-        :param count: The number of items in the message
-        :param data: The data in the message
-        :param offset: The offset in the data where the actual data starts
-        :param key_prefix: The prefix of the keys
-        :param payload_prefix: The prefix of the payload
-        :param timestamp: The timestamp of the packet
-        :param prefix_type: The type of the key prefix if 16-bits
+        :param EIEIOType eieio_type: The type of the message
+        :param int count: The number of items in the message
+        :param bytes data: The data in the message
+        :param int offset:
+            The offset in the data where the actual data starts
+        :param int key_prefix: The prefix of the keys
+        :param int payload_prefix: The prefix of the payload
+        :param int timestamp: The timestamp of the packet
+        :param EIEIOPrefix prefix_type: The type of the key prefix if 16-bits
         """
         # pylint: disable=too-many-arguments
         payload_base = payload_prefix
@@ -202,7 +203,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     def is_next_element(self):
         """ Determine if there is another element to be read
 
-        :return: True if the message was created with data, and there are more\
+        :return: True if the message was created with data, and there are more
             elements to be read
         :rtype: bool
         """

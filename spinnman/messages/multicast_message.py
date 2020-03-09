@@ -27,7 +27,6 @@ class MulticastMessage(object):
 
         :param int key: The key of the packet
         :param int payload: The optional payload of the packet
-        :raise None: No known exceptions are raised
         """
         self._key = key
         self._payload = payload

@@ -35,6 +35,11 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         "_next_block_address"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetHeapProcess, self).__init__(connection_selector)
 
         self._heap_address = None

@@ -29,12 +29,12 @@ class BMPSetLed(BMPRequest):
     def __init__(self, led, action, boards):
         """
 
-        :param led: Number of the LED or an iterable of LEDs to set the\
+        :param led: Number of the LED or an iterable of LEDs to set the
             state of (0-7)
         :type led: int or list(int)
         :param SCPLEDAction action:
             State to set the LED to, either on, off or toggle
-        :param boards: Specifies the board to control the LEDs of. This may\
+        :param boards: Specifies the board to control the LEDs of. This may
             also be an iterable of multiple boards (in the same frame).
         :type boards: int or list(int)
         """

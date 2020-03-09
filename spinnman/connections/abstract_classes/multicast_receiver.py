@@ -32,7 +32,6 @@ class MulticastReceiver(Connection):
 
         :return: The coordinates, (x, y), of the chips
         :rtype: iterable(tuple(int, int))
-        :raise None: No known exceptions are raised
         """
 
     @abstractmethod

@@ -92,7 +92,7 @@ class DiagnosticFilter(object):
         :param default_routing_statuses:
             Increment the counter if one or more of the given default routing
             statuses match (or None or empty list to match all)
-        :param default_routing_statuses:
+        :type default_routing_statuses:
             list(DiagnosticFilterDefaultRoutingStatus)
         :param emergency_routing_statuses:
             Increment the counter if one or more of the given emergency routing

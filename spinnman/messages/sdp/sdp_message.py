@@ -30,7 +30,6 @@ class SDPMessage(object):
         :param data: The data of the SDP packet, or None if no data
         :type data: bytes or bytearray or None
         :param int offset: The offset where the valid data starts
-        :raise None: No known exceptions are thrown
         """
 
         self._sdp_header = sdp_header

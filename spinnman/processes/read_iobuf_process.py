@@ -40,6 +40,11 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         "_next_reads"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(ReadIOBufProcess, self).__init__(connection_selector)
 
         # A dictionary of (x, y, p) -> iobuf address

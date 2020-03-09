@@ -233,9 +233,9 @@ class _Group(object):
     def group_exceptions(error_requests, exceptions, tracebacks):
         """ Groups exceptions into a form usable by an exception.
 
-        :param error_requests: the error requests
-        :param exceptions: the exceptions
-        :param tracebacks: the tracebacks
+        :param list(SCPRequest) error_requests: the error requests
+        :param list(Exception) exceptions: the exceptions
+        :param list tracebacks: the tracebacks
         :return: a sorted exception pile
         :rtype: dict(Exception,_Group)
         """

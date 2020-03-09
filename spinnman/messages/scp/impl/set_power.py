@@ -48,7 +48,6 @@ class SetPower(BMPRequest):
 
             .. note::
                 Leave this at the default because of hardware bugs.
-        :rtype: None
         """
 
         if board_to_send_to != 0:

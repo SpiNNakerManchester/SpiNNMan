@@ -25,6 +25,11 @@ class GetVersionProcess(AbstractSingleConnectionProcess):
         "_version_info"]
 
     def __init__(self, connection_selector, n_retries=N_RETRIES):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetVersionProcess, self).__init__(connection_selector, n_retries)
         self._version_info = None
 

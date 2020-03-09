@@ -32,7 +32,6 @@ class MulticastSender(Connection):
 
         :return: The coordinates, (x, y), of the chips
         :rtype: iterable(tuple(int, int))
-        :raise None: No known exceptions are raised
         """
 
     @abstractmethod
@@ -40,8 +39,6 @@ class MulticastSender(Connection):
         """ Sends a SpiNNaker multicast message using this connection
 
         :param MulticastMessage multicast_message: The message to be sent
-        :return: Nothing is returned
-        :rtype: None
         :raise SpinnmanIOException:
             If there is an error sending the message
         """
