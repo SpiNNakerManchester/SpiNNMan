@@ -89,14 +89,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _make_chip(self, chip_info, machine):
         """ Creates a chip from a ChipSummaryInfo structure.
 
-        :param chip_info: \
+        :param ChipSummaryInfo chip_info:
             The ChipSummaryInfo structure to create the chip from
-        :type chip_info: \
-            :py:class:`spinnman.model.ChipSummaryInfo`
         :return: The created chip
-        :rtype: :py:class:`spinn_machine.Chip`
+        :rtype: ~spinn_machine.Chip
         """
-
         # Create the down cores set if any
         n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
         core_states = chip_info.core_states
@@ -131,6 +128,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             down_cores=down_cores)
 
     def _make_router(self, chip_info, machine):
+        """
+        :param ChipSummaryInfo chip_info:
+        :param ~spinn_machine.Machine machine:
+        :rtype: ~spinn_machine.Router
+        """
         links = list()
         for link in chip_info.working_links:
             dest_xy = machine.xy_over_link(chip_info.x, chip_info.y, link)
@@ -147,7 +149,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             n_available_multicast_entries=(
                 chip_info.n_free_multicast_routing_entries))
 
-    def _receive_p2p_data(self, column, scp_read_response):
+    def __receive_p2p_data(self, column, scp_read_response):
         self._p2p_column_data[column] = (
             scp_read_response.data, scp_read_response.offset)
 
@@ -166,7 +168,15 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def get_machine_details(self, boot_x, boot_y, width, height,
                             repair_machine, ignore_bad_ethernets):
-
+        """
+        :param int boot_x:
+        :param int boot_y:
+        :param int width:
+        :param int height:
+        :param bool repair_machine:
+        :param bool ignore_bad_ethernets:
+        :rtype: ~spinn_machine.Machine
+        """
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
         self._p2p_column_data = [None] * width
@@ -177,7 +187,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     x=boot_x, y=boot_y,
                     base_address=(ROUTER_REGISTER_P2P_ADDRESS + offset),
                     size=p2p_column_bytes),
-                functools.partial(self._receive_p2p_data, column))
+                functools.partial(self.__receive_p2p_data, column))
         self._finish()
         self.check_for_error()
         p2p_table = P2PTable(width, height, self._p2p_column_data)
@@ -209,6 +219,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _fill_machine(
             self, machine, repair_machine, ignore_bad_ethernets):
+        """
+        :param ~spinn_machine.Machine machine:
+        :param bool repair_machine:
+        :param bool ignore_bad_ethernets:
+        :rtype: ~spinn_machine.Machine
+        """
         for chip_info in sorted(
                 self._chip_info.values(), key=lambda chip: (chip.x, chip.y)):
             if (chip_info.ethernet_ip_address is not None and
@@ -239,16 +255,17 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         Processes the collection of ignore links to remove then from chipinfo
 
-        Converts any local x, y ipaddress to global xy
+        Converts any local x, y, IP address to global xy
 
         Discards any ignores which are known to have no\
         affect based on the already read chip_info
 
         Also removes any inverse links
 
-        Logs all actions except for ignores with unused ip addresses
+        Logs all actions except for ignores with unused IP addresses
 
-        :param machine: An empty machine to handle wraparrounds
+        :param ~spinn_machine.Machine machine:
+            An empty machine to handle wraparounds
         """
         if len(self._ignore_links) == 0:
             return
@@ -297,7 +314,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Converts any physical  cores to virtual ones.\
         Core numbers <= 0 are assumed to be 0 - physical_id
 
-        :param machine: An empty machine to handle wraparrounds
+        :param ~spinn_machine.Machine machine:
+            An empty machine to handle wraparounds
         """
         if len(self._ignore_cores) == 0:
             return
@@ -322,7 +340,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         Logs all actions except for ignores with unused ip addresses
 
-        :param machine: An empty machine to handle wraparrounds
+        :param ~spinn_machine.Machine machine:
+            An empty machine to handle wraparounds
         """
         for ignore in self._ignore_chips:
             # Convert by ip to global
@@ -436,8 +455,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._report_ignore("{}", p_to_v_map)
         self._virtual_map[xy] = p_to_v_map
 
-    def _verify__virtual_to_physical_core_map(self, xy):
-        """ Add this method to _get_virtual_p to verify the mappings"""
+    def _verify_virtual_to_physical_core_map(self, xy):
+        """ Add this method to _get_virtual_p to verify the mappings.
+        """
         v_to_p = SystemVariableDefinition.virtual_to_physical_core_map
         self._send_request(
             ReadMemory(
@@ -463,7 +483,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         Writes the ignore message by either creating or appending the report
 
-        The implemenation choice to reopen the file every time is not the\
+        The implementation choice to reopen the file every time is not the\
         fastest but is the cleanest and safest for code that in default\
         conditions is never run.
         """
@@ -474,8 +494,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             else:
                 self._report_file = join(
                     self._default_report_directory, REPORT_FILE)
-            with open(self._report_file, "w") as r_file:
-                r_file.write(full_message)
-        else:
-            with open(self._report_file, "a") as r_file:
-                r_file.write(full_message)
+
+        with open(self._report_file, "a") as r_file:
+            r_file.write(full_message)

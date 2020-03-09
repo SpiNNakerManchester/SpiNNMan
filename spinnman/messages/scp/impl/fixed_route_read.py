@@ -27,7 +27,7 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class FixedRouteRead(AbstractSCPRequest):
-    """ Sets a fixed route entry
+    """ Gets a fixed route entry
     """
 
     __slots__ = []

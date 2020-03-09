@@ -26,13 +26,10 @@ class SDPMessage(object):
 
     def __init__(self, sdp_header, data=None, offset=0):
         """
-        :param sdp_header: The header of the message
-        :type sdp_header:\
-            :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
+        :param SDPHeader sdp_header: The header of the message
         :param data: The data of the SDP packet, or None if no data
         :type data: bytes or bytearray or None
-        :param offset: The offset where the valid data starts
-        :type offset: int
+        :param int offset: The offset where the valid data starts
         :raise None: No known exceptions are thrown
         """
 
@@ -44,8 +41,7 @@ class SDPMessage(object):
     def bytestring(self):
         """ The bytestring of the message
 
-        :return: The bytestring of the message
-        :rtype: str
+        :rtype: bytes
         """
         if self._data is not None:
             return self._sdp_header.bytestring + self._data[self._offset:]
@@ -53,6 +49,11 @@ class SDPMessage(object):
 
     @staticmethod
     def from_bytestring(data, offset):
+        """
+        :param bytes data:
+        :param int offset:
+        :rtype: SDPMessage
+        """
         sdp_header = SDPHeader.from_bytestring(data, offset)
         return SDPMessage(sdp_header, data, offset + 8)
 
@@ -60,8 +61,7 @@ class SDPMessage(object):
     def sdp_header(self):
         """ The header of the packet
 
-        :return: An SDP header
-        :rtype: :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
+        :rtype: SDPHeader
         """
         return self._sdp_header
 

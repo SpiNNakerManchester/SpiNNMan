@@ -18,7 +18,7 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
-    """ A process for reading a chip's fixed route routing entry.
+    """ A process for reading a fixed route routing table entry.
     """
 
     __slots__ = (
@@ -27,34 +27,30 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
     )
 
     def __init__(self, connection_selector):
-        """ Creates the process for writing a fixed route entry to a chip's\
-            router.
-
+        """
         :param connection_selector: the SC&MP connection selector
         """
         super(ReadFixedRouteRoutingEntryProcess, self).__init__(
             connection_selector)
         self._route = None
 
-    def handle_read_response(self, response):
+    def __handle_read_response(self, response):
         self._route = response.route
 
     def read_fixed_route(self, x, y, app_id=0):
-        """ Reads a fixed route routing table entry.
+        """ Read the fixed route entry installed on a particular chip's router.
 
-        :param x: The x-coordinate of the chip, between 0 and 255; \
+        :param int x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions
-        :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255; \
+        :param int y: The y-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions
-        :type y: int
-        :param app_id: The ID of the application with which to associate the\
+        :param int app_id:
+            The ID of the application with which to associate the
             routes.  If not specified, defaults to 0.
-        :type app_id: int
-        :rtype: None
+        :rtype: ~spinn_machine.FixedRouteEntry
         """
         self._send_request(FixedRouteRead(x, y, app_id),
-                           self.handle_read_response)
+                           self.__handle_read_response)
         self._finish()
         self.check_for_error()
         return self._route

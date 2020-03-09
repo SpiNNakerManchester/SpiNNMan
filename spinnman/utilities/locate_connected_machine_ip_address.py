@@ -25,10 +25,10 @@ def locate_connected_machine(handler):
     """ Locates any SpiNNaker machines IP addresses from the auto-transmitted\
         packets from non-booted SpiNNaker machines.
 
-    :param handler: A callback that decides whether to stop searching. The\
-        callback is given two arguments: the IP address found and the current\
-        time.
-    :type handler: (ipaddr, float) --> bool
+    :param callable handler:
+        A callback that decides whether to stop searching. The callback is
+        given two arguments: the IP address found and the current time. It
+        should return True if the search should cease.
     """
 
     connection = IPAddressesConnection()
@@ -43,7 +43,7 @@ def locate_connected_machine(handler):
 
 
 if __name__ == "__main__":
-    def ctrlc_handler(sig, frame):  # @UnusedVariable
+    def _ctrlc_handler(sig, frame):  # @UnusedVariable
         """
         :param sig:
         :param frame:
@@ -53,12 +53,12 @@ if __name__ == "__main__":
         print("Exiting")
         sys.exit()
 
-    def print_connected(ip_address, timestamp):
+    def _print_connected(ip_address, timestamp):
         print(ip_address, "({})".format(
             socket.gethostbyaddr(ip_address)[0]), "at", timestamp)
         return False
 
     print("The following addresses might be SpiNNaker boards "
           "(press Ctrl-C to quit):")
-    signal.signal(signal.SIGINT, ctrlc_handler)
-    locate_connected_machine(handler=print_connected)
+    signal.signal(signal.SIGINT, _ctrlc_handler)
+    locate_connected_machine(handler=_print_connected)

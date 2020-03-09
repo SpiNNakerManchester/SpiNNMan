@@ -36,15 +36,14 @@ class FloodFillData(AbstractSCPRequest):
     def __init__(self, nearest_neighbour_id, block_no, base_address, data,
                  offset=0, length=None):
         """
-        :param nearest_neighbour_id: The ID of the packet, between 0 and 127
-        :type nearest_neighbour_id: int
-        :param block_no: Which block this block is, between 0 and 255
-        :type block_no: int
-        :param base_address: The base address where the data is to be loaded
-        :type base_address: int
-        :param data: The data to load, between 4 and 256 bytes and the size\
-            must be divisible by 4
-        :type data: bytearray
+        :param int nearest_neighbour_id:
+            The ID of the packet, between 0 and 127
+        :param int block_no: Which block this block is, between 0 and 255
+        :param int base_address:
+            The base address where the data is to be loaded
+        :param bytes data:
+            The data to load, between 4 and 256 bytes and the size must be
+            divisible by 4
         """
         # pylint: disable=too-many-arguments
         self._size = length

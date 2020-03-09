@@ -31,14 +31,12 @@ class BMPSetLed(BMPRequest):
 
         :param led: Number of the LED or an iterable of LEDs to set the\
             state of (0-7)
-        :type led: int or iterable of int
-        :param action: State to set the LED to, either on, off or toggle
-        :type action:\
-            :py:class:`spinnman.messages.scp.enums.led_action.SCPLEDAction`
+        :type led: int or list(int)
+        :param SCPLEDAction action:
+            State to set the LED to, either on, off or toggle
         :param boards: Specifies the board to control the LEDs of. This may\
             also be an iterable of multiple boards (in the same frame).
-        :type boards: int or iterable of int
-        :rtype: None
+        :type boards: int or list(int)
         """
 
         # set up the led entry for arg1

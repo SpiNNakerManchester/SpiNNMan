@@ -19,21 +19,20 @@ from spinnman.processes import AbstractMultiConnectionProcess
 
 
 class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
+    """ Load a fixed route routing entry onto a chip.
+    """
     __slots__ = []
 
     def load_fixed_route(self, x, y, fixed_route, app_id=0):
-        """ Load a fixed route routing entry onto a chip.
-
-        :param x: The x-coordinate of the chip, between 0 and 255; \
+        """
+        :param int x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions.
-        :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255; \
+        :param int y: The y-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions.
-        :type y: int
-        :param fixed_route: the fixed route entry
-        :param app_id: The ID of the application with which to associate the\
-            routes.  If not specified, defaults to 0.
-        :type app_id: int
+        :param ~spinn_machine.FixedRouteEntry fixed_route:
+            the fixed route entry
+        :param int app_id: The ID of the application with which to associate
+            the routes.  If not specified, defaults to 0.
         :rtype: None
         """
         route_entry = \

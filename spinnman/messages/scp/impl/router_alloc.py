@@ -33,16 +33,12 @@ class RouterAlloc(AbstractSCPRequest):
 
     def __init__(self, x, y, app_id, n_entries):
         """
-        :param x: \
+        :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :type x: int
-        :param y: \
+        :param int y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :type y: int
-        :param app_id: The ID of the application, between 0 and 255
-        :type app_id: int
-        :param n_entries: The number of entries to allocate
-        :type n_entries: int
+        :param int app_id: The ID of the application, between 0 and 255
+        :param int n_entries: The number of entries to allocate
         """
         super(RouterAlloc, self).__init__(
             SDPHeader(

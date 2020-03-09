@@ -36,9 +36,8 @@ class BootConnection(
         :param str local_host:
             The local host name or IP address to bind to.
             If not specified defaults to bind to all interfaces, unless
-            remote_host is specified, in which case binding is done to the
+            `remote_host` is specified, in which case binding is done to the
             IP address that will be used to send packets.
-        :type local_host: str
         :param int local_port:
             The local port to bind to, between 1025 and 65535.
             If not specified, defaults to a random unused local port
@@ -47,7 +46,7 @@ class BootConnection(
             specified, the socket will be available for listening only, and
             will throw and exception if used for sending
         :param int remote_port: The remote port to send packets to.  If
-            remote_host is None, this is ignored.
+            `remote_host` is None, this is ignored.
         :raise SpinnmanIOException:
             If there is an error setting up the communication channel
         """

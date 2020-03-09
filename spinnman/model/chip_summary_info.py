@@ -40,12 +40,10 @@ class ChipSummaryInfo(object):
 
     def __init__(self, chip_summary_data, offset, x, y):
         """
-        :param chip_summary_data: The data from the SCP response
-        :type chip_summary_data: bytearray
-        :param offset: The offset into the data where the data starts
-        :type offset: int
-        :param x: The x-coordinate of the chip that this data is from
-        :param y: The y-coordinate of the chip that this data is from
+        :param bytes chip_summary_data: The data from the SCP response
+        :param int offset: The offset into the data where the data starts
+        :param int x: The x-coordinate of the chip that this data is from
+        :param int y: The y-coordinate of the chip that this data is from
         """
         (chip_summary_flags, self._largest_free_sdram_block,
             self._largest_free_sram_block) = _THREE_WORDS.unpack_from(
@@ -110,7 +108,7 @@ class ChipSummaryInfo(object):
     def core_states(self):
         """ The state of the cores on the chip (list of one per core)
 
-        :rtype: list(:py:class:`spinnman.model.enums.CPUState`)
+        :rtype: list(CPUState)
         """
         return self._core_states
 

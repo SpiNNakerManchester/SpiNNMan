@@ -33,7 +33,7 @@ class RouterDiagnostics(object):
         """
         :param int control_register: The value of the control register
         :param int error_status: The value of the error_status
-        :param iterable(int) register_values:
+        :param list(int) register_values:
             The values of the 16 router registers
         :raise SpinnmanInvalidParameterException:
             If the number of register values is not 16
@@ -56,7 +56,6 @@ class RouterDiagnostics(object):
     def mon(self):
         """ The "mon" part of the control register
 
-        :return: The mon bits
         :rtype: int
         """
         return self._mon
@@ -65,7 +64,6 @@ class RouterDiagnostics(object):
     def wait_1(self):
         """ The "wait_1" part of the control register
 
-        :return: The wait_1 bits
         :rtype: int
         """
         return self._wait_1
@@ -74,7 +72,6 @@ class RouterDiagnostics(object):
     def wait_2(self):
         """ The "wait_2" part of the control register
 
-        :return: The wait_2 bits
         :rtype: int
         """
         return self._wait_2
@@ -83,7 +80,6 @@ class RouterDiagnostics(object):
     def error_status(self):
         """ The error status
 
-        :return: The error status
         :rtype: int
         """
         return self._error_status
@@ -92,7 +88,6 @@ class RouterDiagnostics(object):
     def error_count(self):
         """ The count of errors
 
-        :return: The count of errors
         :rtype: int
         """
         return self._error_status & 0xFF
@@ -101,9 +96,7 @@ class RouterDiagnostics(object):
     def errors_set(self):
         """ A list of errors that have been detected
 
-        :return: A list of errors
-        :rtype: list of \
-            :py:class:`spinnman.model.enums.router_error.RouterError`
+        :rtype: list(RouterError)
         """
         return [
             error for error in RouterError if error.value & self._error_status]
@@ -112,7 +105,6 @@ class RouterDiagnostics(object):
     def n_local_multicast_packets(self):
         """ The number of multicast packets received from local cores.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.LOC_MC.value]
@@ -121,7 +113,6 @@ class RouterDiagnostics(object):
     def n_external_multicast_packets(self):
         """ The number of multicast packets received from external links.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.EXT_MC.value]
@@ -130,7 +121,6 @@ class RouterDiagnostics(object):
     def n_dropped_multicast_packets(self):
         """ The number of multicast packets received that were dropped.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.DUMP_MC.value]
@@ -139,7 +129,6 @@ class RouterDiagnostics(object):
     def n_local_peer_to_peer_packets(self):
         """ The number of peer-to-peer packets received from local cores.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.LOC_PP.value]
@@ -148,7 +137,6 @@ class RouterDiagnostics(object):
     def n_external_peer_to_peer_packets(self):
         """ The number of peer-to-peer packets received from external links.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.EXT_PP.value]
@@ -157,7 +145,6 @@ class RouterDiagnostics(object):
     def n_dropped_peer_to_peer_packets(self):
         """ The number of peer-to-peer packets received that were dropped.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.DUMP_PP.value]
@@ -166,7 +153,6 @@ class RouterDiagnostics(object):
     def n_local_nearest_neighbour_packets(self):
         """ The number of nearest-neighbour packets received from local cores.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.LOC_NN.value]
@@ -176,7 +162,6 @@ class RouterDiagnostics(object):
         """ The number of nearest-neighbour packets received from external\
             links.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.EXT_NN.value]
@@ -185,7 +170,6 @@ class RouterDiagnostics(object):
     def n_dropped_nearest_neighbour_packets(self):
         """ The number of nearest-neighbour packets received that were dropped.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.DUMP_NN.value]
@@ -194,7 +178,6 @@ class RouterDiagnostics(object):
     def n_local_fixed_route_packets(self):
         """ The number of fixed-route packets received from local cores.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.LOC_FR.value]
@@ -203,7 +186,6 @@ class RouterDiagnostics(object):
     def n_external_fixed_route_packets(self):
         """ The number of fixed-route packets received from external links.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.EXT_FR.value]
@@ -212,40 +194,43 @@ class RouterDiagnostics(object):
     def n_dropped_fixed_route_packets(self):
         """ The number of fixed-route packets received that were dropped.
 
-        :return: The number of packets
         :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.DUMP_FR.value]
 
     @property
     def user_0(self):
-        """ The data gained from the user 0 router diagnostic filter.
+        """ The number of packets counted by the user 0 router diagnostic\
+            filter.
 
-        :return: the number of packets captured by this filter.
+        :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.USER_0.value]
 
     @property
     def user_1(self):
-        """ The data gained from the user 1 router diagnostic filter
+        """ The number of packets counted by the user 1 router diagnostic\
+            filter.
 
-        :return: the number of packets captured by this filter.
+        :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.USER_1.value]
 
     @property
     def user_2(self):
-        """ The data gained from the user 2 router diagnostic filter.
+        """ The number of packets counted by the user 2 router diagnostic\
+            filter.
 
-        :return: the number of packets captured by this filter.
+        :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.USER_2.value]
 
     @property
     def user_3(self):
-        """ The data gained from the user 3 router diagnostic filter.
+        """ The number of packets counted by the user 3 router diagnostic\
+            filter.
 
-        :return: the number of packets captured by this filter.
+        :rtype: int
         """
         return self._register_values[ROUTER_REGISTER_REGISTERS.USER_3.value]
 

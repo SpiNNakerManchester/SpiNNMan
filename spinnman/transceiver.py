@@ -923,7 +923,7 @@ class Transceiver(object):
 
         :param number_of_boards:
             this parameter is deprecated and will be ignored
-        :type number_of_boards: int
+        :type number_of_boards: int or None
         :param width: this parameter is deprecated and will be ignored
         :type width: int or None
         :param height: this parameter is deprecated and will be ignored
@@ -992,7 +992,7 @@ class Transceiver(object):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
-                IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms.value))
+                IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
 
         return version_info
 
@@ -1185,7 +1185,7 @@ class Transceiver(object):
             on the board are obtained.
         :return: An iterable of the buffers, which may not be in the order
             of core_subsets
-        :rtype: iterable(~spinnman.model.IOBuffer)
+        :rtype: iterable(IOBuffer)
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -1256,7 +1256,7 @@ class Transceiver(object):
         :param int y: The y-coordinate of the chip containing the processor
         :param int p: The ID of the processor to get the IOBUF for
         :return: An IOBUF buffer
-        :rtype: ~spinnman.model.IOBuffer
+        :rtype: IOBuffer
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -1276,7 +1276,7 @@ class Transceiver(object):
 
         :param int app_id:
             The ID of the application from which to get the count.
-        :param ~spinnman.model.CPUState state: The state count to get
+        :param CPUState state: The state count to get
         :return: A count of the cores with the given status
         :rtype: int
         :raise SpinnmanIOException:
@@ -1430,7 +1430,7 @@ class Transceiver(object):
             all of the binaries.  Note this will get the binaries into c_main\
             but will not signal the barrier.
 
-        :param ~spinnman.model.ExecutableTargets executable_targets:
+        :param ExecutableTargets executable_targets:
             The binaries to be executed and the cores to execute them on
         :param int app_id: The app_id to give this application
         """
@@ -1541,8 +1541,8 @@ class Transceiver(object):
         :param led:
             Number of the LED or an iterable of LEDs to set the state of (0-7)
         :type led: int or iterable(int)
-        :param action: State to set the LED to, either on, off or toggle
-        :type action: ~spinnman.messages.scp.scp_led_action.SCPLEDAction
+        :param LEDAction action:
+            State to set the LED to, either on, off or toggle
         :param board: Specifies the board to control the LEDs of. This may
             also be an iterable of multiple boards (in the same frame). The
             command will actually be sent to the first board in the iterable.
@@ -1602,7 +1602,7 @@ class Transceiver(object):
         :param int frame: the frame this is targeting
         :param int board: which board to request the ADC data from
         :return: the FPGA's ADC data object
-        :rtype: ~spinnman.model.adc_info.ADCInfo
+        :rtype: ADCInfo
         """
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
@@ -1632,7 +1632,6 @@ class Transceiver(object):
             The y-coordinate of the chip where the memory is to be written to
         :param int base_address:
             The address in SDRAM where the region of memory is to be written
-        :type base_address: int
         :param data: The data to write.  Should be one of the following:
             * An instance of AbstractDataReader
             * A bytearray
@@ -1641,7 +1640,7 @@ class Transceiver(object):
                 set to True)
         :type data:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
-            or bytearray or int or str
+            or bytes or bytearray or int or str
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
             * If data is an AbstractDataReader, an error is raised
@@ -1708,7 +1707,7 @@ class Transceiver(object):
             * A single integer; will be written in little-endian byte order
         :type data:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
-            or bytearray or int
+            or bytes or bytearray or int
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
             * If data is an AbstractDataReader, an error is raised
@@ -1766,7 +1765,7 @@ class Transceiver(object):
                 be set to True)
         :type data:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
-            or bytearray or int or str
+            or bytes or bytearray or int or str
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
             * If data is an AbstractDataReader, an error is raised
@@ -1984,9 +1983,9 @@ class Transceiver(object):
         :param ~spinn_machine.CoreSubsets all_core_subsets:
             The cores to filter
         :param states: The state or states to filter on
-        :type states: CPUState or set(~CPUState)
+        :type states: CPUState or set(CPUState)
         :return: Core subsets object containing cores in the given state(s)
-        :rtype: ~spinn_machine.CoreSubsets
+        :rtype: CPUInfos
         """
         core_infos = self.get_cpu_information(all_core_subsets)
         cores_in_state = CPUInfos()

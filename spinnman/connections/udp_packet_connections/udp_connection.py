@@ -144,11 +144,10 @@ class UDPConnection(Connection):
     def receive(self, timeout=None):
         """ Receive data from the connection
 
-        :param timeout: The timeout in seconds, or None to wait forever
-        :type timeout: None or float
+        :param float timeout: The timeout in seconds, or None to wait forever
         :return: The data received as a bytestring
-        :rtype: str
-        :raise SpinnmanTimeoutException: \
+        :rtype: bytes
+        :raise SpinnmanTimeoutException:
             If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
         """
@@ -164,12 +163,11 @@ class UDPConnection(Connection):
         """ Receive data from the connection along with the address where the\
             data was received from
 
-        :param timeout: The timeout, or None to wait forever
-        :type timeout: None
-        :return: A tuple of the data received and a tuple of the\
+        :param float timeout: The timeout, or None to wait forever
+        :return: A tuple of the data received and a tuple of the
             (address, port) received from
-        :rtype: str, (str, int)
-        :raise SpinnmanTimeoutException: \
+        :rtype: tuple(bytes, tuple(str, int))
+        :raise SpinnmanTimeoutException:
             If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
         """
@@ -185,7 +183,7 @@ class UDPConnection(Connection):
         """ Send data down this connection
 
         :param data: The data to be sent
-        :type data: str
+        :type data: bytes or bytearray
         :raise SpinnmanIOException: If there is an error sending the data
         """
         if not self._can_send:
@@ -202,9 +200,9 @@ class UDPConnection(Connection):
         """ Send data down this connection
 
         :param data: The data to be sent as a bytestring
-        :type data: str
-        :param address: A tuple of (address, port) to send the data to
-        :type address: (str, int)
+        :type data: bytes or bytearray
+        :param tuple(str,int) address:
+            A tuple of (address, port) to send the data to
         :raise SpinnmanIOException: If there is an error sending the data
         """
         try:

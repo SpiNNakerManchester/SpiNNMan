@@ -29,18 +29,17 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             self, x, y, p, base_address, data, offset, n_bytes):
         """ Writes memory onto a SpiNNaker chip from a bytearray.
 
-        :param x: \
+        :param int x:
             The x-coordinate of the chip where the memory is to be written to
-        :param y: \
+        :param int y:
             The y-coordinate of the chip where the memory is to be written to
-        :param p: \
+        :param int p:
             The processor of the chip where the memory is to be written to
-        :param processor_address: the (x, y, p) coords of the chip in question
-        :param base_address: the address in SDRAM to start writing
+        :param int base_address: the address in SDRAM to start writing
         :param data: the data to write
         :type data: bytearray or bytes
-        :param offset: where in the data to start writing from
-        :param n_bytes: how much data to write
+        :param int offset: where in the data to start writing from
+        :param int n_bytes: how much data to write
         :rtype: None
         """
         self._write_memory_from_bytearray(
@@ -57,16 +56,16 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             self, x, y, p, base_address, reader, n_bytes):
         """ Writes memory onto a SpiNNaker chip from a reader.
 
-        :param x: \
+        :param int x:
             The x-coordinate of the chip where the memory is to be written to
-        :param y: \
+        :param int y:
             The y-coordinate of the chip where the memory is to be written to
-        :param p: \
+        :param int p:
             The processor of the chip where the memory is to be written to
-        :param base_address: the address in SDRAM to start writing
+        :param int base_address: the address in SDRAM to start writing
         :param reader: the readable object containing the data to write
-        :type reader: :py:class:`io.RawIOBase` or :py:class:`io.BufferedIOBase`
-        :param n_bytes: how much data to write
+        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
+        :param int n_bytes: how much data to write
         :rtype: None
         """
         self._write_memory_from_reader(
