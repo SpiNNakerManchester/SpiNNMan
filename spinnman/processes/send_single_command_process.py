@@ -31,11 +31,15 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess):
             connection_selector, n_retries=n_retries, timeout=timeout)
         self._response = None
 
-    def handle_response(self, response):
+    def __handle_response(self, response):
         self._response = response
 
     def execute(self, request):
-        self._send_request(request, self.handle_response)
+        """
+        :param AbstractSCPRequest request:
+        :rtype: AbstractSCPResponse
+        """
+        self._send_request(request, self.__handle_response)
         self._finish()
         self.check_for_error()
         return self._response

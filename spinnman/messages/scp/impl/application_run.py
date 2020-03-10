@@ -36,7 +36,7 @@ class ApplicationRun(AbstractSCPRequest):
         :param list(int) processors:
             The processors on the chip where the executable should be
             started, between 1 and 17
-        :param boool wait:
+        :param bool wait:
             True if the processors should enter a "wait" state on starting
         """
         # pylint: disable=too-many-arguments

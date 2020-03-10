@@ -146,7 +146,7 @@ class ChipInfo(object):
     def links_available(self):
         """ The links that are available on the chip
 
-        :rtype: iterable of int
+        :rtype: iterable(int)
         """
         return self._links_available
 

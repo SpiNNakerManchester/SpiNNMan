@@ -111,7 +111,6 @@ class AbstractSCPRequest(object):
     def bytestring(self):
         """ The request as a bytestring
 
-        :return: The request as a bytestring
         :rtype: bytes
         """
         data = (self._sdp_header.bytestring +
@@ -130,5 +129,5 @@ class AbstractSCPRequest(object):
             received
 
         :return: An SCP response, or None if no response is required
-        :rtype: SCPResponse
+        :rtype: AbstractSCPResponse
         """

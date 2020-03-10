@@ -66,6 +66,4 @@ class SetPower(BMPRequest):
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ Get the response from the powering message
-        """
         return CheckOKResponse("powering request", "CMD_BMP_POWER")

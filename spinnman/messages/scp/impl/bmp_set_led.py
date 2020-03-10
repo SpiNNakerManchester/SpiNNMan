@@ -32,7 +32,7 @@ class BMPSetLed(BMPRequest):
         :param led: Number of the LED or an iterable of LEDs to set the
             state of (0-7)
         :type led: int or list(int)
-        :param SCPLEDAction action:
+        :param LEDAction action:
             State to set the LED to, either on, off or toggle
         :param boards: Specifies the board to control the LEDs of. This may
             also be an iterable of multiple boards (in the same frame).
@@ -59,6 +59,4 @@ class BMPSetLed(BMPRequest):
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
-        """ Get the response from the write FPGA register request
-        """
         return CheckOKResponse("Set the LEDs of a board", "CMD_LED")

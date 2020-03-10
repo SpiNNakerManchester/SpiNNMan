@@ -1306,6 +1306,7 @@ class Transceiver(object):
             The cores on the chip on which to run the application
         :param executable:
             The data that is to be executed. Should be one of the following:
+
             * An instance of AbstractDataReader
             * A bytearray/bytes
             * A filename of a file containing the executable (in which case\
@@ -1317,6 +1318,7 @@ class Transceiver(object):
             The ID of the application with which to associate the executable
         :param int n_bytes:
             The size of the executable data in bytes. If not specified:
+
             * If executable is an AbstractDataReader, an error is raised
             * If executable is a bytearray, the length of the bytearray will\
               be used
@@ -1371,6 +1373,7 @@ class Transceiver(object):
             Which cores on which chips to start the executable
         :param executable:
             The data that is to be executed. Should be one of the following:
+
             * An instance of AbstractDataReader
             * A bytearray
             * A filename of an executable (in which case `is_filename` must be\
@@ -1382,6 +1385,7 @@ class Transceiver(object):
             The ID of the application with which to associate the executable
         :param int n_bytes:
             The size of the executable data in bytes. If not specified:
+
             * If `executable` is an AbstractDataReader, an error is raised
             * If `executable` is a bytearray, the length of the bytearray will\
               be used
@@ -1626,6 +1630,7 @@ class Transceiver(object):
         :param int base_address:
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
+
             * An instance of AbstractDataReader
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
@@ -1636,6 +1641,7 @@ class Transceiver(object):
             or bytes or bytearray or int or str
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
+
             * If `data` is an AbstractDataReader, an error is raised
             * If `data` is a bytearray, the length of the bytearray will be\
               used
@@ -1653,7 +1659,7 @@ class Transceiver(object):
             * If `x, y` does not lead to a valid chip
             * If a packet is received that has invalid parameters
             * If `base_address` is not a positive integer
-            * If `data` is an AbstractDataReader but n_bytes is not specified
+            * If `data` is an AbstractDataReader but `n_bytes` is not specified
             * If `data` is an int and `n_bytes` is more than 4
             * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
@@ -1694,6 +1700,7 @@ class Transceiver(object):
         :param int base_address:
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
+
             * An instance of AbstractDataReader
             * A bytearray/bytes
             * A single integer; will be written in little-endian byte order
@@ -1702,12 +1709,13 @@ class Transceiver(object):
             or bytes or bytearray or int
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
+
             * If `data` is an AbstractDataReader, an error is raised
             * If `data` is a bytearray, the length of the bytearray will be\
               used
             * If `data` is an int, 4 will be used
         :param int offset:
-            The offset where the valid data starts (if the data is
+            The offset where the valid data starts (if `data` is
             an int then offset will be ignored and used 0)
         :param int cpu:
             The CPU to use, typically 0 (or if a BMP, the slot number)
@@ -1720,7 +1728,7 @@ class Transceiver(object):
             * If `x, y` does not lead to a valid chip
             * If a packet is received that has invalid parameters
             * If `base_address` is not a positive integer
-            * If `data` is an AbstractDataReader but n_bytes is not specified
+            * If `data` is an AbstractDataReader but `n_bytes` is not specified
             * If `data` is an int and `n_bytes` is more than 4
             * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
@@ -1749,6 +1757,7 @@ class Transceiver(object):
             The address in SDRAM where the region of memory is to be written
         :param data:
             The data that is to be written.  Should be one of the following:
+
             * An instance of AbstractDataReader
             * A bytearray or bytestring
             * A single integer
@@ -1759,14 +1768,15 @@ class Transceiver(object):
             or bytes or bytearray or int or str
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
+
             * If `data` is an AbstractDataReader, an error is raised
             * If `data` is a bytearray, the length of the bytearray will be\
               used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the size of the file will be used
         :param int offset:
-            The offset where the valid data starts; if the data is
-            a int, then the offset will be ignored and 0 is used.
+            The offset where the valid data starts; if `data` is
+            an int, then the offset will be ignored and 0 is used.
         :param bool is_filename:
             True if `data` should be interpreted as a file name
         :raise SpinnmanIOException:
@@ -1823,7 +1833,7 @@ class Transceiver(object):
         :raise SpinnmanInvalidPacketException:
             If a packet is received that is not in the valid format
         :raise SpinnmanInvalidParameterException:
-            * If one of x, y, p, base_address or length is invalid
+            * If one of `x`, `y`, `cpu`, `base_address` or `length` is invalid
             * If a packet is received that has invalid parameters
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
@@ -1855,7 +1865,7 @@ class Transceiver(object):
         :raise SpinnmanInvalidPacketException:
             If a packet is received that is not in the valid format
         :raise SpinnmanInvalidParameterException:
-            * If one of x, y, p, base_address or length is invalid
+            * If one of `x`, `y`, `cpu`, `base_address` or `length` is invalid
             * If a packet is received that has invalid parameters
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange

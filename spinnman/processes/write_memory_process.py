@@ -47,6 +47,23 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
 
     def write_link_memory_from_bytearray(
             self, x, y, p, link, base_address, data, offset, n_bytes):
+        """ Writes memory onto a neighbour of a SpiNNaker chip from a\
+            bytearray.
+
+        :param int x:
+            The x-coordinate of the chip where the memory is to be written to
+        :param int y:
+            The y-coordinate of the chip where the memory is to be written to
+        :param int p:
+            The processor of the chip where the memory is to be written to
+        :param int link:
+            Along which link is the neighbour.
+        :param int base_address: the address in SDRAM to start writing
+        :param data: the data to write
+        :type data: bytearray or bytes
+        :param int offset: where in the data to start writing from
+        :param int n_bytes: how much data to write
+        """
         self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
             functools.partial(WriteLink, x=x, y=y, cpu=p, link=link))
@@ -63,7 +80,9 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             The processor of the chip where the memory is to be written to
         :param int base_address: the address in SDRAM to start writing
         :param reader: the readable object containing the data to write
-        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
+        :type reader:
+            ~spinn_storage_handlers.abstract_classes.AbstractDataReader or
+            ~io.RawIOBase or ~io.BufferedIOBase
         :param int n_bytes: how much data to write
         """
         self._write_memory_from_reader(
@@ -72,6 +91,23 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
 
     def write_link_memory_from_reader(
             self, x, y, p, link, base_address, reader, n_bytes):
+        """ Writes memory onto a neighbour of a SpiNNaker chip from a reader.
+
+        :param int x:
+            The x-coordinate of the chip where the memory is to be written to
+        :param int y:
+            The y-coordinate of the chip where the memory is to be written to
+        :param int p:
+            The processor of the chip where the memory is to be written to
+        :param int link:
+            Along which link is the neighbour.
+        :param int base_address: the address in SDRAM to start writing
+        :param reader: the readable object containing the data to write
+        :type reader:
+            ~spinn_storage_handlers.abstract_classes.AbstractDataReader or
+            ~io.RawIOBase or ~io.BufferedIOBase
+        :param int n_bytes: how much data to write
+        """
         self._write_memory_from_reader(
             base_address, reader, n_bytes,
             functools.partial(WriteLink, x=x, y=y, cpu=p, link=link))

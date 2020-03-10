@@ -48,7 +48,11 @@ class TokenBucket(object):
 
         If there are not enough tokens and block is False, returns False.
 
-        It is an error to consume more tokens than the bucket _capacity.
+        It is an error to consume more tokens than the bucket capacity.
+
+        :param int tokens:
+        :param bool block:
+        :rtype: bool
         """
         while block and tokens > self.tokens:
             deficit = tokens - self._tokens
@@ -62,6 +66,8 @@ class TokenBucket(object):
 
     @property
     def tokens(self):
+        """ The number of tokens currently in the bucket.
+        """
         if self._tokens < self._capacity:
             now = time.time()
             delta = self._fill_rate * (now - self._timestamp)

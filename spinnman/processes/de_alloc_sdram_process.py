@@ -1,3 +1,4 @@
+
 # Copyright (c) 2017-2019 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
@@ -31,6 +32,13 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         self._no_blocks_freed = None
 
     def de_alloc_sdram(self, x, y, app_id, base_address=None):
+        """
+        :param int x:
+        :param int y:
+        :param int app_id:
+        :param base_address:
+        :type base_address: int or None
+        """
         callback = None
         # deallocate space in the SDRAM
         if base_address is None:

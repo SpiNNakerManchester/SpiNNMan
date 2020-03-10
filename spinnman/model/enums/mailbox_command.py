@@ -19,11 +19,15 @@ from enum import Enum
 class MailboxCommand(Enum):
     """ Commands sent between an application and the monitor processor
     """
-
+    #: The mailbox is idle
     SHM_IDLE = (0, "The mailbox is idle")
+    #: The mailbox contains an SDP message
     SHM_MSG = (1, "The mailbox contains an SDP message")
+    #: The mailbox contains a no-operation (used for watchdog)
     SHM_NOP = (2, "The mailbox contains a non-operation")
+    #: The mailbox contains a signal
     SHM_SIGNAL = (3, "The mailbox contains a signal")
+    #: The mailbox contains a command
     SHM_CMD = (4, "The mailbox contains a command")
 
     def __new__(cls, value, doc=""):

@@ -34,9 +34,18 @@ class GetVersionProcess(AbstractSingleConnectionProcess):
         self._version_info = None
 
     def _get_response(self, version_response):
+        """
+        :param GetVersionResponse version_response:
+        """
         self._version_info = version_response.version_info
 
     def get_version(self, x, y, p):
+        """
+        :param int x:
+        :param int y:
+        :param int p:
+        :rtype: VersionInfo
+        """
         self._send_request(GetVersion(x=x, y=y, p=p),
                            self._get_response)
         self._finish()

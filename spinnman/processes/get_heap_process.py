@@ -69,6 +69,11 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         self.check_for_error()
 
     def get_heap(self, chip_address, pointer=HEAP_ADDRESS):
+        """
+        :param tuple(int,int) chip_address: x, y
+        :param SystemVariableDefinition pointer:
+        :rtype: list(HeapElement)
+        """
         self._read_address(
             chip_address, SYSTEM_VARIABLE_BASE_ADDRESS + pointer.offset,
             pointer.data_type.value, self._read_heap_address_response)

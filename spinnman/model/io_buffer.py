@@ -26,7 +26,7 @@ class IOBuffer(object):
         :param int x: The x-coordinate of a chip
         :param int y: The y-coordinate of a chip
         :param int p: The p-coordinate of a chip
-        :param bytes iobuf: The contents of the buffer for the chip
+        :param str iobuf: The contents of the buffer for the chip
         """
         self._x = x
         self._y = y
@@ -61,7 +61,7 @@ class IOBuffer(object):
     def iobuf(self):
         """ The contents of the buffer
 
-        :rtype: bytes
+        :rtype: str
         """
         return self._iobuf
 

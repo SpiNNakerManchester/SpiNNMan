@@ -64,7 +64,7 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         self._entries[route_no + offset] = MulticastRoutingEntry(
             key, mask, processor_ids, link_ids, False)
 
-    def handle_read_response(self, offset, response):
+    def __handle_response(self, offset, response):
         for route_no in range(_ENTRIES_PER_READ):
             entry = _ROUTE_ENTRY_PATTERN.unpack_from(
                 response.data,
@@ -72,14 +72,19 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             self._add_routing_entry(route_no, offset, *entry)
 
     def get_routes(self, x, y, base_address):
-
+        """
+        :param int x:
+        :param int y:
+        :param int base_address:
+        :rtype: list(~spinn_machine.MulticastRoutingEntry)
+        """
         # Create the read requests
         offset = 0
         for _ in range(_N_READS):
             self._send_request(
                 ReadMemory(
                     x, y, base_address + (offset * 16), UDP_MESSAGE_MAX_SIZE),
-                functools.partial(self.handle_read_response, offset))
+                functools.partial(self.__handle_response, offset))
             offset += _ENTRIES_PER_READ
         self._finish()
         self.check_for_error()

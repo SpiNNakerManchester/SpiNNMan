@@ -189,18 +189,24 @@ class SCPRequestPipeLine(object):
 
     @property
     def n_timeouts(self):
+        """ The number of timeouts that occurred. """
         return self._n_timeouts
 
     @property
     def n_channels(self):
+        """ The number of requests to send before checking for responses. """
         return self._n_channels
 
     @property
     def n_resent(self):
+        """ The number of packets that have been resent. """
         return self._n_resent
 
     @property
     def n_retry_code_resent(self):
+        """ The number of resends due to reasons for which automated retry is\
+            the correct response in-protocol.
+        """
         return self._n_retry_code_resent
 
     def _remove_record(self, seq):

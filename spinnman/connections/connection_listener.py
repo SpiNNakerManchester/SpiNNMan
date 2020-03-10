@@ -71,6 +71,8 @@ class ConnectionListener(Thread):
             logger.exception("problem in listener call")
 
     def run(self):
+        """ Implements the listening thread.
+        """
         try:
             handler = self.__connection.get_receive_method()
             while not self.__done:

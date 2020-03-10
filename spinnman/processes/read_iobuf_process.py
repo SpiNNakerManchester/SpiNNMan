@@ -143,7 +143,9 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
 
     def read_iobuf(self, iobuf_size, core_subsets):
         """
-        :rtype: iterable of IOBuffer
+        :param int iobuf_size:
+        :param ~spinn_machine.CoreSubsets core_subsets:
+        :rtype: iterable(IOBuffer)
         """
         # Get the iobuf address for each core
         for core_subset in core_subsets:
