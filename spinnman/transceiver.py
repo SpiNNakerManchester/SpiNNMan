@@ -1308,8 +1308,8 @@ class Transceiver(object):
             The data that is to be executed. Should be one of the following:
             * An instance of AbstractDataReader
             * A bytearray/bytes
-            * A filename of a file containing the executable (in which case
-                `is_filename` must be set to True)
+            * A filename of a file containing the executable (in which case\
+              `is_filename` must be set to True)
         :type executable:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader`
             or bytes or bytearray or str
@@ -1318,8 +1318,8 @@ class Transceiver(object):
         :param int n_bytes:
             The size of the executable data in bytes. If not specified:
             * If executable is an AbstractDataReader, an error is raised
-            * If executable is a bytearray, the length of the bytearray will
-                be used
+            * If executable is a bytearray, the length of the bytearray will\
+              be used
             * If executable is an int, 4 will be used
             * If executable is a str, the length of the file will be used
         :param bool wait:
@@ -1373,8 +1373,8 @@ class Transceiver(object):
             The data that is to be executed. Should be one of the following:
             * An instance of AbstractDataReader
             * A bytearray
-            * A filename of an executable (in which case `is_filename` must be
-                set to True)
+            * A filename of an executable (in which case `is_filename` must be\
+              set to True)
         :type executable:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
             or bytes or bytearray or str
@@ -1382,11 +1382,11 @@ class Transceiver(object):
             The ID of the application with which to associate the executable
         :param int n_bytes:
             The size of the executable data in bytes. If not specified:
-            * If executable is an AbstractDataReader, an error is raised
-            * If executable is a bytearray, the length of the bytearray will
-                be used
-            * If executable is an int, 4 will be used
-            * If executable is a str, the length of the file will be used
+            * If `executable` is an AbstractDataReader, an error is raised
+            * If `executable` is a bytearray, the length of the bytearray will\
+              be used
+            * If `executable` is an int, 4 will be used
+            * If `executable` is a str, the length of the file will be used
         :param bool wait:
             True if the processors should enter a "wait" state on loading
         :param bool is_filename: True if the data is a filename
@@ -1397,11 +1397,12 @@ class Transceiver(object):
             If a packet is received that is not in the valid format
         :raise SpinnmanInvalidParameterException:
             * If one of the specified cores is not valid
-            * If app_id is an invalid application ID
+            * If `app_id` is an invalid application ID
             * If a packet is received that has invalid parameters
-            * If data is an AbstractDataReader but n_bytes is not specified
-            * If data is an int and n_bytes is more than 4
-            * If n_bytes is less than 0
+            * If `executable` is an AbstractDataReader but `n_bytes` is not\
+              specified
+            * If `executable` is an int and `n_bytes` is more than 4
+            * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
@@ -1628,32 +1629,33 @@ class Transceiver(object):
             * An instance of AbstractDataReader
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
-            * A filename of a data file (in which case `is_filename` must be
-                set to True)
+            * A filename of a data file (in which case `is_filename` must be\
+              set to True)
         :type data:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
             or bytes or bytearray or int or str
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
-            * If data is an AbstractDataReader, an error is raised
-            * If data is a bytearray, the length of the bytearray will be used
-            * If data is an int, 4 will be used
-            * If data is a str, the length of the file will be used
+            * If `data` is an AbstractDataReader, an error is raised
+            * If `data` is a bytearray, the length of the bytearray will be\
+              used
+            * If `data` is an int, 4 will be used
+            * If `data` is a str, the length of the file will be used
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
-        :param bool is_filename: True if the data is a filename
+        :param bool is_filename: True if `data` is a filename
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
         :raise SpinnmanInvalidPacketException:
             If a packet is received that is not in the valid format
         :raise SpinnmanInvalidParameterException:
-            * If x, y does not lead to a valid chip
+            * If `x, y` does not lead to a valid chip
             * If a packet is received that has invalid parameters
-            * If base_address is not a positive integer
-            * If data is an AbstractDataReader but n_bytes is not specified
-            * If data is an int and n_bytes is more than 4
-            * If n_bytes is less than 0
+            * If `base_address` is not a positive integer
+            * If `data` is an AbstractDataReader but n_bytes is not specified
+            * If `data` is an int and `n_bytes` is more than 4
+            * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
@@ -1700,9 +1702,10 @@ class Transceiver(object):
             or bytes or bytearray or int
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
-            * If data is an AbstractDataReader, an error is raised
-            * If data is a bytearray, the length of the bytearray will be used
-            * If data is an int, 4 will be used
+            * If `data` is an AbstractDataReader, an error is raised
+            * If `data` is a bytearray, the length of the bytearray will be\
+              used
+            * If `data` is an int, 4 will be used
         :param int offset:
             The offset where the valid data starts (if the data is
             an int then offset will be ignored and used 0)
@@ -1714,12 +1717,12 @@ class Transceiver(object):
         :raise SpinnmanInvalidPacketException:
             If a packet is received that is not in the valid format
         :raise SpinnmanInvalidParameterException:
-            * If x, y does not lead to a valid chip
+            * If `x, y` does not lead to a valid chip
             * If a packet is received that has invalid parameters
-            * If base_address is not a positive integer
-            * If data is an AbstractDataReader but n_bytes is not specified
-            * If data is an int and n_bytes is more than 4
-            * If n_bytes is less than 0
+            * If `base_address` is not a positive integer
+            * If `data` is an AbstractDataReader but n_bytes is not specified
+            * If `data` is an int and `n_bytes` is more than 4
+            * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
@@ -1749,22 +1752,23 @@ class Transceiver(object):
             * An instance of AbstractDataReader
             * A bytearray or bytestring
             * A single integer
-            * A file name of a file to read (in which case `is_filename`
-                should be set to True)
+            * A file name of a file to read (in which case `is_filename`\
+              should be set to True)
         :type data:
             ~spinn_storage_handlers.abstract_classes.AbstractDataReader
             or bytes or bytearray or int or str
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
-            * If data is an AbstractDataReader, an error is raised
-            * If data is a bytearray, the length of the bytearray will be used
-            * If data is an int, 4 will be used
-            * If data is a str, the size of the file will be used
+            * If `data` is an AbstractDataReader, an error is raised
+            * If `data` is a bytearray, the length of the bytearray will be\
+              used
+            * If `data` is an int, 4 will be used
+            * If `data` is a str, the size of the file will be used
         :param int offset:
-            The offset where the valid data starts, if the data is
+            The offset where the valid data starts; if the data is
             a int, then the offset will be ignored and 0 is used.
         :param bool is_filename:
-            True if the data should be interpreted as a file name
+            True if `data` should be interpreted as a file name
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
@@ -1772,7 +1776,7 @@ class Transceiver(object):
             If a packet is received that is not in the valid format
         :raise SpinnmanInvalidParameterException:
             * If one of the specified chips is not valid
-            * If app_id is an invalid application ID
+            * If `app_id` is an invalid application ID
             * If a packet is received that has invalid parameters
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange

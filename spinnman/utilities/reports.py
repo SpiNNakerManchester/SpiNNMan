@@ -48,6 +48,11 @@ def generate_machine_report(report_directory, machine, connections):
 
 
 def _write_header(f, timestamp, machine, connections):
+    """
+    :param str timestamp:
+    :param ~spinn_machine.Machine machine:
+    :param list(Connection) connections:
+    """
     f.write("\t\tTarget SpiNNaker Machine Structure\n")
     f.write("\t\t==================================\n")
     f.write("\nGenerated: {} for target machine '{}'\n\n".format(
@@ -59,6 +64,9 @@ def _write_header(f, timestamp, machine, connections):
 
 
 def _write_chip_router_report(f, chip):
+    """
+    :param ~spinn_machine.Chip chip:
+    """
     f.write("\nInformation for chip {}:{}\n".format(chip.x, chip.y))
     f.write("Neighbouring chips \n{}\n".format(
         chip.router.get_neighbouring_chips_coords()))

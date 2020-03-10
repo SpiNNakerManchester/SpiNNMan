@@ -46,7 +46,7 @@ class SCPReceiver(Connection):
         :return: The SCP result, the sequence number, the data of the response
             and the offset at which the data starts (i.e., where the SDP
             header starts).
-        :rtype: tuple(SCPResult, int, bytestring, int)
+        :rtype: tuple(SCPResult, int, bytes, int)
         :raise SpinnmanIOException:
             If there is an error receiving the message
         :raise SpinnmanTimeoutException:

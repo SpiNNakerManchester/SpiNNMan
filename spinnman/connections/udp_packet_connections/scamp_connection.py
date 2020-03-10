@@ -68,7 +68,8 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
         self._chip_x = x
         self._chip_y = y
 
-    @overrides(SCPSender.get_scp_data, additional_arguments=['x', 'y'])
+    @overrides(SCPSender.get_scp_data,
+               additional_arguments=['x', 'y'], extend_defaults=True)
     def get_scp_data(self, scp_request, x=None, y=None):
         """
         :param int x: Optional: x-coordinate of where to send to
