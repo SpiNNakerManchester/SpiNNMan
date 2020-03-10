@@ -155,14 +155,25 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 chip_info.n_free_multicast_routing_entries))
 
     def __receive_p2p_data(self, column, scp_read_response):
+        """
+        :param int column:
+        :param _SCPReadMemoryResponse scp_read_response:
+        """
         self._p2p_column_data[column] = (
             scp_read_response.data, scp_read_response.offset)
 
     def _receive_chip_info(self, scp_read_chip_info_response):
+        """
+        :param GetChipInfoResponse scp_read_chip_info_response:
+        """
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
 
     def _receive_error(self, request, exception, tb):
+        """
+        :param AbstractSCPRequest request:
+        :param Exception exception:
+        """
         # If we get an ReadLink with a
         # SpinnmanUnexpectedResponseCodeException, this is a failed link
         # and so can be ignored
@@ -372,6 +383,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                             inv_xy, inv_link, global_xy)
 
     def _ignores_local_to_global(self, local_x, local_y, ip_address, machine):
+        """
+        :param int local_x:
+        :param int local_y:
+        :param str ip_address:
+        :param ~spinn_machine.Machine machine:
+        :rtype: tuple(int,int)
+        """
         if ip_address is None:
             global_xy = (local_x, local_y)
         else:
@@ -397,6 +415,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             return None
 
     def _ethernet_by_ipaddress(self, ip_address):
+        """
+        :param str ip_address:
+        :rtype: tuple(int,int)
+        """
         if self._ethernets is None:
             self._ethernets = dict()
             for chip_info in self._chip_info.values():
@@ -406,6 +428,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         return self._ethernets.get(ip_address, None)
 
     def _get_virtual_p(self, xy, p):
+        """
+        :param tuple(int,int) xy:
+        :param int p:
+        :rtype: int
+        """
         if xy not in self._virtual_map:
             if xy not in self._chip_info:
                 # Chip not part of board so ignore
@@ -443,6 +470,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             return virtual_p
 
     def _receive_physical_to_virtual_core_map(self, xy, scp_read_response):
+        """
+        :param tuple(int,int) xy:
+        :param _SCPReadMemoryResponse scp_read_response:
+        """
         chipinfo = self._chip_info[xy]
         ip_address = self._chip_info[(0, 0)].ethernet_ip_address
 
@@ -462,6 +493,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _verify_virtual_to_physical_core_map(self, xy):
         """ Add this method to _get_virtual_p to verify the mappings.
+
+        :param tuple(int,int) xy:
         """
         v_to_p = SystemVariableDefinition.virtual_to_physical_core_map
         self._send_request(
@@ -474,6 +507,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._finish()
 
     def _receive_virtual_to_physical_core_map(self, xy, scp_read_response):
+        """
+        :param tuple(int,int) xy:
+        :param _SCPReadMemoryResponse scp_read_response:
+        """
         p_to_v_map = self._virtual_map[xy]
         chipinfo = self._chip_info[xy]
         for i in range(
@@ -491,6 +528,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         The implementation choice to reopen the file every time is not the\
         fastest but is the cleanest and safest for code that in default\
         conditions is never run.
+
+        :param str message:
         """
         full_message = message.format(*args) + "\n"
         if self._report_file is None:
