@@ -177,3 +177,6 @@ class ChipSummaryInfo(object):
         :rtype: str
         """
         return self._ethernet_ip_address
+
+    def __repr__(self):
+        return "x:{} y:{} n_cores:{}".format(self.x, self.y, self.n_cores)

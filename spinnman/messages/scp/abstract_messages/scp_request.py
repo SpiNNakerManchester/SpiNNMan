@@ -52,7 +52,7 @@ class AbstractSCPRequest(object):
         :param argument_3: The third argument, or None if no third argument
         :type argument_3: int
         :param data: The optional data, or None if no data
-        :type data: bytearray
+        :type data: bytearray or bytes
         :raise None: No known exceptions are raised
         """
         # pylint: disable=too-many-arguments

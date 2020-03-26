@@ -13,10 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    from collections.abc import namedtuple
-except ImportError:
-    from collections import namedtuple
+from collections import namedtuple
 import struct
 from enum import Enum
 
@@ -47,6 +44,11 @@ class _DataType(Enum):
     @property
     def struct_code(self):
         return self._struct_code
+
+    @property
+    def is_byte_array(self):
+        # can't use BYTE_ARRAY.value directly here
+        return self._value_ == 16
 
 
 class _Definition(namedtuple("_Definition",

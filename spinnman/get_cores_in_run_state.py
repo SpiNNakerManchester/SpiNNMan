@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import argparse
 from spinnman.transceiver import create_transceiver_from_hostname
-from board_test_configuration import BoardTestConfiguration
 from spinn_machine import CoreSubsets, CoreSubset
 from spinnman.model.enums import CPUState
 
@@ -55,8 +55,7 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
         print('watchdog core: {} {} {}'.format(x, y, p))
 
 
-def make_transceiver(host=None):
-    config = BoardTestConfiguration()
+def make_transceiver(config, host=None):
     config.set_up_remote_board()
     if host is None:
         host = config.remotehost
@@ -88,7 +87,13 @@ def main():
     app_id = args.appid
     print_chips = not args.noprintchips
 
-    transceiver = make_transceiver(args.host)
+    try:
+        from board_test_configuration import BoardTestConfiguration
+        config = BoardTestConfiguration()
+    except ImportError:
+        print("cannot read board test configuration")
+        sys.exit(1)
+    transceiver = make_transceiver(config, args.host)
     try:
         get_cores_in_run_state(transceiver, app_id, print_chips)
     finally:

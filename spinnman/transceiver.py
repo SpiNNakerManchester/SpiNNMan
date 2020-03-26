@@ -17,10 +17,7 @@
 import random
 import struct
 from threading import Condition, RLock
-try:
-    from collections.abc import defaultdict
-except ImportError:
-    from collections import defaultdict
+from collections import defaultdict
 import logging
 import socket
 import time
@@ -98,9 +95,9 @@ _ONE_LONG = struct.Struct("<Q")
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         ignore_chips=None, ignore_cores=None, ignored_links=None,
-        max_core_id=None, auto_detect_bmp=False, scamp_connections=None,
+        auto_detect_bmp=False, scamp_connections=None,
         boot_port_no=None, max_sdram_size=None, repair_machine=False,
-        ignore_bad_ethernets=True):
+        ignore_bad_ethernets=True, default_report_directory=None):
     """ Create a Transceiver by creating a UDPConnection to the given\
         hostname on port 17893 (the default SCAMP port), and a\
         BootConnection on port 54321 (the default boot port), optionally\
@@ -125,9 +122,6 @@ def create_transceiver_from_hostname(
         Requests for a "machine" will have these links excluded, as if they \
         never existed.
     :type ignored_links: set of (int, int, int)
-    :param max_core_id: The maximum core ID in any discovered machine.\
-        Requests for a "machine" will only have core IDs up to this value.
-    :type max_core_id: int
     :param version: the type of SpiNNaker board used within the SpiNNaker\
         machine being used. If a spinn-5 board, then the version will be 5,\
         spinn-3 would equal 3 and so on.
@@ -161,6 +155,9 @@ def create_transceiver_from_hostname(
         If True the ipaddress is ignored
         If False the chip with the bad ipaddress is removed.
     :type ignore_bad_ethernets: bool
+    :param default_report_directory: Directory to write any reports too. \
+        If None the current directory will be used.
+    :type default_report_directory: str or None
     :return: The created transceiver
     :rtype: :py:class:`spinnman.transceiver.Transceiver`
     :raise spinnman.exceptions.SpinnmanIOException: \
@@ -203,10 +200,11 @@ def create_transceiver_from_hostname(
 
     return Transceiver(
         version, connections=connections, ignore_chips=ignore_chips,
-        ignore_cores=ignore_cores, max_core_id=max_core_id,
+        ignore_cores=ignore_cores,
         ignore_links=ignored_links, scamp_connections=scamp_connections,
         max_sdram_size=max_sdram_size, repair_machine=repair_machine,
-        ignore_bad_ethernets=ignore_bad_ethernets)
+        ignore_bad_ethernets=ignore_bad_ethernets,
+        default_report_directory=default_report_directory)
 
 
 class Transceiver(object):
@@ -229,6 +227,7 @@ class Transceiver(object):
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
+        "_default_report_directory",
         "_flood_write_lock",
         "_height",
         "_ignore_bad_ethernets",
@@ -238,7 +237,6 @@ class Transceiver(object):
         "_iobuf_size",
         "_machine",
         "_machine_off",
-        "_max_core_id",
         "_max_sdram_size",
         "_multicast_sender_connections",
         "_n_chip_execute_locks",
@@ -258,9 +256,9 @@ class Transceiver(object):
 
     def __init__(
             self, version, connections=None, ignore_chips=None,
-            ignore_cores=None, ignore_links=None, max_core_id=None,
+            ignore_cores=None, ignore_links=None,
             scamp_connections=None, max_sdram_size=None, repair_machine=False,
-            ignore_bad_ethernets=True):
+            ignore_bad_ethernets=True, default_report_directory=None):
         """
         :param version: The version of the board being connected to
         :type version: int
@@ -282,10 +280,6 @@ class Transceiver(object):
             machine. Requests for a "machine" will have these links excluded,\
             as if they never existed.
         :type ignore_links: set of (int, int, int)
-        :param max_core_id: The maximum core ID in any discovered machine.\
-            Requests for a "machine" will only have core IDs up to and\
-            including this value.
-        :type max_core_id: int
         :param max_sdram_size: the max size each chip can say it has for SDRAM\
             (mainly used in debugging purposes)
         :type max_sdram_size: int or None
@@ -308,6 +302,9 @@ class Transceiver(object):
             If True the ipaddress is ignored
             If False the chip with the bad ipaddress is removed.
         :type ignore_bad_ethernets: bool
+        :param default_report_directory: Directory to write any reports too. \
+            If None the current directory will be used.
+        :type default_report_directory: str or None
         :raise spinnman.exceptions.SpinnmanIOException: \
             If there is an error communicating with the board, or if no \
             connections to the board can be found (if connections is None)
@@ -327,7 +324,6 @@ class Transceiver(object):
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
         self._ignore_links = ignore_links if ignore_links is not None else {}
-        self._max_core_id = max_core_id
         self._max_sdram_size = max_sdram_size
         self._iobuf_size = None
         self._app_id_tracker = None
@@ -420,6 +416,7 @@ class Transceiver(object):
         self._check_bmp_connections()
 
         self._machine_off = False
+        self._default_report_directory = default_report_directory
 
     def _identify_connections(self, connections):
         for conn in connections:
@@ -675,8 +672,8 @@ class Transceiver(object):
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._ignore_chips,
-            self._ignore_cores, self._ignore_links, self._max_core_id,
-            self._max_sdram_size)
+            self._ignore_cores, self._ignore_links, self._max_sdram_size,
+            self._default_report_directory)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height,
             self._repair_machine, self._ignore_bad_ethernets)
@@ -1122,11 +1119,13 @@ class Transceiver(object):
         return cpu_info
 
     def _get_sv_data(self, x, y, data_item):
+        addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
+        if data_item.data_type.is_byte_array:
+            # Do not need to decode the bytes of a byte array
+            return self.read_memory(x, y, addr, data_item.array_size)
         return struct.unpack_from(
             data_item.data_type.struct_code,
-            self.read_memory(
-                x, y, SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset,
-                data_item.data_type.value))[0]
+            self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
     @staticmethod
     def get_user_0_register_address_from_core(p):
@@ -1141,6 +1140,10 @@ class Transceiver(object):
 
     def read_user_0(self, x, y, p):
         addr = self.get_user_0_register_address_from_core(p)
+        return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
+
+    def read_user_1(self, x, y, p):
+        addr = self.get_user_1_register_address_from_core(p)
         return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
 
     @staticmethod
@@ -2027,7 +2030,7 @@ class Transceiver(object):
                 if is_error:
                     error_core_states = self.get_cores_in_state(
                         all_core_subsets, error_states)
-                    if len(error_states) > 0:
+                    if len(error_core_states) > 0:
                         raise SpiNNManCoresNotInStateException(
                             timeout, cpu_states, error_core_states)
 

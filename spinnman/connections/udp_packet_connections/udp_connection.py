@@ -196,7 +196,8 @@ class UDPConnection(Connection):
                 "Remote host and/or port not set - data cannot be sent with"
                 " this connection")
         try:
-            self._socket.send(data)
+            while not self._socket.send(data):
+                pass
         except Exception as e:  # pylint: disable=broad-except
             raise_from(SpinnmanIOException(str(e)), e)
 
@@ -210,7 +211,8 @@ class UDPConnection(Connection):
         :raise SpinnmanIOException: If there is an error sending the data
         """
         try:
-            self._socket.sendto(data, address)
+            while not self._socket.sendto(data, address):
+                pass
         except Exception as e:  # pylint: disable=broad-except
             raise_from(SpinnmanIOException(str(e)), e)
 

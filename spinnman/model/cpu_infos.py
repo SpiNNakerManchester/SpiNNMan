@@ -13,10 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    from collections.abc import OrderedDict
-except ImportError:
-    from collections import OrderedDict
+from collections import OrderedDict
 from six import iteritems, iterkeys, itervalues
 
 
@@ -94,7 +91,7 @@ class CPUInfos(object):
         return self._cpu_infos[x, y, p]
 
     def __str__(self):
-        return self._cpu_infos.keys()
+        return str(self._cpu_infos.keys())
 
     def __repr__(self):
         return self.__str__()
