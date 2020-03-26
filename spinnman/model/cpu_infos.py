@@ -29,14 +29,10 @@ class CPUInfos(object):
     def add_processor(self, x, y, processor_id, cpu_info):
         """ Add a processor on a given chip to the set.
 
-        :param x: The x-coordinate of the chip
-        :type x: int
-        :param y: The y-coordinate of the chip
-        :type y: int
-        :param processor_id: A processor ID
-        :type processor_id: int
-        :param cpu_info: The CPU information for the core
-        :type cpu_info: :py:class:`spinnman.model.enums.cpu_info.CPUInfo`
+        :param int x: The x-coordinate of the chip
+        :param int y: The y-coordinate of the chip
+        :param int processor_id: A processor ID
+        :param CPUInfo cpu_info: The CPU information for the core
         """
         self._cpu_infos[x, y, processor_id] = cpu_info
 

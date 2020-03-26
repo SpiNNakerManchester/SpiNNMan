@@ -25,7 +25,9 @@ class P2PTableRoute(Enum):
     WEST = 0b011
     SOUTH_WEST = 0b100
     SOUTH = 0b101
+    #: No route to this chip
     NONE = (0b110, "No route to this chip")
+    #: Route to the monitor on the current chip
     MONITOR = (0b111, "Route to the monitor on the current chip")
 
     def __new__(cls, value, doc=""):

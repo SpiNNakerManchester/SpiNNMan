@@ -38,12 +38,9 @@ class SendSignal(AbstractSCPRequest):
 
     def __init__(self, app_id, signal):
         """
-        :param app_id: The ID of the application, between 0 and 255
-        :type app_id: int
-        :param signal: The signal to send
-        :type signal: :py:class:`spinnman.messages.scp.scp_signal.SCPSignal`
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: If\
-            app_id is out of range
+        :param int app_id: The ID of the application, between 0 and 255
+        :param Signal signal: The signal to send
+        :raise SpinnmanInvalidParameterException: If app_id is out of range
         """
 
         if app_id < 0 or app_id > 255:

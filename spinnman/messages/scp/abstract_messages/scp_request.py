@@ -39,21 +39,17 @@ class AbstractSCPRequest(object):
                  argument_2=None, argument_3=None, data=None):
         """
 
-        :param sdp_header: The SDP header of the request
-        :type sdp_header:\
-            :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
-        :param scp_request_header: The SCP header of the request
-        :type scp_request_header:\
-            :py:class:`spinnman.messages.scp.SCPRequestHeader`
-        :param argument_1: The first argument, or None if no first argument
-        :type argument_1: int
-        :param argument_2: The second argument, or None if no second argument
-        :type argument_2: int
-        :param argument_3: The third argument, or None if no third argument
-        :type argument_3: int
+        :param SDPHeader sdp_header: The SDP header of the request
+        :param SCPRequestHeader scp_request_header:
+            The SCP header of the request
+        :param int argument_1:
+            The first argument, or None if no first argument
+        :param int argument_2:
+            The second argument, or None if no second argument
+        :param int argument_3:
+            The third argument, or None if no third argument
         :param data: The optional data, or None if no data
-        :type data: bytearray or bytes
-        :raise None: No known exceptions are raised
+        :type data: bytearray or bytes or None
         """
         # pylint: disable=too-many-arguments
         self._sdp_header = sdp_header
@@ -67,7 +63,7 @@ class AbstractSCPRequest(object):
     def sdp_header(self):
         """ The SDP header of the message
 
-        :rtype: :py:class:`spinnman.message.sdp.sdp_header.SDPHeader`
+        :rtype: SDPHeader
         """
         return self._sdp_header
 
@@ -75,8 +71,7 @@ class AbstractSCPRequest(object):
     def scp_request_header(self):
         """ The SCP request header of the message
 
-        :rtype:\
-            :py:class:`spinnman.messages.scp.SCPRequestHeader`
+        :rtype: SCPRequestHeader
         """
         return self._scp_request_header
 
@@ -116,8 +111,7 @@ class AbstractSCPRequest(object):
     def bytestring(self):
         """ The request as a bytestring
 
-        :return: The request as a bytestring
-        :rtype: str
+        :rtype: bytes
         """
         data = (self._sdp_header.bytestring +
                 self._scp_request_header.bytestring)
@@ -135,6 +129,5 @@ class AbstractSCPRequest(object):
             received
 
         :return: An SCP response, or None if no response is required
-        :rtype: :py:class:`spinnman.messages.scp_response.SCPResponse`
-        :raise None: No known exceptions are raised
+        :rtype: AbstractSCPResponse
         """

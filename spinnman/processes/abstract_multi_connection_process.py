@@ -26,26 +26,30 @@ class AbstractMultiConnectionProcess(AbstractProcess):
         "_intermediate_channel_waits",
         "_n_channels",
         "_n_retries",
-        "_next_connection_selector",
+        "_conn_selector",
         "_scp_request_pipelines",
         "_timeout"]
 
     def __init__(self, next_connection_selector,
                  n_retries=N_RETRIES, timeout=SCP_TIMEOUT, n_channels=8,
                  intermediate_channel_waits=7):
+        """
+        :param next_connection_selector:
+        :type next_connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(AbstractMultiConnectionProcess, self).__init__()
         self._scp_request_pipelines = dict()
         self._n_retries = n_retries
         self._timeout = timeout
         self._n_channels = n_channels
         self._intermediate_channel_waits = intermediate_channel_waits
-        self._next_connection_selector = next_connection_selector
+        self._conn_selector = next_connection_selector
 
     def _send_request(self, request, callback=None, error_callback=None):
         if error_callback is None:
             error_callback = self._receive_error
-        connection = self._next_connection_selector.get_next_connection(
-            request)
+        connection = self._conn_selector.get_next_connection(request)
         if connection not in self._scp_request_pipelines:
             scp_request_set = SCPRequestPipeLine(
                 connection, n_retries=self._n_retries,

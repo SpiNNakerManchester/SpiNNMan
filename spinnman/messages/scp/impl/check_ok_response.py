@@ -28,10 +28,8 @@ class CheckOKResponse(AbstractSCPResponse):
 
     def __init__(self, operation, command):
         """
-        :param operation: The operation being performed
-        :type operation: str
-        :param command: The command that was sent
-        :type command: str
+        :param str operation: The operation being performed
+        :param str command: The command that was sent
         """
         super(CheckOKResponse, self).__init__()
         self._operation = operation

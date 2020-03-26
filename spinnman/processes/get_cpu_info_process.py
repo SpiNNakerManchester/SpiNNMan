@@ -26,13 +26,22 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
         "_cpu_info"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetCPUInfoProcess, self).__init__(connection_selector)
         self._cpu_info = list()
 
-    def handle_response(self, x, y, p, response):
+    def __handle_response(self, x, y, p, response):
         self._cpu_info.append(CPUInfo(x, y, p, response.data, response.offset))
 
     def get_cpu_info(self, core_subsets):
+        """
+        :param ~spinn_machine.CoreSubsets core_subsets:
+        :rtype: list(CPUInfo)
+        """
         for core_subset in core_subsets:
             x = core_subset.x
             y = core_subset.y
@@ -40,7 +49,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
             for p in core_subset.processor_ids:
                 self._send_request(
                     ReadMemory(x, y, get_vcpu_address(p), CPU_INFO_BYTES),
-                    functools.partial(self.handle_response, x, y, p))
+                    functools.partial(self.__handle_response, x, y, p))
         self._finish()
         self.check_for_error()
 

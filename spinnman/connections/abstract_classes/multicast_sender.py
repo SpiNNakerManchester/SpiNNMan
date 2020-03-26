@@ -31,19 +31,14 @@ class MulticastSender(Connection):
             can send multicast packets directly
 
         :return: The coordinates, (x, y), of the chips
-        :rtype: iterable of (int, int)
-        :raise None: No known exceptions are raised
+        :rtype: iterable(tuple(int, int))
         """
 
     @abstractmethod
     def send_multicast_message(self, multicast_message):
         """ Sends a SpiNNaker multicast message using this connection
 
-        :param multicast_message: The message to be sent
-        :type multicast_message:\
-            :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :param MulticastMessage multicast_message: The message to be sent
+        :raise SpinnmanIOException:
             If there is an error sending the message
         """

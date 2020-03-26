@@ -28,8 +28,12 @@ class MostDirectConnectionSelector(
         "_machine"]
 
     # pylint: disable=super-init-not-called
-    @overrides(AbstractMultiConnectionProcessConnectionSelector.__init__)
     def __init__(self, machine, connections):
+        """
+        :param ~spinn_machine.Machine machine:
+        :param list(SCAMPConnection) connections:
+            The connections to be used
+        """
         self._machine = machine
         self._connections = dict()
         self._first_connection = None
@@ -42,6 +46,9 @@ class MostDirectConnectionSelector(
             self._first_connection = next(iter(connections))
 
     def set_machine(self, new_machine):
+        """
+        :param ~spinn_machine.Machine new_machine:
+        """
         self._machine = new_machine
 
     @overrides(

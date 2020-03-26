@@ -20,9 +20,13 @@ class DiagnosticFilterPacketType(Enum):
     """ Packet type flags for the diagnostic filters.
         Note that only one has to match for the counter to be incremented
     """
+    #: Packet is multicast
     MULTICAST = (0, "Packet is multicast")
+    #: Packet is point-to-point
     POINT_TO_POINT = (1, "Packet is point-to-point")
+    #: Packet is nearest-neighbour
     NEAREST_NEIGHBOUR = (2, "Packet is nearest-neighbour")
+    #: Packet is fixed-route
     FIXED_ROUTE = (3, "Packet is fixed-route")
 
     def __new__(cls, value, doc=""):

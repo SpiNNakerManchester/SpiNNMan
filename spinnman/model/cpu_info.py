@@ -51,14 +51,11 @@ class CPUInfo(object):
 
     def __init__(self, x, y, p, cpu_data, offset):
         """
-        :param x: The x-coordinate of a chip
-        :type x: int
-        :param y: The y-coordinate of a chip
-        :type y: int
-        :param p: The ID of a core on the chip
-        :type p: int
-        :param cpu_data: A bytestring received from SDRAM on the board
-        :type cpu_data: str
+        :param int x: The x-coordinate of a chip
+        :param int y: The y-coordinate of a chip
+        :param int p: The ID of a core on the chip
+        :param bytes cpu_data: A bytestring received from SDRAM on the board
+        :param int offset:
         """
         # pylint: disable=too-many-arguments
         self._x = x
@@ -129,7 +126,7 @@ class CPUInfo(object):
         """ The current state of the core.
 
         :return: The state of the core
-        :rtype: :py:class:`spinnman.model.enums.cpu_state.CPUState`
+        :rtype: CPUState
         """
         return self._state
 
@@ -174,7 +171,7 @@ class CPUInfo(object):
         """ The reason for a run time error.
 
         :return: The run time error
-        :rtype: :py:class:`spinnman.model.enums.run_time_error.RunTimeError`
+        :rtype: RunTimeError
         """
         return self._run_time_error
 
@@ -184,7 +181,7 @@ class CPUInfo(object):
             processor to the application.
 
         :return: The command
-        :rtype: :py:class:`spinnman.model.enums.mailbox_command.MailboxCommand`
+        :rtype: MailboxCommand
         """
         return self._application_mailbox_command
 
@@ -203,7 +200,7 @@ class CPUInfo(object):
             application to the monitor processor.
 
         :return: The command
-        :rtype: :py:class:`spinnman.model.mailbox_command.MailboxCommand`
+        :rtype: MailboxCommand
         """
         return self._monitor_mailbox_command
 
@@ -275,7 +272,7 @@ class CPUInfo(object):
         """ The current register values (r0 - r7).
 
         :return: An array of 8 values, one for each register
-        :rtype: array of int
+        :rtype: list(int)
         """
         return self._registers
 
@@ -284,7 +281,7 @@ class CPUInfo(object):
         """ The current user values (user0 - user3).
 
         :return: An array of 4 values, one for each user value
-        :rtype: array of int
+        :rtype: list(int)
         """
         return self._user
 

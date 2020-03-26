@@ -31,12 +31,11 @@ class SCPRequestHeader(object):
     def __init__(self, command, sequence=0):
         """
 
-        :param command: The SCP command
-        :type command: :py:class:`spinnman.messages.scp.scp_command.SCPCommand`
-        :param sequence: The number of the SCP packet in order of all packets\
+        :param SCPCommand command: The SCP command
+        :param int sequence:
+            The number of the SCP packet in order of all packets\
             sent or received, between 0 and 65535
-        :type sequence: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If one of the parameters is incorrect
         """
         self._command = command
@@ -46,16 +45,14 @@ class SCPRequestHeader(object):
     def command(self):
         """ The command of the SCP packet
 
-        :return: The command
-        :rtype: :py:class:`spinnman.messages.scp.scp_command.SCPCommand`
+        :rtype: SCPCommand
         """
         return self._command
 
     @property
     def sequence(self):
-        """ The sequence number of the SCP packet
+        """ The sequence number of the SCP packet, between 0 and 65535
 
-        :return: The sequence number of the packet, between 0 and 65535
         :rtype: int
         """
         return self._sequence
@@ -64,11 +61,8 @@ class SCPRequestHeader(object):
     def sequence(self, sequence):
         """ Set the sequence number of the SCP packet
 
-        :param sequence: The sequence number to set, between 0 and 65535
-        :type sequence: int
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :param int sequence: The sequence number to set, between 0 and 65535
+        :raise SpinnmanInvalidParameterException:
             If the sequence is out of range, or if it has already been set
         """
         self._sequence = sequence
@@ -77,7 +71,6 @@ class SCPRequestHeader(object):
     def bytestring(self):
         """ The header as a bytestring
 
-        :return: The header as a bytestring
-        :rtype: str
+        :rtype: bytes
         """
         return _TWO_SHORTS.pack(self._command.value, self._sequence)

@@ -30,15 +30,14 @@ class ReadMemory(AbstractSCPRequest):
 
     def __init__(self, x, y, base_address, size, cpu=0):
         """
-        :param x: The x-coordinate of the chip to read from, between 0 and 255
-        :type x: int
-        :param y: The y-coordinate of the chip to read from, between 0 and 255
-        :type y: int
-        :param base_address: The positive base address to start the read from
-        :type base_address: int
-        :param size: The number of bytes to read, between 1 and 256
-        :type size: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+        :param int x:
+            The x-coordinate of the chip to read from, between 0 and 255
+        :param int y:
+            The y-coordinate of the chip to read from, between 0 and 255
+        :param int base_address:
+            The positive base address to start the read from
+        :param int size: The number of bytes to read, between 1 and 256
+        :raise SpinnmanInvalidParameterException:
             * If the chip coordinates are out of range
             * If the base address is not a positive number
             * If the size is out of range

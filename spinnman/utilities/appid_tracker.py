@@ -33,11 +33,9 @@ class AppIdTracker(object):
             max_app_id=_MAX_APP_ID):
         """
         :param app_ids_in_use: The IDs that are already in use
-        :type app_ids_in_use: list[int] or None
-        :param min_app_id: The smallest application ID to use
-        :type min_app_id: int
-        :param max_app_id: The largest application ID to use
-        :type max_app_id: int
+        :type app_ids_in_use: list(int) or None
+        :param int min_app_id: The smallest application ID to use
+        :param int max_app_id: The largest application ID to use
         """
         self._free_ids = set(range(min_app_id, max_app_id))
         if app_ids_in_use is not None:
@@ -55,7 +53,7 @@ class AppIdTracker(object):
     def allocate_id(self, allocated_id):
         """ Allocate a given ID.
 
-        :param allocated_id: The ID to allocate
+        :param int allocated_id: The ID to allocate
         :raises KeyError: If the ID is not present
         """
         self._free_ids.remove(allocated_id)
@@ -63,7 +61,7 @@ class AppIdTracker(object):
     def free_id(self, id_to_free):
         """ Free a given ID.
 
-        :param id_to_free: The ID to free
+        :param int id_to_free: The ID to free
         :raises KeyError: If the ID is out of range
         """
         if id_to_free < self._min_app_id or id_to_free > self._max_app_id:

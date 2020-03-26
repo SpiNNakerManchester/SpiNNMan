@@ -40,6 +40,11 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         "_next_reads"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(ReadIOBufProcess, self).__init__(connection_selector)
 
         # A dictionary of (x, y, p) -> iobuf address
@@ -138,7 +143,9 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
 
     def read_iobuf(self, iobuf_size, core_subsets):
         """
-        :rtype: iterable of IOBuffer
+        :param int iobuf_size:
+        :param ~spinn_machine.CoreSubsets core_subsets:
+        :rtype: iterable(IOBuffer)
         """
         # Get the iobuf address for each core
         for core_subset in core_subsets:

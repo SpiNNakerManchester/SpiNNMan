@@ -19,6 +19,7 @@ from spinnman.connections.abstract_classes import (
     EIEIOReceiver, EIEIOSender, Listenable)
 from spinnman.messages.eieio import (
     read_eieio_command_message, read_eieio_data_message)
+from spinn_utilities.overrides import overrides
 
 _ONE_SHORT = struct.Struct("<H")
 _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
@@ -31,6 +32,7 @@ class EIEIOConnection(
     """
     __slots__ = []
 
+    @overrides(EIEIOReceiver.receive_eieio_message)
     def receive_eieio_message(self, timeout=None):
         data = self.receive(timeout)
         header = _ONE_SHORT.unpack_from(data)[0]
@@ -38,12 +40,14 @@ class EIEIOConnection(
             return read_eieio_command_message(data, 0)
         return read_eieio_data_message(data, 0)
 
+    @overrides(EIEIOSender.send_eieio_message)
     def send_eieio_message(self, eieio_message):
         self.send(eieio_message.bytestring)
 
     def send_eieio_message_to(self, eieio_message, ip_address, port):
         self.send_to(eieio_message.bytestring, (ip_address, port))
 
+    @overrides(Listenable.get_receive_method)
     def get_receive_method(self):
         return self.receive_eieio_message
 
