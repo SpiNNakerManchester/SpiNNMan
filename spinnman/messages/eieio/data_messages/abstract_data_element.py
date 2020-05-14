@@ -28,11 +28,9 @@ class AbstractDataElement(object):
     def get_bytestring(self, eieio_type):
         """ Get a bytestring for the given type
 
-        :param eieio_type: The type of the message being written
-        :type eieio_type:\
-            :py:class:`spinnman.messages.eieio.eieio_type.EIEIOType`
+        :param EIEIOType eieio_type: The type of the message being written
         :return: A bytestring for the element
-        :rtype: str
-        :raise SpinnmanInvalidParameterException: \
+        :rtype: bytes
+        :raise SpinnmanInvalidParameterException:
             If the type is incompatible with the element
         """

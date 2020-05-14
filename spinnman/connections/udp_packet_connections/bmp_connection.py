@@ -38,9 +38,8 @@ class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
 
     def __init__(self, connection_data):
         """
-        :param connection_data: The description of what to connect to.
-        :type connection_data: \
-            :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
+        :param BMPConnectionData connection_data:
+            The description of what to connect to.
         """
         port = SCP_SCAMP_PORT if connection_data.port_num is None\
             else connection_data.port_num

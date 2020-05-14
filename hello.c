@@ -20,7 +20,7 @@ void timer_callback(uint unused0, uint unused1) {
     spin1_exit(0);
 }
 
-void c_main() {
+void c_main(void) {
     io_printf(IO_BUF, "Starting...\n");
     spin1_set_timer_tick(1000);
     spin1_callback_on(TIMER_TICK, timer_callback, 1);

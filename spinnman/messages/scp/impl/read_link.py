@@ -29,19 +29,17 @@ class ReadLink(AbstractSCPRequest):
 
     def __init__(self, x, y, link, base_address, size, cpu=0):
         """
-        :param x: The x-coordinate of the chip to read from, between 0 and 255
-        :type x: int
-        :param y: The y-coordinate of the chip to read from, between 0 and 255
-        :type y: int
-        :param cpu: The CPU core to use, normally 0 (or if a BMP, the board \
-            slot number)
-        :type cpu: int
-        :param link: The ID of the link down which to send the query
-        :type link: int
-        :param base_address: The positive base address to start the read from
-        :type base_address: int
-        :param size: The number of bytes to read, between 1 and 256
-        :type size: int
+        :param int x:
+            The x-coordinate of the chip to read from, between 0 and 255
+        :param int y:
+            The y-coordinate of the chip to read from, between 0 and 255
+        :param int link: The ID of the link down which to send the query
+        :param int base_address:
+            The positive base address to start the read from
+        :param int size: The number of bytes to read, between 1 and 256
+        :param int cpu:
+            The CPU core to use, normally 0
+            (or if a BMP, the board slot number)
         """
         # pylint: disable=too-many-arguments
         super(ReadLink, self).__init__(
@@ -86,7 +84,7 @@ class _SCPReadLinkResponse(AbstractSCPResponse):
     def data(self):
         """ The data read
 
-        :rtype: bytearray
+        :rtype: bytes
         """
         return self._data
 

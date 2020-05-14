@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import struct
+from spinn_utilities.overrides import overrides
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from .udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
@@ -33,26 +34,21 @@ class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
     def __init__(self, chip_x=None, chip_y=None, local_host=None,
                  local_port=None, remote_host=None, remote_port=None):
         """
-        :param chip_x: The optional x-coordinate of the chip at the remote\
-            end of the connection. If not specified, it will not be possible\
+        :param int chip_x: The optional x-coordinate of the chip at the remote
+            end of the connection. If not specified, it will not be possible
             to send SDP messages that require a response with this connection.
-        :type chip_x: int
-        :param chip_y: The optional y-coordinate of the chip at the remote\
-            end of the connection. If not specified, it will not be possible\
+        :param int chip_y: The optional y-coordinate of the chip at the remote
+            end of the connection. If not specified, it will not be possible
             to send SDP messages that require a response with this connection.
-        :type chip_y: int
-        :param local_host: The optional IP address or host name of the local\
-            interface to listen on
-        :type local_host: str
-        :param local_port: The optional local port to listen on
-        :type local_port: int
-        :param remote_host: The optional remote host name or IP address to\
-            send messages to. If not specified, sending will not be possible\
+        :param str local_host: The optional IP address or host name of the
+            local interface to listen on
+        :param int local_port: The optional local port to listen on
+        :param str remote_host: The optional remote host name or IP address to
+            send messages to. If not specified, sending will not be possible
             using this connection
-        :type remote_host: str
-        :param remote_port: The optional remote port number to send messages\
-            to. If not specified, sending will not be possible using this\
-            connection
+        :param int remote_port: The optional remote port number to send
+            messages to. If not specified, sending will not be possible using
+            this connection
         """
         # pylint: disable=too-many-arguments
         super(SDPConnection, self).__init__(
@@ -60,12 +56,13 @@ class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
         self._chip_x = chip_x
         self._chip_y = chip_y
 
+    @overrides(SDPReceiver.receive_sdp_message)
     def receive_sdp_message(self, timeout=None):
         data = self.receive(timeout)
         return SDPMessage.from_bytestring(data, 2)
 
+    @overrides(SDPSender.send_sdp_message)
     def send_sdp_message(self, sdp_message):
-
         # If a reply is expected, the connection should
         if sdp_message.sdp_header.flags == SDPFlag.REPLY_EXPECTED:
             update_sdp_header_for_udp_send(
@@ -74,6 +71,7 @@ class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
             update_sdp_header_for_udp_send(sdp_message.sdp_header, 0, 0)
         self.send(_TWO_SKIP.pack() + sdp_message.bytestring)
 
+    @overrides(Listenable.get_receive_method)
     def get_receive_method(self):
         return self.receive_sdp_message
 

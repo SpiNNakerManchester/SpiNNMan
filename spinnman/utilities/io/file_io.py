@@ -21,7 +21,7 @@ from spinnman.processes.fill_process import FillDataType
 
 
 class FileIO(AbstractIO):
-    """ A file input/output interface to match the MemoryIO interface
+    """ A file input/output interface to match the MemoryIO interface.
     """
 
     __slots__ = [
@@ -41,10 +41,13 @@ class FileIO(AbstractIO):
 
     def __init__(self, file_obj, start_offset, end_offset):
         """
-        :param file_obj: The file handle or file name to write to
+        :param file_obj: The file handle or file name to write to.
+
+            .. note::
+                If given a filename of an existing file, that file will be
+                truncated to zero bytes long.
         :type file_obj: str or file
-        :param start_offset: The start offset into the file
-        :type start_offset: int
+        :param int start_offset: The start offset into the file
         :param end_offset: The end offset from the start of the file
         :type end_offset: int or None
         """

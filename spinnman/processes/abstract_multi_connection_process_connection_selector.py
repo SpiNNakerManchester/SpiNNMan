@@ -23,19 +23,11 @@ class AbstractMultiConnectionProcessConnectionSelector(object):
     """
     __slots__ = []
 
-    # connections will be used when worked out how
-
-    @abstractmethod
-    def __init__(self, connections):
-        """
-        :param connections: The connections to be used
-        """
-
     @abstractmethod
     def get_next_connection(self, message):
         """ Get the index of the  next connection for the process from a list\
             of connections.
 
-        :param message: The SCP message to be sent
-        :rtype: int
+        :param AbstractSCPRequest message: The SCP message to be sent
+        :rtype: SCAMPConnection
         """

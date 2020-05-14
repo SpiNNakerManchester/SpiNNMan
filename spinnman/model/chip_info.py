@@ -35,11 +35,11 @@ class ChipInfo(object):
 
     def __init__(self, system_data, offset):
         """
-        :param system_data: An bytestring retrieved from SDRAM on the board
-        :type system_data: str
-        :param offset: \
+        :param bytes system_data:
+            An bytestring retrieved from SDRAM on the board
+        :param int offset:
             The offset into the bytestring where the actual data starts
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If the data doesn't contain valid system data information
         """
         self._system_data = system_data
@@ -146,7 +146,7 @@ class ChipInfo(object):
     def links_available(self):
         """ The links that are available on the chip
 
-        :rtype: iterable of int
+        :rtype: iterable(int)
         """
         return self._links_available
 

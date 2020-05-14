@@ -44,6 +44,6 @@ class GetChipInfoResponse(AbstractSCPResponse):
     def chip_info(self):
         """ The chip information received
 
-        :rtype: :py:class:`spinnman.model.chip_summary_info.ChipSummaryInfo`
+        :rtype: ChipSummaryInfo
         """
         return self._chip_info

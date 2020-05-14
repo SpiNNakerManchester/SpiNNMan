@@ -33,8 +33,8 @@ class ExecutableTargets(object):
     def add_subsets(self, binary, subsets):
         """ Add core subsets to a binary
 
-        :param binary: the path to the binary needed to be executed
-        :param subsets: \
+        :param str binary: the path to the binary needed to be executed
+        :param ~spinn_machine.CoreSubsets subsets:
             the subset of cores that the binary needs to be loaded on
         :return:
         """
@@ -45,10 +45,12 @@ class ExecutableTargets(object):
     def add_processor(self, binary, chip_x, chip_y, chip_p):
         """ Add a processor to the executable targets
 
-        :param binary: the binary path for executable
-        :param chip_x: the coordinate on the machine in terms of x for the chip
-        :param chip_y: the coordinate on the machine in terms of y for the chip
-        :param chip_p: the processor ID to place this executable on
+        :param str binary: the binary path for executable
+        :param int chip_x:
+            the coordinate on the machine in terms of x for the chip
+        :param int chip_y:
+            the coordinate on the machine in terms of y for the chip
+        :param int chip_p: the processor ID to place this executable on
         :return:
         """
         if self.known(binary, chip_x, chip_y, chip_p):
@@ -62,36 +64,49 @@ class ExecutableTargets(object):
     def get_cores_for_binary(self, binary):
         """ Get the cores that a binary is to run on
 
-        :param binary: The binary to find the cores for
+        :param str binary: The binary to find the cores for
         """
         return self._targets.get(binary)
 
     @property
     def binaries(self):
         """ The binaries of the executables
+
+        :rtype: iterable(str)
         """
         return self._targets.keys()
 
     @property
     def total_processors(self):
         """ The total number of cores to be loaded
+
+        :rtype: int
         """
         return self._total_processors
 
     @property
     def all_core_subsets(self):
         """ All the core subsets for all the binaries
+
+        :rtype: ~spinn_machine.CoreSubsets
         """
         return self._all_core_subsets
 
     def known(self, binary, chip_x, chip_y, chip_p):
-        if self._all_core_subsets.is_core(chip_x, chip_y, chip_p):
-            # OK if and only if the chip is in this binary already
-            if binary in self._targets:
-                if self._targets[binary].is_core(chip_x, chip_y, chip_p):
-                    return True
-            parameter = "x:{} y:{} p:{}".format(chip_x, chip_y, chip_p)
-            problem = "Already associated with a different binary"
-            raise SpinnmanInvalidParameterException(parameter, binary, problem)
-        else:
+        """
+        :param str binary:
+        :param int chip_x:
+        :param int chip_y:
+        :param int chip_p:
+        :rtype: bool
+        """
+        if not self._all_core_subsets.is_core(chip_x, chip_y, chip_p):
             return False
+        # OK if and only if the chip is in this binary already
+        if binary in self._targets:
+            if self._targets[binary].is_core(chip_x, chip_y, chip_p):
+                return True
+
+        parameter = "x:{} y:{} p:{}".format(chip_x, chip_y, chip_p)
+        problem = "Already associated with a different binary"
+        raise SpinnmanInvalidParameterException(parameter, binary, problem)

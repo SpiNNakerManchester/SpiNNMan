@@ -30,18 +30,17 @@ class SDPReceiver(Connection):
         """ Receives an SDP message from this connection.  Blocks until the\
             message has been received, or a timeout occurs.
 
-        :param timeout: \
-            The time in seconds to wait for the message to arrive; if not\
+        :param int timeout:
+            The time in seconds to wait for the message to arrive; if not
             specified, will wait forever, or until the connection is closed.
-        :type timeout: int
         :return: The received SDP message
-        :rtype: :py:class:`spinnman.messages.sdp.sdp_message.SDPMessage`
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :rtype: SDPMessage
+        :raise SpinnmanIOException:
             If there is an error receiving the message
-        :raise spinnman.exceptions.SpinnmanTimeoutException: \
+        :raise SpinnmanTimeoutException:
             If there is a timeout before a message is received
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+        :raise SpinnmanInvalidPacketException:
             If the received packet is not a valid SDP message
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If one of the fields of the SDP message is invalid
         """

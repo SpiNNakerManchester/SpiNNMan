@@ -28,13 +28,9 @@ class RouterClear(AbstractSCPRequest):
 
     def __init__(self, x, y):
         """
-        :param x: The x-coordinate of the chip, between 0 and 255; \
-            this is not checked due to speed restrictions
-        :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255; \
-            this is not checked due to speed restrictions
-        :type y: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
+        :param int x: The x-coordinate of the chip, between 0 and 255
+        :param int y: The y-coordinate of the chip, between 0 and 255
+        :raise SpinnmanInvalidParameterException:
             * If x is out of range
             * If y is out of range
         """

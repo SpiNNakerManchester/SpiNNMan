@@ -27,21 +27,21 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class FixedRouteRead(AbstractSCPRequest):
+    """ Gets a fixed route entry
+    """
+
     __slots__ = []
 
     def __init__(self, x, y, app_id):
-        """ Sets a fixed route entry
-
-        :param x: The x-coordinate of the chip, between 0 and 255,\
+        """
+        :param int x: The x-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
-        :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255\
+        :param int y: The y-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
-        :type y: int
-        :param app_id: The ID of the application with which to associate the\
-            routes.  If not specified, defaults to 0.
-        :type app_id: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
+        :param int app_id:
+            The ID of the application with which to associate the routes.
+            If not specified, defaults to 0.
+        :raise SpinnmanInvalidParameterException:
             * If x is out of range
             * If y is out of range
         """

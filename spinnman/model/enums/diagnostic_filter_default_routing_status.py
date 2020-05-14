@@ -20,7 +20,9 @@ class DiagnosticFilterDefaultRoutingStatus(Enum):
     """ Default routing flags for the diagnostic filters.
         Note that only one has to match for the counter to be incremented
     """
+    #: Packet is to be default routed
     DEFAULT_ROUTED = (0, "Packet is to be default routed")
+    #: Packet is not to be default routed
     NON_DEFAULT_ROUTED = (1, "Packet is not to be default routed")
 
     def __new__(cls, value, doc=""):

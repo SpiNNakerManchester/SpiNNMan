@@ -23,15 +23,10 @@ class IOBuffer(object):
 
     def __init__(self, x, y, p, iobuf):
         """
-        :param x: The x-coordinate of a chip
-        :type x: int
-        :param y: The y-coordinate of a chip
-        :type y: int
-        :param p: The p-coordinate of a chip
-        :type p: int
-        :param iobuf: The contents of the buffer for the chip
-        :type iobuf: str
-        :raise None: No known exceptions are raised
+        :param int x: The x-coordinate of a chip
+        :param int y: The y-coordinate of a chip
+        :param int p: The p-coordinate of a chip
+        :param str iobuf: The contents of the buffer for the chip
         """
         self._x = x
         self._y = y
@@ -42,7 +37,6 @@ class IOBuffer(object):
     def x(self):
         """ The x-coordinate of the chip containing the core
 
-        :return: The x-coordinate of the chip
         :rtype: int
         """
         return self._x
@@ -51,7 +45,6 @@ class IOBuffer(object):
     def y(self):
         """ The y-coordinate of the chip containing the core
 
-        :return: The y-coordinate of the chip
         :rtype: int
         """
         return self._y
@@ -60,7 +53,6 @@ class IOBuffer(object):
     def p(self):
         """ The ID of the core on the chip
 
-        :return: The ID of the core
         :rtype: int
         """
         return self._p
@@ -69,7 +61,6 @@ class IOBuffer(object):
     def iobuf(self):
         """ The contents of the buffer
 
-        :return: The contents of the buffer
         :rtype: str
         """
         return self._iobuf

@@ -31,7 +31,7 @@ before_install:
   - git clone https://github.com/SpiNNakerManchester/SupportScripts.git support
   - python support/travis_blocking_stdout.py
   - support/rat.sh download
-  # Bring pip up to date 
+  # Bring pip up to date
   - pip install --upgrade pip setuptools wheel
   # SpiNNakerManchester internal dependencies; development mode
   - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNUtils.git
@@ -41,18 +41,19 @@ before_install:
 install:
   - python ./setup.py install
   - pip install -r requirements-test.txt
-  - pip install python-coveralls 'coverage>=4.4'
+  - pip install 'pylint<2.5' python-coveralls 'coverage>=4.4,<5.0'
   - pip install spinnaker_proxy
 
 script:
   - py.test unittests integration_tests --cov spinnman
   # Code quality check
   - flake8
+  - ( pylint --output-format=colorized --disable=R,C spinnman; exit $(($? & 35)) )
   - support/rat.sh run
   - cd doc/source
   - sphinx-build -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
-  - sphinx-build -T -b json -d _build/doctrees-json -D language=en . _build/json
-  - sphinx-build -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
+  - sphinx-build -q -T -b json -d _build/doctrees-json -D language=en . _build/json
+  - sphinx-build -q -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
 
 after_success:
   - cd $TRAVIS_BUILD_DIR

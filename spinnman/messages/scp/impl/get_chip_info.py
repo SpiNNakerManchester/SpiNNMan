@@ -28,12 +28,12 @@ class GetChipInfo(AbstractSCPRequest):
 
     def __init__(self, x, y, with_size=False):
         """
-        :param x: The x-coordinate of the chip to read from, between 0 and 255
-        :type x: int
-        :param y: The y-coordinate of the chip to read from, between 0 and 255
-        :type y: int
-        :param with_size: Whether the size should be included in the response
-        :type with_size: bool
+        :param int x:
+            The x-coordinate of the chip to read from, between 0 and 255
+        :param int y:
+            The y-coordinate of the chip to read from, between 0 and 255
+        :param bool with_size:
+            Whether the size should be included in the response
         """
         # Bits 0-4 + bit 6 = all information except size
         argument_1 = 0x5F

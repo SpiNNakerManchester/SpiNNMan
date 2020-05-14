@@ -36,14 +36,10 @@ class IPTagGet(AbstractSCPRequest):
 
     def __init__(self, x, y, tag):
         """
-        :param x: The x-coordinate of a chip, between 0 and 255
-        :type x: int
-        :param y: The y-coordinate of a chip, between 0 and 255
-        :type y: int
-        :param tag: The tag to get details of, between 0 and 7
-        :type tag: int
-        :param tag: The tag, between 0 and 7
-        :type tag: int
+        :param int x: The x-coordinate of a chip, between 0 and 255
+        :param int y: The y-coordinate of a chip, between 0 and 255
+        :param int tag: The tag to get details of, between 0 and 7
+        :param int tag: The tag, between 0 and 7
         """
         super(IPTagGet, self).__init__(
             SDPHeader(

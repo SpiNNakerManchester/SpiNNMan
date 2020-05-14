@@ -14,6 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 from .application_run_process import ApplicationRunProcess
 from .de_alloc_sdram_process import DeAllocSDRAMProcess
 from .fill_process import FillDataType
@@ -40,6 +42,7 @@ from .write_memory_flood_process import WriteMemoryFloodProcess
 from .write_memory_process import WriteMemoryProcess
 
 __all__ = ["AbstractMultiConnectionProcess", "ApplicationRunProcess",
+           "AbstractMultiConnectionProcessConnectionSelector",
            "DeAllocSDRAMProcess", "GetCPUInfoProcess", "GetHeapProcess",
            "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
            "GetVersionProcess", "FillDataType", "FillProcess",

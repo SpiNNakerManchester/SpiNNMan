@@ -29,11 +29,7 @@ class SpinnakerBootSender(Connection):
     def send_boot_message(self, boot_message):
         """ Sends a SpiNNaker boot message using this connection.
 
-        :param boot_message: The message to be sent
-        :type boot_message:\
-            :py:class:`spinnman.messages.spinnaker_boot.SpinnakerBootMessage`
-        :return: Nothing is returned
-        :rtype: None
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :param SpinnakerBootMessage boot_message: The message to be sent
+        :raise SpinnmanIOException:
             If there is an error sending the message
         """

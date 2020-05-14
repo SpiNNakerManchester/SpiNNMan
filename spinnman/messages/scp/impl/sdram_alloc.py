@@ -34,20 +34,16 @@ class SDRAMAlloc(AbstractSCPRequest):
 
     def __init__(self, x, y, app_id, size, tag=None):
         """
-        :param x: \
+        :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :type x: int
-        :param y: \
+        :param int y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :type y: int
-        :param app_id: The ID of the application, between 0 and 255
-        :type app_id: int
-        :param size: The size in bytes of memory to be allocated
-        :type size: int
-        :param tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can be\
-            looked up by a SpiNNaker application to discover the address of\
+        :param int app_id: The ID of the application, between 0 and 255
+        :param int size: The size in bytes of memory to be allocated
+        :param int tag:
+            The tag for the SDRAM, a 8-bit (chip-wide) tag that can be
+            looked up by a SpiNNaker application to discover the address of
             the allocated block. If `0` then no tag is applied.
-        :type tag: int
         """
         # pylint: disable=too-many-arguments
         if tag is None:

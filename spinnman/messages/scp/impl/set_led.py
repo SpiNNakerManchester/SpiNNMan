@@ -28,16 +28,12 @@ class SetLED(AbstractSCPRequest):
 
     def __init__(self, x, y, cpu, led_states):
         """
-        :param x: The x-coordinate of the chip, between 0 and 255
-        :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255
-        :type y: int
-        :param cpu: The CPU-number to use to set the SetLED.
-        :type cpu: int
-        :param led_states: \
-            A dictionary mapping SetLED index to state with\
+        :param int x: The x-coordinate of the chip, between 0 and 255
+        :param int y: The y-coordinate of the chip, between 0 and 255
+        :param int cpu: The CPU-number to use to set the SetLED.
+        :param dict(int,int) led_states:
+            A dictionary mapping SetLED index to state with
             0 being off, 1 on and 2 inverted.
-        :type led_states: dict
         """
         encoded_led_states = 0
         for led, state in led_states.items():

@@ -42,6 +42,6 @@ class GetVersionResponse(AbstractSCPResponse):
     def version_info(self):
         """ The version information received
 
-        :rtype: :py:class:`spinnman.model.version_info.VersionInfo`
+        :rtype: VersionInfo
         """
         return self._version_info

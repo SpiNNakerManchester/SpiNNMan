@@ -19,23 +19,20 @@ import logging
 from spinn_utilities.log import FormatAdapter
 
 logger = FormatAdapter(logging.getLogger(__name__))
+_REPORT_NAME = "machine_structure.rpt"
 
 
 def generate_machine_report(report_directory, machine, connections):
     """ Generate report on the physical structure of the target SpiNNaker \
         machine.
 
-    :param report_directory: the directory to which reports are stored
-    :param machine: the machine python object
-    :param connections: the list of connections to the machine
-    :type report_directory: str
-    :type machine: :py:class:`spinn_machine.Machine`
-    :type connections: \
-        iterable(:py:class:`spinnman.connections.abstract_classes.AbstractConnection`)
-    :rtype: None
+    :param str report_directory: the directory to which reports are stored
+    :param ~spinn_machine.Machine machine: the machine python object
+    :param list(Connection) connections:
+        the list of connections to the machine
     :raise IOError: when a file cannot be opened for some reason
     """
-    file_name = os.path.join(report_directory, "machine_structure.rpt")
+    file_name = os.path.join(report_directory, _REPORT_NAME)
     time_date_string = time.strftime("%c")
     try:
         with open(file_name, "w") as f:
@@ -51,6 +48,11 @@ def generate_machine_report(report_directory, machine, connections):
 
 
 def _write_header(f, timestamp, machine, connections):
+    """
+    :param str timestamp:
+    :param ~spinn_machine.Machine machine:
+    :param list(Connection) connections:
+    """
     f.write("\t\tTarget SpiNNaker Machine Structure\n")
     f.write("\t\t==================================\n")
     f.write("\nGenerated: {} for target machine '{}'\n\n".format(
@@ -62,6 +64,9 @@ def _write_header(f, timestamp, machine, connections):
 
 
 def _write_chip_router_report(f, chip):
+    """
+    :param ~spinn_machine.Chip chip:
+    """
     f.write("\nInformation for chip {}:{}\n".format(chip.x, chip.y))
     f.write("Neighbouring chips \n{}\n".format(
         chip.router.get_neighbouring_chips_coords()))

@@ -39,7 +39,7 @@ class IPAddressesConnection(UDPConnection):
             (_, (ip_address, port)) = self.receive_with_address(timeout)
             if port == _BOOTROM_SPINN_PORT:
                 return ip_address
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             pass
         return None
 

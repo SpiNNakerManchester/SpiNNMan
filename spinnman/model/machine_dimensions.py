@@ -23,11 +23,8 @@ class MachineDimensions(object):
 
     def __init__(self, width, height):
         """
-        :param width: The width of the machine in chips
-        :type width: int
-        :param height: The height of the machine in chips
-        :type height: int
-        :raise None: No known exceptions are raised
+        :param int width: The width of the machine in chips
+        :param int height: The height of the machine in chips
         """
         self._width = width
         self._height = height
@@ -36,7 +33,6 @@ class MachineDimensions(object):
     def width(self):
         """ The width of the machine in chips
 
-        :return: The width
         :rtype: int
         """
         return self._width
@@ -45,7 +41,6 @@ class MachineDimensions(object):
     def height(self):
         """ The height of the machine in chips
 
-        :return: The height
         :rtype: int
         """
         return self._height

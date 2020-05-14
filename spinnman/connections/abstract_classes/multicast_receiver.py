@@ -31,8 +31,7 @@ class MulticastReceiver(Connection):
             receiver can receive receive packets directly
 
         :return: The coordinates, (x, y), of the chips
-        :rtype: iterable of (int, int)
-        :raise None: No known exceptions are raised
+        :rtype: iterable(tuple(int, int))
         """
 
     @abstractmethod
@@ -40,19 +39,17 @@ class MulticastReceiver(Connection):
         """ Receives a multicast message from this connection.  Blocks until\
             a message has been received, or a timeout occurs.
 
-        :param timeout: \
-            The time in seconds to wait for the message to arrive; if not\
+        :param int timeout:
+            The time in seconds to wait for the message to arrive; if not
             specified, will wait forever, or until the connection is closed
-        :type timeout: int
         :return: a multicast message
-        :rtype:\
-            :py:class:`spinnman.messages.multicast_message.MulticastMessage`
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :rtype: MulticastMessage
+        :raise SpinnmanIOException:
             If there is an error receiving the message.
-        :raise spinnman.exceptions.SpinnmanTimeoutException: \
+        :raise SpinnmanTimeoutException:
             If there is a timeout before a message is received.
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+        :raise SpinnmanInvalidPacketException:
             If the received packet is not a valid multicast message.
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If one of the fields of the multicast message is invalid.
         """

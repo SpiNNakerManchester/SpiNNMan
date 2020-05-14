@@ -20,7 +20,9 @@ class DiagnosticFilterPayloadStatus(Enum):
     """ Payload flags for the diagnostic filters.
         Note that only one has to match for the counter to be incremented
     """
+    #: Packet has a payload
     WITH_PAYLOAD = (0, "Packet has a payload")
+    #: Packet doesn't have a payload
     WITHOUT_PAYLOAD = (1, "Packet doesn't have a payload")
 
     def __new__(cls, value, doc=""):

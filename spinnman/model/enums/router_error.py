@@ -16,19 +16,19 @@
 from enum import Enum
 
 
-class P2PTableRoute(Enum):
-    """ P2P Routing table routes
+class RouterError(Enum):
+    """ Router error flags
     """
-    EAST = 0b000
-    NORTH_EAST = 0b001
-    NORTH = 0b010
-    WEST = 0b011
-    SOUTH_WEST = 0b100
-    SOUTH = 0b101
-    #: No route to this chip
-    NONE = (0b110, "No route to this chip")
-    #: Route to the monitor on the current chip
-    MONITOR = (0b111, "Route to the monitor on the current chip")
+    #: Error packet detected (0x80000000)
+    ERROR = (0x80000000, "Error packet detected")
+    #: More than one error packet detected (0x40000000)
+    OVERFLOW = (0x40000000, "More than one error packet detected")
+    #: Parity Error (0x20000000)
+    PARITY = (0x20000000, "Parity Error")
+    #: Framing Error (0x10000000)
+    FRAMING = (0x10000000, "Framing Error")
+    #: Timestamp Error (0x08000000)
+    TIMESTAMP = (0x08000000, "Timestamp Error")
 
     def __new__(cls, value, doc=""):
         # pylint: disable=protected-access, unused-argument
