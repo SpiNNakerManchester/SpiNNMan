@@ -1930,8 +1930,8 @@ class Transceiver(object):
             progress_bar = DummyProgressBar(len(all_core_subsets), None)
         else:
             progress_bar = ProgressBar(
-                len(all_core_subsets) ,
-               "Waiting for cores to reach state(s): " + str(cpu_states))
+                len(all_core_subsets),
+                "Waiting for cores to reach state(s): " + str(cpu_states))
 
         # check that the right number of processors are in the states
         processors_ready = 0
