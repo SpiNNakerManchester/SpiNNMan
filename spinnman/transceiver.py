@@ -1929,7 +1929,7 @@ class Transceiver(object):
         if suppress_progress:
             progress_bar = DummyProgressBar(len(all_core_subsets), None)
         else:
-            return ProgressBar(
+            progress_bar = ProgressBar(
                 len(all_core_subsets) ,
                "Waiting for cores to reach state(s): " + str(cpu_states))
 
