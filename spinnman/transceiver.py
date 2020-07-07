@@ -25,6 +25,7 @@ import os
 from past.builtins import xrange
 from six import raise_from
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.progress_bar import DummyProgressBar, ProgressBar
 from spinn_machine import CoreSubsets
 from spinn_storage_handlers.abstract_classes import AbstractDataReader
 from spinn_storage_handlers import FileDataReader
@@ -1902,7 +1903,7 @@ class Transceiver(object):
             time_between_polls=0.1,
             error_states=frozenset({
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),
-            counts_between_full_check=100):
+            counts_between_full_check=100, suppress_progress=True):
         """ Waits for the specified cores running the given application to be\
             in some target state or states. Handles failures.
 
@@ -1925,6 +1926,12 @@ class Transceiver(object):
         :raise SpinnmanTimeoutException:
             If a timeout is specified and exceeded.
         """
+        if suppress_progress:
+            progress_bar = DummyProgressBar(len(all_core_subsets), None)
+        else:
+            return ProgressBar(
+                len(all_core_subsets) ,
+               "Waiting for cores to reach state(s): " + str(cpu_states))
 
         # check that the right number of processors are in the states
         processors_ready = 0
@@ -1938,7 +1945,7 @@ class Transceiver(object):
             for cpu_state in cpu_states:
                 processors_ready += self.get_core_state_count(
                     app_id, cpu_state)
-
+            progress_bar.set_completed(processors_ready)
             # If the count is too small, check for error states
             if processors_ready < len(all_core_subsets):
                 is_error = False
@@ -1976,6 +1983,8 @@ class Transceiver(object):
             if len(cores_not_in_state) != 0:
                 raise SpiNNManCoresNotInStateException(
                     timeout, cpu_states, cores_not_in_state)
+
+        progress_bar.end()
 
     def get_cores_in_state(self, all_core_subsets, states):
         """ Get all cores that are in a given state or set of states
