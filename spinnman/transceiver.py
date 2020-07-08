@@ -1902,7 +1902,7 @@ class Transceiver(object):
             time_between_polls=0.1,
             error_states=frozenset({
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),
-            counts_between_full_check=100):
+            counts_between_full_check=100, progress_bar=None):
         """ Waits for the specified cores running the given application to be\
             in some target state or states. Handles failures.
 
@@ -1922,12 +1922,15 @@ class Transceiver(object):
         :param int counts_between_full_check:
             The number of times to use the count signal before instead using
             the full CPU state check
+        :param progress_bar: Possible progress bar to update.
+        :type progress_bar: ~spinn_utilities.progress_bar.ProgressBar or None
         :raise SpinnmanTimeoutException:
             If a timeout is specified and exceeded.
         """
 
         # check that the right number of processors are in the states
         processors_ready = 0
+        max_processors_ready = 0
         timeout_time = None if timeout is None else time.time() + timeout
         tries = 0
         while (processors_ready < len(all_core_subsets) and
@@ -1938,7 +1941,10 @@ class Transceiver(object):
             for cpu_state in cpu_states:
                 processors_ready += self.get_core_state_count(
                     app_id, cpu_state)
-
+            if progress_bar:
+                if processors_ready > max_processors_ready:
+                    progress_bar.update(processors_ready - max_processors_ready)
+                    max_processors_ready = processors_ready
             # If the count is too small, check for error states
             if processors_ready < len(all_core_subsets):
                 is_error = False
