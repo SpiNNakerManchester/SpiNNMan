@@ -32,7 +32,8 @@ class IPTagSet(AbstractSCPRequest):
         """
         :param int x: The x-coordinate of a chip, between 0 and 255
         :param int y: The y-coordinate of a chip, between 0 and 255
-        :param bytes host: The host address, as an array of 4 bytes
+        :param bytearray or list[int] host: The host address, \
+            as an array of 4 bytes
         :param int port: The port, between 0 and 65535
         :param int tag: The tag, between 0 and 7
         :param bool strip: if the SDP header should be striped from the packet
