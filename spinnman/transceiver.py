@@ -1951,7 +1951,8 @@ class Transceiver(object):
                     app_id, cpu_state)
             if progress_bar:
                 if processors_ready > max_processors_ready:
-                    progress_bar.update(processors_ready - max_processors_ready)
+                    progress_bar.update(
+                        processors_ready - max_processors_ready)
                     max_processors_ready = processors_ready
             # If the count is too small, check for error states
             if processors_ready < len(all_core_subsets):
