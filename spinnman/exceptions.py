@@ -150,14 +150,15 @@ class SpinnmanTimeoutException(SpinnmanException):
         could finish
     """
 
-    def __init__(self, operation, timeout):
+    def __init__(self, operation, timeout, msg=None):
         """
         :param str operation: The operation being performed
         :param float timeout: The timeout value in seconds
         """
-        super(SpinnmanTimeoutException, self).__init__(
-            "Operation {} timed out after {} seconds".format(
-                operation, timeout))
+        if msg is None:
+            msg = "Operation {} timed out after {} seconds".format(
+                operation, timeout)
+        super(SpinnmanTimeoutException, self).__init__(msg)
 
         self._operation = operation
         self._timeout = timeout
@@ -360,9 +361,11 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         :param set(CPUState) expected_states:
         :param CPUInfos failed_core_states:
         """
-        msg = "waiting for cores to reach one of {}".format(
-            expected_states)
-        super(SpiNNManCoresNotInStateException, self).__init__(msg, timeout)
+
+        msg = "waiting for cores {} to reach one of {}".format(
+            failed_core_states, expected_states)
+        super(SpiNNManCoresNotInStateException, self).__init__(
+            msg, timeout, msg)
         self._failed_core_states = failed_core_states
 
     def failed_core_states(self):
