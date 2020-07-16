@@ -15,6 +15,10 @@
 
 from enum import Enum
 
+#: the amount of time to wait in seconds between powering off and powering
+# on a SpiNNaker board.
+POWER_CYCLE_WAIT_TIME_IN_SECONDS = 30
+
 #: The default port of the connection
 SCP_SCAMP_PORT = 17893
 

@@ -1459,12 +1459,16 @@ class Transceiver(object):
 
     def power_on_machine(self):
         """ Power on the whole machine
+        :rtype bool
+        :return success of failure to power on machine
         """
         if not self._bmp_connections:
             logger.warning("No BMP connections, so can't power on")
+            return False
         for bmp_connection in self._bmp_connections:
             self.power_on(bmp_connection.boards, bmp_connection.cabinet,
                           bmp_connection.frame)
+        return True
 
     def power_on(self, boards=0, cabinet=0, frame=0):
         """ Power on a set of boards in the machine
@@ -1479,12 +1483,16 @@ class Transceiver(object):
 
     def power_off_machine(self):
         """ Power off the whole machine
+        :rtype bool
+        :return success or failure to power off the machine
         """
         if not self._bmp_connections:
             logger.warning("No BMP connections, so can't power off")
+            return False
         for bmp_connection in self._bmp_connections:
             self.power_off(bmp_connection.boards, bmp_connection.cabinet,
                            bmp_connection.frame)
+        return True
 
     def power_off(self, boards=0, cabinet=0, frame=0):
         """ Power off a set of boards in the machine
