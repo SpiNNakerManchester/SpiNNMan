@@ -44,9 +44,13 @@ class ExecutableTargets(object):
         None means dont record it.
         :return:
         """
-        for subset in subsets.core_subsets:
-            for p in subset.processor_ids:
-                self.add_processor(binary, subset.x, subset.y, p)
+        try:
+            for subset in subsets.core_subsets:
+                for p in subset.processor_ids:
+                    self.add_processor(binary, subset.x, subset.y, p)
+        except AttributeError:
+            if subsets is not None:
+                raise
         if executable_type is not None:
             self._binary_type_map[executable_type].add(binary)
 
