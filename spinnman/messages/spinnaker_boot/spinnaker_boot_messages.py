@@ -101,7 +101,9 @@ class SpinnakerBootMessages(object):
         # Byte swap and store the data for later use
         boot_data.byteswap()
         # tostring() deprecated in 3, tobytes() not present in 2
-        self._boot_data = boot_data.tostring() if PY2 else boot_data.tobytes()
+        self._boot_data = (
+            boot_data.tostring() if PY2
+            else boot_data.tobytes())  # pylint: disable=no-member
         self._n_bytes_to_read = n_words_to_read * 4
 
     @staticmethod
