@@ -130,7 +130,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y,
-            down_cores=down_cores)
+            parent_link=chip_info.parent_link, down_cores=down_cores)
 
     def _make_router(self, chip_info, machine):
         """
@@ -259,8 +259,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                         "ip address: {}", chip_info.x, chip_info.y,
                         chip_info.ethernet_ip_address)
                     continue
-            else:
-                machine.add_chip(self._make_chip(chip_info, machine))
+
+            # If the above has not continued, add the chip
+            machine.add_chip(self._make_chip(chip_info, machine))
 
         machine.validate()
         return machine_repair(machine, repair_machine)
