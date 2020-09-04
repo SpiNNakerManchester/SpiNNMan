@@ -130,7 +130,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y,
-            parent_link=chip_info.parent_link, down_cores=down_cores)
+            down_cores=down_cores, parent_link=chip_info.parent_link)
 
     def _make_router(self, chip_info, machine):
         """
