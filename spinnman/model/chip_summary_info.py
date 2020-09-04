@@ -15,12 +15,13 @@
 
 import struct
 from spinnman.model.enums import CPUState
+from spinn_machine.machine import Machine
 
 _THREE_WORDS = struct.Struct("<3I")
 _TWO_BYTES = struct.Struct("<BB")
 _FOUR_BYTES = struct.Struct("<4B")
 _EIGHTEEN_BYTES = struct.Struct("<18B")
-_ONE_WORD = struct.Struct("<I")
+_ONE_SHORT = struct.Struct("<H")
 
 
 class ChipSummaryInfo(object):
@@ -85,9 +86,13 @@ class ChipSummaryInfo(object):
         # In case the data hasn't been added in the version of SCAMP being used
         self._parent_link = None
         if len(chip_summary_data) > data_offset:
-            self._parent_link = _ONE_WORD.unpack_from(
+            (self._parent_link, ) = _ONE_SHORT.unpack_from(
                 chip_summary_data, data_offset)
-            data_offset += 4
+            # The root chip will use the P2P "self", which is outside the range
+            # of valid links, so check and skip this one
+            if self._parent_link > len(Machine.LINK_ADD_TABLE):
+                self._parent_link = None
+            data_offset += 2
 
     @property
     def x(self):
