@@ -15,11 +15,13 @@
 
 import struct
 from spinnman.model.enums import CPUState
+from spinn_machine.machine import Machine
 
 _THREE_WORDS = struct.Struct("<3I")
 _TWO_BYTES = struct.Struct("<BB")
 _FOUR_BYTES = struct.Struct("<4B")
 _EIGHTEEN_BYTES = struct.Struct("<18B")
+_ONE_SHORT = struct.Struct("<H")
 
 
 class ChipSummaryInfo(object):
@@ -35,6 +37,7 @@ class ChipSummaryInfo(object):
         "_n_free_multicast_routing_entries",
         "_nearest_ethernet_x",
         "_nearest_ethernet_y",
+        "_parent_link",
         "_working_links",
         "_x", "_y"]
 
@@ -79,6 +82,17 @@ class ChipSummaryInfo(object):
         if ethernet_ip_address != "0.0.0.0":
             self._ethernet_ip_address = ethernet_ip_address
         data_offset += 4
+
+        # In case the data hasn't been added in the version of SCAMP being used
+        self._parent_link = None
+        if len(chip_summary_data) > data_offset:
+            (self._parent_link, ) = _ONE_SHORT.unpack_from(
+                chip_summary_data, data_offset)
+            # The root chip will use the P2P "self", which is outside the range
+            # of valid links, so check and skip this one
+            if self._parent_link > len(Machine.LINK_ADD_TABLE):
+                self._parent_link = None
+            data_offset += 2
 
     @property
     def x(self):
@@ -175,6 +189,14 @@ class ChipSummaryInfo(object):
         :rtype: str
         """
         return self._ethernet_ip_address
+
+    @property
+    def parent_link(self):
+        """ The link to the parent of the chip in the tree of chips from root
+
+        :rtype: int
+        """
+        return self._parent_link
 
     def __repr__(self):
         return "x:{} y:{} n_cores:{}".format(self.x, self.y, self.n_cores)
