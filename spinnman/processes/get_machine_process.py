@@ -169,7 +169,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
 
-    def _receive_error(self, request, exception, tb):
+    def _receive_error(self, request, exception, tb, connection):
         """
         :param AbstractSCPRequest request:
         :param Exception exception:
@@ -180,7 +180,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if isinstance(request, ReadLink):
             if isinstance(exception, SpinnmanUnexpectedResponseCodeException):
                 return
-        super(GetMachineProcess, self)._receive_error(request, exception, tb)
+        super(GetMachineProcess, self)._receive_error(
+            request, exception, tb, connection)
 
     def get_machine_details(self, boot_x, boot_y, width, height,
                             repair_machine, ignore_bad_ethernets):
