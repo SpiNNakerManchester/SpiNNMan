@@ -58,7 +58,7 @@ class AbstractProcess(object):
 
             if print_exception:
                 logger.error(self.ERROR_MESSAGE.format(
-                    connection.remote_host, connection.chip_x,
+                    connection.remote_ip_address, connection.chip_x,
                     connection.chip_y, sdp_header.destination_chip_x,
                     sdp_header.destination_chip_y, sdp_header.destination_cpu,
                     exc_info=(Exception, self._exceptions, self._tracebacks)))
