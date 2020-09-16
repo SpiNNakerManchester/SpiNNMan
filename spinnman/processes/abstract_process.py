@@ -29,19 +29,24 @@ class AbstractProcess(object):
         "_error_requests",
         "_exceptions",
         "_tracebacks",
-        "_ip_addresses", ]
+        "_connections", ]
+
+    ERROR_MESSAGE = (
+        "failure in request to board %s with ethernet chip (%d, %d) for "
+        "chip (%d, %d, %d)")
+
 
     def __init__(self):
         self._exceptions = []
         self._tracebacks = []
         self._error_requests = []
-        self._ip_addresses = []
+        self._connections = []
 
-    def _receive_error(self, request, exception, tb, ip_address):
+    def _receive_error(self, request, exception, tb, connection):
         self._error_requests.append(request)
         self._exceptions.append(exception)
         self._tracebacks.append(tb)
-        self._ip_addresses.append(ip_address)
+        self._connections.append(connection)
 
     def is_error(self):
         return bool(self._exceptions)
@@ -50,13 +55,14 @@ class AbstractProcess(object):
         if len(self._exceptions) == 1:
             exc_info = sys.exc_info()
             sdp_header = self._error_requests[0].sdp_header
+            connection = self._connections[0]
 
             if print_exception:
-                logger.error(
-                    "failure in request to board %s for chip (%d, %d, %d)",
-                    self._ip_addresses[0], sdp_header.destination_chip_x,
+                logger.error(self.ERROR_MESSAGE.format(
+                    connection.remote_host, connection.chip_x,
+                    connection.chip_y, sdp_header.destination_chip_x,
                     sdp_header.destination_chip_y, sdp_header.destination_cpu,
-                    exc_info=(Exception, self._exceptions, self._tracebacks))
+                    exc_info=(Exception, self._exceptions, self._tracebacks)))
 
             raise SpinnmanGenericProcessException(
                 self._exceptions[0], exc_info[2],
@@ -66,7 +72,7 @@ class AbstractProcess(object):
         elif self._exceptions:
             ex = SpinnmanGroupedProcessException(
                 self._error_requests, self._exceptions, self._tracebacks,
-                self._ip_addresses)
+                self._connections)
             if print_exception:
                 logger.error("%s", str(ex))
             raise ex

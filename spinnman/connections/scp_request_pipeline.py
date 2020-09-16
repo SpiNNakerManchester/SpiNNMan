@@ -237,7 +237,7 @@ class SCPRequestPipeLine(object):
                 except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
                         request_sent, e, sys.exc_info()[2],
-                        self._connection.remote_host)
+                        self._connection)
                     self._remove_record(seq)
             else:
 
@@ -250,7 +250,7 @@ class SCPRequestPipeLine(object):
                 except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
                         request_sent, e, sys.exc_info()[2],
-                        self._connection.remote_host)
+                        self._connection)
 
                 # Remove the sequence from the outstanding responses
                 self._remove_record(seq)
@@ -267,7 +267,7 @@ class SCPRequestPipeLine(object):
             except Exception as e:  # pylint: disable=broad-except
                 self._error_callbacks[seq](
                     request_sent, e, sys.exc_info()[2],
-                    self._connection.remote_host)
+                    self._connection)
                 to_remove.append(seq)
 
         for seq in to_remove:
