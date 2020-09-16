@@ -214,9 +214,9 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
 
 
 class _Group(object):
-    def __init__(self, trace_back):
+    def __init__(self, trace_back, ip_address):
         self.trace_back = trace_back
-        self.chip_core = "["
+        self.chip_core = "board {} [".format(ip_address)
         self._separator = ""
 
     def finalise(self):
@@ -231,24 +231,25 @@ class _Group(object):
         self._separator = ","
 
     @staticmethod
-    def group_exceptions(error_requests, exceptions, tracebacks):
+    def group_exceptions(error_requests, exceptions, tracebacks, ip_addresses):
         """ Groups exceptions into a form usable by an exception.
 
         :param list(SCPRequest) error_requests: the error requests
         :param list(Exception) exceptions: the exceptions
         :param list tracebacks: the tracebacks
+        :param list ip_addresses: the ip addresses
         :return: a sorted exception pile
         :rtype: dict(Exception,_Group)
         """
         data = OrderedDict()
-        for error_request, exception, trace_back in zip(
-                error_requests, exceptions, tracebacks):
+        for error_request, exception, trace_back, ip_address in zip(
+                error_requests, exceptions, tracebacks, ip_addresses):
             for stored_exception in data.keys():
                 if isinstance(exception, type(stored_exception)):
                     found_exception = stored_exception
                     break
             else:
-                data[exception] = _Group(trace_back)
+                data[exception] = _Group(trace_back, ip_address)
                 found_exception = exception
             data[found_exception].add_coord(error_request.sdp_header)
         for exception in data:
@@ -260,10 +261,10 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with a\
         collection of cores/chips
     """
-    def __init__(self, error_requests, exceptions, tracebacks):
+    def __init__(self, error_requests, exceptions, tracebacks, ip_addresses):
         problem = "Exceptions found were:\n"
         for exception, description in _Group.group_exceptions(
-                error_requests, exceptions, tracebacks):
+                error_requests, exceptions, tracebacks, ip_addresses):
             problem += \
                 "   Received exception class: {}\n" \
                 "       With message {}\n" \
