@@ -35,7 +35,6 @@ class AbstractProcess(object):
         "failure in request to board %s with ethernet chip (%d, %d) for "
         "chip (%d, %d, %d)")
 
-
     def __init__(self):
         self._exceptions = []
         self._tracebacks = []
