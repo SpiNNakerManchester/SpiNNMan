@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from spinn_utilities.overrides import overrides
 from spinn_machine import FixedRouteEntry
@@ -12,21 +27,21 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class FixedRouteRead(AbstractSCPRequest):
+    """ Gets a fixed route entry
+    """
+
     __slots__ = []
 
     def __init__(self, x, y, app_id):
-        """ Sets a fixed route entry
-
-        :param x: The x-coordinate of the chip, between 0 and 255,\
+        """
+        :param int x: The x-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
-        :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255\
+        :param int y: The y-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
-        :type y: int
-        :param app_id: The ID of the application with which to associate the\
-            routes.  If not specified, defaults to 0.
-        :type app_id: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:\
+        :param int app_id:
+            The ID of the application with which to associate the routes.
+            If not specified, defaults to 0.
+        :raise SpinnmanInvalidParameterException:
             * If x is out of range
             * If y is out of range
         """

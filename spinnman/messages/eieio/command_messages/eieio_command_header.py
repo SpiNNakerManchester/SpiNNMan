@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from enum import Enum
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -29,15 +44,13 @@ class EIEIOCommandHeader(object):
         """ Read an EIEIO command header from a bytestring
 
         :param data: The bytestring to read the data from
-        :type data: str or bytes
-        :param offset: The offset where the valid data starts
-        :type offset: int
+        :type data: bytes or bytearray
+        :param int offset: The offset where the valid data starts
         :return: an EIEIO command header
-        :rtype:\
-            :py:class:`EIEIOCommandHeader`
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :rtype: EIEIOCommandHeader
+        :raise SpinnmanIOException:
             If there is an error reading from the reader
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If there is an error setting any of the values
         """
         command_header = _ONE_SHORT.unpack_from(data, offset)[0]

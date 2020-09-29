@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from six import add_metaclass
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
@@ -24,21 +39,17 @@ class AbstractSCPRequest(object):
                  argument_2=None, argument_3=None, data=None):
         """
 
-        :param sdp_header: The SDP header of the request
-        :type sdp_header:\
-            :py:class:`spinnman.messages.sdp.sdp_header.SDPHeader`
-        :param scp_request_header: The SCP header of the request
-        :type scp_request_header:\
-            :py:class:`spinnman.messages.scp.SCPRequestHeader`
-        :param argument_1: The first argument, or None if no first argument
-        :type argument_1: int
-        :param argument_2: The second argument, or None if no second argument
-        :type argument_2: int
-        :param argument_3: The third argument, or None if no third argument
-        :type argument_3: int
+        :param SDPHeader sdp_header: The SDP header of the request
+        :param SCPRequestHeader scp_request_header:
+            The SCP header of the request
+        :param int argument_1:
+            The first argument, or None if no first argument
+        :param int argument_2:
+            The second argument, or None if no second argument
+        :param int argument_3:
+            The third argument, or None if no third argument
         :param data: The optional data, or None if no data
-        :type data: bytearray
-        :raise None: No known exceptions are raised
+        :type data: bytearray or bytes or None
         """
         # pylint: disable=too-many-arguments
         self._sdp_header = sdp_header
@@ -52,7 +63,7 @@ class AbstractSCPRequest(object):
     def sdp_header(self):
         """ The SDP header of the message
 
-        :rtype: :py:class:`spinnman.message.sdp.sdp_header.SDPHeader`
+        :rtype: SDPHeader
         """
         return self._sdp_header
 
@@ -60,8 +71,7 @@ class AbstractSCPRequest(object):
     def scp_request_header(self):
         """ The SCP request header of the message
 
-        :rtype:\
-            :py:class:`spinnman.messages.scp.SCPRequestHeader`
+        :rtype: SCPRequestHeader
         """
         return self._scp_request_header
 
@@ -101,8 +111,7 @@ class AbstractSCPRequest(object):
     def bytestring(self):
         """ The request as a bytestring
 
-        :return: The request as a bytestring
-        :rtype: str
+        :rtype: bytes
         """
         data = (self._sdp_header.bytestring +
                 self._scp_request_header.bytestring)
@@ -120,6 +129,5 @@ class AbstractSCPRequest(object):
             received
 
         :return: An SCP response, or None if no response is required
-        :rtype: :py:class:`spinnman.messages.scp_response.SCPResponse`
-        :raise None: No known exceptions are raised
+        :rtype: AbstractSCPResponse
         """

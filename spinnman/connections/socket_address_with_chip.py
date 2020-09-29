@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from spinnman.constants import SCP_SCAMP_PORT
 
 
@@ -10,6 +25,12 @@ class SocketAddressWithChip(object):
         "_port_num"]
 
     def __init__(self, hostname, chip_x, chip_y, port_num=SCP_SCAMP_PORT):
+        """
+        :param str hostname:
+        :param int chip_x:
+        :param int chip_y:
+        :param int port_num:
+        """
         self._hostname = hostname
         self._port_num = port_num
         self._chip_x = chip_x
@@ -19,7 +40,7 @@ class SocketAddressWithChip(object):
     def hostname(self):
         """ The hostname of the socket
 
-        :return: the hostname
+        :rtype: str
         """
         return self._hostname
 
@@ -27,7 +48,7 @@ class SocketAddressWithChip(object):
     def port_num(self):
         """ The port number of the socket
 
-        :return: the port
+        :rtype: int
         """
         return self._port_num
 
@@ -35,7 +56,7 @@ class SocketAddressWithChip(object):
     def chip_x(self):
         """ The x-coordinate of the chip
 
-        :return: the x-coordinate
+        :rtype: int
         """
         return self._chip_x
 
@@ -43,7 +64,7 @@ class SocketAddressWithChip(object):
     def chip_y(self):
         """ The y-coordinate of the chip
 
-        :return: the y-coordinate
+        :rtype: int
         """
         return self._chip_y
 

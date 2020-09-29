@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 
@@ -20,11 +35,11 @@ class ChipInfo(object):
 
     def __init__(self, system_data, offset):
         """
-        :param system_data: An bytestring retrieved from SDRAM on the board
-        :type system_data: str
-        :param offset: \
+        :param bytes system_data:
+            An bytestring retrieved from SDRAM on the board
+        :param int offset:
             The offset into the bytestring where the actual data starts
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If the data doesn't contain valid system data information
         """
         self._system_data = system_data
@@ -131,7 +146,7 @@ class ChipInfo(object):
     def links_available(self):
         """ The links that are available on the chip
 
-        :rtype: iterable of int
+        :rtype: iterable(int)
         """
         return self._links_available
 

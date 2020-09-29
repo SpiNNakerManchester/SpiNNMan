@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import math
 from spinnman.messages.scp.impl import (
     FloodFillEnd, FloodFillStart, FloodFillData)
@@ -25,6 +40,14 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
     def write_memory_from_bytearray(self, nearest_neighbour_id, base_address,
                                     data, offset, n_bytes=None):
+        """
+        :param int nearest_neighbour_id:
+        :param int base_address:
+        :param data:
+        :type data: bytes or bytearray
+        :param int offset:
+        :param int n_bytes:
+        """
         # pylint: disable=too-many-arguments
         if n_bytes is None:
             n_bytes = len(data)
@@ -51,6 +74,15 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
     def write_memory_from_reader(self, nearest_neighbour_id, base_address,
                                  reader, n_bytes):
+        """
+        :param int nearest_neighbour_id:
+        :param int base_address:
+        :param reader:
+        :type reader:
+            ~spinn_storage_handlers.abstract_classes.AbstractDataReader or
+            ~io.RawIOBase or ~io.BufferedIOBase
+        :param int n_bytes:
+        """
         self._start_flood_fill(n_bytes, nearest_neighbour_id)
 
         offset = base_address

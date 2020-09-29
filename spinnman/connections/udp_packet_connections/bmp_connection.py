@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from spinn_utilities.overrides import overrides
 from .udp_connection import UDPConnection
@@ -23,9 +38,8 @@ class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
 
     def __init__(self, connection_data):
         """
-        :param connection_data: The description of what to connect to.
-        :type connection_data: \
-            :py:class:`spinnman.model.bmp_connection_data.BMPConnectionData`
+        :param BMPConnectionData connection_data:
+            The description of what to connect to.
         """
         port = SCP_SCAMP_PORT if connection_data.port_num is None\
             else connection_data.port_num

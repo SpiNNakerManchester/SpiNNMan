@@ -1,7 +1,19 @@
-try:
-    from collections.abc import namedtuple
-except ImportError:
-    from collections import namedtuple
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from collections import namedtuple
 import struct
 from enum import Enum
 
@@ -33,6 +45,11 @@ class _DataType(Enum):
     def struct_code(self):
         return self._struct_code
 
+    @property
+    def is_byte_array(self):
+        # can't use BYTE_ARRAY.value directly here
+        return self._value_ == 16
+
 
 class _Definition(namedtuple("_Definition",
                              "offset, data_type, default, array_size, doc")):
@@ -47,7 +64,7 @@ class _Definition(namedtuple("_Definition",
 
 
 class SystemVariableDefinition(Enum):
-    """ Defines the system variables available
+    """ Defines the system variables available.
     """
 
     y = _Definition(
@@ -298,17 +315,13 @@ class SystemVariableDefinition(Enum):
 
     def __init__(self, offset, data_type, default, array_size, doc):
         """
-
-        :param data_type: The data type of the variable
-        :type data_type: :py:class:`_DataType`
-        :param offset: The offset from the start of the system variable\
+        :param _DataType data_type: The data type of the variable
+        :param int offset: The offset from the start of the system variable
             structure where the variable is found
-        :type offset: int
-        :param default: \
+        :param object default:
             The default value assigned to the variable if not overridden
-        :type default: int
         :param array_size: The length of the array, or None if not an array
-        :type array_size: int
+        :type array_size: int or None
         """
         # pylint: disable=too-many-arguments
         self._data_type = data_type

@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
@@ -15,19 +30,14 @@ class ApplicationRun(AbstractSCPRequest):
 
     def __init__(self, app_id, x, y, processors, wait=False):
         """
-        :param app_id: The ID of the application to run, between 16 and 255
-        :type app_id: int
-        :param x: The x-coordinate of the chip to run on, between 0 and 255
-        :type x: int
-        :param y: The y-coordinate of the chip to run on, between 0 and 255
-        :type y: int
-        :param processors: \
-            The processors on the chip where the executable should be \
+        :param int app_id: The ID of the application to run, between 16 and 255
+        :param int x: The x-coordinate of the chip to run on, between 0 and 255
+        :param int y: The y-coordinate of the chip to run on, between 0 and 255
+        :param list(int) processors:
+            The processors on the chip where the executable should be
             started, between 1 and 17
-        :type processors: list of int
-        :param wait: \
+        :param bool wait:
             True if the processors should enter a "wait" state on starting
-        :type wait: bool
         """
         # pylint: disable=too-many-arguments
         processor_mask = 0

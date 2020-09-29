@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import os
 import struct
 from spinn_utilities.overrides import overrides
@@ -6,7 +21,7 @@ from spinnman.processes.fill_process import FillDataType
 
 
 class FileIO(AbstractIO):
-    """ A file input/output interface to match the MemoryIO interface
+    """ A file input/output interface to match the MemoryIO interface.
     """
 
     __slots__ = [
@@ -26,10 +41,13 @@ class FileIO(AbstractIO):
 
     def __init__(self, file_obj, start_offset, end_offset):
         """
-        :param file_obj: The file handle or file name to write to
+        :param file_obj: The file handle or file name to write to.
+
+            .. note::
+                If given a filename of an existing file, that file will be
+                truncated to zero bytes long.
         :type file_obj: str or file
-        :param start_offset: The start offset into the file
-        :type start_offset: int
+        :param int start_offset: The start offset into the file
         :param end_offset: The end offset from the start of the file
         :type end_offset: int or None
         """

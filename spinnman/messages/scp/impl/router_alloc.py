@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
@@ -18,16 +33,12 @@ class RouterAlloc(AbstractSCPRequest):
 
     def __init__(self, x, y, app_id, n_entries):
         """
-        :param x: \
+        :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :type x: int
-        :param y: \
+        :param int y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :type y: int
-        :param app_id: The ID of the application, between 0 and 255
-        :type app_id: int
-        :param n_entries: The number of entries to allocate
-        :type n_entries: int
+        :param int app_id: The ID of the application, between 0 and 255
+        :param int n_entries: The number of entries to allocate
         """
         super(RouterAlloc, self).__init__(
             SDPHeader(

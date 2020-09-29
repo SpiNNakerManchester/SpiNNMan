@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -16,23 +31,16 @@ class ReverseIPTagSet(AbstractSCPRequest):
     def __init__(self, x, y, destination_x, destination_y, destination_p, port,
                  tag, sdp_port):
         """
-        :param x: The x-coordinate of a chip, between 0 and 255
-        :type x: int
-        :param y: The y-coordinate of a chip, between 0 and 255
-        :type y: int
-        :param destination_x: \
+        :param int x: The x-coordinate of a chip, between 0 and 255
+        :param int y: The y-coordinate of a chip, between 0 and 255
+        :param int destination_x:
             The x-coordinate of the destination chip, between 0 and 255
-        :type destination_x: int
-        :param destination_y: \
+        :param int destination_y:
             The y-coordinate of the destination chip, between 0 and 255
-        :type destination_y: int
-        :param destination_p: \
+        :param int destination_p:
             The ID of the destination processor, between 0 and 17
-        :type destination_p: int
-        :param port: The port, between 0 and 65535
-        :type port: int
-        :param tag: The tag, between 0 and 7
-        :type tag: int
+        :param int port: The port, between 0 and 65535
+        :param int tag: The tag, between 0 and 7
         """
         # pylint: disable=too-many-arguments
         strip_value = 1

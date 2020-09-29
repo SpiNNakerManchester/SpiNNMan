@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import socket
 import sys
 from six import reraise
@@ -16,9 +31,10 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
         from the final part e.g. if the machine IP address is 192.168.0.5, the\
         BMP IP address is assumed to be 192.168.0.4
 
-    :param hostname: the SpiNNaker machine main hostname or IP address
-    :param number_of_boards: the number of boards in the machine
+    :param str hostname: the SpiNNaker machine main hostname or IP address
+    :param int number_of_boards: the number of boards in the machine
     :return: The BMP connection data
+    :rtype: BMPConnectionData
     """
     # take the IP address, split by dots, and subtract 1 off last bit
     ip_bits = socket.gethostbyname(hostname).split(".")
@@ -41,8 +57,8 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
 def get_vcpu_address(p):
     """ Get the address of the vcpu_t structure for the given core
 
-    :param p: The core
-    :type p: int
+    :param int p: The core
+    :rtype: int
     """
     return CPU_INFO_OFFSET + (CPU_INFO_BYTES * p)
 
@@ -51,10 +67,11 @@ def send_port_trigger_message(connection, board_address):
     """ Sends a port trigger message using a connection to (hopefully) open a\
         port in a NAT and/or firewall to allow incoming packets to be received.
 
-    :param connection: \
+    :param UDPConnection connection:
         The UDP connection down which the trigger message should be sent
-    :param board_address: \
-        The address of the SpiNNaker board to which the message should be sent
+    :param str board_address:
+        The IP address of the SpiNNaker board to which the message should be
+        sent
     """
 
     # Set up the message so that no reply is expected and it is sent to an
@@ -70,11 +87,12 @@ def send_port_trigger_message(connection, board_address):
 
 
 def reprogram_tag(connection, tag, strip=True):
-    """ Reprogramme an IP Tag to send responses to a given SCAMPConnection
+    """ Reprogram an IP Tag to send responses to a given SCAMPConnection
 
-    :param connection: The connection to target the tag at
-    :param tag: The id of the tag to set
-    :param strip: True if
+    :param SCAMPConnection connection: The connection to target the tag at
+    :param int tag: The id of the tag to set
+    :param bool strip:
+        True if the tag should strip SDP headers from outgoing messages
     """
     request = IPTagSet(
         connection.chip_x, connection.chip_y, [0, 0, 0, 0], 0, tag,

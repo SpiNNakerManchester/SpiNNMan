@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import time
 
 
@@ -15,8 +30,8 @@ class TokenBucket(object):
 
     def __init__(self, tokens, fill_rate):
         """
-        :param tokens: the total tokens in the bucket
-        :param fill_rate:\
+        :param int tokens: the total tokens in the bucket
+        :param float fill_rate:
             the rate in tokens/second that the bucket will be refilled.
         """
         self._capacity = float(tokens)
@@ -33,7 +48,11 @@ class TokenBucket(object):
 
         If there are not enough tokens and block is False, returns False.
 
-        It is an error to consume more tokens than the bucket _capacity.
+        It is an error to consume more tokens than the bucket capacity.
+
+        :param int tokens:
+        :param bool block:
+        :rtype: bool
         """
         while block and tokens > self.tokens:
             deficit = tokens - self._tokens
@@ -47,6 +66,8 @@ class TokenBucket(object):
 
     @property
     def tokens(self):
+        """ The number of tokens currently in the bucket.
+        """
         if self._tokens < self._capacity:
             now = time.time()
             delta = self._fill_rate * (now - self._timestamp)

@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import functools
 from past.builtins import xrange
 from spinn_machine.tags import ReverseIPTag, IPTag
@@ -11,14 +26,19 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         "_tag_info"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetTagsProcess, self).__init__(connection_selector)
         self._tag_info = None
         self._tags = None
 
-    def handle_tag_info_response(self, response):
+    def __handle_tag_info_response(self, response):
         self._tag_info = response
 
-    def handle_get_tag_response(self, tag, board_address, response):
+    def __handle_get_tag_response(self, tag, board_address, response):
         if response.in_use:
             ip_address = response.ip_address
             host = "{}.{}.{}.{}".format(ip_address[0], ip_address[1],
@@ -36,10 +56,15 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
                     response.port, response.strip_sdp)
 
     def get_tags(self, connection):
+        """
+        :param SCAMPConnection connection:
+        :rtype:
+            list(~spinn_machine.tags.IPTag or ~spinn_machine.tags.ReverseIPTag)
+        """
         # Get the tag information, without which we cannot continue
         self._send_request(IPTagGetInfo(
             connection.chip_x, connection.chip_y),
-            self.handle_tag_info_response)
+            self.__handle_tag_info_response)
         self._finish()
         self.check_for_error()
 
@@ -50,7 +75,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
             self._send_request(IPTagGet(
                 connection.chip_x, connection.chip_y, tag),
                 functools.partial(
-                    self.handle_get_tag_response, tag,
+                    self.__handle_get_tag_response, tag,
                     connection.remote_ip_address))
         self._finish()
         self.check_for_error()

@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -5,7 +20,7 @@ from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
 
-_NNP_FORWARD_RETRY = (1 << 31) | (0x3f << 8) | 0x18
+_NNP_FORWARD_RETRY = (1 << 31) | (0x3f << 8) | 0x1A
 _NNP_FLOOD_FILL_START = 6
 
 
@@ -16,17 +31,14 @@ class FloodFillStart(AbstractSCPRequest):
 
     def __init__(self, nearest_neighbour_id, n_blocks, x=None, y=None):
         """
-        :param nearest_neighbour_id: The ID of the packet, between 0 and 127
-        :type nearest_neighbour_id: int
-        :param n_blocks: The number of blocks of data that will be sent,\
-            between 0 and 255
-        :type n_blocks: int
-        :param x: The x-coordinate of the chip to load the data on to. If not\
-            specified, the data will be loaded on to all chips
-        :type x: int
-        :param y: The y-coordinate of the chip to load the data on to. If not\
-            specified, the data will be loaded on to all chips
-        :type y: int
+        :param int nearest_neighbour_id:
+            The ID of the packet, between 0 and 127
+        :param int n_blocks:
+            The number of blocks of data that will be sent, between 0 and 255
+        :param int x: The x-coordinate of the chip to load the data on to. If
+            not specified, the data will be loaded on to all chips
+        :param int y: The y-coordinate of the chip to load the data on to. If
+            not specified, the data will be loaded on to all chips
         """
         key = ((_NNP_FLOOD_FILL_START << 24) | (nearest_neighbour_id << 16) |
                (n_blocks << 8))

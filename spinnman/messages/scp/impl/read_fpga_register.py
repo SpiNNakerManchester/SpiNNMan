@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import (
@@ -17,11 +32,11 @@ class ReadFPGARegister(BMPRequest):
     def __init__(self, fpga_num, register, board):
         """ Sets up a read FPGA register request.
 
-        :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
-        :param register: Register address to read to (will be rounded down to\
+        :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
+        :param int register:
+            Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
-        :param board: which board to request the FPGA register from
-        :rtype: None
+        :param int board: which board to request the FPGA register from
         """
 
         # check to stop people asking for none word aligned memory addresses

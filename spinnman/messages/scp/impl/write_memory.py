@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 from spinn_utilities.overrides import overrides
 from spinnman.constants import address_length_dtype
 from spinnman.messages.scp import SCPRequestHeader
@@ -15,18 +30,15 @@ class WriteMemory(AbstractSCPRequest):
 
     def __init__(self, x, y, base_address, data, cpu=0):
         """
-        :param x: The x-coordinate of the chip, between 0 and 255;\
+        :param int x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions
-        :type x: int
-        :param y: The y-coordinate of the chip, between 0 and 255;\
+        :param int y: The y-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions
-        :type y: int
-        :param base_address: The base_address to start writing to \
+        :param int base_address: The base_address to start writing to
             the base address is not checked to see if its not valid
-        :type base_address: int
-        :param data: between 1 and 256 bytes of data to write;\
+        :param data: between 1 and 256 bytes of data to write;
             this is not checked due to speed restrictions
-        :type data: bytearray or string
+        :type data: bytearray or bytes
         """
         # pylint: disable=too-many-arguments
         size = len(data)

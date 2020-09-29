@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
@@ -36,14 +51,11 @@ class CPUInfo(object):
 
     def __init__(self, x, y, p, cpu_data, offset):
         """
-        :param x: The x-coordinate of a chip
-        :type x: int
-        :param y: The y-coordinate of a chip
-        :type y: int
-        :param p: The ID of a core on the chip
-        :type p: int
-        :param cpu_data: A bytestring received from SDRAM on the board
-        :type cpu_data: str
+        :param int x: The x-coordinate of a chip
+        :param int y: The y-coordinate of a chip
+        :param int p: The ID of a core on the chip
+        :param bytes cpu_data: A bytestring received from SDRAM on the board
+        :param int offset:
         """
         # pylint: disable=too-many-arguments
         self._x = x
@@ -114,7 +126,7 @@ class CPUInfo(object):
         """ The current state of the core.
 
         :return: The state of the core
-        :rtype: :py:class:`spinnman.model.enums.cpu_state.CPUState`
+        :rtype: CPUState
         """
         return self._state
 
@@ -159,7 +171,7 @@ class CPUInfo(object):
         """ The reason for a run time error.
 
         :return: The run time error
-        :rtype: :py:class:`spinnman.model.enums.run_time_error.RunTimeError`
+        :rtype: RunTimeError
         """
         return self._run_time_error
 
@@ -169,7 +181,7 @@ class CPUInfo(object):
             processor to the application.
 
         :return: The command
-        :rtype: :py:class:`spinnman.model.enums.mailbox_command.MailboxCommand`
+        :rtype: MailboxCommand
         """
         return self._application_mailbox_command
 
@@ -188,7 +200,7 @@ class CPUInfo(object):
             application to the monitor processor.
 
         :return: The command
-        :rtype: :py:class:`spinnman.model.mailbox_command.MailboxCommand`
+        :rtype: MailboxCommand
         """
         return self._monitor_mailbox_command
 
@@ -260,7 +272,7 @@ class CPUInfo(object):
         """ The current register values (r0 - r7).
 
         :return: An array of 8 values, one for each register
-        :rtype: array of int
+        :rtype: list(int)
         """
         return self._registers
 
@@ -269,7 +281,7 @@ class CPUInfo(object):
         """ The current user values (user0 - user3).
 
         :return: An array of 4 values, one for each user value
-        :rtype: array of int
+        :rtype: list(int)
         """
         return self._user
 

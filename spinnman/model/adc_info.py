@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 from spinnman import constants
 
@@ -30,9 +45,9 @@ class ADCInfo(object):
 
     def __init__(self, adc_data, offset):
         """
-        :param adc_data: bytes from an SCP packet containing ADC information
-        :type adc_data: str
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :param bytes adc_data:
+            bytes from an SCP packet containing ADC information
+        :raise SpinnmanInvalidParameterException:
             If the message does not contain valid ADC information
         """
         data = _PATTERN.unpack_from(adc_data, offset)

@@ -21,7 +21,7 @@ Contents
 .. toctree::
    :maxdepth: 4
 
-   spinnman
+   modules
 
 
 Indices and tables

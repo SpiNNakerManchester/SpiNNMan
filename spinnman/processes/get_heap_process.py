@@ -1,3 +1,18 @@
+# Copyright (c) 2017-2019 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import struct
 import functools
 from spinnman.processes import AbstractMultiConnectionProcess
@@ -20,6 +35,11 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         "_next_block_address"]
 
     def __init__(self, connection_selector):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetHeapProcess, self).__init__(connection_selector)
 
         self._heap_address = None
@@ -49,6 +69,11 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         self.check_for_error()
 
     def get_heap(self, chip_address, pointer=HEAP_ADDRESS):
+        """
+        :param tuple(int,int) chip_address: x, y
+        :param SystemVariableDefinition pointer:
+        :rtype: list(HeapElement)
+        """
         self._read_address(
             chip_address, SYSTEM_VARIABLE_BASE_ADDRESS + pointer.offset,
             pointer.data_type.value, self._read_heap_address_response)
