@@ -2771,6 +2771,14 @@ class Transceiver(object):
             x, y, base_address, repeat_value, bytes_to_fill, data_type)
 
     def wait_for_state(self, app_id, states, tag):
+        """ Wait for a given app to reach one of a given set of states
+
+        :param int app_id: The id of the app to wait for.
+        :param list(CPUState) states: The state(s) to wait for
+        :param int tag:
+            A tag for the return notification to ensure that it doesn't get
+            mixed up with previous requests
+        """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(WaitForState(app_id, states, tag))
 
