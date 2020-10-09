@@ -14,6 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # pylint: disable=too-many-arguments
+import io
+import os
 import random
 import struct
 from threading import Condition, RLock
@@ -21,13 +23,10 @@ from collections import defaultdict
 import logging
 import socket
 import time
-import os
 from past.builtins import xrange
 from six import raise_from
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import CoreSubsets
-from spinn_storage_handlers.abstract_classes import AbstractDataReader
-from spinn_storage_handlers import FileDataReader
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
     CPU_USER_0_START_ADDRESS, CPU_USER_1_START_ADDRESS,
@@ -1312,8 +1311,7 @@ class Transceiver(object):
             * A filename of a file containing the executable (in which case\
               `is_filename` must be set to True)
         :type executable:
-            ~spinn_storage_handlers.abstract_classes.AbstractDataReader`
-            or bytes or bytearray or str
+            ~io.RawIOBase or bytes or bytearray or str
         :param int app_id:
             The ID of the application with which to associate the executable
         :param int n_bytes:
@@ -1379,8 +1377,7 @@ class Transceiver(object):
             * A filename of an executable (in which case `is_filename` must be\
               set to True)
         :type executable:
-            ~spinn_storage_handlers.abstract_classes.AbstractDataReader
-            or bytes or bytearray or str
+            ~io.RawIOBase or bytes or bytearray or str
         :param int app_id:
             The ID of the application with which to associate the executable
         :param int n_bytes:
@@ -1645,8 +1642,7 @@ class Transceiver(object):
             * A filename of a data file (in which case `is_filename` must be\
               set to True)
         :type data:
-            ~spinn_storage_handlers.abstract_classes.AbstractDataReader
-            or bytes or bytearray or int or str
+            ~io.RawIOBase or bytes or bytearray or int or str
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
@@ -1674,13 +1670,13 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         process = WriteMemoryProcess(self._scamp_connection_selector)
-        if isinstance(data, AbstractDataReader):
+        if isinstance(data, io.RawIOBase):
             process.write_memory_from_reader(
                 x, y, cpu, base_address, data, n_bytes)
         elif isinstance(data, str) and is_filename:
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
-            with FileDataReader(data) as reader:
+            with open(data, "rb") as reader:
                 process.write_memory_from_reader(
                     x, y, cpu, base_address, reader, n_bytes)
         elif isinstance(data, int):
@@ -1713,8 +1709,7 @@ class Transceiver(object):
             * A bytearray/bytes
             * A single integer; will be written in little-endian byte order
         :type data:
-            ~spinn_storage_handlers.abstract_classes.AbstractDataReader
-            or bytes or bytearray or int
+            ~io.RawIOBase or bytes or bytearray or int
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
@@ -1743,7 +1738,7 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         process = WriteMemoryProcess(self._scamp_connection_selector)
-        if isinstance(data, AbstractDataReader):
+        if isinstance(data, io.RawIOBase):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
         elif isinstance(data, int):
@@ -1772,8 +1767,7 @@ class Transceiver(object):
             * A file name of a file to read (in which case `is_filename`\
               should be set to True)
         :type data:
-            ~spinn_storage_handlers.abstract_classes.AbstractDataReader
-            or bytes or bytearray or int or str
+            ~io.RawIOBase or bytes or bytearray or int or str
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
@@ -1804,13 +1798,13 @@ class Transceiver(object):
         with self._flood_write_lock:
             # Start the flood fill
             nearest_neighbour_id = self._get_next_nearest_neighbour_id()
-            if isinstance(data, AbstractDataReader):
+            if isinstance(data, io.RawIOBase):
                 process.write_memory_from_reader(
                     nearest_neighbour_id, base_address, data, n_bytes)
             elif isinstance(data, str) and is_filename:
                 if n_bytes is None:
                     n_bytes = os.stat(data).st_size
-                with FileDataReader(data) as reader:
+                with open(data, "rb") as reader:
                     process.write_memory_from_reader(
                         nearest_neighbour_id, base_address, reader, n_bytes)
             elif isinstance(data, int):

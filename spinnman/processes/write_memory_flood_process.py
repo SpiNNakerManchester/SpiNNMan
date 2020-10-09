@@ -78,9 +78,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
         :param int nearest_neighbour_id:
         :param int base_address:
         :param reader:
-        :type reader:
-            ~spinn_storage_handlers.abstract_classes.AbstractDataReader or
-            ~io.RawIOBase or ~io.BufferedIOBase
+        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
         :param int n_bytes:
         """
         self._start_flood_fill(n_bytes, nearest_neighbour_id)

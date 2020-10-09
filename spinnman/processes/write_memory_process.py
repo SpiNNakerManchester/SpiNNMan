@@ -80,9 +80,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             The processor of the chip where the memory is to be written to
         :param int base_address: the address in SDRAM to start writing
         :param reader: the readable object containing the data to write
-        :type reader:
-            ~spinn_storage_handlers.abstract_classes.AbstractDataReader or
-            ~io.RawIOBase or ~io.BufferedIOBase
+        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
         :param int n_bytes: how much data to write
         """
         self._write_memory_from_reader(
@@ -103,9 +101,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             Along which link is the neighbour.
         :param int base_address: the address in SDRAM to start writing
         :param reader: the readable object containing the data to write
-        :type reader:
-            ~spinn_storage_handlers.abstract_classes.AbstractDataReader or
-            ~io.RawIOBase or ~io.BufferedIOBase
+        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
         :param int n_bytes: how much data to write
         """
         self._write_memory_from_reader(
