@@ -16,11 +16,12 @@
 import os
 from abc import (ABCMeta, abstractmethod, abstractproperty)
 from six import add_metaclass
+from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.processes.fill_process import FillDataType
 
 
 @add_metaclass(ABCMeta)
-class AbstractIO(object):
+class AbstractIO(AbstractContextManager):
     __slots__ = []
 
     @abstractmethod
@@ -39,16 +40,6 @@ class AbstractIO(object):
         :rtype: AbstractIO
         :raise ValueError:
             If the index or slice is outside of the current region
-        """
-
-    @abstractmethod
-    def __enter__(self):
-        """ Enter a new block which will call :py:meth:`~.close` when exited.
-        """
-
-    @abstractmethod
-    def __exit__(self, exception_type, exception_value, traceback):
-        """ Exit a block and call :py:meth:`~.close`.
         """
 
     @abstractmethod

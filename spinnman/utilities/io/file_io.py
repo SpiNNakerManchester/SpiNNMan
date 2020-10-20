@@ -98,14 +98,6 @@ class FileIO(AbstractIO):
 
             return FileIO(self._file, start_offset, end_offset)
 
-    @overrides(AbstractIO.__enter__)
-    def __enter__(self):
-        return self
-
-    @overrides(AbstractIO.__exit__)
-    def __exit__(self, exception_type, exception_value, traceback):
-        self.close()
-
     @overrides(AbstractIO.close)
     def close(self):
         self._file.close()
