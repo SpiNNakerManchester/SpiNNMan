@@ -15,10 +15,11 @@
 
 from six import add_metaclass
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from spinn_utilities.abstract_context_manager import AbstractContextManager
 
 
 @add_metaclass(AbstractBase)
-class Connection(object):
+class Connection(AbstractContextManager):
     """ An abstract connection to the SpiNNaker board over some medium
     """
 

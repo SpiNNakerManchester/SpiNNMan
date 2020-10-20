@@ -16,13 +16,14 @@
 import logging
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
+from spinn_utilities.abstract_context_manager import AbstractContextManager
 
 logger = logging.getLogger(__name__)
 _POOL_SIZE = 4
 _TIMEOUT = 1
 
 
-class ConnectionListener(Thread):
+class ConnectionListener(Thread, AbstractContextManager):
     """ Thread that listens to a connection and calls callbacks with new\
         messages when they arrive.
     """
