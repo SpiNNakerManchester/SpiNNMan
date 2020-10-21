@@ -14,13 +14,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from abc import (ABCMeta, abstractmethod, abstractproperty)
+from abc import abstractmethod, abstractproperty
 from six import add_metaclass
+from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.processes.fill_process import FillDataType
 
 
-@add_metaclass(ABCMeta)
+@add_metaclass(AbstractBase)
 class AbstractIO(AbstractContextManager):
     __slots__ = []
 
