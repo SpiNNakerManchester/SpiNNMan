@@ -278,15 +278,6 @@ class MemoryIO(AbstractIO):
                 self._chip_memory_io.y,
                 start_address, end_address)
 
-    @overrides(AbstractIO.__enter__)
-    def __enter__(self):
-        return self
-
-    @overrides(AbstractIO.__exit__)
-    def __exit__(self, exception_type, exception_value, traceback):
-        self.close()
-        return False
-
     @overrides(AbstractIO.close)
     def close(self):
         self._chip_memory_io.flush_write_buffer()

@@ -25,6 +25,7 @@ import socket
 import time
 from past.builtins import xrange
 from six import raise_from
+from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import CoreSubsets
 from spinnman.constants import (
@@ -203,7 +204,7 @@ def create_transceiver_from_hostname(
         default_report_directory=default_report_directory)
 
 
-class Transceiver(object):
+class Transceiver(AbstractContextManager):
     """ An encapsulation of various communications with the SpiNNaker board.
 
         The methods of this class are designed to be thread-safe;\
@@ -2588,7 +2589,7 @@ class Transceiver(object):
             if True, the machine is sent a power down
             command via its BMP (if it has one)
         """
-
+        # pylint: disable=arguments-differ
         if power_off_machine and self._bmp_connections:
             self.power_off_machine()
 
