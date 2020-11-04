@@ -67,6 +67,12 @@ jobs:
       run: python setup.py install
       working-directory: SpiNNMachine
 
+    - name: Install
+      run: |
+        python setup.py develop
+        pip install -r requirements-test.txt
+        pip install 'pylint<2.5'
+
     - name: Test with pytest
       run: |
         pytest unittests --cov spinnman
