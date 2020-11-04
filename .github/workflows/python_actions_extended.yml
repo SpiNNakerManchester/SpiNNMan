@@ -18,7 +18,7 @@
 
 name: Python Actions Extended
 
-on: [push, pull_request]
+on: push
 
 jobs:
   build:
@@ -41,15 +41,6 @@ jobs:
       with:
         repository: SpiNNakerManchester/SupportScripts
         path: support
-
-    - name: Set GITHUB_BRANCH (merge)
-      if: github.event_name != 'pull_request'
-      shell: bash
-      run: echo "GITHUB_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" >> $GITHUB_ENV
-    - name: Set GITHUB_BRANCH (pull request)
-      if: github.event_name == 'pull_request'
-      shell: bash
-      run: echo "GITHUB_BRANCH=$(echo ${GITHUB_HEAD_REF} | tr / -)" >> $GITHUB_ENV
 
     - name: Checkout Spinnaker Dependencies
       run: |
@@ -88,12 +79,12 @@ jobs:
         support/rat.sh download
         support/rat.sh run
 
-    #- name: Build documentation with sphinx
-    #  run: |
-    #    cd doc/source
-    #    sphinx-build -W -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
-    #    sphinx-build -W -T -b json -d _build/doctrees-json -D language=en . _build/json
-    #    sphinx-build -W -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
+    - name: Build documentation with sphinx
+      run: |
+        cd doc/source
+        sphinx-build -W -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
+        sphinx-build -W -T -b json -d _build/doctrees-json -D language=en . _build/json
+        sphinx-build -W -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
 
     - name: Run coveralls and report coverage
       env:
