@@ -80,7 +80,7 @@ jobs:
     - name: Lint with flake8
       run: |
         # run flake8
-        flake8 spinn_machine unittests
+        flake8 spinnman unittests
 
     - name: Run rat copyright enforcement
       run: |
