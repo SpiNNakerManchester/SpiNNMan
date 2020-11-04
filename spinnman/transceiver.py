@@ -1118,10 +1118,40 @@ class Transceiver(AbstractContextManager):
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
     def read_user_0(self, x, y, p):
+        """ Get the contents of the user_0 register for the given processor.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
         addr = self.get_user_0_register_address_from_core(p)
         return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
 
     def read_user_1(self, x, y, p):
+        """ Get the contents of the user_1 register for the given processor.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
         addr = self.get_user_1_register_address_from_core(p)
         return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
 
@@ -1307,7 +1337,7 @@ class Transceiver(AbstractContextManager):
         :param executable:
             The data that is to be executed. Should be one of the following:
 
-            * An instance of AbstractDataReader
+            * An instance of RawIOBase
             * A bytearray/bytes
             * A filename of a file containing the executable (in which case\
               `is_filename` must be set to True)
@@ -1318,7 +1348,7 @@ class Transceiver(AbstractContextManager):
         :param int n_bytes:
             The size of the executable data in bytes. If not specified:
 
-            * If executable is an AbstractDataReader, an error is raised
+            * If executable is an RawIOBase, an error is raised
             * If executable is a bytearray, the length of the bytearray will\
               be used
             * If executable is an int, 4 will be used
@@ -1373,7 +1403,7 @@ class Transceiver(AbstractContextManager):
         :param executable:
             The data that is to be executed. Should be one of the following:
 
-            * An instance of AbstractDataReader
+            * An instance of RawIOBase
             * A bytearray
             * A filename of an executable (in which case `is_filename` must be\
               set to True)
@@ -1384,7 +1414,7 @@ class Transceiver(AbstractContextManager):
         :param int n_bytes:
             The size of the executable data in bytes. If not specified:
 
-            * If `executable` is an AbstractDataReader, an error is raised
+            * If `executable` is an RawIOBase, an error is raised
             * If `executable` is a bytearray, the length of the bytearray will\
               be used
             * If `executable` is an int, 4 will be used
@@ -1401,8 +1431,7 @@ class Transceiver(AbstractContextManager):
             * If one of the specified cores is not valid
             * If `app_id` is an invalid application ID
             * If a packet is received that has invalid parameters
-            * If `executable` is an AbstractDataReader but `n_bytes` is not\
-              specified
+            * If `executable` is an RawIOBase but `n_bytes` is not specified
             * If `executable` is an int and `n_bytes` is more than 4
             * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
@@ -1637,7 +1666,7 @@ class Transceiver(AbstractContextManager):
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
 
-            * An instance of AbstractDataReader
+            * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
             * A filename of a data file (in which case `is_filename` must be\
@@ -1647,7 +1676,7 @@ class Transceiver(AbstractContextManager):
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
-            * If `data` is an AbstractDataReader, an error is raised
+            * If `data` is an RawIOBase, an error is raised
             * If `data` is a bytearray, the length of the bytearray will be\
               used
             * If `data` is an int, 4 will be used
@@ -1664,7 +1693,7 @@ class Transceiver(AbstractContextManager):
             * If `x, y` does not lead to a valid chip
             * If a packet is received that has invalid parameters
             * If `base_address` is not a positive integer
-            * If `data` is an AbstractDataReader but `n_bytes` is not specified
+            * If `data` is an RawIOBase but `n_bytes` is not specified
             * If `data` is an int and `n_bytes` is more than 4
             * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
@@ -1706,7 +1735,7 @@ class Transceiver(AbstractContextManager):
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
 
-            * An instance of AbstractDataReader
+            * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer; will be written in little-endian byte order
         :type data:
@@ -1714,7 +1743,7 @@ class Transceiver(AbstractContextManager):
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
-            * If `data` is an AbstractDataReader, an error is raised
+            * If `data` is an RawIOBase, an error is raised
             * If `data` is a bytearray, the length of the bytearray will be\
               used
             * If `data` is an int, 4 will be used
@@ -1732,7 +1761,7 @@ class Transceiver(AbstractContextManager):
             * If `x, y` does not lead to a valid chip
             * If a packet is received that has invalid parameters
             * If `base_address` is not a positive integer
-            * If `data` is an AbstractDataReader but `n_bytes` is not specified
+            * If `data` is an RawIOBase but `n_bytes` is not specified
             * If `data` is an int and `n_bytes` is more than 4
             * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
@@ -1762,7 +1791,7 @@ class Transceiver(AbstractContextManager):
         :param data:
             The data that is to be written.  Should be one of the following:
 
-            * An instance of AbstractDataReader
+            * An instance of RawIOBase
             * A bytearray or bytestring
             * A single integer
             * A file name of a file to read (in which case `is_filename`\
@@ -1772,7 +1801,7 @@ class Transceiver(AbstractContextManager):
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
-            * If `data` is an AbstractDataReader, an error is raised
+            * If `data` is an RawIOBase, an error is raised
             * If `data` is a bytearray, the length of the bytearray will be\
               used
             * If `data` is an int, 4 will be used
@@ -2436,7 +2465,7 @@ class Transceiver(AbstractContextManager):
         :param int y:
             The y-coordinate of the chip from which to get the information
         :return: The router diagnostic information
-        :rtype: ~RouterDiagnostics
+        :rtype: RouterDiagnostics
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
