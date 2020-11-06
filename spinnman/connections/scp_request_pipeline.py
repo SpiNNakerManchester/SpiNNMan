@@ -143,7 +143,7 @@ class SCPRequestPipeLine(object):
             parameter, or `None` if the response doesn't need to be processed
         :param callable error_callback: A callback function to call when an
             error is found when processing the message; takes the original
-            :py:class`AbstractSCPRequest`, the exception caught and a list of
+            :py:class:`AbstractSCPRequest`, the exception caught and a list of
             tuples of (filename, line number, function name, text) as a
             traceback
         """

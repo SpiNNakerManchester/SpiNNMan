@@ -40,9 +40,10 @@ class ExecutableTargets(object):
         :param str binary: the path to the binary needed to be executed
         :param ~spinn_machine.CoreSubsets subsets:
             the subset of cores that the binary needs to be loaded on
-        :param executable_type: the type of this executable.
-        None means dont record it.
-        :return:
+        :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
+                executable_type:
+            The type of this executable.
+            ``None`` means don't record it.
         """
         try:
             for subset in subsets.core_subsets:
@@ -64,9 +65,9 @@ class ExecutableTargets(object):
         :param int chip_y:
             the coordinate on the machine in terms of y for the chip
         :param int chip_p: the processor ID to place this executable on
-        :param ExecutableType executable_type:
+        :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
+                executable_type:
             the executable type for locating n cores of
-        :return:
         """
         if self.known(binary, chip_x, chip_y, chip_p):
             return
@@ -81,7 +82,8 @@ class ExecutableTargets(object):
     def get_n_cores_for_executable_type(self, executable_type):
         """ get the number of cores that the executable type is using
 
-        :param ExecutableType executable_type:
+        :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
+                executable_type:
             the executable type for locating n cores of
         :return: the number of cores using this executable type
         :rtype: int
@@ -93,7 +95,9 @@ class ExecutableTargets(object):
     def get_binaries_of_executable_type(self, executable_type):
         """ get the binaries of a given a executable type
 
-        :param ExecutableType executable_type: the executable type enum value
+        :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
+                executable_type:
+            the executable type enum value
         :return: iterable of binaries with that executable type
         :rtype: iterable(str)
         """
@@ -103,7 +107,8 @@ class ExecutableTargets(object):
         """ get the executable types in the set of binaries
 
         :return: iterable of the executable types in this binary set.
-        :rtype: iterable(ExecutableType)
+        :rtype:
+            iterable(~spinn_front_end_common.utilities.utility_objs.ExecutableType)
         """
         return self._binary_type_map.keys()
 
