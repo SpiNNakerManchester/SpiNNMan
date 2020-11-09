@@ -30,6 +30,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
             self, connection_selector, n_channels, intermediate_channel_waits):
         """ Creates the process for writing a fixed route entry to a chip's \
             router.
+
         :param int intermediate_channel_waits:
         :param int n_channels:
         :param connection_selector: the SC&MP connection selector
