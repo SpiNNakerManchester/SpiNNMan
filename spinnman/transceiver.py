@@ -1811,7 +1811,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         process = WriteMemoryProcess(
-        self._scamp_connection_selector,
+            self._scamp_connection_selector,
             n_channels=self._multi_packets_in_flight_n_channels,
             intermediate_channel_waits=(
                 self._multi_packets_in_flight_channel_waits))

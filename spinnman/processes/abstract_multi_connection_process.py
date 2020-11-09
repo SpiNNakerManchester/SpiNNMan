@@ -30,9 +30,10 @@ class AbstractMultiConnectionProcess(AbstractProcess):
         "_scp_request_pipelines",
         "_timeout"]
 
-    def __init__(self, next_connection_selector, n_channels,
+    def __init__(
+            self, next_connection_selector, n_channels,
             intermediate_channel_waits, n_retries=N_RETRIES,
-                 timeout=SCP_TIMEOUT):
+            timeout=SCP_TIMEOUT):
         """
         :param next_connection_selector:
         :type next_connection_selector:

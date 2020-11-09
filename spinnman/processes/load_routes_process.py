@@ -75,7 +75,6 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF)
 
         # Upload the data
-        table_address = 0x67800000
         process = WriteMemoryProcess(
             self._conn_selector, n_channels=self._n_channels,
             intermediate_channel_waits=self._intermediate_channel_waits)
