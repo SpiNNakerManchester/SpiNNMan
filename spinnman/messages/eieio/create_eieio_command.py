@@ -26,14 +26,11 @@ def read_eieio_command_message(data, offset):
         identifying the command which was contained in the packet, including\
         any parameter, if required by the command
 
-    :param data: data received from the network as a bytestring
-    :type data: str
-    :param offset: offset at which the parsing operation should start
-    :type offset: int
-    :return: an object which inherits from EIEIOCommandMessage which contains\
+    :param bytes data: data received from the network as a bytestring
+    :param int offset: offset at which the parsing operation should start
+    :return: an object which inherits from EIEIOCommandMessage which contains
         parsed data received from the network
-    :rtype: \
-        :py:class:`spinnman.messages.eieio.command_messages.EIEIOCommandMessage`
+    :rtype: EIEIOCommandMessage
     """
     command_header = EIEIOCommandHeader.from_bytestring(data, offset)
     command_number = command_header.command

@@ -36,12 +36,12 @@ class VersionInfo(object):
 
     def __init__(self, version_data, offset=0):
         """
-        :param version_data: \
+        :param bytes version_data:
             bytes from an SCP packet containing version information
-        :param offset: the offset in the bytes from an SCP packet containing\
+        :param int offset:
+            the offset in the bytes from an SCP packet containing
             version information
-        :type version_data: bytearray
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If the message does not contain valid version information
         """
         (self._p, self._physical_cpu_id, self._y, self._x, _,
@@ -73,7 +73,6 @@ class VersionInfo(object):
     def name(self):
         """ The name of the software.
 
-        :return: The name
         :rtype: str
         """
         return self._name
@@ -82,7 +81,6 @@ class VersionInfo(object):
     def version_number(self):
         """ The version number of the software.
 
-        :return: The version
         :rtype: tuple(int, int, int)
         """
         return self._version_number
@@ -91,7 +89,6 @@ class VersionInfo(object):
     def hardware(self):
         """ The hardware being run on.
 
-        :return: The hardware
         :rtype: str
         """
         return self._hardware
@@ -100,7 +97,6 @@ class VersionInfo(object):
     def x(self):
         """ The x-coordinate of the chip where the information was obtained.
 
-        :return: the x-coordinate
         :rtype: int
         """
         return self._x
@@ -109,7 +105,6 @@ class VersionInfo(object):
     def y(self):
         """ The y-coordinate of the chip where the information was obtained.
 
-        :return: The y-coordinate
         :rtype: int
         """
         return self._y
@@ -119,16 +114,14 @@ class VersionInfo(object):
         """ The processor ID of the processor where the information was\
             obtained.
 
-        :return: the processor ID
         :rtype: int
         """
         return self._p
 
     @property
     def build_date(self):
-        """ The build date of the software.
+        """ The build date of the software, in seconds since 1st January 1970
 
-        :return: The number of seconds since 1st January 1970
         :rtype: int
         """
         return self._build_date
@@ -137,7 +130,6 @@ class VersionInfo(object):
     def version_string(self):
         """ The version information as text.
 
-        :return: The version information
         :rtype: str
         """
         return self._version_string

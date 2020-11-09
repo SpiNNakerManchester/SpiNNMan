@@ -40,6 +40,14 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
     def write_memory_from_bytearray(self, nearest_neighbour_id, base_address,
                                     data, offset, n_bytes=None):
+        """
+        :param int nearest_neighbour_id:
+        :param int base_address:
+        :param data:
+        :type data: bytes or bytearray
+        :param int offset:
+        :param int n_bytes:
+        """
         # pylint: disable=too-many-arguments
         if n_bytes is None:
             n_bytes = len(data)
@@ -66,6 +74,13 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
     def write_memory_from_reader(self, nearest_neighbour_id, base_address,
                                  reader, n_bytes):
+        """
+        :param int nearest_neighbour_id:
+        :param int base_address:
+        :param reader:
+        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
+        :param int n_bytes:
+        """
         self._start_flood_fill(n_bytes, nearest_neighbour_id)
 
         offset = base_address

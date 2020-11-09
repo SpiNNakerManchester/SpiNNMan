@@ -16,13 +16,14 @@
 import logging
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
+from spinn_utilities.abstract_context_manager import AbstractContextManager
 
 logger = logging.getLogger(__name__)
 _POOL_SIZE = 4
 _TIMEOUT = 1
 
 
-class ConnectionListener(Thread):
+class ConnectionListener(Thread, AbstractContextManager):
     """ Thread that listens to a connection and calls callbacks with new\
         messages when they arrive.
     """
@@ -35,11 +36,12 @@ class ConnectionListener(Thread):
 
     def __init__(self, connection, n_processes=_POOL_SIZE, timeout=_TIMEOUT):
         """
-        :param connection: An AbstractListenable connection to listen to
-        :param n_processes: \
+        :param Listenable connection: A connection to listen to
+        :param int n_processes:
             The number of threads to use when calling callbacks
-        :param timeout: How long to wait for messages before checking to see\
-            if the connection is to be terminated.
+        :param float timeout:
+            How long to wait for messages before checking to see if the
+            connection is to be terminated.
         """
         super(ConnectionListener, self).__init__(
             name="Connection listener for connection {}".format(connection))
@@ -70,6 +72,8 @@ class ConnectionListener(Thread):
             logger.exception("problem in listener call")
 
     def run(self):
+        """ Implements the listening thread.
+        """
         try:
             handler = self.__connection.get_receive_method()
             while not self.__done:
@@ -86,9 +90,9 @@ class ConnectionListener(Thread):
     def add_callback(self, callback):
         """ Add a callback to be called when a message is received
 
-        :param callback: A callable which takes a single parameter, which is\
-            the message received
-        :type callback: callable (connection message type -> None)
+        :param callable callback:
+            A callable which takes a single parameter, which is the message
+            received; the result of the callback will be ignored.
         """
         self.__callbacks.add(callback)
 

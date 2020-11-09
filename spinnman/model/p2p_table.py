@@ -30,6 +30,11 @@ class P2PTable(object):
         "_width"]
 
     def __init__(self, width, height, column_data):
+        """
+        :param int width:
+        :param int height:
+        :param bytes column_data:
+        """
         self._routes = dict()
         self._width = width
         self._height = height
@@ -50,7 +55,7 @@ class P2PTable(object):
     def get_n_column_bytes(height):
         """ Get the number of bytes to be read for each column of the table.
 
-        :param height: The height of the machine
+        :param int height: The height of the machine
         """
         return ((height + 7) // 8) * 4
 
@@ -59,32 +64,39 @@ class P2PTable(object):
         """ Get the offset of the next column in the table from the P2P base\
             address.
 
-        :param column: The column to be read
+        :param int column: The column to be read
         """
         return (((256 * column) // 8) * 4)
 
     @property
     def width(self):
         """ The width of the machine that this table represents.
+
+        :rtype: int
         """
         return self._width
 
     @property
     def height(self):
         """ The height of the machine that this table represents.
+
+        :rtype: int
         """
         return self._height
 
     def iterchips(self):
         """ Get an iterator of tuples of (x, y) coordinates in the table
+
+        :rtype: iterable(P2PTableRute)
         """
         return iterkeys(self._routes)
 
     def is_route(self, x, y):
         """ Determines if there is a route in the P2P table to the given chip.
 
-        :param x: The x-coordinate of the chip to look up
-        :param y: The y-coordinate of the chip to look up
+        :param int x: The x-coordinate of the chip to look up
+        :param int y: The y-coordinate of the chip to look up
+        :rtype: bool
         """
         return (
             (x, y) in self._routes and
@@ -93,8 +105,9 @@ class P2PTable(object):
     def get_route(self, x, y):
         """ Get the route to follow from this chip to the given chip.
 
-        :param x: The x-coordinate of the chip to find the route to
-        :param y: The y-coordinate of the chip to find the route to
+        :param int x: The x-coordinate of the chip to find the route to
+        :param int y: The y-coordinate of the chip to find the route to
+        :rtype: P2PTableRoute
         """
         if (x, y) in self._routes:
             return self._routes[x, y]

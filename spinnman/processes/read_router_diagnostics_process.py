@@ -33,6 +33,11 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
 
     def __init__(
             self, connection_selector, n_channels, intermediate_channel_waits):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(ReadRouterDiagnosticsProcess, self).__init__(
             connection_selector, n_channels=n_channels,
             intermediate_channel_waits=intermediate_channel_waits)
@@ -40,26 +45,31 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
         self._error_status = None
         self._register_values = [0] * _N_REGISTERS
 
-    def handle_control_register_response(self, response):
+    def __handle_control_register_response(self, response):
         self._control_register = _ONE_WORD.unpack_from(
             response.data, response.offset)[0]
 
-    def handle_error_status_response(self, response):
+    def __handle_error_status_response(self, response):
         self._error_status = _ONE_WORD.unpack_from(
             response.data, response.offset)[0]
 
-    def handle_register_response(self, response):
+    def __handle_register_response(self, response):
         for register in range(_N_REGISTERS):
             self._register_values[register] = _ONE_WORD.unpack_from(
                 response.data, response.offset + (register * 4))[0]
 
     def get_router_diagnostics(self, x, y):
+        """
+        :param int x:
+        :param int y:
+        :rtype: RouterDiagnostics
+        """
         self._send_request(ReadMemory(x, y, 0xe1000000, 4),
-                           self.handle_control_register_response)
+                           self.__handle_control_register_response)
         self._send_request(ReadMemory(x, y, 0xe1000014, 4),
-                           self.handle_error_status_response)
+                           self.__handle_error_status_response)
         self._send_request(ReadMemory(x, y, 0xe1000300, 16 * 4),
-                           self.handle_register_response)
+                           self.__handle_register_response)
         self._finish()
         self.check_for_error()
 

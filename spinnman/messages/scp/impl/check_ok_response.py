@@ -28,10 +28,9 @@ class CheckOKResponse(AbstractSCPResponse):
 
     def __init__(self, operation, command):
         """
-        :param operation: The operation being performed
-        :type operation: str
+        :param str operation: The operation being performed
         :param command: The command that was sent
-        :type command: str
+        :type command: str or ~enum.Enum or int
         """
         super(CheckOKResponse, self).__init__()
         self._operation = operation
@@ -42,4 +41,4 @@ class CheckOKResponse(AbstractSCPResponse):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                self._operation, self._command, result.name)
+                self._operation, str(self._command), result.name)

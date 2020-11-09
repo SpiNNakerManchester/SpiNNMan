@@ -36,6 +36,13 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
 
     def __init__(
             self, connection_selector, n_channels, intermediate_channel_waits):
+        """
+        :param int n_channels:
+        :param int intermediate_channel_waits:
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetHeapProcess, self).__init__(
             connection_selector, n_channels=n_channels,
             intermediate_channel_waits=intermediate_channel_waits)
@@ -67,6 +74,11 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         self.check_for_error()
 
     def get_heap(self, chip_address, pointer=HEAP_ADDRESS):
+        """
+        :param tuple(int,int) chip_address: x, y
+        :param SystemVariableDefinition pointer:
+        :rtype: list(HeapElement)
+        """
         self._read_address(
             chip_address, SYSTEM_VARIABLE_BASE_ADDRESS + pointer.offset,
             pointer.data_type.value, self._read_heap_address_response)

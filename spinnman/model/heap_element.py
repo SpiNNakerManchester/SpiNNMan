@@ -33,9 +33,9 @@ class HeapElement(object):
 
     def __init__(self, block_address, next_address, free):
         """
-        :param block_address: The address of this element on the heap
-        :param next_address: The address of the next element on the heap
-        :param free: The "free" element of the block as read from the heap
+        :param int block_address: The address of this element on the heap
+        :param int next_address: The address of the next element on the heap
+        :param int free: The "free" element of the block as read from the heap
         """
         self._block_address = block_address
         self._next_address = next_address
@@ -49,36 +49,48 @@ class HeapElement(object):
     @property
     def block_address(self):
         """ The address of the block
+
+        :rtype: int
         """
         return self._block_address
 
     @property
     def next_address(self):
         """ The address of the next block, or 0 if none
+
+        :rtype: int
         """
         return self._next_address
 
     @property
     def size(self):
         """ The usable size of this block (not including the header)
+
+        :rtype: int
         """
         return self._next_address - self._block_address - 8
 
     @property
     def is_free(self):
         """ True if this block is a free block, False otherwise
+
+        :rtype: bool
         """
         return self._is_free
 
     @property
     def tag(self):
         """ The tag of the block if allocated, or None if not
+
+        :rtype: int or None
         """
         return self._tag
 
     @property
     def app_id(self):
         """ The application ID of the block if allocated, or None if not
+
+        :rtype: int or None
         """
         return self._app_id
 

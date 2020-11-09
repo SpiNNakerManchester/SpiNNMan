@@ -13,6 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+""" This is a script used to check the state of a SpiNNaker machine.
+"""
+
 import sys
 import argparse
 from spinnman.transceiver import create_transceiver_from_hostname
@@ -24,6 +27,11 @@ IGNORED_IDS = {SCAMP_ID, 16}  # WHY 16?
 
 
 def get_cores_in_run_state(txrx, app_id, print_all_chips):
+    """
+    :param Transceiver txrx:
+    :param int app_id:
+    :param bool print_all_chips:
+    """
     count_finished = txrx.get_core_state_count(app_id, CPUState.FINISHED)
     count_run = txrx.get_core_state_count(app_id, CPUState.RUNNING)
     print('running: {} finished: {}'.format(count_run, count_finished))
@@ -55,7 +63,12 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
         print('watchdog core: {} {} {}'.format(x, y, p))
 
 
-def make_transceiver(config, host=None):
+def _make_transceiver(config, host=None):
+    """
+    :param BoardTestConfiguration config:
+    :param str host:
+    :rtype: Transceiver
+    """
     config.set_up_remote_board()
     if host is None:
         host = config.remotehost
@@ -70,6 +83,8 @@ def make_transceiver(config, host=None):
 
 
 def main():
+    """ Runs the script.
+    """
     ap = argparse.ArgumentParser(
         description="Check the state of a SpiNNaker machine.")
     ap.add_argument(
@@ -93,7 +108,7 @@ def main():
     except ImportError:
         print("cannot read board test configuration")
         sys.exit(1)
-    transceiver = make_transceiver(config, args.host)
+    transceiver = _make_transceiver(config, args.host)
     try:
         get_cores_in_run_state(transceiver, app_id, print_chips)
     finally:

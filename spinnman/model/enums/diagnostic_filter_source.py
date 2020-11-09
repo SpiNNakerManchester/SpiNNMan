@@ -20,7 +20,9 @@ class DiagnosticFilterSource(Enum):
     """ Source flags for the diagnostic filters.
         Note that only one has to match for the counter to be incremented
     """
+    #: Source is a local core
     LOCAL = (0, "Source is a local core")
+    #: Source is not a local core
     NON_LOCAL = (1, "Source is not a local core")
 
     def __new__(cls, value, doc=""):

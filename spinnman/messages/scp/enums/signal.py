@@ -50,11 +50,8 @@ class Signal(Enum):
 
     def __init__(self, value, signal_type, doc=""):
         """
-
-        :param value: The value used for the signal
-        :type value: int
-        :param signal_type: The "type" of the signal
-        :type signal_type: :py:class:`.SignalType`
+        :param int value: The value used for the signal
+        :param SignalType signal_type: The "type" of the signal
         """
         self._value_ = value
         self._signal_type = signal_type

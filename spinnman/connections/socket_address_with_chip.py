@@ -25,6 +25,12 @@ class SocketAddressWithChip(object):
         "_port_num"]
 
     def __init__(self, hostname, chip_x, chip_y, port_num=SCP_SCAMP_PORT):
+        """
+        :param str hostname:
+        :param int chip_x:
+        :param int chip_y:
+        :param int port_num:
+        """
         self._hostname = hostname
         self._port_num = port_num
         self._chip_x = chip_x
@@ -34,7 +40,7 @@ class SocketAddressWithChip(object):
     def hostname(self):
         """ The hostname of the socket
 
-        :return: the hostname
+        :rtype: str
         """
         return self._hostname
 
@@ -42,7 +48,7 @@ class SocketAddressWithChip(object):
     def port_num(self):
         """ The port number of the socket
 
-        :return: the port
+        :rtype: int
         """
         return self._port_num
 
@@ -50,7 +56,7 @@ class SocketAddressWithChip(object):
     def chip_x(self):
         """ The x-coordinate of the chip
 
-        :return: the x-coordinate
+        :rtype: int
         """
         return self._chip_x
 
@@ -58,7 +64,7 @@ class SocketAddressWithChip(object):
     def chip_y(self):
         """ The y-coordinate of the chip
 
-        :return: the y-coordinate
+        :rtype: int
         """
         return self._chip_y
 

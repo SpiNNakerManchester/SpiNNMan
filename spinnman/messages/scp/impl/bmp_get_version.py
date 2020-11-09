@@ -27,9 +27,8 @@ class BMPGetVersion(BMPRequest):
 
     def __init__(self, board):
         """
-        :param board: The board to get the version from
-        :type board: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException:
+        :param int board: The board to get the version from
+        :raise SpinnmanInvalidParameterException:
             * If the chip coordinates are out of range
             * If the processor is out of range
         """

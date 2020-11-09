@@ -21,129 +21,138 @@ MULTI_PACKETS_IN_FLIGHT_N_CHANNELS = 8
 # how many packets to still be in flight before transmitting more
 MULTI_PACKETS_IN_FLIGHT_CHANNEL_WAITS = 7
 
-# The default port of the connection
+#: the amount of time to wait in seconds between powering off and powering
+# on a SpiNNaker board.
+POWER_CYCLE_WAIT_TIME_IN_SECONDS = 30
+
+#: The default port of the connection
 SCP_SCAMP_PORT = 17893
 
-# The default port of the connection
+#: The default port of the connection
 UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
 
-# The base address of the system variable structure in System ram
+#: The base address of the system variable structure in System ram
 SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
 
-# The base address of a routers diagnostic filter controls
+#: The base address of a routers diagnostic filter controls
 ROUTER_REGISTER_BASE_ADDRESS = 0xe1000000
 
-# The base address of a routers p2p routing table
+#: The base address of a routers p2p routing table
 ROUTER_REGISTER_P2P_ADDRESS = ROUTER_REGISTER_BASE_ADDRESS + 0x10000
 
-# offset for the router filter controls first register (one word each)
+#: Offset for the router filter controls first register (one word each)
 ROUTER_FILTER_CONTROLS_OFFSET = 0x200
 
-# point where default filters finish and user set-able ones are available
+#: Point where default filters finish and user set-able ones are available
 ROUTER_DEFAULT_FILTERS_MAX_POSITION = 11
 
-# size of a router diagnostic filter control register in bytes
+#: Size of a router diagnostic filter control register in bytes
 ROUTER_DIAGNOSTIC_FILTER_SIZE = 4
 
-# number of router diagnostic filters
+#: Number of router diagnostic filters
 NO_ROUTER_DIAGNOSTIC_FILTERS = 16
 
-# The size of the system variable structure in bytes
+#: The size of the system variable structure in bytes
 SYSTEM_VARIABLE_BYTES = 256
 
-# The max size a UDP packet can be
+#: The max size a UDP packet can be, excluding headers
 UDP_MESSAGE_MAX_SIZE = 256
 
-# the address of the start of the VCPU structure (copied from sark.h)
+#: The address of the start of the VCPU structure (copied from sark.h)
 CPU_INFO_OFFSET = 0xe5007000
 
-# how many bytes the CPU info data takes up
+#: How many bytes the CPU info data takes up
 CPU_INFO_BYTES = 128
 
-# the address at which user0 register starts
+#: The address at which user0 register starts
 CPU_USER_0_START_ADDRESS = 112
 
-# the address at which user1 register starts
+#: The address at which user1 register starts
 CPU_USER_1_START_ADDRESS = 116
 
-# the address at which user2 register starts
+#: The address at which user2 register starts
 CPU_USER_2_START_ADDRESS = 120
 
-# the address at which user3 register starts
+#: The address at which user3 register starts
 CPU_USER_3_START_ADDRESS = 124
 
-# the address at which the iobuf address starts
+#: The address at which the iobuf address starts
 CPU_IOBUF_ADDRESS_OFFSET = 88
 
-# max user requested tag value
+#: Max user requested tag value
 MAX_TAG_ID = 7
 
-# The range of values the BMP's 12-bit ADCs can measure.
+#: The range of values the BMP's 12-bit ADCs can measure.
 BMP_ADC_MAX = 1 << 12
 
-# Multiplier to convert from ADC value to volts for lines less than 2.5 V.
+#: Multiplier to convert from ADC value to volts for lines less than 2.5 V.
 BMP_V_SCALE_2_5 = 2.5 / BMP_ADC_MAX
 
-# Multiplier to convert from ADC value to volts for 3.3 V lines.
+#: Multiplier to convert from ADC value to volts for 3.3 V lines.
 BMP_V_SCALE_3_3 = 3.75 / BMP_ADC_MAX
 
-# Multiplier to convert from ADC value to volts for 12 V lines.
+#: Multiplier to convert from ADC value to volts for 12 V lines.
 BMP_V_SCALE_12 = 15.0 / BMP_ADC_MAX
 
-# Multiplier to convert from temperature probe values to degrees Celsius.
+#: Multiplier to convert from temperature probe values to degrees Celsius.
 BMP_TEMP_SCALE = 1.0 / 256.0
 
-# Temperature value returned when a probe is not connected.
+#: Temperature value returned when a probe is not connected.
 BMP_MISSING_TEMP = -0x8000
 
-# Fan speed value returned when a fan is absent.
+#: Fan speed value returned when a fan is absent.
 BMP_MISSING_FAN = -1
 
-# Timeout for BMP power-on commands to reply.
+#: Timeout for BMP power-on commands to reply.
 BMP_POWER_ON_TIMEOUT = 10.0
 
-# Timeout for other BMP commands to reply
+#: Timeout for other BMP commands to reply
 BMP_TIMEOUT = 0.5
 
-# Time to sleep after powering on boards
+#: Time to sleep after powering on boards
 BMP_POST_POWER_ON_SLEEP_TIME = 5.0
 
 
-# a listing of what SpiNNaker specific EIEIO commands there are.
 class EIEIO_COMMAND_IDS(Enum):
-    # Database handshake with external program
+    """ A listing of what SpiNNaker specific EIEIO commands there are.
+    """
+    #: Database handshake with external program
     DATABASE_CONFIRMATION = 1
-    # Fill in buffer area with padding
+    #: Fill in buffer area with padding
     EVENT_PADDING = 2
-    # End of all buffers, stop execution
+    #: End of all buffers, stop execution
     EVENT_STOP = 3
-    # Stop complaining that there is SDRAM free space for buffers
+    #: Stop complaining that there is SDRAM free space for buffers
     STOP_SENDING_REQUESTS = 4
-    # Start complaining that there is SDRAM free space for buffers
+    #: Start complaining that there is SDRAM free space for buffers
     START_SENDING_REQUESTS = 5
-    # Spinnaker requesting new buffers for spike source population
+    #: Spinnaker requesting new buffers for spike source population
     SPINNAKER_REQUEST_BUFFERS = 6
-    # Buffers being sent from host to SpiNNaker
+    #: Buffers being sent from host to SpiNNaker
     HOST_SEND_SEQUENCED_DATA = 7
-    # Buffers available to be read from a buffered out vertex
+    #: Buffers available to be read from a buffered out vertex
     SPINNAKER_REQUEST_READ_DATA = 8
-    # Host confirming data being read form SpiNNaker memory
+    #: Host confirming data being read form SpiNNaker memory
     HOST_DATA_READ = 9
-    # command for notifying the external devices that the simulation
-    # has stopped
+    #: Command for notifying the external devices that the simulation
+    #: has stopped
     STOP_PAUSE_NOTIFICATION = 10
-    # command for notifying the external devices that the simulation has
-    # started
+    #: Command for notifying the external devices that the simulation has
+    #: started
     START_RESUME_NOTIFICATION = 11
-    # Host confirming request to read data received
+    #: Host confirming request to read data received
     HOST_DATA_READ_ACK = 12
 
 
-# the values used by the SCP IP tag time outs. These control how long to wait
-# for any message request which requires a response, before raising an error.
-# The value is calculated via the following formulae
-# 10ms * 2^(tag_timeout_value - 1)
 class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
+    """ The values used by the SCP IP tag time outs. These control how long to\
+        wait for any message request which requires a response, before raising\
+        an error.
+
+    The value is calculated via the following formula:
+
+    10ms * 2^(`tag_timeout_value` - 1)
+    """
     TIMEOUT_10_ms = 1
     TIMEOUT_20_ms = 2
     TIMEOUT_40_ms = 3
@@ -156,6 +165,8 @@ class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
 
 
 class ROUTER_REGISTER_REGISTERS(Enum):
+    """ The indices to the router registers.
+    """
     LOC_MC = 0
     EXT_MC = 1
     LOC_PP = 2
@@ -174,17 +185,18 @@ class ROUTER_REGISTER_REGISTERS(Enum):
     USER_3 = 15
 
 
-# the types of read available from SARK. These values are used to tell SARK how
-# to read the data in a time efficient manner.
 class READ_TYPES(Enum):
+    """ The types of read available from SARK. These values are used to tell\
+        SARK how to read the data in a time efficient manner.
+    """
     BYTE = 0
     HALF_WORD = 1
     WORD = 2
 
 
-# This is a mapping between read address in the mapping between word byte
-# position, the number of bytes you wish to read, and the type of time
-# efficient way to read said amount of bytes via SARK
+#: This is a mapping between read address in the mapping between word byte
+#: position, the number of bytes you wish to read, and the type of time
+#: efficient way to read said amount of bytes via SARK
 address_length_dtype = {
     (0, 0): READ_TYPES.WORD,
     (0, 1): READ_TYPES.BYTE,
@@ -203,13 +215,13 @@ address_length_dtype = {
     (3, 2): READ_TYPES.BYTE,
     (3, 3): READ_TYPES.BYTE}
 
-# This is the default timeout when using SCP
+#: This is the default timeout when using SCP
 SCP_TIMEOUT = 1.0
 
-# This is the default number of retries when using SCP
+#: This is the default number of retries when using SCP
 N_RETRIES = 10
 
-# This is the number of retries during boot - this is different because
-# otherwise boot takes too long (retrying on a non-booted machine will never
-# work)
+#: This is the number of retries during boot - this is different because
+#: otherwise boot takes too long (retrying on a non-booted machine will never
+#: work)
 BOOT_RETRIES = 3

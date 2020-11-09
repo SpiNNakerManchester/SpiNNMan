@@ -26,13 +26,10 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
 
     def __init__(self, eieio_command_header, data=None, offset=0):
         """
-        :param eieio_command_header: The header of the message
-        :type eieio_command_header:\
-            :py:class:`spinnman.messages.eieio.command_messages.EIEIOCommandHeader`
-        :param data: Optional incoming data
-        :type data: str
-        :param offset: Offset into the data where valid data begins
-        :type offset: int
+        :param EIEIOCommandHeader eieio_command_header:
+            The header of the message
+        :param bytes data: Optional incoming data
+        :param int offset: Offset into the data where valid data begins
         """
         # The header
         self._eieio_command_header = eieio_command_header

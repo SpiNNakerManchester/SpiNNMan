@@ -27,16 +27,23 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
 
     def __init__(
             self, connection_selector, n_channels, intermediate_channel_waits):
+        """
+        :param int intermediate_channel_waits:
+        :param int n_channels:
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
         super(GetTagsProcess, self).__init__(
             connection_selector, n_channels=n_channels,
             intermediate_channel_waits=intermediate_channel_waits)
         self._tag_info = None
         self._tags = None
 
-    def handle_tag_info_response(self, response):
+    def __handle_tag_info_response(self, response):
         self._tag_info = response
 
-    def handle_get_tag_response(self, tag, board_address, response):
+    def __handle_get_tag_response(self, tag, board_address, response):
         if response.in_use:
             ip_address = response.ip_address
             host = "{}.{}.{}.{}".format(ip_address[0], ip_address[1],
@@ -54,10 +61,15 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
                     response.port, response.strip_sdp)
 
     def get_tags(self, connection):
+        """
+        :param SCAMPConnection connection:
+        :rtype:
+            list(~spinn_machine.tags.IPTag or ~spinn_machine.tags.ReverseIPTag)
+        """
         # Get the tag information, without which we cannot continue
         self._send_request(IPTagGetInfo(
             connection.chip_x, connection.chip_y),
-            self.handle_tag_info_response)
+            self.__handle_tag_info_response)
         self._finish()
         self.check_for_error()
 
@@ -68,7 +80,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
             self._send_request(IPTagGet(
                 connection.chip_x, connection.chip_y, tag),
                 functools.partial(
-                    self.handle_get_tag_response, tag,
+                    self.__handle_get_tag_response, tag,
                     connection.remote_ip_address))
         self._finish()
         self.check_for_error()

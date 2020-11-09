@@ -30,10 +30,8 @@ class SpinnmanInvalidPacketException(SpinnmanException):
 
     def __init__(self, packet_type, problem):
         """
-        :param packet_type: The type of packet expected
-        :type packet_type: str
-        :param problem: The problem with the packet
-        :type problem: str
+        :param str packet_type: The type of packet expected
+        :param str problem: The problem with the packet
         """
         super(SpinnmanInvalidPacketException, self).__init__(
             "Invalid packet of type {} received: {}".format(
@@ -61,12 +59,9 @@ class SpinnmanInvalidParameterException(SpinnmanException):
 
     def __init__(self, parameter, value, problem):
         """
-        :param parameter: The name of the parameter that is invalid
-        :type parameter: str
-        :param value: The value of the parameter that is invalid
-        :type value: str
-        :param problem: The problem with the parameter
-        :type problem: str
+        :param str parameter: The name of the parameter that is invalid
+        :param str value: The value of the parameter that is invalid
+        :param str problem: The problem with the parameter
         """
         super(SpinnmanInvalidParameterException, self).__init__(
             "Setting parameter {} to value {} is invalid: {}".format(
@@ -101,12 +96,9 @@ class SpinnmanInvalidParameterTypeException(SpinnmanException):
 
     def __init__(self, parameter, param_type, problem):
         """
-        :param parameter: The name of the parameter that is invalid
-        :type parameter: str
-        :param param_type: The type of the parameter that is invalid
-        :type param_type: str
-        :param problem: The problem with the parameter
-        :type problem: str
+        :param str parameter: The name of the parameter that is invalid
+        :param str param_type: The type of the parameter that is invalid
+        :param str problem: The problem with the parameter
         """
         super(SpinnmanInvalidParameterTypeException, self).__init__(
             "Parameter {} of type {} is invalid: {}".format(
@@ -140,8 +132,7 @@ class SpinnmanIOException(SpinnmanException):
 
     def __init__(self, problem):
         """
-        :param problem: The problem with the IO
-        :type problem: str
+        :param str problem: The problem with the IO
         """
         super(SpinnmanIOException, self).__init__("IO Error: {}".format(
             problem))
@@ -159,16 +150,15 @@ class SpinnmanTimeoutException(SpinnmanException):
         could finish
     """
 
-    def __init__(self, operation, timeout):
+    def __init__(self, operation, timeout, msg=None):
         """
-        :param operation: The operation being performed
-        :type operation: str
-        :param timeout: The timeout value in seconds
-        :type timeout: int
+        :param str operation: The operation being performed
+        :param float timeout: The timeout value in seconds
         """
-        super(SpinnmanTimeoutException, self).__init__(
-            "Operation {} timed out after {} seconds".format(
-                operation, timeout))
+        if msg is None:
+            msg = "Operation {} timed out after {} seconds".format(
+                operation, timeout)
+        super(SpinnmanTimeoutException, self).__init__(msg)
 
         self._operation = operation
         self._timeout = timeout
@@ -193,12 +183,9 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
 
     def __init__(self, operation, command, response):
         """
-        :param operation: The operation being performed
-        :type operation: str
-        :param command: The command being executed
-        :type command: str
-        :param response: The response received in error
-        :type response: str
+        :param str operation: The operation being performed
+        :param str command: The command being executed
+        :param str response: The response received in error
         """
         super(SpinnmanUnexpectedResponseCodeException, self).__init__(
             "Unexpected response {} while performing operation {} using"
@@ -227,9 +214,10 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
 
 
 class _Group(object):
-    def __init__(self, trace_back):
+    def __init__(self, trace_back, connection):
         self.trace_back = trace_back
-        self.chip_core = "["
+        self.chip_core = "board {} with ethernet chip {}:{} [".format(
+            connection.remote_host, connection.chip_x, connection.chip_y)
         self._separator = ""
 
     def finalise(self):
@@ -244,24 +232,26 @@ class _Group(object):
         self._separator = ","
 
     @staticmethod
-    def group_exceptions(error_requests, exceptions, tracebacks):
+    def group_exceptions(error_requests, exceptions, tracebacks, connections):
         """ Groups exceptions into a form usable by an exception.
 
-        :param error_requests: the error requests
-        :param exceptions: the exceptions
-        :param tracebacks: the tracebacks
+        :param list(SCPRequest) error_requests: the error requests
+        :param list(Exception) exceptions: the exceptions
+        :param list tracebacks: the tracebacks
+        :param list connections: the connections the errors were associated \
+        with
         :return: a sorted exception pile
         :rtype: dict(Exception,_Group)
         """
         data = OrderedDict()
-        for error_request, exception, trace_back in zip(
-                error_requests, exceptions, tracebacks):
+        for error_request, exception, trace_back, connection in zip(
+                error_requests, exceptions, tracebacks, connections):
             for stored_exception in data.keys():
                 if isinstance(exception, type(stored_exception)):
                     found_exception = stored_exception
                     break
             else:
-                data[exception] = _Group(trace_back)
+                data[exception] = _Group(trace_back, connection)
                 found_exception = exception
             data[found_exception].add_coord(error_request.sdp_header)
         for exception in data:
@@ -273,10 +263,10 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with a\
         collection of cores/chips
     """
-    def __init__(self, error_requests, exceptions, tracebacks):
+    def __init__(self, error_requests, exceptions, tracebacks, connections):
         problem = "Exceptions found were:\n"
         for exception, description in _Group.group_exceptions(
-                error_requests, exceptions, tracebacks):
+                error_requests, exceptions, tracebacks, connections):
             problem += \
                 "   Received exception class: {}\n" \
                 "       With message {}\n" \
@@ -293,6 +283,12 @@ class SpinnmanGenericProcessException(SpinnmanException):
         core/chip
     """
     def __init__(self, exception, tb, x, y, p, tb2=None):
+        """
+        :param Exception exception:
+        :param int x:
+        :param int y:
+        :param int p:
+        """
         # pylint: disable=too-many-arguments
         super(SpinnmanGenericProcessException, self).__init__(
             "\n     Received exception class: {} \n"
@@ -308,6 +304,9 @@ class SpinnmanGenericProcessException(SpinnmanException):
 
     @property
     def exception(self):
+        """
+        :rtype: Exception
+        """
         return self._stored_exception
 
 
@@ -317,8 +316,7 @@ class SpinnmanUnsupportedOperationException(SpinnmanException):
 
     def __init__(self, operation):
         """
-        :param operation: The operation being requested
-        :type operation: str
+        :param str operation: The operation being requested
         """
         super(SpinnmanUnsupportedOperationException, self).__init__(
             "Operation {} is not supported".format(operation))
@@ -327,16 +325,22 @@ class SpinnmanUnsupportedOperationException(SpinnmanException):
     @property
     def operation(self):
         """ The unsupported operation requested
+
+        :rtype: str
         """
         return self._operation
 
 
 class SpinnmanEIEIOPacketParsingException(SpinnmanException):
-    """ Unable to complete the parsing of the EIEIO packet received.
+    """ Unable to complete the parsing of the EIEIO packet received.\
     The routine used is invalid or the content of the packet is invalid
     """
 
     def __init__(self, parsing_format, packet):
+        """
+        :param str parsing_format:
+        :param bytes packet:
+        """
         super(SpinnmanEIEIOPacketParsingException, self).__init__(
             "The packet received is being parsed as an EIEIO {0:s} packet, "
             "but the content of the packet is invalid".format(parsing_format))
@@ -344,18 +348,31 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
 
     @property
     def packet(self):
+        """
+        :rtype: bytes
+        """
         return self._packet
 
 
 class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
-    """ Cores failed to reach a given state within a timeout
+    """ Cores failed to reach a given state within a timeout.
     """
 
     def __init__(self, timeout, expected_states, failed_core_states):
-        msg = "waiting for cores to reach one of {}".format(
-            expected_states)
-        super(SpiNNManCoresNotInStateException, self).__init__(msg, timeout)
+        """
+        :param float timeout:
+        :param set(CPUState) expected_states:
+        :param CPUInfos failed_core_states:
+        """
+
+        msg = "waiting for cores {} to reach one of {}".format(
+            failed_core_states, expected_states)
+        super(SpiNNManCoresNotInStateException, self).__init__(
+            msg, timeout, msg)
         self._failed_core_states = failed_core_states
 
     def failed_core_states(self):
+        """
+        :rtype: CPUInfos
+        """
         return self._failed_core_states

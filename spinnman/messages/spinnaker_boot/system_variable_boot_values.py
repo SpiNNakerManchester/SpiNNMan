@@ -64,7 +64,7 @@ class _Definition(namedtuple("_Definition",
 
 
 class SystemVariableDefinition(Enum):
-    """ Defines the system variables available
+    """ Defines the system variables available.
     """
 
     y = _Definition(
@@ -315,17 +315,13 @@ class SystemVariableDefinition(Enum):
 
     def __init__(self, offset, data_type, default, array_size, doc):
         """
-
-        :param data_type: The data type of the variable
-        :type data_type: :py:class:`_DataType`
-        :param offset: The offset from the start of the system variable\
+        :param _DataType data_type: The data type of the variable
+        :param int offset: The offset from the start of the system variable
             structure where the variable is found
-        :type offset: int
-        :param default: \
+        :param object default:
             The default value assigned to the variable if not overridden
-        :type default: int
         :param array_size: The length of the array, or None if not an array
-        :type array_size: int
+        :type array_size: int or None
         """
         # pylint: disable=too-many-arguments
         self._data_type = data_type

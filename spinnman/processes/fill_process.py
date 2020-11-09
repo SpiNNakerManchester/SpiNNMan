@@ -57,7 +57,7 @@ class FillDataType(Enum):
     def struct(self):
         """ An object that can pack and unpack 4 bytes-worth of this type.
 
-        :rtype: struct.Struct
+        :rtype: ~struct.Struct
         """
         return self._struct
 
@@ -116,12 +116,12 @@ class FillProcess(AbstractMultiConnectionProcess):
 
     def fill_memory(self, x, y, base_address, data, size, data_type):
         """
-        :type x: int
-        :type y: int
-        :type base_address: int
-        :type data: int
-        :type size: int
-        :type data_type: spinnman.processes.fill_process.FillDataType
+        :param int x:
+        :param int y:
+        :param int base_address:
+        :param int data:
+        :param int size:
+        :param FillDataType data_type:
         """
         # Don't do anything if there is nothing to do!
         if size == 0:

@@ -20,12 +20,17 @@ from .abstract_multi_connection_process_connection_selector import (
 
 class RoundRobinConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
+    """ A connection selector that just spreads work as evenly as possible.
+    """
     __slots__ = [
         "_connections",
         "_next_connection_index"]
 
-    @overrides(AbstractMultiConnectionProcessConnectionSelector.__init__)
     def __init__(self, connections):  # pylint: disable=super-init-not-called
+        """
+        :param list(SCAMPConnection) connections:
+            The connections to be used
+        """
         self._connections = connections
         self._next_connection_index = 0
 

@@ -17,7 +17,7 @@ import os
 import math
 import time
 import array
-from six import iteritems
+from six import iteritems, PY2
 from .system_variable_boot_values import (
     SystemVariableBootValues, spinnaker_boot_values, SystemVariableDefinition)
 from .spinnaker_boot_message import SpinnakerBootMessage
@@ -45,13 +45,12 @@ class SpinnakerBootMessages(object):
     def __init__(self, board_version=None, extra_boot_values=None):
         """ Builds the boot messages needed to boot the SpiNNaker machine
 
-        :param board_version: The version of the board to be booted
-        :type board_version: int
+        :param int board_version: The version of the board to be booted
         :param extra_boot_values: Any additional values to be set during boot
-        :type extra_boot_values: dict of SystemVariableDefinition to value
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :type extra_boot_values: dict(SystemVariableDefinition, object)
+        :raise SpinnmanInvalidParameterException:
             If the board version is not supported
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :raise SpinnmanIOException:
             If there is an error assembling the packets
         """
         if (board_version is not None and
@@ -101,11 +100,17 @@ class SpinnakerBootMessages(object):
 
         # Byte swap and store the data for later use
         boot_data.byteswap()
-        self._boot_data = boot_data.tostring()
+        # tostring() deprecated in 3, tobytes() not present in 2
+        self._boot_data = (
+            boot_data.tostring() if PY2
+            else boot_data.tobytes())  # pylint: disable=no-member
         self._n_bytes_to_read = n_words_to_read * 4
 
     @staticmethod
     def _get_boot_image_file():
+        """
+        :rtype: tuple(str,int)
+        """
         this_dir, _ = os.path.split(__file__)
         file_name = os.path.join(this_dir, "boot_data", _BOOT_DATA_FILE_NAME)
         file_size = os.stat(file_name).st_size
@@ -121,6 +126,9 @@ class SpinnakerBootMessages(object):
 
     def _get_packet_data(self, block_id):
         """ Read a packet of data
+
+        :param int block_id:
+        :rtype: bytes
         """
         offset = block_id * _BOOT_MESSAGE_DATA_BYTES
         n_bytes = min(self._n_bytes_to_read - offset, _BOOT_MESSAGE_DATA_BYTES)
@@ -128,7 +136,9 @@ class SpinnakerBootMessages(object):
 
     @property
     def messages(self):
-        """ Get an iterable of message to be sent.
+        """ An iterable of message to be sent.
+
+        :rtype: iterable(SpinnakerBootMessage)
         """
 
         # Construct and yield the start packet
