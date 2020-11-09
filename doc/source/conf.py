@@ -54,8 +54,13 @@ extensions = [
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.6', None),
+    'spinn_utilities': (
+        'https://spinnutils.readthedocs.io/en/latest/', None),
     'spinn_machine': (
         'https://spinnmachine.readthedocs.io/en/latest/', None),
+    # WARNING! This is a forward reference!
+    'spinn_front_end_common': (
+        'https://spinnfrontendcommon.readthedocs.io/en/latest/', None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
