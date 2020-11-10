@@ -21,7 +21,9 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess):
     __slots__ = [
         "_response"]
 
-    def __init__(self, connection_selector, n_retries=3, timeout=SCP_TIMEOUT):
+    def __init__(
+            self, connection_selector, n_channels, intermediate_channel_waits,
+            n_retries=3, timeout=SCP_TIMEOUT):
         """
         :param connection_selector:
         :type connection_selector:
@@ -29,7 +31,8 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess):
         """
         super(SendSingleCommandProcess, self).__init__(
             connection_selector, n_retries=n_retries, timeout=timeout,
-            n_channels=1, intermediate_channel_waits=0)
+            n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._response = None
 
     def __handle_response(self, response):

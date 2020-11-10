@@ -541,7 +541,11 @@ class Transceiver(AbstractContextManager):
         """
         for _ in xrange(_CONNECTION_CHECK_RETRIES):
             try:
-                sender = SendSingleCommandProcess(connection_selector)
+                sender = SendSingleCommandProcess(
+                    connection_selector,
+                    n_channels=self._multi_packets_in_flight_n_channels,
+                    intermediate_channel_waits=(
+                        self._multi_packets_in_flight_channel_waits))
                 chip_info = sender.execute(  # pylint: disable=no-member
                     GetChipInfo(chip_x, chip_y)).chip_info
                 if not chip_info.is_ethernet_available:
@@ -1015,7 +1019,11 @@ class Transceiver(AbstractContextManager):
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
         for scamp_connection in self._scamp_connections:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process = SendSingleCommandProcess(
+                self._scamp_connection_selector,
+                n_channels=self._multi_packets_in_flight_n_channels,
+                intermediate_channel_waits=(
+                    self._multi_packets_in_flight_channel_waits))
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
@@ -1354,7 +1362,11 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         response = process.execute(CountState(app_id, state))
         return response.count  # pylint: disable=no-member
 
@@ -1414,7 +1426,11 @@ class Transceiver(AbstractContextManager):
             is_filename=is_filename)
 
         # Request the start of the executable
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(ApplicationRun(app_id, x, y, processors, wait))
 
         # Release the lock
@@ -1600,7 +1616,10 @@ class Transceiver(AbstractContextManager):
             if power_command == PowerCommand.POWER_ON
             else BMP_TIMEOUT)
         process = SendSingleCommandProcess(
-            connection_selector, timeout=timeout, n_retries=0)
+            connection_selector, timeout=timeout, n_retries=0,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(SetPower(power_command, boards))
         self._machine_off = power_command == PowerCommand.POWER_OFF
 
@@ -1624,7 +1643,10 @@ class Transceiver(AbstractContextManager):
         :param int frame: the frame this is targeting
         """
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+            self._bmp_connection(cabinet, frame),
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(BMPSetLed(led, action, board))
 
     def read_fpga_register(self, fpga_num, register, cabinet, frame, board):
@@ -1642,7 +1664,10 @@ class Transceiver(AbstractContextManager):
         :rtype: int
         """
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame), timeout=1.0)
+            self._bmp_connection(cabinet, frame), timeout=1.0,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register  # pylint: disable=no-member
@@ -1662,7 +1687,10 @@ class Transceiver(AbstractContextManager):
         :param int board: which board to write the FPGA register to
         """
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+            self._bmp_connection(cabinet, frame),
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(
             WriteFPGARegister(fpga_num, register, value, board))
 
@@ -1676,7 +1704,10 @@ class Transceiver(AbstractContextManager):
         :rtype: ADCInfo
         """
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+            self._bmp_connection(cabinet, frame),
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         response = process.execute(ReadADC(board))
         return response.adc_info  # pylint: disable=no-member
 
@@ -1689,7 +1720,10 @@ class Transceiver(AbstractContextManager):
         :return: the sver from the BMP
         """
         process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+            self._bmp_connection(cabinet, frame),
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         response = process.execute(BMPGetVersion(board))
         return response.version_info  # pylint: disable=no-member
 
@@ -1979,7 +2013,11 @@ class Transceiver(AbstractContextManager):
         """
 
         if not self._machine_off:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process = SendSingleCommandProcess(
+                self._scamp_connection_selector,
+                n_channels=self._multi_packets_in_flight_n_channels,
+                intermediate_channel_waits=(
+                    self._multi_packets_in_flight_channel_waits))
             process.execute(AppStop(app_id))
         else:
             logger.warning(
@@ -2160,7 +2198,11 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(SendSignal(app_id, signal))
 
     def set_leds(self, x, y, cpu, led_states):
@@ -2181,7 +2223,11 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(SetLED(x, y, cpu, led_states))
 
     def locate_spinnaker_connection_for_board_address(self, board_address):
@@ -2237,7 +2283,11 @@ class Transceiver(AbstractContextManager):
             ip_string = socket.gethostbyname(host_string)
             ip_address = bytearray(socket.inet_aton(ip_string))
 
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process = SendSingleCommandProcess(
+                self._scamp_connection_selector,
+                n_channels=self._multi_packets_in_flight_n_channels,
+                intermediate_channel_waits=(
+                    self._multi_packets_in_flight_channel_waits))
             process.execute(IPTagSet(
                 connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
                 ip_tag.tag, strip=ip_tag.strip_sdp, use_sender=use_sender))
@@ -2306,7 +2356,11 @@ class Transceiver(AbstractContextManager):
                 "The given board address is not recognised")
 
         for connection in connections:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process = SendSingleCommandProcess(
+                self._scamp_connection_selector,
+                n_channels=self._multi_packets_in_flight_n_channels,
+                intermediate_channel_waits=(
+                    self._multi_packets_in_flight_channel_waits))
             process.execute(ReverseIPTagSet(
                 connection.chip_x, connection.chip_y,
                 reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
@@ -2334,7 +2388,11 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         for conn in self.__get_connection_list(board_address=board_address):
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process = SendSingleCommandProcess(
+                self._scamp_connection_selector,
+                n_channels=self._multi_packets_in_flight_n_channels,
+                intermediate_channel_waits=(
+                    self._multi_packets_in_flight_channel_waits))
             process.execute(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
     def get_tags(self, connection=None):
@@ -2534,7 +2592,11 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(RouterClear(x, y))
 
     def get_router_diagnostics(self, x, y):
@@ -2603,7 +2665,11 @@ class Transceiver(AbstractContextManager):
             ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
             position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(WriteMemory(
             x, y, memory_position, _ONE_WORD.pack(data_to_send)))
 
@@ -2636,7 +2702,11 @@ class Transceiver(AbstractContextManager):
             ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
             position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         response = process.execute(ReadMemory(x, y, memory_position, 4))
         return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
             response.data, response.offset)[0])  # pylint: disable=no-member
@@ -2673,7 +2743,11 @@ class Transceiver(AbstractContextManager):
         if enable:
             for counter_id in counter_ids:
                 clear_data |= 1 << counter_id + 16
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         process.execute(WriteMemory(
             x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
 
