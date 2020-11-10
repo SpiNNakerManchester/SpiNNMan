@@ -217,7 +217,7 @@ class _Group(object):
     def __init__(self, trace_back, connection):
         self.trace_back = trace_back
         self.chip_core = "board {} with ethernet chip {}:{} [".format(
-            connection.remote_host, connection.chip_x, connection.chip_y)
+            connection.remote_ip_address, connection.chip_x, connection.chip_y)
         self._separator = ""
 
     def finalise(self):
