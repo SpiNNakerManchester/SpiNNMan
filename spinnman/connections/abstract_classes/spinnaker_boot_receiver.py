@@ -30,19 +30,17 @@ class SpinnakerBootReceiver(Connection):
         """ Receives a boot message from this connection.  Blocks until a\
             message has been received, or a timeout occurs.
 
-        :param timeout: \
-            The time in seconds to wait for the message to arrive; if not\
+        :param int timeout:
+            The time in seconds to wait for the message to arrive; if not
             specified, will wait forever, or until the connection is closed.
-        :type timeout: int
         :return: a boot message
-        :rtype:\
-            :py:class:`spinnman.messages.spinnaker_boot.SpinnakerBootMessage`
-        :raise spinnman.exceptions.SpinnmanIOException: \
+        :rtype: SpinnakerBootMessage
+        :raise SpinnmanIOException:
             If there is an error receiving the message
-        :raise spinnman.exceptions.SpinnmanTimeoutException: \
+        :raise SpinnmanTimeoutException:
             If there is a timeout before a message is received
-        :raise spinnman.exceptions.SpinnmanInvalidPacketException: \
+        :raise SpinnmanInvalidPacketException:
             If the received packet is not a valid SpiNNaker boot message
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If one of the fields of the SpiNNaker boot message is invalid
         """

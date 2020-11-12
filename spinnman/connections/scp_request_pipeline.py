@@ -65,17 +65,17 @@ class SCPRequestPipeLine(object):
                  intermediate_channel_waits=0,
                  n_retries=N_RETRIES, packet_timeout=SCP_TIMEOUT):
         """
-        :param connection: \
+        :param SCAMPConnection connection:
             The connection over which the communication is to take place
-        :param n_channels: The number of requests to send before checking for\
-            responses.  If None, this will be determined automatically
-        :param intermediate_channel_waits: The number of outstanding responses\
-            to wait for before continuing sending requests. If None, this will\
-            be determined automatically
-        :param n_retries: The number of times to resend any packet for any\
+        :param int n_channels: The number of requests to send before checking
+            for responses.  If None, this will be determined automatically
+        :param int intermediate_channel_waits: The number of outstanding
+            responses to wait for before continuing sending requests. If None,
+            this will be determined automatically
+        :param int n_retries: The number of times to resend any packet for any
             reason before an error is triggered
-        :param packet_timeout: The number of elapsed seconds after sending a\
-            packet before it is considered a timeout.
+        :param float packet_timeout: The number of elapsed seconds after
+            sending a packet before it is considered a timeout.
         """
         self._connection = connection
         self._n_channels = n_channels
@@ -137,14 +137,15 @@ class SCPRequestPipeLine(object):
     def send_request(self, request, callback, error_callback):
         """ Add an SCP request to the set to be sent
 
-        :param request: The SCP request to be sent
-        :param callback: A callback function to call when the response has\
-            been received; takes SCPResponse as a parameter, or None if the\
-            response doesn't need to be processed
-        :param error_callback: A callback function to call when an error is\
-            found when processing the message; takes original\
-            AbstractSCPRequest, exception caught and a list of tuples of\
-            (filename, line number, function name, text) as a traceback
+        :param AbstractSCPRequest request: The SCP request to be sent
+        :param callable callback: A callback function to call when the
+            response has been received; takes a :py:class:`SCPResponse` as a
+            parameter, or `None` if the response doesn't need to be processed
+        :param callable error_callback: A callback function to call when an
+            error is found when processing the message; takes the original
+            :py:class:`AbstractSCPRequest`, the exception caught and a list of
+            tuples of (filename, line number, function name, text) as a
+            traceback
         """
 
         # If the connection has not been measured
@@ -188,18 +189,24 @@ class SCPRequestPipeLine(object):
 
     @property
     def n_timeouts(self):
+        """ The number of timeouts that occurred. """
         return self._n_timeouts
 
     @property
     def n_channels(self):
+        """ The number of requests to send before checking for responses. """
         return self._n_channels
 
     @property
     def n_resent(self):
+        """ The number of packets that have been resent. """
         return self._n_resent
 
     @property
     def n_retry_code_resent(self):
+        """ The number of resends due to reasons for which automated retry is\
+            the correct response in-protocol.
+        """
         return self._n_retry_code_resent
 
     def _remove_record(self, seq):
@@ -229,7 +236,8 @@ class SCPRequestPipeLine(object):
                     self._n_retry_code_resent += 1
                 except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
-                        request_sent, e, sys.exc_info()[2])
+                        request_sent, e, sys.exc_info()[2],
+                        self._connection)
                     self._remove_record(seq)
             else:
 
@@ -241,7 +249,8 @@ class SCPRequestPipeLine(object):
                         self._callbacks[seq](response)
                 except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
-                        request_sent, e, sys.exc_info()[2])
+                        request_sent, e, sys.exc_info()[2],
+                        self._connection)
 
                 # Remove the sequence from the outstanding responses
                 self._remove_record(seq)
@@ -257,7 +266,8 @@ class SCPRequestPipeLine(object):
                 self._resend(seq, request_sent, "timeout")
             except Exception as e:  # pylint: disable=broad-except
                 self._error_callbacks[seq](
-                    request_sent, e, sys.exc_info()[2])
+                    request_sent, e, sys.exc_info()[2],
+                    self._connection)
                 to_remove.append(seq)
 
         for seq in to_remove:
@@ -292,7 +302,8 @@ class SCPRequestPipeLine(object):
     def _do_retrieve(self, n_packets, timeout):
         """ Receives responses until there are only n_packets responses left
 
-        :param n_packets: The number of packets that can remain after running
+        :param int n_packets:
+            The number of packets that can remain after running
         """
 
         # While there are still more packets in progress than some threshold

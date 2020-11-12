@@ -20,9 +20,9 @@ from .iptag_command import IPTagCommand
 from .led_action import LEDAction
 from .power_command import PowerCommand
 from .scp_result import SCPResult
-from .signal import Signal
+from .signal import Signal, SignalType
 
 __all__ = [
     "AllocFree", "BMPInfo", "SCPCommand",
     "IPTagCommand", "LEDAction",
-    "PowerCommand", "SCPResult", "Signal", ]
+    "PowerCommand", "SCPResult", "Signal", "SignalType"]

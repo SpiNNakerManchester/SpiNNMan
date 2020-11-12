@@ -13,10 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-try:
-    from collections.abc import OrderedDict
-except ImportError:
-    from collections import OrderedDict
+from collections import OrderedDict
 from six import iteritems, iterkeys, itervalues
 
 
@@ -32,14 +29,10 @@ class CPUInfos(object):
     def add_processor(self, x, y, processor_id, cpu_info):
         """ Add a processor on a given chip to the set.
 
-        :param x: The x-coordinate of the chip
-        :type x: int
-        :param y: The y-coordinate of the chip
-        :type y: int
-        :param processor_id: A processor ID
-        :type processor_id: int
-        :param cpu_info: The CPU information for the core
-        :type cpu_info: :py:class:`spinnman.model.enums.cpu_info.CPUInfo`
+        :param int x: The x-coordinate of the chip
+        :param int y: The y-coordinate of the chip
+        :param int processor_id: A processor ID
+        :param CPUInfo cpu_info: The CPU information for the core
         """
         self._cpu_infos[x, y, processor_id] = cpu_info
 
@@ -94,7 +87,7 @@ class CPUInfos(object):
         return self._cpu_infos[x, y, p]
 
     def __str__(self):
-        return self._cpu_infos.keys()
+        return str(self._cpu_infos.keys())
 
     def __repr__(self):
         return self.__str__()

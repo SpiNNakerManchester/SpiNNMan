@@ -52,13 +52,16 @@ extensions = [
     'sphinx.ext.intersphinx'
 ]
 
-intersphinx_mapping = {'spinn_machine':
-                       ('http://spinnmachine.readthedocs.org/en/latest/',
-                           None),
-                       'spinn_storage_handlers':
-                           ('http://spinnmachine.readthedocs.io/en/latest/',
-                            None)
-                       }
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3.6', None),
+    'spinn_utilities': (
+        'https://spinnutils.readthedocs.io/en/latest/', None),
+    'spinn_machine': (
+        'https://spinnmachine.readthedocs.io/en/latest/', None),
+    # WARNING! This is a forward reference!
+    'spinn_front_end_common': (
+        'https://spinnfrontendcommon.readthedocs.io/en/latest/', None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -74,7 +77,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'SpiNNMan'
-copyright = u'2014-2017'
+copyright = u'2014-2020'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -366,4 +369,18 @@ for f in os.listdir("."):
     if (os.path.isfile(f) and f.endswith(
             ".rst") and f != "index.rst" and f != "modules.rst"):
         os.remove(f)
-apidoc.main([None, '-o', ".", "../../spinnman"])
+apidoc.main([None, '-o', ".", "../../spinnman",
+             "../../spinnman/connections/[au]*/[a-z]*.py",
+             "../../spinnman/connections/[cst]*.py",
+             "../../spinnman/messages/eieio/*_messages/[a-z]*.py",
+             "../../spinnman/messages/eieio/cr*.py",
+             "../../spinnman/messages/eieio/ei*.py",
+             "../../spinnman/messages/scp/[aei]*/[a-z]*.py",
+             "../../spinnman/messages/scp/s*.py",
+             "../../spinnman/messages/sdp/[a-z]*.py",
+             "../../spinnman/messages/spinnaker_boot/s*.py",
+             "../../spinnman/model/[a-df-z]*.py",
+             "../../spinnman/model/en*/[a-z]*.py",
+             "../../spinnman/model/ex*.py",
+             "../../spinnman/processes/[a-z]*.py",
+             ])

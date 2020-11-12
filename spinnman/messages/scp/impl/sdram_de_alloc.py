@@ -33,15 +33,12 @@ class SDRAMDeAlloc(AbstractSCPRequest):
 
     def __init__(self, x, y, app_id, base_address=None):
         """
-        :param x: \
+        :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :type x: int
-        :param y: \
+        :param int y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :type y: int
-        :param app_id: The ID of the application, between 0 and 255
-        :type app_id: int
-        :param base_address: The start address in SDRAM to which the block\
+        :param int app_id: The ID of the application, between 0 and 255
+        :param base_address: The start address in SDRAM to which the block
             needs to be deallocated, or none if deallocating via app_id
         :type base_address: int or None
         """

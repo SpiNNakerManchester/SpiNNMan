@@ -73,11 +73,12 @@ class _ChipMemoryIO(object):
             self, transceiver, x, y, base_address=UNBUFFERED_SDRAM_START,
             buffer_size=256):
         """
-        :param transceiver: The transceiver to read and write with
-        :param x: The x-coordinate of the chip to write to
-        :param y: The y-coordinate of the chip to write to
-        :param base_address: The lowest address that can be written
-        :param buffer_size: The size of the write buffer to improve efficiency
+        :param Transceiver transceiver: The transceiver to read and write with
+        :param int x: The x-coordinate of the chip to write to
+        :param int y: The y-coordinate of the chip to write to
+        :param int base_address: The lowest address that can be written
+        :param int buffer_size:
+            The size of the write buffer to improve efficiency
         """
         # pylint: disable=too-many-arguments
         self._transceiver = transceiver
@@ -115,6 +116,8 @@ class _ChipMemoryIO(object):
     @property
     def current_address(self):
         """ Return the current absolute address within the region
+
+        :rtype: int
         """
         return self._current_address
 
@@ -129,7 +132,7 @@ class _ChipMemoryIO(object):
     def read(self, n_bytes):
         """ Read a number of bytes
 
-        :param n_bytes: The number of bytes to read
+        :param int n_bytes: The number of bytes to read
         :rtype: bytes
         """
         if n_bytes == 0:
@@ -146,8 +149,7 @@ class _ChipMemoryIO(object):
     def write(self, data):
         """ Write some data
 
-        :param data: The data to write
-        :type data: bytes
+        :param bytes data: The data to write
         """
         n_bytes = len(data)
 
@@ -178,13 +180,9 @@ class _ChipMemoryIO(object):
     def fill(self, repeat_value, bytes_to_fill, data_type=FillDataType.WORD):
         """ Fill the memory with repeated data
 
-        :param repeat_value: The value to repeat
-        :type repeat_value: int
-        :param bytes_to_fill: Number of bytes to fill from current position
-        :type bytes_to_fill: int
-        :param data_type: The type of the repeat value
-        :type data_type: \
-            :py:class:`spinnman.processes.fill_process.FillDataType`
+        :param int repeat_value: The value to repeat
+        :param int bytes_to_fill: Number of bytes to fill from current position
+        :param FillDataType data_type: The type of the repeat value
         """
         self.flush_write_buffer()
         self._transceiver.fill_memory(
@@ -218,12 +216,13 @@ class MemoryIO(AbstractIO):
 
     def __init__(self, transceiver, x, y, start_address, end_address):
         """
-        :param transceiver: The transceiver to read and write with
-        :param x: The x-coordinate of the chip to write to
-        :param y: The y-coordinate of the chip to write to
-        :param start_address: The start address of the region to write to
-        :param end_address:\
-            The end address of the region to write to.  This is the first\
+        :param Transceiver transceiver:
+            The transceiver to read and write with
+        :param int x: The x-coordinate of the chip to write to
+        :param int y: The y-coordinate of the chip to write to
+        :param int start_address: The start address of the region to write to
+        :param int end_address:
+            The end address of the region to write to.  This is the first
             address just outside the region
         """
         # pylint: disable=too-many-arguments
@@ -278,15 +277,6 @@ class MemoryIO(AbstractIO):
                 self._chip_memory_io.transceiver, self._chip_memory_io.x,
                 self._chip_memory_io.y,
                 start_address, end_address)
-
-    @overrides(AbstractIO.__enter__)
-    def __enter__(self):
-        return self
-
-    @overrides(AbstractIO.__exit__)
-    def __exit__(self, exception_type, exception_value, traceback):
-        self.close()
-        return False
 
     @overrides(AbstractIO.close)
     def close(self):

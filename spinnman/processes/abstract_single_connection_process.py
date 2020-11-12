@@ -27,6 +27,12 @@ class AbstractSingleConnectionProcess(AbstractProcess):
         "_n_retries"]
 
     def __init__(self, connection_selector, n_retries=N_RETRIES):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        :param int n_retries:
+        """
         super(AbstractSingleConnectionProcess, self).__init__()
         self._scp_request_pipeline = None
         self._connection_selector = connection_selector

@@ -26,12 +26,12 @@ class BMPRequest(AbstractSCPRequest):
                  argument_2=None, argument_3=None, data=None):
         """
         :param boards: The board or boards to be addressed by this request
-        :type boards: int or iterable of int
-        :param scp_request_header: The SCP request header
-        :param argument_1: The optional first argument
-        :param argument_2: The optional second argument
-        :param argument_3: The optional third argument
-        :param data: The optional data to be sent
+        :type boards: int or list(int) or tuple(int)
+        :param SCPRequestHeader scp_request_header: The SCP request header
+        :param int argument_1: The optional first argument
+        :param int argument_2: The optional second argument
+        :param int argument_3: The optional third argument
+        :param bytes data: The optional data to be sent
         """
         # pylint: disable=too-many-arguments
         sdp_header = SDPHeader(

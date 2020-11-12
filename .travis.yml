@@ -14,11 +14,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 language: python
-python:
-  - 2.7
-  - 3.6
-  - 3.7
-dist: xenial
+os: linux
+jobs:
+  include:
+    - name: Py3.6
+      python: 3.6
+      dist: bionic
+    - name: Py3.7
+      python: 3.7
+      dist: focal
+    - name: Py3.8
+      python: 3.8
+      dist: focal
+    - name: Py2.7 (legacy)
+      python: 2.7
+      dist: xenial
 addons:
   apt:
     packages:
@@ -31,17 +41,16 @@ before_install:
   - git clone https://github.com/SpiNNakerManchester/SupportScripts.git support
   - python support/travis_blocking_stdout.py
   - support/rat.sh download
-  # Bring pip up to date 
+  # Bring pip up to date
   - pip install --upgrade pip setuptools wheel
   # SpiNNakerManchester internal dependencies; development mode
   - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNUtils.git
   - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNMachine.git
-  - support/pipinstall.sh git://github.com/SpiNNakerManchester/SpiNNStorageHandlers.git
 
 install:
   - python ./setup.py install
   - pip install -r requirements-test.txt
-  - pip install pylint python-coveralls 'coverage>=4.4'
+  - pip install 'pylint<2.5' python-coveralls 'coverage>=4.4,<5.0'
   - pip install spinnaker_proxy
 
 script:
@@ -52,8 +61,8 @@ script:
   - support/rat.sh run
   - cd doc/source
   - sphinx-build -T -E -b html -d _build/doctrees-readthedocsdirhtml -D language=en . _build/html
-  - sphinx-build -T -b json -d _build/doctrees-json -D language=en . _build/json
-  - sphinx-build -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
+  - sphinx-build -q -T -b json -d _build/doctrees-json -D language=en . _build/json
+  - sphinx-build -q -T -b singlehtml -d _build/doctrees-readthedocssinglehtmllocalmedia -D language=en . _build/localmedia
 
 after_success:
   - cd $TRAVIS_BUILD_DIR

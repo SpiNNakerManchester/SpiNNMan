@@ -25,9 +25,11 @@ from .diagnostic_filter_source import DiagnosticFilterSource
 from .mailbox_command import MailboxCommand
 from .p2p_table_route import P2PTableRoute
 from .run_time_error import RunTimeError
+from .router_error import RouterError
 
 __all__ = ["CPUState", "DiagnosticFilterDefaultRoutingStatus",
-           "DiagnosticFilterDestination", "RunTimeError",
+           "DiagnosticFilterDestination",
            "DiagnosticFilterEmergencyRoutingStatus",
            "DiagnosticFilterPacketType", "DiagnosticFilterPayloadStatus",
-           "DiagnosticFilterSource", "MailboxCommand", "P2PTableRoute"]
+           "DiagnosticFilterSource", "MailboxCommand", "P2PTableRoute",
+           "RouterError", "RunTimeError"]

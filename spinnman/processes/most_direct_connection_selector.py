@@ -32,8 +32,15 @@ class MostDirectConnectionSelector(
     geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
 
     # pylint: disable=super-init-not-called
-    @overrides(AbstractMultiConnectionProcessConnectionSelector.__init__)
     def __init__(self, width, height, connections):
+        """
+        :param width: The width of the machine or None if not known
+        :type width: int or None
+        :param height: The height of the machine or None if not known
+        :type height: int or None
+        :param list(SCAMPConnection) connections:
+            The connections to be used
+        """
         self._width = width
         self._height = height
         self._connections = dict()
@@ -47,6 +54,10 @@ class MostDirectConnectionSelector(
             self._first_connection = next(iter(connections))
 
     def set_dims(self, width, height):
+        """
+        :param int width: The width of the machine
+        :param int height: The height of the machine
+        """
         self._width = width
         self._height = height
 

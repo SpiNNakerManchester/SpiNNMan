@@ -45,9 +45,9 @@ class ADCInfo(object):
 
     def __init__(self, adc_data, offset):
         """
-        :param adc_data: bytes from an SCP packet containing ADC information
-        :type adc_data: str
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :param bytes adc_data:
+            bytes from an SCP packet containing ADC information
+        :raise SpinnmanInvalidParameterException:
             If the message does not contain valid ADC information
         """
         data = _PATTERN.unpack_from(adc_data, offset)
