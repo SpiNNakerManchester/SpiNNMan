@@ -61,8 +61,8 @@ class SCPRequestPipeLine(object):
         "_send_time",
         "_times_sent"]
 
-    def __init__(self, connection, n_channels=1,
-                 intermediate_channel_waits=0,
+    def __init__(self, connection, n_channels,
+                 intermediate_channel_waits,
                  n_retries=N_RETRIES, packet_timeout=SCP_TIMEOUT):
         """
         :param SCAMPConnection connection:
