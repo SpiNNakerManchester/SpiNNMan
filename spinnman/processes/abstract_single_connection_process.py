@@ -24,19 +24,27 @@ class AbstractSingleConnectionProcess(AbstractProcess):
     __slots__ = [
         "_connection_selector",
         "_scp_request_pipeline",
-        "_n_retries"]
+        "_n_retries",
+        "_n_channels",
+        "_intermediate_channel_waits"]
 
-    def __init__(self, connection_selector, n_retries=N_RETRIES):
+    def __init__(
+            self, connection_selector, n_channels,
+            intermediate_channel_waits, n_retries=N_RETRIES):
         """
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         :param int n_retries:
+        :param int n_channels:
+        :param int intermediate_channel_waits:
         """
         super(AbstractSingleConnectionProcess, self).__init__()
         self._scp_request_pipeline = None
         self._connection_selector = connection_selector
         self._n_retries = n_retries
+        self._n_channels = n_channels
+        self._intermediate_channel_waits = intermediate_channel_waits
 
     def _send_request(self, request, callback=None, error_callback=None):
         if error_callback is None:
@@ -44,10 +52,12 @@ class AbstractSingleConnectionProcess(AbstractProcess):
 
         # If no pipe line built yet, build one on the connection selected for
         # it
+
         if self._scp_request_pipeline is None:
             self._scp_request_pipeline = SCPRequestPipeLine(
                 self._connection_selector.get_next_connection(request),
-                n_retries=self._n_retries)
+                n_retries=self._n_retries, n_channels=self._n_channels,
+                intermediate_channel_waits=self._intermediate_channel_waits)
 
         # send request
         self._scp_request_pipeline.send_request(

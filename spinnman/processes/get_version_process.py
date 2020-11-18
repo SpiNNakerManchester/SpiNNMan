@@ -24,13 +24,19 @@ class GetVersionProcess(AbstractSingleConnectionProcess):
     __slots__ = [
         "_version_info"]
 
-    def __init__(self, connection_selector, n_retries=N_RETRIES):
+    def __init__(
+            self, connection_selector, n_channels,
+            intermediate_channel_waits, n_retries=N_RETRIES):
         """
         :param connection_selector:
+        :param int intermediate_channel_waits:
+        :param int n_channels:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(GetVersionProcess, self).__init__(connection_selector, n_retries)
+        super(GetVersionProcess, self).__init__(
+            connection_selector, n_retries=n_retries, n_channels=n_channels,
+            intermediate_channel_waits=intermediate_channel_waits)
         self._version_info = None
 
     def _get_response(self, version_response):

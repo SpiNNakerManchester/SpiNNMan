@@ -891,7 +891,11 @@ class Transceiver(AbstractContextManager):
         """
         if connection_selector is None:
             connection_selector = self._scamp_connection_selector
-        process = GetVersionProcess(connection_selector, n_retries)
+        process = GetVersionProcess(
+            connection_selector, n_retries=n_retries,
+            n_channels=self._multi_packets_in_flight_n_channels,
+            intermediate_channel_waits=(
+                self._multi_packets_in_flight_channel_waits))
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
     def boot_board(
