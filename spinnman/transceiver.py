@@ -65,7 +65,7 @@ from spinnman.processes import (
     DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
     GetCPUInfoProcess, ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
-    FillProcess, FillDataType, LoadFixedRouteRoutingEntryProcess,
+    FillDataType, LoadFixedRouteRoutingEntryProcess,
     ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
@@ -2773,25 +2773,6 @@ class Transceiver(AbstractContextManager):
         """
         process = GetHeapProcess(self._scamp_connection_selector)
         return process.get_heap((x, y), heap)
-
-    def fill_memory(
-            self, x, y, base_address, repeat_value, bytes_to_fill,
-            data_type=FillDataType.WORD):
-        """ Fill some memory with repeated data
-
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
-        :param int base_address: The address at which to start the fill
-        :param int repeat_value: The data to repeat
-        :param int bytes_to_fill:
-            The number of bytes to fill. Must be compatible with the data\
-            type i.e. if the data type is WORD, the number of bytes must\
-            be divisible by 4
-        :param FillDataType data_type:
-        """
-        process = FillProcess(self._scamp_connection_selector)
-        return process.fill_memory(
-            x, y, base_address, repeat_value, bytes_to_fill, data_type)
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
