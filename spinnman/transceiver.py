@@ -65,7 +65,7 @@ from spinnman.processes import (
     DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
     GetCPUInfoProcess, ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
-    FillDataType, LoadFixedRouteRoutingEntryProcess,
+    LoadFixedRouteRoutingEntryProcess,
     ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
