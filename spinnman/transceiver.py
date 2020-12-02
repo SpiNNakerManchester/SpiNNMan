@@ -1155,6 +1155,25 @@ class Transceiver(AbstractContextManager):
         addr = self.get_user_1_register_address_from_core(p)
         return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
 
+    def read_user_2(self, x, y, p):
+        """ Get the contents of the user_2 register for the given processor.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        addr = self.get_user_2_register_address_from_core(p)
+        return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
+
     @staticmethod
     def get_user_1_register_address_from_core(p):
         """ Get the address of user 1 for a given processor on the board
