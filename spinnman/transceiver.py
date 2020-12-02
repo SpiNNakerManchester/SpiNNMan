@@ -98,16 +98,16 @@ def create_transceiver_from_hostname(
         auto_detect_bmp=False, scamp_connections=None,
         boot_port_no=None, max_sdram_size=None, repair_machine=False,
         ignore_bad_ethernets=True, default_report_directory=None):
-    """ Create a Transceiver by creating a UDPConnection to the given\
-        hostname on port 17893 (the default SCAMP port), and a\
-        BootConnection on port 54321 (the default boot port), optionally\
-        discovering any additional links using the UDPConnection, and then\
-        returning the transceiver created with the conjunction of the created\
-        UDPConnection and the discovered connections.
+    """ Create a Transceiver by creating a :py:class:`~.UDPConnection` to the\
+        given hostname on port 17893 (the default SCAMP port), and a\
+        :py:class:`~.BootConnection` on port 54321 (the default boot port),\
+        optionally discovering any additional links using the UDPConnection,\
+        and then returning the transceiver created with the conjunction of\
+        the created UDPConnection and the discovered connections.
 
     :param str hostname: The hostname or IP address of the board
     :param number_of_boards: a number of boards expected to be supported, or
-        None, which defaults to a single board
+        ``None``, which defaults to a single board
     :type number_of_boards: int or None
     :param set(tuple(int,int)) ignore_chips:
         An optional set of chips to ignore in the machine.
@@ -127,7 +127,7 @@ def create_transceiver_from_hostname(
     :param list(BMPConnectionData) bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
     :param bool auto_detect_bmp:
-        True if the BMP of version 4 or 5 boards should be
+        ``True`` if the BMP of version 4 or 5 boards should be
         automatically determined from the board IP address
     :param int boot_port_no: the port number used to boot the machine
     :param list(SCAMPConnection) scamp_connections:
@@ -139,21 +139,21 @@ def create_transceiver_from_hostname(
     :param bool repair_machine:
         Flag to set the behaviour if a repairable error
         is found on the machine.
-        If true will create a machine without the problamatic bits.
-        (See machine_factory.machine_repair)
-        If False get machine will raise an Exception if a problamatic
+        If ``True`` will create a machine without the problematic bits.
+        (See :py:func:`~spinn_machine.machine_factory.machine_repair`.)
+        If ``False`` get machine will raise an Exception if a problematic
         machine is discovered.
     :param bool ignore_bad_ethernets:
         Flag to say that ip_address information
-        on none ethernet chips should be ignored.
-        None_ethernet chips are defined here as ones that do not report
-        themselves their nearest ethernet.
-        The bad ipaddress is always logged
-        If True the ipaddress is ignored
-        If False the chip with the bad ipaddress is removed.
+        on non-Ethernet chips should be ignored.
+        Non-ethernet chips are defined here as ones that do not report
+        themselves as their nearest Ethernet.
+        The bad IP address is always logged.
+        If ``True`` the IP address is ignored.
+        If ``False`` the chip with the bad IP address is removed.
     :param default_report_directory:
         Directory to write any reports too.
-        If None the current directory will be used.
+        If ``None`` the current directory will be used.
     :type default_report_directory: str or None
     :return: The created transceiver
     :rtype: Transceiver
@@ -207,14 +207,15 @@ def create_transceiver_from_hostname(
 class Transceiver(AbstractContextManager):
     """ An encapsulation of various communications with the SpiNNaker board.
 
-        The methods of this class are designed to be thread-safe;\
-        thus you can make multiple calls to the same (or different) methods\
-        from multiple threads and expect each call to work as if it had been\
-        called sequentially, although the order of returns is not guaranteed.\
-        Note also that with multiple connections to the board, using multiple\
-        threads in this way may result in an increase in the overall speed of\
-        operation, since the multiple calls may be made separately over the\
-        set of given connections.
+    The methods of this class are designed to be thread-safe;
+    thus you can make multiple calls to the same (or different) methods
+    from multiple threads and expect each call to work as if it had been
+    called sequentially, although the order of returns is not guaranteed.
+
+    Note also that with multiple connections to the board, using multiple
+    threads in this way may result in an increase in the overall speed of
+    operation, since the multiple calls may be made separately over the
+    set of given connections.
     """
     __slots__ = [
         "_all_connections",
@@ -279,24 +280,24 @@ class Transceiver(AbstractContextManager):
         :param bool repair_machine:
             Flag to set the behaviour if a repairable error
             is found on the machine.
-            If true will create a machine without the problematic bits.
-            (See `machine_factory.machine_repair`)
-            If False get machine will raise an Exception if a problematic
+            If ``True`` will create a machine without the problematic bits.
+            (See :py:func:`~spinn_machine.machine_factory.machine_repair`.)
+            If ``False`` get machine will raise an Exception if a problematic
             machine is discovered.
         :param bool ignore_bad_ethernets:
             Flag to say that ip_address information
-            on none ethernet chips should be ignored.
-            None_ethernet chips are defined here as ones that do not report
-            themselves their nearest ethernet.
-            The bad ipaddress is always logged
-            If True the ipaddress is ignored
-            If False the chip with the bad ipaddress is removed.
+            on non-Ethernet chips should be ignored.
+            Non-Ethernet chips are defined here as ones that do not report
+            themselves their nearest Ethernet.
+            The bad IP address is always logged.
+            If ``True`` the IP address is ignored.
+            If ``False`` the chip with the bad IP address is removed.
         :param str default_report_directory:
-            Directory to write any reports too. If None the current directory
-            will be used.
+            Directory to write any reports too. If ``None`` the current
+            directory will be used.
         :raise SpinnmanIOException:
-            If there is an error communicating with the board, or if no \
-            connections to the board can be found (if connections is None)
+            If there is an error communicating with the board, or if no
+            connections to the board can be found (if connections is ``None``)
         :raise SpinnmanInvalidPacketException:
             If a packet is received that is not in the valid format
         :raise SpinnmanInvalidParameterException:
