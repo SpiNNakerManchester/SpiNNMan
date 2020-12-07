@@ -1849,7 +1849,7 @@ class Transceiver(AbstractContextManager):
                     nearest_neighbour_id, base_address, data, offset, n_bytes)
 
     def read_memory(self, x, y, base_address, length, cpu=0):
-        """ Read some areas of SDRAM from the board
+        """ Read some areas of memory (usually SDRAM) from the board.
 
         :param int x:
             The x-coordinate of the chip where the memory is to be read from
@@ -1858,7 +1858,9 @@ class Transceiver(AbstractContextManager):
         :param int base_address:
             The address in SDRAM where the region of memory to be read starts
         :param int length: The length of the data to be read in bytes
-        :param int cpu: the core ID used to read the memory of
+        :param int cpu:
+            the core ID used to read the memory of; should usually be 0 when
+            reading from SDRAM, but may be other values when reading from DTCM.
         :return: A bytearray of data read
         :rtype: bytes
         :raise SpinnmanIOException:
@@ -1875,8 +1877,37 @@ class Transceiver(AbstractContextManager):
         process = ReadMemoryProcess(self._scamp_connection_selector)
         return process.read_memory(x, y, cpu, base_address, length)
 
+    def read_word(self, x, y, base_address, cpu=0):
+        """ Read a word (usually of SDRAM) from the board.
+
+        :param int x:
+            The x-coordinate of the chip where the word is to be read from
+        :param int y:
+            The y-coordinate of the chip where the word is to be read from
+        :param int base_address:
+            The address (usually in SDRAM) where the word to be read starts
+        :param int cpu:
+            the core ID used to read the word; should usually be 0 when reading
+            from SDRAM, but may be other values when reading from DTCM.
+        :return: The unsigned integer value at ``base_address``
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If one of `x`, `y`, `cpu` or `base_address` is invalid
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        process = ReadMemoryProcess(self._scamp_connection_selector)
+        data = process.read_memory(x, y, cpu, base_address, _ONE_WORD.size)
+        (value, ) = _ONE_WORD.unpack(data)
+        return value
+
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
-        """ Read some areas of memory on a neighbouring chip using a LINK_READ
+        """ Read some areas of memory on a neighbouring chip using a LINK_READ\
             SCP command. If sent to a BMP, this command can be used to\
             communicate with the FPGAs' debug registers.
 
