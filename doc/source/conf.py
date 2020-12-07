@@ -29,7 +29,6 @@
 
 # import sys
 import os
-from sphinx import apidoc
 
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -369,18 +368,45 @@ for f in os.listdir("."):
     if (os.path.isfile(f) and f.endswith(
             ".rst") and f != "index.rst" and f != "modules.rst"):
         os.remove(f)
-apidoc.main([None, '-o', ".", "../../spinnman",
-             "../../spinnman/connections/[au]*/[a-z]*.py",
-             "../../spinnman/connections/[cst]*.py",
-             "../../spinnman/messages/eieio/*_messages/[a-z]*.py",
-             "../../spinnman/messages/eieio/cr*.py",
-             "../../spinnman/messages/eieio/ei*.py",
-             "../../spinnman/messages/scp/[aei]*/[a-z]*.py",
-             "../../spinnman/messages/scp/s*.py",
-             "../../spinnman/messages/sdp/[a-z]*.py",
-             "../../spinnman/messages/spinnaker_boot/s*.py",
-             "../../spinnman/model/[a-df-z]*.py",
-             "../../spinnman/model/en*/[a-z]*.py",
-             "../../spinnman/model/ex*.py",
-             "../../spinnman/processes/[a-z]*.py",
-             ])
+
+
+def filtered_files(base, excludes=None):
+    if not excludes:
+        excludes = []
+    for root, _dirs, files in os.walk(base):
+        for filename in files:
+            if filename.endswith(".py") and not filename.startswith("_"):
+                full = root + "/" + filename
+                if full not in excludes:
+                    yield full
+
+
+# UGH!
+output_dir = os.path.abspath(".")
+os.chdir("../..")
+
+# We only document __init__.py files... except for these special cases.
+# Use the unix full pathname from the root of the checked out repo
+explicit_wanted_files = [
+    "spinnman/constants.py",
+    "spinnman/get_cores_in_run_state.py",
+    "spinnman/exceptions.py",
+    "spinnman/transceiver.py",
+    "spinnman/messages/multicast_message.py",
+    "spinnman/utilities/utility_functions.py",
+    "spinnman/utilities/appid_tracker.py",
+    "spinnman/utilities/locate_connected_machine_ip_address.py",
+    "spinnman/utilities/reports.py",
+    ]
+options = ['-o', output_dir, "spinnman"]
+options.extend(filtered_files("spinnman", explicit_wanted_files))
+# Special case: Don't want this empty package at all.
+options.append("spinnman/messages/spinnaker_boot/boot_data/*")
+try:
+    # Old style API; Python 2.7
+    from sphinx import apidoc
+    options = [None] + options
+except ImportError:
+    # New style API; Python 3.6 onwards
+    from sphinx.ext import apidoc
+apidoc.main(options)
