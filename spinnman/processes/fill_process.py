@@ -16,11 +16,12 @@
 import logging
 import struct
 from enum import Enum
+from spinn_utilities.log import FormatAdapter
 from spinnman.messages.scp.impl import FillRequest, WriteMemory
 from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess)
 
-logger = logging.getLogger(__name__)
+logger = FormatAdapter(logging.getLogger(__name__))
 ALIGNMENT = 4
 
 

@@ -16,10 +16,11 @@
 from __future__ import print_function
 import logging
 import sys
+from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import (
     SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
 
-logger = logging.getLogger(__name__)
+logger = FormatAdapter(logging.getLogger(__name__))
 
 
 class AbstractProcess(object):
