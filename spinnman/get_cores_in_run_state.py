@@ -69,11 +69,12 @@ def _make_transceiver(config, host=None):
     :param str host:
     :rtype: Transceiver
     """
-    config.set_up_remote_board()
     if host is None:
+        config.set_up_remote_board()
         host = config.remotehost
 
     print("talking to SpiNNaker system at {}".format(host))
+    return create_transceiver_from_hostname(host, 3)
     return create_transceiver_from_hostname(
         host, config.board_version,
         ignore_cores=CoreSubsets(),
@@ -82,7 +83,7 @@ def _make_transceiver(config, host=None):
         auto_detect_bmp=config.auto_detect_bmp)
 
 
-def main():
+def main(args):
     """ Runs the script.
     """
     ap = argparse.ArgumentParser(
@@ -97,7 +98,7 @@ def main():
     ap.add_argument(
         "host", default=None, nargs='?',
         help="the hostname or IP address of the SpiNNaker machine to inspect")
-    args = ap.parse_args()
+    args = ap.parse_args(args)
     # These ought to be parsed from command line arguments
     app_id = args.appid
     print_chips = not args.noprintchips
@@ -116,4 +117,4 @@ def main():
 
 
 if __name__ == "__main__":  # pragma: no cover
-    main()
+    main(sys.argv[1:])
