@@ -18,8 +18,6 @@ from .abstract_multi_connection_process_connection_selector import (
     AbstractMultiConnectionProcessConnectionSelector)
 from .application_run_process import ApplicationRunProcess
 from .de_alloc_sdram_process import DeAllocSDRAMProcess
-from .fill_process import FillDataType
-from .fill_process import FillProcess
 from .get_heap_process import GetHeapProcess
 from .get_cpu_info_process import GetCPUInfoProcess
 from .get_machine_process import GetMachineProcess
@@ -45,10 +43,10 @@ __all__ = ["AbstractMultiConnectionProcess", "ApplicationRunProcess",
            "AbstractMultiConnectionProcessConnectionSelector",
            "DeAllocSDRAMProcess", "GetCPUInfoProcess", "GetHeapProcess",
            "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
-           "GetVersionProcess", "FillDataType", "FillProcess",
-           "LoadFixedRouteRoutingEntryProcess", "LoadMultiCastRoutesProcess",
-           "MallocSDRAMProcess", "MostDirectConnectionSelector",
-           "ReadFixedRouteRoutingEntryProcess", "ReadIOBufProcess",
-           "ReadMemoryProcess", "ReadRouterDiagnosticsProcess",
-           "RoundRobinConnectionSelector", "SendSingleCommandProcess",
-           "WriteMemoryFloodProcess", "WriteMemoryProcess"]
+           "GetVersionProcess", "LoadFixedRouteRoutingEntryProcess",
+           "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
+           "MostDirectConnectionSelector", "ReadFixedRouteRoutingEntryProcess",
+           "ReadIOBufProcess", "ReadMemoryProcess",
+           "ReadRouterDiagnosticsProcess", "RoundRobinConnectionSelector",
+           "SendSingleCommandProcess", "WriteMemoryFloodProcess",
+           "WriteMemoryProcess"]

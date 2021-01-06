@@ -164,9 +164,9 @@ class SystemVariableDefinition(Enum):
     led_1 = _Definition(
         _DataType.INT, offset=0x34,
         doc="The last part of the LED definitions")
-    padding_1 = _Definition(
+    clock_drift = _Definition(
         _DataType.INT, offset=0x38,
-        doc="A word of padding")
+        doc="The clock drift")
     random_seed = _Definition(
         _DataType.INT, offset=0x3c,
         doc="The random seed")
