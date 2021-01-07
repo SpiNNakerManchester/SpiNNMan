@@ -17,8 +17,9 @@ import logging
 from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
 from spinn_utilities.abstract_context_manager import AbstractContextManager
+from spinn_utilities.log import FormatAdapter
 
-logger = logging.getLogger(__name__)
+logger = FormatAdapter(logging.getLogger(__name__))
 _POOL_SIZE = 4
 _TIMEOUT = 1
 
