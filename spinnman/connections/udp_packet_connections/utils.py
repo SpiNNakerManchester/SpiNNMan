@@ -18,9 +18,10 @@ import platform
 import socket
 import subprocess
 from six import raise_from
+from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import SpinnmanIOException
 
-logger = logging.getLogger(__name__)
+logger = FormatAdapter(logging.getLogger(__name__))
 _SDP_SOURCE_PORT = 7
 _SDP_SOURCE_CPU = 31
 _SDP_TAG = 0xFF
