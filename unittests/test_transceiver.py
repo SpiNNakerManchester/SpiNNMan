@@ -19,6 +19,7 @@ import struct
 from spinn_machine import virtual_machine
 from spinnman.transceiver import Transceiver
 from spinnman import constants
+from spinnman.connections import SocketAddressWithChip
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
@@ -26,6 +27,7 @@ from spinnman.connections.udp_packet_connections import (
     BootConnection, EIEIOConnection, SCAMPConnection)
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
+from spinnman.transceiver import create_transceiver_from_hostname
 
 board_config = BoardTestConfiguration()
 ver = 5  # Guess?
@@ -242,6 +244,24 @@ class TestTransceiver(unittest.TestCase):
                 expected_data = struct.pack("B", expected_writes[write])
                 assert written_memory[write_item][3] == expected_data
                 write_item += 1
+
+    def test_no_connections(self):
+        # Create transceiver with only a SpcketAddress
+        scamp_connections = [SocketAddressWithChip(None, 1, 1)]
+        Transceiver(version=5, scamp_connections=scamp_connections)
+
+    def test_create_empty_transciever(self):
+        # not sure what this is good for but the code allow is
+        trnx = create_transceiver_from_hostname(None, 6)
+
+
+    def test_identify_connections_two_boots(self):
+        connections = []
+        connections.append(BootConnection())
+        connections.append(BootConnection())
+
+        with self.assertRaises(SpinnmanInvalidParameterException):
+            Transceiver(version=5, connections=connections)
 
 
 if __name__ == '__main__':
