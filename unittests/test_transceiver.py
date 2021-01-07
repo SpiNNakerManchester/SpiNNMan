@@ -19,7 +19,6 @@ import struct
 from spinn_machine import virtual_machine
 from spinnman.transceiver import Transceiver
 from spinnman import constants
-from spinnman.connections import ConnectionListener
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
