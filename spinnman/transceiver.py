@@ -40,8 +40,7 @@ from spinnman.constants import (
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
-    SpinnmanUnexpectedResponseCodeException, SpinnmanInvalidPacketException,
-    SpiNNManCoresNotInStateException)
+    SpinnmanUnexpectedResponseCodeException, SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
@@ -2685,7 +2684,10 @@ class Transceiver(AbstractContextManager):
         :rtype: UDPConnection
         """
 
-        # If the connection class is not an Listenable, this is an
+        # If local_host is not specified, normalise it
+        if local_host is None:
+            local_host = "0.0.0.0"
+
         # error
         if not issubclass(connection_class, Listenable):
             raise SpinnmanInvalidParameterException(
@@ -2720,9 +2722,9 @@ class Transceiver(AbstractContextManager):
                     # If we are to listen to a specific interface, and the
                     # listener is on all interfaces, this is an error
                     if "0.0.0.0" in receiving_connections:
-                        raise SpinnmanInvalidPacketException(
-                            "local_port and local_host",
-                            "{} and {}".format(local_port, local_host))
+                        raise SpinnmanInvalidParameterException(
+                            "local_port", str(local_port),
+                            "all interfaces already listening on this port")
 
                 # If the type of an existing connection is wrong, this is an
                 # error
@@ -2754,10 +2756,6 @@ class Transceiver(AbstractContextManager):
         # If we are here, the local port wasn't specified to try to use an
         # existing connection of the correct class
         if connections_of_class:
-
-            # If local_host is not specified, normalise it
-            if local_host is None:
-                local_host = "0.0.0.0"
 
             # Find a connection that matches the local host
             for a_connection, a_listener in connections_of_class:

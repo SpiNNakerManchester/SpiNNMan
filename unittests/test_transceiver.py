@@ -19,6 +19,8 @@ import struct
 from spinn_machine import virtual_machine
 from spinnman.transceiver import Transceiver
 from spinnman import constants
+from spinnman.connections import ConnectionListener
+from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
 from spinnman.connections.udp_packet_connections import (
@@ -131,8 +133,7 @@ class TestTransceiver(unittest.TestCase):
 
         # Create board connections
         connections = []
-        connections.append(SCAMPConnection(
-            remote_host=None))
+        connections.append(SCAMPConnection(remote_host=None))
         orig_connection = EIEIOConnection()
         connections.append(orig_connection)
 
@@ -155,6 +156,63 @@ class TestTransceiver(unittest.TestCase):
         assert connection_2 == orig_connection
         assert connection_3 == orig_connection
         assert connection_4 != orig_connection
+
+    def test_listener_creation_bad_connection_class(self):
+        # Create board connections
+        connections = []
+        connections.append(SCAMPConnection(remote_host=None))
+        orig_connection = EIEIOConnection()
+        connections.append(orig_connection)
+
+        # Create transceiver
+        trnx = Transceiver(version=5, connections=connections)
+
+        with self.assertRaises(SpinnmanInvalidParameterException):
+            trnx.register_udp_listener(
+                callback=None, connection_class=str)
+
+    def test_listener_creation_multiple_same_port_local_host(self):
+        # Create board connections
+        connections = []
+        connections.append(SCAMPConnection(remote_host=None))
+        orig_connection = EIEIOConnection()
+        connections.append(orig_connection)
+
+        # Create transceiver
+        trnx = Transceiver(version=5, connections=connections)
+
+        trnx.register_udp_listener(
+            callback=None, connection_class=EIEIOConnection,
+            local_port=orig_connection.local_port, local_host="0.0.0.0")
+
+        with self.assertRaises(SpinnmanInvalidParameterException):
+            trnx.register_udp_listener(
+                callback=None, connection_class=EIEIOConnection,
+                local_port=orig_connection.local_port, local_host="1.1.1.1")
+
+    def test_listener_creation_multiple_same_port_none_local_host(self):
+        # Create board connections
+        connections = []
+        connections.append(SCAMPConnection())
+        orig_connection = EIEIOConnection()
+        connections.append(orig_connection)
+
+        # Create transceiver
+        trnx = Transceiver(version=5, connections=connections)
+
+        # hack in a record of listing to a specific interface
+        trnx._udp_receive_connections_by_port[orig_connection.local_port+1][
+                    "1.1.1.1"] = (None, None)
+
+        with self.assertRaises(SpinnmanInvalidParameterException):
+            trnx.register_udp_listener(
+                callback=None, connection_class=EIEIOConnection,
+                local_port=orig_connection.local_port+1, local_host="0.0.0.0")
+
+        with self.assertRaises(SpinnmanInvalidParameterException):
+            trnx.register_udp_listener(
+                callback=None, connection_class=EIEIOConnection,
+                local_port=orig_connection.local_port + 1)
 
     def test_set_watch_dog(self):
         connections = []
