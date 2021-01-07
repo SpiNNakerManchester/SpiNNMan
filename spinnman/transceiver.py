@@ -56,8 +56,7 @@ from spinnman.messages.scp.impl import (
     IPTagSet, IPTagClear, RouterClear)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
-    SpinnakerBootSender, SCPSender, SDPSender,
-    MulticastSender, SCPReceiver, Listenable)
+    SpinnakerBootSender, SCPSender, SDPSender, SCPReceiver, Listenable)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, UDPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
@@ -235,7 +234,6 @@ class Transceiver(AbstractContextManager):
         "_machine",
         "_machine_off",
         "_max_sdram_size",
-        "_multicast_sender_connections",
         "_n_chip_execute_locks",
         "_nearest_neighbour_id",
         "_nearest_neighbour_lock",
@@ -356,9 +354,6 @@ class Transceiver(AbstractContextManager):
         # A list of all connections that can be used to send SDP messages
         self._sdp_sender_connections = list()
 
-        # A list of all connections that can be used to send Multicast messages
-        self._multicast_sender_connections = list()
-
         # A dict of IP address -> SCAMP connection
         # These are those that can be used for setting up IP Tags
         self._udp_scamp_connections = dict()
@@ -436,10 +431,6 @@ class Transceiver(AbstractContextManager):
             # Locate any connections that can send SDP
             if isinstance(conn, SDPSender):
                 self._sdp_sender_connections.append(conn)
-
-            # Locate any connections that can send Multicast
-            if isinstance(conn, MulticastSender):
-                self._multicast_sender_connections.append(conn)
 
             # Locate any connections that can send and receive SCP
             if isinstance(conn, SCPSender) and isinstance(conn, SCPReceiver):
