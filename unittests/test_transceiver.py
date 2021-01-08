@@ -252,8 +252,7 @@ class TestTransceiver(unittest.TestCase):
 
     def test_create_empty_transciever(self):
         # not sure what this is good for but the code allow is
-        trnx = create_transceiver_from_hostname(None, 6)
-
+        create_transceiver_from_hostname(None, 6)
 
     def test_identify_connections_two_boots(self):
         connections = []
