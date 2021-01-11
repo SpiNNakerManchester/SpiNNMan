@@ -16,7 +16,6 @@
 # pylint: disable=too-many-arguments
 import io
 import os
-import random
 import struct
 from threading import Condition, RLock
 from collections import defaultdict
@@ -608,7 +607,7 @@ class Transceiver(AbstractContextManager):
             If the response is not one of the expected codes
         """
         logger.warning(
-            "Tranceiver.send_scp_message is deprecated due to no know useage. "
+            "Tranceiver.send_scp_message is deprecated due to no known useage. "
             "Please contact spinnakerusers to ask for the depractation "
             "to be lifted or this method risks being removed.")
         if connection is None:
@@ -1366,7 +1365,7 @@ class Transceiver(AbstractContextManager):
         """
 
         logger.warning(
-            "Tranceiver.execute is deprecated due to no know useage. "
+            "Tranceiver.execute is deprecated due to no known useage. "
             "Please contact spinnakerusers to ask for the depractation "
             "to be lifted or this method risks being removed.")
         # Lock against updates
@@ -1572,6 +1571,8 @@ class Transceiver(AbstractContextManager):
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
 
+        note: Depreciated and untested as appears not to be used.
+
         :param led:
             Number of the LED or an iterable of LEDs to set the state of (0-7)
         :type led: int or iterable(int)
@@ -1584,6 +1585,10 @@ class Transceiver(AbstractContextManager):
         :param int cabinet: the cabinet this is targeting
         :param int frame: the frame this is targeting
         """
+        logger.warning(
+            "Tranceiver.set_led is deprecated due to no known useage. "
+            "Please contact spinnakerusers to ask for the depractation "
+            "to be lifted or this method risks being removed.")
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         process.execute(BMPSetLed(led, action, board))
@@ -2140,6 +2145,8 @@ class Transceiver(AbstractContextManager):
     def set_leds(self, x, y, cpu, led_states):
         """ Set SetLED states.
 
+        note: Deprecated and untested due to no known usage
+
         :param int x: The x-coordinate of the chip on which to set the LEDs
         :param int y: The x-coordinate of the chip on which to set the LEDs
         :param int cpu: The CPU of the chip on which to set the LEDs
@@ -2155,6 +2162,10 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        logger.warning(
+            "Tranceiver.set_leds is deprecated due to no known useage. "
+            "Please contact spinnakerusers to ask for the depractation "
+            "to be lifted or this method risks being removed.")
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(SetLED(x, y, cpu, led_states))
 
