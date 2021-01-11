@@ -655,8 +655,18 @@ class Transceiver(AbstractContextManager):
         self._app_id_tracker = AppIdTracker()
 
         logger.info("Detected a machine on IP address {} which has {}",
-                    self._boot_send_connection.remote_ip_address,
+                    self._boot_ip_address,
                     self._machine.cores_and_link_output_string())
+
+    @property
+    def _boot_ip_address(self):
+        if self._boot_send_connection:
+            return self._boot_send_connection.remote_ip_address
+        if self._machine:
+            chip00 = self._machine.get_chip_at(0, 0)
+            if chip00:
+                return chip00.ip_address
+        return "unknown"
 
     def discover_scamp_connections(self):
         """ Find connections to the board and store these for future use.\

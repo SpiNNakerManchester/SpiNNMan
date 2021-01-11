@@ -25,6 +25,7 @@ from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
 from spinnman.connections.udp_packet_connections import (
     BootConnection, EIEIOConnection, SCAMPConnection)
+from spinnman.model import BMPConnectionData
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
 from spinnman.transceiver import create_transceiver_from_hostname
@@ -134,7 +135,8 @@ class TestTransceiver(unittest.TestCase):
 
         # Create board connections
         connections = []
-        connections.append(SCAMPConnection(remote_host=None))
+        scamp_connection = SCAMPConnection(remote_host=None)
+        connections.append(scamp_connection)
         orig_connection = EIEIOConnection()
         connections.append(orig_connection)
 
@@ -157,6 +159,11 @@ class TestTransceiver(unittest.TestCase):
         assert connection_2 == orig_connection
         assert connection_3 == orig_connection
         assert connection_4 != orig_connection
+        all_connections = trnx.get_connections()
+        self.assertIn(scamp_connection, all_connections)
+        self.assertIn(orig_connection, all_connections)
+        self.assertIn(connection_4, all_connections)
+        self.assertEquals(3, len(all_connections))
 
     def test_listener_creation_bad_connection_class(self):
         # Create board connections
@@ -262,6 +269,26 @@ class TestTransceiver(unittest.TestCase):
         with self.assertRaises(SpinnmanInvalidParameterException):
             Transceiver(version=5, connections=connections)
 
+    def test_bmp_connection(self):
+        bmp_connection_data = [BMPConnectionData(
+            0, 0, "spinn-4c.cs.man.ac.uk", [0], None)]
+        try:
+            txrx = create_transceiver_from_hostname(
+                "spinn-4.cs.man.ac.uk", 5,
+                bmp_connection_data=bmp_connection_data)
+            txrx.ensure_board_is_ready()
+        except Exception:
+            self.skipTest("Skipping as spinn-4 not reachable")
+        txrx._check_bmp_connections()
+
+    def test_app_id_tracker_no_boot(self):
+        board_config.set_up_remote_board()
+        connections = set()
+        connections.add(SCAMPConnection(
+            remote_host=board_config.remotehost))
+        trans = transceiver.Transceiver(ver, connections=connections)
+        trans.app_id_tracker
+        trans.close()
 
 if __name__ == '__main__':
     unittest.main()
