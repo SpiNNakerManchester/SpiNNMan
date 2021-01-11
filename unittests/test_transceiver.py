@@ -325,7 +325,29 @@ class TestTransceiver(unittest.TestCase):
         self.assertTrue(txrx._machine_off)
         txrx.power_on()
         self.assertFalse(txrx._machine_off)
+        with self.assertRaises(SpinnmanInvalidParameterException):
+            txrx._bmp_connection(2, 2)
+        txrx.close()
 
+    def test_fpga_register(self):
+        bmp_connection_data = [BMPConnectionData(
+            0, 0, "spinn-4c.cs.man.ac.uk", [0], None)]
+        try:
+            txrx = create_transceiver_from_hostname(
+                "spinn-4.cs.man.ac.uk", 5,
+                bmp_connection_data=bmp_connection_data)
+            txrx.ensure_board_is_ready()
+        except Exception:
+            self.skipTest("Skipping as spinn-4 not reachable")
+        register = 0x5C
+        fpga_num = 2
+        a = txrx.read_fpga_register(fpga_num, register, 0, 0, 0)
+        # This does not appear to change anything but that may be due to a
+        # fault on that board
+        txrx.write_fpga_register(fpga_num, register, True, 0, 0, 0)
+        # b = txrx.read_fpga_register(fpga_num, register, 0, 0, 0)
+        # txrx.write_fpga_register(fpga_num, register, a, 0, 0, 0)
+        txrx.close()
 
 if __name__ == '__main__':
     unittest.main()
