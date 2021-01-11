@@ -523,6 +523,8 @@ class Transceiver(AbstractContextManager):
     def _get_chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
 
+        Note: Deprecated and untested as self.execute deprecated.
+
         :param int x:
         :param int y:
         """
@@ -545,6 +547,8 @@ class Transceiver(AbstractContextManager):
 
     def _release_chip_execute_lock(self, x, y):
         """ Release the lock for executing on a chip
+
+        Note: Deprecated and untested as self.execute deprecated.
 
         :param int x:
         :param int y:
@@ -581,21 +585,10 @@ class Transceiver(AbstractContextManager):
         # Release the execute lock
         self._chip_execute_lock_condition.release()
 
-    @staticmethod
-    def _get_random_connection(connections):
-        """ Returns the given connection, or else picks one at random
-
-        :param list(Connection) connections:
-            the list of connections to locate a random one from
-        :return: a connection object
-        :rtype: Connection or None
-        """
-        if not connections:
-            return None
-        return connections[random.randint(0, len(connections) - 1)]
-
     def send_scp_message(self, message, connection=None):
         """ Sends an SCP message, without expecting a response
+
+        Note: Deprecated and untested as no known usage
 
         :param AbstractSCPRequest message: The message to send
         :param SCAMPConnection connection:
@@ -614,9 +607,12 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If the response is not one of the expected codes
         """
+        logger.warning(
+            "Tranceiver.send_scp_message is deprecated due to no know useage. "
+            "Please contact spinnakerusers to ask for the depractation "
+            "to be lifted or this method risks being removed.")
         if connection is None:
-            connection = self._get_random_connection(
-                self._scp_sender_connections)
+            connection = self._scp_sender_connections[0]
         connection.send_scp_request(message)
 
     def send_sdp_message(self, message, connection=None):
@@ -626,11 +622,8 @@ class Transceiver(AbstractContextManager):
         :param SDPConnection connection: An optional connection to use
         """
         if connection is None:
-            connection_to_use = self._get_random_connection(
-                self._sdp_sender_connections)
-        else:
-            connection_to_use = connection
-        connection_to_use.send_sdp_message(message)
+            connection = self._sdp_sender_connections[0]
+        connection.send_sdp_message(message)
 
     def _update_machine(self):
         """ Get the current machine status and store it
@@ -1319,6 +1312,8 @@ class Transceiver(AbstractContextManager):
             wait=False, is_filename=False):
         """ Start an executable running on a single chip
 
+        Note: Deprecated due to no known use.
+
         :param int x:
             The x-coordinate of the chip on which to run the executable
         :param int y:
@@ -1360,6 +1355,10 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
 
+        logger.warning(
+            "Tranceiver.execute is deprecated due to no know useage. "
+            "Please contact spinnakerusers to ask for the depractation "
+            "to be lifted or this method risks being removed.")
         # Lock against updates
         self._get_chip_execute_lock(x, y)
 
