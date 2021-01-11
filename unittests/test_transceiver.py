@@ -28,7 +28,8 @@ from spinnman.connections.udp_packet_connections import (
 from spinnman.model import BMPConnectionData
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
-from spinnman.transceiver import create_transceiver_from_hostname
+from spinnman.transceiver import (
+    create_transceiver_from_hostname, _SCAMP_VERSION)
 
 board_config = BoardTestConfiguration()
 ver = 5  # Guess?
@@ -126,8 +127,9 @@ class TestTransceiver(unittest.TestCase):
         board_config.set_up_remote_board()
         trans = transceiver.create_transceiver_from_hostname(
             board_config.remotehost, board_config.board_version)
-        # self.assertFalse(trans.is_connected())
         trans.boot_board()
+        # this tests a depricated warning so ok to nuke if params nuked
+        trans.boot_board(number_of_boards=2)
         trans.close()
 
     def test_listener_creation(self):
@@ -280,6 +282,8 @@ class TestTransceiver(unittest.TestCase):
         except Exception:
             self.skipTest("Skipping as spinn-4 not reachable")
         txrx._check_bmp_connections()
+        txrx.is_connected()
+        txrx.is_connected(list(txrx.get_connections())[0])
 
     def test_app_id_tracker_no_boot(self):
         board_config.set_up_remote_board()
@@ -289,6 +293,39 @@ class TestTransceiver(unittest.TestCase):
         trans = transceiver.Transceiver(ver, connections=connections)
         trans.app_id_tracker
         trans.close()
+
+    def test_is_scamp_version_compabible(self):
+        self.assertFalse(Transceiver.is_scamp_version_compabible(
+            (_SCAMP_VERSION[0]+1, _SCAMP_VERSION[0], _SCAMP_VERSION[0])))
+        self.assertTrue(Transceiver.is_scamp_version_compabible(
+            (_SCAMP_VERSION[0], _SCAMP_VERSION[1]+1, _SCAMP_VERSION[0])))
+        self.assertFalse(Transceiver.is_scamp_version_compabible(
+            (_SCAMP_VERSION[0], _SCAMP_VERSION[1]-1, _SCAMP_VERSION[0])))
+        self.assertTrue(Transceiver.is_scamp_version_compabible(
+            (_SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2]+1)))
+        self.assertFalse(Transceiver.is_scamp_version_compabible(
+            (_SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2]-1)))
+
+    def test_power(self):
+        bmp_connection_data = [BMPConnectionData(
+            0, 0, "spinn-4c.cs.man.ac.uk", [0], None)]
+        try:
+            txrx = create_transceiver_from_hostname(
+                "spinn-4.cs.man.ac.uk", 5,
+                bmp_connection_data=bmp_connection_data)
+            txrx.ensure_board_is_ready()
+        except Exception:
+            self.skipTest("Skipping as spinn-4 not reachable")
+        self.assertFalse(txrx._machine_off)
+        txrx.power_off()
+        self.assertTrue(txrx._machine_off)
+        txrx.power_on_machine()
+        self.assertFalse(txrx._machine_off)
+        txrx.power_off_machine()
+        self.assertTrue(txrx._machine_off)
+        txrx.power_on()
+        self.assertFalse(txrx._machine_off)
+
 
 if __name__ == '__main__':
     unittest.main()
