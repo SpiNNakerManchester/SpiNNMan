@@ -607,8 +607,8 @@ class Transceiver(AbstractContextManager):
             If the response is not one of the expected codes
         """
         logger.warning(
-            "Tranceiver.send_scp_message is deprecated due to no known useage. "
-            "Please contact spinnakerusers to ask for the depractation "
+            "Tranceiver.send_scp_message is deprecated due to no known useage."
+            " Please contact spinnakerusers to ask for the depractation "
             "to be lifted or this method risks being removed.")
         if connection is None:
             connection = self._scp_sender_connections[0]

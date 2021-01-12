@@ -346,8 +346,9 @@ class TestTransceiver(unittest.TestCase):
         # fault on that board
         txrx.write_fpga_register(fpga_num, register, True, 0, 0, 0)
         # b = txrx.read_fpga_register(fpga_num, register, 0, 0, 0)
-        # txrx.write_fpga_register(fpga_num, register, a, 0, 0, 0)
+        txrx.write_fpga_register(fpga_num, register, a, 0, 0, 0)
         txrx.close()
+
 
 if __name__ == '__main__':
     unittest.main()
