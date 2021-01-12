@@ -1334,7 +1334,7 @@ class Transceiver(AbstractContextManager):
             wait=False, is_filename=False):
         """ Start an executable running on a single chip
 
-        Note: Deprecated due to no known use.
+        Note: Deprecated and untested due to no known use.
 
         :param int x:
             The x-coordinate of the chip on which to run the executable
@@ -1648,12 +1648,19 @@ class Transceiver(AbstractContextManager):
     def read_adc_data(self, board, cabinet, frame):
         """ Read the BMP ADC data
 
+        Note: This method is deprecated as not used.
+        It also appears to be broken.
+
         :param int cabinet: cabinet: the cabinet this is targeting
         :param int frame: the frame this is targeting
         :param int board: which board to request the ADC data from
         :return: the FPGA's ADC data object
         :rtype: ADCInfo
         """
+        logger.warning(
+            "Tranceiver.read_adc_data is deprecated due to no known useage. "
+            "Please contact spinnakerusers to ask for the depractation "
+            "to be lifted or this method risks being removed.")
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(ReadADC(board))
