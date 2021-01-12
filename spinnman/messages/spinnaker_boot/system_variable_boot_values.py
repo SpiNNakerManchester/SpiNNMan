@@ -179,8 +179,10 @@ class SystemVariableDefinition(Enum):
     nearest_neighbour_delay_us = _Definition(
         _DataType.BYTE, offset=0x42, default=20,
         doc="The delay between nearest-neighbour packets in microseconds")
+    # Note the default is for a message setting watchdog to True
+    # not the default if no message sent
     software_watchdog_count = _Definition(
-        _DataType.BYTE, offset=0x43,
+        _DataType.BYTE, offset=0x43, default=3,
         doc="The number of watch dog timeouts before an error is raised")
     padding_2 = _Definition(
         _DataType.INT, offset=0x44,

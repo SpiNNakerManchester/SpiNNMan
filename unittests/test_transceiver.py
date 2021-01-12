@@ -238,6 +238,9 @@ class TestTransceiver(unittest.TestCase):
         # The expected write values for the watch dog
         expected_writes = (
             SystemVariableDefinition.software_watchdog_count.default, 0, 5)
+        # Check that True and False generate different messages
+        self.assertNotEqual(
+            SystemVariableDefinition.software_watchdog_count.default, 0)
 
         # Check the values that were "written" for set_watch_dog,
         # which should be one per chip

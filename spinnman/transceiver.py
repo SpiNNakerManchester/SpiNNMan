@@ -1236,6 +1236,11 @@ class Transceiver(AbstractContextManager):
         """ Enable, disable or set the value of the watch dog timer on a\
             specific chip
 
+        Note: This method is deprecated, untested and no longer recommended.
+        In the past it was found to produce False positive timeouts if a core
+        was in a long loop especially with interrupts disabled.
+        It was also found to increase network traffic making issues worse.
+
         :param int x: chip x coord to write new watchdog param to
         :param int y: chip y coord to write new watchdog param to
         :param watch_dog:
@@ -1260,12 +1265,20 @@ class Transceiver(AbstractContextManager):
     def set_watch_dog(self, watch_dog):
         """ Enable, disable or set the value of the watch dog timer
 
+        Note: This method is deprecated, untested and no longer recommended.
+        In the past it was found to produce False positve timeouts if a core
+        was in a long loop especially with interrupt disabled.
+        It was also found to increase network traffic making issues worse.
+
         :param watch_dog:
             Either a boolean indicating whether to enable (True) or
             disable (False) the watch dog timer, or an int value to set the
             timer count to.
         :type watch_dog: bool or int
         """
+        if watch_dog:
+            logger.warning(
+                "Setting the watchdog. However its usage not recommended")
         if self._machine is None:
             self._update_machine()
         for x, y in self._machine.chip_coordinates:
