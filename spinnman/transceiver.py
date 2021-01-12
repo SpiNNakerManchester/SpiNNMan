@@ -106,15 +106,15 @@ def create_transceiver_from_hostname(
     :param number_of_boards: a number of boards expected to be supported, or
         ``None``, which defaults to a single board
     :type number_of_boards: int or None
-    :param set(tuple(int,int)) ignore_chips:
+    :param set(IgnoreChip) ignore_chips:
         An optional set of chips to ignore in the machine.
         Requests for a "machine" will have these chips excluded, as if they
         never existed. The processor_ids of the specified chips are ignored.
-    :param set(tuple(int,int,int)) ignore_cores:
+    :param set(IgnoreCore) ignore_cores:
         An optional set of cores to ignore in the machine.
         Requests for a "machine" will have these cores excluded, as if they
         never existed.
-    :param set(tuple(int,int,int)) ignored_links:
+    :param set(IgnoreLink) ignored_links:
         An optional set of links to ignore in the machine.
         Requests for a "machine" will have these links excluded, as if they
         never existed.
@@ -258,14 +258,14 @@ class Transceiver(AbstractContextManager):
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
-        :param set(tuple(int,int)) ignore_chips:
+        :param set(IgnoreChip) ignore_chips:
             An optional set of chips to ignore in the machine. Requests for a
             "machine" will have these chips excluded, as if they never
             existed. The processor_ids of the specified chips are ignored.
-        :param set(tuple(int,int,int)) ignore_cores:
+        :param set(IgnoreCore) ignore_cores:
             An optional set of cores to ignore in the machine. Requests for a
             "machine" will have these cores excluded, as if they never existed.
-        :param set(tuple(int,int,int)) ignore_links:
+        :param set(IgnoreLink) ignore_links:
             An optional set of links to ignore in the machine. Requests for a
             "machine" will have these links excluded, as if they never existed.
         :param max_sdram_size: the max size each chip can say it has for SDRAM

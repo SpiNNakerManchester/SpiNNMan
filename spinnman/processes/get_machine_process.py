@@ -69,7 +69,24 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
-        """
+       :param set(IgnoreChip) ignore_chips:
+            An optional set of chips to ignore in the machine.
+            Requests for a "machine" will have these chips excluded,
+             as if they never existed.
+             The processor_ids of the specified chips are ignored.
+        :param set(IgnoreCore) ignore_cores:
+            An optional set of cores to ignore in the machine.
+            Requests for a "machine" will have these cores excluded,
+            as if they never existed.
+        :param set(IgnoreLink) ignored_links:
+            An optional set of links to ignore in the machine.
+            Requests for a "machine" will have these links excluded,
+            as if they never existed.
+        :param max_sdram_size:
+            the max size each chip can say it has for SDRAM
+            (mainly used in debugging purposes)
+        :type max_sdram_size: int or None
+         """
         # pylint: disable=too-many-arguments
         super(GetMachineProcess, self).__init__(connection_selector)
 
