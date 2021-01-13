@@ -1329,74 +1329,6 @@ class Transceiver(AbstractContextManager):
         response = process.execute(CountState(app_id, state))
         return response.count  # pylint: disable=no-member
 
-    def execute(
-            self, x, y, processors, executable, app_id, n_bytes=None,
-            wait=False, is_filename=False):
-        """ Start an executable running on a single chip
-
-        Note: Deprecated and untested due to no known use.
-
-        :param int x:
-            The x-coordinate of the chip on which to run the executable
-        :param int y:
-            The y-coordinate of the chip on which to run the executable
-        :param list(int) processors:
-            The cores on the chip on which to run the application
-        :param executable:
-            The data that is to be executed. Should be one of the following:
-
-            * An instance of RawIOBase
-            * A bytearray/bytes
-            * A filename of a file containing the executable (in which case\
-              `is_filename` must be set to True)
-        :type executable:
-            ~io.RawIOBase or bytes or bytearray or str
-        :param int app_id:
-            The ID of the application with which to associate the executable
-        :param int n_bytes:
-            The size of the executable data in bytes. If not specified:
-
-            * If executable is an RawIOBase, an error is raised
-            * If executable is a bytearray, the length of the bytearray will\
-              be used
-            * If executable is an int, 4 will be used
-            * If executable is a str, the length of the file will be used
-        :param bool wait:
-            True if the binary should enter a "wait" state on loading
-        :param bool is_filename: True if executable is a filename
-        :raise SpinnmanIOException:
-            * If there is an error communicating with the board
-            * If there is an error reading the executable
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If x, y, p does not lead to a valid core
-            * If app_id is an invalid application ID
-            * If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-
-        logger.warning(
-            "Tranceiver.execute is deprecated due to no known useage. "
-            "Please contact spinnakerusers to ask for the depractation "
-            "to be lifted or this method risks being removed.")
-        # Lock against updates
-        self._get_chip_execute_lock(x, y)
-
-        # Write the executable
-        EXECUTABLE_ADDRESS = 0x67800000
-        self.write_memory(
-            x, y, EXECUTABLE_ADDRESS, executable, n_bytes,
-            is_filename=is_filename)
-
-        # Request the start of the executable
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(ApplicationRun(app_id, x, y, processors, wait))
-
-        # Release the lock
-        self._release_chip_execute_lock(x, y)
-
     def _get_next_nearest_neighbour_id(self):
         with self._nearest_neighbour_lock:
             next_nearest_neighbour_id = (self._nearest_neighbour_id + 1) % 127
@@ -1680,7 +1612,7 @@ class Transceiver(AbstractContextManager):
         return response.version_info  # pylint: disable=no-member
 
     def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
-                     cpu=0, is_filename=False):
+                     cpu=0):
         """ Write to the SDRAM on the board.
 
         :param int x:
@@ -1690,25 +1622,16 @@ class Transceiver(AbstractContextManager):
         :param int base_address:
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
-
-            * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
-            * A filename of a data file (in which case `is_filename` must be\
-              set to True)
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int or str
+        :type data:bytes or bytearray or int or str
         :param int n_bytes:
-            The amount of data to be written in bytes.  If not specified:
-
-            * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray, the length of the bytearray will be\
-              used
-            * If `data` is an int, 4 will be used
-            * If `data` is a str, the length of the file will be used
-        :param int offset: The offset from which the valid data begins
+            The amount of data to be written in bytes.
+            Ignored if data is an int.
+            If not specified, the length of the data will be used
+        :param int offset: The offset from which the valid data begins.
+            Ignored if data is an int.
         :param int cpu: The optional CPU to write to
-        :param bool is_filename: True if `data` is a filename
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -1718,23 +1641,13 @@ class Transceiver(AbstractContextManager):
             * If `x, y` does not lead to a valid chip
             * If a packet is received that has invalid parameters
             * If `base_address` is not a positive integer
-            * If `data` is an RawIOBase but `n_bytes` is not specified
             * If `data` is an int and `n_bytes` is more than 4
             * If `n_bytes` is less than 0
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
         process = WriteMemoryProcess(self._scamp_connection_selector)
-        if isinstance(data, io.RawIOBase):
-            process.write_memory_from_reader(
-                x, y, cpu, base_address, data, n_bytes)
-        elif isinstance(data, str) and is_filename:
-            if n_bytes is None:
-                n_bytes = os.stat(data).st_size
-            with open(data, "rb") as reader:
-                process.write_memory_from_reader(
-                    x, y, cpu, base_address, reader, n_bytes)
-        elif isinstance(data, int):
+        if isinstance(data, int):
             data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
                 x, y, cpu, base_address, data_to_write, 0, 4)
