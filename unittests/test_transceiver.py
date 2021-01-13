@@ -274,7 +274,7 @@ class TestTransceiver(unittest.TestCase):
         with self.assertRaises(SpinnmanInvalidParameterException):
             Transceiver(version=5, connections=connections)
 
-    def test_bmp_connection(self):
+    def _spin4(self):
         bmp_connection_data = [BMPConnectionData(
             0, 0, "spinn-4c.cs.man.ac.uk", [0], None)]
         try:
@@ -282,8 +282,12 @@ class TestTransceiver(unittest.TestCase):
                 "spinn-4.cs.man.ac.uk", 5,
                 bmp_connection_data=bmp_connection_data)
             txrx.ensure_board_is_ready()
+            return txrx
         except Exception:
             self.skipTest("Skipping as spinn-4 not reachable")
+
+    def test_bmp_connection(self):
+        txrx = self._spin4()
         txrx._check_bmp_connections()
         txrx.is_connected()
         txrx.is_connected(list(txrx.get_connections())[0])
@@ -310,15 +314,7 @@ class TestTransceiver(unittest.TestCase):
             (_SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2]-1)))
 
     def test_power(self):
-        bmp_connection_data = [BMPConnectionData(
-            0, 0, "spinn-4c.cs.man.ac.uk", [0], None)]
-        try:
-            txrx = create_transceiver_from_hostname(
-                "spinn-4.cs.man.ac.uk", 5,
-                bmp_connection_data=bmp_connection_data)
-            txrx.ensure_board_is_ready()
-        except Exception:
-            self.skipTest("Skipping as spinn-4 not reachable")
+        txrx = self._spin4()
         self.assertFalse(txrx._machine_off)
         txrx.power_off()
         self.assertTrue(txrx._machine_off)
@@ -333,15 +329,7 @@ class TestTransceiver(unittest.TestCase):
         txrx.close()
 
     def test_fpga_register(self):
-        bmp_connection_data = [BMPConnectionData(
-            0, 0, "spinn-4c.cs.man.ac.uk", [0], None)]
-        try:
-            txrx = create_transceiver_from_hostname(
-                "spinn-4.cs.man.ac.uk", 5,
-                bmp_connection_data=bmp_connection_data)
-            txrx.ensure_board_is_ready()
-        except Exception:
-            self.skipTest("Skipping as spinn-4 not reachable")
+        txrx = self._spin4()
         register = 0x5C
         fpga_num = 2
         a = txrx.read_fpga_register(fpga_num, register, 0, 0, 0)
@@ -351,6 +339,18 @@ class TestTransceiver(unittest.TestCase):
         # b = txrx.read_fpga_register(fpga_num, register, 0, 0, 0)
         txrx.write_fpga_register(fpga_num, register, a, 0, 0, 0)
         txrx.close()
+
+    def test_get_iobuf_from_core(self):
+        txrx = self._spin4()
+        result = txrx.get_iobuf_from_core(0, 1, 2)
+        self.assertEquals(result.x, 0)
+        self.assertEquals(result.y, 1)
+        self.assertEquals(result.p, 2)
+
+    # This appears to be broken or it is misused on a single board
+    # def test_get_iobuf_from_core(self):
+    #    txrx = self._spin4()
+    #    txrx.read_adc_data(0, 0, 0)
 
 
 if __name__ == '__main__':
