@@ -52,14 +52,14 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
     cores_running = txrx.get_cores_in_state(all_cores, CPUState.RUNNING)
     cores_watchdog = txrx.get_cores_in_state(all_cores, CPUState.WATCHDOG)
 
-    for (x, y, p), _ in cores_running:
+    for (x, y, p) in cores_running:
         if p not in IGNORED_IDS:
             print('run core: {} {} {}'.format(x, y, p))
 
-    for (x, y, p), _ in cores_finished:
+    for (x, y, p) in cores_finished:
         print('finished core: {} {} {}'.format(x, y, p))
 
-    for (x, y, p), _ in cores_watchdog:
+    for (x, y, p) in cores_watchdog:
         print('watchdog core: {} {} {}'.format(x, y, p))
 
 

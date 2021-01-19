@@ -2029,6 +2029,7 @@ class Transceiver(AbstractContextManager):
                     progress_bar.update(
                         processors_ready - max_processors_ready)
                     max_processors_ready = processors_ready
+
             # If the count is too small, check for error states
             if processors_ready < len(all_core_subsets):
                 is_error = False
