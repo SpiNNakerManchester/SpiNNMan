@@ -13,10 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import configparser
 import os
 import socket
 import unittest
-from six.moves import configparser
 from spinn_utilities.ping import Ping
 from spinnman.model import BMPConnectionData
 

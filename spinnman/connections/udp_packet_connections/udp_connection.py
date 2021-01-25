@@ -16,7 +16,6 @@
 import logging
 import socket
 import select
-from six import raise_from
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
@@ -154,9 +153,9 @@ class UDPConnection(Connection):
             self._socket.settimeout(timeout)
             return self._socket.recv(300)
         except socket.timeout as e:
-            raise_from(SpinnmanTimeoutException("receive", timeout), e)
+            raise SpinnmanTimeoutException("receive", timeout) from e
         except Exception as e:  # pylint: disable=broad-except
-            raise_from(SpinnmanIOException(str(e)), e)
+            raise SpinnmanIOException(str(e)) from e
 
     def receive_with_address(self, timeout=None):
         """ Receive data from the connection along with the address where the\
@@ -174,9 +173,9 @@ class UDPConnection(Connection):
             self._socket.settimeout(timeout)
             return self._socket.recvfrom(300)
         except socket.timeout as e:
-            raise_from(SpinnmanTimeoutException("receive", timeout), e)
+            raise SpinnmanTimeoutException("receive", timeout) from e
         except Exception as e:  # pylint: disable=broad-except
-            raise_from(SpinnmanIOException(str(e)), e)
+            raise SpinnmanIOException(str(e)) from e
 
     def send(self, data):
         """ Send data down this connection
@@ -193,7 +192,7 @@ class UDPConnection(Connection):
             while not self._socket.send(data):
                 pass
         except Exception as e:  # pylint: disable=broad-except
-            raise_from(SpinnmanIOException(str(e)), e)
+            raise SpinnmanIOException(str(e)) from e
 
     def send_to(self, data, address):
         """ Send data down this connection
@@ -208,7 +207,7 @@ class UDPConnection(Connection):
             while not self._socket.sendto(data, address):
                 pass
         except Exception as e:  # pylint: disable=broad-except
-            raise_from(SpinnmanIOException(str(e)), e)
+            raise SpinnmanIOException(str(e)) from e
 
     @overrides(Connection.close)
     def close(self):

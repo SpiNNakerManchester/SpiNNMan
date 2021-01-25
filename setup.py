@@ -75,9 +75,7 @@ setup(
     install_requires=[
         'SpiNNUtilities >= 1!5.1.1, < 1!6.0.0',
         'SpiNNMachine >= 1!5.1.1, < 1!6.0.0',
-        'enum34',
         'future',
-        'futures; python_version == "2.7"',
         'six'],
     entry_points={
         "console_scripts": [
