@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import struct
-from past.builtins import xrange
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
 from .eieio_command_message import EIEIOCommandMessage
@@ -93,7 +92,7 @@ class HostDataRead(EIEIOCommandMessage):
         region_id = list()
         space_read = list()
 
-        for _ in xrange(n_requests):
+        for _ in range(n_requests):
             channel_ack, region_id_ack, space_read_ack = \
                 _PATTERN_xxBBI.unpack_from(data, offset)
             channel.append(channel_ack)
@@ -108,7 +107,7 @@ class HostDataRead(EIEIOCommandMessage):
         byte_string = super(HostDataRead, self).bytestring
         n_requests = self.n_requests
         byte_string += _PATTERN_BB.pack(n_requests, self.sequence_no)
-        for i in xrange(n_requests):
+        for i in range(n_requests):
             byte_string += _PATTERN_xxBBI.pack(
                 self.channel(i), self.region_id(i), self.space_read(i))
         return byte_string
