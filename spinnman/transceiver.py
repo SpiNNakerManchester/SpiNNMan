@@ -2033,6 +2033,15 @@ class Transceiver(AbstractContextManager):
                     processors_ready = len(cores_in_state)
                     tries = 0
 
+                    # iterate over the cores waiting to finish and see
+                    # which ones we're missing
+                    for core_subset in all_core_subsets.core_subsets:
+                        for p in core_subset.processor_ids:
+                            if ((core_subset.x, core_subset.y, p) not in
+                                    cores_in_state.keys()):
+                                logger.warning("waiting on {}:{}:{}".format(
+                                    core_subset.x, core_subset.y, p))
+
                 # If we're still not in the correct state, wait a bit
                 if processors_ready < len(all_core_subsets):
                     time.sleep(time_between_polls)
