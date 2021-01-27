@@ -13,13 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from six import add_metaclass
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 
 
-@add_metaclass(AbstractBase)
-class Connection(AbstractContextManager):
+class Connection(AbstractContextManager, metaclass=AbstractBase):
     """ An abstract connection to the SpiNNaker board over some medium
     """
 

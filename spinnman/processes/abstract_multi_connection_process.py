@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from six import itervalues
 from .abstract_process import AbstractProcess
 from spinnman.connections import SCPRequestPipeLine
 from spinnman.constants import SCP_TIMEOUT, N_RETRIES
@@ -61,5 +60,5 @@ class AbstractMultiConnectionProcess(AbstractProcess):
             request, callback, error_callback)
 
     def _finish(self):
-        for request_pipeline in itervalues(self._scp_request_pipelines):
+        for request_pipeline in self._scp_request_pipelines.values():
             request_pipeline.finish()

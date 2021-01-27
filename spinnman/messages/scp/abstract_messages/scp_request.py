@@ -14,14 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import struct
-from six import add_metaclass
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 _THREE_WORDS = struct.Struct("<III")
 
 
-@add_metaclass(AbstractBase)
-class AbstractSCPRequest(object):
+class AbstractSCPRequest(object, metaclass=AbstractBase):
     """ Represents an Abstract SCP Request
     """
     __slots__ = [

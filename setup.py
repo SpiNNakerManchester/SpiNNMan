@@ -74,8 +74,7 @@ setup(
     package_data=package_data,
     install_requires=[
         'SpiNNUtilities >= 1!5.1.1, < 1!6.0.0',
-        'SpiNNMachine >= 1!5.1.1, < 1!6.0.0',
-        'six'],
+        'SpiNNMachine >= 1!5.1.1, < 1!6.0.0'],
     entry_points={
         "console_scripts": [
             "get_cores_in_run_state = spinnman.get_cores_in_run_state:main"]
