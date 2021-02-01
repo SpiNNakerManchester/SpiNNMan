@@ -33,7 +33,7 @@ class AbstractProcess(object):
         "_connections", ]
 
     ERROR_MESSAGE = (
-        "failure in request to board %s with ethernet chip (%d, %d) for "
+        "failure in request to board {} with ethernet chip (%d, %d) for "
         "chip (%d, %d, %d)")
 
     def __init__(self):
@@ -74,5 +74,5 @@ class AbstractProcess(object):
                 self._error_requests, self._exceptions, self._tracebacks,
                 self._connections)
             if print_exception:
-                logger.error("%s", str(ex))
+                logger.error("{}".format(str(ex)))
             raise ex
