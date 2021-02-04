@@ -27,7 +27,7 @@ class GetChipInfoResponse(AbstractSCPResponse):
         "_chip_info"]
 
     def __init__(self):
-        super(GetChipInfoResponse, self).__init__()
+        super().__init__()
         self._chip_info = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)

@@ -56,8 +56,7 @@ class HostDataRead(EIEIOCommandMessage):
                 "defined, {2:d} region(s) defined, {3:d} channel(s) "
                 "defined".format(
                     n_requests, len(space_read), len(region_id), len(channel)))
-        super(HostDataRead, self).__init__(EIEIOCommandHeader(
-            EIEIO_COMMAND_IDS.HOST_DATA_READ))
+        super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ))
         self._header = _HostDataReadHeader(n_requests, sequence_no)
         self._acks = _HostDataReadAck(channel, region_id, space_read)
 
@@ -104,7 +103,7 @@ class HostDataRead(EIEIOCommandMessage):
 
     @property
     def bytestring(self):
-        byte_string = super(HostDataRead, self).bytestring
+        byte_string = super().bytestring
         n_requests = self.n_requests
         byte_string += _PATTERN_BB.pack(n_requests, self.sequence_no)
         for i in range(n_requests):

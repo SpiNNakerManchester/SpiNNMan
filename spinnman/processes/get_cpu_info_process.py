@@ -31,7 +31,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(GetCPUInfoProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._cpu_info = list()
 
     def __handle_response(self, x, y, p, response):

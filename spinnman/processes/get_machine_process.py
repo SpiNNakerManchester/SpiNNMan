@@ -71,7 +71,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             AbstractMultiConnectionProcessConnectionSelector
         """
         # pylint: disable=too-many-arguments
-        super(GetMachineProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
 
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}

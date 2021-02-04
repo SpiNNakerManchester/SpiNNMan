@@ -37,7 +37,7 @@ class AbstractMultiConnectionProcess(AbstractProcess):
         :type next_connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(AbstractMultiConnectionProcess, self).__init__()
+        super().__init__()
         self._scp_request_pipelines = dict()
         self._n_retries = n_retries
         self._timeout = timeout

@@ -32,8 +32,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(ReadFixedRouteRoutingEntryProcess, self).__init__(
-            connection_selector)
+        super().__init__(connection_selector)
         self._route = None
 
     def __handle_read_response(self, response):

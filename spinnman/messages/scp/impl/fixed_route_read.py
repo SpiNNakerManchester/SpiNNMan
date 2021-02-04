@@ -45,7 +45,7 @@ class FixedRouteRead(AbstractSCPRequest):
             * If x is out of range
             * If y is out of range
         """
-        super(FixedRouteRead, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -67,7 +67,7 @@ class _FixedRouteResponse(AbstractSCPResponse):
         "_route"]
 
     def __init__(self):
-        super(_FixedRouteResponse, self).__init__()
+        super().__init__()
         self._route = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)

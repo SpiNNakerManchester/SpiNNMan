@@ -40,7 +40,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(GetHeapProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
 
         self._heap_address = None
         self._next_block_address = None

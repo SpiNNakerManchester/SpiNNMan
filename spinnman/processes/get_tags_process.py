@@ -30,7 +30,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(GetTagsProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._tag_info = None
         self._tags = None
 

@@ -29,6 +29,9 @@ class BootConnection(
     """ A connection to the SpiNNaker board that uses UDP to for booting
     """
     __slots__ = []
+    _REPR_TEMPLATE = (
+        "BootConnection(local_host={}, local_port={}, remote_host={}, "
+        "remote_port={})")
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):
@@ -50,12 +53,9 @@ class BootConnection(
         :raise SpinnmanIOException:
             If there is an error setting up the communication channel
         """
-
         if remote_port is None:
             remote_port = UDP_BOOT_CONNECTION_DEFAULT_PORT
-
-        super(BootConnection, self).__init__(
-            local_host, local_port, remote_host, remote_port)
+        super().__init__(local_host, local_port, remote_host, remote_port)
 
     @overrides(SpinnakerBootSender.send_boot_message)
     def send_boot_message(self, boot_message):
@@ -70,8 +70,6 @@ class BootConnection(
         return SpinnakerBootMessage.from_bytestring(data, 0)
 
     def __repr__(self):
-        return\
-            "BootConnection(local_host={}, local_port={}, remote_host={},"\
-            "remote_port={})".format(
-                self.local_ip_address, self.local_port,
-                self.remote_ip_address, self.remote_port)
+        return self._REPR_TEMPLATE.format(
+            self.local_ip_address, self.local_port,
+            self.remote_ip_address, self.remote_port)

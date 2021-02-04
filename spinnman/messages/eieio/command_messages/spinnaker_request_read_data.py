@@ -64,7 +64,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
                     n_requests, len(start_address), len(space_to_be_read),
                     len(region_id), len(channel)))
 
-        super(SpinnakerRequestReadData, self).__init__(EIEIOCommandHeader(
+        super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA))
         self._header = _SpinnakerRequestReadDataHeader(
             x, y, p, n_requests, sequence_no)
@@ -140,7 +140,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
 
     @property
     def bytestring(self):
-        byte_string = super(SpinnakerRequestReadData, self).bytestring
+        byte_string = super().bytestring
         byte_string += _PATTERN_BB.pack(self.x, self.y)
         n_requests = self.n_requests
         processor_and_request = (self.p << 3) | n_requests
