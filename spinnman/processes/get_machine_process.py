@@ -180,8 +180,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if isinstance(request, ReadLink):
             if isinstance(exception, SpinnmanUnexpectedResponseCodeException):
                 return
-        super(GetMachineProcess, self)._receive_error(
-            request, exception, tb, connection)
+        super()._receive_error(request, exception, tb, connection)
 
     def get_machine_details(self, boot_x, boot_y, width, height,
                             repair_machine, ignore_bad_ethernets):
