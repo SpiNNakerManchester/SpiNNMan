@@ -95,7 +95,8 @@ def create_transceiver_from_hostname(
         ignore_chips=None, ignore_cores=None, ignored_links=None,
         auto_detect_bmp=False, scamp_connections=None,
         boot_port_no=None, max_sdram_size=None, repair_machine=False,
-        ignore_bad_ethernets=True, default_report_directory=None):
+        ignore_bad_ethernets=True, default_report_directory=None,
+        report_waiting_logs=False):
     """ Create a Transceiver by creating a :py:class:`~.UDPConnection` to the\
         given hostname on port 17893 (the default SCAMP port), and a\
         :py:class:`~.BootConnection` on port 54321 (the default boot port),\
@@ -153,6 +154,8 @@ def create_transceiver_from_hostname(
         Directory to write any reports too.
         If ``None`` the current directory will be used.
     :type default_report_directory: str or None
+    :param report_waiting_logs:  flag for reporting waiting logs
+    :type report_waiting_logs: bool
     :return: The created transceiver
     :rtype: Transceiver
     :raise SpinnmanIOException:
@@ -199,7 +202,8 @@ def create_transceiver_from_hostname(
         ignore_links=ignored_links, scamp_connections=scamp_connections,
         max_sdram_size=max_sdram_size, repair_machine=repair_machine,
         ignore_bad_ethernets=ignore_bad_ethernets,
-        default_report_directory=default_report_directory)
+        default_report_directory=default_report_directory,
+        report_waiting_logs=report_waiting_logs)
 
 
 class Transceiver(AbstractContextManager):
@@ -248,13 +252,15 @@ class Transceiver(AbstractContextManager):
         "_udp_receive_connections_by_port",
         "_udp_scamp_connections",
         "_version",
-        "_width"]
+        "_width",
+        "_report_waiting_logs"]
 
     def __init__(
             self, version, connections=None, ignore_chips=None,
             ignore_cores=None, ignore_links=None,
             scamp_connections=None, max_sdram_size=None, repair_machine=False,
-            ignore_bad_ethernets=True, default_report_directory=None):
+            ignore_bad_ethernets=True, default_report_directory=None,
+            report_waiting_logs=False):
         """
         :param int version: The version of the board being connected to
         :param list(Connection) connections:
@@ -293,6 +299,8 @@ class Transceiver(AbstractContextManager):
         :param str default_report_directory:
             Directory to write any reports too. If ``None`` the current
             directory will be used.
+        :param report_waiting_logs:  flag for reporting waiting logs
+        :type report_waiting_logs: bool
         :raise SpinnmanIOException:
             If there is an error communicating with the board, or if no
             connections to the board can be found (if connections is ``None``)
@@ -317,6 +325,7 @@ class Transceiver(AbstractContextManager):
         self._app_id_tracker = None
         self._repair_machine = repair_machine
         self._ignore_bad_ethernets = ignore_bad_ethernets
+        self._report_waiting_logs = report_waiting_logs
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -2033,12 +2042,14 @@ class Transceiver(AbstractContextManager):
 
                     # iterate over the cores waiting to finish and see
                     # which ones we're missing
-                    for core_subset in all_core_subsets.core_subsets:
-                        for p in core_subset.processor_ids:
-                            if ((core_subset.x, core_subset.y, p) not in
-                                    cores_in_state.keys()):
-                                logger.warning("waiting on {}:{}:{}".format(
-                                    core_subset.x, core_subset.y, p))
+                    if self._report_waiting_logs:
+                        for core_subset in all_core_subsets.core_subsets:
+                            for p in core_subset.processor_ids:
+                                if ((core_subset.x, core_subset.y, p) not in
+                                        cores_in_state.keys()):
+                                    logger.warning(
+                                        "waiting on {}:{}:{}".format(
+                                            core_subset.x, core_subset.y, p))
 
                 # If we're still not in the correct state, wait a bit
                 if processors_ready < len(all_core_subsets):
