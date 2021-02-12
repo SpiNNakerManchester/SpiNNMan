@@ -43,7 +43,7 @@ class WriteFPGARegister(BMPRequest):
             down to the nearest 32-bit word boundary).
         :param int value: A 32-bit int value to write to the register
         """
-        super(WriteFPGARegister, self).__init__(
+        super().__init__(
             board,
             SCPRequestHeader(command=SCPCommand.CMD_LINK_WRITE),
             argument_1=addr & (~0x3), argument_2=4, argument_3=fpga_num,

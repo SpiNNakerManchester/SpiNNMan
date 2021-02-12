@@ -54,7 +54,7 @@ class SDRAMAlloc(AbstractSCPRequest):
                 "The tag param needs to be between 0 and 255, or None (in "
                 "which case 0 will be used by default)", str(tag))
 
-        super(SDRAMAlloc, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -79,7 +79,7 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         "_size"]
 
     def __init__(self, size):
-        super(_SCPSDRAMAllocResponse, self).__init__()
+        super().__init__()
         self._size = size
         self._base_address = None
 

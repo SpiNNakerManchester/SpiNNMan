@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import struct
-from past.builtins import xrange
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
 from .eieio_command_message import EIEIOCommandMessage
@@ -65,7 +64,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
                     n_requests, len(start_address), len(space_to_be_read),
                     len(region_id), len(channel)))
 
-        super(SpinnakerRequestReadData, self).__init__(EIEIOCommandHeader(
+        super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA))
         self._header = _SpinnakerRequestReadDataHeader(
             x, y, p, n_requests, sequence_no)
@@ -120,7 +119,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         start_address = list()
         space_to_be_read = list()
 
-        for i in xrange(n_requests):
+        for i in range(n_requests):
             if i == 0:
                 request_channel, request_region_id, request_start_address, \
                     request_space_to_be_read = _PATTERN_BBII.unpack_from(
@@ -141,12 +140,12 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
 
     @property
     def bytestring(self):
-        byte_string = super(SpinnakerRequestReadData, self).bytestring
+        byte_string = super().bytestring
         byte_string += _PATTERN_BB.pack(self.x, self.y)
         n_requests = self.n_requests
         processor_and_request = (self.p << 3) | n_requests
 
-        for i in xrange(n_requests):
+        for i in range(n_requests):
             if i == 0:
                 byte_string += _PATTERN_BBBBII.pack(
                     processor_and_request, self.sequence_no,

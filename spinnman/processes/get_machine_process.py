@@ -71,7 +71,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             AbstractMultiConnectionProcessConnectionSelector
         """
         # pylint: disable=too-many-arguments
-        super(GetMachineProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
 
         self._ignore_chips = ignore_chips if ignore_chips is not None else {}
         self._ignore_cores = ignore_cores if ignore_cores is not None else {}
@@ -180,8 +180,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if isinstance(request, ReadLink):
             if isinstance(exception, SpinnmanUnexpectedResponseCodeException):
                 return
-        super(GetMachineProcess, self)._receive_error(
-            request, exception, tb, connection)
+        super()._receive_error(request, exception, tb, connection)
 
     def get_machine_details(self, boot_x, boot_y, width, height,
                             repair_machine, ignore_bad_ethernets):

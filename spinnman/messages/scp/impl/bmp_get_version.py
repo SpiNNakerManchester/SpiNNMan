@@ -32,7 +32,7 @@ class BMPGetVersion(BMPRequest):
             * If the chip coordinates are out of range
             * If the processor is out of range
         """
-        super(BMPGetVersion, self).__init__(
+        super().__init__(
             board, SCPRequestHeader(command=SCPCommand.CMD_VER))
 
     @overrides(AbstractSCPRequest.get_scp_response)

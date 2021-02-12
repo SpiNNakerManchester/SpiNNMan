@@ -43,7 +43,7 @@ class ReadFPGARegister(BMPRequest):
         # inverses all bits of a value, so is basically a inverse mask for the
         # value entered.
         arg1 = register & (~0x3)
-        super(ReadFPGARegister, self).__init__(
+        super().__init__(
             board,
             SCPRequestHeader(command=SCPCommand.CMD_LINK_READ),
             argument_1=arg1, argument_2=4, argument_3=fpga_num)
@@ -60,7 +60,7 @@ class _SCPReadFPGARegisterResponse(BMPResponse):
         "_fpga_register"]
 
     def __init__(self):
-        super(_SCPReadFPGARegisterResponse, self).__init__()
+        super().__init__()
         self._fpga_register = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)

@@ -44,7 +44,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
         """
 
         if base_address is not None:
-            super(SDRAMDeAlloc, self).__init__(
+            super().__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                     destination_cpu=0, destination_chip_x=x,
@@ -56,7 +56,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
                 argument_2=base_address)
             self._read_n_blocks_freed = False
         else:
-            super(SDRAMDeAlloc, self).__init__(
+            super().__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                     destination_cpu=0, destination_chip_x=x,
@@ -83,7 +83,7 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
     def __init__(self, read_n_blocks_freed=False):
         """
         """
-        super(_SCPSDRAMDeAllocResponse, self).__init__()
+        super().__init__()
         self._number_of_blocks_freed = None
         self._read_n_blocks_freed = read_n_blocks_freed
 

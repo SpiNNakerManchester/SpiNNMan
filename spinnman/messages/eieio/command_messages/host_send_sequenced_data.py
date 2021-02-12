@@ -33,7 +33,7 @@ class HostSendSequencedData(EIEIOCommandMessage):
         "_sequence_no"]
 
     def __init__(self, region_id, sequence_no, eieio_data_message):
-        super(HostSendSequencedData, self).__init__(EIEIOCommandHeader(
+        super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.HOST_SEND_SEQUENCED_DATA))
         self._region_id = region_id
         self._sequence_no = sequence_no
@@ -64,6 +64,6 @@ class HostSendSequencedData(EIEIOCommandMessage):
 
     @property
     def bytestring(self):
-        return (super(HostSendSequencedData, self).bytestring +
+        return (super().bytestring +
                 _PATTERN_BB.pack(self._region_id, self._sequence_no) +
                 self._eieio_data_message.bytestring)

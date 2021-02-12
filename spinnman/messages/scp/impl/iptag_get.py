@@ -41,7 +41,7 @@ class IPTagGet(AbstractSCPRequest):
         :param int tag: The tag to get details of, between 0 and 7
         :param int tag: The tag, between 0 and 7
         """
-        super(IPTagGet, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -74,7 +74,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     def __init__(self):
         """
         """
-        super(_SCPIPTagGetResponse, self).__init__()
+        super().__init__()
         self._ip_address = None
         self._mac_address = None
         self._port = None

@@ -17,7 +17,6 @@ import os
 import math
 import time
 import array
-from six import iteritems, PY2
 from .system_variable_boot_values import (
     SystemVariableBootValues, spinnaker_boot_values, SystemVariableDefinition)
 from .spinnaker_boot_message import SpinnakerBootMessage
@@ -74,7 +73,7 @@ class SpinnakerBootMessages(object):
 
         # Set any additional values
         if extra_boot_values is not None:
-            for variable, value in iteritems(extra_boot_values):
+            for variable, value in extra_boot_values.items():
                 spinnaker_boot_value.set_value(variable, value)
 
         # Get the data as an array, to be used later
@@ -100,10 +99,7 @@ class SpinnakerBootMessages(object):
 
         # Byte swap and store the data for later use
         boot_data.byteswap()
-        # tostring() deprecated in 3, tobytes() not present in 2
-        self._boot_data = (
-            boot_data.tostring() if PY2
-            else boot_data.tobytes())  # pylint: disable=no-member
+        self._boot_data = boot_data.tobytes()
         self._n_bytes_to_read = n_words_to_read * 4
 
     @staticmethod

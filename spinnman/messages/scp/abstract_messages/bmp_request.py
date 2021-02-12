@@ -38,7 +38,7 @@ class BMPRequest(AbstractSCPRequest):
             flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
             destination_cpu=BMPRequest.get_first_board(boards),
             destination_chip_x=0, destination_chip_y=0)
-        super(BMPRequest, self).__init__(
+        super().__init__(
             sdp_header, scp_request_header,
             argument_1, argument_2, argument_3, data)
 

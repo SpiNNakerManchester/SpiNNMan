@@ -27,7 +27,7 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(SendSingleCommandProcess, self).__init__(
+        super().__init__(
             connection_selector, n_retries=n_retries, timeout=timeout)
         self._response = None
 

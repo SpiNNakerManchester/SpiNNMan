@@ -29,7 +29,7 @@
 
 # import sys
 import os
-
+from sphinx.ext import apidoc
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -402,11 +402,4 @@ options = ['-o', output_dir, "spinnman"]
 options.extend(filtered_files("spinnman", explicit_wanted_files))
 # Special case: Don't want this empty package at all.
 options.append("spinnman/messages/spinnaker_boot/boot_data/*")
-try:
-    # Old style API; Python 2.7
-    from sphinx import apidoc
-    options = [None] + options
-except ImportError:
-    # New style API; Python 3.6 onwards
-    from sphinx.ext import apidoc
 apidoc.main(options)

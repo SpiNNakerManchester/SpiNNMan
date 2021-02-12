@@ -51,8 +51,7 @@ class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
             this connection
         """
         # pylint: disable=too-many-arguments
-        super(SDPConnection, self).__init__(
-            local_host, local_port, remote_host, remote_port)
+        super().__init__(local_host, local_port, remote_host, remote_port)
         self._chip_x = chip_x
         self._chip_y = chip_y
 

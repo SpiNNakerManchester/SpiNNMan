@@ -30,8 +30,8 @@ class HostDataReadAck(EIEIOCommandMessage):
         "_sequence_no"]
 
     def __init__(self, sequence_no):
-        super(HostDataReadAck, self).__init__(EIEIOCommandHeader(
-            EIEIO_COMMAND_IDS.HOST_DATA_READ_ACK))
+        super().__init__(
+            EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ_ACK))
         self._sequence_no = sequence_no
 
     @property
@@ -46,6 +46,6 @@ class HostDataReadAck(EIEIOCommandMessage):
 
     @property
     def bytestring(self):
-        byte_string = super(HostDataReadAck, self).bytestring
+        byte_string = super().bytestring
         byte_string += _PATTERN_B.pack(self.sequence_no)
         return byte_string

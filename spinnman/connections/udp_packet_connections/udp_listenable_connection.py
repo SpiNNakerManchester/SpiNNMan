@@ -19,13 +19,6 @@ from .udp_connection import UDPConnection
 
 
 class UDPListenableConnection(UDPConnection, Listenable):
-
-    def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=None):
-        super(UDPListenableConnection, self).__init__(
-            local_host=local_host, local_port=local_port,
-            remote_host=remote_host, remote_port=remote_port)
-
     @overrides(Listenable.get_receive_method)
     def get_receive_method(self):
         return self.receive

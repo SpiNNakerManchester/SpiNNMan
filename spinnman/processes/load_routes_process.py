@@ -38,7 +38,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(LoadMultiCastRoutesProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._base_address = None
 
     def __handle_router_alloc_response(self, response):
