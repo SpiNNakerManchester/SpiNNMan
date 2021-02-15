@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
@@ -52,22 +52,23 @@ jobs:
       uses: ./support/actions/pytest
       with:
         tests: unittests
-        coverage: ${{ matrix.python-version == 3.6 }}
+        coverage: ${{ matrix.python-version == 3.8 }}
         cover-packages: spinnman
         coveralls-token: ${{ secrets.COVERALLS_REPO_TOKEN }}
 
     - name: Lint with flake8
       run: flake8 spinnman unittests
     - name: Lint with pylint
+      if: matrix.python-version != 3.9
       uses: ./support/actions/pylint
       with: 
         package: spinnman
 
     - name: Run rat copyright enforcement
-      if: matrix.python-version == 3.6
+      if: matrix.python-version == 3.8
       uses: ./support/actions/check-copyrights
     - name: Build documentation with sphinx
-      if: matrix.python-version == 3.6
+      if: matrix.python-version == 3.8
       uses: ./support/actions/sphinx
       with:
         directory: doc/source
