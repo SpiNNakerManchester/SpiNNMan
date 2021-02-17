@@ -31,7 +31,7 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
         "_tto"]
 
     def __init__(self):
-        super(IPTagGetInfoResponse, self).__init__()
+        super().__init__()
         self._tto = None
         self._pool_size = None
         self._fixed_size = None

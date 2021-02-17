@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from six import add_metaclass
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.scp import SCPResponseHeader
@@ -27,8 +26,7 @@ _SCP_HEADER_OFFSET = 8
 _SCP_DATA_OFFSET = 12
 
 
-@add_metaclass(AbstractBase)
-class AbstractSCPResponse(object):
+class AbstractSCPResponse(object, metaclass=AbstractBase):
     """ Represents an abstract SCP Response.
     """
     __slots__ = [

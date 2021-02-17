@@ -27,8 +27,7 @@ class IPAddressesConnection(UDPConnection):
 
     def __init__(self, local_host=None,
                  local_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
-        super(IPAddressesConnection, self).__init__(
-            local_host=local_host, local_port=local_port)
+        super().__init__(local_host=local_host, local_port=local_port)
 
     def supports_sends_message(self, message):  # @UnusedVariable
         # pylint: disable=unused-argument

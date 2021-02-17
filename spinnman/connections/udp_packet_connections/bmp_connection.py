@@ -43,7 +43,7 @@ class BMPConnection(UDPConnection, SCPReceiver, SCPSender):
         """
         port = SCP_SCAMP_PORT if connection_data.port_num is None\
             else connection_data.port_num
-        super(BMPConnection, self).__init__(
+        super().__init__(
             remote_host=connection_data.ip_address, remote_port=port)
         self._cabinet = connection_data.cabinet
         self._frame = connection_data.frame

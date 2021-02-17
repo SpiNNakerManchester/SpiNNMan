@@ -39,7 +39,7 @@ class SetLED(AbstractSCPRequest):
         for led, state in led_states.items():
             encoded_led_states |= {0: 2, 1: 3, 2: 1}[state] << (2 * led)
 
-        super(SetLED, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=cpu, destination_chip_x=x,

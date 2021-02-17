@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import OrderedDict
-from six import iteritems, iterkeys, itervalues
 
 
 class CPUInfos(object):
@@ -42,7 +41,7 @@ class CPUInfos(object):
 
         :return: iterable of x,y,p core info
         """
-        return iteritems(self._cpu_infos)
+        return iter(self._cpu_infos.items())
 
     def __iter__(self):
         return iter(self._cpu_infos)
@@ -50,7 +49,7 @@ class CPUInfos(object):
     def iteritems(self):
         """ Get an iterable of (x, y, p), cpu_info
         """
-        return iteritems(self._cpu_infos)
+        return iter(self._cpu_infos.items())
 
     def items(self):
         return self._cpu_infos.items()
@@ -61,7 +60,7 @@ class CPUInfos(object):
     def itervalues(self):
         """ Get an iterable of cpu_info.
         """
-        return itervalues(self._cpu_infos)
+        return iter(self._cpu_infos.items())
 
     def keys(self):
         return self._cpu_infos.keys()
@@ -69,7 +68,7 @@ class CPUInfos(object):
     def iterkeys(self):
         """ Get an iterable of (x, y, p).
         """
-        return iterkeys(self._cpu_infos)
+        return iter(self._cpu_infos.keys())
 
     def __len__(self):
         """ The total number of processors that are in these core subsets.

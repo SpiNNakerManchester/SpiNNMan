@@ -43,7 +43,7 @@ class ReadMemory(AbstractSCPRequest):
             * If the size is out of range
         """
         # pylint: disable=too-many-arguments
-        super(ReadMemory, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=cpu, destination_chip_x=x,
@@ -67,7 +67,7 @@ class _SCPReadMemoryResponse(AbstractSCPResponse):
         "_offset"]
 
     def __init__(self):
-        super(_SCPReadMemoryResponse, self).__init__()
+        super().__init__()
         self._data = None
         self._length = None
         self._offset = None

@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import print_function
 import unittest
 import struct
 from spinn_machine import virtual_machine
@@ -36,7 +35,7 @@ class MockWriteTransceiver(Transceiver):
             self, version, connections=None, ignore_chips=None,
             ignore_cores=None, ignore_links=None,
             scamp_connections=None, max_sdram_size=None):
-        super(MockWriteTransceiver, self).__init__(
+        super().__init__(
             version, connections=connections, ignore_chips=ignore_chips,
             ignore_cores=ignore_cores, ignore_links=ignore_links,
             scamp_connections=scamp_connections, max_sdram_size=max_sdram_size)

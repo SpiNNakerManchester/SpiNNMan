@@ -14,8 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import struct
-from past.builtins import xrange
-from six import iterkeys
 from spinnman.model.enums import P2PTableRoute
 
 _ONE_WORD = struct.Struct("<I")
@@ -38,7 +36,7 @@ class P2PTable(object):
         self._routes = dict()
         self._width = width
         self._height = height
-        for x in xrange(len(column_data)):
+        for x in range(len(column_data)):
             y = 0
             pos = 0
             while y < height:
@@ -87,9 +85,9 @@ class P2PTable(object):
     def iterchips(self):
         """ Get an iterator of tuples of (x, y) coordinates in the table
 
-        :rtype: iterable(P2PTableRute)
+        :rtype: iterable(tuple(int,int))
         """
-        return iterkeys(self._routes)
+        return iter(self._routes.keys())
 
     def is_route(self, x, y):
         """ Determines if there is a route in the P2P table to the given chip.

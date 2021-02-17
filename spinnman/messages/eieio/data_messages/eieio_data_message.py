@@ -113,7 +113,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
         :rtype: int
         """
-        return EIEIODataMessage.min_packet_length(
+        return self.min_packet_length(
             eieio_type=self._header.eieio_type,
             is_prefix=self._header.prefix is not None,
             is_payload_base=self._header.payload_base is not None)
@@ -163,9 +163,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                 "Larger than the maximum allowed of {}".format(
                     self._header.eieio_type.max_value))
 
-        EIEIODataMessage.add_element(
-            self, KeyPayloadDataElement(
-                key, payload, self._header.is_time))
+        self.add_element(KeyPayloadDataElement(
+            key, payload, self._header.is_time))
 
     def add_key(self, key):
         """ Add a key to the packet
@@ -180,7 +179,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                 "key", key,
                 "Larger than the maximum allowed of {}".format(
                     self._header.eieio_type.max_value))
-        EIEIODataMessage.add_element(self, KeyDataElement(key))
+        self.add_element(KeyDataElement(key))
 
     def add_element(self, element):
         """ Add an element to the message.  The correct type of element must\

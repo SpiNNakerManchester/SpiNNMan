@@ -30,7 +30,7 @@ class GetVersionProcess(AbstractSingleConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(GetVersionProcess, self).__init__(connection_selector, n_retries)
+        super().__init__(connection_selector, n_retries)
         self._version_info = None
 
     def _get_response(self, version_response):

@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import division
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -55,7 +54,7 @@ class FloodFillData(AbstractSCPRequest):
         argument_1 = _NNP_FORWARD_RETRY | nearest_neighbour_id
         argument_2 = (block_no << 16) | (((self._size // 4) - 1) << 8)
 
-        super(FloodFillData, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0,
@@ -67,7 +66,7 @@ class FloodFillData(AbstractSCPRequest):
 
     @property
     def bytestring(self):
-        datastring = super(FloodFillData, self).bytestring
+        datastring = super().bytestring
         data = self._data_to_write[self._offset:self._offset + self._size]
         return datastring + bytes(data)
 

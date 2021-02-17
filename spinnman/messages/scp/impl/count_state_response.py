@@ -29,7 +29,7 @@ class CountStateResponse(AbstractSCPResponse):
         "_count"]
 
     def __init__(self):
-        super(CountStateResponse, self).__init__()
+        super().__init__()
         self._count = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)

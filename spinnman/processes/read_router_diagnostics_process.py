@@ -37,7 +37,7 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(ReadRouterDiagnosticsProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._control_register = None
         self._error_status = None
         self._register_values = [0] * _N_REGISTERS

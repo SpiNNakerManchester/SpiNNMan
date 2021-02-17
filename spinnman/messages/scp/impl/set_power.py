@@ -60,7 +60,7 @@ class SetPower(BMPRequest):
         arg1 = (int(delay * 1000) << 16) | power_command.value
         arg2 = self.get_board_mask(boards)
 
-        super(SetPower, self).__init__(
+        super().__init__(
             board_to_send_to,
             SCPRequestHeader(command=SCPCommand.CMD_BMP_POWER),
             argument_1=arg1, argument_2=arg2)

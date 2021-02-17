@@ -42,7 +42,7 @@ class WriteMemory(AbstractSCPRequest):
         """
         # pylint: disable=too-many-arguments
         size = len(data)
-        super(WriteMemory, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=cpu, destination_chip_x=x,
@@ -56,8 +56,7 @@ class WriteMemory(AbstractSCPRequest):
 
     @property
     def bytestring(self):
-        datastring = super(WriteMemory, self).bytestring
-        return datastring + bytes(self._data_to_write)
+        return super().bytestring + bytes(self._data_to_write)
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):

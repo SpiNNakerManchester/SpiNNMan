@@ -13,9 +13,5 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-six
-future
-enum34
-futures; python_version == "2.7"
 SpiNNUtilities >= 1!5.1.1, < 1!6.0.0
 SpiNNMachine >= 1!5.1.1, < 1!6.0.0

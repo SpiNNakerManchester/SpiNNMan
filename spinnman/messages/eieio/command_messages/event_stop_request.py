@@ -25,5 +25,4 @@ class EventStopRequest(EIEIOCommandMessage):
     __slots__ = []
 
     def __init__(self):
-        super(EventStopRequest, self).__init__(EIEIOCommandHeader(
-            EIEIO_COMMAND_IDS.EVENT_STOP))
+        super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.EVENT_STOP))

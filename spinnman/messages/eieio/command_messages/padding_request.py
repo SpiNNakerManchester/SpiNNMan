@@ -24,8 +24,7 @@ class PaddingRequest(EIEIOCommandMessage):
     __slots__ = []
 
     def __init__(self):
-        super(PaddingRequest, self).__init__(EIEIOCommandHeader(
-            EIEIO_COMMAND_IDS.EVENT_PADDING))
+        super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.EVENT_PADDING))
 
     @staticmethod
     def get_min_packet_length():

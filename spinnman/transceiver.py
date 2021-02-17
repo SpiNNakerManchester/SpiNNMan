@@ -23,8 +23,6 @@ from collections import defaultdict
 import logging
 import socket
 import time
-from past.builtins import xrange
-from six import raise_from
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import CoreSubsets
@@ -503,9 +501,9 @@ class Transceiver(AbstractContextManager):
             # If it fails to respond due to timeout, maybe that the connection
             # isn't valid
             except SpinnmanTimeoutException as e:
-                raise_from(SpinnmanException(
+                raise SpinnmanException(
                     "BMP connection to {} is not responding".format(
-                        conn.remote_ip_address)), e)
+                        conn.remote_ip_address)) from e
             except Exception:
                 logger.exception("Failed to speak to BMP at {}",
                                  conn.remote_ip_address)
@@ -523,7 +521,7 @@ class Transceiver(AbstractContextManager):
         :return: True if a valid response is received, False otherwise
         :rtype: bool
         """
-        for _ in xrange(_CONNECTION_CHECK_RETRIES):
+        for _ in range(_CONNECTION_CHECK_RETRIES):
             try:
                 sender = SendSingleCommandProcess(connection_selector)
                 chip_info = sender.execute(  # pylint: disable=no-member
@@ -1043,8 +1041,8 @@ class Transceiver(AbstractContextManager):
                         number_of_boards, width, height, extra_boot_values)
                     current_tries_to_go -= 1
                 elif isinstance(e.exception, SpinnmanIOException):
-                    raise_from(SpinnmanIOException(
-                        "Failed to communicate with the machine"), e)
+                    raise SpinnmanIOException(
+                        "Failed to communicate with the machine") from e
                 else:
                     raise
             except SpinnmanTimeoutException:
@@ -1053,8 +1051,8 @@ class Transceiver(AbstractContextManager):
                     number_of_boards, width, height, extra_boot_values)
                 current_tries_to_go -= 1
             except SpinnmanIOException as e:
-                raise_from(SpinnmanIOException(
-                    "Failed to communicate with the machine"), e)
+                raise SpinnmanIOException(
+                    "Failed to communicate with the machine") from e
 
         # The last thing we tried was booting, so try again to get the version
         if version_info is None:

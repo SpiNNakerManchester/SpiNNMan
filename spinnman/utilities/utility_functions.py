@@ -14,8 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import socket
-import sys
-from six import reraise
 from spinnman.model import BMPConnectionData
 from spinnman.messages.sdp import SDPMessage, SDPHeader, SDPFlag
 from spinnman.constants import SCP_SCAMP_PORT, CPU_INFO_BYTES, CPU_INFO_OFFSET
@@ -98,7 +96,7 @@ def reprogram_tag(connection, tag, strip=True):
         connection.chip_x, connection.chip_y, [0, 0, 0, 0], 0, tag,
         strip=strip, use_sender=True)
     data = connection.get_scp_data(request)
-    einfo = None
+    exn = None
     for _ in range(3):
         try:
             connection.send(data)
@@ -106,6 +104,7 @@ def reprogram_tag(connection, tag, strip=True):
                 connection.receive_scp_response()
             request.get_scp_response().read_bytestring(response, offset)
             return
-        except SpinnmanTimeoutException:
-            einfo = sys.exc_info()
-    reraise(*einfo)
+        except SpinnmanTimeoutException as e:
+            exn = e
+    # Should be impossible to get here with exn=None
+    raise exn or Exception

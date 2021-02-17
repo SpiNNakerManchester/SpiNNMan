@@ -48,7 +48,7 @@ class FloodFillStart(AbstractSCPRequest):
             data = (((x & 0xfc) << 24) + ((y & 0xfc) << 16) +
                     (3 << 16) + (1 << m))
 
-        super(FloodFillStart, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0,

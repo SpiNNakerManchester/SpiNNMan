@@ -53,7 +53,7 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
         # pylint: disable=too-many-arguments
         if remote_port is None:
             remote_port = SCP_SCAMP_PORT
-        super(SCAMPConnection, self).__init__(
+        super().__init__(
             chip_x, chip_y, local_host, local_port, remote_host, remote_port)
 
     @property

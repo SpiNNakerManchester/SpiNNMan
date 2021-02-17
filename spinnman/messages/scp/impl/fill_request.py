@@ -38,7 +38,7 @@ class FillRequest(AbstractSCPRequest):
         :param int size: The number of bytes to fill in
         """
         # pylint: disable=too-many-arguments
-        super(FillRequest, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,

@@ -16,7 +16,6 @@
 import sys
 from threading import RLock
 import time
-from six import iteritems
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.constants import SCP_TIMEOUT, N_RETRIES
@@ -260,7 +259,7 @@ class SCPRequestPipeLine(object):
 
         # If there is a timeout, all packets remaining are resent
         to_remove = list()
-        for seq, request_sent in iteritems(self._requests):
+        for seq, request_sent in self._requests.items():
             self._in_progress -= 1
             try:
                 self._resend(seq, request_sent, "timeout")

@@ -38,7 +38,7 @@ class GetVersion(AbstractSCPRequest):
             * If the chip coordinates are out of range
             * If the processor is out of range
         """
-        super(GetVersion, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=p, destination_chip_x=x,
