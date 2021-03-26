@@ -54,7 +54,7 @@ class FloodFillEnd(AbstractSCPRequest):
         if wait:
             data = data | _WAIT_FLAG
 
-        super(FloodFillEnd, self).__init__(
+        super().__init__(
             SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                       destination_cpu=0,
                       destination_chip_x=self.DEFAULT_DEST_X_COORD,

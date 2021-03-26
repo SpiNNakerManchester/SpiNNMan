@@ -24,9 +24,8 @@ class NotificationProtocolStartResume(EIEIOCommandMessage):
     __slots__ = []
 
     def __init__(self):
-        super(NotificationProtocolStartResume, self).__init__(
-            EIEIOCommandHeader(
-                EIEIO_COMMAND_IDS.START_RESUME_NOTIFICATION))
+        super().__init__(EIEIOCommandHeader(
+            EIEIO_COMMAND_IDS.START_RESUME_NOTIFICATION))
 
     @staticmethod
     def from_bytestring(command_header, data, offset):

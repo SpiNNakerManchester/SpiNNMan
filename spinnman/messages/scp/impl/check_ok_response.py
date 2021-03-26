@@ -32,7 +32,7 @@ class CheckOKResponse(AbstractSCPResponse):
         :param command: The command that was sent
         :type command: str or ~enum.Enum or int
         """
-        super(CheckOKResponse, self).__init__()
+        super().__init__()
         self._operation = operation
         self._command = command
 

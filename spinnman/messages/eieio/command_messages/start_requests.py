@@ -26,5 +26,5 @@ class StartRequests(EIEIOCommandMessage):
     __slots__ = []
 
     def __init__(self):
-        super(StartRequests, self).__init__(EIEIOCommandHeader(
+        super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.START_SENDING_REQUESTS))

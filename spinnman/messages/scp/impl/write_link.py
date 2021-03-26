@@ -41,7 +41,7 @@ class WriteLink(AbstractSCPRequest):
         :param bytes data: Up to 256 bytes of data to write
         """
         # pylint: disable=too-many-arguments
-        super(WriteLink, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=cpu, destination_chip_x=x,
@@ -53,8 +53,7 @@ class WriteLink(AbstractSCPRequest):
 
     @property
     def bytestring(self):
-        datastring = super(WriteLink, self).bytestring
-        return datastring + bytes(self._data_to_write)
+        return super().bytestring + bytes(self._data_to_write)
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):

@@ -52,7 +52,7 @@ class BMPSetLed(BMPRequest):
         arg2 = self.get_board_mask(boards)
 
         # initialise the request now
-        super(BMPSetLed, self).__init__(
+        super().__init__(
             boards,
             SCPRequestHeader(command=SCPCommand.CMD_LED),
             argument_1=arg1, argument_2=arg2)

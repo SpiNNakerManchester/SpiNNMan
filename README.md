@@ -9,14 +9,10 @@ Requirements
 ============
 In addition to a standard Python installation, this package depends on:
 
- - six
- - enum34
  - SpiNNMachine
 
 These requirements can be install using pip:
 
-    pip install six
-    pip install enum34
     pip install SpiNNMachine
 
 User Installation
@@ -59,7 +55,5 @@ enabled, run:
 Documentation
 =============
 [SpiNNMan Python documentation](http://spinnman.readthedocs.io)
-
-[Combined PyNN7 python documentation](http://spinnaker7manchester.readthedocs.io)
 
 [Combined PyNN8 python documentation](http://spinnaker8manchester.readthedocs.io)

@@ -46,7 +46,7 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             AbstractMultiConnectionProcessConnectionSelector
         :param int app_id:
         """
-        super(GetMultiCastRoutesProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._entries = [None] * _N_ENTRIES
         self._app_id = app_id
 

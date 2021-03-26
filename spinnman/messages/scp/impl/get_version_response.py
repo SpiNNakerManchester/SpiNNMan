@@ -27,7 +27,7 @@ class GetVersionResponse(AbstractSCPResponse):
         "_version_info"]
 
     def __init__(self):
-        super(GetVersionResponse, self).__init__()
+        super().__init__()
         self._version_info = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)

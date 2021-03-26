@@ -32,7 +32,7 @@ class ReadADC(BMPRequest):
         """
         :param int board: which board to request the ADC register from
         """
-        super(ReadADC, self).__init__(
+        super().__init__(
             board,
             SCPRequestHeader(command=SCPCommand.CMD_BMP_INFO),
             argument_1=BMPInfo.ADC)
@@ -49,7 +49,7 @@ class _SCPReadADCResponse(BMPResponse):
         "_adc_info"]
 
     def __init__(self):
-        super(_SCPReadADCResponse, self).__init__()
+        super().__init__()
         self._adc_info = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)

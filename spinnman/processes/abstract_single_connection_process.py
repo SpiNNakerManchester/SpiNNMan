@@ -33,7 +33,7 @@ class AbstractSingleConnectionProcess(AbstractProcess):
             AbstractMultiConnectionProcessConnectionSelector
         :param int n_retries:
         """
-        super(AbstractSingleConnectionProcess, self).__init__()
+        super().__init__()
         self._scp_request_pipeline = None
         self._connection_selector = connection_selector
         self._n_retries = n_retries

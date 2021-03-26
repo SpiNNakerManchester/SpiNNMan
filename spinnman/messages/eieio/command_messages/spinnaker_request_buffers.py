@@ -34,7 +34,7 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
 
     def __init__(self, x, y, p, region_id, sequence_no, space_available):
         # pylint: disable=too-many-arguments
-        super(SpinnakerRequestBuffers, self).__init__(EIEIOCommandHeader(
+        super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS))
         self._x = x
         self._y = y
@@ -81,7 +81,6 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
 
     @property
     def bytestring(self):
-        return (super(SpinnakerRequestBuffers, self).bytestring +
-                _PATTERN_BBBxBBI.pack(
-                    self._y, self._x, self._p << 3, self._region_id,
-                    self._sequence_no, self._space_available))
+        return (super().bytestring + _PATTERN_BBBxBBI.pack(
+            self._y, self._x, self._p << 3, self._region_id,
+            self._sequence_no, self._space_available))

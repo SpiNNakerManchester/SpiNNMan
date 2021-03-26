@@ -59,7 +59,7 @@ class _Definition(namedtuple("_Definition",
 
     def __new__(cls, data_type, offset, default=0, array_size=None, doc=""):
         # pylint: disable=too-many-arguments
-        return super(_Definition, cls).__new__(
+        return super().__new__(
             cls, offset, data_type, default, array_size, doc)
 
 

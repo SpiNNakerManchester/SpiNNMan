@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2017-2021 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,12 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
--r requirements.txt
-flake8
-numpy > 1.13, < 1.20; python_version == '3.6'
-numpy > 1.13, < 1.21; python_version == '3.7'
-numpy; python_version >= '3.8'
-coverage >= 4.4, < 5.0
-# pytest will be brought in by pytest-cov
-pytest-cov
-sphinx >= 3.0, < 4
+# Files are listed here if they are NOT imported into their directory/module's
+# __init__.py and reexported with __all__.
+
+spinnman/constants.py
+spinnman/get_cores_in_run_state.py
+spinnman/exceptions.py
+spinnman/transceiver.py
+spinnman/messages/multicast_message.py
+spinnman/utilities/utility_functions.py
+spinnman/utilities/appid_tracker.py
+spinnman/utilities/locate_connected_machine_ip_address.py
+spinnman/utilities/reports.py

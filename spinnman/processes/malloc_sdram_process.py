@@ -29,7 +29,7 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(MallocSDRAMProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._base_address = None
 
     def _handle_sdram_alloc_response(self, response):

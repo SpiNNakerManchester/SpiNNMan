@@ -40,7 +40,7 @@ class RouterAlloc(AbstractSCPRequest):
         :param int app_id: The ID of the application, between 0 and 255
         :param int n_entries: The number of entries to allocate
         """
-        super(RouterAlloc, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -65,7 +65,7 @@ class _SCPRouterAllocResponse(AbstractSCPResponse):
     def __init__(self):
         """
         """
-        super(_SCPRouterAllocResponse, self).__init__()
+        super().__init__()
         self._base_address = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)

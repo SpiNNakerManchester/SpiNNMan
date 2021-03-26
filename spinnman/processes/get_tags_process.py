@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import functools
-from past.builtins import xrange
 from spinn_machine.tags import ReverseIPTag, IPTag
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.messages.scp.impl import IPTagGetInfo, IPTagGet
@@ -31,7 +30,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(GetTagsProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._tag_info = None
         self._tags = None
 
@@ -71,7 +70,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         # Get the tags themselves
         n_tags = self._tag_info.pool_size + self._tag_info.fixed_size
         self._tags = [None] * n_tags
-        for tag in xrange(n_tags):
+        for tag in range(n_tags):
             self._send_request(IPTagGet(
                 connection.chip_x, connection.chip_y, tag),
                 functools.partial(

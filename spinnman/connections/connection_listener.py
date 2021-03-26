@@ -44,7 +44,7 @@ class ConnectionListener(Thread, AbstractContextManager):
             How long to wait for messages before checking to see if the
             connection is to be terminated.
         """
-        super(ConnectionListener, self).__init__(
+        super().__init__(
             name="Connection listener for connection {}".format(connection))
         self.daemon = True
         self.__connection = connection

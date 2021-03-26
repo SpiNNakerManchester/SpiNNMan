@@ -31,7 +31,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super(ReadMemoryProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._view = None
 
     def __handle_response(self, offset, response):
