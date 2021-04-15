@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from collections import defaultdict
+from contextlib import suppress
 import logging
 import functools
 import struct
@@ -212,12 +213,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         for (x, y) in p2p_table.iterchips():
             self._send_request(GetChipInfo(x, y), self._receive_chip_info)
         self._finish()
-        try:
-            self.check_for_error()
-        except Exception:  # pylint: disable=broad-except
-            # Ignore errors so far, as any error here just means that a chip
+        with suppress(Exception):
+            # Ignore errors, as any error here just means that a chip
             # is down that wasn't marked as down
-            pass
+            self.check_for_error()
 
         # Warn about unexpected missing chips
         for (x, y) in p2p_table.iterchips():

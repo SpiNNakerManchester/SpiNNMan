@@ -91,6 +91,8 @@ def reprogram_tag(connection, tag, strip=True):
     :param int tag: The id of the tag to set
     :param bool strip:
         True if the tag should strip SDP headers from outgoing messages
+    :raises SpinnmanTimeoutException:
+        If things time out several times
     """
     request = IPTagSet(
         connection.chip_x, connection.chip_y, [0, 0, 0, 0], 0, tag,
@@ -100,8 +102,7 @@ def reprogram_tag(connection, tag, strip=True):
     for _ in range(3):
         try:
             connection.send(data)
-            _, _, response, offset = \
-                connection.receive_scp_response()
+            _, _, response, offset = connection.receive_scp_response()
             request.get_scp_response().read_bytestring(response, offset)
             return
         except SpinnmanTimeoutException as e:

@@ -75,7 +75,7 @@ class ConnectionListener(Thread, AbstractContextManager):
     def run(self):
         """ Implements the listening thread.
         """
-        try:
+        with self.__callback_pool:
             handler = self.__connection.get_receive_method()
             while not self.__done:
                 try:
@@ -84,9 +84,6 @@ class ConnectionListener(Thread, AbstractContextManager):
                     if not self.__done:
                         logger.warning("problem when dispatching message",
                                        exc_info=True)
-        finally:
-            self.__callback_pool.shutdown()
-            self.__callback_pool = None
 
     def add_callback(self, callback):
         """ Add a callback to be called when a message is received

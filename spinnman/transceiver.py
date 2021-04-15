@@ -20,7 +20,7 @@ import random
 import struct
 from threading import Condition, RLock
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 import logging
 import socket
 import time
@@ -1035,12 +1035,10 @@ class Transceiver(AbstractContextManager):
 
         # The last thing we tried was booting, so try again to get the version
         if version_info is None:
-            try:
+            with suppress(SpinnmanException):
                 version_info = self.get_scamp_version()
                 if self.__is_default_destination(version_info):
                     version_info = None
-            except SpinnmanException:
-                pass
         if version_info is not None:
             logger.info("Found board with version {}", version_info)
         return version_info
