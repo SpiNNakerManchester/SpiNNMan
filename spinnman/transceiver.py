@@ -20,6 +20,7 @@ import random
 import struct
 from threading import Condition, RLock
 from collections import defaultdict
+from contextlib import contextmanager
 import logging
 import socket
 import time
@@ -88,6 +89,7 @@ _TWO_BYTES = struct.Struct("<BB")
 _FOUR_BYTES = struct.Struct("<BBBB")
 _ONE_WORD = struct.Struct("<I")
 _ONE_LONG = struct.Struct("<Q")
+_EXECUTABLE_ADDRESS = 0x67800000
 
 
 def create_transceiver_from_hostname(
@@ -405,7 +407,7 @@ class Transceiver(AbstractContextManager):
         # checked or updated
         # The write lock condition should also be acquired to avoid a flood
         # fill during an individual chip execute
-        self._chip_execute_locks = dict()
+        self._chip_execute_locks = defaultdict(Condition)
         self._chip_execute_lock_condition = Condition()
         self._n_chip_execute_locks = 0
 
@@ -537,66 +539,43 @@ class Transceiver(AbstractContextManager):
                 break
         return False
 
-    def _get_chip_execute_lock(self, x, y):
+    @contextmanager
+    def _chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
 
         :param int x:
         :param int y:
         """
-
-        key = (x, y)
         # Check if there is a lock for the given chip
         with self._chip_execute_lock_condition:
-            if key not in self._chip_execute_locks:
-                chip_lock = Condition()
-                self._chip_execute_locks[key] = chip_lock
-            else:
-                chip_lock = self._chip_execute_locks[key]
-
-        # Get the lock for the chip
+            chip_lock = self._chip_execute_locks[x, y]
+        # Acquire the lock for the chip
         chip_lock.acquire()
 
         # Increment the lock counter (used for the flood lock)
         with self._chip_execute_lock_condition:
             self._n_chip_execute_locks += 1
 
-    def _release_chip_execute_lock(self, x, y):
-        """ Release the lock for executing on a chip
+        try:
+            yield chip_lock
+        finally:
+            with self._chip_execute_lock_condition:
+                # Release the chip lock
+                chip_lock.release()
+                # Decrement the lock and notify
+                self._n_chip_execute_locks -= 1
+                self._chip_execute_lock_condition.notify_all()
 
-        :param int x:
-        :param int y:
-        """
-
-        # Get the chip lock
-        with self._chip_execute_lock_condition:
-            chip_lock = self._chip_execute_locks[x, y]
-
-            # Release the chip lock
-            chip_lock.release()
-
-            # Decrement the lock and notify
-            self._n_chip_execute_locks -= 1
-            self._chip_execute_lock_condition.notify_all()
-
-    def _get_flood_execute_lock(self):
+    @contextmanager
+    def _flood_execute_lock(self):
         """ Get a lock for executing a flood fill of an executable
         """
-
         # Get the execute lock all together, so nothing can access it
-        self._chip_execute_lock_condition.acquire()
-
-        # Wait until nothing is executing
-        while self._n_chip_execute_locks > 0:
-            self._chip_execute_lock_condition.wait()
-
-        # When nothing is executing, we can return here
-
-    def _release_flood_execute_lock(self):
-        """ Release the lock for executing a flood fill
-        """
-
-        # Release the execute lock
-        self._chip_execute_lock_condition.release()
+        with self._chip_execute_lock_condition:
+            # Wait until nothing is executing
+            self._chip_execute_lock_condition.wait_for(
+                lambda: self._n_chip_execute_locks < 1)
+            yield self._chip_execute_lock_condition
 
     @staticmethod
     def _get_random_connection(connections):
@@ -1347,7 +1326,7 @@ class Transceiver(AbstractContextManager):
 
             * An instance of RawIOBase
             * A bytearray/bytes
-            * A filename of a file containing the executable (in which case\
+            * A filename of a file containing the executable (in which case
               `is_filename` must be set to True)
         :type executable:
             ~io.RawIOBase or bytes or bytearray or str
@@ -1357,7 +1336,7 @@ class Transceiver(AbstractContextManager):
             The size of the executable data in bytes. If not specified:
 
             * If executable is an RawIOBase, an error is raised
-            * If executable is a bytearray, the length of the bytearray will\
+            * If executable is a bytearray, the length of the bytearray will
               be used
             * If executable is an int, 4 will be used
             * If executable is a str, the length of the file will be used
@@ -1376,22 +1355,16 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-
         # Lock against updates
-        self._get_chip_execute_lock(x, y)
+        with self._chip_execute_lock(x, y):
+            # Write the executable
+            self.write_memory(
+                x, y, _EXECUTABLE_ADDRESS, executable, n_bytes,
+                is_filename=is_filename)
 
-        # Write the executable
-        EXECUTABLE_ADDRESS = 0x67800000
-        self.write_memory(
-            x, y, EXECUTABLE_ADDRESS, executable, n_bytes,
-            is_filename=is_filename)
-
-        # Request the start of the executable
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(ApplicationRun(app_id, x, y, processors, wait))
-
-        # Release the lock
-        self._release_chip_execute_lock(x, y)
+            # Request the start of the executable
+            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process.execute(ApplicationRun(app_id, x, y, processors, wait))
 
     def _get_next_nearest_neighbour_id(self):
         with self._nearest_neighbour_lock:
@@ -1413,7 +1386,7 @@ class Transceiver(AbstractContextManager):
 
             * An instance of RawIOBase
             * A bytearray
-            * A filename of an executable (in which case `is_filename` must be\
+            * A filename of an executable (in which case `is_filename` must be
               set to True)
         :type executable:
             ~io.RawIOBase or bytes or bytearray or str
@@ -1423,7 +1396,7 @@ class Transceiver(AbstractContextManager):
             The size of the executable data in bytes. If not specified:
 
             * If `executable` is an RawIOBase, an error is raised
-            * If `executable` is a bytearray, the length of the bytearray will\
+            * If `executable` is a bytearray, the length of the bytearray will
               be used
             * If `executable` is an int, 4 will be used
             * If `executable` is a str, the length of the file will be used
@@ -1446,18 +1419,15 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         # Lock against other executable's
-        self._get_flood_execute_lock()
+        with self._flood_execute_lock():
+            # Flood fill the system with the binary
+            self.write_memory_flood(
+                _EXECUTABLE_ADDRESS, executable, n_bytes,
+                is_filename=is_filename)
 
-        # Flood fill the system with the binary
-        self.write_memory_flood(
-            0x67800000, executable, n_bytes, is_filename=is_filename)
-
-        # Execute the binary on the cores on the chips where required
-        process = ApplicationRunProcess(self._scamp_connection_selector)
-        process.run(app_id, core_subsets, wait)
-
-        # Release the lock
-        self._release_flood_execute_lock()
+            # Execute the binary on the cores on the chips where required
+            process = ApplicationRunProcess(self._scamp_connection_selector)
+            process.run(app_id, core_subsets, wait)
 
     def execute_application(self, executable_targets, app_id):
         """ Execute a set of binaries that make up a complete application\
