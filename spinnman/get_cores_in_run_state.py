@@ -108,11 +108,8 @@ def main():
     except ImportError:
         print("cannot read board test configuration")
         sys.exit(1)
-    transceiver = _make_transceiver(config, args.host)
-    try:
+    with _make_transceiver(config, args.host) as transceiver:
         get_cores_in_run_state(transceiver, app_id, print_chips)
-    finally:
-        transceiver.close()
 
 
 if __name__ == "__main__":  # pragma: no cover

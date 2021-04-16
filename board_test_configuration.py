@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import configparser
+from contextlib import closing
 import os
 import socket
 import unittest
@@ -61,12 +62,9 @@ class BoardTestConfiguration(object):
         self.auto_detect_bmp = \
             self._config.getboolean("Machine", "auto_detect_bmp")
         self.localport = _PORT
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
+        with closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM)) as s:
             s.connect((self.remotehost, _PORT))
             self.localhost = s.getsockname()[0]
-        finally:
-            s.close()
 
     def set_up_nonexistent_board(self):
         self.localhost = None

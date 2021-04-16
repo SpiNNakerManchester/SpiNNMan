@@ -12,9 +12,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from .udp_connection import UDPConnection
+from contextlib import suppress
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
+from .udp_connection import UDPConnection
 
 _BOOTROM_SPINN_PORT = 54321  # Matches SPINN_PORT in spinnaker_bootROM
 
@@ -34,12 +34,10 @@ class IPAddressesConnection(UDPConnection):
         return False
 
     def receive_ip_address(self, timeout=None):
-        try:
+        with suppress(Exception):
             (_, (ip_address, port)) = self.receive_with_address(timeout)
             if port == _BOOTROM_SPINN_PORT:
                 return ip_address
-        except Exception:  # pylint: disable=broad-except
-            pass
         return None
 
     def __repr__(self):

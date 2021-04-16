@@ -345,12 +345,9 @@ def print_transceiver_tests(transceiver):
             print(heap_element)
 
 
-_transceiver = create_transceiver_from_hostname(
-    board_config.remotehost, board_config.board_version,
-    ignore_cores=down_cores, ignore_chips=down_chips,
-    bmp_connection_data=board_config.bmp_names,
-    auto_detect_bmp=board_config.auto_detect_bmp)
-try:
+with create_transceiver_from_hostname(
+        board_config.remotehost, board_config.board_version,
+        ignore_cores=down_cores, ignore_chips=down_chips,
+        bmp_connection_data=board_config.bmp_names,
+        auto_detect_bmp=board_config.auto_detect_bmp) as _transceiver:
     print_transceiver_tests(_transceiver)
-finally:
-    _transceiver.close()

@@ -16,6 +16,7 @@
 import logging
 import socket
 import select
+from contextlib import suppress
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
@@ -211,10 +212,8 @@ class UDPConnection(Connection):
 
     @overrides(Connection.close)
     def close(self):
-        try:
+        with suppress(Exception):
             self._socket.shutdown(socket.SHUT_WR)
-        except Exception:  # pylint: disable=broad-except
-            pass
         self._socket.close()
 
     def is_ready_to_receive(self, timeout=0):

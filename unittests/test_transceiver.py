@@ -70,10 +70,8 @@ class TestTransceiver(unittest.TestCase):
         connections = set()
         connections.add(SCAMPConnection(
             remote_host=board_config.remotehost))
-        trans = transceiver.Transceiver(ver, connections=connections)
-
-        assert trans.get_connections() == connections
-        trans.close()
+        with transceiver.Transceiver(ver, connections=connections) as trans:
+            assert trans.get_connections() == connections
 
     def test_create_new_transceiver_from_list_connections(self):
         board_config.set_up_remote_board()
@@ -83,13 +81,12 @@ class TestTransceiver(unittest.TestCase):
         board_config.set_up_local_virtual_board()
         connections.append(BootConnection(
             remote_host=board_config.remotehost))
-        trans = transceiver.Transceiver(ver, connections=connections)
-        instantiated_connections = trans.get_connections()
+        with transceiver.Transceiver(ver, connections=connections) as trans:
+            instantiated_connections = trans.get_connections()
 
-        for connection in connections:
-            assert connection in instantiated_connections
-        # assert trans.get_connections() == connections
-        trans.close()
+            for connection in connections:
+                assert connection in instantiated_connections
+            # assert trans.get_connections() == connections
 
     def test_retrieving_machine_details(self):
         board_config.set_up_remote_board()
@@ -99,31 +96,27 @@ class TestTransceiver(unittest.TestCase):
         board_config.set_up_local_virtual_board()
         connections.append(BootConnection(
             remote_host=board_config.remotehost))
-        trans = transceiver.Transceiver(ver, connections=connections)
+        with transceiver.Transceiver(ver, connections=connections) as trans:
+            if board_config.board_version in (2, 3):
+                assert trans.get_machine_dimensions().width == 2
+                assert trans.get_machine_dimensions().height == 2
+            elif board_config.board_version in (4, 5):
+                assert trans.get_machine_dimensions().width == 8
+                assert trans.get_machine_dimensions().height == 8
+            else:
+                size = trans.get_machine_dimensions()
+                print(f"Unknown board with size {size.width} x {size.height}")
 
-        if board_config.board_version == 3 or board_config.board_version == 2:
-            assert trans.get_machine_dimensions().width == 2
-            assert trans.get_machine_dimensions().height == 2
-        elif (board_config.board_version == 5 or
-                board_config.board_version == 4):
-            assert trans.get_machine_dimensions().width == 8
-            assert trans.get_machine_dimensions().height == 8
-        else:
-            size = trans.get_machine_dimensions()
-            print("Unknown board with x size {0:d} and y size {1:d}".format(
-                size.width, size.height))
-        assert trans.is_connected()
-        print(trans.get_scamp_version())
-        print(trans.get_cpu_information())
-        trans.close()
+            assert trans.is_connected()
+            print(trans.get_scamp_version())
+            print(trans.get_cpu_information())
 
     def test_boot_board(self):
         board_config.set_up_remote_board()
-        trans = transceiver.create_transceiver_from_hostname(
-            board_config.remotehost, board_config.board_version)
-        # self.assertFalse(trans.is_connected())
-        trans.boot_board()
-        trans.close()
+        with transceiver.create_transceiver_from_hostname(
+                board_config.remotehost, board_config.board_version) as trans:
+            # self.assertFalse(trans.is_connected())
+            trans.boot_board()
 
     def test_listener_creation(self):
         # Tests the creation of listening sockets
@@ -136,24 +129,23 @@ class TestTransceiver(unittest.TestCase):
         connections.append(orig_connection)
 
         # Create transceiver
-        trnx = Transceiver(version=5, connections=connections)
+        with Transceiver(version=5, connections=connections) as trnx:
+            # Register a UDP listeners
+            connection_1 = trnx.register_udp_listener(
+                callback=None, connection_class=EIEIOConnection)
+            connection_2 = trnx.register_udp_listener(
+                callback=None, connection_class=EIEIOConnection)
+            connection_3 = trnx.register_udp_listener(
+                callback=None, connection_class=EIEIOConnection,
+                local_port=orig_connection.local_port)
+            connection_4 = trnx.register_udp_listener(
+                callback=None, connection_class=EIEIOConnection,
+                local_port=orig_connection.local_port + 1)
 
-        # Register a UDP listeners
-        connection_1 = trnx.register_udp_listener(
-            callback=None, connection_class=EIEIOConnection)
-        connection_2 = trnx.register_udp_listener(
-            callback=None, connection_class=EIEIOConnection)
-        connection_3 = trnx.register_udp_listener(
-            callback=None, connection_class=EIEIOConnection,
-            local_port=orig_connection.local_port)
-        connection_4 = trnx.register_udp_listener(
-            callback=None, connection_class=EIEIOConnection,
-            local_port=orig_connection.local_port + 1)
-
-        assert connection_1 == orig_connection
-        assert connection_2 == orig_connection
-        assert connection_3 == orig_connection
-        assert connection_4 != orig_connection
+            assert connection_1 == orig_connection
+            assert connection_2 == orig_connection
+            assert connection_3 == orig_connection
+            assert connection_4 != orig_connection
 
     def test_set_watch_dog(self):
         connections = []
