@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
 import unittest
 from spinn_utilities.config_holder import run_config_checks
 from spinnman.config_setup import reset_configs
@@ -25,4 +26,7 @@ class TestCfgChecker(unittest.TestCase):
         reset_configs()
 
     def test_config_checks(self):
-        run_config_checks("spinnman", exceptions="test.cfg")
+        unittests = os.path.dirname(__file__)
+        parent = os.path.dirname(unittests)
+        spinnman = os.path.join(parent, "spinnman")
+        run_config_checks(directories=[spinnman, unittests])
