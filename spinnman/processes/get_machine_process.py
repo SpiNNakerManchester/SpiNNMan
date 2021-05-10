@@ -177,7 +177,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         super()._receive_error(request, exception, tb, connection)
 
     def get_machine_details(self, boot_x, boot_y, width, height,
-                            repair_machine, ignore_bad_ethernets):
+                            repair_machineXX, ignore_bad_ethernetsXX):
         """
         :param int boot_x:
         :param int boot_y:

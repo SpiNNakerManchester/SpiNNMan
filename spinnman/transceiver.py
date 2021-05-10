@@ -24,6 +24,7 @@ from contextlib import contextmanager, suppress
 import logging
 import socket
 import time
+from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import CoreSubsets
@@ -95,9 +96,7 @@ _EXECUTABLE_ADDRESS = 0x67800000
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         auto_detect_bmp=False, scamp_connections=None,
-        boot_port_no=None, repair_machine=False,
-        ignore_bad_ethernets=True, default_report_directory=None,
-        report_waiting_logs=False):
+        boot_port_no=None, default_report_directory=None):
     """ Create a Transceiver by creating a :py:class:`~.UDPConnection` to the\
         given hostname on port 17893 (the default SCAMP port), and a\
         :py:class:`~.BootConnection` on port 54321 (the default boot port),\
@@ -120,27 +119,10 @@ def create_transceiver_from_hostname(
     :param int boot_port_no: the port number used to boot the machine
     :param list(SCAMPConnection) scamp_connections:
         the list of connections used for SCAMP communications
-    :param bool repair_machine:
-        Flag to set the behaviour if a repairable error
-        is found on the machine.
-        If ``True`` will create a machine without the problematic bits.
-        (See :py:func:`~spinn_machine.machine_factory.machine_repair`.)
-        If ``False`` get machine will raise an Exception if a problematic
-        machine is discovered.
-    :param bool ignore_bad_ethernets:
-        Flag to say that ip_address information
-        on non-Ethernet chips should be ignored.
-        Non-ethernet chips are defined here as ones that do not report
-        themselves as their nearest Ethernet.
-        The bad IP address is always logged.
-        If ``True`` the IP address is ignored.
-        If ``False`` the chip with the bad IP address is removed.
     :param default_report_directory:
         Directory to write any reports too.
         If ``None`` the current directory will be used.
     :type default_report_directory: str or None
-    :param report_waiting_logs:  flag for reporting waiting logs
-    :type report_waiting_logs: bool
     :return: The created transceiver
     :rtype: Transceiver
     :raise SpinnmanIOException:
@@ -183,10 +165,7 @@ def create_transceiver_from_hostname(
 
     return Transceiver(
         version, connections=connections, scamp_connections=scamp_connections,
-        repair_machine=repair_machine,
-        ignore_bad_ethernets=ignore_bad_ethernets,
-        default_report_directory=default_report_directory,
-        report_waiting_logs=report_waiting_logs)
+        default_report_directory=default_report_directory)
 
 
 class Transceiver(AbstractContextManager):
@@ -213,7 +192,6 @@ class Transceiver(AbstractContextManager):
         "_default_report_directory",
         "_flood_write_lock",
         "_height",
-        "_ignore_bad_ethernets",
         "_iobuf_size",
         "_machine",
         "_machine_off",
@@ -222,7 +200,6 @@ class Transceiver(AbstractContextManager):
         "_nearest_neighbour_id",
         "_nearest_neighbour_lock",
         "_original_connections",
-        "_repair_machine",
         "_scamp_connection_selector",
         "_scamp_connections",
         "_scp_sender_connections",
@@ -231,13 +208,11 @@ class Transceiver(AbstractContextManager):
         "_udp_receive_connections_by_port",
         "_udp_scamp_connections",
         "_version",
-        "_width",
-        "_report_waiting_logs"]
+        "_width"]
 
     def __init__(
             self, version, connections=None, scamp_connections=None,
-            repair_machine=False, ignore_bad_ethernets=True,
-            default_report_directory=None, report_waiting_logs=False):
+            default_report_directory=None):
         """
         :param int version: The version of the board being connected to
         :param list(Connection) connections:
@@ -245,26 +220,9 @@ class Transceiver(AbstractContextManager):
             communication will be possible until connections are found.
         :param list(SocketAddressWithChip) scamp_connections:
             a list of SCAMP connection data or None
-        :param bool repair_machine:
-            Flag to set the behaviour if a repairable error
-            is found on the machine.
-            If ``True`` will create a machine without the problematic bits.
-            (See :py:func:`~spinn_machine.machine_factory.machine_repair`.)
-            If ``False`` get machine will raise an Exception if a problematic
-            machine is discovered.
-        :param bool ignore_bad_ethernets:
-            Flag to say that ip_address information
-            on non-Ethernet chips should be ignored.
-            Non-Ethernet chips are defined here as ones that do not report
-            themselves their nearest Ethernet.
-            The bad IP address is always logged.
-            If ``True`` the IP address is ignored.
-            If ``False`` the chip with the bad IP address is removed.
         :param str default_report_directory:
             Directory to write any reports too. If ``None`` the current
             directory will be used.
-        :param report_waiting_logs:  flag for reporting waiting logs
-        :type report_waiting_logs: bool
         :raise SpinnmanIOException:
             If there is an error communicating with the board, or if no
             connections to the board can be found (if connections is ``None``)
@@ -283,9 +241,6 @@ class Transceiver(AbstractContextManager):
         self._height = None
         self._iobuf_size = None
         self._app_id_tracker = None
-        self._repair_machine = repair_machine
-        self._ignore_bad_ethernets = ignore_bad_ethernets
-        self._report_waiting_logs = report_waiting_logs
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -600,8 +555,7 @@ class Transceiver(AbstractContextManager):
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector, self._default_report_directory)
         self._machine = get_machine_process.get_machine_details(
-            version_info.x, version_info.y, self._width, self._height,
-            self._repair_machine, self._ignore_bad_ethernets)
+            version_info.x, version_info.y, self._width, self._height)
 
         # update the SCAMP selector with the machine
         self._scamp_connection_selector.set_machine(self._machine)
@@ -1966,7 +1920,7 @@ class Transceiver(AbstractContextManager):
 
                     # iterate over the cores waiting to finish and see
                     # which ones we're missing
-                    if self._report_waiting_logs:
+                    if get_config_bool("Machine", "report_waiting_logs"):
                         for core_subset in all_core_subsets.core_subsets:
                             for p in core_subset.processor_ids:
                                 if ((core_subset.x, core_subset.y, p) not in
