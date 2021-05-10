@@ -95,7 +95,7 @@ _EXECUTABLE_ADDRESS = 0x67800000
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         auto_detect_bmp=False, scamp_connections=None,
-        boot_port_no=None, max_sdram_size=None, repair_machine=False,
+        boot_port_no=None, repair_machine=False,
         ignore_bad_ethernets=True, default_report_directory=None,
         report_waiting_logs=False):
     """ Create a Transceiver by creating a :py:class:`~.UDPConnection` to the\
@@ -120,10 +120,6 @@ def create_transceiver_from_hostname(
     :param int boot_port_no: the port number used to boot the machine
     :param list(SCAMPConnection) scamp_connections:
         the list of connections used for SCAMP communications
-    :param max_sdram_size:
-        the max size each chip can say it has for SDRAM
-        (mainly used in debugging purposes)
-    :type max_sdram_size: int or None
     :param bool repair_machine:
         Flag to set the behaviour if a repairable error
         is found on the machine.
@@ -187,7 +183,7 @@ def create_transceiver_from_hostname(
 
     return Transceiver(
         version, connections=connections, scamp_connections=scamp_connections,
-        max_sdram_size=max_sdram_size, repair_machine=repair_machine,
+        repair_machine=repair_machine,
         ignore_bad_ethernets=ignore_bad_ethernets,
         default_report_directory=default_report_directory,
         report_waiting_logs=report_waiting_logs)
@@ -221,7 +217,6 @@ class Transceiver(AbstractContextManager):
         "_iobuf_size",
         "_machine",
         "_machine_off",
-        "_max_sdram_size",
         "_multicast_sender_connections",
         "_n_chip_execute_locks",
         "_nearest_neighbour_id",
@@ -241,17 +236,13 @@ class Transceiver(AbstractContextManager):
 
     def __init__(
             self, version, connections=None, scamp_connections=None,
-            max_sdram_size=None, repair_machine=False,
-            ignore_bad_ethernets=True, default_report_directory=None,
-            report_waiting_logs=False):
+            repair_machine=False, ignore_bad_ethernets=True,
+            default_report_directory=None, report_waiting_logs=False):
         """
         :param int version: The version of the board being connected to
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
-        :param max_sdram_size: the max size each chip can say it has for SDRAM
-            (mainly used in debugging purposes)
-        :type max_sdram_size: int or None
         :param list(SocketAddressWithChip) scamp_connections:
             a list of SCAMP connection data or None
         :param bool repair_machine:
@@ -290,7 +281,6 @@ class Transceiver(AbstractContextManager):
         self._machine = None
         self._width = None
         self._height = None
-        self._max_sdram_size = max_sdram_size
         self._iobuf_size = None
         self._app_id_tracker = None
         self._repair_machine = repair_machine
@@ -608,8 +598,7 @@ class Transceiver(AbstractContextManager):
 
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
-            self._scamp_connection_selector, self._max_sdram_size,
-            self._default_report_directory)
+            self._scamp_connection_selector, self._default_report_directory)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height,
             self._repair_machine, self._ignore_bad_ethernets)

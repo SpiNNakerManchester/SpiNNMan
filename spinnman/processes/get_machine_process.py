@@ -19,7 +19,7 @@ import logging
 import functools
 import struct
 from os.path import join
-from spinn_utilities.config_holder import get_config_str
+from spinn_utilities.config_holder import get_config_int, get_config_str
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Router, Chip, SDRAM, Link, machine_from_size)
@@ -51,7 +51,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         "_ethernets",
         # Holds a map from x,y to a set of virtual cores to ignores
         "_ignore_cores_map",
-        "_max_sdram_size",
         "_p2p_column_data",
         # Used if there are any ignore core requests
         # Holds a mapping from (x,y) to a mapping of phsyical to virtual core
@@ -62,8 +61,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Kept as None until first write
         "_report_file"]
 
-    def __init__(self, connection_selector, max_sdram_size=None,
-                 default_report_directory=None):
+    def __init__(self, connection_selector, default_report_directory=None):
         """
         :param connection_selector:
         :type connection_selector:
@@ -73,8 +71,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         super().__init__(connection_selector)
 
         self._ignore_cores_map = defaultdict(set)
-
-        self._max_sdram_size = max_sdram_size
 
         self._p2p_column_data = list()
 
@@ -114,9 +110,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
-        if (self._max_sdram_size is not None and
-                sdram_size > self._max_sdram_size):
-            sdram_size = self._max_sdram_size
+        max_sdram_size = get_config_int(
+            "Machine", "max_sdram_allowed_per_chip")
+        if (max_sdram_size is not None and
+                sdram_size > max_sdram_size):
+            sdram_size = max_sdram_size
         sdram = SDRAM(size=sdram_size)
 
         # Create the chip
