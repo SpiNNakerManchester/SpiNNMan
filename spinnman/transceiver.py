@@ -94,7 +94,6 @@ _EXECUTABLE_ADDRESS = 0x67800000
 
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
-        ignore_chips=None, ignore_cores=None, ignored_links=None,
         auto_detect_bmp=False, scamp_connections=None,
         boot_port_no=None, max_sdram_size=None, repair_machine=False,
         ignore_bad_ethernets=True, default_report_directory=None,
@@ -110,18 +109,6 @@ def create_transceiver_from_hostname(
     :param number_of_boards: a number of boards expected to be supported, or
         ``None``, which defaults to a single board
     :type number_of_boards: int or None
-    :param set(tuple(int,int)) ignore_chips:
-        An optional set of chips to ignore in the machine.
-        Requests for a "machine" will have these chips excluded, as if they
-        never existed. The processor_ids of the specified chips are ignored.
-    :param set(tuple(int,int,int)) ignore_cores:
-        An optional set of cores to ignore in the machine.
-        Requests for a "machine" will have these cores excluded, as if they
-        never existed.
-    :param set(tuple(int,int,int)) ignored_links:
-        An optional set of links to ignore in the machine.
-        Requests for a "machine" will have these links excluded, as if they
-        never existed.
     :param int version: the type of SpiNNaker board used within the SpiNNaker
         machine being used. If a spinn-5 board, then the version will be 5,
         spinn-3 would equal 3 and so on.
@@ -199,9 +186,7 @@ def create_transceiver_from_hostname(
         remote_host=hostname, remote_port=boot_port_no))
 
     return Transceiver(
-        version, connections=connections, ignore_chips=ignore_chips,
-        ignore_cores=ignore_cores,
-        ignore_links=ignored_links, scamp_connections=scamp_connections,
+        version, connections=connections, scamp_connections=scamp_connections,
         max_sdram_size=max_sdram_size, repair_machine=repair_machine,
         ignore_bad_ethernets=ignore_bad_ethernets,
         default_report_directory=default_report_directory,
@@ -233,9 +218,6 @@ class Transceiver(AbstractContextManager):
         "_flood_write_lock",
         "_height",
         "_ignore_bad_ethernets",
-        "_ignore_chips",
-        "_ignore_cores",
-        "_ignore_links",
         "_iobuf_size",
         "_machine",
         "_machine_off",
@@ -258,9 +240,8 @@ class Transceiver(AbstractContextManager):
         "_report_waiting_logs"]
 
     def __init__(
-            self, version, connections=None, ignore_chips=None,
-            ignore_cores=None, ignore_links=None,
-            scamp_connections=None, max_sdram_size=None, repair_machine=False,
+            self, version, connections=None, scamp_connections=None,
+            max_sdram_size=None, repair_machine=False,
             ignore_bad_ethernets=True, default_report_directory=None,
             report_waiting_logs=False):
         """
@@ -268,16 +249,6 @@ class Transceiver(AbstractContextManager):
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
-        :param set(tuple(int,int)) ignore_chips:
-            An optional set of chips to ignore in the machine. Requests for a
-            "machine" will have these chips excluded, as if they never
-            existed. The processor_ids of the specified chips are ignored.
-        :param set(tuple(int,int,int)) ignore_cores:
-            An optional set of cores to ignore in the machine. Requests for a
-            "machine" will have these cores excluded, as if they never existed.
-        :param set(tuple(int,int,int)) ignore_links:
-            An optional set of links to ignore in the machine. Requests for a
-            "machine" will have these links excluded, as if they never existed.
         :param max_sdram_size: the max size each chip can say it has for SDRAM
             (mainly used in debugging purposes)
         :type max_sdram_size: int or None
@@ -319,9 +290,6 @@ class Transceiver(AbstractContextManager):
         self._machine = None
         self._width = None
         self._height = None
-        self._ignore_chips = ignore_chips if ignore_chips is not None else {}
-        self._ignore_cores = ignore_cores if ignore_cores is not None else {}
-        self._ignore_links = ignore_links if ignore_links is not None else {}
         self._max_sdram_size = max_sdram_size
         self._iobuf_size = None
         self._app_id_tracker = None
@@ -640,8 +608,7 @@ class Transceiver(AbstractContextManager):
 
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
-            self._scamp_connection_selector, self._ignore_chips,
-            self._ignore_cores, self._ignore_links, self._max_sdram_size,
+            self._scamp_connection_selector, self._max_sdram_size,
             self._default_report_directory)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height,

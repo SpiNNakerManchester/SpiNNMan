@@ -32,12 +32,10 @@ ver = 5  # Guess?
 class MockWriteTransceiver(Transceiver):
 
     def __init__(
-            self, version, connections=None, ignore_chips=None,
-            ignore_cores=None, ignore_links=None,
-            scamp_connections=None, max_sdram_size=None):
+            self, version, connections=None, scamp_connections=None,
+            max_sdram_size=None):
         super().__init__(
-            version, connections=connections, ignore_chips=ignore_chips,
-            ignore_cores=ignore_cores, ignore_links=ignore_links,
+            version, connections=connections,
             scamp_connections=scamp_connections, max_sdram_size=max_sdram_size)
         self.written_memory = list()
 
