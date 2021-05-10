@@ -39,10 +39,6 @@ n_cores = 20
 core_subsets = CoreSubsets(core_subsets=[CoreSubset(0, 0, range(1, 11)),
                                          CoreSubset(1, 1, range(1, 11))])
 
-down_cores = CoreSubsets()
-down_cores.add_processor(0, 0, 5)
-down_chips = CoreSubsets(core_subsets=[CoreSubset(0, 1, [])])
-
 
 def print_enums(name, enum_list):
     string = ""
@@ -347,7 +343,6 @@ def print_transceiver_tests(transceiver):
 
 with create_transceiver_from_hostname(
         board_config.remotehost, board_config.board_version,
-        ignore_cores=down_cores, ignore_chips=down_chips,
         bmp_connection_data=board_config.bmp_names,
         auto_detect_bmp=board_config.auto_detect_bmp) as _transceiver:
     print_transceiver_tests(_transceiver)
