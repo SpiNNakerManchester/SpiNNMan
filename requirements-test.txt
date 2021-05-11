@@ -21,4 +21,4 @@ numpy; python_version >= '3.8'
 coverage >= 4.4, < 5.0
 # pytest will be brought in by pytest-cov
 pytest-cov
-sphinx >= 3.0, < 4
+sphinx >= 4
