@@ -19,7 +19,8 @@ import logging
 import functools
 import struct
 from os.path import join
-from spinn_utilities.config_holder import get_config_int, get_config_str
+from spinn_utilities.config_holder import (
+    get_config_bool, get_config_int, get_config_str)
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Router, Chip, SDRAM, Link, machine_from_size)
@@ -176,15 +177,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return
         super()._receive_error(request, exception, tb, connection)
 
-    def get_machine_details(self, boot_x, boot_y, width, height,
-                            repair_machineXX, ignore_bad_ethernetsXX):
+    def get_machine_details(self, boot_x, boot_y, width, height):
         """
         :param int boot_x:
         :param int boot_y:
         :param int width:
         :param int height:
-        :param bool repair_machine:
-        :param bool ignore_bad_ethernets:
         :rtype: ~spinn_machine.Machine
         """
         # Get the P2P table - 8 entries are packed into each 32-bit word
@@ -222,11 +220,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._process_ignore_links(machine)
         self._preprocess_ignore_cores(machine)
 
-        return self._fill_machine(
-            machine, repair_machine, ignore_bad_ethernets)
+        return self._fill_machine(machine)
 
-    def _fill_machine(
-            self, machine, repair_machine, ignore_bad_ethernets):
+    def _fill_machine(self, machine):
         """
         :param ~spinn_machine.Machine machine:
         :param bool repair_machine:
@@ -238,7 +234,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if (chip_info.ethernet_ip_address is not None and
                     (chip_info.x != chip_info.nearest_ethernet_x
                      or chip_info.y != chip_info.nearest_ethernet_y)):
-                if ignore_bad_ethernets:
+                if get_config_bool("Machine", "ignore_bad_ethernets"):
                     logger.warning(
                         "Chip {}:{} claimed it has ip address: {}. "
                         "This ip will not be used.",
@@ -256,7 +252,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             machine.add_chip(self._make_chip(chip_info, machine))
 
         machine.validate()
-        return machine_repair(machine, repair_machine)
+        return machine_repair(machine)
 
     # Stuff below here is purely for dealing with ignores
 
