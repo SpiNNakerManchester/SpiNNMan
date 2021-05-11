@@ -419,7 +419,7 @@ for fl in os.listdir("."):
         os.remove(fl)
 os.chdir("../..")  # WARNING! RELATIVE FILENAMES CHANGE MEANING HERE!
 apidoc.main([
-    '-q', '-o', _output_dir, _package_base,
+    '-o', _output_dir, _package_base,
     "spinnman/messages/spinnaker_boot/boot_data/*",
     # Special case: Don't want that empty package at all.
     *filtered_files(_package_base, _unfiltered_files)])
