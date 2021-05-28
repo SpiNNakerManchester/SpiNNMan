@@ -50,9 +50,8 @@ from spinnman.messages.spinnaker_boot import (
 from spinnman.messages.scp.enums import Signal, PowerCommand
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
-    BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
-    WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
-    CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
+    BMPGetVersion, SetPower, ReadFPGARegister, WriteFPGARegister, IPTagSetTTO,
+    ReverseIPTagSet, ReadMemory, CountState, WriteMemory, SendSignal, AppStop,
     IPTagSet, IPTagClear, RouterClear)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
@@ -61,14 +60,13 @@ from spinnman.connections.abstract_classes import (
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, UDPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
-    DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
+    GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
     GetCPUInfoProcess, ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
     LoadFixedRouteRoutingEntryProcess,
     ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
-    SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
-    MostDirectConnectionSelector)
+    SendSingleCommandProcess, MostDirectConnectionSelector)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
 from spinnman.utilities.appid_tracker import AppIdTracker

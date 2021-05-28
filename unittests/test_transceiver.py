@@ -14,12 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-import struct
 from spinn_machine import virtual_machine
 from spinnman.transceiver import Transceiver
-from spinnman import constants
-from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
-    SystemVariableDefinition)
 from spinnman.connections.udp_packet_connections import (
     BootConnection, EIEIOConnection, SCAMPConnection)
 import spinnman.transceiver as transceiver
