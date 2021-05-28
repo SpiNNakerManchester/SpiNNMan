@@ -45,6 +45,6 @@ __all__ = ["AbstractMultiConnectionProcess", "ApplicationRunProcess",
            "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
            "MostDirectConnectionSelector", "ReadFixedRouteRoutingEntryProcess",
            "ReadIOBufProcess", "ReadMemoryProcess",
-           "ReadRouterDiagnosticsProcess", "RoundRobinConnectionSelector",
+           "RoundRobinConnectionSelector",
            "SendSingleCommandProcess", "WriteMemoryFloodProcess",
            "WriteMemoryProcess"]
