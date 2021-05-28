@@ -308,20 +308,6 @@ def print_transceiver_tests(transceiver):
         if data != 123456789:
             raise Exception("values are not identical")
 
-    with Section("Test writing bytearrays and ints to write_neighbour_memory "
-                 "and extracting them"):
-        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=inputdata)
-        data = struct.unpack(
-            "<Q", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 8))[0]
-        if data != 123456789123456789:
-            raise Exception("values are not identical")
-
-        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=123456789)
-        data = struct.unpack(
-            "<I", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 4))[0]
-        if data != 123456789:
-            raise Exception("values are not identical")
-
     with Section("Test writing bytearrays and ints to write_memory_flood and "
                  "extracting them"):
         transceiver.write_memory_flood(0x70000000, data=inputdata)
@@ -339,10 +325,6 @@ def print_transceiver_tests(transceiver):
             "<I", transceiver.read_memory(1, 1, 0x70000000, 4))[0]
         if data != 123456789 or data2 != 123456789:
             raise Exception("values are not identical")
-
-    with Section("Get Heap"):
-        for heap_element in transceiver.get_heap(0, 0):
-            print(heap_element)
 
 
 with create_transceiver_from_hostname(

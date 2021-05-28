@@ -147,36 +147,6 @@ class TestTransceiver(unittest.TestCase):
             assert connection_3 == orig_connection
             assert connection_4 != orig_connection
 
-    def test_set_watch_dog(self):
-        connections = []
-        connections.append(SCAMPConnection(
-            remote_host=None))
-        tx = MockWriteTransceiver(version=5, connections=connections)
-
-        # All chips
-        tx.set_watch_dog(True)
-        tx.set_watch_dog(False)
-        tx.set_watch_dog(5)
-
-        # The expected write values for the watch dog
-        expected_writes = (
-            SystemVariableDefinition.software_watchdog_count.default, 0, 5)
-
-        # Check the values that were "written" for set_watch_dog,
-        # which should be one per chip
-        written_memory = tx.written_memory
-        write_item = 0
-        for write in range(3):
-            for x, y in tx.get_machine_details().chip_coordinates:
-                assert written_memory[write_item][0] == x
-                assert written_memory[write_item][1] == y
-                assert written_memory[write_item][2] == (
-                    constants.SYSTEM_VARIABLE_BASE_ADDRESS +
-                    SystemVariableDefinition.software_watchdog_count.offset)
-                expected_data = struct.pack("B", expected_writes[write])
-                assert written_memory[write_item][3] == expected_data
-                write_item += 1
-
 
 if __name__ == '__main__':
     unittest.main()
