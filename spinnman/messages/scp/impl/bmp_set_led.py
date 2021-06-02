@@ -23,6 +23,9 @@ from .check_ok_response import CheckOKResponse
 
 class BMPSetLed(BMPRequest):
     """ Set the LED(s) of a board to either on, off or toggling
+
+        This class is currently deprecated and untested as there is no
+        known use except for Transceiver.set_led which is itself deprecated.
     """
     __slots__ = []
 

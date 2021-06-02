@@ -25,6 +25,10 @@ from spinnman.model import ADCInfo
 class ReadADC(BMPRequest):
     """ SCP Request for the data from the BMP including voltages and\
         temperature.
+
+        This class is currently deprecated and untested as there is no
+        known use except for Transceiver.read_adc_data which is itself
+        deprecated.
     """
     __slots__ = []
 
