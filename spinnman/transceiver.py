@@ -1245,8 +1245,8 @@ class Transceiver(AbstractContextManager):
         :type watch_dog: bool or int
         """
         # build what we expect it to be
-        warn_once("The set_watch_dog_on_chip method is deprecated and "
-                  "untested due to no known use.")
+        warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
+                          "and untested due to no known use.")
         value_to_set = watch_dog
         WATCHDOG = SystemVariableDefinition.software_watchdog_count
         if isinstance(watch_dog, bool):
@@ -1272,8 +1272,8 @@ class Transceiver(AbstractContextManager):
             timer count to.
         :type watch_dog: bool or int
         """
-        warn_once("The set_watch_dog method is deprecated and "
-                  "untested due to no known use.")
+        warn_once(logger, "The set_watch_dog method is deprecated and "
+                          "untested due to no known use.")
         if self._machine is None:
             self._update_machine()
         for x, y in self._machine.chip_coordinates:
@@ -1301,7 +1301,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once("The get_iobuf_from_core method is deprecated and "
+        warn_once(logger, "The get_iobuf_from_core method is deprecated and "
                   "untested due to no known use.")
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
@@ -1379,8 +1379,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once("The Transceiver's execute method is deprecated and "
-                  "untested due to no known use.")
+        warn_once(logger, "The Transceiver's execute method is deprecated "
+                          "and untested due to no known use.")
         # Lock against updates
         with self._chip_execute_lock(x, y):
             # Write the executable
@@ -1592,7 +1592,7 @@ class Transceiver(AbstractContextManager):
         :param int cabinet: the cabinet this is targeting
         :param int frame: the frame this is targeting
         """
-        warn_once("The set_led method is deprecated and "
+        warn_once(logger, "The set_led method is deprecated and "
                   "untested due to no known use.")
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
@@ -1650,7 +1650,7 @@ class Transceiver(AbstractContextManager):
         :return: the FPGA's ADC data object
         :rtype: ADCInfo
         """
-        warn_once("The read_adc_data method is deprecated and "
+        warn_once(logger, "The read_adc_data method is deprecated and "
                   "untested due to no known use.")
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
@@ -1783,7 +1783,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once("The write_neighbour_memory method is deprecated and "
+        warn_once(logger, "The write_neighbour_memory method is deprecated and "
                   "untested due to no known use.")
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
@@ -1955,8 +1955,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once("The read_neighbour_memory method is deprecated and "
-                  "untested due to no known use.")
+        warn_once(logger, "The read_neighbour_memory method is deprecated "
+                  "and untested due to no known use.")
         process = ReadMemoryProcess(self._scamp_connection_selector)
         return process.read_link_memory(x, y, cpu, link, base_address, length)
 
@@ -2189,7 +2189,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once("The set_leds is deprecated and "
+        warn_once(logger, "The set_leds is deprecated and "
                   "untested due to no known use.")
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(SetLED(x, y, cpu, led_states))
@@ -2402,7 +2402,7 @@ class Transceiver(AbstractContextManager):
         :param int base_address: The base address of the allocated memory
         :param int app_id: The app ID of the allocated memory
         """
-        warn_once("The free_sdram method is deprecated and "
+        warn_once(logger, "The free_sdram method is deprecated and "
                   "untested due to no known use.")
         process = DeAllocSDRAMProcess(self._scamp_connection_selector)
         process.de_alloc_sdram(x, y, app_id, base_address)
@@ -2420,7 +2420,7 @@ class Transceiver(AbstractContextManager):
         :return: The number of blocks freed
         :rtype: int
         """
-        warn_once("The free_sdram_by_app_id method is deprecated and "
+        warn_once(logger, "The free_sdram_by_app_id method is deprecated and "
                   "untested due to no known use.")
         process = DeAllocSDRAMProcess(self._scamp_connection_selector)
         process.de_alloc_sdram(x, y, app_id)
@@ -2554,7 +2554,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once("The get_router_diagnostics method is deprecated and "
+        warn_once(logger, "The get_router_diagnostics method is deprecated and "
                   "untested due to no known use.")
         process = ReadRouterDiagnosticsProcess(self._scamp_connection_selector)
         return process.get_router_diagnostics(x, y)
@@ -2685,7 +2685,7 @@ class Transceiver(AbstractContextManager):
 
         :rtype: int
         """
-        warn_once("The number_of_boards_located method is deprecated and "
+        warn_once(logger, "The number_of_boards_located method is deprecated and "
                   "untested due to no known use.")
         boards = 0
         for bmp_connection in self._bmp_connections:
@@ -2851,7 +2851,7 @@ class Transceiver(AbstractContextManager):
 
         :rtype: dict(tuple(int,int),MostDirectConnectionSelector)
         """
-        warn_once("The bmp_connection property is deprecated and "
+        warn_once(logger, "The bmp_connection property is deprecated and "
                   "untested due to no known use.")
         return self._bmp_connection_selectors
 
