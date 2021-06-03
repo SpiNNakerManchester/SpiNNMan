@@ -1783,8 +1783,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once(logger, "The write_neighbour_memory method is deprecated and "
-                  "untested due to no known use.")
+        warn_once(logger, "The write_neighbour_memory method is deprecated "
+                          "and untested due to no known use.")
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
             process.write_link_memory_from_reader(
@@ -2554,8 +2554,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once(logger, "The get_router_diagnostics method is deprecated and "
-                  "untested due to no known use.")
+        warn_once(logger, "The get_router_diagnostics method is deprecated "
+                          "and untested due to no known use.")
         process = ReadRouterDiagnosticsProcess(self._scamp_connection_selector)
         return process.get_router_diagnostics(x, y)
 
@@ -2685,8 +2685,8 @@ class Transceiver(AbstractContextManager):
 
         :rtype: int
         """
-        warn_once(logger, "The number_of_boards_located method is deprecated and "
-                  "untested due to no known use.")
+        warn_once(logger, "The number_of_boards_located method is deprecated "
+                          "and untested due to no known use.")
         boards = 0
         for bmp_connection in self._bmp_connections:
             boards += len(bmp_connection.boards)
