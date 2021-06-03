@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2017-2021 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -63,26 +63,47 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
         print('watchdog core: {} {} {}'.format(x, y, p))
 
 
-def _make_transceiver(config, host=None):
+def _make_transceiver(host, version, bmp_names):
     """
-    :param BoardTestConfiguration config:
-    :param str host:
+    :param host: Most to use or None to use test config for all params
+    :type host: str or None
+    :param version: Board version to use (None defaults to 5 unless host is
+        192.168.240.253 (spin 3)
+    :type version: int or None
+    :param bmp: bmp conenction or None to auto detect (if applicable)
+    :type bmp: str or None
     :rtype: Transceiver
     """
-    config.set_up_remote_board()
     if host is None:
+        try:
+            from board_test_configuration import BoardTestConfiguration
+            config = BoardTestConfiguration()
+        except ImportError:
+            print("cannot read board test configuration")
+            sys.exit(1)
+        config.set_up_remote_board()
         host = config.remotehost
+        version = config.board_version
+        bmp_names = config.bmp_names
+        auto_detect_bmp = config.auto_detect_bmp
+    else:
+        if version is None:
+            if host == "192.168.240.253":
+                version = 3
+            else:
+                version = 5
+        auto_detect_bmp = False
 
     print("talking to SpiNNaker system at {}".format(host))
     return create_transceiver_from_hostname(
-        host, config.board_version,
+        host, version,
         ignore_cores=CoreSubsets(),
         ignore_chips=CoreSubsets(core_subsets=[]),
-        bmp_connection_data=config.bmp_names,
-        auto_detect_bmp=config.auto_detect_bmp)
+        bmp_connection_data=bmp_names,
+        auto_detect_bmp=auto_detect_bmp)
 
 
-def main():
+def main(args):
     """ Runs the script.
     """
     ap = argparse.ArgumentParser(
@@ -91,26 +112,31 @@ def main():
         "-a", "--appid", help="the application ID to check", type=int,
         default=17)
     ap.add_argument(
+        "-v", "--version", help="the version of your boards", type=int,
+        default=None)
+    ap.add_argument(
+        "-b", "--bmp_names",
+        help="the hostname or IP address of the BMP of the SpiNNaker machine "
+             "to inspects",
+        type=str, default=None)
+    ap.add_argument(
         "-n", "--noprintchips", action="store_true", default=False,
         help=("don't print all the chips out; avoids a great deal of "
               "output for large machines"))
     ap.add_argument(
         "host", default=None, nargs='?',
         help="the hostname or IP address of the SpiNNaker machine to inspect")
-    args = ap.parse_args()
+    args = ap.parse_args(args)
     # These ought to be parsed from command line arguments
     app_id = args.appid
     print_chips = not args.noprintchips
 
+    transceiver = _make_transceiver(args.host, args.version, args.bmp_names)
     try:
-        from board_test_configuration import BoardTestConfiguration
-        config = BoardTestConfiguration()
-    except ImportError:
-        print("cannot read board test configuration")
-        sys.exit(1)
-    with _make_transceiver(config, args.host) as transceiver:
         get_cores_in_run_state(transceiver, app_id, print_chips)
+    finally:
+        transceiver.close()
 
 
 if __name__ == "__main__":  # pragma: no cover
-    main()
+    main(sys.argv[1:])
