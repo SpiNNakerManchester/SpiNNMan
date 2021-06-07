@@ -1282,9 +1282,7 @@ class Transceiver(AbstractContextManager):
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        This method is currently deprecated and likely to be removed.
 
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
@@ -1302,7 +1300,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         warn_once(logger, "The get_iobuf_from_core method is deprecated and "
-                  "untested due to no known use.")
+                  "likely to be removed.")
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
         return next(self.get_iobuf(core_subsets))
@@ -1335,9 +1333,7 @@ class Transceiver(AbstractContextManager):
             wait=False, is_filename=False):
         """ Start an executable running on a single chip
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        This method is currently deprecated and likely to be removed.
 
         :param int x:
             The x-coordinate of the chip on which to run the executable
@@ -1380,7 +1376,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         warn_once(logger, "The Transceiver's execute method is deprecated "
-                          "and untested due to no known use.")
+                          "likely to be removed.")
         # Lock against updates
         with self._chip_execute_lock(x, y):
             # Write the executable
@@ -2393,9 +2389,7 @@ class Transceiver(AbstractContextManager):
     def free_sdram(self, x, y, base_address, app_id):
         """ Free allocated SDRAM
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        This method is currently deprecated and likely to be removed.
 
         :param int x: The x-coordinate of the chip onto which to ask for memory
         :param int y: The y-coordinate of the chip onto which to ask for memory
@@ -2403,7 +2397,7 @@ class Transceiver(AbstractContextManager):
         :param int app_id: The app ID of the allocated memory
         """
         warn_once(logger, "The free_sdram method is deprecated and "
-                  "untested due to no known use.")
+                  "likely to be removed.")
         process = DeAllocSDRAMProcess(self._scamp_connection_selector)
         process.de_alloc_sdram(x, y, app_id, base_address)
 
@@ -2554,8 +2548,6 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once(logger, "The get_router_diagnostics method is deprecated "
-                          "and untested due to no known use.")
         process = ReadRouterDiagnosticsProcess(self._scamp_connection_selector)
         return process.get_router_diagnostics(x, y)
 
@@ -2679,14 +2671,12 @@ class Transceiver(AbstractContextManager):
     def number_of_boards_located(self):
         """ The number of boards currently configured.
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        This method is currently deprecated and likely to be removed.
 
         :rtype: int
         """
         warn_once(logger, "The number_of_boards_located method is deprecated "
-                          "and untested due to no known use.")
+                          "and likely to be removed.")
         boards = 0
         for bmp_connection in self._bmp_connections:
             boards += len(bmp_connection.boards)
@@ -2845,14 +2835,12 @@ class Transceiver(AbstractContextManager):
     @property
     def bmp_connection(self):
         """
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        This method is currently deprecated and likely to be removed.
 
         :rtype: dict(tuple(int,int),MostDirectConnectionSelector)
         """
         warn_once(logger, "The bmp_connection property is deprecated and "
-                  "untested due to no known use.")
+                  "likely to be removed.")
         return self._bmp_connection_selectors
 
     def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
