@@ -27,6 +27,7 @@ import time
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.logger_utils import warn_once
 from spinn_machine import CoreSubsets
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
@@ -455,6 +456,9 @@ class Transceiver(AbstractContextManager):
     @contextmanager
     def _chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
+
+        This method is currently deprecated and untested as there is no
+        known use except for excute which is itself deprecated.
 
         :param int x:
         :param int y:
@@ -1138,6 +1142,10 @@ class Transceiver(AbstractContextManager):
         """ Enable, disable or set the value of the watch dog timer on a\
             specific chip
 
+        This method is currently deprecated and untested as there is no
+        known use. Same functionaility provided by ybug and bmpc.
+        Retained in case needed for hardware debugging.
+
         :param int x: chip x coord to write new watchdog param to
         :param int y: chip y coord to write new watchdog param to
         :param watch_dog:
@@ -1147,6 +1155,8 @@ class Transceiver(AbstractContextManager):
         :type watch_dog: bool or int
         """
         # build what we expect it to be
+        warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
+                          "and untested due to no known use.")
         value_to_set = watch_dog
         WATCHDOG = SystemVariableDefinition.software_watchdog_count
         if isinstance(watch_dog, bool):
@@ -1162,12 +1172,18 @@ class Transceiver(AbstractContextManager):
     def set_watch_dog(self, watch_dog):
         """ Enable, disable or set the value of the watch dog timer
 
+        This method is currently deprecated and untested as there is no
+        known use. Same functionaility provided by ybug and bmpc.
+        Retained in case nneded for hardware debugging.
+
         :param watch_dog:
             Either a boolean indicating whether to enable (True) or
             disable (False) the watch dog timer, or an int value to set the
             timer count to.
         :type watch_dog: bool or int
         """
+        warn_once(logger, "The set_watch_dog method is deprecated and "
+                          "untested due to no known use.")
         if self._machine is None:
             self._update_machine()
         for x, y in self._machine.chip_coordinates:
@@ -1175,6 +1191,8 @@ class Transceiver(AbstractContextManager):
 
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
+
+        This method is currently deprecated and likely to be removed.
 
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
@@ -1191,6 +1209,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        warn_once(logger, "The get_iobuf_from_core method is deprecated and "
+                  "likely to be removed.")
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
         return next(self.get_iobuf(core_subsets))
@@ -1222,6 +1242,8 @@ class Transceiver(AbstractContextManager):
             self, x, y, processors, executable, app_id, n_bytes=None,
             wait=False, is_filename=False):
         """ Start an executable running on a single chip
+
+        This method is currently deprecated and likely to be removed.
 
         :param int x:
             The x-coordinate of the chip on which to run the executable
@@ -1263,6 +1285,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        warn_once(logger, "The Transceiver's execute method is deprecated "
+                          "likely to be removed.")
         # Lock against updates
         with self._chip_execute_lock(x, y):
             # Write the executable
@@ -1458,6 +1482,10 @@ class Transceiver(AbstractContextManager):
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
 
+        This method is currently deprecated and untested as there is no
+        known use. Same functionaility provided by ybug and bmpc.
+        Retained in case needed for hardware debugging.
+
         :param led:
             Number of the LED or an iterable of LEDs to set the state of (0-7)
         :type led: int or iterable(int)
@@ -1470,6 +1498,8 @@ class Transceiver(AbstractContextManager):
         :param int cabinet: the cabinet this is targeting
         :param int frame: the frame this is targeting
         """
+        warn_once(logger, "The set_led method is deprecated and "
+                  "untested due to no known use.")
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         process.execute(BMPSetLed(led, action, board))
@@ -1516,12 +1546,18 @@ class Transceiver(AbstractContextManager):
     def read_adc_data(self, board, cabinet, frame):
         """ Read the BMP ADC data
 
+        This method is currently deprecated and untested as there is no
+        known use. Same functionaility provided by ybug and bmpc.
+        Retained in case needed for hardware debugging.
+
         :param int cabinet: cabinet: the cabinet this is targeting
         :param int frame: the frame this is targeting
         :param int board: which board to request the ADC data from
         :return: the FPGA's ADC data object
         :rtype: ADCInfo
         """
+        warn_once(logger, "The read_adc_data method is deprecated and "
+                  "untested due to no known use.")
         process = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame))
         response = process.execute(ReadADC(board))
@@ -1653,6 +1689,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        warn_once(logger, "The write_neighbour_memory method is deprecated "
+                          "and untested due to no known use.")
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
             process.write_link_memory_from_reader(
@@ -1796,6 +1834,10 @@ class Transceiver(AbstractContextManager):
             SCP command. If sent to a BMP, this command can be used to\
             communicate with the FPGAs' debug registers.
 
+        This method is currently deprecated and untested as there is no
+        known use. Same functionaility provided by ybug and bmpc.
+        Retained in case needed for hardware debugging.
+
         :param int x:
             The x-coordinate of the chip whose neighbour is to be read from
         :param int y:
@@ -1819,7 +1861,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-
+        warn_once(logger, "The read_neighbour_memory method is deprecated "
+                  "and untested due to no known use.")
         process = ReadMemoryProcess(self._scamp_connection_selector)
         return process.read_link_memory(x, y, cpu, link, base_address, length)
 
@@ -2052,6 +2095,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        warn_once(logger, "The set_leds is deprecated and "
+                  "untested due to no known use.")
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(SetLED(x, y, cpu, led_states))
 
@@ -2254,16 +2299,24 @@ class Transceiver(AbstractContextManager):
     def free_sdram(self, x, y, base_address, app_id):
         """ Free allocated SDRAM
 
+        This method is currently deprecated and likely to be removed.
+
         :param int x: The x-coordinate of the chip onto which to ask for memory
         :param int y: The y-coordinate of the chip onto which to ask for memory
         :param int base_address: The base address of the allocated memory
         :param int app_id: The app ID of the allocated memory
         """
+        warn_once(logger, "The free_sdram method is deprecated and "
+                  "likely to be removed.")
         process = DeAllocSDRAMProcess(self._scamp_connection_selector)
         process.de_alloc_sdram(x, y, app_id, base_address)
 
     def free_sdram_by_app_id(self, x, y, app_id):
         """ Free all SDRAM allocated to a given app ID
+
+        This method is currently deprecated and untested as there is no
+        known use. Same functionaility provided by ybug and bmpc.
+        Retained in case needed for hardware debugging.
 
         :param int x: The x-coordinate of the chip onto which to ask for memory
         :param int y: The y-coordinate of the chip onto which to ask for memory
@@ -2271,6 +2324,8 @@ class Transceiver(AbstractContextManager):
         :return: The number of blocks freed
         :rtype: int
         """
+        warn_once(logger, "The free_sdram_by_app_id method is deprecated and "
+                  "untested due to no known use.")
         process = DeAllocSDRAMProcess(self._scamp_connection_selector)
         process.de_alloc_sdram(x, y, app_id)
         return process.no_blocks_freed
@@ -2526,8 +2581,12 @@ class Transceiver(AbstractContextManager):
     def number_of_boards_located(self):
         """ The number of boards currently configured.
 
+        This method is currently deprecated and likely to be removed.
+
         :rtype: int
         """
+        warn_once(logger, "The number_of_boards_located method is deprecated "
+                          "and likely to be removed.")
         boards = 0
         for bmp_connection in self._bmp_connections:
             boards += len(bmp_connection.boards)
@@ -2686,8 +2745,12 @@ class Transceiver(AbstractContextManager):
     @property
     def bmp_connection(self):
         """
+        This method is currently deprecated and likely to be removed.
+
         :rtype: dict(tuple(int,int),MostDirectConnectionSelector)
         """
+        warn_once(logger, "The bmp_connection property is deprecated and "
+                  "likely to be removed.")
         return self._bmp_connection_selectors
 
     def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
