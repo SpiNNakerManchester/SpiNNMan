@@ -19,9 +19,12 @@ import logging
 import functools
 import struct
 from os.path import join
+from spinn_utilities.config_holder import (
+    get_config_bool, get_config_int, get_config_str)
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Router, Chip, SDRAM, Link, machine_from_size)
+from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
 from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
@@ -47,12 +50,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Used if there are any ignores with ip addresses
         # Holds a mapping from ip to board root (x,y)
         "_ethernets",
-        "_ignore_chips",
-        "_ignore_cores",
         # Holds a map from x,y to a set of virtual cores to ignores
         "_ignore_cores_map",
-        "_ignore_links",
-        "_max_sdram_size",
         "_p2p_column_data",
         # Used if there are any ignore core requests
         # Holds a mapping from (x,y) to a mapping of phsyical to virtual core
@@ -63,9 +62,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Kept as None until first write
         "_report_file"]
 
-    def __init__(self, connection_selector, ignore_chips, ignore_cores,
-                 ignore_links, max_sdram_size=None,
-                 default_report_directory=None):
+    def __init__(self, connection_selector, default_report_directory=None):
         """
         :param connection_selector:
         :type connection_selector:
@@ -74,12 +71,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # pylint: disable=too-many-arguments
         super().__init__(connection_selector)
 
-        self._ignore_chips = ignore_chips if ignore_chips is not None else {}
-        self._ignore_cores = ignore_cores if ignore_cores is not None else {}
         self._ignore_cores_map = defaultdict(set)
-        self._ignore_links = ignore_links if ignore_links is not None else {}
-
-        self._max_sdram_size = max_sdram_size
 
         self._p2p_column_data = list()
 
@@ -119,9 +111,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
-        if (self._max_sdram_size is not None and
-                sdram_size > self._max_sdram_size):
-            sdram_size = self._max_sdram_size
+        max_sdram_size = get_config_int(
+            "Machine", "max_sdram_allowed_per_chip")
+        if (max_sdram_size is not None and
+                sdram_size > max_sdram_size):
+            sdram_size = max_sdram_size
         sdram = SDRAM(size=sdram_size)
 
         # Create the chip
@@ -183,15 +177,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return
         super()._receive_error(request, exception, tb, connection)
 
-    def get_machine_details(self, boot_x, boot_y, width, height,
-                            repair_machine, ignore_bad_ethernets):
+    def get_machine_details(self, boot_x, boot_y, width, height):
         """
         :param int boot_x:
         :param int boot_y:
         :param int width:
         :param int height:
-        :param bool repair_machine:
-        :param bool ignore_bad_ethernets:
         :rtype: ~spinn_machine.Machine
         """
         # Get the P2P table - 8 entries are packed into each 32-bit word
@@ -229,11 +220,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._process_ignore_links(machine)
         self._preprocess_ignore_cores(machine)
 
-        return self._fill_machine(
-            machine, repair_machine, ignore_bad_ethernets)
+        return self._fill_machine(machine)
 
-    def _fill_machine(
-            self, machine, repair_machine, ignore_bad_ethernets):
+    def _fill_machine(self, machine):
         """
         :param ~spinn_machine.Machine machine:
         :param bool repair_machine:
@@ -245,7 +234,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if (chip_info.ethernet_ip_address is not None and
                     (chip_info.x != chip_info.nearest_ethernet_x
                      or chip_info.y != chip_info.nearest_ethernet_y)):
-                if ignore_bad_ethernets:
+                if get_config_bool("Machine", "ignore_bad_ethernets"):
                     logger.warning(
                         "Chip {}:{} claimed it has ip address: {}. "
                         "This ip will not be used.",
@@ -263,7 +252,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             machine.add_chip(self._make_chip(chip_info, machine))
 
         machine.validate()
-        return machine_repair(machine, repair_machine)
+        return machine_repair(machine)
 
     # Stuff below here is purely for dealing with ignores
 
@@ -283,10 +272,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param ~spinn_machine.Machine machine:
             An empty machine to handle wraparounds
         """
-        if len(self._ignore_links) == 0:
-            return
-
-        for ignore in self._ignore_links:
+        for ignore in IgnoreLink.parse_string(
+                get_config_str("Machine", "down_links")):
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
@@ -333,10 +320,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param ~spinn_machine.Machine machine:
             An empty machine to handle wraparounds
         """
-        if len(self._ignore_cores) == 0:
-            return
         # Convert by ip to global
-        for ignore in self._ignore_cores:
+        for ignore in IgnoreCore.parse_string(
+                get_config_str("Machine", "down_cores")):
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
@@ -359,7 +345,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param ~spinn_machine.Machine machine:
             An empty machine to handle wraparounds
         """
-        for ignore in self._ignore_chips:
+        for ignore in IgnoreChip.parse_string(
+                get_config_str("Machine", "down_chips")):
             # Convert by ip to global
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)

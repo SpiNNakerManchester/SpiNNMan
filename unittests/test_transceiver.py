@@ -16,6 +16,7 @@
 import unittest
 import struct
 from spinn_machine import virtual_machine
+from spinnman.config_setup import reset_configs
 from spinnman.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
@@ -32,13 +33,10 @@ ver = 5  # Guess?
 class MockWriteTransceiver(Transceiver):
 
     def __init__(
-            self, version, connections=None, ignore_chips=None,
-            ignore_cores=None, ignore_links=None,
-            scamp_connections=None, max_sdram_size=None):
+            self, version, connections=None, scamp_connections=None):
         super().__init__(
-            version, connections=connections, ignore_chips=ignore_chips,
-            ignore_cores=ignore_cores, ignore_links=ignore_links,
-            scamp_connections=scamp_connections, max_sdram_size=max_sdram_size)
+            version, connections=connections,
+            scamp_connections=scamp_connections)
         self.written_memory = list()
 
     def get_machine_details(self):
@@ -56,6 +54,10 @@ class MockWriteTransceiver(Transceiver):
 
 
 class TestTransceiver(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        reset_configs()
 
     def test_create_new_transceiver_to_board(self):
         board_config.set_up_remote_board()

@@ -97,8 +97,6 @@ def _make_transceiver(host, version, bmp_names):
     print("talking to SpiNNaker system at {}".format(host))
     return create_transceiver_from_hostname(
         host, version,
-        ignore_cores=CoreSubsets(),
-        ignore_chips=CoreSubsets(core_subsets=[]),
         bmp_connection_data=bmp_names,
         auto_detect_bmp=auto_detect_bmp)
 
