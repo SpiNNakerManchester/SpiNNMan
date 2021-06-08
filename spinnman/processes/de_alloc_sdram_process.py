@@ -19,6 +19,11 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
+    """
+        This class is currently deprecated and untested as there is no
+        known use except for Transceiver.free_sdram and free_sdram_by_app_id
+        which are both themselves deprecated.
+    """
     __slots__ = [
         "_no_blocks_freed"]
 
