@@ -15,9 +15,14 @@
 
 import unittest
 from spinnman.connections.udp_packet_connections import BootConnection
+from spinnman.config_setup import unittest_setup
 
 
 class MyTestCase(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_something(self):
         udp_connect = BootConnection()
         self.assertIsNotNone(udp_connect)

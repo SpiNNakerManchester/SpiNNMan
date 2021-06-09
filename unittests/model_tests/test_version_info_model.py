@@ -16,10 +16,15 @@
 import unittest
 import struct
 from spinnman.model import VersionInfo
+from spinnman.config_setup import unittest_setup
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class TestVersionInfo(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_retrieving_bits_from_version_data(self):
         p2p_adr = 0xf0a1
         phys_cpu = 0xff

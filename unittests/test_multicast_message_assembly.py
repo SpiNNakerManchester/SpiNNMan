@@ -14,10 +14,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+from spinnman.config_setup import unittest_setup
 import spinnman.messages.multicast_message as multicast_msg
 
 
 class TestMulticastMessage(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_create_new_multicast_message_without_payload(self):
         msg = multicast_msg.MulticastMessage(1)
         self.assertEqual(msg.key, 1)

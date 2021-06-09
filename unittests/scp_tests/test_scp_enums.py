@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+from spinnman.config_setup import unittest_setup
 from spinnman.messages.scp.enums import IPTagCommand
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp.enums import SCPResult
@@ -22,6 +23,10 @@ from spinnman.messages.scp.enums.signal import SignalType
 
 
 class TestSCPEnums(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_iptag(self):
         self.assertEqual(IPTagCommand.NEW.value, 0)
         self.assertEqual(IPTagCommand.SET.value, 1)

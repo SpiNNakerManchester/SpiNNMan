@@ -16,11 +16,16 @@
 import unittest
 from spinn_machine.tags import IPTag
 from board_test_configuration import BoardTestConfiguration
+from spinnman.config_setup import unittest_setup
 
 board_config = BoardTestConfiguration()
 
 
 class TestIptag(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_new_iptag(self):
         board_config.set_up_remote_board()
         ip = "8.8.8.8"

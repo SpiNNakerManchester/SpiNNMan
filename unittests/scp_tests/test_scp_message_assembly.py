@@ -14,12 +14,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+from spinnman.config_setup import unittest_setup
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp.impl import GetVersion, ReadLink, ReadMemory
 
 
 class TestSCPMessageAssembly(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_create_new_scp_header(self):
         header = SCPRequestHeader(SCPCommand.CMD_VER)
 
