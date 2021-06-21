@@ -16,6 +16,7 @@
 from spinnman.processes.abstract_single_connection_process import (
     AbstractSingleConnectionProcess)
 from spinnman.messages.scp.impl import ReadMemory
+from spinnman.config_setup import unittest_setup
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.exceptions import (
     SpinnmanTimeoutException, SpinnmanGenericProcessException)
@@ -41,6 +42,7 @@ class MockConnection(SCAMPConnection):
 
 
 def test_error_print():
+    unittest_setup()
     connection = MockConnection(0, 0)
     process = MockProcess(RoundRobinConnectionSelector([connection]))
     with pytest.raises(SpinnmanGenericProcessException):

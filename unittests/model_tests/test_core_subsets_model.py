@@ -15,9 +15,14 @@
 
 import unittest
 from spinn_machine import CoreSubset, CoreSubsets
+from spinnman.config_setup import unittest_setup
 
 
 class TestCoreSubsets(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_create_new_default_core_subsets(self):
         css = CoreSubsets()
         self.assertIsNotNone(css, "must make instance of CoreSubsets")

@@ -16,9 +16,14 @@
 import unittest
 from spinnman.model.enums import MailboxCommand, CPUState, RunTimeError
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
+from spinnman.config_setup import unittest_setup
 
 
 class TestingEnums(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_mailbox_command_enum(self):
         self.assertEqual(MailboxCommand.SHM_IDLE.value, 0)
         self.assertEqual(MailboxCommand.SHM_MSG.value, 1)

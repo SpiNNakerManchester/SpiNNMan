@@ -14,11 +14,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+from spinnman.config_setup import unittest_setup
 from spinnman.messages.scp.impl import GetVersion
 from spinnman.messages.scp.enums import SCPCommand
 
 
 class TestSCPVersionRequest(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_new_version_request(self):
         ver_request = GetVersion(0, 1, 2)
         self.assertEqual(ver_request.scp_request_header.command,

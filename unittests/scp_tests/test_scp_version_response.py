@@ -15,12 +15,17 @@
 
 import unittest
 from struct import pack
+from spinnman.config_setup import unittest_setup
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.messages.sdp import SDPFlag
 
 
 class TestSCPVersionResponse(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_new_scp_version_response(self):
         GetVersionResponse()
 
