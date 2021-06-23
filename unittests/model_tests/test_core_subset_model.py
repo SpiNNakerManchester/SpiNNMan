@@ -15,9 +15,14 @@
 
 import unittest
 from spinn_machine import CoreSubset
+from spinnman.config_setup import unittest_setup
 
 
 class TestCoreSubset(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_create_new_core_subset(self):
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, proc_list)

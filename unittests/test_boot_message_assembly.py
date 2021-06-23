@@ -15,10 +15,15 @@
 
 import unittest
 import spinnman.messages.spinnaker_boot.spinnaker_boot_message as boot_msg
+from spinnman.config_setup import unittest_setup
 from spinnman.messages.spinnaker_boot import SpinnakerBootOpCode
 
 
 class TestSpiNNakerBootMessage(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_create_new_boot_message(self):
         msg = boot_msg.SpinnakerBootMessage(SpinnakerBootOpCode.HELLO, 0, 0, 0)
         self.assertEqual(msg.data, None)
