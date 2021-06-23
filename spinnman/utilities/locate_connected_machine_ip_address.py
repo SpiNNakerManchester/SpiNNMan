@@ -53,8 +53,11 @@ if __name__ == "__main__":
         sys.exit()
 
     def _print_connected(ip_address, timestamp):
-        print(ip_address, "({})".format(
-            socket.gethostbyaddr(ip_address)[0]), "at", timestamp)
+        try:
+            hostname = socket.gethostbyaddr(ip_address)[0]
+        except Exception:
+            hostname = "Unknown host"
+        print(ip_address, "({})".format(hostname), "at", timestamp)
         return False
 
     print("The following addresses might be SpiNNaker boards "
