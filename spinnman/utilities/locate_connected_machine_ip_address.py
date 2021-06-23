@@ -54,10 +54,10 @@ if __name__ == "__main__":
 
     def _print_connected(ip_address, timestamp):
         try:
-            hostname = socket.gethostbyaddr(ip_address)[0]
+            hostname = f" ({socket.gethostbyaddr(ip_address)[0]})"
         except Exception:
-            hostname = "Unknown host"
-        print(ip_address, "({})".format(hostname), "at", timestamp)
+            hostname = ""
+        print(f"{ip_address}{hostname} at {timestamp}")
         return False
 
     print("The following addresses might be SpiNNaker boards "
