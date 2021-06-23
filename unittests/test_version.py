@@ -18,11 +18,15 @@ import spinn_utilities
 import spinn_machine
 from spinnman.transceiver import Transceiver, _SCAMP_VERSION
 import spinnman
+from spinnman.config_setup import unittest_setup
 
 
 class Test(unittest.TestCase):
     """ Tests for the SCAMP version comparison
     """
+
+    def setUp(self):
+        unittest_setup()
 
     def test_version_same(self):
         self.assertTrue(Transceiver.is_scamp_version_compabible((

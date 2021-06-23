@@ -15,6 +15,7 @@
 
 import unittest
 from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.config_setup import unittest_setup
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.scp.impl import GetVersion, ReadLink, ReadMemory
 from spinnman.messages.scp.enums import SCPResult
@@ -25,6 +26,9 @@ board_config = BoardTestConfiguration()
 
 
 class TestUDPConnection(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
 
     def test_scp_version_request_and_response_board(self):
         board_config.set_up_remote_board()

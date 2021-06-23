@@ -15,6 +15,7 @@
 
 import struct
 import unittest
+from spinnman.config_setup import unittest_setup
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.impl import CheckOKResponse
 from spinnman.messages.scp.enums import SCPResult
@@ -22,6 +23,10 @@ from spinnman.messages.sdp import SDPFlag
 
 
 class TestOkResponse(unittest.TestCase):
+
+    def setUp(self):
+        unittest_setup()
+
     def test_new_scp_check_ok_response(self):
         CheckOKResponse("Testing operation", "Testing command")
 
