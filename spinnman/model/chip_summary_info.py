@@ -190,6 +190,11 @@ class ChipSummaryInfo(object):
         """
         return self._ethernet_ip_address
 
+    def clear_ethernet_ip_address(self):
+        """ Forces the Ethernet IP address to None, in case of an errant chip
+        """
+        self._ethernet_ip_address = None
+
     @property
     def parent_link(self):
         """ The link to the parent of the chip in the tree of chips from root

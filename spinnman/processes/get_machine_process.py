@@ -240,7 +240,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                         "This ip will not be used.",
                         chip_info.x, chip_info.y,
                         chip_info.ethernet_ip_address)
-                    chip_info.ethernet_ip_address = None
+                    chip_info.clear_ethernet_ip_address()
                 else:
                     logger.warning(
                         "Not using chip {}:{} as it has an unexpected "
