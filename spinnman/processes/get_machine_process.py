@@ -55,13 +55,15 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         "_ignore_cores_map",
         "_p2p_column_data",
         # Used if there are any ignore core requests
-        # Holds a mapping from (x,y) to a mapping of phsyical to virtual core
+        # Holds a mapping from (x,y) to a mapping of physical to virtual core
         "_virtual_map",
-        # Directory to put the ingore report if required
+        # Directory to put the ignore report if required
         "_default_report_directory",
-        # Ignore report file path for ignre report.
+        # Ignore report file path for ignore report.
         # Kept as None until first write
-        "_report_file"]
+        "_report_file",
+        # Progress bar to fill in as details are received
+        "_progress"]
 
     def __init__(self, connection_selector, default_report_directory=None):
         """
@@ -83,7 +85,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._ethernets = None
         self._virtual_map = {}
         self._default_report_directory = default_report_directory
-        self._report_file = None
+        self._report_file = None#
+        self._progress = None
 
     def _make_chip(self, chip_info, machine):
         """ Creates a chip from a ChipSummaryInfo structure.
@@ -164,6 +167,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
+        if self._progress is not None:
+            self._progress.update()
 
     def _receive_error(self, request, exception, tb, connection):
         """
@@ -202,12 +207,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         p2p_table = P2PTable(width, height, self._p2p_column_data)
 
         # Get the chip information for each chip
-        progress = ProgressBar(
+        self._progress = ProgressBar(
             p2p_table.n_routes,
             f"Reading details from {p2p_table.n_routes} chips")
-        for (x, y) in progress.over(p2p_table.iterchips()):
+        for (x, y) in p2p_table.iterchips():
             self._send_request(GetChipInfo(x, y), self._receive_chip_info)
         self._finish()
+        self._progress.end()
         with suppress(Exception):
             # Ignore errors, as any error here just means that a chip
             # is down that wasn't marked as down
