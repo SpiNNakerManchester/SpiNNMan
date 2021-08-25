@@ -85,7 +85,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._ethernets = None
         self._virtual_map = {}
         self._default_report_directory = default_report_directory
-        self._report_file = None#
+        self._report_file = None
         self._progress = None
 
     def _make_chip(self, chip_info, machine):
