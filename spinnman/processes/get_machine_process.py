@@ -36,6 +36,7 @@ from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinn_utilities.progress_bar import ProgressBar
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -201,7 +202,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         p2p_table = P2PTable(width, height, self._p2p_column_data)
 
         # Get the chip information for each chip
-        for (x, y) in p2p_table.iterchips():
+        progress = ProgressBar(
+            p2p_table.n_routes,
+            f"Reading details from {p2p_table.n_routes} chips")
+        for (x, y) in progress.over(p2p_table.iterchips()):
             self._send_request(GetChipInfo(x, y), self._receive_chip_info)
         self._finish()
         with suppress(Exception):
