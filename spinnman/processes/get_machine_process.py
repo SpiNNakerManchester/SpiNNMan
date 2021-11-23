@@ -21,6 +21,7 @@ import struct
 from os.path import join
 from spinn_utilities.config_holder import (
     get_config_bool, get_config_int, get_config_str)
+from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Router, Chip, SDRAM, Link, machine_from_size)
@@ -55,14 +56,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         "_p2p_column_data",
         # Used if there are any ignore core requests
         # Holds a mapping from (x,y) to a mapping of phsyical to virtual core
-        "_virtual_map",
-        # Directory to put the ingore report if required
-        "_default_report_directory",
-        # Ignore report file path for ignre report.
-        # Kept as None until first write
-        "_report_file"]
+        "_virtual_map"]
 
-    def __init__(self, connection_selector, default_report_directory=None):
+    def __init__(self, connection_selector):
         """
         :param connection_selector:
         :type connection_selector:
@@ -81,8 +77,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Set ethernets to None meaning not computed yet
         self._ethernets = None
         self._virtual_map = {}
-        self._default_report_directory = default_report_directory
-        self._report_file = None
 
     def _make_chip(self, chip_info, machine):
         """ Creates a chip from a ChipSummaryInfo structure.
@@ -519,12 +513,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param str message:
         """
         full_message = message.format(*args) + "\n"
-        if self._report_file is None:
-            if self._default_report_directory is None:
-                self._report_file = REPORT_FILE
-            else:
-                self._report_file = join(
-                    self._default_report_directory, REPORT_FILE)
-
-        with open(self._report_file, "a") as r_file:
+        report_file = join(UtilsDataView().run_dir_path, REPORT_FILE)
+        with open(report_file, "a") as r_file:
             r_file.write(full_message)

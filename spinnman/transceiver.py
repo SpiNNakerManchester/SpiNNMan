@@ -97,7 +97,7 @@ _EXECUTABLE_ADDRESS = 0x67800000
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
         auto_detect_bmp=False, scamp_connections=None,
-        boot_port_no=None, default_report_directory=None):
+        boot_port_no=None):
     """ Create a Transceiver by creating a :py:class:`~.UDPConnection` to the\
         given hostname on port 17893 (the default SCAMP port), and a\
         :py:class:`~.BootConnection` on port 54321 (the default boot port),\
@@ -120,10 +120,6 @@ def create_transceiver_from_hostname(
     :param int boot_port_no: the port number used to boot the machine
     :param list(SCAMPConnection) scamp_connections:
         the list of connections used for SCAMP communications
-    :param default_report_directory:
-        Directory to write any reports too.
-        If ``None`` the current directory will be used.
-    :type default_report_directory: str or None
     :return: The created transceiver
     :rtype: Transceiver
     :raise SpinnmanIOException:
@@ -165,8 +161,7 @@ def create_transceiver_from_hostname(
         remote_host=hostname, remote_port=boot_port_no))
 
     return Transceiver(
-        version, connections=connections, scamp_connections=scamp_connections,
-        default_report_directory=default_report_directory)
+        version, connections=connections, scamp_connections=scamp_connections)
 
 
 class Transceiver(AbstractContextManager):
@@ -190,7 +185,6 @@ class Transceiver(AbstractContextManager):
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
-        "_default_report_directory",
         "_flood_write_lock",
         "_height",
         "_iobuf_size",
@@ -212,8 +206,7 @@ class Transceiver(AbstractContextManager):
         "_width"]
 
     def __init__(
-            self, version, connections=None, scamp_connections=None,
-            default_report_directory=None):
+            self, version, connections=None, scamp_connections=None):
         """
         :param int version: The version of the board being connected to
         :param list(Connection) connections:
@@ -221,9 +214,6 @@ class Transceiver(AbstractContextManager):
             communication will be possible until connections are found.
         :param list(SocketAddressWithChip) scamp_connections:
             a list of SCAMP connection data or None
-        :param str default_report_directory:
-            Directory to write any reports too. If ``None`` the current
-            directory will be used.
         :raise SpinnmanIOException:
             If there is an error communicating with the board, or if no
             connections to the board can be found (if connections is ``None``)
@@ -329,7 +319,6 @@ class Transceiver(AbstractContextManager):
         self._check_bmp_connections()
 
         self._machine_off = False
-        self._default_report_directory = default_report_directory
 
     def _identify_connections(self, connections):
         for conn in connections:
@@ -557,7 +546,7 @@ class Transceiver(AbstractContextManager):
 
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
-            self._scamp_connection_selector, self._default_report_directory)
+            self._scamp_connection_selector)
         self._machine = get_machine_process.get_machine_details(
             version_info.x, version_info.y, self._width, self._height)
 
