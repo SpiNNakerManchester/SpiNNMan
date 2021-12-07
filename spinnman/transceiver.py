@@ -2725,13 +2725,6 @@ class Transceiver(AbstractContextManager):
         return connection
 
     @property
-    def scamp_connection_selector(self):
-        """
-        :rtype: MostDirectConnectionSelector
-        """
-        return self._scamp_connection_selector
-
-    @property
     def bmp_connection(self):
         """
         This method is currently deprecated and likely to be removed.

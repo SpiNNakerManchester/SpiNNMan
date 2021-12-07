@@ -36,6 +36,7 @@ class _SpiNNManDataModel(object):
 
     __slots__ = [
         # Data values cached
+        "_scamp_connection_selector",
         "_transceiver",
     ]
 
@@ -59,6 +60,7 @@ class _SpiNNManDataModel(object):
         Clears out all data that should change after a reset and graaph change
         """
         self._transceiver = None
+        self._scamp_connection_selector = None
         self._soft_reset()
 
     def _soft_reset(self):
@@ -118,6 +120,66 @@ class SpiNNManDataView(MachineDataView):
         if self.__data._transceiver is None:
              raise self._exception("transceiver")
         return self.__data._transceiver
+
+    def read_memory(self, x, y, base_address, length, cpu=0):
+        """ Read some areas of memory (usually SDRAM) from the board.
+
+        Semantic sugar for  transceiver.read_memory
+
+        :param int x:
+            The x-coordinate of the chip where the memory is to be read from
+        :param int y:
+            The y-coordinate of the chip where the memory is to be read from
+        :param int base_address:
+            The address in SDRAM where the region of memory to be read starts
+        :param int length: The length of the data to be read in bytes
+        :param int cpu:
+            the core ID used to read the memory of; should usually be 0 when
+            reading from SDRAM, but may be other values when reading from DTCM.
+        :return: A bytearray of data read
+        :rtype: bytes
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If one of `x`, `y`, `cpu`, `base_address` or `length` is invalid
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if self.__data._transceiver is None:
+             raise self._exception("transceiver")
+        return self.__data._transceiver.read_memory(
+            x, y, base_address, length, cpu)
+
+    def get_new_id(self):
+        """
+        Gets a new id from the current app_id_tracker
+
+        currently semantic sugar for transceiver.app_id_tracker.get_new_id()
+
+        :rtype: AppIdTracker
+        """
+        if self.__data._transceiver is None:
+             raise self._exception("transceiver")
+        return self.__data._transceiver.app_id_tracker.get_new_id()
+
+    @property
+    def scamp_connection_selector(self):
+        """
+        Gets the scamp connection selector from the transceiver
+
+        Semantic sugar for transceiver.scamp_connection_selector
+
+        :rtype: MostDirectConnectionSelector
+        """
+        if not self.__data._scamp_connection_selector:
+            if self.__data._transceiver is None:
+                raise self._exception("transceiver")
+            self.__data._scamp_connection_selector =\
+                self.__data._transceiver._scamp_connection_selector
+        return self.__data._scamp_connection_selector
 
     #def machine(self):
     #    if self.has_machine():
