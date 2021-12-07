@@ -67,7 +67,14 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         self.__data._soft_reset()
 
     def set_transceiver(self, transceiver):
+        if self.__data._transceiver:
+            self.__data._transceiver.close()
         # Must do a delayed import here so Transceiver can call this
         if not isinstance(transceiver, Transceiver):
             raise TypeError("transceiver should be a Transceiver")
         self.__data._transceiver = transceiver
+
+    def clear_transceiver(self):
+        if self.__data._transceiver:
+            self.__data._transceiver.close()
+        self.__data._transceiver = None

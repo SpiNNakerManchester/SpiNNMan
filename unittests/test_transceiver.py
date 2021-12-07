@@ -54,6 +54,9 @@ class MockWriteTransceiver(Transceiver):
         self.written_memory.append(
             (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
 
+    def close(self):
+        pass
+
 
 class TestTransceiver(unittest.TestCase):
 
