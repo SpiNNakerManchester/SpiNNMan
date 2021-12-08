@@ -121,6 +121,14 @@ class SpiNNManDataView(MachineDataView):
              raise self._exception("transceiver")
         return self.__data._transceiver
 
+    def get_transceiver(self):
+        """
+        The transceiver description or None if the is no tranceiver
+
+        :rtype: ~spinnman.transceiver.Transceiver
+        """
+        return self.__data._transceiver
+
     def read_memory(self, x, y, base_address, length, cpu=0):
         """ Read some areas of memory (usually SDRAM) from the board.
 
