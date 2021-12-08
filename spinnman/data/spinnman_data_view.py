@@ -132,7 +132,7 @@ class SpiNNManDataView(MachineDataView):
     def read_memory(self, x, y, base_address, length, cpu=0):
         """ Read some areas of memory (usually SDRAM) from the board.
 
-        Semantic sugar for  transceiver.read_memory
+        Semantic sugar for transceiver.read_memory
 
         :param int x:
             The x-coordinate of the chip where the memory is to be read from
@@ -160,6 +160,58 @@ class SpiNNManDataView(MachineDataView):
              raise self._exception("transceiver")
         return self.__data._transceiver.read_memory(
             x, y, base_address, length, cpu)
+
+    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
+                     cpu=0, is_filename=False):
+        """ Write to the SDRAM on the board.
+
+        Semantic sugar for transceiver.read_memory
+
+        :param int x:
+            The x-coordinate of the chip where the memory is to be written to
+        :param int y:
+            The y-coordinate of the chip where the memory is to be written to
+        :param int base_address:
+            The address in SDRAM where the region of memory is to be written
+        :param data: The data to write.  Should be one of the following:
+
+            * An instance of RawIOBase
+            * A bytearray/bytes
+            * A single integer - will be written in little-endian byte order
+            * A filename of a data file (in which case `is_filename` must be\
+              set to True)
+        :type data:
+            ~io.RawIOBase or bytes or bytearray or int or str
+        :param int n_bytes:
+            The amount of data to be written in bytes.  If not specified:
+
+            * If `data` is an RawIOBase, an error is raised
+            * If `data` is a bytearray, the length of the bytearray will be\
+              used
+            * If `data` is an int, 4 will be used
+            * If `data` is a str, the length of the file will be used
+        :param int offset: The offset from which the valid data begins
+        :param int cpu: The optional CPU to write to
+        :param bool is_filename: True if `data` is a filename
+        :raise SpinnmanIOException:
+            * If there is an error communicating with the board
+            * If there is an error reading the data
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If `x, y` does not lead to a valid chip
+            * If a packet is received that has invalid parameters
+            * If `base_address` is not a positive integer
+            * If `data` is an RawIOBase but `n_bytes` is not specified
+            * If `data` is an int and `n_bytes` is more than 4
+            * If `n_bytes` is less than 0
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if self.__data._transceiver is None:
+             raise self._exception("transceiver")
+        return self.__data._transceiver.write_memory(
+            x, y, base_address, data, n_bytes, offset, cpu, is_filename)
 
     def get_new_id(self):
         """
