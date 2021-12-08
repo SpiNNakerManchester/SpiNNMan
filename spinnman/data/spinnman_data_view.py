@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from spinn_machine.data import MachineDataView
-from spinn_machine.data.machine_data_writer import MachineDataWriter
 
 
 class _SpiNNManDataModel(object):
@@ -118,7 +117,7 @@ class SpiNNManDataView(MachineDataView):
             If the machine is currently unavailable
         """
         if self.__data._transceiver is None:
-             raise self._exception("transceiver")
+            raise self._exception("transceiver")
         return self.__data._transceiver
 
     def get_transceiver(self):
@@ -157,7 +156,7 @@ class SpiNNManDataView(MachineDataView):
             If a response indicates an error during the exchange
         """
         if self.__data._transceiver is None:
-             raise self._exception("transceiver")
+            raise self._exception("transceiver")
         return self.__data._transceiver.read_memory(
             x, y, base_address, length, cpu)
 
@@ -209,7 +208,7 @@ class SpiNNManDataView(MachineDataView):
             If a response indicates an error during the exchange
         """
         if self.__data._transceiver is None:
-             raise self._exception("transceiver")
+            raise self._exception("transceiver")
         return self.__data._transceiver.write_memory(
             x, y, base_address, data, n_bytes, offset, cpu, is_filename)
 
@@ -222,7 +221,7 @@ class SpiNNManDataView(MachineDataView):
         :rtype: AppIdTracker
         """
         if self.__data._transceiver is None:
-             raise self._exception("transceiver")
+            raise self._exception("transceiver")
         return self.__data._transceiver.app_id_tracker.get_new_id()
 
     @property
@@ -241,7 +240,7 @@ class SpiNNManDataView(MachineDataView):
                 self.__data._transceiver._scamp_connection_selector
         return self.__data._scamp_connection_selector
 
-    #def machine(self):
+    # def machine(self):
     #    if self.has_machine():
     #        return MachineDataView.machine
     #    machine = self.transceiver.read_machine()
