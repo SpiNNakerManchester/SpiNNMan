@@ -73,7 +73,6 @@ from spinnman.processes import (
     MostDirectConnectionSelector)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
-from spinnman.utilities.appid_tracker import AppIdTracker
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -179,7 +178,6 @@ class Transceiver(AbstractContextManager):
     """
     __slots__ = [
         "_all_connections",
-        "_app_id_tracker",
         "_bmp_connection_selectors",
         "_bmp_connections",
         "_boot_send_connection",
@@ -231,7 +229,6 @@ class Transceiver(AbstractContextManager):
         self._width = None
         self._height = None
         self._iobuf_size = None
-        self._app_id_tracker = None
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -557,9 +554,6 @@ class Transceiver(AbstractContextManager):
         self._machine.add_spinnaker_links()
         self._machine.add_fpga_links()
 
-        # TODO: Actually get the existing APP_IDs in use
-        self._app_id_tracker = AppIdTracker()
-
         logger.info("Detected a machine on IP address {} which has {}",
                     self._boot_send_connection.remote_ip_address,
                     self._machine.cores_and_link_output_string())
@@ -699,16 +693,6 @@ class Transceiver(AbstractContextManager):
         if self._machine is None:
             self._update_machine()
         return self._machine
-
-    @property
-    def app_id_tracker(self):
-        """ Get the app ID tracker for this transceiver
-
-        :rtype: AppIdTracker
-        """
-        if self._app_id_tracker is None:
-            self._update_machine()
-        return self._app_id_tracker
 
     def is_connected(self, connection=None):
         """ Determines if the board can be contacted

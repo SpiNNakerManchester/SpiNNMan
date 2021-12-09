@@ -75,7 +75,4 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         self.__data._transceiver = transceiver
 
     def clear_transceiver(self):
-        if self.__data._transceiver:
-            self.__data._transceiver.close()
-        self.__data._transceiver = None
-        self.__data._scamp_connection_selector = None
+        self.__data._clear_transceiver()

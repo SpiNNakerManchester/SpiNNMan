@@ -69,3 +69,14 @@ class TestData(unittest.TestCase):
         self.assertFalse(view.has_transceiver())
         with self.assertRaises(TypeError):
             writer.set_transceiver("bacon")
+
+    def test_app_id_tracker(self):
+        view = SpiNNManDataView()
+        writer = SpiNNManDataWriter()
+        writer.setup()
+        self.assertIsNotNone(view.app_id_tracker)
+        # result happens to be 17 but if it chages change test
+        self.assertEqual(17, view.get_new_id())
+        self.assertEqual(18, view.get_new_id())
+        writer.hard_reset()
+        self.assertEqual(17, view.get_new_id())

@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from spinn_machine.data import MachineDataView
+from spinnman.utilities.appid_tracker import AppIdTracker
 
 
 class _SpiNNManDataModel(object):
@@ -35,6 +36,7 @@ class _SpiNNManDataModel(object):
 
     __slots__ = [
         # Data values cached
+        "_app_id_tracker",
         "_scamp_connection_selector",
         "_transceiver",
     ]
@@ -45,6 +47,7 @@ class _SpiNNManDataModel(object):
         # pylint: disable=protected-access
         obj = object.__new__(cls)
         cls.__singleton = obj
+        obj._transceiver = None
         obj._clear()
         return obj
 
@@ -58,9 +61,18 @@ class _SpiNNManDataModel(object):
         """
         Clears out all data that should change after a reset and graaph change
         """
-        self._transceiver = None
-        self._scamp_connection_selector = None
+        self._app_id_tracker = None
+        self._clear_transceiver()
         self._soft_reset()
+
+    def _clear_transceiver(self):
+        self._scamp_connection_selector = None
+        if self._transceiver:
+            try:
+                self._transceiver.close()
+            except Exception:
+                pass
+        self._transceiver = None
 
     def _soft_reset(self):
         """
@@ -212,6 +224,12 @@ class SpiNNManDataView(MachineDataView):
         return self.__data._transceiver.write_memory(
             x, y, base_address, data, n_bytes, offset, cpu, is_filename)
 
+    @property
+    def app_id_tracker(self):
+        if self.__data._app_id_tracker is None:
+            self.__data._app_id_tracker = AppIdTracker()
+        return self.__data._app_id_tracker
+
     def get_new_id(self):
         """
         Gets a new id from the current app_id_tracker
@@ -220,9 +238,7 @@ class SpiNNManDataView(MachineDataView):
 
         :rtype: AppIdTracker
         """
-        if self.__data._transceiver is None:
-            raise self._exception("transceiver")
-        return self.__data._transceiver.app_id_tracker.get_new_id()
+        return self.app_id_tracker.get_new_id()
 
     @property
     def scamp_connection_selector(self):
