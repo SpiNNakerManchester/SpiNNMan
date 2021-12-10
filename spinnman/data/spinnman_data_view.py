@@ -255,10 +255,3 @@ class SpiNNManDataView(MachineDataView):
             self.__data._scamp_connection_selector =\
                 self.__data._transceiver._scamp_connection_selector
         return self.__data._scamp_connection_selector
-
-    # def machine(self):
-    #    if self.has_machine():
-    #        return MachineDataView.machine
-    #    machine = self.transceiver.read_machine()
-    #    MachineDataWriter().set_machine(machine)
-    #    return machine

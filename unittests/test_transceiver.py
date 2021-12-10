@@ -17,6 +17,7 @@ import unittest
 import struct
 from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
+from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
@@ -113,6 +114,7 @@ class TestTransceiver(unittest.TestCase):
 
             assert trans.is_connected()
             print(trans.get_scamp_version())
+            SpiNNManDataWriter().set_machine(trans.get_machine_details())
             print(trans.get_cpu_information())
 
     def test_boot_board(self):
@@ -156,7 +158,7 @@ class TestTransceiver(unittest.TestCase):
         connections.append(SCAMPConnection(
             remote_host=None))
         tx = MockWriteTransceiver(version=5, connections=connections)
-
+        SpiNNManDataWriter().set_machine(tx.get_machine_details())
         # All chips
         tx.set_watch_dog(True)
         tx.set_watch_dog(False)

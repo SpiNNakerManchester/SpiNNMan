@@ -38,6 +38,7 @@ from spinnman.constants import (
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
     ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
     BOOT_RETRIES)
+from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
@@ -186,7 +187,6 @@ class Transceiver(AbstractContextManager):
         "_flood_write_lock",
         "_height",
         "_iobuf_size",
-        "_machine",
         "_machine_off",
         "_multicast_sender_connections",
         "_n_chip_execute_locks",
@@ -225,7 +225,6 @@ class Transceiver(AbstractContextManager):
 
         # Place to keep the current machine
         self._version = version
-        self._machine = None
         self._width = None
         self._height = None
         self._iobuf_size = None
@@ -367,8 +366,7 @@ class Transceiver(AbstractContextManager):
                         self._udp_scamp_connections[board_address] = conn
 
         # update the transceiver with the conn selectors.
-        return MostDirectConnectionSelector(
-            self._machine, self._scamp_connections)
+        return MostDirectConnectionSelector(self._scamp_connections)
 
     def _check_bmp_connections(self):
         """ Check that the BMP connections are actually connected to valid BMPs
@@ -531,33 +529,6 @@ class Transceiver(AbstractContextManager):
             connection_to_use = connection
         connection_to_use.send_sdp_message(message)
 
-    def _update_machine(self):
-        """ Get the current machine status and store it
-        """
-
-        # Get the width and height of the machine
-        self.get_machine_dimensions()
-
-        # Get the coordinates of the boot chip
-        version_info = self.get_scamp_version()
-
-        # Get the details of all the chips
-        get_machine_process = GetMachineProcess(
-            self._scamp_connection_selector)
-        self._machine = get_machine_process.get_machine_details(
-            version_info.x, version_info.y, self._width, self._height)
-
-        # update the SCAMP selector with the machine
-        self._scamp_connection_selector.set_machine(self._machine)
-
-        # Work out and add the SpiNNaker links and FPGA links
-        self._machine.add_spinnaker_links()
-        self._machine.add_fpga_links()
-
-        logger.info("Detected a machine on IP address {} which has {}",
-                    self._boot_send_connection.remote_ip_address,
-                    self._machine.cores_and_link_output_string())
-
     def discover_scamp_connections(self):
         """ Find connections to the board and store these for future use.\
             Note that connections can be empty, in which case another local\
@@ -690,9 +661,27 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if self._machine is None:
-            self._update_machine()
-        return self._machine
+
+        # Get the width and height of the machine
+        self.get_machine_dimensions()
+
+        # Get the coordinates of the boot chip
+        version_info = self.get_scamp_version()
+
+        # Get the details of all the chips
+        get_machine_process = GetMachineProcess(
+            self._scamp_connection_selector)
+        machine = get_machine_process.get_machine_details(
+            version_info.x, version_info.y, self._width, self._height)
+
+        # Work out and add the SpiNNaker links and FPGA links
+        machine.add_spinnaker_links()
+        machine.add_fpga_links()
+
+        logger.info("Detected a machine on IP address {} which has {}",
+                    self._boot_send_connection.remote_ip_address,
+                    machine.cores_and_link_output_string())
+        return machine
 
     def is_connected(self, connection=None):
         """ Determines if the board can be contacted
@@ -953,10 +942,8 @@ class Transceiver(AbstractContextManager):
 
         # Get all the cores if the subsets are not given
         if core_subsets is None:
-            if self._machine is None:
-                self._update_machine()
             core_subsets = CoreSubsets()
-            for chip in self._machine.chips:
+            for chip in SpiNNManDataView().machine.chips:
                 for processor in chip.processors:
                     core_subsets.add_processor(
                         chip.x, chip.y, processor.processor_id)
@@ -1157,9 +1144,7 @@ class Transceiver(AbstractContextManager):
         """
         warn_once(logger, "The set_watch_dog method is deprecated and "
                           "untested due to no known use.")
-        if self._machine is None:
-            self._update_machine()
-        for x, y in self._machine.chip_coordinates:
+        for x, y in SpiNNManDataView().machine.chip_coordinates:
             self.set_watch_dog_on_chip(x, y, watch_dog)
 
     def get_iobuf_from_core(self, x, y, p):
