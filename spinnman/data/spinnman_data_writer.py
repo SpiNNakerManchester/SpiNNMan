@@ -83,6 +83,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def local_hard_reset(self):
         self.__data._hard_reset()
+        self.clear_transceiver()
 
     def hard_reset(self):
         MachineDataWriter.hard_reset(self)
@@ -98,8 +99,8 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     def set_transceiver(self, transceiver):
         if self.__data._transceiver:
             self.__data._transceiver.close()
-        #if not isinstance(transceiver, Transceiver):
-        #    raise TypeError("transceiver should be a Transceiver")
+        if not isinstance(transceiver, Transceiver):
+            raise TypeError("transceiver should be a Transceiver")
         self.__data._transceiver = transceiver
 
     def clear_transceiver(self):

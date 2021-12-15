@@ -65,14 +65,14 @@ class _SpiNNManDataModel(object):
         #self._clear_transceiver()
         self._soft_reset()
 
-    #def _clear_transceiver(self):
-    #    self._scamp_connection_selector = None
-    #    if self._transceiver:
-    #        try:
-    #            self._transceiver.close()
-    #        except Exception:
-    #            pass
-    #    self._transceiver = None
+    def _clear_transceiver(self):
+        self._scamp_connection_selector = None
+        if self._transceiver:
+            try:
+                self._transceiver.close()
+            except Exception:
+                pass
+        self._transceiver = None
 
     def _soft_reset(self):
         """
