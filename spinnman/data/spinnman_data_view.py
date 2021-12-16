@@ -56,6 +56,7 @@ class _SpiNNManDataModel(object):
         Clears out all data
         """
         self._hard_reset()
+        self._clear_transceiver()
 
     def _hard_reset(self):
         """
