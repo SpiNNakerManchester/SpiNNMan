@@ -356,7 +356,7 @@ class Transceiver(AbstractContextManager):
                 if isinstance(conn, BMPConnection):
                     self._bmp_connections.append(conn)
                     self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
-                        MostDirectConnectionSelector(None, [conn])
+                        MostDirectConnectionSelector([conn])
                 else:
                     self._scamp_connections.append(conn)
 
@@ -583,7 +583,7 @@ class Transceiver(AbstractContextManager):
 
             # check if it works
             if self._check_connection(
-                    MostDirectConnectionSelector(None, [conn]), x, y):
+                    MostDirectConnectionSelector([conn]), x, y):
                 self._scp_sender_connections.append(conn)
                 self._all_connections.add(conn)
                 self._udp_scamp_connections[ip_address] = conn

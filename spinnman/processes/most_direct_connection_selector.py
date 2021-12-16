@@ -30,7 +30,6 @@ class MostDirectConnectionSelector(
     # pylint: disable=super-init-not-called
     def __init__(self, connections):
         """
-        :param ~spinn_machine.Machine machine:
         :param list(SCAMPConnection) connections:
             The connections to be used
         """
