@@ -56,13 +56,13 @@ class _SpiNNManDataModel(object):
         Clears out all data
         """
         self._hard_reset()
+        self._clear_transceiver()
 
     def _hard_reset(self):
         """
         Clears out all data that should change after a reset and graaph change
         """
         self._app_id_tracker = None
-        self._clear_transceiver()
         self._soft_reset()
 
     def _clear_transceiver(self):

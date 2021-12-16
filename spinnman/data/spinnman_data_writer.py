@@ -33,43 +33,63 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     __data = _SpiNNManDataModel()
     __slots__ = []
 
-    def mock(self):
+    def local_mock(self):
         """
         Clears out all data and adds mock values where needed.
-
         This should set the most likely defaults values.
         But be aware that what is considered the most likely default could
         change over time.
-
         Unittests that depend on any valid value being set should be able to
         depend on Mock.
+        Unittest that depend on a specific value should call mock and then
+        set that value.
+        """
+        self.__data._clear()
 
+    def mock(self):
+        """
+        Clears out all data and adds mock values where needed.
+        This should set the most likely defaults values.
+        But be aware that what is considered the most likely default could
+        change over time.
+        Unittests that depend on any valid value being set should be able to
+        depend on Mock.
         Unittest that depend on a specific value should call mock and then
         set that value.
         """
         MachineDataWriter.mock(self)
+        self.local_mock()
+
+    def local_setup(self):
+        """
+        Puts all data back into the state expected at sim.setup time
+        """
         self.__data._clear()
 
     def setup(self):
         """
         Puts all data back into the state expected at sim.setup time
-
         """
         MachineDataWriter.setup(self)
-        self.__data._clear()
+        self.local_setup()
+
+    def local_hard_reset(self):
+        self.__data._hard_reset()
 
     def hard_reset(self):
         MachineDataWriter.hard_reset(self)
-        self.__data._hard_reset()
+        self.local_hard_reset()
+
+    def local_soft_reset(self):
+        self.__data._soft_reset()
 
     def soft_reset(self):
         MachineDataWriter.soft_reset(self)
-        self.__data._soft_reset()
+        self.local_soft_reset()
 
     def set_transceiver(self, transceiver):
         if self.__data._transceiver:
             self.__data._transceiver.close()
-        # Must do a delayed import here so Transceiver can call this
         if not isinstance(transceiver, Transceiver):
             raise TypeError("transceiver should be a Transceiver")
         self.__data._transceiver = transceiver
