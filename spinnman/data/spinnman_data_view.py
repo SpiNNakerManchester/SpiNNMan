@@ -56,7 +56,6 @@ class _SpiNNManDataModel(object):
         Clears out all data
         """
         self._hard_reset()
-        self._clear_transceiver()
 
     def _hard_reset(self):
         """
@@ -64,6 +63,7 @@ class _SpiNNManDataModel(object):
         """
         self._app_id_tracker = None
         self._soft_reset()
+        self._clear_transceiver()
 
     def _clear_transceiver(self):
         self._scamp_connection_selector = None

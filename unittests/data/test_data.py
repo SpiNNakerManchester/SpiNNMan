@@ -60,13 +60,10 @@ class TestData(unittest.TestCase):
         writer.setup()
         with self.assertRaises(DataNotYetAvialable):
             view.transceiver
-        writer.clear_transceiver()
         self.assertFalse(view.has_transceiver())
         writer.set_transceiver(MockTranceiver())
         view.transceiver
         self.assertTrue(view.has_transceiver())
-        writer.clear_transceiver()
-        self.assertFalse(view.has_transceiver())
         with self.assertRaises(TypeError):
             writer.set_transceiver("bacon")
 
