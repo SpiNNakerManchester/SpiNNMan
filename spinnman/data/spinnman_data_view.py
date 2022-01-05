@@ -230,7 +230,8 @@ class SpiNNManDataView(MachineDataView):
             self.__data._app_id_tracker = AppIdTracker()
         return self.__data._app_id_tracker
 
-    def get_new_id(self):
+    @classmethod
+    def get_new_id(cls):
         """
         Gets a new id from the current app_id_tracker
 
@@ -238,7 +239,9 @@ class SpiNNManDataView(MachineDataView):
 
         :rtype: AppIdTracker
         """
-        return self.app_id_tracker.get_new_id()
+        if cls.__data._app_id_tracker is None:
+            cls.__data._app_id_tracker = AppIdTracker()
+        return cls.__data._app_id_tracker.get_new_id()
 
     @property
     def scamp_connection_selector(self):
