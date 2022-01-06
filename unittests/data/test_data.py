@@ -39,25 +39,22 @@ class TestData(unittest.TestCase):
 
     def test_setup(self):
         view = SpiNNManDataView()
-        writer = SpiNNManDataWriter()
         # What happens before setup depends on the previous test
         # Use manual_check to verify this without dependency
-        writer.setup()
+        SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
             view.transceiver
 
     def test_mock(self):
         view = SpiNNManDataView()
-        writer = SpiNNManDataWriter()
-        writer.mock()
+        SpiNNManDataWriter.mock()
         # check there is a
         #   value not what it is
         view.machine
 
     def test_transceiver(self):
         view = SpiNNManDataView()
-        writer = SpiNNManDataWriter()
-        writer.setup()
+        writer = SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
             view.transceiver
         self.assertFalse(view.has_transceiver())
@@ -69,8 +66,7 @@ class TestData(unittest.TestCase):
 
     def test_app_id_tracker(self):
         view = SpiNNManDataView()
-        writer = SpiNNManDataWriter()
-        writer.setup()
+        writer = SpiNNManDataWriter.setup()
         self.assertIsNotNone(view.app_id_tracker)
         # result happens to be 17 but if it chages change test
         self.assertEqual(17, view.get_new_id())
