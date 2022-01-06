@@ -15,6 +15,7 @@
 
 import logging
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.overrides import overrides
 from spinn_machine.data.machine_data_writer import MachineDataWriter
 from spinnman.transceiver import Transceiver
 from .spinnman_data_view import _SpiNNManDataModel, SpiNNManDataView
@@ -33,45 +34,27 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     __data = _SpiNNManDataModel()
     __slots__ = []
 
-    def local_mock(self):
+    def _spinnman_mock(self):
         """
-        Clears out all data and adds mock values where needed.
-        This should set the most likely defaults values.
-        But be aware that what is considered the most likely default could
-        change over time.
-        Unittests that depend on any valid value being set should be able to
-        depend on Mock.
-        Unittest that depend on a specific value should call mock and then
-        set that value.
+        Like _mock but does not call super class _mock
         """
         self.__data._clear()
 
-    def mock(self):
-        """
-        Clears out all data and adds mock values where needed.
-        This should set the most likely defaults values.
-        But be aware that what is considered the most likely default could
-        change over time.
-        Unittests that depend on any valid value being set should be able to
-        depend on Mock.
-        Unittest that depend on a specific value should call mock and then
-        set that value.
-        """
-        MachineDataWriter.mock(self)
-        self.local_mock()
+    @overrides(MachineDataWriter._mock)
+    def _mock(self):
+        MachineDataWriter._mock(self)
+        self._spinnman_mock()
 
-    def local_setup(self):
+    def _spinnman_setup(self):
         """
-        Puts all data back into the state expected at sim.setup time
+        Like _setup but does not call super class _setup
         """
         self.__data._clear()
 
-    def setup(self):
-        """
-        Puts all data back into the state expected at sim.setup time
-        """
-        MachineDataWriter.setup(self)
-        self.local_setup()
+    @overrides(MachineDataWriter._setup)
+    def _setup(self):
+        MachineDataWriter._setup(self)
+        self._spinnman_setup()
 
     def local_hard_reset(self):
         self.__data._hard_reset()
