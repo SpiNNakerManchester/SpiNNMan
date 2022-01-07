@@ -943,7 +943,7 @@ class Transceiver(AbstractContextManager):
         # Get all the cores if the subsets are not given
         if core_subsets is None:
             core_subsets = CoreSubsets()
-            for chip in SpiNNManDataView().machine.chips:
+            for chip in SpiNNManDataView.get_machine().chips:
                 for processor in chip.processors:
                     core_subsets.add_processor(
                         chip.x, chip.y, processor.processor_id)
@@ -1144,7 +1144,7 @@ class Transceiver(AbstractContextManager):
         """
         warn_once(logger, "The set_watch_dog method is deprecated and "
                           "untested due to no known use.")
-        for x, y in SpiNNManDataView().machine.chip_coordinates:
+        for x, y in SpiNNManDataView.get_machine().chip_coordinates:
             self.set_watch_dog_on_chip(x, y, watch_dog)
 
     def get_iobuf_from_core(self, x, y, p):

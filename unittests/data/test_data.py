@@ -46,11 +46,10 @@ class TestData(unittest.TestCase):
             view.transceiver
 
     def test_mock(self):
-        view = SpiNNManDataView()
         SpiNNManDataWriter.mock()
         # check there is a
         #   value not what it is
-        view.machine
+        SpiNNManDataView.get_machine()
 
     def test_transceiver(self):
         view = SpiNNManDataView()
