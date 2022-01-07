@@ -218,24 +218,31 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver.write_memory(
             x, y, base_address, data, n_bytes, offset, cpu, is_filename)
 
-    @property
-    def app_id_tracker(self):
-        if self.__data._app_id_tracker is None:
-            self.__data._app_id_tracker = AppIdTracker()
-        return self.__data._app_id_tracker
-
     @classmethod
     def get_new_id(cls):
         """
         Gets a new id from the current app_id_tracker
 
-        currently semantic sugar for transceiver.app_id_tracker.get_new_id()
+        previously transceiver.app_id_tracker.get_new_id()
 
         :rtype: AppIdTracker
         """
         if cls.__data._app_id_tracker is None:
             cls.__data._app_id_tracker = AppIdTracker()
         return cls.__data._app_id_tracker.get_new_id()
+
+    @classmethod
+    def free_id(cls, app_id):
+        """
+        Frees up an app_id
+
+        previously transceiver.app_id_tracker.free_id(app_id)
+
+        :param int app_id:
+
+        """
+        if cls.__data._app_id_tracker:
+            cls.__data._app_id_tracker.free_id(app_id)
 
     @property
     def scamp_connection_selector(self):
