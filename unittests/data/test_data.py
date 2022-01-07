@@ -38,12 +38,11 @@ class TestData(unittest.TestCase):
         unittest_setup()
 
     def test_setup(self):
-        view = SpiNNManDataView()
         # What happens before setup depends on the previous test
         # Use manual_check to verify this without dependency
         SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
-            view.transceiver
+            SpiNNManDataView.get_transceiver()
 
     def test_mock(self):
         SpiNNManDataWriter.mock()
@@ -55,11 +54,11 @@ class TestData(unittest.TestCase):
         view = SpiNNManDataView()
         writer = SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
-            view.transceiver
-        self.assertFalse(view.has_transceiver())
+            SpiNNManDataView.get_transceiver()
+        self.assertFalse(SpiNNManDataView.has_transceiver())
         writer.set_transceiver(MockTranceiver())
-        view.transceiver
-        self.assertTrue(view.has_transceiver())
+        SpiNNManDataView.get_transceiver()
+        self.assertTrue(SpiNNManDataView.has_transceiver())
         with self.assertRaises(TypeError):
             writer.set_transceiver("bacon")
 

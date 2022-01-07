@@ -111,13 +111,14 @@ class SpiNNManDataView(MachineDataView):
 
     # transceiver methods
 
-    def has_transceiver(self):
+    @classmethod
+    def has_transceiver(cls):
         """
         Reports if a transceiver is currently set
 
         :rtype: bool
         """
-        return self.__data._transceiver is not None
+        return cls.__data._transceiver is not None
 
     @property
     def transceiver(self):
@@ -132,13 +133,16 @@ class SpiNNManDataView(MachineDataView):
             raise self._exception("transceiver")
         return self.__data._transceiver
 
-    def get_transceiver(self):
+    @classmethod
+    def get_transceiver(cls):
         """
         The transceiver description or None if the is no tranceiver
 
         :rtype: ~spinnman.transceiver.Transceiver
         """
-        return self.__data._transceiver
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver
 
     def read_memory(self, x, y, base_address, length, cpu=0):
         """ Read some areas of memory (usually SDRAM) from the board.
