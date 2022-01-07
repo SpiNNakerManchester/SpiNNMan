@@ -244,8 +244,8 @@ class SpiNNManDataView(MachineDataView):
         if cls.__data._app_id_tracker:
             cls.__data._app_id_tracker.free_id(app_id)
 
-    @property
-    def scamp_connection_selector(self):
+    @classmethod
+    def get_scamp_connection_selector(cls):
         """
         Gets the scamp connection selector from the transceiver
 
@@ -253,9 +253,9 @@ class SpiNNManDataView(MachineDataView):
 
         :rtype: MostDirectConnectionSelector
         """
-        if not self.__data._scamp_connection_selector:
-            if self.__data._transceiver is None:
-                raise self._exception("transceiver")
-            self.__data._scamp_connection_selector =\
-                self.__data._transceiver._scamp_connection_selector
-        return self.__data._scamp_connection_selector
+        if not cls.__data._scamp_connection_selector:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver")
+            cls.__data._scamp_connection_selector =\
+                cls.__data._transceiver._scamp_connection_selector
+        return cls.__data._scamp_connection_selector
