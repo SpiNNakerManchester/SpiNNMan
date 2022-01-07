@@ -120,19 +120,6 @@ class SpiNNManDataView(MachineDataView):
         """
         return cls.__data._transceiver is not None
 
-    @property
-    def transceiver(self):
-        """
-        The transceiver description
-
-        :rtype: ~spinnman.transceiver.Transceiver
-        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
-            If the machine is currently unavailable
-        """
-        if self.__data._transceiver is None:
-            raise self._exception("transceiver")
-        return self.__data._transceiver
-
     @classmethod
     def get_transceiver(cls):
         """
@@ -144,7 +131,8 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver")
         return cls.__data._transceiver
 
-    def read_memory(self, x, y, base_address, length, cpu=0):
+    @classmethod
+    def read_memory(cls, x, y, base_address, length, cpu=0):
         """ Read some areas of memory (usually SDRAM) from the board.
 
         Semantic sugar for transceiver.read_memory
@@ -171,12 +159,14 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if self.__data._transceiver is None:
-            raise self._exception("transceiver")
-        return self.__data._transceiver.read_memory(
-            x, y, base_address, length, cpu)
+        try:
+            return cls.__data._transceiver.read_memory(
+                x, y, base_address, length, cpu)
+        except AttributeError:
+            raise cls._exception("transceiver")
 
-    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
+    @classmethod
+    def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
         """ Write to the SDRAM on the board.
 
@@ -223,9 +213,9 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if self.__data._transceiver is None:
-            raise self._exception("transceiver")
-        return self.__data._transceiver.write_memory(
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.write_memory(
             x, y, base_address, data, n_bytes, offset, cpu, is_filename)
 
     @property
