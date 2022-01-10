@@ -51,7 +51,6 @@ class TestData(unittest.TestCase):
         SpiNNManDataView.get_machine()
 
     def test_transceiver(self):
-        view = SpiNNManDataView()
         writer = SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
             SpiNNManDataView.get_transceiver()
