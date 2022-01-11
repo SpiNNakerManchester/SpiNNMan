@@ -102,6 +102,7 @@ class TestTransceiver(unittest.TestCase):
         connections.append(BootConnection(
             remote_host=board_config.remotehost))
         with transceiver.Transceiver(ver, connections=connections) as trans:
+            SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
             if board_config.board_version in (2, 3):
                 assert trans.get_machine_dimensions().width == 2
                 assert trans.get_machine_dimensions().height == 2
