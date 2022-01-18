@@ -127,7 +127,7 @@ class SCPRequestPipeLine(object):
         :return: The next number in the sequence.
         :rtype: int
         """
-        global _next_sequence, _next_sequence_lock
+        global _next_sequence
         with _next_sequence_lock:
             sequence = _next_sequence
             _next_sequence = (sequence + 1) % MAX_SEQUENCE
