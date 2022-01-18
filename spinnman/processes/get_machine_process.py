@@ -514,5 +514,5 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         full_message = message.format(*args) + "\n"
         report_file = join(UtilsDataView.get_run_dir_path(), REPORT_FILE)
-        with open(report_file, "a") as r_file:
+        with open(report_file, "a", encoding="utf-8") as r_file:
             r_file.write(full_message)
