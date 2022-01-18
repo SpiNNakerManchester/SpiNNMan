@@ -55,7 +55,7 @@ if __name__ == "__main__":
     def _print_connected(ip_address, timestamp):
         try:
             hostname = f" ({socket.gethostbyaddr(ip_address)[0]})"
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             hostname = ""
         print(f"{ip_address}{hostname} at {timestamp}")
         return False

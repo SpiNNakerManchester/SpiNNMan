@@ -526,5 +526,5 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 self._report_file = join(
                     self._default_report_directory, REPORT_FILE)
 
-        with open(self._report_file, "a") as r_file:
+        with open(self._report_file, "a", encoding="utf-8") as r_file:
             r_file.write(full_message)
