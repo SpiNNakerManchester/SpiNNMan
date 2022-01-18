@@ -15,9 +15,6 @@
 
 -r requirements.txt
 flake8
-numpy > 1.13, < 1.20; python_version == '3.6'
-numpy > 1.13, < 1.21; python_version == '3.7'
-numpy; python_version >= '3.8'
 coverage >= 4.4, < 5.0
 # pytest will be brought in by pytest-cov
 pytest-cov
