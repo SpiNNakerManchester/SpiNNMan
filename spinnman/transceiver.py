@@ -105,7 +105,9 @@ def create_transceiver_from_hostname(
         and then returning the transceiver created with the conjunction of\
         the created UDPConnection and the discovered connections.
 
-    :param str hostname: The hostname or IP address of the board
+    :param hostname: The hostname or IP address of the board or None if
+        only the BMP conenctions are of interest
+    :type hostname: str or None
     :param number_of_boards: a number of boards expected to be supported, or
         ``None``, which defaults to a single board
     :type number_of_boards: int or None
