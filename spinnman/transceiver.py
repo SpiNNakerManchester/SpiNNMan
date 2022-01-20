@@ -1897,7 +1897,10 @@ class Transceiver(AbstractContextManager):
         """
         xys = set()
         for cpu_info in cpu_infos:
-            xys.add((cpu_info.x, cpu_info.y))
+            if isinstance(cpu_info, tuple):
+                xys.add((cpu_info[0], cpu_info[1]))
+            else:
+                xys.add((cpu_info.x, cpu_info.y))
         for (x, y) in xys:
             logger.info(self._machine.where_is_xy(x, y))
 
