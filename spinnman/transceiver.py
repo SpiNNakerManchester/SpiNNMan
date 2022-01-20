@@ -1889,6 +1889,18 @@ class Transceiver(AbstractContextManager):
                 "You are calling a app stop on a turned off machine. "
                 "Please fix and try again")
 
+    def log_where_is_info(self, cpu_infos):
+        """
+        Logs the where_is info for each chip in cpu_infos
+
+        :param cpu_infos:
+        """
+        xys = set()
+        for cpu_info in cpu_infos:
+            xys.add((cpu_info.x, cpu_info.y))
+        for (x, y) in xys:
+            logger.info(self._machine.where_is_xy(x, y))
+
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
             time_between_polls=0.1,
@@ -1919,7 +1931,6 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanTimeoutException:
             If a timeout is specified and exceeded.
         """
-
         # check that the right number of processors are in the states
         processors_ready = 0
         max_processors_ready = 0
@@ -1949,6 +1960,7 @@ class Transceiver(AbstractContextManager):
                     error_core_states = self.get_cores_in_state(
                         all_core_subsets, error_states)
                     if len(error_core_states) > 0:
+                        self.log_where_is_info(error_core_states)
                         raise SpiNNManCoresNotInStateException(
                             timeout, cpu_states, error_core_states)
 
@@ -1984,6 +1996,7 @@ class Transceiver(AbstractContextManager):
             # If we are sure we haven't reached the final state,
             # report a timeout error
             if len(cores_not_in_state) != 0:
+                self.log_where_is_info(cores_not_in_state)
                 raise SpiNNManCoresNotInStateException(
                     timeout, cpu_states, cores_not_in_state)
 
