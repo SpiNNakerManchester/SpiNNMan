@@ -1796,9 +1796,12 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-
-        process = ReadMemoryProcess(self._scamp_connection_selector)
-        return process.read_memory(x, y, cpu, base_address, length)
+        try:
+            process = ReadMemoryProcess(self._scamp_connection_selector)
+            return process.read_memory(x, y, cpu, base_address, length)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def read_word(self, x, y, base_address, cpu=0):
         """ Read a word (usually of SDRAM) from the board.
@@ -1824,10 +1827,14 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = ReadMemoryProcess(self._scamp_connection_selector)
-        data = process.read_memory(x, y, cpu, base_address, _ONE_WORD.size)
-        (value, ) = _ONE_WORD.unpack(data)
-        return value
+        try:
+            process = ReadMemoryProcess(self._scamp_connection_selector)
+            data = process.read_memory(x, y, cpu, base_address, _ONE_WORD.size)
+            (value, ) = _ONE_WORD.unpack(data)
+            return value
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
         """ Read some areas of memory on a neighbouring chip using a LINK_READ\
@@ -1861,10 +1868,14 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once(logger, "The read_neighbour_memory method is deprecated "
-                  "and untested due to no known use.")
-        process = ReadMemoryProcess(self._scamp_connection_selector)
-        return process.read_link_memory(x, y, cpu, link, base_address, length)
+        try:
+            warn_once(logger, "The read_neighbour_memory method is deprecated "
+                      "and untested due to no known use.")
+            process = ReadMemoryProcess(self._scamp_connection_selector)
+            return process.read_link_memory(x, y, cpu, link, base_address, length)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def stop_application(self, app_id):
         """ Sends a stop request for an app_id
@@ -2111,10 +2122,14 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        warn_once(logger, "The set_leds is deprecated and "
-                  "untested due to no known use.")
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(SetLED(x, y, cpu, led_states))
+        try:
+            warn_once(logger, "The set_leds is deprecated and "
+                      "untested due to no known use.")
+            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process.execute(SetLED(x, y, cpu, led_states))
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def locate_spinnaker_connection_for_board_address(self, board_address):
         """ Find a connection that matches the given board IP address
@@ -2308,9 +2323,13 @@ class Transceiver(AbstractContextManager):
         :return: the base address of the allocated memory
         :rtype: int
         """
-        process = MallocSDRAMProcess(self._scamp_connection_selector)
-        process.malloc_sdram(x, y, size, app_id, tag)
-        return process.base_address
+        try:
+            process = MallocSDRAMProcess(self._scamp_connection_selector)
+            process.malloc_sdram(x, y, size, app_id, tag)
+            return process.base_address
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def free_sdram(self, x, y, base_address, app_id):
         """ Free allocated SDRAM
@@ -2322,10 +2341,14 @@ class Transceiver(AbstractContextManager):
         :param int base_address: The base address of the allocated memory
         :param int app_id: The app ID of the allocated memory
         """
-        warn_once(logger, "The free_sdram method is deprecated and "
-                  "likely to be removed.")
-        process = DeAllocSDRAMProcess(self._scamp_connection_selector)
-        process.de_alloc_sdram(x, y, app_id, base_address)
+        try:
+            warn_once(logger, "The free_sdram method is deprecated and "
+                      "likely to be removed.")
+            process = DeAllocSDRAMProcess(self._scamp_connection_selector)
+            process.de_alloc_sdram(x, y, app_id, base_address)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def free_sdram_by_app_id(self, x, y, app_id):
         """ Free all SDRAM allocated to a given app ID
@@ -2340,11 +2363,15 @@ class Transceiver(AbstractContextManager):
         :return: The number of blocks freed
         :rtype: int
         """
-        warn_once(logger, "The free_sdram_by_app_id method is deprecated and "
-                  "untested due to no known use.")
-        process = DeAllocSDRAMProcess(self._scamp_connection_selector)
-        process.de_alloc_sdram(x, y, app_id)
-        return process.no_blocks_freed
+        try:
+            warn_once(logger, "The free_sdram_by_app_id method is deprecated and "
+                      "untested due to no known use.")
+            process = DeAllocSDRAMProcess(self._scamp_connection_selector)
+            process.de_alloc_sdram(x, y, app_id)
+            return process.no_blocks_freed
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def load_multicast_routes(self, x, y, routes, app_id):
         """ Load a set of multicast routes on to a chip
@@ -2367,9 +2394,12 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-
-        process = LoadMultiCastRoutesProcess(self._scamp_connection_selector)
-        process.load_routes(x, y, routes, app_id)
+        try:
+            process = LoadMultiCastRoutesProcess(self._scamp_connection_selector)
+            process.load_routes(x, y, routes, app_id)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def load_fixed_route(self, x, y, fixed_route, app_id):
         """ Loads a fixed route routing table entry onto a chip's router.
@@ -2392,9 +2422,13 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = LoadFixedRouteRoutingEntryProcess(
-            self._scamp_connection_selector)
-        process.load_fixed_route(x, y, fixed_route, app_id)
+        try:
+            process = LoadFixedRouteRoutingEntryProcess(
+                self._scamp_connection_selector)
+            process.load_fixed_route(x, y, fixed_route, app_id)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def read_fixed_route(self, x, y, app_id):
         """ Reads a fixed route routing table entry from a chip's router.
@@ -2408,9 +2442,13 @@ class Transceiver(AbstractContextManager):
             routes.  If not specified, defaults to 0.
         :return: the route as a fixed route entry
         """
-        process = ReadFixedRouteRoutingEntryProcess(
-            self._scamp_connection_selector)
-        return process.read_fixed_route(x, y, app_id)
+        try:
+            process = ReadFixedRouteRoutingEntryProcess(
+                self._scamp_connection_selector)
+            return process.read_fixed_route(x, y, app_id)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def get_multicast_routes(self, x, y, app_id=None):
         """ Get the current multicast routes set up on a chip
@@ -2433,11 +2471,15 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        base_address = self._get_sv_data(
-            x, y, SystemVariableDefinition.router_table_copy_address)
-        process = GetMultiCastRoutesProcess(
-            self._scamp_connection_selector, app_id)
-        return process.get_routes(x, y, base_address)
+        try:
+            base_address = self._get_sv_data(
+                x, y, SystemVariableDefinition.router_table_copy_address)
+            process = GetMultiCastRoutesProcess(
+                self._scamp_connection_selector, app_id)
+            return process.get_routes(x, y, base_address)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def clear_multicast_routes(self, x, y):
         """ Remove all the multicast routes on a chip
@@ -2453,8 +2495,12 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(RouterClear(x, y))
+        try:
+            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process.execute(RouterClear(x, y))
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def get_router_diagnostics(self, x, y):
         """ Get router diagnostic information from a chip
@@ -2474,8 +2520,12 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = ReadRouterDiagnosticsProcess(self._scamp_connection_selector)
-        return process.get_router_diagnostics(x, y)
+        try:
+            process = ReadRouterDiagnosticsProcess(self._scamp_connection_selector)
+            return process.get_router_diagnostics(x, y)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
         """ Sets a router diagnostic filter in a router
@@ -2502,6 +2552,15 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        try:
+            self.__set_router_diagnostic_filter(
+                x, y, position, diagnostic_filter)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
+
+    def __set_router_diagnostic_filter(
+            self, x, y, position, diagnostic_filter):
         data_to_send = diagnostic_filter.filter_word
         if position > NO_ROUTER_DIAGNOSTIC_FILTERS:
             raise SpinnmanInvalidParameterException(
@@ -2548,14 +2607,20 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        memory_position = (
-            ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
-            position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
+        try:
+            memory_position = (
+                ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
+                position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        response = process.execute(ReadMemory(x, y, memory_position, 4))
-        return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
-            response.data, response.offset)[0])  # pylint: disable=no-member
+            process = SendSingleCommandProcess(
+                self._scamp_connection_selector)
+            response = process.execute(ReadMemory(x, y, memory_position, 4))
+            return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
+                response.data, response.offset)[0])
+            # pylint: disable=no-member
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
                                          counter_ids=None):
@@ -2577,21 +2642,25 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if counter_ids is None:
-            counter_ids = range(0, 16)
-        clear_data = 0
-        for counter_id in counter_ids:
-            if counter_id < 0 or counter_id > 15:
-                raise SpinnmanInvalidParameterException(
-                    "counter_id", counter_id,
-                    "Diagnostic counter IDs must be between 0 and 15")
-            clear_data |= 1 << counter_id
-        if enable:
+        try:
+            if counter_ids is None:
+                counter_ids = range(0, 16)
+            clear_data = 0
             for counter_id in counter_ids:
-                clear_data |= 1 << counter_id + 16
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(WriteMemory(
-            x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
+                if counter_id < 0 or counter_id > 15:
+                    raise SpinnmanInvalidParameterException(
+                        "counter_id", counter_id,
+                        "Diagnostic counter IDs must be between 0 and 15")
+                clear_data |= 1 << counter_id
+            if enable:
+                for counter_id in counter_ids:
+                    clear_data |= 1 << counter_id + 16
+            process = SendSingleCommandProcess(self._scamp_connection_selector)
+            process.execute(WriteMemory(
+                x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     @property
     def number_of_boards_located(self):
@@ -2778,8 +2847,12 @@ class Transceiver(AbstractContextManager):
             The SystemVariableDefinition which is the heap to read
         :rtype: list(HeapElement)
         """
-        process = GetHeapProcess(self._scamp_connection_selector)
-        return process.get_heap((x, y), heap)
+        try:
+            process = GetHeapProcess(self._scamp_connection_selector)
+            return process.get_heap((x, y), heap)
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
