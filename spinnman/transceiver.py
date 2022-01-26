@@ -1872,7 +1872,8 @@ class Transceiver(AbstractContextManager):
             warn_once(logger, "The read_neighbour_memory method is deprecated "
                       "and untested due to no known use.")
             process = ReadMemoryProcess(self._scamp_connection_selector)
-            return process.read_link_memory(x, y, cpu, link, base_address, length)
+            return process.read_link_memory(
+                x, y, cpu, link, base_address, length)
         except Exception:
             logger.info(self._machine.where_is_xy(x, y))
             raise
@@ -2364,8 +2365,8 @@ class Transceiver(AbstractContextManager):
         :rtype: int
         """
         try:
-            warn_once(logger, "The free_sdram_by_app_id method is deprecated and "
-                      "untested due to no known use.")
+            warn_once(logger, "The free_sdram_by_app_id method is deprecated "
+                              "and untested due to no known use.")
             process = DeAllocSDRAMProcess(self._scamp_connection_selector)
             process.de_alloc_sdram(x, y, app_id)
             return process.no_blocks_freed
@@ -2395,7 +2396,8 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         try:
-            process = LoadMultiCastRoutesProcess(self._scamp_connection_selector)
+            process = LoadMultiCastRoutesProcess(
+                self._scamp_connection_selector)
             process.load_routes(x, y, routes, app_id)
         except Exception:
             logger.info(self._machine.where_is_xy(x, y))
@@ -2521,7 +2523,8 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         try:
-            process = ReadRouterDiagnosticsProcess(self._scamp_connection_selector)
+            process = ReadRouterDiagnosticsProcess(
+                self._scamp_connection_selector)
             return process.get_router_diagnostics(x, y)
         except Exception:
             logger.info(self._machine.where_is_xy(x, y))
