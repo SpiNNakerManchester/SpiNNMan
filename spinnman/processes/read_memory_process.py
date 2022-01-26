@@ -14,9 +14,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import functools
+import logging
+from spinn_utilities.log import FormatAdapter
 from spinnman.messages.scp.impl import ReadLink, ReadMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+
+logger = FormatAdapter(logging.getLogger(__name__))
 
 
 class ReadMemoryProcess(AbstractMultiConnectionProcess):
@@ -47,9 +51,13 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
         :param int length:
         :rtype: bytearray
         """
-        return self._read_memory(
-            base_address, length,
-            functools.partial(ReadMemory, x=x, y=y, cpu=p))
+        try:
+            return self._read_memory(
+                base_address, length,
+                functools.partial(ReadMemory, x=x, y=y, cpu=p))
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def read_link_memory(self, x, y, p, link, base_address, length):
         """
@@ -61,9 +69,13 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
         :param int length:
         :rtype: bytearray
         """
-        return self._read_memory(
-            base_address, length,
-            functools.partial(ReadLink, x=x, y=y, cpu=p, link=link))
+        try:
+            return self._read_memory(
+                base_address, length,
+                functools.partial(ReadLink, x=x, y=y, cpu=p, link=link))
+        except Exception:
+            logger.info(self._machine.where_is_xy(x, y))
+            raise
 
     def _read_memory(self, base_address, length, packet_class):
         data = bytearray(length)
