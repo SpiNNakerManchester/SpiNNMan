@@ -346,7 +346,7 @@ class Transceiver(AbstractContextManager):
                 return self._machine.where_is_xy(x, y)
             return f"No Machine. " \
                    f"Root IP:{self._scamp_connections[0].remote_ip_address}" \
-                   f"x:{y} y:{y}"
+                   f"x:{x} y:{y}"
         except Exception as ex:
             return str(ex)
 
