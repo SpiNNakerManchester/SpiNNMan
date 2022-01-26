@@ -318,6 +318,25 @@ class Transceiver(AbstractContextManager):
 
         self._machine_off = False
 
+    def __where_is_xy(self, x, y):
+        """
+        Attempts to get where_is_x_y info from the machine
+
+        If no machine will do its best.
+
+        :param int x:
+        :param int y:
+        :rtype: str
+        """
+        try:
+            if self._machine:
+                return SpiNNManDataView.get_machine().where_is_xy(x, y)
+            return f"No Machine. " \
+                   f"Root IP:{self._scamp_connections[0].remote_ip_address}" \
+                   f"x:{x} y:{y}"
+        except Exception as ex:
+            return str(ex)
+
     def _identify_connections(self, connections):
         for conn in connections:
 
@@ -1760,7 +1779,7 @@ class Transceiver(AbstractContextManager):
             process = ReadMemoryProcess(self._scamp_connection_selector)
             return process.read_memory(x, y, cpu, base_address, length)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def read_word(self, x, y, base_address, cpu=0):
@@ -1793,7 +1812,7 @@ class Transceiver(AbstractContextManager):
             (value, ) = _ONE_WORD.unpack(data)
             return value
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
@@ -1835,7 +1854,7 @@ class Transceiver(AbstractContextManager):
             return process.read_link_memory(
                 x, y, cpu, link, base_address, length)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def stop_application(self, app_id):
@@ -1874,7 +1893,7 @@ class Transceiver(AbstractContextManager):
             else:
                 xys.add((cpu_info.x, cpu_info.y))
         for (x, y) in xys:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
 
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
@@ -2089,7 +2108,7 @@ class Transceiver(AbstractContextManager):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(SetLED(x, y, cpu, led_states))
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def locate_spinnaker_connection_for_board_address(self, board_address):
@@ -2289,7 +2308,7 @@ class Transceiver(AbstractContextManager):
             process.malloc_sdram(x, y, size, app_id, tag)
             return process.base_address
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def free_sdram(self, x, y, base_address, app_id):
@@ -2308,7 +2327,7 @@ class Transceiver(AbstractContextManager):
             process = DeAllocSDRAMProcess(self._scamp_connection_selector)
             process.de_alloc_sdram(x, y, app_id, base_address)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def free_sdram_by_app_id(self, x, y, app_id):
@@ -2331,7 +2350,7 @@ class Transceiver(AbstractContextManager):
             process.de_alloc_sdram(x, y, app_id)
             return process.no_blocks_freed
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def load_multicast_routes(self, x, y, routes, app_id):
@@ -2360,7 +2379,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             process.load_routes(x, y, routes, app_id)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def load_fixed_route(self, x, y, fixed_route, app_id):
@@ -2389,7 +2408,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             process.load_fixed_route(x, y, fixed_route, app_id)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def read_fixed_route(self, x, y, app_id):
@@ -2409,7 +2428,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             return process.read_fixed_route(x, y, app_id)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def get_multicast_routes(self, x, y, app_id=None):
@@ -2440,7 +2459,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def clear_multicast_routes(self, x, y):
@@ -2461,7 +2480,7 @@ class Transceiver(AbstractContextManager):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(RouterClear(x, y))
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def get_router_diagnostics(self, x, y):
@@ -2487,7 +2506,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             return process.get_router_diagnostics(x, y)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
@@ -2519,7 +2538,7 @@ class Transceiver(AbstractContextManager):
             self.__set_router_diagnostic_filter(
                 x, y, position, diagnostic_filter)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def __set_router_diagnostic_filter(
@@ -2582,7 +2601,7 @@ class Transceiver(AbstractContextManager):
                 response.data, response.offset)[0])
             # pylint: disable=no-member
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def clear_router_diagnostic_counters(self, x, y, enable=True,
@@ -2622,7 +2641,7 @@ class Transceiver(AbstractContextManager):
             process.execute(WriteMemory(
                 x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     @property
@@ -2807,7 +2826,7 @@ class Transceiver(AbstractContextManager):
             process = GetHeapProcess(self._scamp_connection_selector)
             return process.get_heap((x, y), heap)
         except Exception:
-            logger.info(SpiNNManDataView.where_is_xy(x, y))
+            logger.info(self.__where_is_xy(x, y))
             raise
 
     def __str__(self):
