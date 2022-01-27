@@ -583,12 +583,16 @@ class Transceiver(AbstractContextManager):
         for x, y in geometry.get_potential_ethernet_chips(
                 dims.width, dims.height):
             ip_addr_item = SystemVariableDefinition.ethernet_ip_address
-            ip_address_data = _FOUR_BYTES.unpack_from(
-                self.read_memory(
+            try:
+                # TODO avoid here_is_x,y if read_memory fails
+                data = self.read_memory(
                     x, y,
-                    SYSTEM_VARIABLE_BASE_ADDRESS + ip_addr_item.offset, 4))
+                    SYSTEM_VARIABLE_BASE_ADDRESS + ip_addr_item.offset, 4)
+            except SpinnmanGenericProcessException:
+                continue
+            ip_address_data = _FOUR_BYTES.unpack_from(data)
             ip_address = "{}.{}.{}.{}".format(*ip_address_data)
-
+            logger.info(ip_address)
             if ip_address in self._udp_scamp_connections:
                 continue
             conn = self._search_for_proxies(x, y)
