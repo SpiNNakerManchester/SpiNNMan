@@ -609,8 +609,6 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if ip_address in self._udp_scamp_connections:
-            return
         conn = self._search_for_proxies(x, y)
 
         # if no data, no proxy
@@ -675,6 +673,8 @@ class Transceiver(AbstractContextManager):
             ip_address = "{}.{}.{}.{}".format(*ip_address_data)
             logger.info(ip_address)
             self._check_and_add_scamp_connections(x, y, ip_address)
+        self._scamp_connection_selector = MostDirectConnectionSelector(
+            self._machine, self._scamp_connections)
 
     def add_scamp_connections(self, connections):
         """
@@ -695,6 +695,8 @@ class Transceiver(AbstractContextManager):
         """
         for ((x, y), ip_address) in connections.items():
             self._check_and_add_scamp_connections(x, y, ip_address)
+        self._scamp_connection_selector = MostDirectConnectionSelector(
+            self._machine, self._scamp_connections)
 
     def _search_for_proxies(self, x, y):
         """ Looks for an entry within the UDP SCAMP connections which is\
