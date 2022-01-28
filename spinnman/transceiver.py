@@ -594,15 +594,53 @@ class Transceiver(AbstractContextManager):
                     self._boot_send_connection.remote_ip_address,
                     self._machine.cores_and_link_output_string())
 
-    def discover_scamp_connections(self):
-        """ Find connections to the board and store these for future use.\
-            Note that connections can be empty, in which case another local\
-            discovery mechanism will be used.  Note that an exception will be\
-            thrown if no initial connections can be found to the board.
+    def _check_and_add_scamp_connections(self, x, y, ip_address):
+        """
+        :param int x:
+        :param int y:
+        :param str ip_address:
 
-        :return: An iterable of discovered connections, not including the
-            initially given connections in the constructor
-        :rtype: list(SCAMPConnection)
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if ip_address in self._udp_scamp_connections:
+            return
+        conn = self._search_for_proxies(x, y)
+
+        # if no data, no proxy
+        if conn is None:
+            conn = SCAMPConnection(
+                remote_host=ip_address, chip_x=x, chip_y=y)
+        else:
+            # proxy, needs an adjustment
+            if conn.remote_ip_address in self._udp_scamp_connections:
+                del self._udp_scamp_connections[conn.remote_ip_address]
+
+        # check if it works
+        if self._check_connection(
+                MostDirectConnectionSelector(None, [conn]), x, y):
+            self._scp_sender_connections.append(conn)
+            self._all_connections.add(conn)
+            self._udp_scamp_connections[ip_address] = conn
+            self._scamp_connections.append(conn)
+        else:
+            logger.warning(
+                "Additional Ethernet connection on {} at chip {}, {} "
+                "cannot be contacted", ip_address, x, y)
+
+    def discover_scamp_connections(self):
+        """
+        Find connections to the board and store these for future use.
+
+        Note that an exception will be
+        thrown if no initial connections can be found to the board.
+
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -622,7 +660,6 @@ class Transceiver(AbstractContextManager):
         dims = self.get_machine_dimensions()
 
         # Find all the new connections via the machine Ethernet-connected chips
-        new_connections = list()
         geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
         for x, y in geometry.get_potential_ethernet_chips(
                 dims.width, dims.height):
@@ -637,34 +674,27 @@ class Transceiver(AbstractContextManager):
             ip_address_data = _FOUR_BYTES.unpack_from(data)
             ip_address = "{}.{}.{}.{}".format(*ip_address_data)
             logger.info(ip_address)
-            if ip_address in self._udp_scamp_connections:
-                continue
-            conn = self._search_for_proxies(x, y)
+            self._check_and_add_scamp_connections(x, y, ip_address)
 
-            # if no data, no proxy
-            if conn is None:
-                conn = SCAMPConnection(
-                    remote_host=ip_address, chip_x=x, chip_y=y)
-            else:
-                # proxy, needs an adjustment
-                if conn.remote_ip_address in self._udp_scamp_connections:
-                    del self._udp_scamp_connections[conn.remote_ip_address]
+    def add_scamp_connections(self, connections):
+        """
+        Check connections to the board and store these for future use.
 
-            # check if it works
-            if self._check_connection(
-                    MostDirectConnectionSelector(None, [conn]), x, y):
-                self._scp_sender_connections.append(conn)
-                self._all_connections.add(conn)
-                self._udp_scamp_connections[ip_address] = conn
-                self._scamp_connections.append(conn)
-                new_connections.append(conn)
-            else:
-                logger.warning(
-                    "Additional Ethernet connection on {} at chip {}, {} "
-                    "cannot be contacted", ip_address, x, y)
+        Note that an exception will be
+        thrown if no initial connections can be found to the board.
 
-        # Update the connection queues after finding new connections
-        return new_connections
+        :param dict((int, int), str) connections: Dict of x,y o ip address
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        for ((x, y), ip_address) in connections.items():
+            self._check_and_add_scamp_connections(x, y, ip_address)
 
     def _search_for_proxies(self, x, y):
         """ Looks for an entry within the UDP SCAMP connections which is\
