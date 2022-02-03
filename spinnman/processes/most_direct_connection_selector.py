@@ -55,7 +55,7 @@ class MostDirectConnectionSelector(
             return self._first_connection
 
         (x, y) = key
-        chip =SpiNNManDataView.get_chip_at(x, y)
+        chip = SpiNNManDataView.get_chip_at(x, y)
         if chip:
             key = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
         else:
