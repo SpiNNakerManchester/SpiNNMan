@@ -314,12 +314,12 @@ class Transceiver(AbstractContextManager):
         :rtype: str
         """
         try:
-            if self._machine:
+            if SpiNNManDataView.has_machine():
                 return SpiNNManDataView.get_machine().where_is_xy(x, y)
             return f"No Machine. " \
                    f"Root IP:{self._scamp_connections[0].remote_ip_address}" \
                    f"x:{x} y:{y}"
-        except Exception as ex:
+        except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
     def _identify_connections(self, connections):
@@ -555,7 +555,7 @@ class Transceiver(AbstractContextManager):
 
         # check if it works
         if self._check_connection(
-                MostDirectConnectionSelector(None, [conn]), x, y):
+                MostDirectConnectionSelector([conn]), x, y):
             self._scp_sender_connections.append(conn)
             self._all_connections.add(conn)
             self._udp_scamp_connections[ip_address] = conn
@@ -607,7 +607,7 @@ class Transceiver(AbstractContextManager):
             logger.info(ip_address)
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
-            self._machine, self._scamp_connections)
+            self._scamp_connections)
 
     def add_scamp_connections(self, connections):
         """
@@ -629,7 +629,7 @@ class Transceiver(AbstractContextManager):
         for ((x, y), ip_address) in connections.items():
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
-            self._machine, self._scamp_connections)
+            self._scamp_connections)
 
     def get_connections(self):
         """ Get the currently known connections to the board, made up of those\
