@@ -96,8 +96,8 @@ _EXECUTABLE_ADDRESS = 0x67800000
 
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False, scamp_connections=None,
-        boot_port_no=None, default_report_directory=None):
+        auto_detect_bmp=False, boot_port_no=None,
+        default_report_directory=None):
     """ Create a Transceiver by creating a :py:class:`~.UDPConnection` to the\
         given hostname on port 17893 (the default SCAMP port), and a\
         :py:class:`~.BootConnection` on port 54321 (the default boot port),\
@@ -118,7 +118,7 @@ def create_transceiver_from_hostname(
         ``True`` if the BMP of version 4 or 5 boards should be
         automatically determined from the board IP address
     :param int boot_port_no: the port number used to boot the machine
-    :param list(SCAMPConnection) scamp_connections:
+    :param scamp_connections:
         the list of connections used for SCAMP communications
     :param default_report_directory:
         Directory to write any reports too.
@@ -156,16 +156,14 @@ def create_transceiver_from_hostname(
             bmp_ip_list.append(bmp_connection.remote_ip_address)
         logger.info("Transceiver using BMPs: {}", bmp_ip_list)
 
-    # handle the SpiNNaker connection
-    if scamp_connections is None:
-        connections.append(SCAMPConnection(remote_host=hostname))
+    connections.append(SCAMPConnection(remote_host=hostname))
 
     # handle the boot connection
     connections.append(BootConnection(
         remote_host=hostname, remote_port=boot_port_no))
 
     return Transceiver(
-        version, connections=connections, scamp_connections=scamp_connections,
+        version, connections=connections,
         default_report_directory=default_report_directory)
 
 
@@ -212,15 +210,12 @@ class Transceiver(AbstractContextManager):
         "_width"]
 
     def __init__(
-            self, version, connections=None, scamp_connections=None,
-            default_report_directory=None):
+            self, version, connections=None, default_report_directory=None):
         """
         :param int version: The version of the board being connected to
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
-        :param list(SocketAddressWithChip) scamp_connections:
-            a list of SCAMP connection data or None
         :param str default_report_directory:
             Directory to write any reports too. If ``None`` the current
             directory will be used.
@@ -290,15 +285,6 @@ class Transceiver(AbstractContextManager):
         # A list of all connections that can be used to send and receive SCP
         # messages for SCAMP interaction
         self._scamp_connections = list()
-
-        # if there has been SCAMP connections given, build them
-        if scamp_connections is not None:
-            for socket_address in scamp_connections:
-                connections.append(SCAMPConnection(
-                    remote_host=socket_address.hostname,
-                    remote_port=socket_address.port_num,
-                    chip_x=socket_address.chip_x,
-                    chip_y=socket_address.chip_y))
 
         # The BMP connections
         self._bmp_connections = list()
@@ -609,16 +595,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        conn = self._search_for_proxies(x, y)
-
-        # if no data, no proxy
-        if conn is None:
-            conn = SCAMPConnection(
+        conn = SCAMPConnection(
                 remote_host=ip_address, chip_x=x, chip_y=y)
-        else:
-            # proxy, needs an adjustment
-            if conn.remote_ip_address in self._udp_scamp_connections:
-                del self._udp_scamp_connections[conn.remote_ip_address]
 
         # check if it works
         if self._check_connection(
@@ -697,20 +675,6 @@ class Transceiver(AbstractContextManager):
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._machine, self._scamp_connections)
-
-    def _search_for_proxies(self, x, y):
-        """ Looks for an entry within the UDP SCAMP connections which is\
-            linked to a given chip
-
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
-        :return: the connection to use connection
-        :rtype: None or SCAMPConnection
-        """
-        for connection in self._scamp_connections:
-            if connection.chip_x == x and connection.chip_y == y:
-                return connection
-        return None
 
     def get_connections(self):
         """ Get the currently known connections to the board, made up of those\
