@@ -46,13 +46,21 @@ class MostDirectConnectionSelector(
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
     def get_next_connection(self, message):
+        key = (message.sdp_header.destination_chip_x,
+               message.sdp_header.destination_chip_y)
+        if key in self._connections:
+            return self._connections[key]
+
         if not SpiNNManDataView.has_machine() or len(self._connections) == 1:
             return self._first_connection
 
-        chip = SpiNNManDataView.get_chip_at(
-            message.sdp_header.destination_chip_x,
-            message.sdp_header.destination_chip_y)
-        key = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
+        (x, y) = key
+        chip =SpiNNManDataView.get_chip_at(x, y)
+        if chip:
+            key = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
+        else:
+            # Use 255, 255 as that is the connection added by transceiver init
+            key = (255, 255)
 
         if key not in self._connections:
             return self._first_connection
