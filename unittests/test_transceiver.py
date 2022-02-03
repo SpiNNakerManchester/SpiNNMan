@@ -33,10 +33,8 @@ ver = 5  # Guess?
 class MockWriteTransceiver(Transceiver):
 
     def __init__(
-            self, version, connections=None, scamp_connections=None):
-        super().__init__(
-            version, connections=connections,
-            scamp_connections=scamp_connections)
+            self, version, connections=None):
+        super().__init__(version, connections=connections)
         self.written_memory = list()
 
     def get_machine_details(self):
@@ -124,8 +122,7 @@ class TestTransceiver(unittest.TestCase):
 
         # Create board connections
         connections = []
-        connections.append(SCAMPConnection(
-            remote_host=None))
+        connections.append(SCAMPConnection(remote_host=None))
         orig_connection = EIEIOConnection()
         connections.append(orig_connection)
 
@@ -150,8 +147,7 @@ class TestTransceiver(unittest.TestCase):
 
     def test_set_watch_dog(self):
         connections = []
-        connections.append(SCAMPConnection(
-            remote_host=None))
+        connections.append(SCAMPConnection(remote_host=None))
         tx = MockWriteTransceiver(version=5, connections=connections)
 
         # All chips
