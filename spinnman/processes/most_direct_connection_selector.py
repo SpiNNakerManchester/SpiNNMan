@@ -27,7 +27,6 @@ class MostDirectConnectionSelector(
         "_first_connection",
         "_machine"]
 
-    # pylint: disable=super-init-not-called
     def __init__(self, machine, connections):
         """
         :param ~spinn_machine.Machine machine:
