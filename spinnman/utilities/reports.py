@@ -35,7 +35,7 @@ def generate_machine_report(report_directory, machine, connections):
     file_name = os.path.join(report_directory, _REPORT_NAME)
     time_date_string = time.strftime("%c")
     try:
-        with open(file_name, "w") as f:
+        with open(file_name, "w", encoding="utf-8") as f:
             _write_header(f, time_date_string, machine, connections)
             # TODO: Add further details on the target machine.
             for chip in machine.chips:
