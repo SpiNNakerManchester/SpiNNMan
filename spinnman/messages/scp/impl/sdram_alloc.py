@@ -25,6 +25,8 @@ from spinnman.exceptions import (
 
 _ONE_WORD = struct.Struct("<I")
 
+FLAG_RETRY_TAG = 4
+
 
 class SDRAMAlloc(AbstractSCPRequest):
     """ An SCP Request to allocate space in the SDRAM space
@@ -32,7 +34,7 @@ class SDRAMAlloc(AbstractSCPRequest):
     __slots__ = [
         "_size"]
 
-    def __init__(self, x, y, app_id, size, tag=None):
+    def __init__(self, x, y, app_id, size, tag=None, retry_tag=True):
         """
         :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
@@ -44,8 +46,15 @@ class SDRAMAlloc(AbstractSCPRequest):
             The tag for the SDRAM, a 8-bit (chip-wide) tag that can be
             looked up by a SpiNNaker application to discover the address of
             the allocated block. If `0` then no tag is applied.
+        :param bool retry_tag:
+            If a tag is used, add a safety check to retry the tag.  This can
+            avoid issues with re-allocating memory on a retry message.
         """
         # pylint: disable=too-many-arguments
+        extra_flag = 0
+        if retry_tag and tag is not None:
+            extra_flag = FLAG_RETRY_TAG
+
         if tag is None:
             tag = 0
         elif not(0 <= tag < 256):
@@ -61,6 +70,7 @@ class SDRAMAlloc(AbstractSCPRequest):
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
             argument_1=(
+                (extra_flag << 16) |
                 (app_id << 8) |
                 AllocFree.ALLOC_SDRAM.value),  # @UndefinedVariable
             argument_2=size, argument_3=tag)
