@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2021-2022 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ REPORTS_DIRNAME = "reports"
 
 class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     """
-    Writer class for the Fec Data
+    Writer class for the SpiNNMan
 
     """
     __data = _SpiNNManDataModel()
@@ -57,20 +57,43 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         self._spinnman_setup()
 
     def local_hard_reset(self):
+        """
+        Puts spinnman data back into the state expected at graph changed and
+            sim.reset
+
+        Unlike hard_reset this method does not call super classes
+
+        This resets any data set after sim.setup has finished
+        """
+
         self.__data._hard_reset()
 
+    @overrides(MachineDataWriter.hard_reset)
     def hard_reset(self):
         MachineDataWriter.hard_reset(self)
         self.local_hard_reset()
 
     def local_soft_reset(self):
+        """
+        Puts all data back into the state expected at sim.reset but not
+        graph changed
+
+        Unlike soft_reset this method does not call super classes
+        """
         self.__data._soft_reset()
 
+    @overrides(MachineDataWriter.hard_reset)
     def soft_reset(self):
         MachineDataWriter.soft_reset(self)
         self.local_soft_reset()
 
     def set_transceiver(self, transceiver):
+        """
+        Sets the transceiver object
+
+        :param Transceiver transceiver:
+        :raises TypeError: I the transceiver is not a Transceiver
+        """
         if self.__data._transceiver:
             self.__data._transceiver.close()
         if not isinstance(transceiver, Transceiver):
@@ -78,4 +101,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         self.__data._transceiver = transceiver
 
     def clear_transceiver(self):
+        """
+        Closes and clears the transceiver and scamp_connection_selector
+        """
         self.__data._clear_transceiver()

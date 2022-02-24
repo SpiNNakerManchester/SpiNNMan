@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2021-2022 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -126,6 +126,8 @@ class SpiNNManDataView(MachineDataView):
         The transceiver description or None if the is no tranceiver
 
         :rtype: ~spinnman.transceiver.Transceiver
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
         """
         if cls.__data._transceiver is None:
             raise cls._exception("transceiver")
@@ -149,6 +151,8 @@ class SpiNNManDataView(MachineDataView):
             reading from SDRAM, but may be other values when reading from DTCM.
         :return: A bytearray of data read
         :rtype: bytes
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -198,6 +202,8 @@ class SpiNNManDataView(MachineDataView):
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
         :param bool is_filename: True if `data` is a filename
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -252,6 +258,8 @@ class SpiNNManDataView(MachineDataView):
         Semantic sugar for transceiver.scamp_connection_selector
 
         :rtype: MostDirectConnectionSelector
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
         """
         if not cls.__data._scamp_connection_selector:
             if cls.__data._transceiver is None:
