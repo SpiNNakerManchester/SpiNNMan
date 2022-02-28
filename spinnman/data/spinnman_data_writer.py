@@ -82,7 +82,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         """
         self.__data._soft_reset()
 
-    @overrides(MachineDataWriter.hard_reset)
+    @overrides(MachineDataWriter.soft_reset)
     def soft_reset(self):
         MachineDataWriter.soft_reset(self)
         self.local_soft_reset()
