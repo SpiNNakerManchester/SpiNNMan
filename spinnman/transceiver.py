@@ -376,7 +376,7 @@ class Transceiver(AbstractContextManager):
                 if isinstance(conn, BMPConnection):
                     self._bmp_connections.append(conn)
                     self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
-                        MostDirectConnectionSelector(None, [conn], self)
+                        MostDirectConnectionSelector(None, [conn], None)
                 else:
                     self._scamp_connections.append(conn)
 
@@ -387,7 +387,7 @@ class Transceiver(AbstractContextManager):
 
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(
-            self._machine, self._scamp_connections, self)
+            self._machine, self._scamp_connections, None)
 
     def _check_bmp_connections(self):
         """ Check that the BMP connections are actually connected to valid BMPs
@@ -600,7 +600,7 @@ class Transceiver(AbstractContextManager):
 
         # check if it works
         if self._check_connection(
-                MostDirectConnectionSelector(None, [conn], self), x, y):
+                MostDirectConnectionSelector(None, [conn], None), x, y):
             self._scp_sender_connections.append(conn)
             self._all_connections.add(conn)
             self._udp_scamp_connections[ip_address] = conn
@@ -911,6 +911,10 @@ class Transceiver(AbstractContextManager):
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
+        
+        # Update the connection selector so that it can ask for processor ids
+        self._scamp_connection_selector = MostDirectConnectionSelector(
+            self._machine, self._scamp_connections, self)
 
         return version_info
 
