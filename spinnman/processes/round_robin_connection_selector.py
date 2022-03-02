@@ -27,7 +27,7 @@ class RoundRobinConnectionSelector(
         "_next_connection_index",
         "_transceiver"]
 
-    def __init__(self, connections, transceiver):  # pylint: disable=super-init-not-called
+    def __init__(self, connections, transceiver):
         """
         :param list(SCAMPConnection) connections:
             The connections to be used
@@ -42,7 +42,7 @@ class RoundRobinConnectionSelector(
         index = self._next_connection_index
         self._next_connection_index = (index + 1) % len(self._connections)
         return self._connections[index]
-    
+
     @property
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.transceiver)

@@ -52,7 +52,7 @@ class AbstractProcess(object, metaclass=AbstractBase):
 
     def is_error(self):
         return bool(self._exceptions)
-    
+
     @abstractproperty
     def connection_selector(self):
         """ Get the connection selector of the process
@@ -68,13 +68,13 @@ class AbstractProcess(object, metaclass=AbstractBase):
                 txrx, sdp_header.destination_chip_x,
                 sdp_header.destination_chip_y,
                 sdp_header.destination_cpu)
-                
+
             if print_exception:
                 logger.error(
                     self.ERROR_MESSAGE.format(
                         connection.remote_ip_address, connection.chip_x,
                         connection.chip_y, sdp_header.destination_chip_x,
-                        sdp_header.destination_chip_y, 
+                        sdp_header.destination_chip_y,
                         sdp_header.destination_cpu, phys_p))
 
             raise SpinnmanGenericProcessException(

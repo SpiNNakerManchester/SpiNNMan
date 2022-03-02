@@ -55,7 +55,7 @@ class AbstractSingleConnectionProcess(AbstractProcess):
 
     def _finish(self):
         self._scp_request_pipeline.finish()
-        
+
     @property
     def connection_selector(self):
         return self._connection_selector

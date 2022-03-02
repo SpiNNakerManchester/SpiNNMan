@@ -21,7 +21,7 @@ def get_physical_cpu_id(txrx, x, y, p):
     if txrx is None:
         return "Unknown Physical Core"
     try:
-        cpu_info = txrx.get_cpu_information_from_core(self, x, y, p)
+        cpu_info = txrx.get_cpu_information_from_core(x, y, p)
         v_to_p_map = cpu_info.virtual_to_physical_core_map
         if p >= len(v_to_p_map) or v_to_p_map[p] == 0xFF:
             return "Unknown Physical Core"

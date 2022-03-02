@@ -166,12 +166,12 @@ class ChipInfo(object):
         :rtype: bytearray
         """
         return self._physical_to_virtual_core_map
-    
+
     @property
     def virtual_to_physical_core_map(self):
         """ The virtual core ID to physical core ID map; entries with a value\
             of 0xFF are non-operational cores
-            
+
         :rtype: bytearray
         """
         return self._virtual_to_physical_core_map

@@ -75,7 +75,7 @@ class MostDirectConnectionSelector(
         if key not in self._connections:
             return self._first_connection
         return self._connections[key]
-    
+
     @property
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.transceiver)

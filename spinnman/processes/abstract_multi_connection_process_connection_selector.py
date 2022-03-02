@@ -31,7 +31,7 @@ class AbstractMultiConnectionProcessConnectionSelector(
         :param AbstractSCPRequest message: The SCP message to be sent
         :rtype: SCAMPConnection
         """
-    
+
     @abstractproperty
     def transceiver(self):
         """ The transceiver from which the connections are being selected.
