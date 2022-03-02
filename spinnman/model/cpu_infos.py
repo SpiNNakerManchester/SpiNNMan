@@ -86,7 +86,8 @@ class CPUInfos(object):
         return self._cpu_infos[x, y, p]
 
     def __str__(self):
-        return str(self._cpu_infos.keys())
+        return str([f"{x}, {y}, {p} (ph: {info.physical_cpu_id})" 
+                    for (x, y, p), info in self._cpu_infos.items()])
 
     def __repr__(self):
         return self.__str__()

@@ -15,14 +15,17 @@
 
 import logging
 import sys
+from spinn_utilities.abstract_base import (
+    AbstractBase, abstractproperty)
 from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import (
-    SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
+    SpinnmanGenericProcessException, SpinnmanGroupedProcessException,
+    get_physical_cpu_id)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class AbstractProcess(object):
+class AbstractProcess(object, metaclass=AbstractBase):
     """ An abstract process for talking to SpiNNaker efficiently.
     """
     __slots__ = [
@@ -33,7 +36,7 @@ class AbstractProcess(object):
 
     ERROR_MESSAGE = (
         "failure in request to board {} with ethernet chip (%d, %d) for "
-        "chip (%d, %d, %d)")
+        "chip (%d, %d, %d(%d))")
 
     def __init__(self):
         self._exceptions = []
@@ -49,29 +52,40 @@ class AbstractProcess(object):
 
     def is_error(self):
         return bool(self._exceptions)
+    
+    @abstractproperty
+    def connection_selector(self):
+        """ Get the connection selector of the process
+        """
 
     def check_for_error(self, print_exception=False):
         if len(self._exceptions) == 1:
             exc_info = sys.exc_info()
             sdp_header = self._error_requests[0].sdp_header
             connection = self._connections[0]
-
+            txrx = self.connection_selector.transceiver
+            phys_p = get_physical_cpu_id(
+                txrx, sdp_header.destination_chip_x,
+                sdp_header.destination_chip_y,
+                sdp_header.destination_cpu)
+                
             if print_exception:
-                logger.error(self.ERROR_MESSAGE.format(
-                    connection.remote_ip_address, connection.chip_x,
-                    connection.chip_y, sdp_header.destination_chip_x,
-                    sdp_header.destination_chip_y, sdp_header.destination_cpu,
-                    exc_info=(Exception, self._exceptions, self._tracebacks)))
+                logger.error(
+                    self.ERROR_MESSAGE.format(
+                        connection.remote_ip_address, connection.chip_x,
+                        connection.chip_y, sdp_header.destination_chip_x,
+                        sdp_header.destination_chip_y, 
+                        sdp_header.destination_cpu, phys_p))
 
             raise SpinnmanGenericProcessException(
                 self._exceptions[0], exc_info[2],
                 sdp_header.destination_chip_x,
                 sdp_header.destination_chip_y, sdp_header.destination_cpu,
-                self._tracebacks[0])
+                phys_p, self._tracebacks[0])
         elif self._exceptions:
             ex = SpinnmanGroupedProcessException(
                 self._error_requests, self._exceptions, self._tracebacks,
-                self._connections)
+                self._connections, self.connection_selector.transceiver)
             if print_exception:
                 logger.error("{}".format(str(ex)))
             raise ex
