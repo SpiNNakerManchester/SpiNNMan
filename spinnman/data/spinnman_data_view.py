@@ -36,6 +36,7 @@ class _SpiNNManDataModel(object):
 
     __slots__ = [
         # Data values cached
+        "_app_id",
         "_app_id_tracker",
         "_scamp_connection_selector",
         "_transceiver",
@@ -61,6 +62,7 @@ class _SpiNNManDataModel(object):
         """
         Clears out all data that should change after a reset and graaph change
         """
+        self._app_id = None
         self._app_id_tracker = None
         self._soft_reset()
         self._clear_transceiver()
@@ -223,6 +225,14 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver")
         return cls.__data._transceiver.write_memory(
             x, y, base_address, data, n_bytes, offset, cpu, is_filename)
+
+    # app_id methods
+
+    @classmethod
+    def get_app_id(cls):
+        if cls.__data._app_id is None:
+            cls.__data._app_id = cls.get_new_id()
+        return cls.__data._app_id
 
     @classmethod
     def get_new_id(cls):
