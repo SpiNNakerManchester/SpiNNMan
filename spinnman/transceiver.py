@@ -302,8 +302,6 @@ class Transceiver(AbstractContextManager):
         self._check_bmp_connections()
 
         self._machine_off = False
-        print(self._machine_off)
-        pop = 1/0
 
     def __where_is_xy(self, x, y):
         """

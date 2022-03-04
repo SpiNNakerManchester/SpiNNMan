@@ -56,7 +56,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         MachineDataWriter._setup(self)
         self._spinnman_setup()
 
-    def local_hard_reset(self):
+    def _local_hard_reset(self):
         """
         Puts spinnman data back into the state expected at graph changed and
             sim.reset
@@ -68,12 +68,12 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
         self.__data._hard_reset()
 
-    @overrides(MachineDataWriter.hard_reset)
-    def hard_reset(self):
-        MachineDataWriter.hard_reset(self)
-        self.local_hard_reset()
+    @overrides(MachineDataWriter._hard_reset)
+    def _hard_reset(self):
+        MachineDataWriter._hard_reset(self)
+        self._local_hard_reset()
 
-    def local_soft_reset(self):
+    def _local_soft_reset(self):
         """
         Puts all data back into the state expected at sim.reset but not
         graph changed
@@ -82,10 +82,10 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         """
         self.__data._soft_reset()
 
-    @overrides(MachineDataWriter.soft_reset)
-    def soft_reset(self):
-        MachineDataWriter.soft_reset(self)
-        self.local_soft_reset()
+    @overrides(MachineDataWriter._soft_reset)
+    def _soft_reset(self):
+        MachineDataWriter._soft_reset(self)
+        self._local_soft_reset()
 
     def set_transceiver(self, transceiver):
         """
