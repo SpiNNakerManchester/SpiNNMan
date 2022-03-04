@@ -31,6 +31,9 @@ class MockTranceiver(Transceiver):
     def close(self):
         pass
 
+    def stop_application(self, app_id):
+        pass
+
 
 class TestData(unittest.TestCase):
 

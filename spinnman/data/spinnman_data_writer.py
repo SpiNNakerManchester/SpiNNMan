@@ -95,13 +95,24 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         :raises TypeError: I the transceiver is not a Transceiver
         """
         if self.__data._transceiver:
+            self.__data._transceiver.stop_application(self.get_app_id())
             self.__data._transceiver.close()
         if not isinstance(transceiver, Transceiver):
             raise TypeError("transceiver should be a Transceiver")
         self.__data._transceiver = transceiver
 
+    def stop_transceiver(self):
+        """
+        Stops an existing transceiver but does not clear it
+
+        If there is currently no transceiver this is ignored
+
+        """
+        self.__data._stop_transceiver()
+
     def clear_transceiver(self):
         """
-        Closes and clears the transceiver and scamp_connection_selector
+        Stops, closes and clears the transceiver and scamp_connection_selector
         """
+        self.__data._stop_transceiver()
         self.__data._clear_transceiver()

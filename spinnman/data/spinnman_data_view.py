@@ -67,6 +67,11 @@ class _SpiNNManDataModel(object):
         self._soft_reset()
         self._clear_transceiver()
 
+    def _stop_transceiver(self):
+        if self._transceiver:
+            if self._app_id:
+                self._transceiver.stop_application(self._app_id)
+
     def _clear_transceiver(self):
         self._scamp_connection_selector = None
         if self._transceiver:
