@@ -54,14 +54,10 @@ class MostDirectConnectionSelector(
         if not SpiNNManDataView.has_machine() or len(self._connections) == 1:
             return self._first_connection
 
-        (x, y) = key
-        chip = SpiNNManDataView.get_chip_at(x, y)
-        if chip:
-            key = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
-        else:
-            # Use 255, 255 as that is the connection added by transceiver init
-            key = (255, 255)
+        x, y = key
+        key = SpiNNManDataView.get_nearest_ethernet(x, y)
 
-        if key not in self._connections:
+        if key in self._connections:
+            return self._connections[key]
+        else:
             return self._first_connection
-        return self._connections[key]
