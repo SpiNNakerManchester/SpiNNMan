@@ -101,15 +101,6 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
             raise TypeError("transceiver should be a Transceiver")
         self.__data._transceiver = transceiver
 
-    def stop_transceiver(self):
-        """
-        Stops an existing transceiver but does not clear it
-
-        If there is currently no transceiver this is ignored
-
-        """
-        self.__data._stop_transceiver()
-
     def clear_transceiver(self):
         """
         Stops, closes and clears the transceiver and scamp_connection_selector
