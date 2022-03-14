@@ -100,10 +100,3 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         if not isinstance(transceiver, Transceiver):
             raise TypeError("transceiver should be a Transceiver")
         self.__data._transceiver = transceiver
-
-    def clear_transceiver(self):
-        """
-        Stops, closes and clears the transceiver and scamp_connection_selector
-        """
-        self.__data._stop_transceiver()
-        self.__data._clear_transceiver()

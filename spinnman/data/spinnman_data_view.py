@@ -72,7 +72,7 @@ class _SpiNNManDataModel(object):
         if self._transceiver:
             try:
                 self._transceiver.close()
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 pass
         self._transceiver = None
 
@@ -168,8 +168,8 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.read_memory(
                 x, y, base_address, length, cpu)
-        except AttributeError:
-            raise cls._exception("transceiver")
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
 
     @classmethod
     def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
