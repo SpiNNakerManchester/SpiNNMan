@@ -92,11 +92,11 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         Sets the transceiver object
 
         :param Transceiver transceiver:
-        :raises TypeError: I the transceiver is not a Transceiver
+        :raises TypeError: If the transceiver is not a Transceiver
         """
         if self.__data._transceiver:
             self.__data._transceiver.stop_application(self.get_app_id())
-            self.__data._transceiver.close()
+            self.__data._clear_transceiver()
         if not isinstance(transceiver, Transceiver):
             raise TypeError("transceiver should be a Transceiver")
         self.__data._transceiver = transceiver

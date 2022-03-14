@@ -13,8 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import logging
+from spinn_utilities.log import FormatAdapter
 from spinn_machine.data import MachineDataView
 from spinnman.utilities.appid_tracker import AppIdTracker
+
+logger = FormatAdapter(logging.getLogger(__name__))
 
 
 class _SpiNNManDataModel(object):
@@ -72,8 +76,9 @@ class _SpiNNManDataModel(object):
         if self._transceiver:
             try:
                 self._transceiver.close()
-            except Exception:  # pylint: disable=broad-except
-                pass
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.exception(
+                    f"Error {ex} when closing the transceiver ignored")
         self._transceiver = None
 
     def _soft_reset(self):
