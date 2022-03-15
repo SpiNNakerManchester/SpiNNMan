@@ -18,7 +18,6 @@ from spinnman.messages.scp.impl import (
     FloodFillEnd, FloodFillStart, FloodFillData)
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
-from spinn_utilities.timer import Timer
 
 
 class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
