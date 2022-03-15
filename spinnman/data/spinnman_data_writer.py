@@ -28,8 +28,10 @@ REPORTS_DIRNAME = "reports"
 
 class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     """
-    Writer class for the SpiNNMan
+    See UtilsDataWriter
 
+    This class is designed to only be used directly within the SpiNNMan
+    repository unittests as all methods are available to subclasses
     """
     __data = _SpiNNManDataModel()
     __slots__ = []
@@ -37,6 +39,9 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     def _spinnman_mock(self):
         """
         Like _mock but does not call super class _mock
+        This method should only be called by setup (via _setup)
+
+        Designed to nly be called from mock via _mock
         """
         self.__data._clear()
 
@@ -48,6 +53,8 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     def _spinnman_setup(self):
         """
         Like _setup but does not call super class _setup
+
+        This method should only be called by setup (via _setup)
         """
         self.__data._clear()
 
@@ -63,7 +70,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
         Unlike hard_reset this method does not call super classes
 
-        This resets any data set after sim.setup has finished
+        This method should only be called by hard_reset (via _hard_reset)
         """
 
         self.__data._hard_reset()
@@ -79,6 +86,8 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         graph changed
 
         Unlike soft_reset this method does not call super classes
+
+        This method should only be called by soft_reset (via _soft_reset)
         """
         self.__data._soft_reset()
 
@@ -94,9 +103,9 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         :param Transceiver transceiver:
         :raises TypeError: If the transceiver is not a Transceiver
         """
-        if self.__data._transceiver:
-            self.__data._transceiver.stop_application(self.get_app_id())
-            self.__data._clear_transceiver()
         if not isinstance(transceiver, Transceiver):
             raise TypeError("transceiver should be a Transceiver")
+        if self.__data._transceiver:
+            raise NotImplementedError(
+                "Over writing and existing transceiver not supported")
         self.__data._transceiver = transceiver
