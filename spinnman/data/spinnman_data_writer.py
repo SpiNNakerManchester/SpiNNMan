@@ -41,7 +41,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         Like _mock but does not call super class _mock
         This method should only be called by setup (via _setup)
 
-        Designed to nly be called from mock via _mock
+        This method should only be called by mock via _mock
         """
         self.__data._clear()
 
