@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import traceback
-from collections import OrderedDict
 
 
 class SpinnmanException(Exception):
@@ -240,7 +239,7 @@ class _Group(object):
         :return: a sorted exception pile
         :rtype: dict(Exception,_Group)
         """
-        data = OrderedDict()
+        data = dict()
         for error_request, exception, trace_back, connection in zip(
                 error_requests, exceptions, tracebacks, connections):
             for stored_exception in data.keys():
