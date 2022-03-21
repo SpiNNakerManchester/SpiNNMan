@@ -55,7 +55,7 @@ from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
     CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
-    IPTagSet, IPTagClear, RouterClear)
+    IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
     SpinnakerBootSender, SCPSender, SDPSender,
@@ -2875,6 +2875,14 @@ class Transceiver(AbstractContextManager):
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
+
+    def control_sync(self, do_sync):
+        """ Control the synchronization of the chips
+
+        :param bool do_sync: Whether to synchonize or not
+        """
+        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process.execute(DoSync(do_sync))
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
