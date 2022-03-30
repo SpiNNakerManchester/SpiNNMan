@@ -96,8 +96,7 @@ _EXECUTABLE_ADDRESS = 0x67800000
 
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False, boot_port_no=None,
-        default_report_directory=None):
+        auto_detect_bmp=False, default_report_directory=None):
     """ Create a Transceiver by creating a :py:class:`~.UDPConnection` to the\
         given hostname on port 17893 (the default SCAMP port), and a\
         :py:class:`~.BootConnection` on port 54321 (the default boot port),\
@@ -117,7 +116,6 @@ def create_transceiver_from_hostname(
     :param bool auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
         automatically determined from the board IP address
-    :param int boot_port_no: the port number used to boot the machine
     :param scamp_connections:
         the list of connections used for SCAMP communications
     :param default_report_directory:
@@ -159,8 +157,7 @@ def create_transceiver_from_hostname(
     connections.append(SCAMPConnection(remote_host=hostname))
 
     # handle the boot connection
-    connections.append(BootConnection(
-        remote_host=hostname, remote_port=boot_port_no))
+    connections.append(BootConnection(remote_host=hostname))
 
     return Transceiver(
         version, connections=connections,

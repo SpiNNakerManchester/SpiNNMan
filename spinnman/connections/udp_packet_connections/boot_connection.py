@@ -33,29 +33,17 @@ class BootConnection(
         "BootConnection(local_host={}, local_port={}, remote_host={}, "
         "remote_port={})")
 
-    def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=None):
+    def __init__(self, remote_host=None):
         """
-        :param str local_host:
-            The local host name or IP address to bind to.
-            If not specified defaults to bind to all interfaces, unless
-            `remote_host` is specified, in which case binding is done to the
-            IP address that will be used to send packets.
-        :param int local_port:
-            The local port to bind to, between 1025 and 65535.
-            If not specified, defaults to a random unused local port
         :param str remote_host:
             The remote host name or IP address to send packets to.  If not
             specified, the socket will be available for listening only, and
             will throw and exception if used for sending
-        :param int remote_port: The remote port to send packets to.  If
-            `remote_host` is None, this is ignored.
         :raise SpinnmanIOException:
             If there is an error setting up the communication channel
         """
-        if remote_port is None:
-            remote_port = UDP_BOOT_CONNECTION_DEFAULT_PORT
-        super().__init__(local_host, local_port, remote_host, remote_port)
+        super().__init__(remote_host=remote_host,
+                         remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
     @overrides(SpinnakerBootSender.send_boot_message)
     def send_boot_message(self, boot_message):
