@@ -112,9 +112,9 @@ class TestSCPEnums(unittest.TestCase):
                          SignalType.NEAREST_NEIGHBOUR)
         self.assertEqual(Signal.STOP.signal_type,
                          SignalType.NEAREST_NEIGHBOUR)
-        self.assertEqual(Signal.START.signal_type,
-                         SignalType.NEAREST_NEIGHBOUR)
 
+        self.assertEqual(Signal.START.signal_type,
+                         SignalType.MULTICAST)
         self.assertEqual(Signal.SYNC0.signal_type,
                          SignalType.MULTICAST)
         self.assertEqual(Signal.SYNC1.signal_type,
