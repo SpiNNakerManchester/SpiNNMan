@@ -1,0 +1,293 @@
+# Copyright (c) 2021-2022 The University of Manchester
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from functools import wraps
+from logging import getLogger
+import re
+import requests
+import websocket
+from spinn_utilities.log import FormatAdapter
+from .utils import clean_url
+
+logger = FormatAdapter(getLogger(__name__))
+_S = "JSESSIONID"
+#: Enable detailed debugging by setting to True
+_debug_pretty_print = False
+
+
+def _may_renew(method):
+    def pp_req(req):
+        """
+        :param ~requests.PreparedRequest req:
+        """
+        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
+            '>>>>>>>>>>>START>>>>>>>>>>>',
+            req.method + ' ' + req.url,
+            '\r\n'.join('{}: {}'.format(*kv) for kv in req.headers.items()),
+            req.body if req.body else ""))
+
+    def pp_resp(resp):
+        """
+        :param ~requests.Response resp:
+        """
+        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
+            '<<<<<<<<<<<START<<<<<<<<<<<',
+            str(resp.status_code) + " " + resp.reason,
+            '\r\n'.join('{}: {}'.format(*kv) for kv in resp.headers.items()),
+            # Assume we only get textual responses
+            str(resp.content, "UTF-8") if resp.content else ""))
+
+    @wraps(method)
+    def call(self, *args, **kwargs):
+        renew_count = 0
+        while True:
+            r = method(self, *args, **kwargs)
+            if _debug_pretty_print:
+                pp_req(r.request)
+                pp_resp(r)
+            if _S in r.cookies:
+                self._session_id = r.cookies[_S]
+            if r.status_code != 401 or not renew_count:
+                return r
+            self.renew()
+            renew_count += 1
+
+    return call
+
+
+class Session:
+    """
+    Manages session credentials for the Spalloc client.
+    """
+    __slots__ = (
+        "__login_form_url", "__login_submit_url", "__srv_base",
+        "__username", "__password", "__token",
+        "_session_id", "__csrf", "__csrf_header")
+
+    def __init__(self, service_url, username, password, token):
+        """
+        :param str service_url: The reference to the service.
+            *Should not* include a username or password in it.
+        :param str username: The user name to use
+        :param str password: The password to use
+        :param str token: The bearer token to use
+        """
+        url = clean_url(service_url)
+        self.__login_form_url = url + "system/login.html"
+        self.__login_submit_url = url + "system/perform_login"
+        self.__srv_base = url + "srv/spalloc/"
+        self.__username = username
+        self.__password = password
+        self.__token = token
+
+    @_may_renew
+    def get(self, url, **kwargs):
+        """
+        Do an HTTP ``GET`` in the session.
+
+        :param str url:
+        :rtype: ~requests.Response
+        """
+        params = kwargs if kwargs else None
+        cookies = {_S: self._session_id}
+        r = requests.get(url, params=params, cookies=cookies,
+                         allow_redirects=False)
+        logger.debug("GET {} returned {}", url, r.status_code)
+        return r
+
+    @_may_renew
+    def post(self, url, jsonobj, **kwargs):
+        """
+        Do an HTTP ``POST`` in the session.
+
+        :param str url:
+        :param dict jsonobj:
+        :rtype: ~requests.Response
+        """
+        params = kwargs if kwargs else None
+        cookies, headers = self._credentials
+        r = requests.post(url, params=params, json=jsonobj,
+                          cookies=cookies, headers=headers,
+                          allow_redirects=False)
+        logger.debug("POST {} returned {}", url, r.status_code)
+        return r
+
+    @_may_renew
+    def put(self, url, data, **kwargs):
+        """
+        Do an HTTP ``PUT`` in the session. Puts plain text *OR* JSON!
+
+        :param str url:
+        :param str data:
+        :rtype: ~requests.Response
+        """
+        params = kwargs if kwargs else None
+        cookies, headers = self._credentials
+        if isinstance(data, str):
+            headers["Content-Type"] = "text/plain; charset=UTF-8"
+        r = requests.put(url, params=params, data=data,
+                         cookies=cookies, headers=headers,
+                         allow_redirects=False)
+        logger.debug("PUT {} returned {}", url, r.status_code)
+        return r
+
+    @_may_renew
+    def delete(self, url, **kwargs):
+        """
+        Do an HTTP ``DELETE`` in the session.
+
+        :param str url:
+        :rtype: ~requests.Response
+        """
+        params = kwargs if kwargs else None
+        cookies, headers = self._credentials
+        r = requests.delete(url, params=params, cookies=cookies,
+                            headers=headers, allow_redirects=False)
+        logger.debug("DELETE {} returned {}", url, r.status_code)
+        return r
+
+    def renew(self):
+        """
+        Renews the session, logging the user into it so that state modification
+        operations can be performed.
+
+        :returns: Description of the root of the service, without CSRF data
+        :rtype: dict
+        """
+        if self.__token:
+            r = requests.get(self.__login_form_url, allow_redirects=False)
+            self._session_id = r.cookies[_S]
+        else:
+            # Step one: a temporary session so we can log in
+            csrf_matcher = re.compile(
+                r"""<input type="hidden" name="_csrf" value="(.*)" />""")
+            r = requests.get(self.__login_form_url, allow_redirects=False)
+            logger.debug("GET {} returned {}",
+                         self.__login_form_url, r.status_code)
+            m = csrf_matcher.search(r.text)
+            if not m:
+                raise Exception("could not establish temporary session")
+            csrf = m.group(1)
+            session = r.cookies[_S]
+
+            # Step two: actually do the log in
+            form = {
+                "_csrf": csrf,
+                "username": self.__username,
+                "password": self.__password,
+                "submit": "submit"
+            }
+            # NB: returns redirect that sets a cookie
+            r = requests.post(self.__login_submit_url,
+                              cookies={_S: session}, allow_redirects=False,
+                              data=form)
+            logger.debug("POST {} returned {}",
+                         self.__login_submit_url, r.status_code)
+            self._session_id = r.cookies[_S]
+            # We don't need to follow that redirect
+
+        # Step three: get the basic service data and new CSRF token
+        obj = self.get(self.__srv_base).json()
+        self.__csrf_header = obj["csrf-header"]
+        self.__csrf = obj["csrf-token"]
+        del obj["csrf-header"]
+        del obj["csrf-token"]
+        return obj
+
+    @property
+    def _credentials(self):
+        """
+        The credentials for requests. *Serializable.*
+        """
+        cookies = {_S: self._session_id}
+        headers = {self.__csrf_header: self.__csrf}
+        if self.__token:
+            # This would be better off done once per session only
+            headers["Authorization"] = f"Bearer {self.__token}"
+        return cookies, headers
+
+    def websocket(self, url, header=None, cookie=None, **kwargs):
+        """
+        Create a websocket that uses the session credentials to establish
+        itself.
+
+        :param str url: Actual location to open websocket at
+        :param dict(str,str) header: Optional HTTP headers
+        :param str cookie:
+            Optional cookies (composed as semicolon-separated string)
+        :param kwargs: Other options to :py:func:`~websocket.create_connection`
+        :rtype: ~websocket.WebSocket
+        """
+        # Note: *NOT* a renewable action!
+        if header is None:
+            header = {}
+        header[self.__csrf_header] = self.__csrf
+        if cookie is not None:
+            cookie += ";"
+        cookie += _S + "=" + self._session_id
+        return websocket.create_connection(
+            url, header=header, cookie=cookie, **kwargs)
+
+    def _purge(self):
+        """
+        Clears out all credentials from this session, rendering the session
+        completely inoperable henceforth.
+        """
+        self.__username = None
+        self.__password = None
+        self._session_id = None
+        self.__csrf = None
+
+
+class SessionAware:
+    """
+    Connects to the session.
+    """
+    __slots__ = ("__session", "_url")
+
+    def __init__(self, session: Session, url: str):
+        self.__session = session
+        self._url = clean_url(url)
+
+    @property
+    def _session_credentials(self):
+        """
+        Get the current session credentials.
+        Only supposed to be called by subclasses.
+
+        :rtype: tuple(dict(str,str),dict(str,str))
+        """
+        return self.__session._credentials
+
+    def _get(self, url: str, **kwargs):
+        return self.__session.get(url, **kwargs)
+
+    def _post(self, url: str, jsonobj: dict, **kwargs):
+        return self.__session.post(url, jsonobj, **kwargs)
+
+    def _put(self, url: str, data: str, **kwargs):
+        return self.__session.put(url, data, **kwargs)
+
+    def _delete(self, url: str, **kwargs):
+        return self.__session.delete(url, **kwargs)
+
+    def _websocket(self, url: str, **kwargs):
+        """
+        Create a websocket that uses the session credentials to establish
+        itself.
+
+        :param str url: Actual location to open websocket at
+        :rtype: ~websocket.WebSocket
+        """
+        return self.__session.websocket(url, **kwargs)
