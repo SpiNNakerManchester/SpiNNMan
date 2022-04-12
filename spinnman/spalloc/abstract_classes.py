@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import struct
-from typing import Callable, Dict, Iterable, Tuple
+from typing import Callable, Dict, Iterable, Set, Tuple
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod, abstractproperty)
 from spinn_utilities.overrides import overrides
@@ -206,7 +206,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
 
     @abstractproperty
-    def tags(self) -> set[str]:
+    def tags(self) -> Set[str]:
         """
         The tags of the machine.
         """
