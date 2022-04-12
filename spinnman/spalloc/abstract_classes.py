@@ -12,29 +12,35 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from collections.abc import Iterable
 import struct
+from typing import Callable, Dict
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod, abstractproperty)
 from spinn_utilities.overrides import overrides
+from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.connections.abstract_classes import (
     Listenable, SDPReceiver, SDPSender, SCPReceiver, SCPSender)
 from spinnman.connections.udp_packet_connections import (
     update_sdp_header_for_udp_send)
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.sdp import SDPMessage, SDPFlag
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPResult
+from spinnman.transceiver import Transceiver
+from .enums import SpallocState
 
 _TWO_SHORTS = struct.Struct("<2H")
 
 
-class AbstractSpallocClient(meta=AbstractBase):
+class AbstractSpallocClient(object, metaclass=AbstractBase):
     """
     The API exported by the Spalloc Client.
     """
     __slots__ = ()
 
     @abstractmethod
-    def list_machines(self):
+    def list_machines(self) -> Dict[str, 'SpallocMachine']:
         """
         Get the machines supported by the server.
 
@@ -44,7 +50,7 @@ class AbstractSpallocClient(meta=AbstractBase):
         """
 
     @abstractmethod
-    def list_jobs(self, deleted=False):
+    def list_jobs(self, deleted: bool = False) -> Iterable['SpallocJob']:
         """
         Get the jobs known to the server.
 
@@ -54,7 +60,9 @@ class AbstractSpallocClient(meta=AbstractBase):
         """
 
     @abstractmethod
-    def create_job(self, num_boards=1, machine_name=None, keepalive=45):
+    def create_job(
+            self, num_boards: int = 1, machine_name: str = None,
+            keepalive: int = 45) -> 'SpallocJob':
         """
         Create a job with a specified number of boards.
 
@@ -71,7 +79,9 @@ class AbstractSpallocClient(meta=AbstractBase):
         """
 
     @abstractmethod
-    def create_job_rect(self, width, height, machine_name=None, keepalive=45):
+    def create_job_rect(
+            self, width: int, height: int, machine_name: str = None,
+            keepalive: int = 45) -> 'SpallocJob':
         """
         Create a job with a rectangle of boards.
 
@@ -91,8 +101,9 @@ class AbstractSpallocClient(meta=AbstractBase):
 
     @abstractmethod
     def create_job_board(
-            self, triad=None, physical=None, ip_address=None,
-            machine_name=None, keepalive=45):
+            self, triad: tuple[int, int, int] = None,
+            physical: tuple[int, int, int] = None, ip_address: str = None,
+            machine_name: str = None, keepalive: int = 45) -> 'SpallocJob':
         """
         Create a job with a specific board. At least one of ``triad``,
         ``physical`` and ``ip_address`` must be not ``None``.
@@ -115,7 +126,8 @@ class AbstractSpallocClient(meta=AbstractBase):
 
 
 class SpallocProxiedConnection(
-        SDPReceiver, SDPSender, SCPSender, SCPReceiver, Listenable):
+        SDPReceiver, SDPSender, SCPSender, SCPReceiver, Listenable,
+        metaclass=AbstractBase):
     """
     The socket interface supported by proxied sockets. The socket will always
     be talking to a specific board. This emulates a SCAMPConnection.
@@ -144,16 +156,16 @@ class SpallocProxiedConnection(
         """
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self):
+    def get_receive_method(self) -> Callable:
         return self.receive_sdp_message
 
     @overrides(SDPReceiver.receive_sdp_message)
-    def receive_sdp_message(self, timeout=None):
+    def receive_sdp_message(self, timeout=None) -> SDPMessage:
         data = self.receive(timeout)
         return SDPMessage.from_bytestring(data, 2)
 
     @overrides(SDPSender.send_sdp_message)
-    def send_sdp_message(self, sdp_message):
+    def send_sdp_message(self, sdp_message: SDPMessage):
         # If a reply is expected, the connection should
         if sdp_message.sdp_header.flags == SDPFlag.REPLY_EXPECTED:
             update_sdp_header_for_udp_send(
@@ -163,23 +175,24 @@ class SpallocProxiedConnection(
         self.send(b'\0\0' + sdp_message.bytestring)
 
     @overrides(SCPReceiver.receive_scp_response)
-    def receive_scp_response(self, timeout=1.0):
+    def receive_scp_response(
+            self, timeout=1.0) -> tuple[SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
     @overrides(SCPSender.send_scp_request)
-    def send_scp_request(self, scp_request):
+    def send_scp_request(self, scp_request: AbstractSCPRequest):
         self.send(self.get_scp_data(scp_request))
 
     @overrides(SCPSender.get_scp_data)
-    def get_scp_data(self, scp_request):
+    def get_scp_data(self, scp_request: AbstractSCPRequest) -> bytes:
         update_sdp_header_for_udp_send(
             scp_request.sdp_header, self.chip_x, self.chip_y)
         return b'\0\0' + scp_request.bytestring
 
 
-class SpallocMachine(meta=AbstractBase):
+class SpallocMachine(object, metaclass=AbstractBase):
     """
     Represents a spalloc-controlled machine.
 
@@ -224,7 +237,7 @@ class SpallocMachine(meta=AbstractBase):
         """
 
     @abstractproperty
-    def area(self):
+    def area(self) -> tuple[int, int]:
         """
         Area of machine, in boards.
 
@@ -233,7 +246,7 @@ class SpallocMachine(meta=AbstractBase):
         """
 
 
-class SpallocJob(meta=AbstractBase):
+class SpallocJob(object, metaclass=AbstractBase):
     """
     Represents a job in spalloc.
 
@@ -242,7 +255,7 @@ class SpallocJob(meta=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def get_state(self):
+    def get_state(self) -> SpallocState:
         """
         Get the current state of the machine.
 
@@ -250,7 +263,7 @@ class SpallocJob(meta=AbstractBase):
         """
 
     @abstractmethod
-    def get_root_host(self):
+    def get_root_host(self) -> str:
         """
         Get the IP address for talking to the machine.
 
@@ -259,7 +272,7 @@ class SpallocJob(meta=AbstractBase):
         """
 
     @abstractmethod
-    def get_connections(self):
+    def get_connections(self) -> Dict[tuple[int, int], str]:
         """
         Get the mapping from board coordinates to IP addresses.
 
@@ -268,7 +281,9 @@ class SpallocJob(meta=AbstractBase):
         """
 
     @abstractmethod
-    def connect_to_board(self, x, y, port=SCP_SCAMP_PORT):
+    def connect_to_board(
+            self, x: int, y: int,
+            port: int = SCP_SCAMP_PORT) -> SpallocProxiedConnection:
         """
         Open a connection to a particular board in the job.
 
@@ -280,7 +295,8 @@ class SpallocJob(meta=AbstractBase):
         """
 
     @abstractmethod
-    def create_transceiver(self, default_report_directory=None):
+    def create_transceiver(
+            self, default_report_directory: str = None) -> Transceiver:
         """
         Create a transceiver that will talk to this job. The transceiver will
         only be configured to talk to the SCP ports of the boards of the job.
@@ -292,7 +308,7 @@ class SpallocJob(meta=AbstractBase):
         """
 
     @abstractmethod
-    def wait_for_state_change(self, old_state):
+    def wait_for_state_change(self, old_state: SpallocState) -> SpallocState:
         """
         Wait until the allocation is not in the given old state.
 
@@ -312,7 +328,7 @@ class SpallocJob(meta=AbstractBase):
         """
 
     @abstractmethod
-    def destroy(self, reason="finished"):
+    def destroy(self, reason: str = "finished"):
         """
         Destroy the job.
 
@@ -326,7 +342,8 @@ class SpallocJob(meta=AbstractBase):
         """
 
     @abstractmethod
-    def launch_keepalive_task(self, period=30):
+    def launch_keepalive_task(
+            self, period: int = 30) -> AbstractContextManager:
         """
         Starts a periodic task to keep a job alive.
 
@@ -340,7 +357,7 @@ class SpallocJob(meta=AbstractBase):
         """
 
     @abstractmethod
-    def where_is_machine(self, x, y):
+    def where_is_machine(self, x: int, y: int) -> tuple[int, int, int]:
         """
         Get the *physical* coordinates of the board hosting the given chip.
 

@@ -12,10 +12,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from typing import Iterable, Tuple
 from urllib.parse import urlparse, urlunparse
 
 
-def clean_url(url):
+def clean_url(url: str) -> str:
     """
     Add a ``/`` to the end of the path part of a URL if there isn't one.
 
@@ -30,7 +31,7 @@ def clean_url(url):
     return urlunparse(parts)
 
 
-def parse_service_url(url):
+def parse_service_url(url: str) -> Tuple[str, str, str]:
     """
     Parses a combined service reference.
 
@@ -47,3 +48,25 @@ def parse_service_url(url):
     url = urlunparse((
         pieces.scheme, netloc, pieces.path, None, None, None))
     return url, user, password
+
+
+def is_server_address(
+        address: str, additional_schemes: Iterable[str] = ()) -> bool:
+    """
+    Test if the given address is a likely spalloc server URL.
+
+    :param str address: The address to check
+    :param ~collections.abc.Iterable(str) additional_schemes:
+        Any additional URL schemes that should be considered to be successes;
+        typically ``{"spalloc"}`` when looser matching is required.
+    :rtype: bool
+    """
+    schemes = {"http", "https"}
+    if additional_schemes:
+        schemes.update(additional_schemes)
+    try:
+        pieces = urlparse(address)
+        scheme = pieces.scheme.lower()
+        return scheme in schemes and pieces.netloc is not None
+    except Exception:  # pylint: disable=broad-except
+        return False

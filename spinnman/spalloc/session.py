@@ -21,13 +21,14 @@ from spinn_utilities.log import FormatAdapter
 from .utils import clean_url
 
 logger = FormatAdapter(getLogger(__name__))
-_S = "JSESSIONID"
+#: The name of the session cookie issued by Spring Security
+_SESSION_COOKIE = "JSESSIONID"
 #: Enable detailed debugging by setting to True
 _debug_pretty_print = False
 
 
 def _may_renew(method):
-    def pp_req(req):
+    def pp_req(req: requests.PreparedRequest):
         """
         :param ~requests.PreparedRequest req:
         """
@@ -37,7 +38,7 @@ def _may_renew(method):
             '\r\n'.join('{}: {}'.format(*kv) for kv in req.headers.items()),
             req.body if req.body else ""))
 
-    def pp_resp(resp):
+    def pp_resp(resp: requests.Response):
         """
         :param ~requests.Response resp:
         """
@@ -56,8 +57,8 @@ def _may_renew(method):
             if _debug_pretty_print:
                 pp_req(r.request)
                 pp_resp(r)
-            if _S in r.cookies:
-                self._session_id = r.cookies[_S]
+            if _SESSION_COOKIE in r.cookies:
+                self._session_id = r.cookies[_SESSION_COOKIE]
             if r.status_code != 401 or not renew_count:
                 return r
             self.renew()
@@ -75,7 +76,8 @@ class Session:
         "__username", "__password", "__token",
         "_session_id", "__csrf", "__csrf_header")
 
-    def __init__(self, service_url, username, password, token):
+    def __init__(
+            self, service_url: str, username: str, password: str, token: str):
         """
         :param str service_url: The reference to the service.
             *Should not* include a username or password in it.
@@ -92,7 +94,7 @@ class Session:
         self.__token = token
 
     @_may_renew
-    def get(self, url, **kwargs):
+    def get(self, url: str, **kwargs) -> requests.Response:
         """
         Do an HTTP ``GET`` in the session.
 
@@ -100,14 +102,14 @@ class Session:
         :rtype: ~requests.Response
         """
         params = kwargs if kwargs else None
-        cookies = {_S: self._session_id}
+        cookies = {_SESSION_COOKIE: self._session_id}
         r = requests.get(url, params=params, cookies=cookies,
                          allow_redirects=False)
         logger.debug("GET {} returned {}", url, r.status_code)
         return r
 
     @_may_renew
-    def post(self, url, jsonobj, **kwargs):
+    def post(self, url: str, jsonobj: dict, **kwargs) -> requests.Response:
         """
         Do an HTTP ``POST`` in the session.
 
@@ -124,7 +126,7 @@ class Session:
         return r
 
     @_may_renew
-    def put(self, url, data, **kwargs):
+    def put(self, url: str, data: str, **kwargs) -> requests.Response:
         """
         Do an HTTP ``PUT`` in the session. Puts plain text *OR* JSON!
 
@@ -143,7 +145,7 @@ class Session:
         return r
 
     @_may_renew
-    def delete(self, url, **kwargs):
+    def delete(self, url: str, **kwargs) -> requests.Response:
         """
         Do an HTTP ``DELETE`` in the session.
 
@@ -157,7 +159,7 @@ class Session:
         logger.debug("DELETE {} returned {}", url, r.status_code)
         return r
 
-    def renew(self):
+    def renew(self) -> dict:
         """
         Renews the session, logging the user into it so that state modification
         operations can be performed.
@@ -167,7 +169,7 @@ class Session:
         """
         if self.__token:
             r = requests.get(self.__login_form_url, allow_redirects=False)
-            self._session_id = r.cookies[_S]
+            self._session_id = r.cookies[_SESSION_COOKIE]
         else:
             # Step one: a temporary session so we can log in
             csrf_matcher = re.compile(
@@ -179,7 +181,7 @@ class Session:
             if not m:
                 raise Exception("could not establish temporary session")
             csrf = m.group(1)
-            session = r.cookies[_S]
+            session = r.cookies[_SESSION_COOKIE]
 
             # Step two: actually do the log in
             form = {
@@ -190,11 +192,12 @@ class Session:
             }
             # NB: returns redirect that sets a cookie
             r = requests.post(self.__login_submit_url,
-                              cookies={_S: session}, allow_redirects=False,
+                              cookies={_SESSION_COOKIE: session},
+                              allow_redirects=False,
                               data=form)
             logger.debug("POST {} returned {}",
                          self.__login_submit_url, r.status_code)
-            self._session_id = r.cookies[_S]
+            self._session_id = r.cookies[_SESSION_COOKIE]
             # We don't need to follow that redirect
 
         # Step three: get the basic service data and new CSRF token
@@ -206,18 +209,20 @@ class Session:
         return obj
 
     @property
-    def _credentials(self):
+    def _credentials(self) -> tuple[dict, dict]:
         """
         The credentials for requests. *Serializable.*
         """
-        cookies = {_S: self._session_id}
+        cookies = {_SESSION_COOKIE: self._session_id}
         headers = {self.__csrf_header: self.__csrf}
         if self.__token:
             # This would be better off done once per session only
             headers["Authorization"] = f"Bearer {self.__token}"
         return cookies, headers
 
-    def websocket(self, url, header=None, cookie=None, **kwargs):
+    def websocket(
+            self, url: str, header: dict = None, cookie: str = None,
+            **kwargs) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.
@@ -235,7 +240,7 @@ class Session:
         header[self.__csrf_header] = self.__csrf
         if cookie is not None:
             cookie += ";"
-        cookie += _S + "=" + self._session_id
+        cookie += _SESSION_COOKIE + "=" + self._session_id
         return websocket.create_connection(
             url, header=header, cookie=cookie, **kwargs)
 
@@ -270,19 +275,19 @@ class SessionAware:
         """
         return self.__session._credentials
 
-    def _get(self, url: str, **kwargs):
+    def _get(self, url: str, **kwargs) -> requests.Response:
         return self.__session.get(url, **kwargs)
 
-    def _post(self, url: str, jsonobj: dict, **kwargs):
+    def _post(self, url: str, jsonobj: dict, **kwargs) -> requests.Response:
         return self.__session.post(url, jsonobj, **kwargs)
 
-    def _put(self, url: str, data: str, **kwargs):
+    def _put(self, url: str, data: str, **kwargs) -> requests.Response:
         return self.__session.put(url, data, **kwargs)
 
-    def _delete(self, url: str, **kwargs):
+    def _delete(self, url: str, **kwargs) -> requests.Response:
         return self.__session.delete(url, **kwargs)
 
-    def _websocket(self, url: str, **kwargs):
+    def _websocket(self, url: str, **kwargs) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.
