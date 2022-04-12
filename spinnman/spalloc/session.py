@@ -16,6 +16,7 @@ from functools import wraps
 from logging import getLogger
 import re
 import requests
+from typing import Tuple
 import websocket
 from spinn_utilities.log import FormatAdapter
 from .utils import clean_url
@@ -209,7 +210,7 @@ class Session:
         return obj
 
     @property
-    def _credentials(self) -> tuple[dict, dict]:
+    def _credentials(self) -> Tuple[dict, dict]:
         """
         The credentials for requests. *Serializable.*
         """
