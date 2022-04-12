@@ -18,9 +18,11 @@ from .abstract_classes import (
     SpallocJob, SpallocMachine, SpallocProxiedConnection)
 from .enums import SpallocState
 from .spalloc import SpallocClient
+from .utils import is_server_address
 
 __all__ = (
     "AbstractSpallocClient",
+    "is_server_address",
     "SpallocClient",
     "SpallocJob",
     "SpallocMachine",
