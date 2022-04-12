@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from collections.abc import Iterable
 import struct
-from typing import Callable, Dict
+from typing import Callable, Dict, Tuple
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod, abstractproperty)
 from spinn_utilities.overrides import overrides
@@ -101,8 +101,8 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job_board(
-            self, triad: tuple[int, int, int] = None,
-            physical: tuple[int, int, int] = None, ip_address: str = None,
+            self, triad: Tuple[int, int, int] = None,
+            physical: Tuple[int, int, int] = None, ip_address: str = None,
             machine_name: str = None, keepalive: int = 45) -> 'SpallocJob':
         """
         Create a job with a specific board. At least one of ``triad``,
@@ -176,7 +176,7 @@ class SpallocProxiedConnection(
 
     @overrides(SCPReceiver.receive_scp_response)
     def receive_scp_response(
-            self, timeout=1.0) -> tuple[SCPResult, int, bytes, int]:
+            self, timeout=1.0) -> Tuple[SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
@@ -237,7 +237,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
 
     @abstractproperty
-    def area(self) -> tuple[int, int]:
+    def area(self) -> Tuple[int, int]:
         """
         Area of machine, in boards.
 
@@ -272,7 +272,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def get_connections(self) -> Dict[tuple[int, int], str]:
+    def get_connections(self) -> Dict[Tuple[int, int], str]:
         """
         Get the mapping from board coordinates to IP addresses.
 
@@ -357,7 +357,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def where_is_machine(self, x: int, y: int) -> tuple[int, int, int]:
+    def where_is_machine(self, x: int, y: int) -> Tuple[int, int, int]:
         """
         Get the *physical* coordinates of the board hosting the given chip.
 
