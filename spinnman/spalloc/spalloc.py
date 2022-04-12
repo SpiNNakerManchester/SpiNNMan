@@ -19,6 +19,7 @@ import queue
 import requests
 import struct
 import threading
+from typing import List, Tuple
 from websocket import WebSocket
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
@@ -408,7 +409,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         return self._keepalive_handle
 
     @overrides(SpallocJob.where_is_machine)
-    def where_is_machine(self, x: int, y: int) -> tuple[int, int, int]:
+    def where_is_machine(self, x: int, y: int) -> Tuple[int, int, int]:
         r = self._get(self.__chip_url, x=int(x), y=int(y))
         if r.status_code == 204:
             return None
@@ -458,7 +459,7 @@ class _ProxiedConnection(SpallocProxiedConnection):
         self.__receiver.listen(self.__handle, self.__msgs.put)
 
     def __call(self, proto: ProxyProtocol, packer: struct.Struct,
-               unpacker: struct.Struct, *args) -> list[int]:
+               unpacker: struct.Struct, *args) -> List[int]:
         if not self.is_connected:
             raise IOError("socket closed")
         with self.__call_lock:
