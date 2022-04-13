@@ -12,6 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import contextlib
 import struct
 from typing import Callable, Dict, Iterable, Set, Tuple
 from spinn_utilities.abstract_base import (
@@ -245,7 +246,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
 
 
-class SpallocJob(object, metaclass=AbstractBase):
+class SpallocJob(contextlib.AbstractContextManager, metaclass=AbstractBase):
     """
     Represents a job in spalloc.
 
@@ -367,3 +368,15 @@ class SpallocJob(object, metaclass=AbstractBase):
             the chip lies outside the allocation.
         :rtype: tuple(int,int,int) or None
         """
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        """
+        Handle exceptions by killing the job and logging the exception in the
+        job's destroy reason.
+        """
+        try:
+            self.destroy(str(exc_value))
+        except Exception:  # pylint: disable=broad-except
+            # Ignore this exception; there's not much we can do with it
+            pass
+        return None
