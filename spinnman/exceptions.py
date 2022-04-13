@@ -155,6 +155,16 @@ class SpinnmanIOException(SpinnmanException):
         return self._problem
 
 
+class SpinnmanEOFException(SpinnmanIOException):
+    """
+    An exception that we're trying to do I/O on a closed socket.
+    That isn't going to work!
+    """
+
+    def __init__(self):
+        super().__init__("connection is closed")
+
+
 class SpinnmanTimeoutException(SpinnmanException):
     """ An exception that indicates that a timeout occurred before an operation
         could finish

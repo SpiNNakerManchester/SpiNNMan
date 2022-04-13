@@ -18,6 +18,7 @@ from threading import Thread
 from concurrent.futures import ThreadPoolExecutor
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
+from spinnman.exceptions import SpinnmanEOFException
 
 logger = FormatAdapter(logging.getLogger(__name__))
 _POOL_SIZE = 4
@@ -80,6 +81,8 @@ class ConnectionListener(Thread, AbstractContextManager):
             while not self.__done:
                 try:
                     self.__run_step(handler)
+                except SpinnmanEOFException:
+                    self.__done = True
                 except Exception:  # pylint: disable=broad-except
                     if not self.__done:
                         logger.warning("problem when dispatching message",
