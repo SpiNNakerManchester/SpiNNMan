@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import traceback
-from collections import OrderedDict
 
 
 def get_physical_cpu_id(txrx, x, y, p):
@@ -155,6 +154,16 @@ class SpinnmanIOException(SpinnmanException):
         return self._problem
 
 
+class SpinnmanEOFException(SpinnmanIOException):
+    """
+    An exception that we're trying to do I/O on a closed socket.
+    That isn't going to work!
+    """
+
+    def __init__(self):
+        super().__init__("connection is closed")
+
+
 class SpinnmanTimeoutException(SpinnmanException):
     """ An exception that indicates that a timeout occurred before an operation
         could finish
@@ -255,7 +264,7 @@ class _Group(object):
         :return: a sorted exception pile
         :rtype: dict(Exception,_Group)
         """
-        data = OrderedDict()
+        data = dict()
         for error_request, exception, trace_back, connection in zip(
                 error_requests, exceptions, tracebacks, connections):
             for stored_exception in data.keys():
