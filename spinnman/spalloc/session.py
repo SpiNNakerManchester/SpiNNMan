@@ -240,8 +240,9 @@ class Session:
             header = {}
         header[self.__csrf_header] = self.__csrf
         if cookie is not None:
-            cookie += ";"
-        cookie += _SESSION_COOKIE + "=" + self._session_id
+            cookie += ";" + _SESSION_COOKIE + "=" + self._session_id
+        else:
+            cookie = _SESSION_COOKIE + "=" + self._session_id
         return websocket.create_connection(
             url, header=header, cookie=cookie, **kwargs)
 

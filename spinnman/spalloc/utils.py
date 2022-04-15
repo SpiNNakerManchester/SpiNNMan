@@ -1,4 +1,4 @@
-# Copyright (c) 2021 The University of Manchester
+# Copyright (c) 2021-2022 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,8 +12,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+Miscellaneous utilities for working with URLs relating to the Spalloc Client.
+"""
+
 from typing import Iterable, Tuple
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse, urlsplit, urlunparse
 
 
 def clean_url(url: str) -> str:
@@ -48,6 +52,13 @@ def parse_service_url(url: str) -> Tuple[str, str, str]:
     url = urlunparse((
         pieces.scheme, netloc, pieces.path, None, None, None))
     return url, user, password
+
+
+def get_hostname(url: str) -> str:
+    """
+    Parses a URL and extracts the hostname part.
+    """
+    return urlsplit(url).hostname
 
 
 def is_server_address(

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 The University of Manchester
+# Copyright (c) 2021-2022 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,6 +12,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+Implementation of the client for the Spalloc web service.
+"""
+
 from logging import getLogger
 from multiprocessing import Process, Queue
 from packaging.version import Version
@@ -26,14 +30,15 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import (
     Connection, Listenable, SCPSender)
-from spinnman.constants import SCP_SCAMP_PORT
+from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from .enums import SpallocState, ProxyProtocol
 from .session import Session, SessionAware
-from .utils import parse_service_url
+from .utils import parse_service_url, get_hostname
 from .abstract_classes import (
-    AbstractSpallocClient,
-    SpallocProxiedConnection, SpallocJob, SpallocMachine)
+    AbstractSpallocClient, SpallocProxiedConnectionBase,
+    SpallocProxiedConnection, SpallocBootConnection, SpallocJob,
+    SpallocMachine)
 from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(getLogger(__name__))
@@ -243,14 +248,18 @@ class _ProxyReceiver(threading.Thread):
         """
         while self.__ws.connected:
             try:
-                msg = self.__ws.recv_data()
+                result = self.__ws.recv_data()
+                frame = result[1]
+                if len(frame) < _msg.size:
+                    # Message is out of protocol
+                    continue
             except Exception:  # pylint: disable=broad-except
                 break
-            code, num = _msg.unpack_from(msg, 0)
+            code, num = _msg.unpack_from(frame, 0)
             if code in (ProxyProtocol.OPEN, ProxyProtocol.CLOSE):
-                self.dispatch_return(num, msg)
+                self.dispatch_return(num, frame)
             else:
-                self.dispatch_message(num, msg)
+                self.dispatch_message(num, frame)
 
     def expect_return(self, handler) -> int:
         """
@@ -346,17 +355,26 @@ class _SpallocJob(SessionAware, SpallocJob):
         if r.status_code == 204:
             return None
         try:
-            return r.json().proxy_ref
+            return r.json()["proxy-ref"]
         except KeyError:
             return None
 
+    def __init_proxy(self):
+        if self.__proxy_handle is None or not self.__proxy_handle.connected:
+            self.__proxy_handle = self._websocket(
+                self.__proxy_url, origin=get_hostname(self._url))
+            self.__proxy_thread = _ProxyReceiver(self.__proxy_handle)
+
     @overrides(SpallocJob.connect_to_board)
     def connect_to_board(self, x, y, port=SCP_SCAMP_PORT):
-        if self.__proxy_handle is None or not self.__proxy_handle.connected:
-            self.__proxy_handle = self._websocket(self.__proxy_url)
-            self.__proxy_thread = _ProxyReceiver(self.__proxy_handle)
-        return _ProxiedConnection(
+        self.__init_proxy()
+        return _ProxiedSCAMPConnection(
             self.__proxy_handle, self.__proxy_thread, x, y, port)
+
+    @overrides(SpallocJob.connect_for_booting)
+    def connect_for_booting(self):
+        self.__init_proxy()
+        return _ProxiedBootConnection(self.__proxy_handle, self.__proxy_thread)
 
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state):
@@ -431,6 +449,8 @@ class _SpallocJob(SessionAware, SpallocJob):
             raise Exception("job not ready to execute scripts")
         proxies = [
             self.connect_to_board(x, y) for (x, y) in self.get_connections()]
+        # Also need a boot connection
+        proxies.append(self.connect_for_booting())
         return Transceiver(version=5, connections=proxies,
                            default_report_directory=default_report_directory)
 
@@ -438,16 +458,14 @@ class _SpallocJob(SessionAware, SpallocJob):
         return f"SpallocJob({self._url})"
 
 
-class _ProxiedConnection(SpallocProxiedConnection):
+class _ProxiedConnection(SpallocProxiedConnectionBase):
     __slots__ = (
         "__ws", "__receiver", "__handle", "__msgs", "__current_msg",
-        "__call_queue", "__call_lock", "_chip_x", "_chip_y")
+        "__call_queue", "__call_lock")
 
     def __init__(
             self, ws: WebSocket, receiver: _ProxyReceiver,
             x: int, y: int, port: int):
-        self._chip_x = x
-        self._chip_y = y
         self.__ws = ws
         self.__receiver = receiver
         self.__msgs = queue.Queue()
@@ -482,7 +500,7 @@ class _ProxiedConnection(SpallocProxiedConnection):
         self.__ws = None
         self.__receiver = None
 
-    @overrides(SpallocProxiedConnection.send)
+    @overrides(SpallocProxiedConnectionBase.send)
     def send(self, message: bytes):
         if not self.is_connected:
             raise IOError("socket closed")
@@ -500,7 +518,7 @@ class _ProxiedConnection(SpallocProxiedConnection):
         else:
             return self.__msgs.get(timeout=timeout)[_msg.size:]
 
-    @overrides(SpallocProxiedConnection.receive)
+    @overrides(SpallocProxiedConnectionBase.receive)
     def receive(self, timeout=None) -> bytes:
         if self.__current_msg is not None:
             try:
@@ -535,6 +553,17 @@ class _ProxiedConnection(SpallocProxiedConnection):
         except queue.Empty:
             return False
 
+
+class _ProxiedSCAMPConnection(_ProxiedConnection, SpallocProxiedConnection):
+    __slots__ = ("_chip_x", "_chip_y")
+
+    def __init__(
+            self, ws: WebSocket, receiver: _ProxyReceiver,
+            x: int, y: int, port: int):
+        super().__init__(ws, receiver, x, y, port)
+        self._chip_x = x
+        self._chip_y = y
+
     @property
     @overrides(SCPSender.chip_x)
     def chip_x(self) -> int:
@@ -544,3 +573,10 @@ class _ProxiedConnection(SpallocProxiedConnection):
     @overrides(SCPSender.chip_y)
     def chip_y(self) -> int:
         return self._chip_y
+
+
+class _ProxiedBootConnection(_ProxiedConnection, SpallocBootConnection):
+    __slots__ = ()
+
+    def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
+        super().__init__(ws, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)

@@ -12,25 +12,34 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import contextlib
+"""
+API of the client for the Spalloc web service.
+"""
+
 import struct
+import time
 from typing import Callable, Dict, Iterable, Set, Tuple
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod, abstractproperty)
 from spinn_utilities.overrides import overrides
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.connections.abstract_classes import (
-    Listenable, SDPReceiver, SDPSender, SCPReceiver, SCPSender)
+    Listenable, SDPReceiver, SDPSender, SCPReceiver, SCPSender,
+    SpinnakerBootReceiver, SpinnakerBootSender)
 from spinnman.connections.udp_packet_connections import (
     update_sdp_header_for_udp_send)
+from spinnman.connections.udp_packet_connections.boot_connection import (
+    _ANTI_FLOOD_DELAY)
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.transceiver import Transceiver
 from .enums import SpallocState
 
 _TWO_SHORTS = struct.Struct("<2H")
+_TWO_SKIP: bytes = b'\0\0'
 
 
 class AbstractSpallocClient(object, metaclass=AbstractBase):
@@ -125,12 +134,9 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         """
 
 
-class SpallocProxiedConnection(
-        SDPReceiver, SDPSender, SCPSender, SCPReceiver, Listenable,
-        metaclass=AbstractBase):
+class SpallocProxiedConnectionBase(Listenable, metaclass=AbstractBase):
     """
-    The socket interface supported by proxied sockets. The socket will always
-    be talking to a specific board. This emulates a SCAMPConnection.
+    Base class for connections proxied via Spalloc.
     """
     __slots__ = ()
 
@@ -155,6 +161,17 @@ class SpallocProxiedConnection(
         :return: The received message.
         """
 
+
+class SpallocProxiedConnection(
+        SpallocProxiedConnectionBase,
+        SDPReceiver, SDPSender, SCPSender, SCPReceiver,
+        metaclass=AbstractBase):
+    """
+    The socket interface supported by proxied sockets. The socket will always
+    be talking to a specific board. This emulates a SCAMPConnection.
+    """
+    __slots__ = ()
+
     @overrides(Listenable.get_receive_method)
     def get_receive_method(self) -> Callable:
         return self.receive_sdp_message
@@ -172,7 +189,7 @@ class SpallocProxiedConnection(
                 sdp_message.sdp_header, self.chip_x, self.chip_y)
         else:
             update_sdp_header_for_udp_send(sdp_message.sdp_header, 0, 0)
-        self.send(b'\0\0' + sdp_message.bytestring)
+        self.send(_TWO_SKIP + sdp_message.bytestring)
 
     @overrides(SCPReceiver.receive_scp_response)
     def receive_scp_response(
@@ -189,7 +206,34 @@ class SpallocProxiedConnection(
     def get_scp_data(self, scp_request: AbstractSCPRequest) -> bytes:
         update_sdp_header_for_udp_send(
             scp_request.sdp_header, self.chip_x, self.chip_y)
-        return b'\0\0' + scp_request.bytestring
+        return _TWO_SKIP + scp_request.bytestring
+
+
+class SpallocBootConnection(
+        SpallocProxiedConnectionBase,
+        SpinnakerBootSender, SpinnakerBootReceiver, metaclass=AbstractBase):
+    """
+    The socket interface supported by proxied boot sockets. The socket will
+    always be talking to the root board of a job.
+    This emulates a BootConnection.
+    """
+    __slots__ = ()
+
+    @overrides(SpinnakerBootSender.send_boot_message)
+    def send_boot_message(self, boot_message: SpinnakerBootMessage):
+        self.send(boot_message.bytestring)
+
+        # Sleep between messages to avoid flooding the machine
+        time.sleep(_ANTI_FLOOD_DELAY)
+
+    @overrides(SpinnakerBootReceiver.receive_boot_message)
+    def receive_boot_message(self, timeout=None) -> SpinnakerBootMessage:
+        data = self.receive(timeout)
+        return SpinnakerBootMessage.from_bytestring(data, 0)
+
+    @overrides(Listenable.get_receive_method)
+    def get_receive_method(self) -> Callable:
+        return self.receive_boot_message
 
 
 class SpallocMachine(object, metaclass=AbstractBase):
@@ -246,7 +290,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
 
 
-class SpallocJob(contextlib.AbstractContextManager, metaclass=AbstractBase):
+class SpallocJob(object, metaclass=AbstractBase):
     """
     Represents a job in spalloc.
 
@@ -292,6 +336,15 @@ class SpallocJob(contextlib.AbstractContextManager, metaclass=AbstractBase):
         :param int port: UDP port to talk to; defaults to the SCP port
         :return: A connection that talks to the board.
         :rtype: SpallocProxiedConnection
+        """
+
+    @abstractmethod
+    def connect_for_booting(self) -> SpallocBootConnection:
+        """
+        Open a connection to a job's allocation so it can be booted.
+
+        :return: a boot connection
+        :rtype: SpallocBootConnection
         """
 
     @abstractmethod
@@ -368,6 +421,12 @@ class SpallocJob(contextlib.AbstractContextManager, metaclass=AbstractBase):
             the chip lies outside the allocation.
         :rtype: tuple(int,int,int) or None
         """
+
+    def __enter__(self):
+        """
+        Return self on entering context.
+        """
+        return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         """
