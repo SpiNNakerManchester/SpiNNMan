@@ -96,7 +96,7 @@ _EXECUTABLE_ADDRESS = 0x67800000
 
 def create_transceiver_from_hostname(
         hostname, version, bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False, boot_port_no=None):
+        auto_detect_bmp=False):
     """ Create a Transceiver by creating a :py:class:`~.UDPConnection` to the\
         given hostname on port 17893 (the default SCAMP port), and a\
         :py:class:`~.BootConnection` on port 54321 (the default boot port),\
@@ -118,7 +118,6 @@ def create_transceiver_from_hostname(
     :param bool auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
         automatically determined from the board IP address
-    :param int boot_port_no: the port number used to boot the machine
     :param scamp_connections:
         the list of connections used for SCAMP communications
     :return: The created transceiver
@@ -156,8 +155,7 @@ def create_transceiver_from_hostname(
     connections.append(SCAMPConnection(remote_host=hostname))
 
     # handle the boot connection
-    connections.append(BootConnection(
-        remote_host=hostname, remote_port=boot_port_no))
+    connections.append(BootConnection(remote_host=hostname))
 
     return Transceiver(version, connections=connections)
 
@@ -190,7 +188,6 @@ class Transceiver(AbstractContextManager):
         "_n_chip_execute_locks",
         "_nearest_neighbour_id",
         "_nearest_neighbour_lock",
-        "_original_connections",
         "_scamp_connection_selector",
         "_scamp_connections",
         "_scp_sender_connections",
@@ -229,8 +226,6 @@ class Transceiver(AbstractContextManager):
         # be closed
         if connections is None:
             connections = list()
-        self._original_connections = set()
-        self._original_connections.update(connections)
 
         # A set of all connection - used for closing
         self._all_connections = set()
@@ -1404,6 +1399,7 @@ class Transceiver(AbstractContextManager):
         if not self._bmp_connections:
             logger.warning("No BMP connections, so can't power off")
             return False
+        logger.info("Turning off machine")
         for bmp_connection in self._bmp_connections:
             self.power_off(bmp_connection.boards, bmp_connection.cabinet,
                            bmp_connection.frame)
@@ -2660,20 +2656,14 @@ class Transceiver(AbstractContextManager):
         # if no BMPs are available, then there's still at least one board
         return max(1, boards)
 
-    def close(self, close_original_connections=True, power_off_machine=False):
+    def close(self):
         """ Close the transceiver and any threads that are running
 
-        :param bool close_original_connections:
-            If True, the original connections passed to the transceiver in the
-            constructor are also closed.
-            If False, only newly discovered connections are closed.
-        :param bool power_off_machine:
-            if True, the machine is sent a power down
-            command via its BMP (if it has one)
         """
         # pylint: disable=arguments-differ
-        if power_off_machine and self._bmp_connections:
-            self.power_off_machine()
+        if self._bmp_connections:
+            if get_config_bool("Machine", "turn_off_machine"):
+                self.power_off_machine()
 
         for connections in self._udp_receive_connections_by_port.values():
             for (_, listener) in connections.values():
@@ -2681,9 +2671,7 @@ class Transceiver(AbstractContextManager):
                     listener.close()
 
         for connection in self._all_connections:
-            if (close_original_connections or
-                    connection not in self._original_connections):
-                connection.close()
+            connection.close()
 
     def register_udp_listener(self, callback, connection_class,
                               local_port=None, local_host=None):
