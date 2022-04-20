@@ -223,6 +223,8 @@ class SpiNNManDataView(MachineDataView):
         """
         Gets the main app id used by the transceiver.
 
+        This method will create a new app_id if one has not yet been created.
+
         :rtype: int
         """
         if cls.__data._app_id is None:
