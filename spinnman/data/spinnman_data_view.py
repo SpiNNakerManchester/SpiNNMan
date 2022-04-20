@@ -115,7 +115,7 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def get_transceiver(cls):
         """
-        The transceiver description or None if the is no tranceiver
+        The transceiver description
 
         :rtype: ~spinnman.transceiver.Transceiver
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
