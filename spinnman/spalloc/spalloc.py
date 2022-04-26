@@ -12,6 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 """
 Implementation of the client for the Spalloc web service.
 """
@@ -38,14 +39,16 @@ from .utils import parse_service_url, get_hostname
 from .abstract_classes import (
     AbstractSpallocClient, SpallocProxiedConnectionBase,
     SpallocProxiedConnection, SpallocBootConnection, SpallocJob,
-    SpallocMachine)
+    SpallocMachine, SpallocEIEIOConnection)
 from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(getLogger(__name__))
 _open_req = struct.Struct("<IIIII")
 _close_req = struct.Struct("<III")
+_open_listen_req = struct.Struct("<II")
 # Open and close share the response structure
 _open_close_res = struct.Struct("<III")
+_open_listen_res = struct.Struct("<IIB4I")
 _msg = struct.Struct("<II")
 
 
@@ -256,10 +259,10 @@ class _ProxyReceiver(threading.Thread):
             except Exception:  # pylint: disable=broad-except
                 break
             code, num = _msg.unpack_from(frame, 0)
-            if code in (ProxyProtocol.OPEN, ProxyProtocol.CLOSE):
-                self.dispatch_return(num, frame)
-            else:
+            if code == ProxyProtocol.MSG:
                 self.dispatch_message(num, frame)
+            else:
+                self.dispatch_return(num, frame)
 
     def expect_return(self, handler) -> int:
         """
@@ -376,6 +379,12 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__init_proxy()
         return _ProxiedBootConnection(self.__proxy_handle, self.__proxy_thread)
 
+    @overrides(SpallocJob.init_eieio_listener_connection)
+    def init_eieio_listener_connection(self):
+        self.__init_proxy()
+        return _ProxiedEIEIOConnection(
+            self.__proxy_handle, self.__proxy_thread)
+
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state):
         while old_state != SpallocState.DESTROYED:
@@ -458,27 +467,34 @@ class _SpallocJob(SessionAware, SpallocJob):
         return f"SpallocJob({self._url})"
 
 
-class _ProxiedConnection(SpallocProxiedConnectionBase):
-    __slots__ = (
-        "__ws", "__receiver", "__handle", "__msgs", "__current_msg",
-        "__call_queue", "__call_lock")
+class _ProxiedConnection(metaclass=AbstractBase):
+    """
+    Core mux/demux emulating a connection that is proxied over a websocket.
 
-    def __init__(
-            self, ws: WebSocket, receiver: _ProxyReceiver,
-            x: int, y: int, port: int):
+    None of the methods are public because subclasses may expose a profile of
+    them to conform to a particular type of connection.
+    """
+    __slots__ = (
+        "__ws", "__receiver", "__msgs", "__call_queue", "__call_lock",
+        "__handle", "__current_msg")
+
+    def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         self.__ws = ws
         self.__receiver = receiver
         self.__msgs = queue.Queue()
-        self.__current_msg = None
         self.__call_queue = queue.Queue(1)
         self.__call_lock = threading.RLock()
-        self.__handle, = self.__call(
-            ProxyProtocol.OPEN, _open_req, _open_close_res, x, y, port)
+        self.__current_msg = None
+        self.__handle, = self._open_connection()
         self.__receiver.listen(self.__handle, self.__msgs.put)
 
-    def __call(self, proto: ProxyProtocol, packer: struct.Struct,
-               unpacker: struct.Struct, *args) -> List[int]:
-        if not self.is_connected:
+    @abstractmethod
+    def _open_connection(self) -> int:
+        pass
+
+    def _call(self, proto: ProxyProtocol, packer: struct.Struct,
+              unpacker: struct.Struct, *args) -> List[int]:
+        if not self._connected:
             raise IOError("socket closed")
         with self.__call_lock:
             # All calls via websocket use correlation_id
@@ -487,23 +503,26 @@ class _ProxiedConnection(SpallocProxiedConnectionBase):
             self.__ws.send_binary(packer.pack(proto, correlation_id, *args))
             return unpacker.unpack(self.__call_queue.get())[2:]
 
-    @overrides(Connection.is_connected)
-    def is_connected(self) -> bool:
+    @property
+    def _connected(self) -> bool:
         return self.__ws and self.__ws.connected
 
-    @overrides(Connection.close)
-    def close(self):
-        channel_id, = self.__call(
-            ProxyProtocol.CLOSE, _close_req, _open_close_res, self.__handle)
-        if channel_id != self.__handle:
-            raise IOError("failed to close proxy socket")
+    def _throw_if_closed(self):
+        if not self._connected:
+            raise IOError("socket closed")
+
+    def _close(self):
+        if self._connected:
+            channel_id, = self.__call(
+                ProxyProtocol.CLOSE, _close_req, _open_close_res,
+                self.__handle)
+            if channel_id != self.__handle:
+                raise IOError("failed to close proxy socket")
         self.__ws = None
         self.__receiver = None
 
-    @overrides(SpallocProxiedConnectionBase.send)
-    def send(self, message: bytes):
-        if not self.is_connected:
-            raise IOError("socket closed")
+    def _send(self, message: bytes):
+        self._throw_if_closed()
         # Put the header on the front and send it
         self.__ws.send_binary(_msg.pack(
             ProxyProtocol.MSG, self.__handle) + message)
@@ -518,8 +537,7 @@ class _ProxiedConnection(SpallocProxiedConnectionBase):
         else:
             return self.__msgs.get(timeout=timeout)[_msg.size:]
 
-    @overrides(SpallocProxiedConnectionBase.receive)
-    def receive(self, timeout=None) -> bytes:
+    def _receive(self, timeout=None) -> bytes:
         if self.__current_msg is not None:
             try:
                 return self.__current_msg
@@ -530,20 +548,15 @@ class _ProxiedConnection(SpallocProxiedConnectionBase):
                 try:
                     return self.__get()
                 except queue.Empty:
-                    pass
-                if not self.is_connected:
-                    raise IOError("socket closed")
+                    self._throw_if_closed()
         else:
             try:
                 return self.__get(timeout)
             except queue.Empty as e:
-                if not self.is_connected:
-                    # pylint: disable=raise-missing-from
-                    raise IOError("socket closed")
+                self._throw_if_closed()
                 raise SpinnmanTimeoutException("receive", timeout) from e
 
-    @overrides(Listenable.is_ready_to_receive)
-    def is_ready_to_receive(self, timeout=0) -> bool:
+    def _is_ready_to_receive(self, timeout=0) -> bool:
         # If we already have a message or the queue peek succeeds, return now
         if self.__current_msg is not None or self.__msgs.not_empty:
             return True
@@ -554,7 +567,46 @@ class _ProxiedConnection(SpallocProxiedConnectionBase):
             return False
 
 
-class _ProxiedSCAMPConnection(_ProxiedConnection, SpallocProxiedConnection):
+class _ProxiedBidirectionalConnection(
+        _ProxiedConnection, SpallocProxiedConnectionBase):
+    __slots__ = ("__connect_args")
+
+    def __init__(
+            self, ws: WebSocket, receiver: _ProxyReceiver,
+            x: int, y: int, port: int):
+        self.__connect_args = (x, y, port)
+        super().__init__(ws, receiver)
+
+    @overrides(_ProxiedConnection._open_connection)
+    def _open_connection(self):
+        handle, = self.__call(
+            ProxyProtocol.OPEN, _open_req, _open_close_res,
+            *self.__connect_args)
+        return handle
+
+    @overrides(Connection.is_connected)
+    def is_connected(self) -> bool:
+        return self._connected
+
+    @overrides(Connection.close)
+    def close(self):
+        self._close()
+
+    @overrides(SpallocProxiedConnectionBase.send)
+    def send(self, message: bytes):
+        self._send(message)
+
+    @overrides(SpallocProxiedConnectionBase.receive)
+    def receive(self, timeout=None) -> bytes:
+        return self._receive(timeout)
+
+    @overrides(Listenable.is_ready_to_receive)
+    def is_ready_to_receive(self, timeout=0) -> bool:
+        return self._is_ready_to_receive(timeout)
+
+
+class _ProxiedSCAMPConnection(
+        _ProxiedBidirectionalConnection, SpallocProxiedConnection):
     __slots__ = ("_chip_x", "_chip_y")
 
     def __init__(
@@ -574,9 +626,66 @@ class _ProxiedSCAMPConnection(_ProxiedConnection, SpallocProxiedConnection):
     def chip_y(self) -> int:
         return self._chip_y
 
+    def __str__(self):
+        return f"SCAMPConnection[proxied]({self.chip_x},{self.chip_y})"
 
-class _ProxiedBootConnection(_ProxiedConnection, SpallocBootConnection):
+
+class _ProxiedBootConnection(
+        _ProxiedBidirectionalConnection, SpallocBootConnection):
     __slots__ = ()
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         super().__init__(ws, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)
+
+    def __str__(self):
+        return "BootConnection[proxied]()"
+
+
+class _ProxiedEIEIOConnection(
+        _ProxiedConnection, SpallocProxiedConnectionBase,
+        SpallocEIEIOConnection):
+    # Special: This is a unidirectional receive-only connection
+    __slots__ = ("__addr", "__port")
+
+    @overrides(_ProxiedConnection._open_connection)
+    def _open_connection(self) -> int:
+        handle, ip1, ip2, ip3, ip4, self.__port = self.__call(
+            ProxyProtocol.OPEN_LISTENER, _open_listen_req, _open_listen_res)
+        # Assemble the address into the format expected elsewhere
+        self.__addr = f"{ip1}.{ip2}.{ip3}.{ip4}"
+        return handle
+
+    @overrides(Connection.is_connected)
+    def is_connected(self) -> bool:
+        return self._connected
+
+    @overrides(Connection.close)
+    def close(self):
+        self._close()
+
+    @overrides(SpallocProxiedConnectionBase.send)
+    def send(self, message: bytes):  # @UnusedVariable
+        self._throw_if_closed()
+        raise IOError("socket is not open for sending")
+
+    @overrides(SpallocProxiedConnectionBase.receive)
+    def receive(self, timeout=None) -> bytes:
+        return self._receive(timeout)
+
+    @overrides(Listenable.is_ready_to_receive)
+    def is_ready_to_receive(self, timeout=0) -> bool:
+        return self._is_ready_to_receive(timeout)
+
+    @property
+    @overrides(SpallocEIEIOConnection.local_ip_address)
+    def local_ip_address(self) -> str:
+        return self.__addr if self._connected else None
+
+    @property
+    @overrides(SpallocEIEIOConnection.local_port)
+    def local_port(self) -> int:
+        return self.__port if self._connected else None
+
+    def __str__(self):
+        return (f"EIEIOConnection[proxied](local:{self.local_ip_address}:"
+                f"{self.local_port})")

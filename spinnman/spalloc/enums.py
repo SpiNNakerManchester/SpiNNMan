@@ -35,3 +35,5 @@ class ProxyProtocol(IntEnum):
     CLOSE = 1
     #: Message sent on a channel
     MSG = 2
+    #: Message relating to opening an unbound listen-only channel
+    OPEN_LISTENER = 3

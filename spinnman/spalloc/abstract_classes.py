@@ -25,12 +25,14 @@ from spinn_utilities.overrides import overrides
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.connections.abstract_classes import (
     Listenable, SDPReceiver, SDPSender, SCPReceiver, SCPSender,
-    SpinnakerBootReceiver, SpinnakerBootSender)
+    SpinnakerBootReceiver, SpinnakerBootSender, EIEIOReceiver)
 from spinnman.connections.udp_packet_connections import (
     update_sdp_header_for_udp_send)
 from spinnman.connections.udp_packet_connections.boot_connection import (
     _ANTI_FLOOD_DELAY)
 from spinnman.constants import SCP_SCAMP_PORT
+from spinnman.messages.eieio import (
+    read_eieio_command_message, read_eieio_data_message)
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPResult
@@ -209,6 +211,48 @@ class SpallocProxiedConnection(
         return _TWO_SKIP + scp_request.bytestring
 
 
+class SpallocEIEIOConnection(
+        SpallocProxiedConnectionBase,
+        EIEIOReceiver, metaclass=AbstractBase):
+    """
+    The socket interface supported by proxied EIEIO listener sockets.
+    This emulates an EIEOConnection opened with no address specified.
+    """
+    __slots__ = ()
+    _ONE_SHORT = struct.Struct("<H")
+
+    @overrides(EIEIOReceiver.receive_eieio_message)
+    def receive_eieio_message(self, timeout=None):
+        data = self.receive(timeout)
+        header = SpallocEIEIOConnection._ONE_SHORT.unpack_from(data)[0]
+        if header & 0xC000 == 0x4000:
+            return read_eieio_command_message(data, 0)
+        return read_eieio_data_message(data, 0)
+
+    @overrides(SpallocProxiedConnectionBase.send)
+    def send(self, message):
+        """
+        .. note::
+            This class does not allow sending.
+        """
+
+    @abstractproperty
+    def local_ip_address(self) -> str:
+        """ The IP address on the server to which the connection is bound.
+
+        :return: The IP address as a dotted string, e.g., 0.0.0.0
+        :rtype: str
+        """
+
+    @abstractproperty
+    def local_port(self) -> int:
+        """ The port on the server to which the connection is bound.
+
+        :return: The local port number
+        :rtype: int
+        """
+
+
 class SpallocBootConnection(
         SpallocProxiedConnectionBase,
         SpinnakerBootSender, SpinnakerBootReceiver, metaclass=AbstractBase):
@@ -345,6 +389,18 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :return: a boot connection
         :rtype: SpallocBootConnection
+        """
+
+    @abstractmethod
+    def init_eieio_listener_connection(self) -> SpallocEIEIOConnection:
+        """
+        Open a listening EIEIO connection to the job's boards. Messages cannot
+        be sent on this connection, but they can be received from all boards.
+        You can also get the *server* side connection information so you can
+        program that into a tag.
+
+        :return: an EIEIO connection in pure listener mode
+        :rtype: SpallocEIEIOConnection
         """
 
     @abstractmethod
