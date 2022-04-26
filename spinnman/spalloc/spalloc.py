@@ -668,6 +668,10 @@ class _ProxiedEIEIOConnection(
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
+    def send_to(self, message: bytes, address: tuple):  # @UnusedVariable
+        self._throw_if_closed()
+        raise IOError("socket is not open for sending")
+
     @overrides(SpallocProxiedConnectionBase.receive)
     def receive(self, timeout=None) -> bytes:
         return self._receive(timeout)
