@@ -236,6 +236,21 @@ class SpallocEIEIOConnection(
             This class does not allow sending.
         """
 
+    def send_to(
+            self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
+        """
+        Send a message on an open socket to a particular board.
+
+        :param bytes message: The message to send.
+        :param int x:
+            The X coordinate of the ethernet chip to send the message to.
+        :param int y:
+            The Y coordinate of the ethernet chip to send the message to.
+        :param int port:
+            The UDP port on the ethernet chip to send the message to.
+            Defaults to the SCP port.
+        """
+
     @abstractproperty
     def local_ip_address(self) -> str:
         """ The IP address on the server to which the connection is bound.
@@ -392,14 +407,14 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def init_eieio_listener_connection(self) -> SpallocEIEIOConnection:
+    def open_listener_connection(self) -> SpallocEIEIOConnection:
         """
         Open a listening EIEIO connection to the job's boards. Messages cannot
-        be sent on this connection, but they can be received from all boards.
-        You can also get the *server* side connection information so you can
-        program that into a tag.
+        be sent on this connection unless you say which board to send to, but
+        they can be received from all boards. You can also get the *server*
+        side connection information so you can program that into a tag.
 
-        :return: an EIEIO connection in pure listener mode
+        :return: an EIEIO connection with no board address bound
         :rtype: SpallocEIEIOConnection
         """
 

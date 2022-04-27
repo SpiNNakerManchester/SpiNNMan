@@ -50,6 +50,7 @@ _open_listen_req = struct.Struct("<II")
 _open_close_res = struct.Struct("<III")
 _open_listen_res = struct.Struct("<IIB4I")
 _msg = struct.Struct("<II")
+_msg_to = struct.Struct("<IIII")
 
 
 class SpallocClient(AbstractContextManager, AbstractSpallocClient):
@@ -379,8 +380,8 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__init_proxy()
         return _ProxiedBootConnection(self.__proxy_handle, self.__proxy_thread)
 
-    @overrides(SpallocJob.init_eieio_listener_connection)
-    def init_eieio_listener_connection(self):
+    @overrides(SpallocJob.open_listener_connection)
+    def open_listener_connection(self):
         self.__init_proxy()
         return _ProxiedEIEIOConnection(
             self.__proxy_handle, self.__proxy_thread)
@@ -527,6 +528,12 @@ class _ProxiedConnection(metaclass=AbstractBase):
         self.__ws.send_binary(_msg.pack(
             ProxyProtocol.MSG, self.__handle) + message)
 
+    def _send_to(self, message: bytes, x: int, y: int, port: int):
+        self._throw_if_closed()
+        # Put the header on the front and send it
+        self.__ws.send_binary(_msg_to.pack(
+            ProxyProtocol.MSG_TO, self.__handle, x, y, port) + message)
+
     def __get(self, timeout: float = 0.5) -> bytes:
         """
         Get a value from the queue. Handles block/non-block switching and
@@ -650,7 +657,7 @@ class _ProxiedEIEIOConnection(
     @overrides(_ProxiedConnection._open_connection)
     def _open_connection(self) -> int:
         handle, ip1, ip2, ip3, ip4, self.__port = self.__call(
-            ProxyProtocol.OPEN_LISTENER, _open_listen_req, _open_listen_res)
+            ProxyProtocol.OPEN_UNBOUND, _open_listen_req, _open_listen_res)
         # Assemble the address into the format expected elsewhere
         self.__addr = f"{ip1}.{ip2}.{ip3}.{ip4}"
         return handle
@@ -668,9 +675,10 @@ class _ProxiedEIEIOConnection(
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
-    def send_to(self, message: bytes, address: tuple):  # @UnusedVariable
-        self._throw_if_closed()
-        raise IOError("socket is not open for sending")
+    @overrides(SpallocEIEIOConnection.send_to)
+    def send_to(
+            self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
+        self._send_to(message, x, y, port)
 
     @overrides(SpallocProxiedConnectionBase.receive)
     def receive(self, timeout=None) -> bytes:
