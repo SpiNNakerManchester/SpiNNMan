@@ -675,8 +675,8 @@ class _ProxiedEIEIOConnection(
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
-    @overrides(SpallocEIEIOConnection.send_to)
-    def send_to(
+    @overrides(SpallocEIEIOConnection.send_to_chip)
+    def send_to_chip(
             self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
         self._send_to(message, x, y, port)
 

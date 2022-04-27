@@ -236,7 +236,8 @@ class SpallocEIEIOConnection(
             This class does not allow sending.
         """
 
-    def send_to(
+    @abstractmethod
+    def send_to_chip(
             self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
         """
         Send a message on an open socket to a particular board.
