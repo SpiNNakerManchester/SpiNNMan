@@ -31,10 +31,12 @@ from spinnman.connections.udp_packet_connections import (
 from spinnman.connections.udp_packet_connections.boot_connection import (
     _ANTI_FLOOD_DELAY)
 from spinnman.constants import SCP_SCAMP_PORT
+from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.eieio import (
     read_eieio_command_message, read_eieio_data_message)
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.impl import IPTagSet
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.transceiver import Transceiver
@@ -161,6 +163,8 @@ class SpallocProxiedConnectionBase(Listenable, metaclass=AbstractBase):
             If None, will wait indefinitely (or until the connection is
             closed).
         :return: The received message.
+        :raises SpinnmanTimeoutException:
+            If a timeout happens
         """
 
 
@@ -220,6 +224,8 @@ class SpallocEIEIOConnection(
     """
     __slots__ = ()
     _ONE_SHORT = struct.Struct("<H")
+    _NUM_UPDATE_TAG_TRIES = 3
+    _UPDATE_TAG_TIMEOUT = 1.0
 
     @overrides(EIEIOReceiver.receive_eieio_message)
     def receive_eieio_message(self, timeout=None):
@@ -267,6 +273,36 @@ class SpallocEIEIOConnection(
         :return: The local port number
         :rtype: int
         """
+
+    def update_tag(self, x: int, y: int, tag: int):
+        """
+        Update the given tag on the given ethernet chip to send messages to
+        this connection.
+
+        :param int x: The ethernet chip's X coordinate
+        :param int y: The ethernet chip's Y coordinate
+        :param int tag: The tag ID to update
+        :raises SpinnmanTimeoutException:
+            If the message isn't handled within a reasonable timeout.
+        :raises SpinnmanUnexpectedResponseCodeException:
+            If the message is rejected by SpiNNaker/SCAMP.
+        """
+        request = IPTagSet(
+            0, 0, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
+        request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
+        update_sdp_header_for_udp_send(request.sdp_header, 0, 0)
+        data = _TWO_SKIP + request.bytestring
+        for _try in range(SpallocEIEIOConnection._NUM_UPDATE_TAG_TRIES):
+            try:
+                self.send_to_chip(data, x, y, SCP_SCAMP_PORT)
+                response_data = self.receive(
+                    SpallocEIEIOConnection._UPDATE_TAG_TIMEOUT)
+                request.get_scp_response().read_bytestring(
+                    response_data, len(_TWO_SKIP))
+                return
+            except SpinnmanTimeoutException as e:
+                if _try + 1 == SpallocEIEIOConnection._NUM_UPDATE_TAG_TRIES:
+                    raise e
 
 
 class SpallocBootConnection(
