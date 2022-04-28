@@ -25,7 +25,7 @@ from spinn_utilities.overrides import overrides
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.connections.abstract_classes import (
     Listenable, SDPReceiver, SDPSender, SCPReceiver, SCPSender,
-    SpinnakerBootReceiver, SpinnakerBootSender, EIEIOReceiver)
+    SpinnakerBootReceiver, SpinnakerBootSender, EIEIOReceiver, EIEIOSender)
 from spinnman.connections.udp_packet_connections import (
     update_sdp_header_for_udp_send)
 from spinnman.connections.udp_packet_connections.boot_connection import (
@@ -42,8 +42,11 @@ from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.transceiver import Transceiver
 from .enums import SpallocState
 
+_ONE_SHORT = struct.Struct("<H")
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP: bytes = b'\0\0'
+_NUM_UPDATE_TAG_TRIES = 3
+_UPDATE_TAG_TIMEOUT = 1.0
 
 
 class AbstractSpallocClient(object, metaclass=AbstractBase):
@@ -217,23 +220,79 @@ class SpallocProxiedConnection(
 
 class SpallocEIEIOConnection(
         SpallocProxiedConnectionBase,
+        EIEIOSender, EIEIOReceiver, metaclass=AbstractBase):
+    """
+    The socket interface supported by proxied EIEIO listener sockets.
+    This emulates an EIEOConnection opened with no address specified.
+    """
+    __slots__ = ()
+
+    @overrides(EIEIOSender.send_eieio_message)
+    def send_eieio_message(self, eieio_message):
+        self.send(eieio_message.bytestring)
+
+    @overrides(EIEIOReceiver.receive_eieio_message)
+    def receive_eieio_message(self, timeout=None):
+        data = self.receive(timeout)
+        header = _ONE_SHORT.unpack_from(data)[0]
+        if header & 0xC000 == 0x4000:
+            return read_eieio_command_message(data, 0)
+        return read_eieio_data_message(data, 0)
+
+    @overrides(Listenable.get_receive_method)
+    def get_receive_method(self):
+        return self.receive_eieio_message
+
+    def update_tag(self, tag: int):
+        """
+        Update the given tag on the given ethernet chip to send messages to
+        this connection.
+
+        :param int x: The ethernet chip's X coordinate
+        :param int y: The ethernet chip's Y coordinate
+        :param int tag: The tag ID to update
+        :raises SpinnmanTimeoutException:
+            If the message isn't handled within a reasonable timeout.
+        :raises SpinnmanUnexpectedResponseCodeException:
+            If the message is rejected by SpiNNaker/SCAMP.
+        """
+        request = IPTagSet(
+            0, 0, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
+        request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
+        update_sdp_header_for_udp_send(request.sdp_header, 0, 0)
+        data = _TWO_SKIP + request.bytestring
+        for _try in range(_NUM_UPDATE_TAG_TRIES):
+            try:
+                self.send(data)
+                response_data = self.receive(_UPDATE_TAG_TIMEOUT)
+                request.get_scp_response().read_bytestring(
+                    response_data, len(_TWO_SKIP))
+                return
+            except SpinnmanTimeoutException as e:
+                if _try + 1 == _NUM_UPDATE_TAG_TRIES:
+                    raise e
+
+
+class SpallocEIEIOListener(
+        SpallocProxiedConnectionBase,
         EIEIOReceiver, metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO listener sockets.
     This emulates an EIEOConnection opened with no address specified.
     """
     __slots__ = ()
-    _ONE_SHORT = struct.Struct("<H")
-    _NUM_UPDATE_TAG_TRIES = 3
-    _UPDATE_TAG_TIMEOUT = 1.0
 
     @overrides(EIEIOReceiver.receive_eieio_message)
     def receive_eieio_message(self, timeout=None):
         data = self.receive(timeout)
-        header = SpallocEIEIOConnection._ONE_SHORT.unpack_from(data)[0]
+        header = _ONE_SHORT.unpack_from(data)[0]
         if header & 0xC000 == 0x4000:
             return read_eieio_command_message(data, 0)
         return read_eieio_data_message(data, 0)
+
+    @overrides(Listenable.get_receive_method)
+    def get_receive_method(self):
+        return self.receive_eieio_message
 
     @overrides(SpallocProxiedConnectionBase.send)
     def send(self, message):
@@ -292,16 +351,15 @@ class SpallocEIEIOConnection(
         request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
         update_sdp_header_for_udp_send(request.sdp_header, 0, 0)
         data = _TWO_SKIP + request.bytestring
-        for _try in range(SpallocEIEIOConnection._NUM_UPDATE_TAG_TRIES):
+        for _try in range(_NUM_UPDATE_TAG_TRIES):
             try:
                 self.send_to_chip(data, x, y, SCP_SCAMP_PORT)
-                response_data = self.receive(
-                    SpallocEIEIOConnection._UPDATE_TAG_TIMEOUT)
+                response_data = self.receive(_UPDATE_TAG_TIMEOUT)
                 request.get_scp_response().read_bytestring(
                     response_data, len(_TWO_SKIP))
                 return
             except SpinnmanTimeoutException as e:
-                if _try + 1 == SpallocEIEIOConnection._NUM_UPDATE_TAG_TRIES:
+                if _try + 1 == _NUM_UPDATE_TAG_TRIES:
                     raise e
 
 
@@ -444,7 +502,18 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def open_listener_connection(self) -> SpallocEIEIOConnection:
+    def open_eieio_connection(self, x: int, y: int) -> SpallocEIEIOConnection:
+        """
+        Open an EIEIO connection to a specific board in a job.
+
+        :param int x: The X coordinate of the ethernet chip to connect to
+        :param int y: The Y coordinate of the ethernet chip to connect to
+        :return: an EIEIO connection with a board address bound
+        :rtype: SpallocEIEIOConnection
+        """
+
+    @abstractmethod
+    def open_listener_connection(self) -> SpallocEIEIOListener:
         """
         Open a listening EIEIO connection to the job's boards. Messages cannot
         be sent on this connection unless you say which board to send to, but
@@ -452,7 +521,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         side connection information so you can program that into a tag.
 
         :return: an EIEIO connection with no board address bound
-        :rtype: SpallocEIEIOConnection
+        :rtype: SpallocEIEIOListener
         """
 
     @abstractmethod

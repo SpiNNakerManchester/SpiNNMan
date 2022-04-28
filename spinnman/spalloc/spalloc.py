@@ -39,7 +39,7 @@ from .utils import parse_service_url, get_hostname
 from .abstract_classes import (
     AbstractSpallocClient, SpallocProxiedConnectionBase,
     SpallocProxiedConnection, SpallocBootConnection, SpallocJob,
-    SpallocMachine, SpallocEIEIOConnection)
+    SpallocMachine, SpallocEIEIOConnection, SpallocEIEIOListener)
 from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(getLogger(__name__))
@@ -380,10 +380,16 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__init_proxy()
         return _ProxiedBootConnection(self.__proxy_handle, self.__proxy_thread)
 
+    @overrides(SpallocJob.open_eieio_connection)
+    def open_eieio_connection(self, x, y):
+        self.__init_proxy()
+        return _ProxiedEIEIOConnection(
+            self.__proxy_handle, self.__proxy_thread, x, y, SCP_SCAMP_PORT)
+
     @overrides(SpallocJob.open_listener_connection)
     def open_listener_connection(self):
         self.__init_proxy()
-        return _ProxiedEIEIOConnection(
+        return _ProxiedEIEIOListener(
             self.__proxy_handle, self.__proxy_thread)
 
     @overrides(SpallocJob.wait_for_state_change)
@@ -649,8 +655,33 @@ class _ProxiedBootConnection(
 
 
 class _ProxiedEIEIOConnection(
-        _ProxiedConnection, SpallocProxiedConnectionBase,
+        _ProxiedBidirectionalConnection, SpallocProxiedConnectionBase,
         SpallocEIEIOConnection):
+    # Special: This is a unidirectional receive-only connection
+    __slots__ = ("__addr", "__port", "__chip_x", "__chip_y")
+
+    def __init__(
+            self, ws: WebSocket, receiver: _ProxyReceiver,
+            x: int, y: int, port: int):
+        super().__init__(ws, receiver, x, y, port)
+        self.__chip_x = x
+        self.__chip_y = y
+
+    def send_to(self, message: bytes, address: tuple):  # @UnusedVariable
+        """
+        Direct ``send_to`` is unsupported.
+        """
+        self._throw_if_closed()
+        raise IOError("socket is not open for sending")
+
+    def __str__(self):
+        return (f"EIEIOConnection[proxied](remote:{self.__chip_x},"
+                f"{self.__chip_y})")
+
+
+class _ProxiedEIEIOListener(
+        _ProxiedConnection, SpallocProxiedConnectionBase,
+        SpallocEIEIOListener):
     # Special: This is a unidirectional receive-only connection
     __slots__ = ("__addr", "__port")
 
@@ -682,7 +713,7 @@ class _ProxiedEIEIOConnection(
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
-    @overrides(SpallocEIEIOConnection.send_to_chip)
+    @overrides(SpallocEIEIOListener.send_to_chip)
     def send_to_chip(
             self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
         self._send_to(message, x, y, port)
@@ -696,12 +727,12 @@ class _ProxiedEIEIOConnection(
         return self._is_ready_to_receive(timeout)
 
     @property
-    @overrides(SpallocEIEIOConnection.local_ip_address)
+    @overrides(SpallocEIEIOListener.local_ip_address)
     def local_ip_address(self) -> str:
         return self.__addr if self._connected else None
 
     @property
-    @overrides(SpallocEIEIOConnection.local_port)
+    @overrides(SpallocEIEIOListener.local_port)
     def local_port(self) -> int:
         return self.__port if self._connected else None
 
