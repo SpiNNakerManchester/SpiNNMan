@@ -24,7 +24,7 @@ import queue
 import requests
 import struct
 import threading
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 from websocket import WebSocket
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
@@ -390,7 +390,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     def open_listener_connection(self):
         self.__init_proxy()
         return _ProxiedEIEIOListener(
-            self.__proxy_handle, self.__proxy_thread)
+            self.__proxy_handle, self.__proxy_thread, self.get_connections())
 
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state):
@@ -683,7 +683,13 @@ class _ProxiedEIEIOListener(
         _ProxiedConnection, SpallocProxiedConnectionBase,
         SpallocEIEIOListener):
     # Special: This is a unidirectional receive-only connection
-    __slots__ = ("__addr", "__port")
+    __slots__ = ("__addr", "__port", "__conns")
+
+    def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
+                 conns: Dict[Tuple[int, int], str]):
+        super().__init__(ws, receiver)
+        # Invert the map
+        self.__conns = {ip: xy for (xy, ip) in conns.items()}
 
     @overrides(_ProxiedConnection._open_connection)
     def _open_connection(self) -> int:
@@ -703,13 +709,6 @@ class _ProxiedEIEIOListener(
 
     @overrides(SpallocProxiedConnectionBase.send)
     def send(self, message: bytes):  # @UnusedVariable
-        self._throw_if_closed()
-        raise IOError("socket is not open for sending")
-
-    def send_to(self, message: bytes, address: tuple):  # @UnusedVariable
-        """
-        Direct ``send_to`` is unsupported.
-        """
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
@@ -735,6 +734,10 @@ class _ProxiedEIEIOListener(
     @overrides(SpallocEIEIOListener.local_port)
     def local_port(self) -> int:
         return self.__port if self._connected else None
+
+    @overrides(SpallocEIEIOListener._get_chip_coords)
+    def _get_chip_coords(self, ip_address: str) -> Tuple[int, int]:
+        return self.__conns[ip_address]
 
     def __str__(self):
         return (f"EIEIOConnection[proxied](local:{self.local_ip_address}:"

@@ -302,6 +302,16 @@ class SpallocEIEIOListener(
         """
 
     @abstractmethod
+    def _get_chip_coords(self, ip_address: str) -> Tuple[int, int]:
+        """
+        Get the coordinates of a chip given its IP address.
+
+        :param str ip_address: The IP address of an ethernet chip in the job.
+        :return: Ethernet chip coordinates: X, Y
+        :rtype: tuple(int, int)
+        """
+
+    @abstractmethod
     def send_to_chip(
             self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
         """
@@ -316,6 +326,21 @@ class SpallocEIEIOListener(
             The UDP port on the ethernet chip to send the message to.
             Defaults to the SCP port.
         """
+
+    def send_to(self, message: bytes, address: Tuple[str, int]):
+        """
+        Send a message on an open socket.
+
+        :param bytes message: The message to send.
+        :param tuple(str,int) address:
+            Where to send it to. Must be the address of an ethernet chip on a
+            board allocated to the job. Does not mean that SpiNNaker is
+            listening on that port (but the SCP port is being listened to if
+            the board is booted).
+        """
+        ip, port = address
+        x, y = self._get_chip_coords(ip)
+        self.send_to_chip(message, x, y, port)
 
     @abstractproperty
     def local_ip_address(self) -> str:
@@ -346,6 +371,7 @@ class SpallocEIEIOListener(
         :raises SpinnmanUnexpectedResponseCodeException:
             If the message is rejected by SpiNNaker/SCAMP.
         """
+        # TODO: should this be setting x,y in the message?
         request = IPTagSet(
             0, 0, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
         request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
@@ -361,6 +387,17 @@ class SpallocEIEIOListener(
             except SpinnmanTimeoutException as e:
                 if _try + 1 == _NUM_UPDATE_TAG_TRIES:
                     raise e
+
+    def update_tag_by_ip(self, ip_address: str, tag: int):
+        """
+        Update a tag on a board at a given IP address to send messages to this
+        connection.
+
+        :param str ip_address: The address of the ethernet chip
+        :param int tag: The ID of the tag
+        """
+        x, y = self._get_chip_coords(ip_address)
+        self.update_tag(x, y, tag)
 
 
 class SpallocBootConnection(

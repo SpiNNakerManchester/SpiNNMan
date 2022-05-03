@@ -2842,6 +2842,33 @@ class Transceiver(AbstractContextManager):
         connections_of_class.append((connection, listener))
         return connection
 
+    def register_existing_udp_listener(self, callback, connection):
+        """ Register a callback for a certain type of traffic to be received\
+            via UDP.
+
+        :param callable callback:
+            Function to be called when a packet is received
+        :param UDPConnection connection:
+            The connection to receive using
+        """
+
+        # If the connection class is not an Listenable, this is an
+        # error
+        if not isinstance(connection, Listenable):
+            raise SpinnmanInvalidParameterException(
+                "connection", connection.__class__,
+                "The connection class must be Listenable")
+
+        self._all_connections.add(connection)
+        listener = ConnectionListener(connection)
+        listener.start()
+        self._udp_receive_connections_by_port[
+            connection.local_port][connection.local_host] = (
+                connection, listener)
+        listener.add_callback(callback)
+        self._udp_listenable_connections_by_class[connection.__class__].append(
+            (connection, listener))
+
     @property
     def scamp_connection_selector(self):
         """
