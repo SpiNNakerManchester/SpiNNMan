@@ -19,6 +19,7 @@ import struct
 import time
 from spinn_machine import CoreSubsets, CoreSubset, MulticastRoutingEntry
 from spinn_machine.tags import IPTag, ReverseIPTag
+from spinnman.config_setup import unittest_setup
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.enums import Signal
@@ -340,7 +341,7 @@ def print_transceiver_tests(transceiver):
         for heap_element in transceiver.get_heap(0, 0):
             print(heap_element)
 
-
+unittest_setup()
 with create_transceiver_from_hostname(
         board_config.remotehost, board_config.board_version,
         bmp_connection_data=board_config.bmp_names,
