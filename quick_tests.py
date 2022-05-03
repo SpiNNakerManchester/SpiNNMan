@@ -13,6 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+To run this you need an hello.aplx
+
+to build that cd into this directory
+then run
+
+make -f $SPINN_DIRS/make/app.make APP=hello
+
+"""
 import logging
 from random import randint
 import struct
