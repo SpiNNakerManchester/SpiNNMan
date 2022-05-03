@@ -13,6 +13,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+To run this you need an hello.aplx
+
+to build that cd into this directory
+then run
+
+make -f $SPINN_DIRS/make/app.make APP=hello
+
+"""
 import logging
 from random import randint
 import struct
@@ -20,6 +29,7 @@ import time
 from spinn_machine import CoreSubsets, CoreSubset, MulticastRoutingEntry
 from spinn_machine.tags import IPTag, ReverseIPTag
 from spinnman.data import SpiNNManDataView
+from spinnman.config_setup import unittest_setup
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.enums import Signal
@@ -341,7 +351,7 @@ def print_transceiver_tests(transceiver):
         for heap_element in transceiver.get_heap(0, 0):
             print(heap_element)
 
-
+unittest_setup()
 with create_transceiver_from_hostname(
         board_config.remotehost, board_config.board_version,
         bmp_connection_data=board_config.bmp_names,
