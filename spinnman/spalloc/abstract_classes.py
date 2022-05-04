@@ -16,6 +16,7 @@
 API of the client for the Spalloc web service.
 """
 
+from sqlite3 import Cursor
 import struct
 import time
 from typing import Callable, Dict, Iterable, Set, Tuple
@@ -634,6 +635,20 @@ class SpallocJob(object, metaclass=AbstractBase):
             ``None`` if there are no boards currently allocated to the job or
             the chip lies outside the allocation.
         :rtype: tuple(int,int,int) or None
+        """
+
+    @abstractmethod
+    def _write_credentials_to_db(self, cur: Cursor):
+        """
+        Write the access credentials for the job to the database accessed by
+        the given cursor.
+
+        .. note ::
+            May assume that there is a ``proxy_configuration`` table with
+            ``kind``, ``name`` and ``value`` columns.
+
+        :param ~sqlite3.Cursor cur:
+            The open cursor to the database.
         """
 
     def __enter__(self):

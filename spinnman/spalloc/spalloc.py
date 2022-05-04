@@ -12,7 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 """
 Implementation of the client for the Spalloc web service.
 """
@@ -26,6 +25,7 @@ import struct
 import threading
 from typing import Dict, List, Tuple
 from websocket import WebSocket
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
@@ -322,6 +322,22 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__keepalive_handle = None
         self.__proxy_handle = None
         self.__proxy_thread = None
+
+    @overrides(SpallocJob._write_credentials_to_db)
+    def _write_credentials_to_db(self, cur):
+        config = {}
+        config["SPALLOC", "job uri"] = self._url
+        cookies, headers = self._session_credentials()
+        for k, v in cookies.items():
+            config["COOKIE", k] = v
+        for k, v in headers.items():
+            config["HEADER", k] = v
+        if "Authorization" in headers:
+            logger.warning("writing user credentials to database")
+        cur.executemany("""
+            INSERT INTO proxy_configuration(kind, name, value)
+            VALUES(?, ?, ?)
+            """, [(k1, k2, v) for (k1, k2), v in config.items()])
 
     @overrides(SpallocJob.get_state)
     def get_state(self):
