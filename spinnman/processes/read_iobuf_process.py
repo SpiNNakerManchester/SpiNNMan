@@ -15,7 +15,7 @@
 
 import functools
 import struct
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 from spinnman.model import IOBuffer
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl import ReadMemory
@@ -50,10 +50,10 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         self._iobuf_address = dict()
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
-        self._iobuf = defaultdict(OrderedDict)
+        self._iobuf = defaultdict(dict)
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> memoryview
-        self._iobuf_view = defaultdict(OrderedDict)
+        self._iobuf_view = defaultdict(dict)
 
         # A list of extra reads that need to be done as a result of the first
         # read = list of (x, y, p, n, base_address, size, offset)
