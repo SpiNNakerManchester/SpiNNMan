@@ -22,6 +22,9 @@ class DatabaseConfirmation(EIEIOCommandMessage):
     """ Packet which contains the path to the database created by the\
         toolchain which is to be used by any software which interfaces with\
         SpiNNaker.
+
+    This message is not sent to SpiNNaker boards but rather to an auxiliary
+    tool (e.g., data visualiser).
     """
     __slots__ = [
         "_database_path"]
