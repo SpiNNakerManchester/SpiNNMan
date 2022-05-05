@@ -260,7 +260,7 @@ class _Group(object):
         :param list tracebacks: the tracebacks
         :param list connections:
             the connections the errors were associated with
-        :param Machine machine: the machine used
+        :param Transceiver transceiver: the transceiver used
         :return: a sorted exception pile
         :rtype: dict(Exception,_Group)
         """
