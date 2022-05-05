@@ -27,7 +27,6 @@ class RoundRobinConnectionSelector(
         "_next_connection_index",
         "_transceiver"]
 
-
     def __init__(self, connections, transceiver):
         """
         :param list(SCAMPConnection) connections:

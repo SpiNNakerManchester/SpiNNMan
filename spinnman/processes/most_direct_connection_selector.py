@@ -28,7 +28,6 @@ class MostDirectConnectionSelector(
         "_machine",
         "_transceiver"]
 
-
     # pylint: disable=super-init-not-called
     def __init__(self, machine, connections, transceiver):
         """
