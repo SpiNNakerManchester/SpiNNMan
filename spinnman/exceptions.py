@@ -14,12 +14,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import traceback
+from spinnman.data import SpiNNManDataView
 
 
-def get_physical_cpu_id(txrx, x, y, p):
-    if txrx is None:
+def get_physical_cpu_id(x, y, p):
+    if not SpiNNManDataView.has_transceiver():
         return "Unknown Physical Core"
     try:
+        txrx = SpiNNManDataView.get_transceiver()
         cpu_info = txrx.get_cpu_information_from_core(x, y, p)
         v_to_p_map = cpu_info.virtual_to_physical_core_map
         if p >= len(v_to_p_map) or v_to_p_map[p] == 0xFF:
@@ -251,8 +253,7 @@ class _Group(object):
         self._separator = ","
 
     @staticmethod
-    def group_exceptions(error_requests, exceptions, tracebacks, connections,
-                         transceiver):
+    def group_exceptions(error_requests, exceptions, tracebacks, connections):
         """ Groups exceptions into a form usable by an exception.
 
         :param list(SCPRequest) error_requests: the error requests
@@ -260,7 +261,6 @@ class _Group(object):
         :param list tracebacks: the tracebacks
         :param list connections:
             the connections the errors were associated with
-        :param Transceiver transceiver: the transceiver used
         :return: a sorted exception pile
         :rtype: dict(Exception,_Group)
         """
@@ -276,7 +276,7 @@ class _Group(object):
                 found_exception = exception
             sdp_header = error_request.sdp_header
             phys_p = get_physical_cpu_id(
-                transceiver, sdp_header.destination_chip_x,
+                sdp_header.destination_chip_x,
                 sdp_header.destination_chip_y,
                 sdp_header.destination_cpu)
             data[found_exception].add_coord(sdp_header, phys_p)
@@ -289,12 +289,10 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with a\
         collection of cores/chips
     """
-    def __init__(self, error_requests, exceptions, tracebacks, connections,
-                 transceiver):
+    def __init__(self, error_requests, exceptions, tracebacks, connections):
         problem = "Exceptions found were:\n"
         for exception, description in _Group.group_exceptions(
-                error_requests, exceptions, tracebacks, connections,
-                transceiver):
+                error_requests, exceptions, tracebacks, connections):
             problem += \
                 "   Received exception class: {}\n" \
                 "       With message {}\n" \

@@ -63,9 +63,8 @@ class AbstractProcess(object, metaclass=AbstractBase):
             exc_info = sys.exc_info()
             sdp_header = self._error_requests[0].sdp_header
             connection = self._connections[0]
-            txrx = self.connection_selector.transceiver
             phys_p = get_physical_cpu_id(
-                txrx, sdp_header.destination_chip_x,
+                sdp_header.destination_chip_x,
                 sdp_header.destination_chip_y,
                 sdp_header.destination_cpu)
 
@@ -85,7 +84,7 @@ class AbstractProcess(object, metaclass=AbstractBase):
         elif self._exceptions:
             ex = SpinnmanGroupedProcessException(
                 self._error_requests, self._exceptions, self._tracebacks,
-                self._connections, self.connection_selector.transceiver)
+                self._connections)
             if print_exception:
                 logger.error("{}".format(str(ex)))
             raise ex

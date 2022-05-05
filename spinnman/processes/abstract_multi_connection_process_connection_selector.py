@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod, abstractproperty)
+    AbstractBase, abstractmethod)
 
 
 class AbstractMultiConnectionProcessConnectionSelector(
@@ -30,9 +30,4 @@ class AbstractMultiConnectionProcessConnectionSelector(
 
         :param AbstractSCPRequest message: The SCP message to be sent
         :rtype: SCAMPConnection
-        """
-
-    @abstractproperty
-    def transceiver(self):
-        """ The transceiver from which the connections are being selected.
         """

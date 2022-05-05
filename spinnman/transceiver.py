@@ -872,7 +872,7 @@ class Transceiver(AbstractContextManager):
 
         # Update the connection selector so that it can ask for processor ids
         self._scamp_connection_selector = MostDirectConnectionSelector(
-            self._machine, self._scamp_connections, self)
+            self._scamp_connections)
 
         return version_info
 

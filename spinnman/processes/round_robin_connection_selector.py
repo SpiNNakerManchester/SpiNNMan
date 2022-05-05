@@ -42,9 +42,3 @@ class RoundRobinConnectionSelector(
         index = self._next_connection_index
         self._next_connection_index = (index + 1) % len(self._connections)
         return self._connections[index]
-
-    @property
-    @overrides(
-        AbstractMultiConnectionProcessConnectionSelector.transceiver)
-    def transceiver(self):
-        return self._transceiver
