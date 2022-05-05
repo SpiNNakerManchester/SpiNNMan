@@ -87,7 +87,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
-    def open_job_from_database(conn: sqlite3.Connection) -> SpallocJob:
+    def open_job_from_database(conn: sqlite3.Cursor) -> SpallocJob:
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
@@ -100,8 +100,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             credentials may have expired; if so, the job will be unable to
             regenerate them.
 
-        :param ~sqlite3.Connection conn:
-            The database connection to retrieve the job details from. Assumes
+        :param ~sqlite3.Cursor conn:
+            The database cursor to retrieve the job details from. Assumes
             the presence of a ``proxy_configuration`` table with ``kind``,
             ``name`` and ``value`` columns.
         :return:
