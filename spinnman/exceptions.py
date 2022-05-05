@@ -16,6 +16,19 @@
 import traceback
 
 
+def get_physical_cpu_id(txrx, x, y, p):
+    if txrx is None:
+        return "Unknown Physical Core"
+    try:
+        cpu_info = txrx.get_cpu_information_from_core(x, y, p)
+        v_to_p_map = cpu_info.virtual_to_physical_core_map
+        if p >= len(v_to_p_map) or v_to_p_map[p] == 0xFF:
+            return "Unknown Physical Core"
+        return str(v_to_p_map[p])
+    except Exception:
+        return "Unknown Physical Core"
+
+
 class SpinnmanException(Exception):
     """ Superclass of exceptions that occur when dealing with communication\
         with SpiNNaker
@@ -229,16 +242,17 @@ class _Group(object):
     def finalise(self):
         self.chip_core += "]"
 
-    def add_coord(self, sdp_header):
-        self.chip_core += "{}[{}:{}:{}]".format(
+    def add_coord(self, sdp_header, phys_p):
+        self.chip_core += "{}[{}:{}:{}({})]".format(
             self._separator,
             sdp_header.destination_chip_x,
             sdp_header.destination_chip_y,
-            sdp_header.destination_cpu)
+            sdp_header.destination_cpu, phys_p)
         self._separator = ","
 
     @staticmethod
-    def group_exceptions(error_requests, exceptions, tracebacks, connections):
+    def group_exceptions(error_requests, exceptions, tracebacks, connections,
+                         transceiver):
         """ Groups exceptions into a form usable by an exception.
 
         :param list(SCPRequest) error_requests: the error requests
@@ -246,6 +260,7 @@ class _Group(object):
         :param list tracebacks: the tracebacks
         :param list connections:
             the connections the errors were associated with
+        :param Transceiver transceiver: the transceiver used
         :return: a sorted exception pile
         :rtype: dict(Exception,_Group)
         """
@@ -259,7 +274,12 @@ class _Group(object):
             else:
                 data[exception] = _Group(trace_back, connection)
                 found_exception = exception
-            data[found_exception].add_coord(error_request.sdp_header)
+            sdp_header = error_request.sdp_header
+            phys_p = get_physical_cpu_id(
+                transceiver, sdp_header.destination_chip_x,
+                sdp_header.destination_chip_y,
+                sdp_header.destination_cpu)
+            data[found_exception].add_coord(sdp_header, phys_p)
         for exception in data:
             data[exception].finalise()
         return data.items()
@@ -269,10 +289,12 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with a\
         collection of cores/chips
     """
-    def __init__(self, error_requests, exceptions, tracebacks, connections):
+    def __init__(self, error_requests, exceptions, tracebacks, connections,
+                 transceiver):
         problem = "Exceptions found were:\n"
         for exception, description in _Group.group_exceptions(
-                error_requests, exceptions, tracebacks, connections):
+                error_requests, exceptions, tracebacks, connections,
+                transceiver):
             problem += \
                 "   Received exception class: {}\n" \
                 "       With message {}\n" \
@@ -288,21 +310,22 @@ class SpinnmanGenericProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with some\
         core/chip
     """
-    def __init__(self, exception, tb, x, y, p, tb2=None):
+    def __init__(self, exception, tb, x, y, p, phys_p, tb2=None):
         """
         :param Exception exception:
         :param int x:
         :param int y:
         :param int p:
+        :param str phys_p:
         """
         # pylint: disable=too-many-arguments
         super().__init__(
             "\n     Received exception class: {} \n"
             "     With message: {} \n"
-            "     When sending to {}:{}:{}\n"
+            "     When sending to {}:{}:{}({})\n"
             "     Stack trace: {}\n".format(
                 exception.__class__.__name__, str(exception), x, y, p,
-                traceback.format_tb(tb)))
+                phys_p, traceback.format_tb(tb)))
 
         self._stored_exception = exception
         if tb2 is not None:
