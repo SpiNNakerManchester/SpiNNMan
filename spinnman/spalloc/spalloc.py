@@ -104,7 +104,9 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             The database connection to retrieve the job details from. Assumes
             the presence of a ``proxy_configuration`` table with ``kind``,
             ``name`` and ``value`` columns.
-        :return: The job handle.
+        :return:
+            The job handle, or ``None`` if the records in the database are
+            absent or incomplete.
         :rtype: SpallocJob
         """
         service_url = None
@@ -123,6 +125,9 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                 cookies[name] = value
             elif kind == "HEADER":
                 headers[name] = value
+        if not service_url or not job_url or not cookies or not headers:
+            # Cannot possibly work without a session or job
+            return None
         session = Session(service_url, session_credentials=(cookies, headers))
         return _SpallocJob(session, job_url)
 
