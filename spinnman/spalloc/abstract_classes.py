@@ -638,9 +638,9 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def _write_credentials_to_db(self, cur: Cursor):
+    def _write_session_credentials_to_db(self, cur: Cursor):
         """
-        Write the access credentials for the job to the database accessed by
+        Write the session credentials for the job to the database accessed by
         the given cursor.
 
         .. note ::

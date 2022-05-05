@@ -21,6 +21,7 @@ from multiprocessing import Process, Queue
 from packaging.version import Version
 import queue
 import requests
+import sqlite3
 import struct
 import threading
 from typing import Dict, List, Tuple
@@ -84,6 +85,46 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         self.__machines_url = obj["machines-ref"]
         self.__jobs_url = obj["jobs-ref"]
         logger.info("established session to {} for {}", service_url, username)
+
+    @staticmethod
+    def open_job_from_database(conn: sqlite3.Connection) -> SpallocJob:
+        """
+        Create a job from the description in the attached database. This is
+        intended to allow for access to the job's allocated resources from
+        visualisers and other third party code participating in the Spinnaker
+        Tools Notification Protocol.
+
+        .. note ::
+
+            The job is not verified to exist and be running. The session
+            credentials may have expired; if so, the job will be unable to
+            regenerate them.
+
+        :param ~sqlite3.Connection conn:
+            The database connection to retrieve the job details from. Assumes
+            the presence of a ``proxy_configuration`` table with ``kind``,
+            ``name`` and ``value`` columns.
+        :return: The job handle.
+        :rtype: SpallocJob
+        """
+        service_url = None
+        job_url = None
+        cookies = {}
+        headers = {}
+        for row in conn.execute(
+                """ SELECT kind, name, value FROM proxy_configuration"""):
+            kind, name, value = row
+            if kind == "SPALLOC":
+                if name == "service uri":
+                    service_url = value
+                elif name == "job uri":
+                    job_url = value
+            elif kind == "COOKIE":
+                cookies[name] = value
+            elif kind == "HEADER":
+                headers[name] = value
+        session = Session(service_url, session_credentials=(cookies, headers))
+        return _SpallocJob(session, job_url)
 
     @overrides(AbstractSpallocClient.list_machines)
     def list_machines(self):
@@ -323,9 +364,10 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__proxy_handle = None
         self.__proxy_thread = None
 
-    @overrides(SpallocJob._write_credentials_to_db)
-    def _write_credentials_to_db(self, cur):
+    @overrides(SpallocJob._write_session_credentials_to_db)
+    def _write_session_credentials_to_db(self, cur):
         config = {}
+        config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
         cookies, headers = self._session_credentials()
         for k, v in cookies.items():
@@ -333,7 +375,9 @@ class _SpallocJob(SessionAware, SpallocJob):
         for k, v in headers.items():
             config["HEADER", k] = v
         if "Authorization" in headers:
-            logger.warning("writing user credentials to database")
+            # We never write the auth headers themselves; we just extend the
+            # session
+            del headers["Authorization"]
         cur.executemany("""
             INSERT INTO proxy_configuration(kind, name, value)
             VALUES(?, ?, ?)

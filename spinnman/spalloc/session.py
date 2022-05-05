@@ -16,7 +16,7 @@ from functools import wraps
 from logging import getLogger
 import re
 import requests
-from typing import Tuple
+from typing import Dict, Tuple
 import websocket
 from spinn_utilities.log import FormatAdapter
 from .utils import clean_url
@@ -73,12 +73,14 @@ class Session:
     Manages session credentials for the Spalloc client.
     """
     __slots__ = (
-        "__login_form_url", "__login_submit_url", "__srv_base",
+        "__login_form_url", "__login_submit_url", "__srv_base", "_service_url",
         "__username", "__password", "__token",
         "_session_id", "__csrf", "__csrf_header")
 
     def __init__(
-            self, service_url: str, username: str, password: str, token: str):
+            self, service_url: str,
+            username: str = None, password: str = None, token: str = None,
+            session_credentials: Tuple[Dict[str, str], Dict[str, str]] = None):
         """
         :param str service_url: The reference to the service.
             *Should not* include a username or password in it.
@@ -89,10 +91,23 @@ class Session:
         url = clean_url(service_url)
         self.__login_form_url = url + "system/login.html"
         self.__login_submit_url = url + "system/perform_login"
+        self._service_url = url
         self.__srv_base = url + "srv/spalloc/"
         self.__username = username
         self.__password = password
         self.__token = token
+        if session_credentials:
+            cookies, headers = session_credentials
+            if _SESSION_COOKIE in cookies:
+                self._session_id = cookies[_SESSION_COOKIE]
+            for key, value in headers.items():
+                if key == "Authorization":
+                    # TODO: extract this?
+                    pass
+                else:
+                    # Urgh
+                    self.__csrf_header = key
+                    self.__csrf = value
 
     @_may_renew
     def get(self, url: str, **kwargs) -> requests.Response:
@@ -210,7 +225,7 @@ class Session:
         return obj
 
     @property
-    def _credentials(self) -> Tuple[dict, dict]:
+    def _credentials(self) -> Tuple[Dict[str, str], Dict[str, str]]:
         """
         The credentials for requests. *Serializable.*
         """
@@ -276,6 +291,15 @@ class SessionAware:
         :rtype: tuple(dict(str,str),dict(str,str))
         """
         return self.__session._credentials
+
+    @property
+    def _service_url(self):
+        """
+        Get the main service URL.
+
+        :rtype: str
+        """
+        return self.__session._service_url
 
     def _get(self, url: str, **kwargs) -> requests.Response:
         return self.__session.get(url, **kwargs)
