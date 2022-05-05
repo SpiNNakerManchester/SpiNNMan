@@ -62,3 +62,7 @@ class AbstractMultiConnectionProcess(AbstractProcess):
     def _finish(self):
         for request_pipeline in self._scp_request_pipelines.values():
             request_pipeline.finish()
+
+    @property
+    def connection_selector(self):
+        return self._conn_selector

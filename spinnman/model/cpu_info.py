@@ -304,6 +304,6 @@ class CPUInfo(object):
         return self._software_version
 
     def __str__(self):
-        return "{}:{}:{:02n} {:18} {:16s} {:3n}".format(
-            self.x, self.y, self.p, self._state.name, self._application_name,
-            self._application_id)
+        return "{}:{}:{:02n} ({:02n}) {:18} {:16s} {:3n}".format(
+            self.x, self.y, self.p, self.physical_cpu_id, self._state.name,
+            self._application_name, self._application_id)

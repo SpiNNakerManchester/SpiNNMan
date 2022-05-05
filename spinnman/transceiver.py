@@ -550,7 +550,11 @@ class Transceiver(AbstractContextManager):
 
         # check if it works
         if self._check_connection(
+<<<<<<< HEAD
                 MostDirectConnectionSelector([conn]), x, y):
+=======
+                MostDirectConnectionSelector(None, [conn], None), x, y):
+>>>>>>> refs/remotes/origin/master
             self._scp_sender_connections.append(conn)
             self._all_connections.add(conn)
             self._udp_scamp_connections[ip_address] = conn
@@ -602,7 +606,11 @@ class Transceiver(AbstractContextManager):
             logger.info(ip_address)
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
+<<<<<<< HEAD
             self._scamp_connections)
+=======
+            self._machine, self._scamp_connections, self)
+>>>>>>> refs/remotes/origin/master
 
     def add_scamp_connections(self, connections):
         """
@@ -624,7 +632,11 @@ class Transceiver(AbstractContextManager):
         for ((x, y), ip_address) in connections.items():
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
+<<<<<<< HEAD
             self._scamp_connections)
+=======
+            self._machine, self._scamp_connections, self)
+>>>>>>> refs/remotes/origin/master
 
     def get_connections(self):
         """ Get the currently known connections to the board, made up of those\
@@ -869,6 +881,10 @@ class Transceiver(AbstractContextManager):
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
+
+        # Update the connection selector so that it can ask for processor ids
+        self._scamp_connection_selector = MostDirectConnectionSelector(
+            self._machine, self._scamp_connections, self)
 
         return version_info
 
@@ -2043,8 +2059,8 @@ class Transceiver(AbstractContextManager):
         break_down = "\n"
         for (x, y, p), core_info in cpu_infos.cpu_infos:
             if core_info.state == CPUState.RUN_TIME_EXCEPTION:
-                break_down += "    {}:{}:{} in state {}:{}\n".format(
-                    x, y, p, core_info.state.name,
+                break_down += "    {}:{}:{} (ph: {}) in state {}:{}\n".format(
+                    x, y, p, core_info.physical_cpu_id, core_info.state.name,
                     core_info.run_time_error.name)
                 break_down += "        r0={}, r1={}, r2={}, r3={}\n".format(
                     core_info.registers[0], core_info.registers[1],
