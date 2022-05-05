@@ -732,6 +732,11 @@ class _ProxiedEIEIOConnection(
         self.__chip_x = x
         self.__chip_y = y
 
+    @property
+    @overrides(SpallocEIEIOConnection._coords)
+    def _coords(self):
+        return self.__chip_x, self.__chip_y
+
     def send_to(self, message: bytes, address: tuple):  # @UnusedVariable
         """
         Direct ``send_to`` is unsupported.

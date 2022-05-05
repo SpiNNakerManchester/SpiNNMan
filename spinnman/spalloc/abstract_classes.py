@@ -244,23 +244,30 @@ class SpallocEIEIOConnection(
     def get_receive_method(self):
         return self.receive_eieio_message
 
+    @abstractproperty
+    def _coords(self) -> Tuple[int, int]:
+        """
+        The X, Y coordinates of the chip this connection is connected to.
+
+        :rtype: tuple(int,int)
+        """
+
     def update_tag(self, tag: int):
         """
-        Update the given tag on the given ethernet chip to send messages to
+        Update the given tag on the connected ethernet chip to send messages to
         this connection.
 
-        :param int x: The ethernet chip's X coordinate
-        :param int y: The ethernet chip's Y coordinate
         :param int tag: The tag ID to update
         :raises SpinnmanTimeoutException:
             If the message isn't handled within a reasonable timeout.
         :raises SpinnmanUnexpectedResponseCodeException:
             If the message is rejected by SpiNNaker/SCAMP.
         """
+        x, y = self._coords
         request = IPTagSet(
-            0, 0, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
+            x, y, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
         request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
-        update_sdp_header_for_udp_send(request.sdp_header, 0, 0)
+        update_sdp_header_for_udp_send(request.sdp_header, x, y)
         data = _TWO_SKIP + request.bytestring
         for _try in range(_NUM_UPDATE_TAG_TRIES):
             try:
@@ -372,11 +379,10 @@ class SpallocEIEIOListener(
         :raises SpinnmanUnexpectedResponseCodeException:
             If the message is rejected by SpiNNaker/SCAMP.
         """
-        # TODO: should this be setting x,y in the message?
         request = IPTagSet(
-            0, 0, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
+            x, y, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
         request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
-        update_sdp_header_for_udp_send(request.sdp_header, 0, 0)
+        update_sdp_header_for_udp_send(request.sdp_header, x, y)
         data = _TWO_SKIP + request.bytestring
         for _try in range(_NUM_UPDATE_TAG_TRIES):
             try:
