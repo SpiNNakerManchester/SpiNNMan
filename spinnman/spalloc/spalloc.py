@@ -585,7 +585,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     def _close(self):
         if self._connected:
-            channel_id, = self.__call(
+            channel_id, = self._call(
                 ProxyProtocol.CLOSE, _close_req, _open_close_res,
                 self.__handle)
             if channel_id != self.__handle:
@@ -657,7 +657,7 @@ class _ProxiedBidirectionalConnection(
 
     @overrides(_ProxiedConnection._open_connection)
     def _open_connection(self):
-        handle, = self.__call(
+        handle, = self._call(
             ProxyProtocol.OPEN, _open_req, _open_close_res,
             *self.__connect_args)
         return handle
@@ -720,8 +720,8 @@ class _ProxiedBootConnection(
 
 
 class _ProxiedEIEIOConnection(
-        _ProxiedBidirectionalConnection, SpallocProxiedConnectionBase,
-        SpallocEIEIOConnection):
+        _ProxiedBidirectionalConnection,
+        SpallocEIEIOConnection, SpallocProxiedConnectionBase):
     # Special: This is a unidirectional receive-only connection
     __slots__ = ("__addr", "__port", "__chip_x", "__chip_y")
 
@@ -737,7 +737,9 @@ class _ProxiedEIEIOConnection(
     def _coords(self):
         return self.__chip_x, self.__chip_y
 
-    def send_to(self, message: bytes, address: tuple):  # @UnusedVariable
+    def send_to(
+            self,
+            message: bytes, address: tuple):  # pylint: disable=unused-argument
         """
         Direct ``send_to`` is unsupported.
         """
@@ -750,8 +752,8 @@ class _ProxiedEIEIOConnection(
 
 
 class _ProxiedEIEIOListener(
-        _ProxiedConnection, SpallocProxiedConnectionBase,
-        SpallocEIEIOListener):
+        _ProxiedConnection,
+        SpallocEIEIOListener, SpallocProxiedConnectionBase):
     # Special: This is a unidirectional receive-only connection
     __slots__ = ("__addr", "__port", "__conns")
 
@@ -763,7 +765,7 @@ class _ProxiedEIEIOListener(
 
     @overrides(_ProxiedConnection._open_connection)
     def _open_connection(self) -> int:
-        handle, ip1, ip2, ip3, ip4, self.__port = self.__call(
+        handle, ip1, ip2, ip3, ip4, self.__port = self._call(
             ProxyProtocol.OPEN_UNBOUND, _open_listen_req, _open_listen_res)
         # Assemble the address into the format expected elsewhere
         self.__addr = f"{ip1}.{ip2}.{ip3}.{ip4}"
