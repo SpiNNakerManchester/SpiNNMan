@@ -51,10 +51,6 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
                     ReadMemory(x, y, get_vcpu_address(p), CPU_INFO_BYTES),
                     functools.partial(self.__handle_response, x, y, p))
         self._finish()
-        self.check_for_error()
+        self.check_for_error(get_phys_cpu=False)
 
         return self._cpu_info
-
-    def check_for_error(self, print_exception=False, get_phys_cpu=True):
-        super(GetCPUInfoProcess, self).check_for_error(
-            print_exception=print_exception, get_phys_cpu=False)
