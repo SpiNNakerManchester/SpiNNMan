@@ -54,3 +54,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
         self.check_for_error()
 
         return self._cpu_info
+
+    def check_for_error(self, print_exception=False, get_phys_cpu=True):
+        super(GetCPUInfoProcess, self).check_for_error(
+            print_exception=print_exception, get_phys_cpu=False)
