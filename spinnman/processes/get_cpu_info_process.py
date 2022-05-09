@@ -51,6 +51,8 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
                     ReadMemory(x, y, get_vcpu_address(p), CPU_INFO_BYTES),
                     functools.partial(self.__handle_response, x, y, p))
         self._finish()
+        # We don't want to loop here, so avoid asking for the Physical CPU
+        # as this will call this function again!
         self.check_for_error(get_phys_cpu=False)
 
         return self._cpu_info
