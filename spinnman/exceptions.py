@@ -24,7 +24,7 @@ def get_physical_cpu_id(txrx, x, y, p):
         v_to_p_map = cpu_info.virtual_to_physical_core_map
         if p >= len(v_to_p_map) or v_to_p_map[p] == 0xFF:
             return "Unknown Physical Core"
-        return str(v_to_p_map[p])
+        return f"({v_to_p_map[p]})"
     except Exception:
         return "Unknown Physical Core"
 
@@ -322,7 +322,7 @@ class SpinnmanGenericProcessException(SpinnmanException):
         super().__init__(
             "\n     Received exception class: {} \n"
             "     With message: {} \n"
-            "     When sending to {}:{}:{}({})\n"
+            "     When sending to {}:{}:{}{}\n"
             "     Stack trace: {}\n".format(
                 exception.__class__.__name__, str(exception), x, y, p,
                 phys_p, traceback.format_tb(tb)))

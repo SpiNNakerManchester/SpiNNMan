@@ -36,7 +36,7 @@ class AbstractProcess(object, metaclass=AbstractBase):
 
     ERROR_MESSAGE = (
         "failure in request to board {} with ethernet chip (%d, %d) for "
-        "chip (%d, %d, %d(%d))")
+        "chip (%d, %d, %d%s")
 
     def __init__(self):
         self._exceptions = []
@@ -64,7 +64,7 @@ class AbstractProcess(object, metaclass=AbstractBase):
             sdp_header = self._error_requests[0].sdp_header
             connection = self._connections[0]
             txrx = self.connection_selector.transceiver
-            phys_p = "Physical Processor Unknown"
+            phys_p = ""
             if get_phys_cpu:
                 phys_p = get_physical_cpu_id(
                     txrx, sdp_header.destination_chip_x,
