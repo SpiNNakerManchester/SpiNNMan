@@ -17,7 +17,7 @@ from spinnman.messages.eieio.command_messages import (
     PaddingRequest, EventStopRequest, StopRequests, StartRequests,
     SpinnakerRequestBuffers, HostSendSequencedData, SpinnakerRequestReadData,
     HostDataRead, EIEIOCommandHeader, EIEIOCommandMessage,
-    DatabaseConfirmation)
+    NotificationProtocolDatabaseLocation)
 from spinnman.constants import EIEIO_COMMAND_IDS
 
 
@@ -35,8 +35,8 @@ def read_eieio_command_message(data, offset):
     command_header = EIEIOCommandHeader.from_bytestring(data, offset)
     command_number = command_header.command
 
-    if command_number == EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value:
-        return DatabaseConfirmation.from_bytestring(
+    if command_number == EIEIO_COMMAND_IDS.DATABASE.value:
+        return NotificationProtocolDatabaseLocation.from_bytestring(
             command_header, data, offset + 2)
     # Fill in buffer area with padding
     elif command_number == EIEIO_COMMAND_IDS.EVENT_PADDING.value:

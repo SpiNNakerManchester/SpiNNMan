@@ -34,8 +34,9 @@ from spinnman.connections.udp_packet_connections.boot_connection import (
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.eieio import (
+    AbstractEIEIOMessage,
     read_eieio_command_message, read_eieio_data_message)
-from spinnman.messages.sdp import SDPMessage, SDPFlag
+from spinnman.messages.sdp import SDPMessage, SDPFlag, SDPHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import IPTagSet
 from spinnman.messages.scp.enums import SCPResult
@@ -223,14 +224,27 @@ class SpallocEIEIOConnection(
         SpallocProxiedConnectionBase,
         EIEIOSender, EIEIOReceiver, metaclass=AbstractBase):
     """
-    The socket interface supported by proxied EIEIO listener sockets.
-    This emulates an EIEOConnection opened with no address specified.
+    The socket interface supported by proxied EIEIO connected sockets.
+    This emulates an EIEOConnection opened with a remote address specified.
     """
     __slots__ = ()
 
     @overrides(EIEIOSender.send_eieio_message)
     def send_eieio_message(self, eieio_message):
+        # Not normally used, as packets need headers to go to SpiNNaker
         self.send(eieio_message.bytestring)
+
+    def send_eieio_message_to_core(
+            self, eieio_message: AbstractEIEIOMessage, x: int, y: int, p: int):
+        sdp_message = SDPMessage(
+            SDPHeader(
+                flags=SDPFlag.REPLY_NOT_EXPECTED, tag=0,
+                destination_port=1, destination_cpu=p,
+                destination_chip_x=x, destination_chip_y=y,
+                source_port=0, source_cpu=0,
+                source_chip_x=0, source_chip_y=0),
+            data=eieio_message.bytestring)
+        self.send(_TWO_SKIP + sdp_message.bytestring)
 
     @overrides(EIEIOReceiver.receive_eieio_message)
     def receive_eieio_message(self, timeout=None):
@@ -365,6 +379,34 @@ class SpallocEIEIOListener(
         :return: The local port number
         :rtype: int
         """
+
+    def send_eieio_message_to_core(
+            self, eieio_message: AbstractEIEIOMessage, x: int, y: int, p: int,
+            ip_address: str):
+        """
+        Send an EIEIO message (one way) to a given core.
+
+        :param AbstractEIEIOMessage eieio_message:
+            The message to send.
+        :param int x:
+            The X coordinate of the core to send to.
+        :param int y:
+            The Y coordinate of the core to send to.
+        :param int p:
+            The ID of the core to send to.
+        :param str ip_address:
+            The IP address of the ethernet chip to route the message via.
+        """
+        sdp_message = SDPMessage(
+            SDPHeader(
+                flags=SDPFlag.REPLY_NOT_EXPECTED, tag=0,
+                destination_port=1, destination_cpu=p,
+                destination_chip_x=x, destination_chip_y=y,
+                source_port=0, source_cpu=0,
+                source_chip_x=0, source_chip_y=0),
+            data=eieio_message.bytestring)
+        self.send_to(
+            _TWO_SKIP + sdp_message.bytestring, (ip_address, SCP_SCAMP_PORT))
 
     def update_tag(self, x: int, y: int, tag: int):
         """
