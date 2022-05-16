@@ -26,7 +26,7 @@ def get_physical_cpu_id(x, y, p):
         v_to_p_map = cpu_info.virtual_to_physical_core_map
         if p >= len(v_to_p_map) or v_to_p_map[p] == 0xFF:
             return "Unknown Physical Core"
-        return str(v_to_p_map[p])
+        return f"({v_to_p_map[p]})"
     except Exception:
         return "Unknown Physical Core"
 
@@ -390,9 +390,13 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         :param set(CPUState) expected_states:
         :param CPUInfos failed_core_states:
         """
-
-        msg = "waiting for cores {} to reach one of {}".format(
-            failed_core_states, expected_states)
+        n_cores = len(failed_core_states)
+        if n_cores > 10:
+            msg = "waiting for {} cores to reach one of {}".format(
+                n_cores, expected_states)
+        else:
+            msg = "waiting for cores {} to reach one of {}".format(
+                failed_core_states, expected_states)
         super().__init__(msg, timeout, msg)
         self._failed_core_states = failed_core_states
 
