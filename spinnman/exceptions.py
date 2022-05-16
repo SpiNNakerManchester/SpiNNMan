@@ -27,7 +27,7 @@ def get_physical_cpu_id(x, y, p):
         if p >= len(v_to_p_map) or v_to_p_map[p] == 0xFF:
             return "Unknown Physical Core"
         return f"({v_to_p_map[p]})"
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         return "Unknown Physical Core"
 
 

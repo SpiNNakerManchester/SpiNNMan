@@ -58,15 +58,17 @@ class AbstractProcess(object, metaclass=AbstractBase):
         """ Get the connection selector of the process
         """
 
-    def check_for_error(self, print_exception=False):
+    def check_for_error(self, print_exception=False, get_phys_cpu=True):
         if len(self._exceptions) == 1:
             exc_info = sys.exc_info()
             sdp_header = self._error_requests[0].sdp_header
             connection = self._connections[0]
-            phys_p = get_physical_cpu_id(
-                sdp_header.destination_chip_x,
-                sdp_header.destination_chip_y,
-                sdp_header.destination_cpu)
+            phys_p = ""
+            if get_phys_cpu:
+                phys_p = get_physical_cpu_id(
+                    sdp_header.destination_chip_x,
+                    sdp_header.destination_chip_y,
+                    sdp_header.destination_cpu)
 
             if print_exception:
                 logger.error(
