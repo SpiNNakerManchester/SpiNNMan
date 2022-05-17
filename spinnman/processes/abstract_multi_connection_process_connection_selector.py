@@ -33,6 +33,8 @@ class AbstractMultiConnectionProcessConnectionSelector(
         """
 
     @abstractproperty
-    def transceiver(self):
-        """ The transceiver from which the connections are being selected.
+    def machine(self):
+        """ The machine in use, or None if not yet read
+
+        :rtype: Machine
         """
