@@ -34,7 +34,7 @@ class RoundRobinConnectionSelector(
         """
         self._connections = connections
         self._next_connection_index = 0
-        self._transceiver = machine
+        self._machine = machine
 
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
