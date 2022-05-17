@@ -19,8 +19,7 @@ from spinn_utilities.abstract_base import (
     AbstractBase, abstractproperty)
 from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import (
-    SpinnmanGenericProcessException, SpinnmanGroupedProcessException,
-    get_physical_cpu_id)
+    SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -58,19 +57,14 @@ class AbstractProcess(object, metaclass=AbstractBase):
         """ Get the connection selector of the process
         """
 
-    def check_for_error(self, print_exception=False, get_phys_cpu=True):
+    def check_for_error(self, print_exception=False):
         if len(self._exceptions) == 1:
             exc_info = sys.exc_info()
             sdp_header = self._error_requests[0].sdp_header
-            connection = self._connections[0]
-            phys_p = ""
-            if get_phys_cpu:
-                phys_p = get_physical_cpu_id(
-                    sdp_header.destination_chip_x,
-                    sdp_header.destination_chip_y,
-                    sdp_header.destination_cpu)
+            phys_p = sdp_header.get_physical_cpu_id()
 
             if print_exception:
+                connection = self._connections[0]
                 logger.error(
                     self.ERROR_MESSAGE.format(
                         connection.remote_ip_address, connection.chip_x,

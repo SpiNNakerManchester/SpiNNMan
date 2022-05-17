@@ -14,21 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import traceback
-from spinnman.data import SpiNNManDataView
-
-
-def get_physical_cpu_id(x, y, p):
-    if not SpiNNManDataView.has_transceiver():
-        return "Unknown Physical Core"
-    try:
-        txrx = SpiNNManDataView.get_transceiver()
-        cpu_info = txrx.get_cpu_information_from_core(x, y, p)
-        v_to_p_map = cpu_info.virtual_to_physical_core_map
-        if p >= len(v_to_p_map) or v_to_p_map[p] == 0xFF:
-            return "Unknown Physical Core"
-        return f"({v_to_p_map[p]})"
-    except Exception:  # pylint: disable=broad-except
-        return "Unknown Physical Core"
 
 
 class SpinnmanException(Exception):
@@ -275,10 +260,7 @@ class _Group(object):
                 data[exception] = _Group(trace_back, connection)
                 found_exception = exception
             sdp_header = error_request.sdp_header
-            phys_p = get_physical_cpu_id(
-                sdp_header.destination_chip_x,
-                sdp_header.destination_chip_y,
-                sdp_header.destination_cpu)
+            phys_p = sdp_header.get_physical_cpu_id()
             data[found_exception].add_coord(sdp_header, phys_p)
         for exception in data:
             data[exception].finalise()
