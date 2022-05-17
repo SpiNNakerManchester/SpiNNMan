@@ -465,36 +465,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 "core {}", xy, virtual_p, 0-p)
             return virtual_p
 
-    def _verify_virtual_to_physical_core_map(self, xy):
-        """ Add this method to _get_virtual_p to verify the mappings.
-
-        :param tuple(int,int) xy:
-        """
-        v_to_p = SystemVariableDefinition.virtual_to_physical_core_map
-        self._send_request(
-            ReadMemory(
-                x=xy[0], y=xy[1],
-                base_address=SYSTEM_VARIABLE_BASE_ADDRESS + v_to_p.offset,
-                size=v_to_p.array_size),
-            functools.partial(
-                self._receive_virtual_to_physical_core_map, xy))
-        self._finish()
-
-    def _receive_virtual_to_physical_core_map(self, xy, scp_read_response):
-        """
-        :param tuple(int,int) xy:
-        :param _SCPReadMemoryResponse scp_read_response:
-        """
-        p_to_v_map = self._virtual_map[xy]
-        chipinfo = self._chip_info[xy]
-        for i in range(
-                scp_read_response.offset,
-                scp_read_response.offset + chipinfo.n_cores):
-            assert p_to_v_map[int(scp_read_response.data[i])] == \
-                    i-scp_read_response.offset
-        self._report_ignore(
-            "Virtual_to_physical_core_map checks for chip {}", xy)
-
     def _report_ignore(self, message, *args):
         """
         Writes the ignore message by either creating or appending the report
