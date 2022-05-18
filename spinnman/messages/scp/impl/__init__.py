@@ -48,6 +48,7 @@ from .write_link import WriteLink
 from .write_memory import WriteMemory
 from .fixed_route_init import FixedRouteInit
 from .fixed_route_read import FixedRouteRead
+from .flood_fill_copy import FloodFillCopy
 
 __all__ = ["AppStop", "ApplicationRun",
            "BMPSetLed", "BMPGetVersion",
@@ -63,4 +64,4 @@ __all__ = ["AppStop", "ApplicationRun",
            "RouterInit", "SDRAMAlloc",
            "SDRAMDeAlloc", "SendSignal",
            "GetVersion", "WriteFPGARegister", "FixedRouteRead",
-           "WriteLink", "WriteMemory", "FixedRouteInit"]
+           "WriteLink", "WriteMemory", "FixedRouteInit", "FloodFillCopy"]

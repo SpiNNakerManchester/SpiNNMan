@@ -55,7 +55,7 @@ from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
     CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
-    IPTagSet, IPTagClear, RouterClear)
+    IPTagSet, IPTagClear, RouterClear, FloodFillCopy)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
     SpinnakerBootSender, SCPSender, SDPSender,
@@ -66,8 +66,7 @@ from spinnman.processes import (
     DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
     GetCPUInfoProcess, ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
-    LoadFixedRouteRoutingEntryProcess,
-    ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
+    LoadFixedRouteRoutingEntryProcess, ReadFixedRouteRoutingEntryProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector)
@@ -1726,7 +1725,8 @@ class Transceiver(AbstractContextManager):
     def write_memory_flood(
             self, base_address, data, n_bytes=None, offset=0,
             is_filename=False):
-        """ Write to the SDRAM of all chips.
+        """ Write to the SDRAM of all chips.  Note that data length must be
+            a whole number of words.
 
         :param int base_address:
             The address in SDRAM where the region of memory is to be written
@@ -1743,7 +1743,7 @@ class Transceiver(AbstractContextManager):
         :param int n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
-            * If `data` is an RawIOBase, an error is raised
+            * If `data` is an RawIOBase, this value is used
             * If `data` is a bytearray, the length of the bytearray will be\
               used
             * If `data` is an int, 4 will be used
@@ -1765,29 +1765,43 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = WriteMemoryFloodProcess(self._scamp_connection_selector)
+        process = WriteMemoryProcess(self._scamp_connection_selector)
         # Ensure only one flood fill occurs at any one time
         with self._flood_write_lock:
             # Start the flood fill
-            nearest_neighbour_id = self._get_next_nearest_neighbour_id()
             if isinstance(data, io.RawIOBase):
+                if n_bytes is None:
+                    raise SpinnmanInvalidParameterException(
+                        "n_bytes", n_bytes,
+                        "When data is a RawIOBase, n_bytes must be specified")
+                if n_bytes % 4 != 0:
+                    raise SpinnmanInvalidParameterException(
+                        "The number of bytes must be divisible by 4")
                 process.write_memory_from_reader(
-                    nearest_neighbour_id, base_address, data, n_bytes)
+                    0, 0, 0, base_address, data, n_bytes)
             elif isinstance(data, str) and is_filename:
                 if n_bytes is None:
                     n_bytes = os.stat(data).st_size
+                if n_bytes % 4 != 0:
+                    raise SpinnmanInvalidParameterException(
+                        "The number of bytes must be divisible by 4")
                 with open(data, "rb") as reader:
                     process.write_memory_from_reader(
-                        nearest_neighbour_id, base_address, reader, n_bytes)
+                        0, 0, 0, base_address, reader, n_bytes)
             elif isinstance(data, int):
+                n_bytes = 4
                 data_to_write = _ONE_WORD.pack(data)
                 process.write_memory_from_bytearray(
-                    nearest_neighbour_id, base_address, data_to_write, 0)
+                    0, 0, 0, base_address, data_to_write, 0, n_bytes)
             else:
                 if n_bytes is None:
                     n_bytes = len(data)
+                if n_bytes % 4 != 0:
+                    raise SpinnmanInvalidParameterException(
+                        "The number of bytes must be divisible by 4")
                 process.write_memory_from_bytearray(
-                    nearest_neighbour_id, base_address, data, offset, n_bytes)
+                    0, 0, 0, base_address, data, offset, n_bytes)
+            self.flood_copy(base_address, n_bytes // 4)
 
     def read_memory(self, x, y, base_address, length, cpu=0):
         """ Read some areas of memory (usually SDRAM) from the board.
@@ -2866,6 +2880,15 @@ class Transceiver(AbstractContextManager):
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
+
+    def flood_copy(self, address, n_words):
+        """ Copy data from a given address on the boot chip to all other chips
+
+        :param int address: The address to copy from/to
+        :param int n_words: The number of words to copy
+        """
+        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process.execute(FloodFillCopy(address, n_words))
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
