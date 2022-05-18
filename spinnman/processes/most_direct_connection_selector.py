@@ -25,11 +25,10 @@ class MostDirectConnectionSelector(
     __slots__ = [
         "_connections",
         "_first_connection",
-        "_machine",
-        "_transceiver"]
+        "_machine"]
 
     # pylint: disable=super-init-not-called
-    def __init__(self, machine, connections, transceiver):
+    def __init__(self, machine, connections):
         """
         :param ~spinn_machine.Machine machine:
         :param list(SCAMPConnection) connections:
@@ -45,7 +44,6 @@ class MostDirectConnectionSelector(
                 (connection.chip_x, connection.chip_y)] = connection
         if self._first_connection is None:
             self._first_connection = next(iter(connections))
-        self._transceiver = transceiver
 
     def set_machine(self, new_machine):
         """
@@ -77,7 +75,6 @@ class MostDirectConnectionSelector(
         return self._connections[key]
 
     @property
-    @overrides(
-        AbstractMultiConnectionProcessConnectionSelector.transceiver)
-    def transceiver(self):
-        return self._transceiver
+    @overrides(AbstractMultiConnectionProcessConnectionSelector.machine)
+    def machine(self):
+        return self._machine

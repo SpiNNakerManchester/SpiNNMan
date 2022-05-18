@@ -369,7 +369,7 @@ class Transceiver(AbstractContextManager):
                 if isinstance(conn, BMPConnection):
                     self._bmp_connections.append(conn)
                     self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
-                        MostDirectConnectionSelector(None, [conn], None)
+                        MostDirectConnectionSelector(None, [conn])
                 else:
                     self._scamp_connections.append(conn)
 
@@ -380,7 +380,7 @@ class Transceiver(AbstractContextManager):
 
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(
-            self._machine, self._scamp_connections, None)
+            self._machine, self._scamp_connections)
 
     def _check_bmp_connections(self):
         """ Check that the BMP connections are actually connected to valid BMPs
@@ -593,7 +593,7 @@ class Transceiver(AbstractContextManager):
 
         # check if it works
         if self._check_connection(
-                MostDirectConnectionSelector(None, [conn], None), x, y):
+                MostDirectConnectionSelector(None, [conn]), x, y):
             self._scp_sender_connections.append(conn)
             self._all_connections.add(conn)
             self._udp_scamp_connections[ip_address] = conn
@@ -645,7 +645,7 @@ class Transceiver(AbstractContextManager):
             logger.info(ip_address)
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
-            self._machine, self._scamp_connections, self)
+            self._machine, self._scamp_connections)
 
     def add_scamp_connections(self, connections):
         """
@@ -667,7 +667,7 @@ class Transceiver(AbstractContextManager):
         for ((x, y), ip_address) in connections.items():
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
-            self._machine, self._scamp_connections, self)
+            self._machine, self._scamp_connections)
 
     def get_connections(self):
         """ Get the currently known connections to the board, made up of those\
@@ -907,7 +907,7 @@ class Transceiver(AbstractContextManager):
 
         # Update the connection selector so that it can ask for processor ids
         self._scamp_connection_selector = MostDirectConnectionSelector(
-            self._machine, self._scamp_connections, self)
+            self._machine, self._scamp_connections)
 
         return version_info
 
