@@ -1776,6 +1776,7 @@ class Transceiver(AbstractContextManager):
                         "When data is a RawIOBase, n_bytes must be specified")
                 if n_bytes % 4 != 0:
                     raise SpinnmanInvalidParameterException(
+                        "n_bytes", n_bytes,
                         "The number of bytes must be divisible by 4")
                 process.write_memory_from_reader(
                     0, 0, 0, base_address, data, n_bytes)
@@ -1784,6 +1785,7 @@ class Transceiver(AbstractContextManager):
                     n_bytes = os.stat(data).st_size
                 if n_bytes % 4 != 0:
                     raise SpinnmanInvalidParameterException(
+                        "n_bytes", n_bytes,
                         "The number of bytes must be divisible by 4")
                 with open(data, "rb") as reader:
                     process.write_memory_from_reader(
@@ -1798,6 +1800,7 @@ class Transceiver(AbstractContextManager):
                     n_bytes = len(data)
                 if n_bytes % 4 != 0:
                     raise SpinnmanInvalidParameterException(
+                        "n_bytes", n_bytes,
                         "The number of bytes must be divisible by 4")
                 process.write_memory_from_bytearray(
                     0, 0, 0, base_address, data, offset, n_bytes)
