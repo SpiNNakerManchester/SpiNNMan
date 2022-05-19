@@ -611,7 +611,7 @@ class Transceiver(AbstractContextManager):
         Note that an exception will be
         thrown if no initial connections can be found to the board.
 
-        :param dict((int, int), str) connections: Dict of x,y o ip address
+        :param dict((int,int),str) connections: Dict of x,y to ip address
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
