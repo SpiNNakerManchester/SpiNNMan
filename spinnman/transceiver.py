@@ -327,7 +327,7 @@ class Transceiver(AbstractContextManager):
             return f"No Machine. " \
                    f"Root IP:{self._scamp_connections[0].remote_ip_address}" \
                    f"x:{x} y:{y}"
-        except Exception as ex:
+        except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
     def _identify_connections(self, connections):
@@ -655,7 +655,7 @@ class Transceiver(AbstractContextManager):
         Note that an exception will be
         thrown if no initial connections can be found to the board.
 
-        :param dict((int, int), str) connections: Dict of x,y o ip address
+        :param dict((int,int),str) connections: Dict of x,y to ip address
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
