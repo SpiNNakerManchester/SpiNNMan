@@ -23,8 +23,10 @@ def _get_next_chips(old_next_chips, machine, chips_done):
         for link in chip.router.links:
             chip_coords = (link.destination_x, link.destination_y)
             if chip_coords not in chips_done:
-                opp_link = (link.source_link_id + 3) % 6
-                next_chips.add((opp_link, machine.get_chip_at(*chip_coords)))
+                next_chip = machine.get_chip_at(*chip_coords)
+                if not next_chip.virtual:
+                    opp_link = (link.source_link_id + 3) % 6
+                    next_chips.add((opp_link, next_chip))
     return next_chips
 
 
