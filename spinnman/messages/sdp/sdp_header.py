@@ -291,7 +291,7 @@ class SDPHeader(object):
 
     def get_physical_cpu_id(self):
         if SpiNNManDataView.has_machine():
-            chip = SpiNNManDataView.get_chip_at(
+            chip = SpiNNManDataView.get_machine().get_chip_at(
                 self._destination_chip_x,  self._destination_chip_y)
             if chip is not None:
                 return chip.get_physical_core_string(
