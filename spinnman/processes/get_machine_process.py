@@ -62,7 +62,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         "_virtual_to_physical_map",
         # Holds a mapping from (x,y) to a mapping of virtual to physical core
         "_physical_to_virtual_map"]
-        # Directory to put the ingore report if required
 
     def __init__(self, connection_selector):
         """
