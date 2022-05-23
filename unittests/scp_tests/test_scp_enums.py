@@ -48,7 +48,7 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPCommand.CMD_AR.value, 19)
 
         self.assertEqual(SCPCommand.CMD_NNP.value, 20)
-        self.assertEqual(SCPCommand.CMD_P2PC.value, 21)
+        self.assertEqual(SCPCommand.CMD_APP_COPY_RUN.value, 21)
         self.assertEqual(SCPCommand.CMD_SIG.value, 22)
         self.assertEqual(SCPCommand.CMD_FFD.value, 23)
         self.assertEqual(SCPCommand.CMD_AS.value, 24)
