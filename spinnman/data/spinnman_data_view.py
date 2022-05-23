@@ -19,6 +19,7 @@ from spinn_machine.data import MachineDataView
 from spinnman.utilities.appid_tracker import AppIdTracker
 
 logger = FormatAdapter(logging.getLogger(__name__))
+# pylint: disable=protected-access
 
 
 class _SpiNNManDataModel(object):
@@ -49,7 +50,6 @@ class _SpiNNManDataModel(object):
     def __new__(cls):
         if cls.__singleton:
             return cls.__singleton
-        # pylint: disable=protected-access
         obj = object.__new__(cls)
         cls.__singleton = obj
         obj._transceiver = None
@@ -69,9 +69,6 @@ class _SpiNNManDataModel(object):
         self._app_id = None
         self._app_id_tracker = None
         self._soft_reset()
-        self._clear_transceiver()
-
-    def _clear_transceiver(self):
         self._scamp_connection_selector = None
         if self._transceiver:
             try:
