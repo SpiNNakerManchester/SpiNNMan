@@ -1327,9 +1327,6 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if self._machine is None:
-            self._update_machine()
-
         # Lock against other executable's
         with self._flood_execute_lock():
             # Flood fill the system with the binary
@@ -1348,7 +1345,7 @@ class Transceiver(AbstractContextManager):
 
             process = ApplicationCopyRunProcess(
                 self._scamp_connection_selector)
-            process.run(self._machine, n_bytes, app_id, core_subsets, wait)
+            process.run(n_bytes, app_id, core_subsets, wait)
 
     def execute_application(self, executable_targets, app_id):
         """ Execute a set of binaries that make up a complete application\
