@@ -93,10 +93,23 @@ class UDPConnection(Connection):
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
 
+    @property
+    def __is_closed(self):
+        """
+        Is the socket closed? Note that just because a socket is not closed
+        doesn't mean that you're going to be able to successfully write to it
+        or read from it; some failures are only detected on use. But closed
+        sockets definitely behave in certain ways!
+
+        :rtype: bool
+        """
+        # Reach into Python'#s guts
+        return self._socket._closed  # pylint: disable=protected-access
+
     @overrides(Connection.is_connected)
     def is_connected(self):
         # Closed sockets are never connected!
-        if self._socket._closed:
+        if self.__is_closed:
             return False
 
         # If this is not a sending socket, it is not connected
@@ -159,7 +172,7 @@ class UDPConnection(Connection):
             If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
         """
-        if self._socket._closed:
+        if self.__is_closed:
             raise SpinnmanEOFException()
         try:
             self._socket.settimeout(timeout)
@@ -181,7 +194,7 @@ class UDPConnection(Connection):
             If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
         """
-        if self._socket._closed:
+        if self.__is_closed:
             raise SpinnmanEOFException()
         try:
             self._socket.settimeout(timeout)
@@ -198,7 +211,7 @@ class UDPConnection(Connection):
         :type data: bytes or bytearray
         :raise SpinnmanIOException: If there is an error sending the data
         """
-        if self._socket._closed:
+        if self.__is_closed:
             raise SpinnmanEOFException()
         if not self._can_send:
             raise SpinnmanIOException(
@@ -206,7 +219,7 @@ class UDPConnection(Connection):
                 " this connection")
         try:
             while not self._socket.send(data):
-                if self._socket._closed:
+                if self.__is_closed:
                     raise SpinnmanEOFException()
         except SpinnmanIOException:
             raise
@@ -222,11 +235,11 @@ class UDPConnection(Connection):
             A tuple of (address, port) to send the data to
         :raise SpinnmanIOException: If there is an error sending the data
         """
-        if self._socket._closed:
+        if self.__is_closed:
             raise SpinnmanEOFException()
         try:
             while not self._socket.sendto(data, address):
-                if self._socket._closed:
+                if self.__is_closed:
                     raise SpinnmanEOFException()
         except SpinnmanIOException:
             raise
@@ -235,14 +248,14 @@ class UDPConnection(Connection):
 
     @overrides(Connection.close)
     def close(self):
-        if self._socket._closed:
+        if self.__is_closed:
             return
         with suppress(Exception):
             self._socket.shutdown(socket.SHUT_WR)
         self._socket.close()
 
     def is_ready_to_receive(self, timeout=0):
-        if self._socket._closed:
+        if self.__is_closed:
             return True
         return len(select.select([self._socket], [], [], timeout)[0]) == 1
 

@@ -70,7 +70,7 @@ from spinnman.processes import (
     ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
-    MostDirectConnectionSelector)
+    MostDirectConnectionSelector, ApplicationCopyRunProcess)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
 from spinnman.utilities.appid_tracker import AppIdTracker
@@ -327,7 +327,7 @@ class Transceiver(AbstractContextManager):
             return f"No Machine. " \
                    f"Root IP:{self._scamp_connections[0].remote_ip_address}" \
                    f"x:{x} y:{y}"
-        except Exception as ex:
+        except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
     def _identify_connections(self, connections):
@@ -655,7 +655,7 @@ class Transceiver(AbstractContextManager):
         Note that an exception will be
         thrown if no initial connections can be found to the board.
 
-        :param dict((int, int), str) connections: Dict of x,y o ip address
+        :param dict((int,int),str) connections: Dict of x,y to ip address
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -1367,16 +1367,28 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        if self._machine is None:
+            self._update_machine()
+
         # Lock against other executable's
         with self._flood_execute_lock():
             # Flood fill the system with the binary
-            self.write_memory_flood(
-                _EXECUTABLE_ADDRESS, executable, n_bytes,
+            n_bytes = self.write_memory(
+                0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes,
                 is_filename=is_filename)
 
-            # Execute the binary on the cores on the chips where required
-            process = ApplicationRunProcess(self._scamp_connection_selector)
-            process.run(app_id, core_subsets, wait)
+            # Execute the binary on the cores on 0, 0 if required
+            if core_subsets.is_chip(0, 0):
+                boot_subset = CoreSubsets()
+                boot_subset.add_core_subset(
+                    core_subsets.get_core_subset_for_chip(0, 0))
+                process = ApplicationRunProcess(
+                    self._scamp_connection_selector)
+                process.run(app_id, boot_subset, wait)
+
+            process = ApplicationCopyRunProcess(
+                self._scamp_connection_selector)
+            process.run(self._machine, n_bytes, app_id, core_subsets, wait)
 
     def execute_application(self, executable_targets, app_id):
         """ Execute a set of binaries that make up a complete application\
@@ -1624,6 +1636,8 @@ class Transceiver(AbstractContextManager):
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
         :param bool is_filename: True if `data` is a filename
+        :return: The number of bytes written
+        :rtype: n_bytes
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -1650,14 +1664,16 @@ class Transceiver(AbstractContextManager):
                 process.write_memory_from_reader(
                     x, y, cpu, base_address, reader, n_bytes)
         elif isinstance(data, int):
+            n_bytes = 4
             data_to_write = _ONE_WORD.pack(data)
             process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data_to_write, 0, 4)
+                x, y, cpu, base_address, data_to_write, 0, n_bytes)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
             process.write_memory_from_bytearray(
                 x, y, cpu, base_address, data, offset, n_bytes)
+        return n_bytes
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
                                n_bytes=None, offset=0, cpu=0):
