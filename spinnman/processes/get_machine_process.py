@@ -73,7 +73,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        # pylint: disable=too-many-arguments
         super().__init__(connection_selector)
 
         self._ignore_cores_map = defaultdict(set)
@@ -259,7 +258,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     (chip_info.x != chip_info.nearest_ethernet_x
                      or chip_info.y != chip_info.nearest_ethernet_y)):
                 if get_config_bool("Machine", "ignore_bad_ethernets"):
-                    # pylint: disable=protected-access
                     logger.warning(
                         "Chip {}:{} claimed it has ip address: {}. "
                         "This ip will not be used.",
