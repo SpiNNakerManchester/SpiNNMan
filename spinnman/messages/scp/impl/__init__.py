@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .app_stop import AppStop
+from .app_copy_run import AppCopyRun
 from .application_run import ApplicationRun
 from .bmp_get_version import BMPGetVersion
 from .bmp_set_led import BMPSetLed
@@ -49,7 +50,7 @@ from .write_memory import WriteMemory
 from .fixed_route_init import FixedRouteInit
 from .fixed_route_read import FixedRouteRead
 
-__all__ = ["AppStop", "ApplicationRun",
+__all__ = ["AppStop", "ApplicationRun", "AppCopyRun",
            "BMPSetLed", "BMPGetVersion",
            "CheckOKResponse", "GetChipInfo", "CountState",
            "FloodFillData", "FillRequest",

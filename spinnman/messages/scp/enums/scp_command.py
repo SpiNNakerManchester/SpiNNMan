@@ -30,7 +30,7 @@ class SCPCommand(Enum):
     CMD_LINK_WRITE = (18, "Write neighbouring chip's memory.")
     CMD_AR = 19
     CMD_NNP = (20, "Send a Nearest-Neighbour packet")
-    CMD_P2PC = 21
+    CMD_APP_COPY_RUN = (21, "Copy a binary from an adjacent chip and start it")
     CMD_SIG = (22, "Send a Signal")
     CMD_FFD = (23, "Send Flood-Fill Data")
     CMD_AS = 24
