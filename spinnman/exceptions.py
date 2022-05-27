@@ -240,7 +240,7 @@ class _Group(object):
         self.chip_core += "]"
 
     def add_coord(self, sdp_header, phys_p):
-        self.chip_core += "{}[{}:{}:{}({})]".format(
+        self.chip_core += "{}[{}:{}:{}{}]".format(
             self._separator,
             sdp_header.destination_chip_x,
             sdp_header.destination_chip_y,
