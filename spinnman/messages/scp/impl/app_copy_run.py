@@ -28,7 +28,7 @@ _WAIT_FLAG = 0x1 << 18
 class AppCopyRun(AbstractSCPRequest):
     """ An SCP request to copy an application and start it
     """
-    __slots__ = []
+    __slots__ = ["__link"]
 
     def __init__(self, x, y, link, size, app_id, processors, wait=False):
         """
@@ -55,6 +55,7 @@ class AppCopyRun(AbstractSCPRequest):
         processor_mask |= (app_id << 24)
         if wait:
             processor_mask |= _WAIT_FLAG
+        self.__link = link
 
         super().__init__(
             SDPHeader(
@@ -64,7 +65,11 @@ class AppCopyRun(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_APP_COPY_RUN),
             argument_1=link, argument_2=size, argument_3=processor_mask)
 
+    def __repr__(self):
+        return f"{super(AppCopyRun, self).__repr__()} (Link {self.__link})"
+
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self):
         return CheckOKResponse(
-            "Application Copy Run", SCPCommand.CMD_APP_COPY_RUN)
+            f"Application Copy Run (Link {self.__link})",
+            SCPCommand.CMD_APP_COPY_RUN)
