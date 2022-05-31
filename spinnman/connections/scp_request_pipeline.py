@@ -285,7 +285,7 @@ class SCPRequestPipeLine(object):
             raise SpinnmanIOException(
                 "Errors sending request {} to {}, {}, {} over {} retries: {}"
                 .format(
-                    request_sent.scp_request_header.command,
+                    request_sent,
                     request_sent.sdp_header.destination_chip_x,
                     request_sent.sdp_header.destination_chip_y,
                     request_sent.sdp_header.destination_cpu,

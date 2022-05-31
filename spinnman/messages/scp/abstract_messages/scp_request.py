@@ -121,6 +121,13 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
             data += bytes(self._data)
         return data
 
+    def __repr__(self):
+        # Default is to return just the command, but can be overridden
+        return str(self._scp_request_header.command)
+
+    def __str__(self):
+        return self.__repr__()
+
     @abstractmethod
     def get_scp_response(self):
         """ Get an SCP response message to be used to process any response\

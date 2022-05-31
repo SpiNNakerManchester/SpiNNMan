@@ -66,7 +66,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
             Whether to put the binary in "wait" mode or run it straight away
         """
         boot_chip = machine.boot_chip
-        chips_done = set((boot_chip.x, boot_chip.y))
+        chips_done = set([(boot_chip.x, boot_chip.y)])
         next_chips = _get_next_chips([(None, boot_chip)], machine, chips_done)
 
         while next_chips:
