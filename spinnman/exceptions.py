@@ -230,7 +230,7 @@ class _Group(object):
         self.chip_core += "]"
 
     def add_coord(self, sdp_header, phys_p):
-        self.chip_core += "{}[{}:{}:{}({})]".format(
+        self.chip_core += "{}[{}:{}:{}{}]".format(
             self._separator,
             sdp_header.destination_chip_x,
             sdp_header.destination_chip_y,
@@ -273,16 +273,23 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     """
     def __init__(self, error_requests, exceptions, tracebacks, connections):
         problem = "Exceptions found were:\n"
-        for exception, description in _Group.group_exceptions(
+        for error_request, exception, trace_back, connection in zip(
                 error_requests, exceptions, tracebacks, connections):
+            sdp_header = error_request.sdp_header
+            phys_p = sdp_header.get_physical_cpu_id()
+            location = "board {} with ethernet chip {}:{} [{}:{}:{}{}]".format(
+                connection.remote_ip_address, connection.chip_x,
+                connection.chip_y, sdp_header.destination_chip_x,
+                sdp_header.destination_chip_y,
+                sdp_header.destination_cpu, phys_p)
             problem += \
                 "   Received exception class: {}\n" \
                 "       With message {}\n" \
                 "       When sending to {}\n" \
                 "       Stack trace: {}\n".format(
                     exception.__class__.__name__, str(exception),
-                    description.chip_core,
-                    traceback.format_tb(description.trace_back))
+                    location,
+                    traceback.format_tb(trace_back))
         super().__init__(problem)
 
 

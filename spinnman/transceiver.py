@@ -2069,7 +2069,7 @@ class Transceiver(AbstractContextManager):
                 break_down += "        r4={}, r5={}, r6={}, r7={}\n".format(
                     core_info.registers[4], core_info.registers[5],
                     core_info.registers[6], core_info.registers[7])
-                break_down += "        PSR={}, SP={}, LR={}".format(
+                break_down += "        PSR={}, SP={}, LR={}\n".format(
                     core_info.processor_state_register,
                     core_info.stack_pointer, core_info.link_register)
             else:
