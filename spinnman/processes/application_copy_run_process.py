@@ -26,18 +26,18 @@ def _get_next_chips(old_next_chips, machine, chips_done):
         The chips to find the chips adjacent to
     :param Machine machine: The machine containing the chips
     :param set(int,int) The coordinates of chips that have already been done
-    :return: A list of (link to read from, chip to be copied to)
-    :rtype: list(int,Chip)
+    :return: A dict of chip coordinates to link to use, Chip
+    :rtype: dict((int,int), (int, Chip))
     """
-    next_chips = set()
-    for _old_link, chip in old_next_chips:
+    next_chips = dict()
+    for _old_link, chip in old_next_chips.values():
         for link in chip.router.links:
             chip_coords = (link.destination_x, link.destination_y)
-            if chip_coords not in chips_done:
+            if chip_coords not in chips_done and chip_coords not in next_chips:
                 next_chip = machine.get_chip_at(*chip_coords)
                 if not next_chip.virtual:
                     opp_link = (link.source_link_id + 3) % 6
-                    next_chips.add((opp_link, next_chip))
+                    next_chips[chip_coords] = (opp_link, next_chip)
     return next_chips
 
 
@@ -67,11 +67,12 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         """
         boot_chip = machine.boot_chip
         chips_done = set([(boot_chip.x, boot_chip.y)])
-        next_chips = _get_next_chips([(None, boot_chip)], machine, chips_done)
+        next_chips = {(boot_chip.x, boot_chip.y): (None, boot_chip)}
+        next_chips = _get_next_chips(next_chips, machine, chips_done)
 
         while next_chips:
             # Do all the chips at the current level
-            for link, chip in next_chips:
+            for link, chip in next_chips.values():
                 subset = core_subsets.get_core_subset_for_chip(chip.x, chip.y)
                 self._send_request(AppCopyRun(
                     chip.x, chip.y, link, size, app_id, subset.processor_ids,
