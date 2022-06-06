@@ -278,7 +278,7 @@ class SCPRequestPipeLine(object):
             # Report timeouts as timeout exception
             if all(reason == "timeout" for reason in self._retry_reason[seq]):
                 raise SpinnmanTimeoutException(
-                    request_sent.scp_request_header.command,
+                    request_sent,
                     self._packet_timeout)
 
             # Report any other exception
