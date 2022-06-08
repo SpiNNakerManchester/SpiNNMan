@@ -17,7 +17,35 @@ from spinnman.messages.scp.impl import AppCopyRun
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
-def _get_next_chips(old_next_chips, machine, chips_done):
+def _on_same_board(chip_1, chip_2):
+    return (chip_1.nearest_ethernet_x == chip_2.nearest_ethernet_x and
+            chip_1.nearest_ethernet_y == chip_2.nearest_ethernet_y)
+
+
+def _board_already_copied_to(chip, boards_copied_to):
+    board_addr = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
+    return board_addr in boards_copied_to
+
+
+def _do_copy(chip_from, chip_to, boards_copied_to):
+    # Never copy to a virtual chip
+    if chip_to.is_virtual:
+        return False
+    # We can always copy if on the same board
+    if _on_same_board(chip_from, chip_to):
+        return True
+    # If not on the same board, but the board has already been copied to,
+    # don't copy to that board again (as that causes timeouts)
+    if _board_already_copied_to(chip_to, boards_copied_to):
+        return False
+    # If we haven't copied to this board, do the copy this once, but then stop
+    # it happening again
+    boards_copied_to.add(
+        (chip_to.nearest_ethernet_x, chip_to.nearest_ethernet_y))
+    return True
+
+
+def _get_next_chips(old_next_chips, machine, chips_done, boards_copied_to):
     """ Get the chips that are adjacent to the last set of chips, which
         haven't yet been loaded.  Also returned are the links for each chip,
         which gives the link which should be read from to get the data.
@@ -35,7 +63,7 @@ def _get_next_chips(old_next_chips, machine, chips_done):
             chip_coords = (link.destination_x, link.destination_y)
             if chip_coords not in chips_done and chip_coords not in next_chips:
                 next_chip = machine.get_chip_at(*chip_coords)
-                if not next_chip.virtual:
+                if _do_copy(chip, next_chip, boards_copied_to):
                     opp_link = (link.source_link_id + 3) % 6
                     next_chips[chip_coords] = (opp_link, next_chip)
     return next_chips
@@ -67,8 +95,10 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         """
         boot_chip = machine.boot_chip
         chips_done = set([(boot_chip.x, boot_chip.y)])
+        boards_copied_to = set(chips_done)
         next_chips = {(boot_chip.x, boot_chip.y): (None, boot_chip)}
-        next_chips = _get_next_chips(next_chips, machine, chips_done)
+        next_chips = _get_next_chips(
+            next_chips, machine, chips_done, boards_copied_to)
 
         while next_chips:
             # Do all the chips at the current level
@@ -80,4 +110,5 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
                 chips_done.add((chip.x, chip.y))
             self._finish()
             self.check_for_error()
-            next_chips = _get_next_chips(next_chips, machine, chips_done)
+            next_chips = _get_next_chips(
+                next_chips, machine, chips_done, boards_copied_to)
