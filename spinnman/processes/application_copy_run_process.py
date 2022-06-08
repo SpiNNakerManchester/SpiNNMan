@@ -29,7 +29,7 @@ def _board_already_copied_to(chip, boards_copied_to):
 
 def _do_copy(chip_from, chip_to, boards_copied_to):
     # Never copy to a virtual chip
-    if chip_to.is_virtual:
+    if chip_to.virtual:
         return False
     # We can always copy if on the same board
     if _on_same_board(chip_from, chip_to):
