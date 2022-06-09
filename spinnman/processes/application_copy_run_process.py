@@ -58,7 +58,8 @@ def _get_next_chips(old_next_chips, machine, chips_done, boards_copied_to):
     :rtype: dict((int,int), (int, Chip))
     """
     next_chips = dict()
-    for _old_link, chip in old_next_chips.values():
+    for x, y in chips_done:
+        chip = machine.get_chip_at(x, y)
         for link in chip.router.links:
             chip_coords = (link.destination_x, link.destination_y)
             if chip_coords not in chips_done and chip_coords not in next_chips:
