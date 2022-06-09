@@ -86,6 +86,11 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = []
 
+    def __init__(self, next_connection_selector):
+        super(ApplicationCopyRunProcess, self).__init__(
+            next_connection_selector, n_channels=1,
+            intermediate_channel_waits=0)
+
     def run(self, machine, size, app_id, core_subsets, wait):
         """ Run the process.
 
