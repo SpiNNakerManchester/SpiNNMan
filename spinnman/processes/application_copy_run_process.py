@@ -66,6 +66,8 @@ def _get_next_chips(old_next_chips, machine, chips_done, boards_copied_to):
                 if _do_copy(chip, next_chip, boards_copied_to):
                     opp_link = (link.source_link_id + 3) % 6
                     next_chips[chip_coords] = (opp_link, next_chip)
+                    # Only let one thing copy from this chip
+                    break
     return next_chips
 
 
