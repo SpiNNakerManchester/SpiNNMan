@@ -45,13 +45,11 @@ def _do_copy(chip_from, chip_to, boards_copied_to):
     return True
 
 
-def _get_next_chips(old_next_chips, machine, chips_done, boards_copied_to):
+def _get_next_chips(machine, chips_done, boards_copied_to):
     """ Get the chips that are adjacent to the last set of chips, which
         haven't yet been loaded.  Also returned are the links for each chip,
         which gives the link which should be read from to get the data.
 
-    :param list(int,Chip) old_next_chips:
-        The chips to find the chips adjacent to
     :param Machine machine: The machine containing the chips
     :param set(int,int) The coordinates of chips that have already been done
     :return: A dict of chip coordinates to link to use, Chip
@@ -86,11 +84,6 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = []
 
-    def __init__(self, next_connection_selector):
-        super(ApplicationCopyRunProcess, self).__init__(
-            next_connection_selector, n_channels=1,
-            intermediate_channel_waits=0)
-
     def run(self, machine, size, app_id, core_subsets, wait):
         """ Run the process.
 
@@ -104,9 +97,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         boot_chip = machine.boot_chip
         chips_done = set([(boot_chip.x, boot_chip.y)])
         boards_copied_to = set(chips_done)
-        next_chips = {(boot_chip.x, boot_chip.y): (None, boot_chip)}
-        next_chips = _get_next_chips(
-            next_chips, machine, chips_done, boards_copied_to)
+        next_chips = _get_next_chips(machine, chips_done, boards_copied_to)
 
         while next_chips:
             # Do all the chips at the current level
@@ -118,5 +109,4 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
                 chips_done.add((chip.x, chip.y))
             self._finish()
             self.check_for_error()
-            next_chips = _get_next_chips(
-                next_chips, machine, chips_done, boards_copied_to)
+            next_chips = _get_next_chips(machine, chips_done, boards_copied_to)
