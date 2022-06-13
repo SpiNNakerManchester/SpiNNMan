@@ -31,17 +31,6 @@ def _do_copy(chip_from, chip_to, boards_copied_to):
     # Never copy to a virtual chip
     if chip_to.virtual:
         return False
-    # We can always copy if on the same board
-    if _on_same_board(chip_from, chip_to):
-        return True
-    # If not on the same board, but the board has already been copied to,
-    # don't copy to that board again (as that causes timeouts)
-    if _board_already_copied_to(chip_to, boards_copied_to):
-        return False
-    # If we haven't copied to this board, do the copy this once, but then stop
-    # it happening again
-    boards_copied_to.add(
-        (chip_to.nearest_ethernet_x, chip_to.nearest_ethernet_y))
     return True
 
 
