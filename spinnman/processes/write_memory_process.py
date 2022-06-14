@@ -93,7 +93,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :param int n_bytes: how much data to write
         :param bool get_sum: whether to return a checksum or 0
         :return: the data checksum or 0 if get_sum=False
-        :rtype int
+        :rtype: int
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
@@ -118,7 +118,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         :param int n_bytes: how much data to write
         :param bool get_sum: whether to return a checksum or 0
         :return: the data checksum or 0 if get_sum=False
-        :rtype int
+        :rtype: int
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
