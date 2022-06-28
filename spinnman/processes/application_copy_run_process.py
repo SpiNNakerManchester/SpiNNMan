@@ -27,13 +27,6 @@ def _board_already_copied_to(chip, boards_copied_to):
     return board_addr in boards_copied_to
 
 
-def _do_copy(chip_from, chip_to, boards_copied_to):
-    # Never copy to a virtual chip
-    if chip_to.virtual:
-        return False
-    return True
-
-
 def _get_next_chips(machine, chips_done, boards_copied_to):
     """ Get the chips that are adjacent to the last set of chips, which
         haven't yet been loaded.  Also returned are the links for each chip,
@@ -51,7 +44,7 @@ def _get_next_chips(machine, chips_done, boards_copied_to):
             chip_coords = (link.destination_x, link.destination_y)
             if chip_coords not in chips_done and chip_coords not in next_chips:
                 next_chip = machine.get_chip_at(*chip_coords)
-                if _do_copy(chip, next_chip, boards_copied_to):
+                if not next_chip.virtual:
                     opp_link = (link.source_link_id + 3) % 6
                     next_chips[chip_coords] = (opp_link, next_chip)
                     # Only let one thing copy from this chip
