@@ -22,25 +22,14 @@ def _on_same_board(chip_1, chip_2):
             chip_1.nearest_ethernet_y == chip_2.nearest_ethernet_y)
 
 
-def _board_already_copied_to(chip, boards_copied_to):
-    board_addr = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
-    return board_addr in boards_copied_to
-
-
-def _do_copy(chip_from, chip_to, boards_copied_to):
-    # Never copy to a virtual chip
-    if chip_to.virtual:
-        return False
-    return True
-
-
-def _get_next_chips(machine, chips_done, boards_copied_to):
+def _get_next_chips(machine, chips_done):
     """ Get the chips that are adjacent to the last set of chips, which
         haven't yet been loaded.  Also returned are the links for each chip,
         which gives the link which should be read from to get the data.
 
     :param Machine machine: The machine containing the chips
-    :param set(int,int) The coordinates of chips that have already been done
+    :param set((int,int)) chips_done:
+    The coordinates of chips that have already been done
     :return: A dict of chip coordinates to link to use, Chip
     :rtype: dict((int,int), (int, Chip))
     """
@@ -51,7 +40,7 @@ def _get_next_chips(machine, chips_done, boards_copied_to):
             chip_coords = (link.destination_x, link.destination_y)
             if chip_coords not in chips_done and chip_coords not in next_chips:
                 next_chip = machine.get_chip_at(*chip_coords)
-                if _do_copy(chip, next_chip, boards_copied_to):
+                if not next_chip.virtual:
                     opp_link = (link.source_link_id + 3) % 6
                     next_chips[chip_coords] = (opp_link, next_chip)
                     # Only let one thing copy from this chip
@@ -86,8 +75,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         """
         boot_chip = machine.boot_chip
         chips_done = set([(boot_chip.x, boot_chip.y)])
-        boards_copied_to = set(chips_done)
-        next_chips = _get_next_chips(machine, chips_done, boards_copied_to)
+        next_chips = _get_next_chips(machine, chips_done)
 
         while next_chips:
             # Do all the chips at the current level
@@ -99,4 +87,4 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
                 chips_done.add((chip.x, chip.y))
             self._finish()
             self.check_for_error()
-            next_chips = _get_next_chips(machine, chips_done, boards_copied_to)
+            next_chips = _get_next_chips(machine, chips_done)
