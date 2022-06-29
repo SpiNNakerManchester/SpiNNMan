@@ -126,7 +126,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
 
     def _write_memory_from_bytearray(
             self, base_address, data, data_offset, n_bytes, packet_class,
-            with_sum):
+            get_sum):
         offset = 0
         n_bytes_to_write = int(n_bytes)
         while n_bytes_to_write > 0:
@@ -141,7 +141,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             data_offset += bytes_to_send
         self._finish()
         self.check_for_error()
-        if not with_sum:
+        if not get_sum:
             return 0
         np_data = numpy.array(data, dtype="uint8")
         np_sum = int(numpy.sum(np_data.view("uint32"), dtype="uint32"))
