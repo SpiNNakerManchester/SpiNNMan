@@ -229,56 +229,6 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         return self._response
 
 
-class _Group(object):
-    def __init__(self, trace_back, connection):
-        self.trace_back = trace_back
-        self.chip_core = "board {} with ethernet chip {}:{} [".format(
-            connection.remote_ip_address, connection.chip_x, connection.chip_y)
-        self._separator = ""
-
-    def finalise(self):
-        self.chip_core += "]"
-
-    def add_coord(self, sdp_header, phys_p):
-        self.chip_core += "{}[{}:{}:{}{}]".format(
-            self._separator,
-            sdp_header.destination_chip_x,
-            sdp_header.destination_chip_y,
-            sdp_header.destination_cpu, phys_p)
-        self._separator = ","
-
-    @staticmethod
-    def group_exceptions(error_requests, exceptions, tracebacks, connections,
-                         machine):
-        """ Groups exceptions into a form usable by an exception.
-
-        :param list(SCPRequest) error_requests: the error requests
-        :param list(Exception) exceptions: the exceptions
-        :param list tracebacks: the tracebacks
-        :param list connections:
-            the connections the errors were associated with
-        :param Transceiver transceiver: the transceiver used
-        :return: a sorted exception pile
-        :rtype: dict(Exception,_Group)
-        """
-        data = dict()
-        for error_request, exception, trace_back, connection in zip(
-                error_requests, exceptions, tracebacks, connections):
-            for stored_exception in data.keys():
-                if isinstance(exception, type(stored_exception)):
-                    found_exception = stored_exception
-                    break
-            else:
-                data[exception] = _Group(trace_back, connection)
-                found_exception = exception
-            sdp_header = error_request.sdp_header
-            phys_p = get_physical_cpu_id(machine, sdp_header)
-            data[found_exception].add_coord(sdp_header, phys_p)
-        for exception in data:
-            data[exception].finalise()
-        return data.items()
-
-
 class SpinnmanGroupedProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with a\
         collection of cores/chips
@@ -320,10 +270,10 @@ class SpinnmanGenericProcessException(SpinnmanException):
         """
         # pylint: disable=too-many-arguments
         super().__init__(
-            "\n     Received exception class: {} \n"
-            "     With message: {} \n"
-            "     When sending to {}:{}:{}({})\n"
-            "     Stack trace: {}\n".format(
+            "   Received exception class: {} \n"
+            "      With message: {} \n"
+            "      When sending to {}:{}:{}{}\n"
+            "      Stack trace: {}\n".format(
                 exception.__class__.__name__, str(exception), x, y, p,
                 phys_p, traceback.format_tb(tb)))
 
