@@ -56,7 +56,7 @@ from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
     CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
-    IPTagSet, IPTagClear, RouterClear)
+    IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
     SpinnakerBootSender, SCPSender, SDPSender,
@@ -1330,9 +1330,9 @@ class Transceiver(AbstractContextManager):
         # Lock against other executable's
         with self._flood_execute_lock():
             # Flood fill the system with the binary
-            n_bytes = self.write_memory(
+            n_bytes, chksum = self.write_memory(
                 0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes,
-                is_filename=is_filename)
+                is_filename=is_filename, get_sum=True)
 
             # Execute the binary on the cores on 0, 0 if required
             if core_subsets.is_chip(0, 0):
@@ -1345,7 +1345,7 @@ class Transceiver(AbstractContextManager):
 
             process = ApplicationCopyRunProcess(
                 self._scamp_connection_selector)
-            process.run(n_bytes, app_id, core_subsets, wait)
+            process.run(n_bytes, app_id, core_subsets, chksum, wait)
 
     def execute_application(self, executable_targets, app_id):
         """ Execute a set of binaries that make up a complete application\
@@ -1564,7 +1564,7 @@ class Transceiver(AbstractContextManager):
         return response.version_info  # pylint: disable=no-member
 
     def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
-                     cpu=0, is_filename=False):
+                     cpu=0, is_filename=False, get_sum=False):
         """ Write to the SDRAM on the board.
 
         :param int x:
@@ -1593,8 +1593,9 @@ class Transceiver(AbstractContextManager):
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
         :param bool is_filename: True if `data` is a filename
-        :return: The number of bytes written
-        :rtype: n_bytes
+        :param bool get_sum: whether to return a checksum or 0
+        :return: The number of bytes written, the checksum (0 if get_sum=False)
+        :rtype: int, int
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -1612,25 +1613,25 @@ class Transceiver(AbstractContextManager):
         """
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
-            process.write_memory_from_reader(
-                x, y, cpu, base_address, data, n_bytes)
+            chksum = process.write_memory_from_reader(
+                x, y, cpu, base_address, data, n_bytes, get_sum)
         elif isinstance(data, str) and is_filename:
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
             with open(data, "rb") as reader:
-                process.write_memory_from_reader(
-                    x, y, cpu, base_address, reader, n_bytes)
+                chksum = process.write_memory_from_reader(
+                    x, y, cpu, base_address, reader, n_bytes, get_sum)
         elif isinstance(data, int):
             n_bytes = 4
             data_to_write = _ONE_WORD.pack(data)
-            process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data_to_write, 0, n_bytes)
+            chksum = process.write_memory_from_bytearray(
+                x, y, cpu, base_address, data_to_write, 0, n_bytes, get_sum)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
-            process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data, offset, n_bytes)
-        return n_bytes
+            chksum = process.write_memory_from_bytearray(
+                x, y, cpu, base_address, data, offset, n_bytes, get_sum)
+        return n_bytes, chksum
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
                                n_bytes=None, offset=0, cpu=0):
@@ -2832,6 +2833,14 @@ class Transceiver(AbstractContextManager):
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
+
+    def control_sync(self, do_sync):
+        """ Control the synchronization of the chips
+
+        :param bool do_sync: Whether to synchonize or not
+        """
+        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process.execute(DoSync(do_sync))
 
     def __str__(self):
         return "transceiver object connected to {} with {} connections"\
