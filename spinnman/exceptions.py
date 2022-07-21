@@ -16,16 +16,6 @@
 import traceback
 
 
-def get_physical_cpu_id(machine, sdp_header):
-    if machine is not None:
-        chip = machine.get_chip_at(sdp_header.destination_chip_x,
-                                   sdp_header.destination_chip_y)
-        if chip is not None:
-            return chip.get_physical_core_string(
-                sdp_header.destination_cpu)
-    return ""
-
-
 class SpinnmanException(Exception):
     """ Superclass of exceptions that occur when dealing with communication\
         with SpiNNaker
@@ -233,13 +223,12 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with a\
         collection of cores/chips
     """
-    def __init__(self, error_requests, exceptions, tracebacks, connections,
-                 machine):
+    def __init__(self, error_requests, exceptions, tracebacks, connections):
         problem = "Exceptions found were:\n"
         for error_request, exception, trace_back, connection in zip(
                 error_requests, exceptions, tracebacks, connections):
             sdp_header = error_request.sdp_header
-            phys_p = get_physical_cpu_id(machine, sdp_header)
+            phys_p = sdp_header.get_physical_cpu_id()
             location = "board {} with ethernet chip {}:{} [{}:{}:{}{}]".format(
                 connection.remote_ip_address, connection.chip_x,
                 connection.chip_y, sdp_header.destination_chip_x,
