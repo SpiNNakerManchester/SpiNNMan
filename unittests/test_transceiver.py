@@ -17,6 +17,7 @@ import unittest
 import struct
 from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
+from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
@@ -49,6 +50,9 @@ class MockWriteTransceiver(Transceiver):
         print("Doing write to", x, y)
         self.written_memory.append(
             (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
+
+    def close(self):
+        pass
 
 
 class TestTransceiver(unittest.TestCase):
@@ -96,6 +100,7 @@ class TestTransceiver(unittest.TestCase):
         connections.append(BootConnection(
             remote_host=board_config.remotehost))
         with transceiver.Transceiver(ver, connections=connections) as trans:
+            SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
             if board_config.board_version in (2, 3):
                 assert trans.get_machine_dimensions().width == 2
                 assert trans.get_machine_dimensions().height == 2
@@ -149,7 +154,7 @@ class TestTransceiver(unittest.TestCase):
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
         tx = MockWriteTransceiver(version=5, connections=connections)
-
+        SpiNNManDataWriter.mock().set_machine(tx.get_machine_details())
         # All chips
         tx.set_watch_dog(True)
         tx.set_watch_dog(False)

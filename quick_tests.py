@@ -28,6 +28,7 @@ import struct
 import time
 from spinn_machine import CoreSubsets, CoreSubset, MulticastRoutingEntry
 from spinn_machine.tags import IPTag, ReverseIPTag
+from spinnman.data import SpiNNManDataView
 from spinnman.config_setup import unittest_setup
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinnman.model.enums import CPUState
@@ -156,7 +157,7 @@ def print_transceiver_tests(transceiver):
         version_info = transceiver.ensure_board_is_ready()
         print(version_info)
 
-    app_id = transceiver.app_id_tracker.get_new_id()
+    app_id = SpiNNManDataView().get_new_id()
 
     with Section("Discovering other connections to the machine"):
         connections = transceiver.discover_scamp_connections()
