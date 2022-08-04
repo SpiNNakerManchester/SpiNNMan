@@ -195,6 +195,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         }, machine_name)
 
     def close(self):
+        # pylint: disable=protected-access
         if self.__session is not None:
             self.__session._purge()
         self.__session = None
@@ -501,6 +502,7 @@ class _SpallocJob(SessionAware, SpallocJob):
                 self._queue.put("quit")
 
         self._keepalive_handle = Closer()
+        # pylint: disable=protected-access
         p = Process(target=_SpallocKeepalive, args=(
             self._keepalive_url, period, self._keepalive_handle._queue,
             *self._session_credentials), daemon=True)
@@ -525,15 +527,14 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__keepalive_handle = handle
 
     @overrides(SpallocJob.create_transceiver)
-    def create_transceiver(self, default_report_directory=None) -> Transceiver:
+    def create_transceiver(self) -> Transceiver:
         if self.get_state() != SpallocState.READY:
             raise Exception("job not ready to execute scripts")
         proxies = [
             self.connect_to_board(x, y) for (x, y) in self.get_connections()]
         # Also need a boot connection
         proxies.append(self.connect_for_booting())
-        return Transceiver(version=5, connections=proxies,
-                           default_report_directory=default_report_directory)
+        return Transceiver(version=5, connections=proxies)
 
     def __repr__(self):
         return f"SpallocJob({self._url})"

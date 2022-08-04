@@ -611,15 +611,11 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def create_transceiver(
-            self, default_report_directory: str = None) -> Transceiver:
+    def create_transceiver(self) -> Transceiver:
         """
         Create a transceiver that will talk to this job. The transceiver will
         only be configured to talk to the SCP ports of the boards of the job.
 
-        :param str default_report_directory:
-            Directory to write any reports too. If ``None`` the current
-            directory will be used.
         :rtype: Transceiver
         """
 
