@@ -57,7 +57,7 @@ class SDRAMAlloc(AbstractSCPRequest):
 
         if tag is None:
             tag = 0
-        elif not(0 <= tag < 256):
+        elif not (0 <= tag < 256):
             raise SpinnmanInvalidParameterException(
                 "tag",
                 "The tag param needs to be between 0 and 255, or None (in "
