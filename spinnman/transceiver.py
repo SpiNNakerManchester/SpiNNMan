@@ -2678,7 +2678,6 @@ class Transceiver(AbstractContextManager):
         """ Close the transceiver and any threads that are running
 
         """
-        # pylint: disable=arguments-differ
         if self._bmp_connections:
             if get_config_bool("Machine", "turn_off_machine"):
                 self.power_off_machine()
