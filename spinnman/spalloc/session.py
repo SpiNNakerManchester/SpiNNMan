@@ -59,6 +59,7 @@ def _may_renew(method):
                 pp_req(r.request)
                 pp_resp(r)
             if _SESSION_COOKIE in r.cookies:
+                # pylint: disable=protected-access
                 self._session_id = r.cookies[_SESSION_COOKIE]
             if r.status_code != 401 or not renew_count:
                 return r
@@ -290,6 +291,7 @@ class SessionAware:
 
         :rtype: tuple(dict(str,str),dict(str,str))
         """
+        # pylint: disable=protected-access
         return self.__session._credentials
 
     @property
@@ -299,6 +301,7 @@ class SessionAware:
 
         :rtype: str
         """
+        # pylint: disable=protected-access
         return self.__session._service_url
 
     def _get(self, url: str, **kwargs) -> requests.Response:
