@@ -30,7 +30,8 @@ class AppCopyRun(AbstractSCPRequest):
     """
     __slots__ = ["__link"]
 
-    def __init__(self, x, y, link, size, app_id, processors, wait=False):
+    def __init__(self, x, y, link, size, app_id, processors, chksum,
+                 wait=False):
         """
         :param int x:
             The x-coordinate of the chip to read from, between 0 and 255
@@ -40,6 +41,7 @@ class AppCopyRun(AbstractSCPRequest):
         :param int size: The number of bytes to read, must be divisible by 4
         :param int app_id: The app to associate the copied binary with
         :param list(int) processors: The processors to start on the chip
+        :param int chksum: The checksum of the data to copy
         :param bool wait: Whether to start in wait mode or not
         """
         # pylint: disable=too-many-arguments
@@ -57,13 +59,15 @@ class AppCopyRun(AbstractSCPRequest):
             processor_mask |= _WAIT_FLAG
         self.__link = link
 
+        arg1 = ((chksum & 0x1FFFFFFF) << 3) | link
+
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_APP_COPY_RUN),
-            argument_1=link, argument_2=size, argument_3=processor_mask)
+            argument_1=arg1, argument_2=size, argument_3=processor_mask)
 
     def __repr__(self):
         return f"{super(AppCopyRun, self).__repr__()} (Link {self.__link})"

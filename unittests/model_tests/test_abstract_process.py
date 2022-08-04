@@ -44,6 +44,6 @@ class MockConnection(SCAMPConnection):
 def test_error_print():
     unittest_setup()
     connection = MockConnection(0, 0)
-    process = MockProcess(RoundRobinConnectionSelector([connection], None))
+    process = MockProcess(RoundRobinConnectionSelector([connection]))
     with pytest.raises(SpinnmanGenericProcessException):
         process.test()

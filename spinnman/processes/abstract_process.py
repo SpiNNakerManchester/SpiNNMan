@@ -19,8 +19,7 @@ from spinn_utilities.abstract_base import (
     AbstractBase, abstractproperty)
 from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import (
-    SpinnmanGenericProcessException, SpinnmanGroupedProcessException,
-    get_physical_cpu_id)
+    SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -36,7 +35,7 @@ class AbstractProcess(object, metaclass=AbstractBase):
 
     ERROR_MESSAGE = (
         "failure in request to board {} with ethernet chip (%d, %d) for "
-        "chip (%d, %d, %d%s")
+        "chip (%d, %d, %d(%d))")
 
     def __init__(self):
         self._exceptions = []
@@ -62,9 +61,7 @@ class AbstractProcess(object, metaclass=AbstractBase):
         if len(self._exceptions) == 1:
             exc_info = sys.exc_info()
             sdp_header = self._error_requests[0].sdp_header
-
-            phys_p = get_physical_cpu_id(
-                self.connection_selector.machine, sdp_header)
+            phys_p = sdp_header.get_physical_cpu_id()
 
             if print_exception:
                 connection = self._connections[0]
@@ -83,7 +80,7 @@ class AbstractProcess(object, metaclass=AbstractBase):
         elif self._exceptions:
             ex = SpinnmanGroupedProcessException(
                 self._error_requests, self._exceptions, self._tracebacks,
-                self._connections, self.connection_selector.machine)
+                self._connections)
             if print_exception:
                 logger.error("{}".format(str(ex)))
             raise ex

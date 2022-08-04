@@ -20,6 +20,7 @@ from .bmp_get_version import BMPGetVersion
 from .bmp_set_led import BMPSetLed
 from .check_ok_response import CheckOKResponse
 from .count_state import CountState
+from .do_sync import DoSync
 from .fill_request import FillRequest
 from .flood_fill_data import FloodFillData
 from .flood_fill_end import FloodFillEnd
@@ -53,6 +54,7 @@ from .fixed_route_read import FixedRouteRead
 __all__ = ["AppStop", "ApplicationRun", "AppCopyRun",
            "BMPSetLed", "BMPGetVersion",
            "CheckOKResponse", "GetChipInfo", "CountState",
+           "DoSync",
            "FloodFillData", "FillRequest",
            "FloodFillEnd", "FloodFillStart",
            "IPTagClear", "IPTagGet", "IPTagGetInfo",

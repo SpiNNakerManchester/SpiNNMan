@@ -24,17 +24,15 @@ class RoundRobinConnectionSelector(
     """
     __slots__ = [
         "_connections",
-        "_next_connection_index",
-        "_machine"]
+        "_next_connection_index"]
 
-    def __init__(self, connections, machine):
+    def __init__(self, connections):
         """
         :param list(SCAMPConnection) connections:
             The connections to be used
         """
         self._connections = connections
         self._next_connection_index = 0
-        self._machine = machine
 
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
@@ -42,8 +40,3 @@ class RoundRobinConnectionSelector(
         index = self._next_connection_index
         self._next_connection_index = (index + 1) % len(self._connections)
         return self._connections[index]
-
-    @property
-    @overrides(AbstractMultiConnectionProcessConnectionSelector.machine)
-    def machine(self):
-        return self._machine

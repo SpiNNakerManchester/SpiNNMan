@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2021-22 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,21 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod)
+from .spinnman_data_view import SpiNNManDataView
 
 
-class AbstractMultiConnectionProcessConnectionSelector(
-        object, metaclass=AbstractBase):
-    """ A connection selector for multi-connection processes
-    """
-    __slots__ = []
-
-    @abstractmethod
-    def get_next_connection(self, message):
-        """ Get the index of the  next connection for the process from a list\
-            of connections.
-
-        :param AbstractSCPRequest message: The SCP message to be sent
-        :rtype: SCAMPConnection
-        """
+__all__ = ["SpiNNManDataView"]
