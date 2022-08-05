@@ -40,11 +40,25 @@ def update_sdp_header_for_udp_send(sdp_header, source_x, source_y):
 
 
 def get_socket():
-    """ Wrapper round socket() system call.
+    """ Wrapper round socket() system call to produce UDP/IPv4 sockets.
     """
     try:
         # Create a UDP Socket
         return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    except Exception as exception:  # pylint: disable=broad-except
+        raise SpinnmanIOException(
+            "Error setting up socket: {}".format(exception)) from exception
+
+
+def get_tcp_socket():
+    """ Wrapper round socket() system call to produce TCP/IPv4 sockets.
+
+    .. note::
+        TCP sockets cannot be used to talk to a SpiNNaker board.
+    """
+    try:
+        # Create a UDP Socket
+        return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except Exception as exception:  # pylint: disable=broad-except
         raise SpinnmanIOException(
             "Error setting up socket: {}".format(exception)) from exception
