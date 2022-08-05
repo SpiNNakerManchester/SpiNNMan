@@ -20,12 +20,12 @@ from contextlib import suppress
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.ping import Ping
-from spinnman.exceptions import (
-    SpinnmanIOException, SpinnmanTimeoutException, SpinnmanEOFException)
+from spinnman.exceptions import (SpinnmanIOException, SpinnmanEOFException)
 from spinnman.connections.abstract_classes import Connection
 from spinnman.utilities.socket_utils import (
     bind_socket, connect_socket, get_udp_socket, get_socket_address,
-    resolve_host, set_receive_buffer_size)
+    resolve_host, set_receive_buffer_size, receive_message,
+    receive_message_and_address, send_message, send_message_to_address)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 _RECEIVE_BUFFER_SIZE = 1048576
@@ -175,13 +175,7 @@ class UDPConnection(Connection):
         """
         if self.__is_closed:
             raise SpinnmanEOFException()
-        try:
-            self._socket.settimeout(timeout)
-            return self._socket.recv(300)
-        except socket.timeout as e:
-            raise SpinnmanTimeoutException("receive", timeout) from e
-        except Exception as e:  # pylint: disable=broad-except
-            raise SpinnmanIOException(str(e)) from e
+        return receive_message(self._socket, timeout, 300)
 
     def receive_with_address(self, timeout=None):
         """ Receive data from the connection along with the address where the\
@@ -197,13 +191,7 @@ class UDPConnection(Connection):
         """
         if self.__is_closed:
             raise SpinnmanEOFException()
-        try:
-            self._socket.settimeout(timeout)
-            return self._socket.recvfrom(300)
-        except socket.timeout as e:
-            raise SpinnmanTimeoutException("receive", timeout) from e
-        except Exception as e:  # pylint: disable=broad-except
-            raise SpinnmanIOException(str(e)) from e
+        return receive_message_and_address(self._socket, timeout, 300)
 
     def send(self, data):
         """ Send data down this connection
@@ -218,14 +206,9 @@ class UDPConnection(Connection):
             raise SpinnmanIOException(
                 "Remote host and/or port not set - data cannot be sent with"
                 " this connection")
-        try:
-            while not self._socket.send(data):
-                if self.__is_closed:
-                    raise SpinnmanEOFException()
-        except SpinnmanIOException:
-            raise
-        except Exception as e:  # pylint: disable=broad-except
-            raise SpinnmanIOException(str(e)) from e
+        while not send_message(self._socket, data):
+            if self.__is_closed:
+                raise SpinnmanEOFException()
 
     def send_to(self, data, address):
         """ Send data down this connection
@@ -238,14 +221,9 @@ class UDPConnection(Connection):
         """
         if self.__is_closed:
             raise SpinnmanEOFException()
-        try:
-            while not self._socket.sendto(data, address):
-                if self.__is_closed:
-                    raise SpinnmanEOFException()
-        except SpinnmanIOException:
-            raise
-        except Exception as e:  # pylint: disable=broad-except
-            raise SpinnmanIOException(str(e)) from e
+        while not send_message_to_address(self._socket, data, address):
+            if self.__is_closed:
+                raise SpinnmanEOFException()
 
     @overrides(Connection.close)
     def close(self):

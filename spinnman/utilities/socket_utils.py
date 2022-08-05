@@ -12,11 +12,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+Wrappers around socket-related system calls to do exception remapping and
+apply some consistency to things.
+"""
 
 import logging
 import socket
 from spinn_utilities.log import FormatAdapter
-from spinnman.exceptions import SpinnmanIOException
+from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -27,9 +31,9 @@ def get_udp_socket():
     try:
         # Create a UDP Socket
         return socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    except Exception as exception:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         raise SpinnmanIOException(
-            "Error setting up socket: {}".format(exception)) from exception
+            f"Error setting up socket: {e}") from e
 
 
 def get_tcp_socket():
@@ -41,9 +45,9 @@ def get_tcp_socket():
     try:
         # Create a UDP Socket
         return socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    except Exception as exception:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         raise SpinnmanIOException(
-            "Error setting up socket: {}".format(exception)) from exception
+            f"Error setting up socket: {e}") from e
 
 
 def set_receive_buffer_size(sock, size):
@@ -64,10 +68,9 @@ def bind_socket(sock, host, port):
     try:
         # Bind the socket
         sock.bind((str(host), int(port)))
-    except Exception as exception:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         raise SpinnmanIOException(
-            "Error binding socket to {}:{}: {}".format(
-                host, port, exception)) from exception
+            f"Error binding socket to {host}:{port}: {e}") from e
 
 
 def resolve_host(host):
@@ -75,10 +78,9 @@ def resolve_host(host):
     """
     try:
         return socket.gethostbyname(host)
-    except Exception as exception:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         raise SpinnmanIOException(
-            "Error getting IP address for {}: {}".format(
-                host, exception)) from exception
+            f"Error getting IP address for {host}: {e}") from e
 
 
 def connect_socket(sock, remote_address, remote_port):
@@ -86,10 +88,9 @@ def connect_socket(sock, remote_address, remote_port):
     """
     try:
         sock.connect((str(remote_address), int(remote_port)))
-    except Exception as exception:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except
         raise SpinnmanIOException(
-            "Error connecting to {}:{}: {}".format(
-                remote_address, remote_port, exception)) from exception
+            f"Error connecting to {remote_address}:{remote_port}: {e}") from e
 
 
 def get_socket_address(sock):
@@ -102,6 +103,51 @@ def get_socket_address(sock):
         if addr is None or addr == "":
             addr = "0.0.0.0"
         return addr, port
-    except Exception as exception:  # pylint: disable=broad-except
-        raise SpinnmanIOException("Error querying socket: {}".format(
-            exception)) from exception
+    except Exception as e:  # pylint: disable=broad-except
+        raise SpinnmanIOException(f"Error querying socket: {e}") from e
+
+
+def receive_message(sock, timeout, size):
+    """
+    Wrapper round recv() system call.
+    """
+    try:
+        sock.settimeout(timeout)
+        return sock.recv(size)
+    except socket.timeout as e:
+        raise SpinnmanTimeoutException("receive", timeout) from e
+    except Exception as e:  # pylint: disable=broad-except
+        raise SpinnmanIOException(f"Error receiving: {e}") from e
+
+
+def receive_message_and_address(sock, timeout, size):
+    """
+    Wrapper round recvfrom() system call.
+    """
+    try:
+        sock.settimeout(timeout)
+        return sock.recvfrom(size)
+    except socket.timeout as e:
+        raise SpinnmanTimeoutException("receive", timeout) from e
+    except Exception as e:  # pylint: disable=broad-except
+        raise SpinnmanIOException(f"Error receiving: {e}") from e
+
+
+def send_message(sock, data):
+    """
+    Wrapper round send() system call.
+    """
+    try:
+        return sock.send(data)
+    except Exception as e:  # pylint: disable=broad-except
+        raise SpinnmanIOException(f"Error sending: {e}") from e
+
+
+def send_message_to_address(sock, data, address):
+    """
+    Wrapper round sendto() system call.
+    """
+    try:
+        return sock.sendto(data, address)
+    except Exception as e:  # pylint: disable=broad-except
+        raise SpinnmanIOException(f"Error sending: {e}") from e
