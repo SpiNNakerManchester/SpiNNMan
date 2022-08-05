@@ -19,11 +19,12 @@ import select
 from contextlib import suppress
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
+from spinn_utilities.ping import Ping
 from spinnman.exceptions import (
     SpinnmanIOException, SpinnmanTimeoutException, SpinnmanEOFException)
 from spinnman.connections.abstract_classes import Connection
-from .utils import (
-    bind_socket, connect_socket, get_socket, get_socket_address, ping,
+from spinnman.utilities.socket_utils import (
+    bind_socket, connect_socket, get_udp_socket, get_socket_address,
     resolve_host, set_receive_buffer_size)
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -61,7 +62,7 @@ class UDPConnection(Connection):
             If there is an error setting up the communication channel
         """
 
-        self._socket = get_socket()
+        self._socket = get_udp_socket()
         set_receive_buffer_size(self._socket, _RECEIVE_BUFFER_SIZE)
 
         # Get the host and port to bind to locally
@@ -119,7 +120,7 @@ class UDPConnection(Connection):
         # check if machine is active and on the network
         for _ in range(_PING_COUNT):
             # Assume connected if ping works
-            if ping(self._remote_ip_address).returncode == 0:
+            if Ping.ping(self._remote_ip_address) == 0:
                 return True
 
         # If the ping fails this number of times, the host cannot be contacted

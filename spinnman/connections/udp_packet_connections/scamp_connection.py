@@ -16,8 +16,8 @@
 import struct
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
-from .utils import update_sdp_header_for_udp_send
 from .sdp_connection import SDPConnection
+from .utils import update_sdp_header_for_udp_send
 from spinnman.connections.abstract_classes import SCPSender, SCPReceiver
 from spinn_utilities.overrides import overrides
 
