@@ -40,11 +40,10 @@ def _get_next_chips(chips_done):
             chip_coords = (link.destination_x, link.destination_y)
             if chip_coords not in chips_done and chip_coords not in next_chips:
                 next_chip = SpiNNManDataView.get_chip_at(*chip_coords)
-                if not next_chip.virtual:
-                    opp_link = (link.source_link_id + 3) % 6
-                    next_chips[chip_coords] = (opp_link, next_chip)
-                    # Only let one thing copy from this chip
-                    break
+                opp_link = (link.source_link_id + 3) % 6
+                next_chips[chip_coords] = (opp_link, next_chip)
+                # Only let one thing copy from this chip
+                break
     return next_chips
 
 
