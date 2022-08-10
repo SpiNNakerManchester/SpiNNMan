@@ -37,8 +37,7 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
     print('running: {} finished: {}'.format(count_run, count_finished))
 
     machine = txrx.get_machine_details()
-    print('machine max x: {} max y: {}'.format(
-        machine.max_chip_x, machine.max_chip_y))
+    print(f'machine width: {machine.width} height: {machine.height}')
     if print_all_chips:
         print('machine chips: {}'.format(list(machine.chips)))
 
