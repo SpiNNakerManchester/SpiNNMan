@@ -44,6 +44,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
         """
 
         if base_address is not None:
+            # pylint: disable=unsupported-binary-operation
             super().__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

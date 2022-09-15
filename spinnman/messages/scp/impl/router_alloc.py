@@ -40,6 +40,7 @@ class RouterAlloc(AbstractSCPRequest):
         :param int app_id: The ID of the application, between 0 and 255
         :param int n_entries: The number of entries to allocate
         """
+        # pylint: disable=unsupported-binary-operation
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
