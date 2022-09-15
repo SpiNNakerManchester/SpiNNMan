@@ -63,6 +63,7 @@ class SDRAMAlloc(AbstractSCPRequest):
                 "The tag param needs to be between 0 and 255, or None (in "
                 "which case 0 will be used by default)", str(tag))
 
+        # pylint: disable=unsupported-binary-operation
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
