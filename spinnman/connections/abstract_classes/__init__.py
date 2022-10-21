@@ -17,7 +17,6 @@ from .connection import Connection
 from .eieio_receiver import EIEIOReceiver
 from .eieio_sender import EIEIOSender
 from .listenable import Listenable
-from .multicast_receiver import MulticastReceiver
 from .multicast_sender import MulticastSender
 from .scp_receiver import SCPReceiver
 from .scp_sender import SCPSender
@@ -28,7 +27,7 @@ from .spinnaker_boot_sender import SpinnakerBootSender
 
 __all__ = ["Connection", "EIEIOReceiver",
            "EIEIOSender", "Listenable",
-           "MulticastReceiver", "MulticastSender",
+           "MulticastSender",
            "SCPReceiver", "SCPSender", "SDPReceiver",
            "SDPSender", "SpinnakerBootReceiver",
            "SpinnakerBootSender"]
