@@ -14,9 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from spinn_utilities.overrides import overrides
-from spinnman.connections.abstract_classes import (
-    SpinnakerBootSender, SpinnakerBootReceiver)
 from .udp_connection import UDPConnection
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
@@ -24,8 +21,7 @@ from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 _ANTI_FLOOD_DELAY = 0.1
 
 
-class BootConnection(
-        UDPConnection, SpinnakerBootSender, SpinnakerBootReceiver):
+class BootConnection(UDPConnection):
     """ A connection to the SpiNNaker board that uses UDP to for booting
     """
     __slots__ = []
@@ -45,15 +41,36 @@ class BootConnection(
         super().__init__(remote_host=remote_host,
                          remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
-    @overrides(SpinnakerBootSender.send_boot_message)
     def send_boot_message(self, boot_message):
+        """ Sends a SpiNNaker boot message using this connection.
+
+        :param SpinnakerBootMessage boot_message: The message to be sent
+        :raise SpinnmanIOException:
+            If there is an error sending the message
+        """
         self.send(boot_message.bytestring)
 
         # Sleep between messages to avoid flooding the machine
         time.sleep(_ANTI_FLOOD_DELAY)
 
-    @overrides(SpinnakerBootReceiver.receive_boot_message)
     def receive_boot_message(self, timeout=None):
+        """ Receives a boot message from this connection.  Blocks until a\
+            message has been received, or a timeout occurs.
+
+        :param int timeout:
+            The time in seconds to wait for the message to arrive; if not
+            specified, will wait forever, or until the connection is closed.
+        :return: a boot message
+        :rtype: SpinnakerBootMessage
+        :raise SpinnmanIOException:
+            If there is an error receiving the message
+        :raise SpinnmanTimeoutException:
+            If there is a timeout before a message is received
+        :raise SpinnmanInvalidPacketException:
+            If the received packet is not a valid SpiNNaker boot message
+        :raise SpinnmanInvalidParameterException:
+            If one of the fields of the SpiNNaker boot message is invalid
+        """
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)
 
