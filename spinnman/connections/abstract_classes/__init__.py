@@ -17,9 +17,5 @@ from .connection import Connection
 from .listenable import Listenable
 from .scp_receiver import SCPReceiver
 from .scp_sender import SCPSender
-from .sdp_receiver import SDPReceiver
-from .sdp_sender import SDPSender
 
-__all__ = ["Connection", "Listenable",
-           "SCPReceiver", "SCPSender",
-           "SDPReceiver", "SDPSender"]
+__all__ = ("Connection", "Listenable", "SCPReceiver", "SCPSender")

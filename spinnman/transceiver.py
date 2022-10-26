@@ -58,15 +58,15 @@ from spinnman.messages.scp.impl import (
     CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
     IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.connections import ConnectionListener
-from spinnman.connections.abstract_classes import (
-    SCPSender, SDPSender, SCPReceiver, Listenable)
+from spinnman.connections.abstract_classes import Listenable
 from spinnman.connections.udp_packet_connections import (
-    BMPConnection, UDPConnection, BootConnection, SCAMPConnection)
+    BMPConnection, UDPConnection, BootConnection, SCAMPConnection,
+    SDPConnection)
 from spinnman.processes import (
     DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
     GetCPUInfoProcess, ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
-    LoadFixedRouteRoutingEntryProcess,
+    LoadFixedRouteRoutingEntryProcess, FixedConnectionSelector,
     ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
@@ -188,7 +188,6 @@ class Transceiver(AbstractContextManager):
         "_nearest_neighbour_lock",
         "_scamp_connection_selector",
         "_scamp_connections",
-        "_scp_sender_connections",
         "_sdp_sender_connections",
         "_udp_listenable_connections_by_class",
         "_udp_receive_connections_by_port",
@@ -245,12 +244,6 @@ class Transceiver(AbstractContextManager):
         # that are listenable.  Note that listener might be None if the
         # connection has not be listened to before.
         self._udp_listenable_connections_by_class = defaultdict(list)
-
-        # A list of all connections that can be used to send SCP messages
-        # Note that some of these might not be able to receive SCP; this
-        # could be useful if they are just using SCP to send a command that
-        # doesn't expect a response
-        self._scp_sender_connections = list()
 
         # A list of all connections that can be used to send SDP messages
         self._sdp_sender_connections = list()
@@ -332,30 +325,21 @@ class Transceiver(AbstractContextManager):
                     self._udp_listenable_connections_by_class[
                         conn.__class__].append((conn, None))
 
-            # Locate any connections that can send SCP
-            # (that are not BMP connections)
-            if (isinstance(conn, SCPSender) and
-                    not isinstance(conn, BMPConnection)):
-                self._scp_sender_connections.append(conn)
-
             # Locate any connections that can send SDP
-            if isinstance(conn, SDPSender):
+            if isinstance(conn, SDPConnection):
                 self._sdp_sender_connections.append(conn)
 
-            # Locate any connections that can send and receive SCP
-            if isinstance(conn, SCPSender) and isinstance(conn, SCPReceiver):
+            # Locate any connections that talk to a BMP
+            if isinstance(conn, BMPConnection):
                 # If it is a BMP conn, add it here
-                if isinstance(conn, BMPConnection):
-                    self._bmp_connections.append(conn)
-                    self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
-                        MostDirectConnectionSelector([conn])
-                else:
-                    self._scamp_connections.append(conn)
-
-                    # If also a UDP conn, add it here (for IP tags)
-                    if isinstance(conn, UDPConnection):
-                        board_address = conn.remote_ip_address
-                        self._udp_scamp_connections[board_address] = conn
+                self._bmp_connections.append(conn)
+                self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
+                    FixedConnectionSelector(conn)
+            # Otherwise, check if it can send and receive SCP (talk to SCAMP)
+            elif isinstance(conn, SCAMPConnection):
+                self._scamp_connections.append(conn)
+                # Remember, for IP tag configuring
+                self._udp_scamp_connections[conn.remote_ip_address] = conn
 
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(self._scamp_connections)
@@ -504,8 +488,7 @@ class Transceiver(AbstractContextManager):
             If the response is not one of the expected codes
         """
         if connection is None:
-            connection = self._get_random_connection(
-                self._scp_sender_connections)
+            connection = self._get_random_connection(self._scamp_connections)
         connection.send_scp_request(message)
 
     def send_sdp_message(self, message, connection=None):
@@ -523,9 +506,9 @@ class Transceiver(AbstractContextManager):
 
     def _check_and_add_scamp_connections(self, x, y, ip_address):
         """
-        :param int x:
-        :param int y:
-        :param str ip_address:
+        :param int x: X coordinate of target chip
+        :param int y: Y coordinate of target chip
+        :param str ip_address: IP address of target chip
 
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -536,13 +519,10 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        conn = SCAMPConnection(
-                remote_host=ip_address, chip_x=x, chip_y=y)
+        conn = SCAMPConnection(remote_host=ip_address, chip_x=x, chip_y=y)
 
         # check if it works
-        if self._check_connection(
-                MostDirectConnectionSelector([conn]), x, y):
-            self._scp_sender_connections.append(conn)
+        if self._check_connection(FixedConnectionSelector(conn), x, y):
             self._all_connections.add(conn)
             self._udp_scamp_connections[ip_address] = conn
             self._scamp_connections.append(conn)
@@ -1424,7 +1404,7 @@ class Transceiver(AbstractContextManager):
         """
         :param int cabinet:
         :param int frame:
-        :rtype: MostDirectConnectionSelector
+        :rtype: FixedConnectionSelector
         """
         key = (cabinet, frame)
         if key not in self._bmp_connection_selectors:
