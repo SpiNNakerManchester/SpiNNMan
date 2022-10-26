@@ -14,15 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .connection import Connection
-from .eieio_receiver import EIEIOReceiver
-from .eieio_sender import EIEIOSender
 from .listenable import Listenable
 from .scp_receiver import SCPReceiver
 from .scp_sender import SCPSender
 from .sdp_receiver import SDPReceiver
 from .sdp_sender import SDPSender
 
-__all__ = ["Connection", "EIEIOReceiver",
-           "EIEIOSender", "Listenable",
+__all__ = ["Connection", "Listenable",
            "SCPReceiver", "SCPSender",
            "SDPReceiver", "SDPSender"]
