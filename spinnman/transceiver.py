@@ -59,7 +59,7 @@ from spinnman.messages.scp.impl import (
     IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.connections import ConnectionListener
 from spinnman.connections.abstract_classes import (
-    SpinnakerBootSender, SCPSender, SDPSender, SCPReceiver, Listenable)
+    SCPSender, SDPSender, SCPReceiver, Listenable)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, UDPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
@@ -316,7 +316,7 @@ class Transceiver(AbstractContextManager):
         for conn in connections:
 
             # locate the only boot send conn
-            if isinstance(conn, SpinnakerBootSender):
+            if isinstance(conn, BootConnection):
                 if self._boot_send_connection is not None:
                     raise SpinnmanInvalidParameterException(
                         "connections", "[... {} ...]".format(conn),
