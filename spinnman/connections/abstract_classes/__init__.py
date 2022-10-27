@@ -15,7 +15,6 @@
 
 from .connection import Connection
 from .listenable import Listenable
-from .scp_receiver import SCPReceiver
-from .scp_sender import SCPSender
+from .abstract_scp_connection import AbstractSCPConnection
 
-__all__ = ("Connection", "Listenable", "SCPReceiver", "SCPSender")
+__all__ = ("Connection", "Listenable", "AbstractSCPConnection")

@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import math
 import struct
 from spinn_utilities.overrides import overrides
 from spinnman.exceptions import (
@@ -130,9 +129,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :rtype: int
         """
         ty = self._header.eieio_type
-        return int(math.floor(
-            (UDP_MESSAGE_MAX_SIZE - self._header.size) /
-            (ty.key_bytes + ty.payload_bytes)))
+        return (UDP_MESSAGE_MAX_SIZE - self._header.size) // (
+            ty.key_bytes + ty.payload_bytes)
 
     @property
     def n_elements(self):

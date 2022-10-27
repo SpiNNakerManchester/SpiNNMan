@@ -18,7 +18,7 @@ from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
 from .sdp_connection import SDPConnection
 from .utils import update_sdp_header_for_udp_send
-from spinnman.connections.abstract_classes import SCPSender, SCPReceiver
+from spinnman.connections.abstract_classes import AbstractSCPConnection
 from spinn_utilities.overrides import overrides
 
 _TWO_SHORTS = struct.Struct("<2H")
@@ -27,7 +27,7 @@ _REPR_TEMPLATE = "SCAMPConnection(chip_x={}, chip_y={}, local_host={}," \
     " local_port={}, remote_host={}, remote_port={})"
 
 
-class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
+class SCAMPConnection(SDPConnection, AbstractSCPConnection):
     """ A UDP connection to SCAMP on the board.
     """
     __slots__ = []
@@ -57,10 +57,12 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
             chip_x, chip_y, local_host, local_port, remote_host, remote_port)
 
     @property
+    @overrides(AbstractSCPConnection.chip_x)
     def chip_x(self):
         return self._chip_x
 
     @property
+    @overrides(AbstractSCPConnection.chip_y)
     def chip_y(self):
         return self._chip_y
 
@@ -68,7 +70,7 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
         self._chip_x = x
         self._chip_y = y
 
-    @overrides(SCPSender.get_scp_data,
+    @overrides(AbstractSCPConnection.get_scp_data,
                additional_arguments=['x', 'y'], extend_defaults=True)
     def get_scp_data(self, scp_request, x=None, y=None):
         """
@@ -83,7 +85,7 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
         update_sdp_header_for_udp_send(scp_request.sdp_header, x, y)
         return _TWO_SKIP.pack() + scp_request.bytestring
 
-    @overrides(SCPReceiver.receive_scp_response)
+    @overrides(AbstractSCPConnection.receive_scp_response)
     def receive_scp_response(self, timeout=1.0):
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
@@ -94,7 +96,7 @@ class SCAMPConnection(SDPConnection, SCPSender, SCPReceiver):
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2, addr, port
 
-    @overrides(SCPSender.send_scp_request)
+    @overrides(AbstractSCPConnection.send_scp_request)
     def send_scp_request(self, scp_request):
         self.send(self.get_scp_data(scp_request))
 

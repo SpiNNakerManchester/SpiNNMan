@@ -669,9 +669,10 @@ class Transceiver(AbstractContextManager):
         machine.add_spinnaker_links()
         machine.add_fpga_links()
 
-        logger.info("Detected a machine on IP address {} which has {}",
-                    self._boot_send_connection.remote_ip_address,
-                    machine.cores_and_link_output_string())
+        if self._boot_send_connection:
+            logger.info("Detected a machine on IP address {} which has {}",
+                        self._boot_send_connection.remote_ip_address,
+                        machine.cores_and_link_output_string())
         return machine
 
     def is_connected(self, connection=None):
@@ -737,6 +738,9 @@ class Transceiver(AbstractContextManager):
             logger.warning(
                 "The width, height and number_of_boards are no longer"
                 " supported, and might be removed in a future version")
+        if not self._boot_send_connection:
+            # No can do. Can't boot without a boot connection.
+            raise SpinnmanIOException("no boot connection available")
         boot_messages = SpinnakerBootMessages(
             board_version=self._version, extra_boot_values=extra_boot_values)
         for boot_message in boot_messages.messages:
@@ -2227,13 +2231,13 @@ class Transceiver(AbstractContextManager):
     def __get_connection_list(self, connection=None, board_address=None):
         """ Get the connections for talking to a board.
 
-        :param SCPSender connection:
+        :param SCAMPConnection connection:
             Optional param that directly gives the connection to use.
         :param str board_address:
             Optional param that gives the address of the board to talk to.
         :return: List of length 1 or 0 (the latter only if the search for
             the given board address fails).
-        :rtype: list(SCPSender)
+        :rtype: list(SCAMPConnection)
         """
         if connection is not None:
             return [connection]
@@ -2302,8 +2306,8 @@ class Transceiver(AbstractContextManager):
         :param int tag: The tag ID
         :param str board_address:
             Board address where the tag should be cleared.
-            If not specified, all SCPSender connections will send the message
-            to clear the tag
+            If not specified, all AbstractSCPConnection connections will send
+            the message to clear the tag
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2322,10 +2326,10 @@ class Transceiver(AbstractContextManager):
     def get_tags(self, connection=None):
         """ Get the current set of tags that have been set on the board
 
-        :param SCPSender connection:
+        :param AbstractSCPConnection connection:
             Connection from which the tags should be received.
-            If not specified, all SCPSender connections will be queried and
-            the response will be combined.
+            If not specified, all AbstractSCPConnection connections will be
+            queried and the response will be combined.
         :return: An iterable of tags
         :rtype: iterable(~spinn_machine.tags.AbstractTag)
         :raise SpinnmanIOException:
