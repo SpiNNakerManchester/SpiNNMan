@@ -15,6 +15,7 @@
 
 import math
 import struct
+from spinn_utilities.overrides import overrides
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterException)
 from spinnman.messages.eieio import (
@@ -86,7 +87,11 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             data=data, offset=offset)
 
     @property
+    @overrides(AbstractEIEIOMessage.eieio_header)
     def eieio_header(self):
+        """
+        :rtype: EIEIODataHeader
+        """
         return self._header
 
     @staticmethod
@@ -251,10 +256,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         return KeyPayloadDataElement(key, payload, self._header.is_time)
 
     @property
+    @overrides(AbstractEIEIOMessage.bytestring)
     def bytestring(self):
-        """
-        :rtype: bytes
-        """
         return self._header.bytestring + self._elements
 
     def __str__(self):
