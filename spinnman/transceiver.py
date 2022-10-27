@@ -162,15 +162,17 @@ def create_transceiver_from_hostname(
 class Transceiver(AbstractContextManager):
     """ An encapsulation of various communications with the SpiNNaker board.
 
-    The methods of this class are designed to be thread-safe;
+    The methods of this class are designed to be thread-safe (provided they do
+    not access a BMP, as access to those is never thread-safe);
     thus you can make multiple calls to the same (or different) methods
     from multiple threads and expect each call to work as if it had been
     called sequentially, although the order of returns is not guaranteed.
 
-    Note also that with multiple connections to the board, using multiple
-    threads in this way may result in an increase in the overall speed of
-    operation, since the multiple calls may be made separately over the
-    set of given connections.
+    .. note::
+        With multiple connections to the board, using multiple threads in this
+        way may result in an increase in the overall speed of operation, since
+        the multiple calls may be made separately over the set of given
+        connections.
     """
     __slots__ = [
         "_all_connections",
@@ -417,8 +419,9 @@ class Transceiver(AbstractContextManager):
     def _chip_execute_lock(self, x, y):
         """ Get a lock for executing an executable on a chip
 
-        This method is currently deprecated and untested as there is no
-        known use except for excute which is itself deprecated.
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use except for execute, which is itself deprecated.
 
         :param int x:
         :param int y:
@@ -535,8 +538,9 @@ class Transceiver(AbstractContextManager):
         """
         Find connections to the board and store these for future use.
 
-        Note that an exception will be
-        thrown if no initial connections can be found to the board.
+        .. note::
+            An exception will be thrown if no initial connections can be
+            found to the board.
 
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -579,8 +583,9 @@ class Transceiver(AbstractContextManager):
         """
         Check connections to the board and store these for future use.
 
-        Note that an exception will be
-        thrown if no initial connections can be found to the board.
+        .. note::
+            An exception will be thrown if no initial connections can be
+            found to the board.
 
         :param dict((int,int),str) connections: Dict of x,y to ip address
         :raise SpinnmanIOException:
@@ -960,6 +965,10 @@ class Transceiver(AbstractContextManager):
     def get_user_0_register_address_from_core(p):
         """ Get the address of user 0 for a given processor on the board
 
+        .. note::
+            Conventionally, user_0 usually holds the address of the table of
+            memory regions.
+
         :param int p: The ID of the processor to get the user 0 address from
         :return: The address for user 0 register for this processor
         :rtype: int
@@ -968,6 +977,10 @@ class Transceiver(AbstractContextManager):
 
     def read_user_0(self, x, y, p):
         """ Get the contents of the user_0 register for the given processor.
+
+        .. note::
+            Conventionally, user_0 usually holds the address of the table of
+            memory regions.
 
         :param int x: X coordinate of the chip
         :param int y: Y coordinate of the chip
@@ -983,7 +996,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         addr = self.get_user_0_register_address_from_core(p)
-        return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
+        return self.read_word(x, y, addr)
 
     def read_user_1(self, x, y, p):
         """ Get the contents of the user_1 register for the given processor.
@@ -1002,7 +1015,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         addr = self.get_user_1_register_address_from_core(p)
-        return struct.unpack("<I", self.read_memory(x, y, addr, 4))[0]
+        return self.read_word(x, y, addr)
 
     @staticmethod
     def get_user_1_register_address_from_core(p):
@@ -1092,9 +1105,10 @@ class Transceiver(AbstractContextManager):
         """ Enable, disable or set the value of the watch dog timer on a\
             specific chip
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
 
         :param int x: chip x coord to write new watchdog param to
         :param int y: chip y coord to write new watchdog param to
@@ -1122,9 +1136,10 @@ class Transceiver(AbstractContextManager):
     def set_watch_dog(self, watch_dog):
         """ Enable, disable or set the value of the watch dog timer
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case nneded for hardware debugging.
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
 
         :param watch_dog:
             Either a boolean indicating whether to enable (True) or
@@ -1140,7 +1155,8 @@ class Transceiver(AbstractContextManager):
     def get_iobuf_from_core(self, x, y, p):
         """ Get the contents of IOBUF for a given core
 
-        This method is currently deprecated and likely to be removed.
+        .. warning::
+            This method is currently deprecated and likely to be removed.
 
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
@@ -1191,7 +1207,8 @@ class Transceiver(AbstractContextManager):
             wait=False, is_filename=False):
         """ Start an executable running on a single chip
 
-        This method is currently deprecated and likely to be removed.
+        .. warning::
+            This method is currently deprecated and likely to be removed.
 
         :param int x:
             The x-coordinate of the chip on which to run the executable
@@ -1321,8 +1338,11 @@ class Transceiver(AbstractContextManager):
     def execute_application(self, executable_targets, app_id):
         """ Execute a set of binaries that make up a complete application\
             on specified cores, wait for them to be ready and then start\
-            all of the binaries.  Note this will get the binaries into c_main\
-            but will not signal the barrier.
+            all of the binaries.
+
+        .. note::
+            This will get the binaries into c_main but will not signal the
+            barrier.
 
         :param ExecutableTargets executable_targets:
             The binaries to be executed and the cores to execute them on
@@ -1440,9 +1460,10 @@ class Transceiver(AbstractContextManager):
     def set_led(self, led, action, board, cabinet, frame):
         """ Set the LED state of a board in the machine
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
 
         :param led:
             Number of the LED or an iterable of LEDs to set the state of (0-7)
@@ -1504,9 +1525,10 @@ class Transceiver(AbstractContextManager):
     def read_adc_data(self, board, cabinet, frame):
         """ Read the BMP ADC data
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
 
         :param int cabinet: cabinet: the cabinet this is targeting
         :param int frame: the frame this is targeting
@@ -1604,11 +1626,56 @@ class Transceiver(AbstractContextManager):
                 x, y, cpu, base_address, data, offset, n_bytes, get_sum)
         return n_bytes, chksum
 
+    def write_user_0(self, x, y, p, value):
+        """ Write to the user_0 register for the given processor.
+
+        .. note::
+            Conventionally, user_0 usually holds the address of the table of
+            memory regions.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :param int value: The value to write
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        addr = self.get_user_0_register_address_from_core(p)
+        self.write_memory(x, y, addr, int(value))
+
+    def write_user_1(self, x, y, p, value):
+        """ Write to the user_1 register for the given processor.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :param int value: The value to write
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        addr = self.get_user_1_register_address_from_core(p)
+        self.write_memory(x, y, addr, int(value))
+
     def write_neighbour_memory(self, x, y, link, base_address, data,
                                n_bytes=None, offset=0, cpu=0):
         """ Write to the memory of a neighbouring chip using a LINK_READ SCP\
             command. If sent to a BMP, this command can be used to communicate\
             with the FPGAs' debug registers.
+
+        .. warning::
+            This method is deprecated and untested due to no known use.
 
         :param int x:
             The x-coordinate of the chip whose neighbour is to be written to
@@ -1804,9 +1871,10 @@ class Transceiver(AbstractContextManager):
             SCP command. If sent to a BMP, this command can be used to\
             communicate with the FPGAs' debug registers.
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
 
         :param int x:
             The x-coordinate of the chip whose neighbour is to be read from
@@ -1864,7 +1932,7 @@ class Transceiver(AbstractContextManager):
                 "You are calling a app stop on a turned off machine. "
                 "Please fix and try again")
 
-    def log_where_is_info(self, cpu_infos):
+    def __log_where_is_info(self, cpu_infos):
         """
         Logs the where_is info for each chip in cpu_infos
 
@@ -1938,7 +2006,7 @@ class Transceiver(AbstractContextManager):
                     error_core_states = self.get_cores_in_state(
                         all_core_subsets, error_states)
                     if len(error_core_states) > 0:
-                        self.log_where_is_info(error_core_states)
+                        self.__log_where_is_info(error_core_states)
                         raise SpiNNManCoresNotInStateException(
                             timeout, cpu_states, error_core_states)
 
@@ -1974,7 +2042,7 @@ class Transceiver(AbstractContextManager):
             # If we are sure we haven't reached the final state,
             # report a timeout error
             if len(cores_not_in_state) != 0:
-                self.log_where_is_info(cores_not_in_state)
+                self.__log_where_is_info(cores_not_in_state)
                 raise SpiNNManCoresNotInStateException(
                     timeout, cpu_states, cores_not_in_state)
 
@@ -2070,6 +2138,9 @@ class Transceiver(AbstractContextManager):
 
     def set_leds(self, x, y, cpu, led_states):
         """ Set SetLED states.
+
+        .. warning::
+            The set_leds is deprecated and untested due to no known use.
 
         :param int x: The x-coordinate of the chip on which to set the LEDs
         :param int y: The x-coordinate of the chip on which to set the LEDs
@@ -2298,7 +2369,8 @@ class Transceiver(AbstractContextManager):
     def free_sdram(self, x, y, base_address, app_id):
         """ Free allocated SDRAM
 
-        This method is currently deprecated and likely to be removed.
+        .. warning::
+            This method is currently deprecated and likely to be removed.
 
         :param int x: The x-coordinate of the chip onto which to ask for memory
         :param int y: The y-coordinate of the chip onto which to ask for memory
@@ -2317,9 +2389,10 @@ class Transceiver(AbstractContextManager):
     def free_sdram_by_app_id(self, x, y, app_id):
         """ Free all SDRAM allocated to a given app ID
 
-        This method is currently deprecated and untested as there is no
-        known use. Same functionaility provided by ybug and bmpc.
-        Retained in case needed for hardware debugging.
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
 
         :param int x: The x-coordinate of the chip onto which to ask for memory
         :param int y: The y-coordinate of the chip onto which to ask for memory
@@ -2632,7 +2705,8 @@ class Transceiver(AbstractContextManager):
     def number_of_boards_located(self):
         """ The number of boards currently configured.
 
-        This method is currently deprecated and likely to be removed.
+        .. warning::
+            This method is currently deprecated and likely to be removed.
 
         :rtype: int
         """
@@ -2647,7 +2721,6 @@ class Transceiver(AbstractContextManager):
 
     def close(self):
         """ Close the transceiver and any threads that are running
-
         """
         if self._bmp_connections:
             if get_config_bool("Machine", "turn_off_machine"):
@@ -2664,15 +2737,17 @@ class Transceiver(AbstractContextManager):
     def register_udp_listener(self, callback, connection_class,
                               local_port=None, local_host=None):
         """ Register a callback for a certain type of traffic to be received\
-            via UDP. Note that the connection class must extend\
-            :py:class:`Listenable` to avoid clashing with the SCAMP and BMP\
-            functionality.
+            via UDP.
+
+        .. note::
+            The connection class must extend :py:class:`Listenable` to avoid
+            clashing with the SCAMP and BMP functionality.
 
         :param callable callback:
             Function to be called when a packet is received
         :param type connection_class:
             The class of connection to receive using (a subclass of
-            :py:class:`Listenable`)
+            :py:class:`Listenable`, not :py:class:`SCAMPConnection`)
         :param int local_port: The optional port number to listen on; if not
             specified, an existing connection will be used if possible,
             otherwise a random free port number will be used
@@ -2688,6 +2763,9 @@ class Transceiver(AbstractContextManager):
             raise SpinnmanInvalidParameterException(
                 "connection_class", connection_class,
                 "The connection class must be Listenable")
+        if issubclass(connection_class, SCAMPConnection):
+            logger.warning("registering UDP listener with SCAMPConnection; "
+                           "combination works... but isn't supported")
 
         connections_of_class = self._udp_listenable_connections_by_class[
             connection_class]
@@ -2780,7 +2858,10 @@ class Transceiver(AbstractContextManager):
     @property
     def bmp_connection(self):
         """
-        This method is currently deprecated and likely to be removed.
+        The BMP connections.
+
+        .. warning::
+            This property is currently deprecated and likely to be removed.
 
         :rtype: dict(tuple(int,int),MostDirectConnectionSelector)
         """
