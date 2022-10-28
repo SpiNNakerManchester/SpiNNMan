@@ -12,7 +12,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+from spinn_utilities.overrides import overrides
 from spinnman.messages.eieio import AbstractEIEIOMessage
 
 
@@ -39,7 +39,11 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         self._offset = offset
 
     @property
+    @overrides(AbstractEIEIOMessage.eieio_header)
     def eieio_header(self):
+        """
+        :rtype: EIEIOCommandHeader
+        """
         return self._eieio_command_header
 
     @property
@@ -55,6 +59,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         return EIEIOCommandMessage(command_header, data, offset)
 
     @property
+    @overrides(AbstractEIEIOMessage.bytestring)
     def bytestring(self):
         return self._eieio_command_header.bytestring
 
