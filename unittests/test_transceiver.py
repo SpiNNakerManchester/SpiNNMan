@@ -134,16 +134,12 @@ class TestTransceiver(unittest.TestCase):
         # Create transceiver
         with Transceiver(version=5, connections=connections) as trnx:
             # Register a UDP listeners
-            connection_1 = trnx.register_udp_listener(
-                callback=None, connection_class=EIEIOConnection)
-            connection_2 = trnx.register_udp_listener(
-                callback=None, connection_class=EIEIOConnection)
-            connection_3 = trnx.register_udp_listener(
-                callback=None, connection_class=EIEIOConnection,
-                local_port=orig_connection.local_port)
-            connection_4 = trnx.register_udp_listener(
-                callback=None, connection_class=EIEIOConnection,
-                local_port=orig_connection.local_port + 1)
+            connection_1 = trnx.register_eieio_listener(callback=None)
+            connection_2 = trnx.register_eieio_listener(callback=None)
+            connection_3 = trnx.register_eieio_listener(
+                callback=None, local_port=orig_connection.local_port)
+            connection_4 = trnx.register_eieio_listener(
+                callback=None, local_port=orig_connection.local_port + 1)
 
             assert connection_1 == orig_connection
             assert connection_2 == orig_connection
