@@ -14,9 +14,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from .connection import Connection
 
 
-class Listenable(object, metaclass=AbstractBase):
+class Listenable(Connection, metaclass=AbstractBase):
     """ An interface for connections that can listen for incoming messages.
     """
 
