@@ -14,11 +14,15 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from .connection import Connection
 
 
-class Listenable(Connection, metaclass=AbstractBase):
-    """ An interface for connections that can listen for incoming messages.
+# Should inherit from Connection, but doesn't for MRO reasons
+class Listenable(object, metaclass=AbstractBase):
+    """
+    An interface for connections that can listen for incoming messages.
+
+    Implementing this interface means that the connection can be used with
+    :py:class:`ConnectionListener`.
     """
 
     __slots__ = ()
