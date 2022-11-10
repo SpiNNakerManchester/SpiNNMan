@@ -2738,6 +2738,16 @@ class Transceiver(AbstractContextManager):
         self._udp_receive_connections_by_port[
             connection.local_port][connection.local_ip_address] = connection
 
+    @property
+    def _num_listeners(self):
+        """
+        For debugging.
+
+        :return: The number of EIEIO listeners registered.
+        :rtype: int
+        """
+        return len(self.__eieio_listeners)
+
     def register_eieio_listener(self, callback,
                                 local_port=None, local_host=None):
         """ Register a callback for EIEIO traffic to be received (via UDP).
