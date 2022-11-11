@@ -24,11 +24,10 @@ from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod, abstractproperty)
 from spinn_utilities.overrides import overrides
 from spinn_utilities.abstract_context_manager import AbstractContextManager
-from spinnman.connections.abstract_classes import (
-    Listenable, SDPReceiver, SDPSender, SCPReceiver, SCPSender,
-    SpinnakerBootReceiver, SpinnakerBootSender, EIEIOReceiver, EIEIOSender)
+from spinnman.connections.abstract_classes import Listenable
 from spinnman.connections.udp_packet_connections import (
-    update_sdp_header_for_udp_send)
+    update_sdp_header_for_udp_send, SCAMPConnection, EIEIOConnection,
+    BootConnection)
 from spinnman.connections.udp_packet_connections.boot_connection import (
     _ANTI_FLOOD_DELAY)
 from spinnman.constants import SCP_SCAMP_PORT
@@ -174,8 +173,7 @@ class SpallocProxiedConnectionBase(Listenable, metaclass=AbstractBase):
 
 
 class SpallocProxiedConnection(
-        SpallocProxiedConnectionBase,
-        SDPReceiver, SDPSender, SCPSender, SCPReceiver,
+        SpallocProxiedConnectionBase, SCAMPConnection,
         metaclass=AbstractBase):
     """
     The socket interface supported by proxied sockets. The socket will always
@@ -187,12 +185,12 @@ class SpallocProxiedConnection(
     def get_receive_method(self) -> Callable:
         return self.receive_sdp_message
 
-    @overrides(SDPReceiver.receive_sdp_message)
+    @overrides(SCAMPConnection.receive_sdp_message)
     def receive_sdp_message(self, timeout=None) -> SDPMessage:
         data = self.receive(timeout)
         return SDPMessage.from_bytestring(data, 2)
 
-    @overrides(SDPSender.send_sdp_message)
+    @overrides(SCAMPConnection.send_sdp_message)
     def send_sdp_message(self, sdp_message: SDPMessage):
         # If a reply is expected, the connection should
         if sdp_message.sdp_header.flags == SDPFlag.REPLY_EXPECTED:
@@ -202,34 +200,38 @@ class SpallocProxiedConnection(
             update_sdp_header_for_udp_send(sdp_message.sdp_header, 0, 0)
         self.send(_TWO_SKIP + sdp_message.bytestring)
 
-    @overrides(SCPReceiver.receive_scp_response)
+    @overrides(SCAMPConnection.receive_scp_response)
     def receive_scp_response(
             self, timeout=1.0) -> Tuple[SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
-    @overrides(SCPSender.send_scp_request)
+    @overrides(SCAMPConnection.send_scp_request)
     def send_scp_request(self, scp_request: AbstractSCPRequest):
         self.send(self.get_scp_data(scp_request))
 
-    @overrides(SCPSender.get_scp_data)
-    def get_scp_data(self, scp_request: AbstractSCPRequest) -> bytes:
-        update_sdp_header_for_udp_send(
-            scp_request.sdp_header, self.chip_x, self.chip_y)
+    @overrides(SCAMPConnection.get_scp_data)
+    def get_scp_data(
+            self, scp_request: AbstractSCPRequest, x=None, y=None) -> bytes:
+        if x is None:
+            x = self.chip_x
+        if y is None:
+            y = self.chip_y
+        update_sdp_header_for_udp_send(scp_request.sdp_header, x, y)
         return _TWO_SKIP + scp_request.bytestring
 
 
 class SpallocEIEIOConnection(
         SpallocProxiedConnectionBase,
-        EIEIOSender, EIEIOReceiver, metaclass=AbstractBase):
+        EIEIOConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO connected sockets.
     This emulates an EIEOConnection opened with a remote address specified.
     """
     __slots__ = ()
 
-    @overrides(EIEIOSender.send_eieio_message)
+    @overrides(EIEIOConnection.send_eieio_message)
     def send_eieio_message(self, eieio_message):
         # Not normally used, as packets need headers to go to SpiNNaker
         self.send(eieio_message.bytestring)
@@ -246,7 +248,7 @@ class SpallocEIEIOConnection(
             data=eieio_message.bytestring)
         self.send(_TWO_SKIP + sdp_message.bytestring)
 
-    @overrides(EIEIOReceiver.receive_eieio_message)
+    @overrides(EIEIOConnection.receive_eieio_message)
     def receive_eieio_message(self, timeout=None):
         data = self.receive(timeout)
         header = _ONE_SHORT.unpack_from(data)[0]
@@ -297,14 +299,14 @@ class SpallocEIEIOConnection(
 
 class SpallocEIEIOListener(
         SpallocProxiedConnectionBase,
-        EIEIOReceiver, metaclass=AbstractBase):
+        EIEIOConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO listener sockets.
     This emulates an EIEOConnection opened with no address specified.
     """
     __slots__ = ()
 
-    @overrides(EIEIOReceiver.receive_eieio_message)
+    @overrides(EIEIOConnection.receive_eieio_message)
     def receive_eieio_message(self, timeout=None):
         data = self.receive(timeout)
         header = _ONE_SHORT.unpack_from(data)[0]
@@ -451,7 +453,7 @@ class SpallocEIEIOListener(
 
 class SpallocBootConnection(
         SpallocProxiedConnectionBase,
-        SpinnakerBootSender, SpinnakerBootReceiver, metaclass=AbstractBase):
+        BootConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied boot sockets. The socket will
     always be talking to the root board of a job.
@@ -459,14 +461,14 @@ class SpallocBootConnection(
     """
     __slots__ = ()
 
-    @overrides(SpinnakerBootSender.send_boot_message)
+    @overrides(BootConnection.send_boot_message)
     def send_boot_message(self, boot_message: SpinnakerBootMessage):
         self.send(boot_message.bytestring)
 
         # Sleep between messages to avoid flooding the machine
         time.sleep(_ANTI_FLOOD_DELAY)
 
-    @overrides(SpinnakerBootReceiver.receive_boot_message)
+    @overrides(BootConnection.receive_boot_message)
     def receive_boot_message(self, timeout=None) -> SpinnakerBootMessage:
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)

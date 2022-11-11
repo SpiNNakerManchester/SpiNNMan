@@ -2869,32 +2869,25 @@ class Transceiver(AbstractContextManager):
         # There wasn't anything
         return None, None
 
-    def register_existing_udp_listener(self, callback, connection):
-        """ Register a callback for a certain type of traffic to be received\
-            via UDP.
+    def register_existing_eieio_listener(self, callback, connection):
+        """
+        Register a callback for EIEIO traffic to be received via UDP on an
+        existing connection.
+
+        .. note::
+            Used when dealing with proxied connections.
 
         :param callable callback:
             Function to be called when a packet is received
-        :param UDPConnection connection:
+        :param EIEIOConnection connection:
             The connection to receive using
         """
-
-        # If the connection class is not an Listenable, this is an
-        # error
-        if not isinstance(connection, Listenable):
-            raise SpinnmanInvalidParameterException(
-                "connection", connection.__class__,
-                "The connection class must be Listenable")
-
         self._all_connections.add(connection)
         listener = ConnectionListener(connection)
         listener.start()
-        self._udp_receive_connections_by_port[
-            connection.local_port][connection.local_host] = (
-                connection, listener)
+        self.__remember_connection(connection)
+        self.__eieio_listeners[connection] = listener
         listener.add_callback(callback)
-        self._udp_listenable_connections_by_class[connection.__class__].append(
-            (connection, listener))
 
     @property
     def bmp_connection(self):

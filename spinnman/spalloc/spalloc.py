@@ -31,7 +31,8 @@ from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import (
-    Connection, Listenable, SCPSender)
+    Connection, Listenable)
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from .enums import SpallocState, ProxyProtocol
@@ -686,24 +687,24 @@ class _ProxiedBidirectionalConnection(
 
 class _ProxiedSCAMPConnection(
         _ProxiedBidirectionalConnection, SpallocProxiedConnection):
-    __slots__ = ("_chip_x", "_chip_y")
+    __slots__ = ("__chip_x", "__chip_y")
 
     def __init__(
             self, ws: WebSocket, receiver: _ProxyReceiver,
             x: int, y: int, port: int):
         super().__init__(ws, receiver, x, y, port)
-        self._chip_x = x
-        self._chip_y = y
+        self.__chip_x = x
+        self.__chip_y = y
 
     @property
-    @overrides(SCPSender.chip_x)
+    @overrides(SCAMPConnection.chip_x)
     def chip_x(self) -> int:
-        return self._chip_x
+        return self.__chip_x
 
     @property
-    @overrides(SCPSender.chip_y)
+    @overrides(SCAMPConnection.chip_y)
     def chip_y(self) -> int:
-        return self._chip_y
+        return self.__chip_y
 
     def __str__(self):
         return f"SCAMPConnection[proxied]({self.chip_x},{self.chip_y})"
@@ -740,7 +741,7 @@ class _ProxiedEIEIOConnection(
 
     def send_to(
             self,
-            message: bytes, address: tuple):  # pylint: disable=unused-argument
+            data: bytes, address: tuple):  # pylint: disable=unused-argument
         """
         Direct ``send_to`` is unsupported.
         """
