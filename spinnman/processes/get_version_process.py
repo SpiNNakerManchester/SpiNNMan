@@ -14,11 +14,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from spinnman.messages.scp.impl import GetVersion
-from .abstract_single_connection_process import AbstractSingleConnectionProcess
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import N_RETRIES
 
 
-class GetVersionProcess(AbstractSingleConnectionProcess):
+class GetVersionProcess(AbstractMultiConnectionProcess):
     """ A process for getting the version of the machine.
     """
     __slots__ = [

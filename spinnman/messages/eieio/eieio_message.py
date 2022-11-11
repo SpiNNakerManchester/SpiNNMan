@@ -12,10 +12,25 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from spinn_utilities.abstract_base import abstractproperty, AbstractBase
 
 
-class AbstractEIEIOMessage(object):
-    """ Marker interface for an EIEIOMessage
+class AbstractEIEIOMessage(object, metaclass=AbstractBase):
+    """ Interface for an EIEIOMessage
     """
 
     __slots__ = ()
+
+    @abstractproperty
+    def eieio_header(self):
+        """
+        The header of the message.
+        """
+
+    @abstractproperty
+    def bytestring(self):
+        """
+        The bytes of the message.
+
+        :rtype: bytes
+        """
