@@ -244,5 +244,6 @@ class UDPConnection(Connection, Listenable):
             self.local_ip_address, self.local_port,
             self.remote_ip_address, self.remote_port)
 
+    @overrides(Listenable.get_receive_method)
     def get_receive_method(self):
         return self.receive
