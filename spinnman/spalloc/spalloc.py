@@ -32,15 +32,14 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import (
     Connection, Listenable)
-from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from .enums import SpallocState, ProxyProtocol
 from .session import Session, SessionAware
 from .utils import parse_service_url, get_hostname
 from .abstract_classes import (
-    AbstractSpallocClient, SpallocProxiedConnectionBase,
-    SpallocProxiedConnection, SpallocBootConnection, SpallocJob,
+    AbstractSpallocClient, SpallocProxiedConnection,
+    SpallocSCPConnection, SpallocBootConnection, SpallocJob,
     SpallocMachine, SpallocEIEIOConnection, SpallocEIEIOListener)
 from spinnman.transceiver import Transceiver
 
@@ -548,9 +547,6 @@ class _ProxiedConnection(metaclass=AbstractBase):
     None of the methods are public because subclasses may expose a profile of
     them to conform to a particular type of connection.
     """
-    __slots__ = (
-        "__ws", "__receiver", "__msgs", "__call_queue", "__call_lock",
-        "__handle", "__current_msg")
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         self.__ws = ws
@@ -648,8 +644,10 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
 
 class _ProxiedBidirectionalConnection(
-        _ProxiedConnection, SpallocProxiedConnectionBase):
-    __slots__ = ("__connect_args")
+        _ProxiedConnection, SpallocProxiedConnection):
+    """
+    A connection that talks to a particular board via the proxy.
+    """
 
     def __init__(
             self, ws: WebSocket, receiver: _ProxyReceiver,
@@ -672,11 +670,61 @@ class _ProxiedBidirectionalConnection(
     def close(self):
         self._close()
 
-    @overrides(SpallocProxiedConnectionBase.send)
-    def send(self, message: bytes):
-        self._send(message)
+    @overrides(SpallocProxiedConnection.send)
+    def send(self, data: bytes):
+        self._send(data)
 
-    @overrides(SpallocProxiedConnectionBase.receive)
+    @overrides(SpallocProxiedConnection.receive)
+    def receive(self, timeout=None) -> bytes:
+        return self._receive(timeout)
+
+    @overrides(Listenable.is_ready_to_receive)
+    def is_ready_to_receive(self, timeout=0) -> bool:
+        return self._is_ready_to_receive(timeout)
+
+
+class _ProxiedUnboundConnection(
+        _ProxiedConnection, SpallocProxiedConnection):
+    """
+    A connection that can listen to all boards via the proxy, but which can
+    only send if a target board is provided.
+    """
+
+    def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
+        super().__init__(ws, receiver)
+        self.__addr = None
+        self.__port = None
+
+    @overrides(_ProxiedConnection._open_connection)
+    def _open_connection(self) -> int:
+        handle, ip1, ip2, ip3, ip4, self.__port = self._call(
+            ProxyProtocol.OPEN_UNBOUND, _open_listen_req, _open_listen_res)
+        # Assemble the address into the format expected elsewhere
+        self.__addr = f"{ip1}.{ip2}.{ip3}.{ip4}"
+        return handle
+
+    @property
+    def _addr(self) -> str:
+        return self.__addr if self._connected else None
+
+    @property
+    def _port(self) -> int:
+        return self.__port if self._connected else None
+
+    @overrides(Connection.is_connected)
+    def is_connected(self) -> bool:
+        return self._connected
+
+    @overrides(Connection.close)
+    def close(self):
+        self._close()
+
+    @overrides(SpallocProxiedConnection.send)
+    def send(self, data: bytes):
+        self._throw_if_closed()
+        raise IOError("socket is not open for sending")
+
+    @overrides(SpallocProxiedConnection.receive)
     def receive(self, timeout=None) -> bytes:
         return self._receive(timeout)
 
@@ -686,25 +734,14 @@ class _ProxiedBidirectionalConnection(
 
 
 class _ProxiedSCAMPConnection(
-        _ProxiedBidirectionalConnection, SpallocProxiedConnection):
+        _ProxiedBidirectionalConnection, SpallocSCPConnection):
     __slots__ = ("__chip_x", "__chip_y")
 
     def __init__(
             self, ws: WebSocket, receiver: _ProxyReceiver,
             x: int, y: int, port: int):
         super().__init__(ws, receiver, x, y, port)
-        self.__chip_x = x
-        self.__chip_y = y
-
-    @property
-    @overrides(SCAMPConnection.chip_x)
-    def chip_x(self) -> int:
-        return self.__chip_x
-
-    @property
-    @overrides(SCAMPConnection.chip_y)
-    def chip_y(self) -> int:
-        return self.__chip_y
+        SpallocSCPConnection.__init__(self, x, y)
 
     def __str__(self):
         return f"SCAMPConnection[proxied]({self.chip_x},{self.chip_y})"
@@ -723,7 +760,7 @@ class _ProxiedBootConnection(
 
 class _ProxiedEIEIOConnection(
         _ProxiedBidirectionalConnection,
-        SpallocEIEIOConnection, SpallocProxiedConnectionBase):
+        SpallocEIEIOConnection, SpallocProxiedConnection):
     # Special: This is a unidirectional receive-only connection
     __slots__ = ("__addr", "__port", "__chip_x", "__chip_y")
 
@@ -753,11 +790,8 @@ class _ProxiedEIEIOConnection(
                 f"{self.__chip_y})")
 
 
-class _ProxiedEIEIOListener(
-        _ProxiedConnection,
-        SpallocEIEIOListener, SpallocProxiedConnectionBase):
-    # Special: This is a unidirectional receive-only connection
-    __slots__ = ("__addr", "__port", "__conns")
+class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
+    __slots__ = ("__conns", )
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
                  conns: Dict[Tuple[int, int], str]):
@@ -765,54 +799,24 @@ class _ProxiedEIEIOListener(
         # Invert the map
         self.__conns = {ip: xy for (xy, ip) in conns.items()}
 
-    @overrides(_ProxiedConnection._open_connection)
-    def _open_connection(self) -> int:
-        handle, ip1, ip2, ip3, ip4, self.__port = self._call(
-            ProxyProtocol.OPEN_UNBOUND, _open_listen_req, _open_listen_res)
-        # Assemble the address into the format expected elsewhere
-        self.__addr = f"{ip1}.{ip2}.{ip3}.{ip4}"
-        return handle
-
-    @overrides(Connection.is_connected)
-    def is_connected(self) -> bool:
-        return self._connected
-
-    @overrides(Connection.close)
-    def close(self):
-        self._close()
-
-    @overrides(SpallocProxiedConnectionBase.send)
-    def send(self, message: bytes):  # @UnusedVariable
-        self._throw_if_closed()
-        raise IOError("socket is not open for sending")
-
     @overrides(SpallocEIEIOListener.send_to_chip)
     def send_to_chip(
             self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
         self._send_to(message, x, y, port)
 
-    @overrides(SpallocProxiedConnectionBase.receive)
-    def receive(self, timeout=None) -> bytes:
-        return self._receive(timeout)
-
-    @overrides(Listenable.is_ready_to_receive)
-    def is_ready_to_receive(self, timeout=0) -> bool:
-        return self._is_ready_to_receive(timeout)
-
     @property
     @overrides(SpallocEIEIOListener.local_ip_address)
     def local_ip_address(self) -> str:
-        return self.__addr if self._connected else None
+        return self._addr
 
     @property
     @overrides(SpallocEIEIOListener.local_port)
     def local_port(self) -> int:
-        return self.__port if self._connected else None
+        return self._port
 
     @overrides(SpallocEIEIOListener._get_chip_coords)
     def _get_chip_coords(self, ip_address: str) -> Tuple[int, int]:
         return self.__conns[ip_address]
 
     def __str__(self):
-        return (f"EIEIOConnection[proxied](local:{self.local_ip_address}:"
-                f"{self.local_port})")
+        return f"EIEIOConnection[proxied](local:{self._addr}:{self._port})"

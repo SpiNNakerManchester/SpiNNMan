@@ -142,18 +142,18 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         """
 
 
-class SpallocProxiedConnectionBase(Listenable, metaclass=AbstractBase):
+class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):
     """
     Base class for connections proxied via Spalloc.
     """
     __slots__ = ()
 
     @abstractmethod
-    def send(self, message: bytes):
+    def send(self, data: bytes):
         """
         Send a message on an open socket.
 
-        :param message: The message to send.
+        :param data: The message to send.
         """
 
     @abstractmethod
@@ -172,14 +172,17 @@ class SpallocProxiedConnectionBase(Listenable, metaclass=AbstractBase):
         """
 
 
-class SpallocProxiedConnection(
-        SpallocProxiedConnectionBase, SCAMPConnection,
+class SpallocSCPConnection(
+        SCAMPConnection, SpallocProxiedConnection,
         metaclass=AbstractBase):
     """
     The socket interface supported by proxied sockets. The socket will always
     be talking to a specific board. This emulates a SCAMPConnection.
     """
     __slots__ = ()
+
+    def __init__(self, x, y):
+        super(SpallocSCPConnection, self).__init__(x, y)
 
     @overrides(Listenable.get_receive_method)
     def get_receive_method(self) -> Callable:
@@ -223,8 +226,7 @@ class SpallocProxiedConnection(
 
 
 class SpallocEIEIOConnection(
-        SpallocProxiedConnectionBase,
-        EIEIOConnection, metaclass=AbstractBase):
+        EIEIOConnection, SpallocProxiedConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO connected sockets.
     This emulates an EIEOConnection opened with a remote address specified.
@@ -298,8 +300,7 @@ class SpallocEIEIOConnection(
 
 
 class SpallocEIEIOListener(
-        SpallocProxiedConnectionBase,
-        EIEIOConnection, metaclass=AbstractBase):
+        EIEIOConnection, SpallocProxiedConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO listener sockets.
     This emulates an EIEOConnection opened with no address specified.
@@ -318,8 +319,8 @@ class SpallocEIEIOListener(
     def get_receive_method(self):
         return self.receive_eieio_message
 
-    @overrides(SpallocProxiedConnectionBase.send)
-    def send(self, message):
+    @overrides(SpallocProxiedConnection.send)
+    def send(self, data):
         """
         .. note::
             This class does not allow sending.
@@ -351,7 +352,7 @@ class SpallocEIEIOListener(
             Defaults to the SCP port.
         """
 
-    def send_to(self, message: bytes, address: Tuple[str, int]):
+    def send_to(self, data: bytes, address: Tuple[str, int]):
         """
         Send a message on an open socket.
 
@@ -364,7 +365,7 @@ class SpallocEIEIOListener(
         """
         ip, port = address
         x, y = self._get_chip_coords(ip)
-        self.send_to_chip(message, x, y, port)
+        self.send_to_chip(data, x, y, port)
 
     @abstractproperty
     def local_ip_address(self) -> str:
@@ -452,8 +453,7 @@ class SpallocEIEIOListener(
 
 
 class SpallocBootConnection(
-        SpallocProxiedConnectionBase,
-        BootConnection, metaclass=AbstractBase):
+        BootConnection, SpallocProxiedConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied boot sockets. The socket will
     always be talking to the root board of a job.
@@ -569,7 +569,7 @@ class SpallocJob(object, metaclass=AbstractBase):
     @abstractmethod
     def connect_to_board(
             self, x: int, y: int,
-            port: int = SCP_SCAMP_PORT) -> SpallocProxiedConnection:
+            port: int = SCP_SCAMP_PORT) -> SpallocSCPConnection:
         """
         Open a connection to a particular board in the job.
 
