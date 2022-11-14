@@ -26,6 +26,7 @@ from spinnman.utilities.socket_utils import (
     bind_socket, connect_socket, get_udp_socket, get_socket_address,
     resolve_host, set_receive_buffer_size, receive_message,
     receive_message_and_address, send_message, send_message_to_address)
+from spinnman.connections.abstract_classes import Listenable
 
 logger = FormatAdapter(logging.getLogger(__name__))
 _RECEIVE_BUFFER_SIZE = 1048576
@@ -33,7 +34,7 @@ _PING_COUNT = 5
 _REPR_TEMPLATE = "UDPConnection(local={}:{}, remote={}:{})"
 
 
-class UDPConnection(Connection):
+class UDPConnection(Connection, Listenable):
     __slots__ = [
         "_can_send",
         "_local_ip_address",
@@ -242,3 +243,6 @@ class UDPConnection(Connection):
         return _REPR_TEMPLATE.format(
             self.local_ip_address, self.local_port,
             self.remote_ip_address, self.remote_port)
+
+    def get_receive_method(self):
+        return self.receive
