@@ -48,7 +48,7 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPCommand.CMD_AR.value, 19)
 
         self.assertEqual(SCPCommand.CMD_NNP.value, 20)
-        self.assertEqual(SCPCommand.CMD_P2PC.value, 21)
+        self.assertEqual(SCPCommand.CMD_APP_COPY_RUN.value, 21)
         self.assertEqual(SCPCommand.CMD_SIG.value, 22)
         self.assertEqual(SCPCommand.CMD_FFD.value, 23)
         self.assertEqual(SCPCommand.CMD_AS.value, 24)
@@ -59,6 +59,7 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPCommand.CMD_ALLOC.value, 28)
 
         self.assertEqual(SCPCommand.CMD_RTR.value, 29)
+        self.assertEqual(SCPCommand.CMD_SYNC.value, 32)
         self.assertEqual(SCPCommand.CMD_FLASH_COPY.value, 49)
         self.assertEqual(SCPCommand.CMD_FLASH_ERASE.value, 50)
         self.assertEqual(SCPCommand.CMD_FLASH_WRITE.value, 51)
@@ -112,9 +113,9 @@ class TestSCPEnums(unittest.TestCase):
                          SignalType.NEAREST_NEIGHBOUR)
         self.assertEqual(Signal.STOP.signal_type,
                          SignalType.NEAREST_NEIGHBOUR)
-        self.assertEqual(Signal.START.signal_type,
-                         SignalType.NEAREST_NEIGHBOUR)
 
+        self.assertEqual(Signal.START.signal_type,
+                         SignalType.MULTICAST)
         self.assertEqual(Signal.SYNC0.signal_type,
                          SignalType.MULTICAST)
         self.assertEqual(Signal.SYNC1.signal_type,

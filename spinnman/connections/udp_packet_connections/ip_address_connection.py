@@ -29,10 +29,6 @@ class IPAddressesConnection(UDPConnection):
                  local_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
         super().__init__(local_host=local_host, local_port=local_port)
 
-    def supports_sends_message(self, message):  # @UnusedVariable
-        # pylint: disable=unused-argument
-        return False
-
     def receive_ip_address(self, timeout=None):
         with suppress(Exception):
             (_, (ip_address, port)) = self.receive_with_address(timeout)

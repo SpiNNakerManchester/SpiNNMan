@@ -14,9 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
-from spinn_utilities.overrides import overrides
-from spinnman.connections.abstract_classes import (
-    SpinnakerBootSender, SpinnakerBootReceiver)
 from .udp_connection import UDPConnection
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
@@ -24,8 +21,7 @@ from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 _ANTI_FLOOD_DELAY = 0.1
 
 
-class BootConnection(
-        UDPConnection, SpinnakerBootSender, SpinnakerBootReceiver):
+class BootConnection(UDPConnection):
     """ A connection to the SpiNNaker board that uses UDP to for booting
     """
     __slots__ = []
@@ -33,39 +29,48 @@ class BootConnection(
         "BootConnection(local_host={}, local_port={}, remote_host={}, "
         "remote_port={})")
 
-    def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=None):
+    def __init__(self, remote_host=None):
         """
-        :param str local_host:
-            The local host name or IP address to bind to.
-            If not specified defaults to bind to all interfaces, unless
-            `remote_host` is specified, in which case binding is done to the
-            IP address that will be used to send packets.
-        :param int local_port:
-            The local port to bind to, between 1025 and 65535.
-            If not specified, defaults to a random unused local port
         :param str remote_host:
             The remote host name or IP address to send packets to.  If not
             specified, the socket will be available for listening only, and
             will throw and exception if used for sending
-        :param int remote_port: The remote port to send packets to.  If
-            `remote_host` is None, this is ignored.
         :raise SpinnmanIOException:
             If there is an error setting up the communication channel
         """
-        if remote_port is None:
-            remote_port = UDP_BOOT_CONNECTION_DEFAULT_PORT
-        super().__init__(local_host, local_port, remote_host, remote_port)
+        super().__init__(remote_host=remote_host,
+                         remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
-    @overrides(SpinnakerBootSender.send_boot_message)
     def send_boot_message(self, boot_message):
+        """ Sends a SpiNNaker boot message using this connection.
+
+        :param SpinnakerBootMessage boot_message: The message to be sent
+        :raise SpinnmanIOException:
+            If there is an error sending the message
+        """
         self.send(boot_message.bytestring)
 
         # Sleep between messages to avoid flooding the machine
         time.sleep(_ANTI_FLOOD_DELAY)
 
-    @overrides(SpinnakerBootReceiver.receive_boot_message)
     def receive_boot_message(self, timeout=None):
+        """ Receives a boot message from this connection.  Blocks until a\
+            message has been received, or a timeout occurs.
+
+        :param int timeout:
+            The time in seconds to wait for the message to arrive; if not
+            specified, will wait forever, or until the connection is closed.
+        :return: a boot message
+        :rtype: SpinnakerBootMessage
+        :raise SpinnmanIOException:
+            If there is an error receiving the message
+        :raise SpinnmanTimeoutException:
+            If there is a timeout before a message is received
+        :raise SpinnmanInvalidPacketException:
+            If the received packet is not a valid SpiNNaker boot message
+        :raise SpinnmanInvalidParameterException:
+            If one of the fields of the SpiNNaker boot message is invalid
+        """
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)
 

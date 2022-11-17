@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2021-2022 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,22 +12,3 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from .connection import Connection
-
-
-class SDPSender(Connection, metaclass=AbstractBase):
-    """ A sender of SDP messages.
-    """
-
-    __slots__ = ()
-
-    @abstractmethod
-    def send_sdp_message(self, sdp_message):
-        """ Sends an SDP message down this connection
-
-        :param SDPMessage sdp_message: The SDP message to be sent
-        :raise SpinnmanIOException:
-            If there is an error sending the message.
-        """

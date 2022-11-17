@@ -15,6 +15,7 @@
 
 import struct
 from .sdp_flag import SDPFlag
+from spinnman.data import SpiNNManDataView
 
 N_BYTES = 8
 _EIGHT_BYTES = struct.Struct("<8B")
@@ -287,3 +288,12 @@ class SDPHeader(object):
             SDPFlag(flags), tag, destination_port, destination_cpu,
             destination_chip_x, destination_chip_y, source_port, source_cpu,
             source_chip_x, source_chip_y)
+
+    def get_physical_cpu_id(self):
+        if SpiNNManDataView.has_machine():
+            chip = SpiNNManDataView.get_machine().get_chip_at(
+                self._destination_chip_x,  self._destination_chip_y)
+            if chip is not None:
+                return chip.get_physical_core_string(
+                    self._destination_cpu)
+        return ""

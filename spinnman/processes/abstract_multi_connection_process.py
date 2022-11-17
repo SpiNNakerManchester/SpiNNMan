@@ -13,15 +13,27 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .abstract_process import AbstractProcess
+import logging
+import sys
+from spinn_utilities.log import FormatAdapter
 from spinnman.connections import SCPRequestPipeLine
 from spinnman.constants import SCP_TIMEOUT, N_RETRIES
+from spinnman.exceptions import (
+    SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
+
+logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class AbstractMultiConnectionProcess(AbstractProcess):
-    """ A process that uses multiple connections in communication.
+class AbstractMultiConnectionProcess:
+    """
+    A process for talking to SpiNNaker efficiently that uses multiple
+    connections in communication if relevant.
     """
     __slots__ = [
+        "_error_requests",
+        "_exceptions",
+        "_tracebacks",
+        "_connections",
         "_intermediate_channel_waits",
         "_n_channels",
         "_n_retries",
@@ -34,10 +46,25 @@ class AbstractMultiConnectionProcess(AbstractProcess):
                  intermediate_channel_waits=7):
         """
         :param next_connection_selector:
+            How to choose the connection.
         :type next_connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
+        :param int n_retries:
+            The number of retries of a message to use. Passed to
+            :py:class:`SCPRequestPipeLine`
+        :param float timeout:
+            The timeout, in seconds. Passed to :py:class:`SCPRequestPipeLine`
+        :param int n_channels:
+            The maximum number of channels to use when talking to a particular
+            SCAMP instance. Passed to :py:class:`SCPRequestPipeLine`
+        :param int intermediate_channel_waits:
+            The maximum number of outstanding message/reply pairs to have on a
+            particular connection. Passed to :py:class:`SCPRequestPipeLine`
         """
-        super().__init__()
+        self._exceptions = []
+        self._tracebacks = []
+        self._error_requests = []
+        self._connections = []
         self._scp_request_pipelines = dict()
         self._n_retries = n_retries
         self._timeout = timeout
@@ -59,6 +86,50 @@ class AbstractMultiConnectionProcess(AbstractProcess):
         self._scp_request_pipelines[connection].send_request(
             request, callback, error_callback)
 
+    def _receive_error(self, request, exception, tb, connection):
+        self._error_requests.append(request)
+        self._exceptions.append(exception)
+        self._tracebacks.append(tb)
+        self._connections.append(connection)
+
+    def is_error(self):
+        return bool(self._exceptions)
+
     def _finish(self):
         for request_pipeline in self._scp_request_pipelines.values():
             request_pipeline.finish()
+
+    @property
+    def connection_selector(self):
+        """ Get the connection selector of the process
+        """
+        return self._conn_selector
+
+    def check_for_error(self, print_exception=False):
+        if len(self._exceptions) == 1:
+            exc_info = sys.exc_info()
+            sdp_header = self._error_requests[0].sdp_header
+            phys_p = sdp_header.get_physical_cpu_id()
+
+            if print_exception:
+                connection = self._connections[0]
+                logger.error(
+                    "failure in request to board {} with ethernet chip "
+                    "({}, {}) for chip ({}, {}, {}({}))",
+                    connection.remote_ip_address, connection.chip_x,
+                    connection.chip_y, sdp_header.destination_chip_x,
+                    sdp_header.destination_chip_y, sdp_header.destination_cpu,
+                    phys_p)
+
+            raise SpinnmanGenericProcessException(
+                self._exceptions[0], exc_info[2],
+                sdp_header.destination_chip_x,
+                sdp_header.destination_chip_y, sdp_header.destination_cpu,
+                phys_p, self._tracebacks[0])
+        elif self._exceptions:
+            ex = SpinnmanGroupedProcessException(
+                self._error_requests, self._exceptions, self._tracebacks,
+                self._connections)
+            if print_exception:
+                logger.error("{}", str(ex))
+            raise ex

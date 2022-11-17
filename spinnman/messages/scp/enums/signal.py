@@ -30,7 +30,7 @@ class Signal(Enum):
     INITIALISE = (0, SignalType.NEAREST_NEIGHBOUR)
     POWER_DOWN = (1, SignalType.NEAREST_NEIGHBOUR)
     STOP = (2, SignalType.NEAREST_NEIGHBOUR)
-    START = (3, SignalType.NEAREST_NEIGHBOUR)
+    START = (3, SignalType.MULTICAST)
     SYNC0 = (4, SignalType.MULTICAST)
     SYNC1 = (5, SignalType.MULTICAST)
     PAUSE = (6, SignalType.MULTICAST)
