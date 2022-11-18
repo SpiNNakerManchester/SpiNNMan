@@ -30,17 +30,21 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
-from spinnman.connections.abstract_classes import (
-    Connection, Listenable)
+from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
-from .enums import SpallocState, ProxyProtocol
+from .spalloc_state import SpallocState
+from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware
 from .utils import parse_service_url, get_hostname
-from .abstract_classes import (
-    AbstractSpallocClient, SpallocProxiedConnection,
-    SpallocSCPConnection, SpallocBootConnection, SpallocJob,
-    SpallocMachine, SpallocEIEIOConnection, SpallocEIEIOListener)
+from .abstract_spalloc_client import AbstractSpallocClient
+from .spalloc_machine import SpallocMachine
+from .spalloc_job import SpallocJob
+from .spalloc_proxied_connection import SpallocProxiedConnection
+from .spalloc_boot_connection import SpallocBootConnection
+from .spalloc_eieio_connection import SpallocEIEIOConnection
+from .spalloc_eieio_listener import SpallocEIEIOListener
+from .spalloc_scp_connection import SpallocSCPConnection
 from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(getLogger(__name__))

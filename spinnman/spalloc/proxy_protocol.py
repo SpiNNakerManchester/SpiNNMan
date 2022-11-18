@@ -15,19 +15,6 @@
 from enum import IntEnum
 
 
-class SpallocState(IntEnum):
-    #: The job is in an unknown state.
-    UNKNOWN = 0
-    #: The job is queued waiting for allocation.
-    QUEUED = 1
-    #: The job is queued waiting for boards to power on or off.
-    POWER = 2
-    #: The job is ready for user code to run on it.
-    READY = 3
-    #: The job has been destroyed.
-    DESTROYED = 4
-
-
 class ProxyProtocol(IntEnum):
     #: Message relating to opening a channel
     OPEN = 0
