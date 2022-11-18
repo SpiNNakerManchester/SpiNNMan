@@ -18,7 +18,7 @@ from .spalloc_job import SpallocJob
 from .spalloc_machine import SpallocMachine
 from .spalloc_proxied_connection import SpallocProxiedConnection
 from .spalloc_state import SpallocState
-from .spalloc import SpallocClient
+from .spalloc_client import SpallocClient
 from .utils import is_server_address
 
 __all__ = (
