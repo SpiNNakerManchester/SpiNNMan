@@ -110,6 +110,14 @@ class Session:
                     self.__csrf_header = key
                     self.__csrf = value
 
+    def __handle_error_or_return(self, response):
+        code = response.status_code
+        if code >= 200 and code < 400:
+            return response
+        result = response.content
+        raise ValueError(f"Unexpected response from server {code}\n"
+                         f"    {str(result)}")
+
     @_may_renew
     def get(self, url: str, **kwargs) -> requests.Response:
         """
@@ -123,7 +131,7 @@ class Session:
         r = requests.get(url, params=params, cookies=cookies,
                          allow_redirects=False)
         logger.debug("GET {} returned {}", url, r.status_code)
-        return r
+        return self.__handle_error_or_return(r)
 
     @_may_renew
     def post(self, url: str, jsonobj: dict, **kwargs) -> requests.Response:
@@ -140,7 +148,7 @@ class Session:
                           cookies=cookies, headers=headers,
                           allow_redirects=False)
         logger.debug("POST {} returned {}", url, r.status_code)
-        return r
+        return self.__handle_error_or_return(r)
 
     @_may_renew
     def put(self, url: str, data: str, **kwargs) -> requests.Response:
@@ -159,7 +167,7 @@ class Session:
                          cookies=cookies, headers=headers,
                          allow_redirects=False)
         logger.debug("PUT {} returned {}", url, r.status_code)
-        return r
+        return self.__handle_error_or_return(r)
 
     @_may_renew
     def delete(self, url: str, **kwargs) -> requests.Response:
@@ -174,7 +182,7 @@ class Session:
         r = requests.delete(url, params=params, cookies=cookies,
                             headers=headers, allow_redirects=False)
         logger.debug("DELETE {} returned {}", url, r.status_code)
-        return r
+        return self.__handle_error_or_return(r)
 
     def renew(self) -> dict:
         """
@@ -185,7 +193,10 @@ class Session:
         :rtype: dict
         """
         if self.__token:
-            r = requests.get(self.__login_form_url, allow_redirects=False)
+            r = requests.get(
+                self.__login_form_url,
+                headers={"Authorization": f"Bearer {self.__token}"},
+                allow_redirects=False)
             self._session_id = r.cookies[_SESSION_COOKIE]
         else:
             # Step one: a temporary session so we can log in
