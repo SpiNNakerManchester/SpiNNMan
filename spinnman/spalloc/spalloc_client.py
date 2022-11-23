@@ -81,8 +81,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         if username is None and password is None:
             service_url, username, password = parse_service_url(service_url)
         self.__session = Session(service_url, username, password, bearer_token)
-        if not bearer_token:
-            obj = self.__session.renew()
+        obj = self.__session.renew()
         v = obj["version"]
         self.version = Version(
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
