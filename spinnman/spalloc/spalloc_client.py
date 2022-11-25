@@ -558,7 +558,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         self.__call_queue = queue.Queue(1)
         self.__call_lock = threading.RLock()
         self.__current_msg = None
-        self.__handle, = self._open_connection()
+        self.__handle = self._open_connection()
         self.__receiver.listen(self.__handle, self.__msgs.put)
 
     @abstractmethod
