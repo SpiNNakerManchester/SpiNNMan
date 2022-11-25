@@ -23,7 +23,7 @@ from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
 from spinnman.connections.udp_packet_connections import (
-    BootConnection, EIEIOConnection, SCAMPConnection)
+    BootConnection, SCAMPConnection)
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
 
