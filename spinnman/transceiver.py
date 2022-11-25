@@ -306,8 +306,6 @@ class Transceiver(AbstractContextManager):
             # Otherwise, check if it can send and receive SCP (talk to SCAMP)
             elif isinstance(conn, SCAMPConnection):
                 self._scamp_connections.append(conn)
-                # Remember, for IP tag configuring
-                self._udp_scamp_connections[conn.remote_ip_address] = conn
 
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(self._scamp_connections)
@@ -363,7 +361,7 @@ class Transceiver(AbstractContextManager):
         :param int chip_x: the chip x coordinate to try to talk to
         :param int chip_y: the chip y coordinate to try to talk to
         :return: True if a valid response is received, False otherwise
-        :rtype: bool
+        :rtype: ChipInfo or None
         """
         for _ in range(_CONNECTION_CHECK_RETRIES):
             try:
@@ -373,13 +371,13 @@ class Transceiver(AbstractContextManager):
                 if not chip_info.is_ethernet_available:
                     time.sleep(0.1)
                 else:
-                    return True
+                    return chip_info
             except (SpinnmanGenericProcessException, SpinnmanTimeoutException,
                     SpinnmanUnexpectedResponseCodeException):
                 pass
             except SpinnmanIOException:
                 break
-        return False
+        return None
 
     @contextmanager
     def _chip_execute_lock(self, x, y):
@@ -491,9 +489,10 @@ class Transceiver(AbstractContextManager):
         conn = SCAMPConnection(remote_host=ip_address, chip_x=x, chip_y=y)
 
         # check if it works
-        if self._check_connection(FixedConnectionSelector(conn), x, y):
+        chip_info = self._check_connection(FixedConnectionSelector(conn), x, y)
+        if chip_info is not None:
             self._all_connections.add(conn)
-            self._udp_scamp_connections[ip_address] = conn
+            self._udp_scamp_connections[chip_info.ethernet_ip_address] = conn
             self._scamp_connections.append(conn)
         else:
             logger.warning(
@@ -815,6 +814,13 @@ class Transceiver(AbstractContextManager):
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
+
+            chip_info = self._check_connection(
+                FixedConnectionSelector(scamp_connection),
+                scamp_connection.chip_x, scamp_connection.chip_y)
+            if chip_info is not None:
+                self._udp_scamp_connections[chip_info.ethernet_ip_address] = \
+                    scamp_connection
 
         # Update the connection selector so that it can ask for processor ids
         self._scamp_connection_selector = MostDirectConnectionSelector(
