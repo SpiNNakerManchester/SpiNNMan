@@ -378,7 +378,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         config = {}
         config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
-        cookies, headers = self._session_credentials()
+        cookies, headers = self._session_credentials
         for k, v in cookies.items():
             config["COOKIE", k] = v
         for k, v in headers.items():
