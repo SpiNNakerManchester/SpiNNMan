@@ -197,6 +197,8 @@ class Session:
                 self.__login_form_url,
                 headers={"Authorization": f"Bearer {self.__token}"},
                 allow_redirects=False)
+            if not r.ok:
+                raise Exception(f"Could not renew session: {r.content}")
             self._session_id = r.cookies[_SESSION_COOKIE]
         else:
             # Step one: a temporary session so we can log in
