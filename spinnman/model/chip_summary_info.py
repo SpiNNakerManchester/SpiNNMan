@@ -191,8 +191,7 @@ class ChipSummaryInfo(object):
         return self._ethernet_ip_address
 
     def clear_ethernet_ip_address(self):
-        """ Sets the ethernet_ip_address to None
-
+        """ Forces the Ethernet IP address to None, in case of an errant chip
         """
         self._ethernet_ip_address = None
 
