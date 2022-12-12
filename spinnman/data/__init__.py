@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2021-22 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,21 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from .connection import Connection
+from .spinnman_data_view import SpiNNManDataView
 
 
-class SpinnakerBootSender(Connection, metaclass=AbstractBase):
-    """ A sender of SpiNNaker Boot messages
-    """
-
-    __slots__ = ()
-
-    @abstractmethod
-    def send_boot_message(self, boot_message):
-        """ Sends a SpiNNaker boot message using this connection.
-
-        :param SpinnakerBootMessage boot_message: The message to be sent
-        :raise SpinnmanIOException:
-            If there is an error sending the message
-        """
+__all__ = ["SpiNNManDataView"]

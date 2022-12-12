@@ -26,7 +26,7 @@ class RoundRobinConnectionSelector(
         "_connections",
         "_next_connection_index"]
 
-    def __init__(self, connections):  # pylint: disable=super-init-not-called
+    def __init__(self, connections):
         """
         :param list(SCAMPConnection) connections:
             The connections to be used

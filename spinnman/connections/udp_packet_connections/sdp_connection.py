@@ -18,15 +18,14 @@ from spinn_utilities.overrides import overrides
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from .udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
-from spinnman.connections.abstract_classes import (
-    SDPReceiver, SDPSender, Listenable)
+from spinnman.connections.abstract_classes import Listenable
 
 _TWO_SKIP = struct.Struct("<2x")
 _REPR_TEMPLATE = "SDPConnection(chip_x={}, chip_y={}, local_host={},"\
     " local_port={}, remote_host={}, remote_port={})"
 
 
-class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
+class SDPConnection(UDPConnection, Listenable):
     __slots__ = [
         "_chip_x",
         "_chip_y"]
@@ -55,13 +54,34 @@ class SDPConnection(UDPConnection, SDPReceiver, SDPSender, Listenable):
         self._chip_x = chip_x
         self._chip_y = chip_y
 
-    @overrides(SDPReceiver.receive_sdp_message)
     def receive_sdp_message(self, timeout=None):
+        """ Receives an SDP message from this connection.  Blocks until the\
+            message has been received, or a timeout occurs.
+
+        :param int timeout:
+            The time in seconds to wait for the message to arrive; if not
+            specified, will wait forever, or until the connection is closed.
+        :return: The received SDP message
+        :rtype: SDPMessage
+        :raise SpinnmanIOException:
+            If there is an error receiving the message
+        :raise SpinnmanTimeoutException:
+            If there is a timeout before a message is received
+        :raise SpinnmanInvalidPacketException:
+            If the received packet is not a valid SDP message
+        :raise SpinnmanInvalidParameterException:
+            If one of the fields of the SDP message is invalid
+        """
         data = self.receive(timeout)
         return SDPMessage.from_bytestring(data, 2)
 
-    @overrides(SDPSender.send_sdp_message)
     def send_sdp_message(self, sdp_message):
+        """ Sends an SDP message down this connection
+
+        :param SDPMessage sdp_message: The SDP message to be sent
+        :raise SpinnmanIOException:
+            If there is an error sending the message.
+        """
         # If a reply is expected, the connection should
         if sdp_message.sdp_header.flags == SDPFlag.REPLY_EXPECTED:
             update_sdp_header_for_udp_send(

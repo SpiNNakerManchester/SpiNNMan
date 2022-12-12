@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from collections import OrderedDict
-
 
 class CPUInfos(object):
     """ A set of CPU information objects.
@@ -23,7 +21,7 @@ class CPUInfos(object):
         "_cpu_infos"]
 
     def __init__(self):
-        self._cpu_infos = OrderedDict()
+        self._cpu_infos = dict()
 
     def add_processor(self, x, y, processor_id, cpu_info):
         """ Add a processor on a given chip to the set.
@@ -86,7 +84,8 @@ class CPUInfos(object):
         return self._cpu_infos[x, y, p]
 
     def __str__(self):
-        return str(self._cpu_infos.keys())
+        return str([f"{x}, {y}, {p} (ph: {info.physical_cpu_id})"
+                    for (x, y, p), info in self._cpu_infos.items()])
 
     def __repr__(self):
         return self.__str__()

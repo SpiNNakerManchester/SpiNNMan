@@ -25,6 +25,11 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = []
 
+    def __init__(self, next_connection_selector):
+        AbstractMultiConnectionProcess.__init__(
+            self, next_connection_selector, n_channels=3,
+            intermediate_channel_waits=2)
+
     def _start_flood_fill(self, n_bytes, nearest_neighbour_id):
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /
                                  UDP_MESSAGE_MAX_SIZE))

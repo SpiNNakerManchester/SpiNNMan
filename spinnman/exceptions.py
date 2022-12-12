@@ -14,7 +14,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import traceback
-from collections import OrderedDict
 
 
 class SpinnmanException(Exception):
@@ -142,6 +141,16 @@ class SpinnmanIOException(SpinnmanException):
         return self._problem
 
 
+class SpinnmanEOFException(SpinnmanIOException):
+    """
+    An exception that we're trying to do I/O on a closed socket.
+    That isn't going to work!
+    """
+
+    def __init__(self):
+        super().__init__("connection is closed")
+
+
 class SpinnmanTimeoutException(SpinnmanException):
     """ An exception that indicates that a timeout occurred before an operation
         could finish
@@ -210,68 +219,29 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         return self._response
 
 
-class _Group(object):
-    def __init__(self, trace_back, connection):
-        self.trace_back = trace_back
-        self.chip_core = "board {} with ethernet chip {}:{} [".format(
-            connection.remote_ip_address, connection.chip_x, connection.chip_y)
-        self._separator = ""
-
-    def finalise(self):
-        self.chip_core += "]"
-
-    def add_coord(self, sdp_header):
-        self.chip_core += "{}[{}:{}:{}]".format(
-            self._separator,
-            sdp_header.destination_chip_x,
-            sdp_header.destination_chip_y,
-            sdp_header.destination_cpu)
-        self._separator = ","
-
-    @staticmethod
-    def group_exceptions(error_requests, exceptions, tracebacks, connections):
-        """ Groups exceptions into a form usable by an exception.
-
-        :param list(SCPRequest) error_requests: the error requests
-        :param list(Exception) exceptions: the exceptions
-        :param list tracebacks: the tracebacks
-        :param list connections:
-            the connections the errors were associated with
-        :return: a sorted exception pile
-        :rtype: dict(Exception,_Group)
-        """
-        data = OrderedDict()
-        for error_request, exception, trace_back, connection in zip(
-                error_requests, exceptions, tracebacks, connections):
-            for stored_exception in data.keys():
-                if isinstance(exception, type(stored_exception)):
-                    found_exception = stored_exception
-                    break
-            else:
-                data[exception] = _Group(trace_back, connection)
-                found_exception = exception
-            data[found_exception].add_coord(error_request.sdp_header)
-        for exception in data:
-            data[exception].finalise()
-        return data.items()
-
-
 class SpinnmanGroupedProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with a\
         collection of cores/chips
     """
     def __init__(self, error_requests, exceptions, tracebacks, connections):
         problem = "Exceptions found were:\n"
-        for exception, description in _Group.group_exceptions(
+        for error_request, exception, trace_back, connection in zip(
                 error_requests, exceptions, tracebacks, connections):
+            sdp_header = error_request.sdp_header
+            phys_p = sdp_header.get_physical_cpu_id()
+            location = "board {} with ethernet chip {}:{} [{}:{}:{}{}]".format(
+                connection.remote_ip_address, connection.chip_x,
+                connection.chip_y, sdp_header.destination_chip_x,
+                sdp_header.destination_chip_y,
+                sdp_header.destination_cpu, phys_p)
             problem += \
                 "   Received exception class: {}\n" \
                 "       With message {}\n" \
                 "       When sending to {}\n" \
                 "       Stack trace: {}\n".format(
                     exception.__class__.__name__, str(exception),
-                    description.chip_core,
-                    traceback.format_tb(description.trace_back))
+                    location,
+                    traceback.format_tb(trace_back))
         super().__init__(problem)
 
 
@@ -279,21 +249,22 @@ class SpinnmanGenericProcessException(SpinnmanException):
     """ Encapsulates exceptions from processes which communicate with some\
         core/chip
     """
-    def __init__(self, exception, tb, x, y, p, tb2=None):
+    def __init__(self, exception, tb, x, y, p, phys_p, tb2=None):
         """
         :param Exception exception:
         :param int x:
         :param int y:
         :param int p:
+        :param str phys_p:
         """
         # pylint: disable=too-many-arguments
         super().__init__(
-            "\n     Received exception class: {} \n"
-            "     With message: {} \n"
-            "     When sending to {}:{}:{}\n"
-            "     Stack trace: {}\n".format(
+            "   Received exception class: {} \n"
+            "      With message: {} \n"
+            "      When sending to {}:{}:{}{}\n"
+            "      Stack trace: {}\n".format(
                 exception.__class__.__name__, str(exception), x, y, p,
-                traceback.format_tb(tb)))
+                phys_p, traceback.format_tb(tb)))
 
         self._stored_exception = exception
         if tb2 is not None:
@@ -360,9 +331,13 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         :param set(CPUState) expected_states:
         :param CPUInfos failed_core_states:
         """
-
-        msg = "waiting for cores {} to reach one of {}".format(
-            failed_core_states, expected_states)
+        n_cores = len(failed_core_states)
+        if n_cores > 10:
+            msg = "waiting for {} cores to reach one of {}".format(
+                n_cores, expected_states)
+        else:
+            msg = "waiting for cores {} to reach one of {}".format(
+                failed_core_states, expected_states)
         super().__init__(msg, timeout, msg)
         self._failed_core_states = failed_core_states
 

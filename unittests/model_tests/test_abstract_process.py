@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from spinnman.processes.abstract_single_connection_process import (
-    AbstractSingleConnectionProcess)
+from spinnman.processes.abstract_multi_connection_process import (
+    AbstractMultiConnectionProcess)
 from spinnman.messages.scp.impl import ReadMemory
 from spinnman.config_setup import unittest_setup
 from spinnman.connections.udp_packet_connections import SCAMPConnection
@@ -24,7 +24,7 @@ from spinnman.processes import RoundRobinConnectionSelector
 import pytest
 
 
-class MockProcess(AbstractSingleConnectionProcess):
+class MockProcess(AbstractMultiConnectionProcess):
 
     def test(self):
         self._send_request(ReadMemory(0, 0, 0, 4))

@@ -17,6 +17,7 @@ import unittest
 import struct
 from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
+from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
@@ -33,10 +34,8 @@ ver = 5  # Guess?
 class MockWriteTransceiver(Transceiver):
 
     def __init__(
-            self, version, connections=None, scamp_connections=None):
-        super().__init__(
-            version, connections=connections,
-            scamp_connections=scamp_connections)
+            self, version, connections=None):
+        super().__init__(version, connections=connections)
         self.written_memory = list()
 
     def get_machine_details(self):
@@ -51,6 +50,9 @@ class MockWriteTransceiver(Transceiver):
         print("Doing write to", x, y)
         self.written_memory.append(
             (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
+
+    def close(self):
+        pass
 
 
 class TestTransceiver(unittest.TestCase):
@@ -98,6 +100,7 @@ class TestTransceiver(unittest.TestCase):
         connections.append(BootConnection(
             remote_host=board_config.remotehost))
         with transceiver.Transceiver(ver, connections=connections) as trans:
+            SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
             if board_config.board_version in (2, 3):
                 assert trans.get_machine_dimensions().width == 2
                 assert trans.get_machine_dimensions().height == 2
@@ -124,24 +127,19 @@ class TestTransceiver(unittest.TestCase):
 
         # Create board connections
         connections = []
-        connections.append(SCAMPConnection(
-            remote_host=None))
+        connections.append(SCAMPConnection(remote_host=None))
         orig_connection = EIEIOConnection()
         connections.append(orig_connection)
 
         # Create transceiver
         with Transceiver(version=5, connections=connections) as trnx:
             # Register a UDP listeners
-            connection_1 = trnx.register_udp_listener(
-                callback=None, connection_class=EIEIOConnection)
-            connection_2 = trnx.register_udp_listener(
-                callback=None, connection_class=EIEIOConnection)
-            connection_3 = trnx.register_udp_listener(
-                callback=None, connection_class=EIEIOConnection,
-                local_port=orig_connection.local_port)
-            connection_4 = trnx.register_udp_listener(
-                callback=None, connection_class=EIEIOConnection,
-                local_port=orig_connection.local_port + 1)
+            connection_1 = trnx.register_eieio_listener(callback=None)
+            connection_2 = trnx.register_eieio_listener(callback=None)
+            connection_3 = trnx.register_eieio_listener(
+                callback=None, local_port=orig_connection.local_port)
+            connection_4 = trnx.register_eieio_listener(
+                callback=None, local_port=orig_connection.local_port + 1)
 
             assert connection_1 == orig_connection
             assert connection_2 == orig_connection
@@ -150,10 +148,9 @@ class TestTransceiver(unittest.TestCase):
 
     def test_set_watch_dog(self):
         connections = []
-        connections.append(SCAMPConnection(
-            remote_host=None))
+        connections.append(SCAMPConnection(remote_host=None))
         tx = MockWriteTransceiver(version=5, connections=connections)
-
+        SpiNNManDataWriter.mock().set_machine(tx.get_machine_details())
         # All chips
         tx.set_watch_dog(True)
         tx.set_watch_dog(False)

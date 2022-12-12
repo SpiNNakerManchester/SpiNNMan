@@ -17,10 +17,10 @@ from collections import defaultdict
 from contextlib import suppress
 import logging
 import functools
-import struct
 from os.path import join
 from spinn_utilities.config_holder import (
     get_config_bool, get_config_int, get_config_str)
+from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (
     Router, Chip, SDRAM, Link, machine_from_size)
@@ -41,6 +41,11 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 REPORT_FILE = "Ignores_report.rpt"
 
+P_TO_V = SystemVariableDefinition.physical_to_virtual_core_map
+V_TO_P = SystemVariableDefinition.virtual_to_physical_core_map
+P_TO_V_ADDR = SYSTEM_VARIABLE_BASE_ADDRESS + P_TO_V.offset
+P_MAPS_SIZE = P_TO_V.array_size + V_TO_P.array_size
+
 
 class GetMachineProcess(AbstractMultiConnectionProcess):
     """ A process for getting the machine details over a set of connections.
@@ -53,22 +58,17 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Holds a map from x,y to a set of virtual cores to ignores
         "_ignore_cores_map",
         "_p2p_column_data",
-        # Used if there are any ignore core requests
-        # Holds a mapping from (x,y) to a mapping of phsyical to virtual core
-        "_virtual_map",
-        # Directory to put the ingore report if required
-        "_default_report_directory",
-        # Ignore report file path for ignre report.
-        # Kept as None until first write
-        "_report_file"]
+        # Holds a mapping from (x,y) to a mapping of physical to virtual core
+        "_virtual_to_physical_map",
+        # Holds a mapping from (x,y) to a mapping of virtual to physical core
+        "_physical_to_virtual_map"]
 
-    def __init__(self, connection_selector, default_report_directory=None):
+    def __init__(self, connection_selector):
         """
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        # pylint: disable=too-many-arguments
         super().__init__(connection_selector)
 
         self._ignore_cores_map = defaultdict(set)
@@ -80,9 +80,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Set ethernets to None meaning not computed yet
         self._ethernets = None
-        self._virtual_map = {}
-        self._default_report_directory = default_report_directory
-        self._report_file = None
+
+        # Maps between virtual and physical cores
+        self._virtual_to_physical_map = dict()
+        self._physical_to_virtual_map = dict()
 
     def _make_chip(self, chip_info, machine):
         """ Creates a chip from a ChipSummaryInfo structure.
@@ -125,7 +126,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y,
-            down_cores=down_cores, parent_link=chip_info.parent_link)
+            down_cores=down_cores, parent_link=chip_info.parent_link,
+            v_to_p_map=self._virtual_to_physical_map.get(
+                (chip_info.x, chip_info.y)))
 
     def _make_router(self, chip_info, machine):
         """
@@ -163,6 +166,17 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
+
+    def _receive_p_maps(self, x, y, scp_read_response):
+        """ Receive the physical-to-virtual and virtual-to-physical maps
+        :param _SCPReadMemoryResponse scp_read_response:
+        """
+        data = scp_read_response.data
+        off = scp_read_response.offset
+        self._physical_to_virtual_map[x, y] = bytearray(
+            data[off:P_TO_V.array_size + off])
+        off += P_TO_V.array_size
+        self._virtual_to_physical_map[x, y] = bytearray(data[off:])
 
     def _receive_error(self, request, exception, tb, connection):
         """
@@ -203,6 +217,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Get the chip information for each chip
         for (x, y) in p2p_table.iterchips():
             self._send_request(GetChipInfo(x, y), self._receive_chip_info)
+            self._send_request(
+                ReadMemory(x, y, P_TO_V_ADDR, P_MAPS_SIZE),
+                functools.partial(self._receive_p_maps, x, y))
         self._finish()
         with suppress(Exception):
             # Ignore errors, as any error here just means that a chip
@@ -420,27 +437,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param int p:
         :rtype: int
         """
-        if xy not in self._virtual_map:
-            if xy not in self._chip_info:
-                # Chip not part of board so ignore
-                return None
-            p_to_v = SystemVariableDefinition.physical_to_virtual_core_map
-            ba = SYSTEM_VARIABLE_BASE_ADDRESS + p_to_v.offset
-            self._send_request(
-                ReadMemory(
-                    x=xy[0], y=xy[1],
-                    base_address=ba,
-                    size=p_to_v.array_size),
-                functools.partial(
-                    self._receive_physical_to_virtual_core_map, xy))
-            self._finish()
-
         if p > 0:
             self._report_ignore("On chip {} ignoring core {}", xy, p)
             return p
         else:
-            virtual_map = self._virtual_map[xy]
-            if 0-p not in virtual_map:
+            virtual_map = self._physical_to_virtual_map[xy]
+            if 0-p >= len(virtual_map) or virtual_map[0-p] == 0xFF:
                 self._report_ignore(
                     "On chip {} physical core {} was not used "
                     "so ignore is being discarded.".format(xy, -p))
@@ -453,60 +455,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 return None
             self._report_ignore(
                 "On chip {} ignoring core {} as it maps to physical "
-                "core {}", xy, 0-p, virtual_p)
+                "core {}", xy, virtual_p, 0-p)
             return virtual_p
-
-    def _receive_physical_to_virtual_core_map(self, xy, scp_read_response):
-        """
-        :param tuple(int,int) xy:
-        :param _SCPReadMemoryResponse scp_read_response:
-        """
-        chipinfo = self._chip_info[xy]
-        ip_address = self._chip_info[(0, 0)].ethernet_ip_address
-
-        self._report_ignore(
-            "Received physical_to_virtual_core_map for chip {} on {}",
-            xy, ip_address)
-        p_to_v_map = {}
-
-        for i in range(
-                scp_read_response.offset,
-                scp_read_response.offset + chipinfo.n_cores):
-            p_to_v_map[i-scp_read_response.offset] = \
-                struct.unpack_from("b", scp_read_response.data, i)[0]
-        # report_ignore (like logger) formats so dict as a param
-        self._report_ignore("{}", p_to_v_map)
-        self._virtual_map[xy] = p_to_v_map
-
-    def _verify_virtual_to_physical_core_map(self, xy):
-        """ Add this method to _get_virtual_p to verify the mappings.
-
-        :param tuple(int,int) xy:
-        """
-        v_to_p = SystemVariableDefinition.virtual_to_physical_core_map
-        self._send_request(
-            ReadMemory(
-                x=xy[0], y=xy[1],
-                base_address=SYSTEM_VARIABLE_BASE_ADDRESS + v_to_p.offset,
-                size=v_to_p.array_size),
-            functools.partial(
-                self._receive_virtual_to_physical_core_map, xy))
-        self._finish()
-
-    def _receive_virtual_to_physical_core_map(self, xy, scp_read_response):
-        """
-        :param tuple(int,int) xy:
-        :param _SCPReadMemoryResponse scp_read_response:
-        """
-        p_to_v_map = self._virtual_map[xy]
-        chipinfo = self._chip_info[xy]
-        for i in range(
-                scp_read_response.offset,
-                scp_read_response.offset + chipinfo.n_cores):
-            assert p_to_v_map[int(scp_read_response.data[i])] == \
-                    i-scp_read_response.offset
-        self._report_ignore(
-            "Virtual_to_physical_core_map checks for chip {}", xy)
 
     def _report_ignore(self, message, *args):
         """
@@ -519,12 +469,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param str message:
         """
         full_message = message.format(*args) + "\n"
-        if self._report_file is None:
-            if self._default_report_directory is None:
-                self._report_file = REPORT_FILE
-            else:
-                self._report_file = join(
-                    self._default_report_directory, REPORT_FILE)
-
-        with open(self._report_file, "a") as r_file:
+        report_file = join(UtilsDataView.get_run_dir_path(), REPORT_FILE)
+        with open(report_file, "a", encoding="utf-8") as r_file:
             r_file.write(full_message)

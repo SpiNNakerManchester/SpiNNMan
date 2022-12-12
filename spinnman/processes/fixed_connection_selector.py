@@ -13,22 +13,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from .connection import Connection
+from spinn_utilities.overrides import overrides
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 
 
-class EIEIOSender(Connection, metaclass=AbstractBase):
-    """ A sender of EIEIO messages
+class FixedConnectionSelector(
+        AbstractMultiConnectionProcessConnectionSelector):
+    """ A connection selector that only uses a single connection.
     """
+    __slots__ = ("__connection", )
 
-    __slots__ = ()
-
-    @abstractmethod
-    def send_eieio_message(self, eieio_message):
-        """ Sends an EIEIO message down this connection
-
-        :param AbstractEIEIOMessage eieio_message:
-            The EIEIO message to be sent
-        :raise SpinnmanIOException:
-            If there is an error sending the message
+    def __init__(self, connection):
         """
+        :param SCAMPConnection connection:
+            The connection to be used
+        """
+        self.__connection = connection
+
+    @overrides(
+        AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
+    def get_next_connection(self, message):
+        return self.__connection

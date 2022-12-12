@@ -127,7 +127,8 @@ class SCPRequestPipeLine(object):
         :return: The next number in the sequence.
         :rtype: int
         """
-        global _next_sequence, _next_sequence_lock
+        # pylint: disable=global-statement
+        global _next_sequence
         with _next_sequence_lock:
             sequence = _next_sequence
             _next_sequence = (sequence + 1) % MAX_SEQUENCE
@@ -277,14 +278,14 @@ class SCPRequestPipeLine(object):
             # Report timeouts as timeout exception
             if all(reason == "timeout" for reason in self._retry_reason[seq]):
                 raise SpinnmanTimeoutException(
-                    request_sent.scp_request_header.command,
+                    request_sent,
                     self._packet_timeout)
 
             # Report any other exception
             raise SpinnmanIOException(
                 "Errors sending request {} to {}, {}, {} over {} retries: {}"
                 .format(
-                    request_sent.scp_request_header.command,
+                    request_sent,
                     request_sent.sdp_header.destination_chip_x,
                     request_sent.sdp_header.destination_chip_y,
                     request_sent.sdp_header.destination_cpu,

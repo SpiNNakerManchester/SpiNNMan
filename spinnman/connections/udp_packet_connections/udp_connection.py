@@ -19,11 +19,14 @@ import select
 from contextlib import suppress
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
-from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
+from spinn_utilities.ping import Ping
+from spinnman.exceptions import (SpinnmanIOException, SpinnmanEOFException)
 from spinnman.connections.abstract_classes import Connection
-from .utils import (
-    bind_socket, connect_socket, get_socket, get_socket_address, ping,
-    resolve_host, set_receive_buffer_size)
+from spinnman.utilities.socket_utils import (
+    bind_socket, connect_socket, get_udp_socket, get_socket_address,
+    resolve_host, set_receive_buffer_size, receive_message,
+    receive_message_and_address, send_message, send_message_to_address)
+from spinnman.connections.abstract_classes import Listenable
 
 logger = FormatAdapter(logging.getLogger(__name__))
 _RECEIVE_BUFFER_SIZE = 1048576
@@ -31,7 +34,7 @@ _PING_COUNT = 5
 _REPR_TEMPLATE = "UDPConnection(local={}:{}, remote={}:{})"
 
 
-class UDPConnection(Connection):
+class UDPConnection(Connection, Listenable):
     __slots__ = [
         "_can_send",
         "_local_ip_address",
@@ -60,7 +63,7 @@ class UDPConnection(Connection):
             If there is an error setting up the communication channel
         """
 
-        self._socket = get_socket()
+        self._socket = get_udp_socket()
         set_receive_buffer_size(self._socket, _RECEIVE_BUFFER_SIZE)
 
         # Get the host and port to bind to locally
@@ -81,6 +84,10 @@ class UDPConnection(Connection):
             connect_socket(self._socket, self._remote_ip_address, remote_port)
             self._can_send = True
 
+        # If things are closed here, it's a catastrophic problem
+        if self._socket._closed:
+            raise SpinnmanEOFException()
+
         # Get the details of where the socket is connected
         self._local_ip_address, self._local_port = \
             get_socket_address(self._socket)
@@ -88,8 +95,25 @@ class UDPConnection(Connection):
         # Set a general timeout on the socket
         self._socket.settimeout(1.0)
 
+    @property
+    def __is_closed(self):
+        """
+        Is the socket closed? Note that just because a socket is not closed
+        doesn't mean that you're going to be able to successfully write to it
+        or read from it; some failures are only detected on use. But closed
+        sockets definitely behave in certain ways!
+
+        :rtype: bool
+        """
+        # Reach into Python'#s guts
+        return self._socket._closed  # pylint: disable=protected-access
+
     @overrides(Connection.is_connected)
     def is_connected(self):
+        # Closed sockets are never connected!
+        if self.__is_closed:
+            return False
+
         # If this is not a sending socket, it is not connected
         if not self._can_send:
             return False
@@ -97,7 +121,7 @@ class UDPConnection(Connection):
         # check if machine is active and on the network
         for _ in range(_PING_COUNT):
             # Assume connected if ping works
-            if ping(self._remote_ip_address).returncode == 0:
+            if Ping.ping(self._remote_ip_address) == 0:
                 return True
 
         # If the ping fails this number of times, the host cannot be contacted
@@ -150,13 +174,9 @@ class UDPConnection(Connection):
             If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
         """
-        try:
-            self._socket.settimeout(timeout)
-            return self._socket.recv(300)
-        except socket.timeout as e:
-            raise SpinnmanTimeoutException("receive", timeout) from e
-        except Exception as e:  # pylint: disable=broad-except
-            raise SpinnmanIOException(str(e)) from e
+        if self.__is_closed:
+            raise SpinnmanEOFException()
+        return receive_message(self._socket, timeout, 300)
 
     def receive_with_address(self, timeout=None):
         """ Receive data from the connection along with the address where the\
@@ -170,13 +190,9 @@ class UDPConnection(Connection):
             If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
         """
-        try:
-            self._socket.settimeout(timeout)
-            return self._socket.recvfrom(300)
-        except socket.timeout as e:
-            raise SpinnmanTimeoutException("receive", timeout) from e
-        except Exception as e:  # pylint: disable=broad-except
-            raise SpinnmanIOException(str(e)) from e
+        if self.__is_closed:
+            raise SpinnmanEOFException()
+        return receive_message_and_address(self._socket, timeout, 300)
 
     def send(self, data):
         """ Send data down this connection
@@ -185,15 +201,15 @@ class UDPConnection(Connection):
         :type data: bytes or bytearray
         :raise SpinnmanIOException: If there is an error sending the data
         """
+        if self.__is_closed:
+            raise SpinnmanEOFException()
         if not self._can_send:
             raise SpinnmanIOException(
                 "Remote host and/or port not set - data cannot be sent with"
                 " this connection")
-        try:
-            while not self._socket.send(data):
-                pass
-        except Exception as e:  # pylint: disable=broad-except
-            raise SpinnmanIOException(str(e)) from e
+        while not send_message(self._socket, data):
+            if self.__is_closed:
+                raise SpinnmanEOFException()
 
     def send_to(self, data, address):
         """ Send data down this connection
@@ -204,22 +220,30 @@ class UDPConnection(Connection):
             A tuple of (address, port) to send the data to
         :raise SpinnmanIOException: If there is an error sending the data
         """
-        try:
-            while not self._socket.sendto(data, address):
-                pass
-        except Exception as e:  # pylint: disable=broad-except
-            raise SpinnmanIOException(str(e)) from e
+        if self.__is_closed:
+            raise SpinnmanEOFException()
+        while not send_message_to_address(self._socket, data, address):
+            if self.__is_closed:
+                raise SpinnmanEOFException()
 
     @overrides(Connection.close)
     def close(self):
+        if self.__is_closed:
+            return
         with suppress(Exception):
             self._socket.shutdown(socket.SHUT_WR)
         self._socket.close()
 
     def is_ready_to_receive(self, timeout=0):
+        if self.__is_closed:
+            return True
         return len(select.select([self._socket], [], [], timeout)[0]) == 1
 
     def __repr__(self):
         return _REPR_TEMPLATE.format(
             self.local_ip_address, self.local_port,
             self.remote_ip_address, self.remote_port)
+
+    @overrides(Listenable.get_receive_method)
+    def get_receive_method(self):
+        return self.receive
