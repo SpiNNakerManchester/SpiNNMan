@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2021-2022 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,8 +12,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from enum import IntEnum
 
-SpiNNUtilities == 1!6.0.1
-SpiNNMachine == 1!6.0.1
-requests >= 2.4.1
-websocket-client
+
+class SpallocState(IntEnum):
+    #: The job is in an unknown state.
+    UNKNOWN = 0
+    #: The job is queued waiting for allocation.
+    QUEUED = 1
+    #: The job is queued waiting for boards to power on or off.
+    POWER = 2
+    #: The job is ready for user code to run on it.
+    READY = 3
+    #: The job has been destroyed.
+    DESTROYED = 4

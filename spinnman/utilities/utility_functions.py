@@ -15,11 +15,13 @@
 
 import socket
 from spinnman.model import BMPConnectionData
+from spinnman.messages.scp.impl import IPTagSet
 from spinnman.messages.sdp import SDPMessage, SDPHeader, SDPFlag
 from spinnman.constants import SCP_SCAMP_PORT, CPU_INFO_BYTES, CPU_INFO_OFFSET
+from spinnman.connections.udp_packet_connections import (
+    SCAMPConnection, UDPConnection)
 from spinnman.connections.udp_packet_connections.utils import (
     update_sdp_header_for_udp_send)
-from spinnman.messages.scp.impl import IPTagSet
 from spinnman.exceptions import SpinnmanTimeoutException
 
 
@@ -84,7 +86,7 @@ def send_port_trigger_message(connection, board_address):
         trigger_message.bytestring, (board_address, SCP_SCAMP_PORT))
 
 
-def reprogram_tag(connection, tag, strip=True):
+def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
     """ Reprogram an IP Tag to send responses to a given SCAMPConnection
 
     :param SCAMPConnection connection: The connection to target the tag at
@@ -104,6 +106,46 @@ def reprogram_tag(connection, tag, strip=True):
             connection.send(data)
             _, _, response, offset = connection.receive_scp_response()
             request.get_scp_response().read_bytestring(response, offset)
+            return
+        except SpinnmanTimeoutException as e:
+            exn = e
+    # Should be impossible to get here with exn=None
+    raise exn or Exception
+
+
+def reprogram_tag_to_listener(
+        connection: UDPConnection, x: int, y: int, ip_address: str, tag: int,
+        strip: bool = True):
+    """
+    Reprogram an IP Tag to send responses to a given connection that is
+    not connected to a specific board. Such connections are normally
+    receive-only connections.
+
+    :param UDPConnection connection: The connection to target the tag at
+    :param int x:
+        The X coordinate of the ethernet chip that should send to the
+        connection
+    :param int y:
+        The Y coordinate of the ethernet chip that should send to the
+        connection
+    :param str ip_address:
+        The IP address of the ethernet chip that should be given the message
+    :param int tag: The id of the tag to set
+    :param bool strip:
+        True if the tag should strip SDP headers from outgoing messages
+    :raises SpinnmanTimeoutException:
+        If things time out several times
+    """
+    request = IPTagSet(
+        x, y, [0, 0, 0, 0], 0, tag,
+        strip=strip, use_sender=True)
+    update_sdp_header_for_udp_send(request.sdp_header, x, y)
+    send_data = b'\0\0' + request.bytestring
+    exn = None
+    for _ in range(3):
+        try:
+            connection.send_to(send_data, (ip_address, SCP_SCAMP_PORT))
+            request.get_scp_response().read_bytestring(connection.receive(), 2)
             return
         except SpinnmanTimeoutException as e:
             exn = e

@@ -23,7 +23,7 @@ from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
 from spinnman.connections.udp_packet_connections import (
-    BootConnection, EIEIOConnection, SCAMPConnection)
+    BootConnection, SCAMPConnection)
 import spinnman.transceiver as transceiver
 from board_test_configuration import BoardTestConfiguration
 
@@ -121,30 +121,6 @@ class TestTransceiver(unittest.TestCase):
                 board_config.remotehost, board_config.board_version) as trans:
             # self.assertFalse(trans.is_connected())
             trans.boot_board()
-
-    def test_listener_creation(self):
-        # Tests the creation of listening sockets
-
-        # Create board connections
-        connections = []
-        connections.append(SCAMPConnection(remote_host=None))
-        orig_connection = EIEIOConnection()
-        connections.append(orig_connection)
-
-        # Create transceiver
-        with Transceiver(version=5, connections=connections) as trnx:
-            # Register a UDP listeners
-            connection_1 = trnx.register_eieio_listener(callback=None)
-            connection_2 = trnx.register_eieio_listener(callback=None)
-            connection_3 = trnx.register_eieio_listener(
-                callback=None, local_port=orig_connection.local_port)
-            connection_4 = trnx.register_eieio_listener(
-                callback=None, local_port=orig_connection.local_port + 1)
-
-            assert connection_1 == orig_connection
-            assert connection_2 == orig_connection
-            assert connection_3 == orig_connection
-            assert connection_4 != orig_connection
 
     def test_set_watch_dog(self):
         connections = []

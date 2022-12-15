@@ -18,17 +18,24 @@ from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
 
 
-class DatabaseConfirmation(EIEIOCommandMessage):
+class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
     """ Packet which contains the path to the database created by the\
         toolchain which is to be used by any software which interfaces with\
-        SpiNNaker.
+        SpiNNaker. Also the acknowledgement of that message.
+
+    This message is not sent to SpiNNaker boards but rather to an auxiliary
+    tool (e.g., data visualiser).
     """
     __slots__ = [
         "_database_path"]
 
     def __init__(self, database_path=None):
-        super().__init__(
-            EIEIOCommandHeader(EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION))
+        """
+        :param str database_path:
+            The location of the database. If ``None``, this is an
+            acknowledgement, stating that the database has now been read.
+        """
+        super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.DATABASE))
         self._database_path = None
         if database_path is not None:
             self._database_path = database_path.encode()
@@ -52,4 +59,4 @@ class DatabaseConfirmation(EIEIOCommandMessage):
         database_path = None
         if len(data) - offset > 0:
             database_path = data[offset:]
-        return DatabaseConfirmation(database_path)
+        return NotificationProtocolDatabaseLocation(database_path)
