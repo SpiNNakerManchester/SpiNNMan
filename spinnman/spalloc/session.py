@@ -129,7 +129,7 @@ class Session:
         params = kwargs if kwargs else None
         cookies = {_SESSION_COOKIE: self._session_id}
         r = requests.get(url, params=params, cookies=cookies,
-                         allow_redirects=False)
+                         allow_redirects=False, timeout=10)
         logger.debug("GET {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
@@ -146,7 +146,7 @@ class Session:
         cookies, headers = self._credentials
         r = requests.post(url, params=params, json=jsonobj,
                           cookies=cookies, headers=headers,
-                          allow_redirects=False)
+                          allow_redirects=False, timeout=10)
         logger.debug("POST {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
@@ -165,7 +165,7 @@ class Session:
             headers["Content-Type"] = "text/plain; charset=UTF-8"
         r = requests.put(url, params=params, data=data,
                          cookies=cookies, headers=headers,
-                         allow_redirects=False)
+                         allow_redirects=False, timeout=10)
         logger.debug("PUT {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
@@ -180,7 +180,8 @@ class Session:
         params = kwargs if kwargs else None
         cookies, headers = self._credentials
         r = requests.delete(url, params=params, cookies=cookies,
-                            headers=headers, allow_redirects=False)
+                            headers=headers, allow_redirects=False,
+                            timeout=10)
         logger.debug("DELETE {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
@@ -196,7 +197,7 @@ class Session:
             r = requests.get(
                 self.__login_form_url,
                 headers={"Authorization": f"Bearer {self.__token}"},
-                allow_redirects=False)
+                allow_redirects=False, timeout=10)
             if not r.ok:
                 raise Exception(f"Could not renew session: {r.content}")
             self._session_id = r.cookies[_SESSION_COOKIE]
@@ -204,7 +205,8 @@ class Session:
             # Step one: a temporary session so we can log in
             csrf_matcher = re.compile(
                 r"""<input type="hidden" name="_csrf" value="(.*)" />""")
-            r = requests.get(self.__login_form_url, allow_redirects=False)
+            r = requests.get(self.__login_form_url, allow_redirects=False,
+                             timeout=10)
             logger.debug("GET {} returned {}",
                          self.__login_form_url, r.status_code)
             m = csrf_matcher.search(r.text)
@@ -224,7 +226,7 @@ class Session:
             r = requests.post(self.__login_submit_url,
                               cookies={_SESSION_COOKIE: session},
                               allow_redirects=False,
-                              data=form)
+                              data=form, timeout=10)
             logger.debug("POST {} returned {}",
                          self.__login_submit_url, r.status_code)
             self._session_id = r.cookies[_SESSION_COOKIE]
