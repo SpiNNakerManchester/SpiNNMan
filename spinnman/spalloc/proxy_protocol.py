@@ -1,4 +1,4 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2021-2022 The University of Manchester
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -12,8 +12,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+from enum import IntEnum
 
-SpiNNUtilities == 1!6.0.1
-SpiNNMachine == 1!6.0.1
-requests >= 2.4.1
-websocket-client
+
+class ProxyProtocol(IntEnum):
+    #: Message relating to opening a channel
+    OPEN = 0
+    #: Message relating to closing a channel
+    CLOSE = 1
+    #: Message sent on a channel
+    MSG = 2
+    #: Message relating to opening an unbound listen-only channel
+    OPEN_UNBOUND = 3
+    #: Message sent on an unbound channel to a given board
+    MSG_TO = 4

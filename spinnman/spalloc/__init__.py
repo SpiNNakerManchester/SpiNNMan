@@ -13,23 +13,23 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from .eieio_command_message import EIEIOCommandMessage
-from .eieio_command_header import EIEIOCommandHeader
-from spinnman.constants import EIEIO_COMMAND_IDS
+from .abstract_spalloc_client import AbstractSpallocClient
+from .spalloc_job import SpallocJob
+from .spalloc_machine import SpallocMachine
+from .spalloc_proxied_connection import SpallocProxiedConnection
+from .spalloc_eieio_connection import SpallocEIEIOConnection
+from .spalloc_eieio_listener import SpallocEIEIOListener
+from .spalloc_state import SpallocState
+from .spalloc_client import SpallocClient
+from .utils import is_server_address
 
-
-class NotificationProtocolStartResume(EIEIOCommandMessage):
-    """ Packet which indicates that the toolchain has started or resumed.
-
-    This message is not sent to SpiNNaker boards but rather to an auxiliary
-    tool (e.g., data visualiser).
-    """
-    __slots__ = []
-
-    def __init__(self):
-        super().__init__(EIEIOCommandHeader(
-            EIEIO_COMMAND_IDS.START_RESUME_NOTIFICATION))
-
-    @staticmethod
-    def from_bytestring(command_header, data, offset):
-        return NotificationProtocolStartResume()
+__all__ = (
+    "AbstractSpallocClient",
+    "is_server_address",
+    "SpallocClient",
+    "SpallocJob",
+    "SpallocMachine",
+    "SpallocProxiedConnection",
+    "SpallocEIEIOConnection",
+    "SpallocEIEIOListener",
+    "SpallocState")

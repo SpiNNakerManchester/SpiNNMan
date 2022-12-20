@@ -29,6 +29,7 @@ from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_machine import CoreSubsets
+from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
     CPU_USER_0_START_ADDRESS, CPU_USER_1_START_ADDRESS,
@@ -42,12 +43,11 @@ from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
-    SpinnmanUnexpectedResponseCodeException, SpinnmanInvalidPacketException,
+    SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
-from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
 from spinnman.messages.scp.enums import Signal, PowerCommand
@@ -57,10 +57,8 @@ from spinnman.messages.scp.impl import (
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
     CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
     IPTagSet, IPTagClear, RouterClear, DoSync)
-from spinnman.connections import ConnectionListener
 from spinnman.connections.udp_packet_connections import (
-    BMPConnection, UDPConnection, BootConnection, SCAMPConnection,
-    SDPConnection, EIEIOConnection)
+    BMPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
     DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
@@ -189,9 +187,6 @@ class Transceiver(AbstractContextManager):
         "_nearest_neighbour_lock",
         "_scamp_connection_selector",
         "_scamp_connections",
-        "_sdp_sender_connections",
-        "__eieio_listeners",
-        "_udp_receive_connections_by_port",
         "_udp_scamp_connections",
         "_version",
         "_width"]
@@ -232,20 +227,6 @@ class Transceiver(AbstractContextManager):
         # A boot send connection - there can only be one in the current system,
         # or otherwise bad things can happen!
         self._boot_send_connection = None
-
-        # A dict of port -> dict of IP address -> connection
-        # for UDP connections.  Note listener might be None if the connection
-        # has not been listened to before.
-        # Used to keep track of what connection is listening on what port
-        # to ensure only one type of traffic is received on any port for any
-        # interface
-        self._udp_receive_connections_by_port = defaultdict(dict)
-
-        # A dict from EIEIO connection to its listener
-        self.__eieio_listeners = dict()
-
-        # A list of all connections that can be used to send SDP messages
-        self._sdp_sender_connections = list()
 
         # A dict of IP address -> SCAMP connection
         # These are those that can be used for setting up IP Tags
@@ -316,14 +297,6 @@ class Transceiver(AbstractContextManager):
                         " specified")
                 self._boot_send_connection = conn
 
-            # Locate any connections listening on a UDP port
-            if isinstance(conn, UDPConnection):
-                self.__remember_connection(conn)
-
-            # Locate any connections that can send SDP
-            if isinstance(conn, SDPConnection):
-                self._sdp_sender_connections.append(conn)
-
             # Locate any connections that talk to a BMP
             if isinstance(conn, BMPConnection):
                 # If it is a BMP conn, add it here
@@ -333,8 +306,6 @@ class Transceiver(AbstractContextManager):
             # Otherwise, check if it can send and receive SCP (talk to SCAMP)
             elif isinstance(conn, SCAMPConnection):
                 self._scamp_connections.append(conn)
-                # Remember, for IP tag configuring
-                self._udp_scamp_connections[conn.remote_ip_address] = conn
 
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(self._scamp_connections)
@@ -390,7 +361,7 @@ class Transceiver(AbstractContextManager):
         :param int chip_x: the chip x coordinate to try to talk to
         :param int chip_y: the chip y coordinate to try to talk to
         :return: True if a valid response is received, False otherwise
-        :rtype: bool
+        :rtype: ChipInfo or None
         """
         for _ in range(_CONNECTION_CHECK_RETRIES):
             try:
@@ -400,13 +371,13 @@ class Transceiver(AbstractContextManager):
                 if not chip_info.is_ethernet_available:
                     time.sleep(0.1)
                 else:
-                    return True
+                    return chip_info
             except (SpinnmanGenericProcessException, SpinnmanTimeoutException,
                     SpinnmanUnexpectedResponseCodeException):
                 pass
             except SpinnmanIOException:
                 break
-        return False
+        return None
 
     @contextmanager
     def _chip_execute_lock(self, x, y):
@@ -495,7 +466,7 @@ class Transceiver(AbstractContextManager):
         """
         if connection is None:
             connection_to_use = self._get_random_connection(
-                self._sdp_sender_connections)
+                self._scamp_connections)
         else:
             connection_to_use = connection
         connection_to_use.send_sdp_message(message)
@@ -518,9 +489,10 @@ class Transceiver(AbstractContextManager):
         conn = SCAMPConnection(remote_host=ip_address, chip_x=x, chip_y=y)
 
         # check if it works
-        if self._check_connection(FixedConnectionSelector(conn), x, y):
+        chip_info = self._check_connection(FixedConnectionSelector(conn), x, y)
+        if chip_info is not None:
             self._all_connections.add(conn)
-            self._udp_scamp_connections[ip_address] = conn
+            self._udp_scamp_connections[chip_info.ethernet_ip_address] = conn
             self._scamp_connections.append(conn)
         else:
             logger.warning(
@@ -664,7 +636,7 @@ class Transceiver(AbstractContextManager):
 
         if self._boot_send_connection:
             logger.info("Detected a machine on IP address {} which has {}",
-                        self._boot_send_connection.remote_ip_address,
+                        machine.boot_chip.ip_address,
                         machine.cores_and_link_output_string())
         return machine
 
@@ -842,6 +814,13 @@ class Transceiver(AbstractContextManager):
             process.execute(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
+
+            chip_info = self._check_connection(
+                FixedConnectionSelector(scamp_connection),
+                scamp_connection.chip_x, scamp_connection.chip_y)
+            if chip_info is not None:
+                self._udp_scamp_connections[chip_info.ethernet_ip_address] = \
+                    scamp_connection
 
         # Update the connection selector so that it can ask for processor ids
         self._scamp_connection_selector = MostDirectConnectionSelector(
@@ -2723,151 +2702,8 @@ class Transceiver(AbstractContextManager):
             if get_config_bool("Machine", "turn_off_machine"):
                 self.power_off_machine()
 
-        for listener in self.__eieio_listeners.values():
-            listener.close()
-
         for connection in self._all_connections:
             connection.close()
-
-    def __remember_connection(self, connection: UDPConnection):
-        """
-        How to add an entry to ``_udp_receive_connections_by_port`` correctly.
-
-        :param UDPConnection connection: The connect to add.
-        """
-        self._udp_receive_connections_by_port[
-            connection.local_port][connection.local_ip_address] = connection
-
-    @property
-    def _num_listeners(self):
-        """
-        For debugging.
-
-        :return: The number of EIEIO listeners registered.
-        :rtype: int
-        """
-        return len(self.__eieio_listeners)
-
-    def register_eieio_listener(self, callback,
-                                local_port=None, local_host=None):
-        """ Register a callback for EIEIO traffic to be received (via UDP).
-
-        :param callable callback:
-            Function to be called when a packet is received. If None, nothing
-            will be registered to be called.
-        :param int local_port: The optional port number to listen on; if not
-            specified, an existing connection will be used if possible,
-            otherwise a random free port number will be used
-        :param str local_host: The optional hostname or IP address to listen
-            on; if not specified, all interfaces will be used for listening
-        :return: The connection to be used
-        :rtype: EIEIOConnection
-        """
-        # If local_host is not specified, normalise it
-        if local_host is None:
-            local_host = "0.0.0.0"
-
-        # If the local port was specified
-        if local_port is not None:
-            connection, listener = self.__lookup_by_port(
-                local_port, local_host)
-
-            # If we are here, nothing is listening on this port, so create
-            # a connection if there isn't already one, and a listener
-            if connection is None:
-                connection = EIEIOConnection(local_port=local_port,
-                                             local_host=local_host)
-                self._all_connections.add(connection)
-                self.__remember_connection(connection)
-
-            if listener is None:
-                listener = ConnectionListener(connection)
-                listener.start()
-                self.__eieio_listeners[connection] = listener
-        else:
-            # If we are here, the local port wasn't specified to try to use an
-            # existing connection of the correct class
-            connection, listener = self.__lookup_wildcard(local_host)
-
-            # Create a connection if there isn't already one, and a listener
-            if connection is None:
-                connection = EIEIOConnection(local_host=local_host)
-                self._all_connections.add(connection)
-                self.__remember_connection(connection)
-
-            if listener is None:
-                listener = ConnectionListener(connection)
-                listener.start()
-                self.__eieio_listeners[connection] = listener
-
-        if callback:
-            listener.add_callback(callback)
-        return connection
-
-    def __lookup_by_port(self, port, host):
-        """
-        Look up a connection and listener for a port/host pair and check, if
-        they exist, that they're of the right type.
-
-        :param int port: The local port for the connection.
-        :param str host: The local host IP address for the connection.
-        :rtype: tuple(EIEIOConnection, ConnectionListener)
-        """
-        receiving_connections = self._udp_receive_connections_by_port[port]
-        connection = None
-
-        # If something is already listening on this port
-        if receiving_connections:
-            if host == "0.0.0.0":
-                # If we are to listen on all interfaces and the listener
-                # is not on all interfaces, this is an error
-                if "0.0.0.0" not in receiving_connections:
-                    raise SpinnmanInvalidParameterException(
-                        "local_port", str(port),
-                        "Another connection is already listening on this port")
-            else:
-                # If we are to listen to a specific interface, and the
-                # listener is on all interfaces, this is an error
-                if "0.0.0.0" in receiving_connections:
-                    raise SpinnmanInvalidPacketException(
-                        "local_port and local_host",
-                        f"{port} and {host}")
-
-            # If the type of an existing connection is wrong, this is an error
-            connection = receiving_connections.get(host, None)
-            if isinstance(connection, EIEIOConnection):
-                return connection, self.__eieio_listeners.get(connection, None)
-            if connection:
-                raise SpinnmanInvalidParameterException(
-                    "connection_class", EIEIOConnection,
-                    "A connection of class {} is already listening on "
-                    "this port on all interfaces".format(
-                        connection.__class__))
-
-        return None, None
-
-    def __lookup_wildcard(self, host):
-        """
-        Look up an EIEIO connection and listener for the given local host
-        address.
-
-        :param str host: The local host IP address for the connection.
-        :rtype: tuple(EIEIOConnection, ConnectionListener)
-        """
-        # If we are here, the local port wasn't specified to try to use an
-        # existing connection of the correct class
-
-        # Find a connection with a running listener that matches the local host
-        for c, l in self.__eieio_listeners.items():
-            if c.local_ip_address == host:
-                return c, l
-        # Find a connection without a running listener that matches the host
-        for hc in self._udp_receive_connections_by_port.values():
-            for h, c in hc.items():
-                if h == host and isinstance(c, EIEIOConnection):
-                    return c, None
-        # There wasn't anything
-        return None, None
 
     @property
     def bmp_connection(self):

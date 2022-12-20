@@ -20,6 +20,9 @@ from spinnman.constants import EIEIO_COMMAND_IDS
 
 class NotificationProtocolPauseStop(EIEIOCommandMessage):
     """ Packet which indicates that the toolchain has paused or stopped
+
+    This message is not sent to SpiNNaker boards but rather to an auxiliary
+    tool (e.g., data visualiser).
     """
     __slots__ = []
 

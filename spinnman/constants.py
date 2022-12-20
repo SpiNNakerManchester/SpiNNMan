@@ -110,8 +110,8 @@ BMP_POST_POWER_ON_SLEEP_TIME = 5.0
 class EIEIO_COMMAND_IDS(Enum):
     """ A listing of what SpiNNaker specific EIEIO commands there are.
     """
-    #: Database handshake with external program
-    DATABASE_CONFIRMATION = 1
+    #: Database handshake with external program; not routed via SpiNNaker
+    DATABASE = 1
     #: Fill in buffer area with padding
     EVENT_PADDING = 2
     #: End of all buffers, stop execution
