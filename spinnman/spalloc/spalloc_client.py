@@ -211,7 +211,7 @@ def _SpallocKeepalive(url, interval, term_queue, cookies, headers):
     headers["Content-Type"] = "text/plain; charset=UTF-8"
     while True:
         requests.put(url, data="alive", cookies=cookies, headers=headers,
-                     allow_redirects=False)
+                     allow_redirects=False, timeout=10)
         try:
             term_queue.get(True, interval)
             break

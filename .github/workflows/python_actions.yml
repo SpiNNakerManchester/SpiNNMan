@@ -59,10 +59,10 @@ jobs:
     - name: Lint with flake8
       run: flake8 spinnman unittests
     - name: Lint with pylint
-      if: matrix.python-version != 3.9
       uses: ./support/actions/pylint
       with: 
         package: spinnman
+        exitcheck: 39
 
     - name: Run rat copyright enforcement
       if: matrix.python-version == 3.8
