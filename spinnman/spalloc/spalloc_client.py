@@ -464,7 +464,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state):
         while old_state != SpallocState.DESTROYED:
-            obj = self._get(self._url, wait="true").json()
+            obj = self._get(self._url, wait="true", timeout=None).json()
             s = SpallocState[obj["state"]]
             if s != old_state or s == SpallocState.DESTROYED:
                 return s

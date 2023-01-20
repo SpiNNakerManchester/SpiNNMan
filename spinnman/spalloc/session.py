@@ -119,26 +119,29 @@ class Session:
                          f"    {str(result)}")
 
     @_may_renew
-    def get(self, url: str, **kwargs) -> requests.Response:
+    def get(self, url: str, timeout: int = 10, **kwargs) -> requests.Response:
         """
         Do an HTTP ``GET`` in the session.
 
         :param str url:
+        :param int timeout:
         :rtype: ~requests.Response
         """
         params = kwargs if kwargs else None
         cookies = {_SESSION_COOKIE: self._session_id}
         r = requests.get(url, params=params, cookies=cookies,
-                         allow_redirects=False, timeout=10)
+                         allow_redirects=False, timeout=timeout)
         logger.debug("GET {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
     @_may_renew
-    def post(self, url: str, jsonobj: dict, **kwargs) -> requests.Response:
+    def post(self, url: str, jsonobj: dict, timeout: int = 10,
+             **kwargs) -> requests.Response:
         """
         Do an HTTP ``POST`` in the session.
 
         :param str url:
+        :param int timeout:
         :param dict jsonobj:
         :rtype: ~requests.Response
         """
@@ -146,17 +149,19 @@ class Session:
         cookies, headers = self._credentials
         r = requests.post(url, params=params, json=jsonobj,
                           cookies=cookies, headers=headers,
-                          allow_redirects=False, timeout=10)
+                          allow_redirects=False, timeout=timeout)
         logger.debug("POST {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
     @_may_renew
-    def put(self, url: str, data: str, **kwargs) -> requests.Response:
+    def put(self, url: str, data: str, timeout: int = 10,
+            **kwargs) -> requests.Response:
         """
         Do an HTTP ``PUT`` in the session. Puts plain text *OR* JSON!
 
         :param str url:
         :param str data:
+        :param int timeout:
         :rtype: ~requests.Response
         """
         params = kwargs if kwargs else None
@@ -165,12 +170,13 @@ class Session:
             headers["Content-Type"] = "text/plain; charset=UTF-8"
         r = requests.put(url, params=params, data=data,
                          cookies=cookies, headers=headers,
-                         allow_redirects=False, timeout=10)
+                         allow_redirects=False, timeout=timeout)
         logger.debug("PUT {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
     @_may_renew
-    def delete(self, url: str, **kwargs) -> requests.Response:
+    def delete(self, url: str, timeout: int = 10,
+               **kwargs) -> requests.Response:
         """
         Do an HTTP ``DELETE`` in the session.
 
@@ -181,7 +187,7 @@ class Session:
         cookies, headers = self._credentials
         r = requests.delete(url, params=params, cookies=cookies,
                             headers=headers, allow_redirects=False,
-                            timeout=10)
+                            timeout=timeout)
         logger.debug("DELETE {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
