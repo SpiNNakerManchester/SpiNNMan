@@ -500,9 +500,14 @@ class _SpallocJob(SessionAware, SpallocJob):
         class Closer(AbstractContextManager):
             def __init__(self):
                 self._queue = Queue(1)
+                self._p = None
 
             def close(self):
                 self._queue.put("quit")
+                # Give it a second, and if it still isn't dead, kill it
+                p.join(1)
+                if p.is_alive():
+                    p.kill()
 
         self._keepalive_handle = Closer()
         # pylint: disable=protected-access
@@ -510,6 +515,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             self._keepalive_url, period, self._keepalive_handle._queue,
             *self._session_credentials), daemon=True)
         p.start()
+        self._keepalive_handle._p = p
         return self._keepalive_handle
 
     @overrides(SpallocJob.where_is_machine)
