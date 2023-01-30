@@ -53,9 +53,9 @@ _close_req = struct.Struct("<III")
 _open_listen_req = struct.Struct("<II")
 # Open and close share the response structure
 _open_close_res = struct.Struct("<III")
-_open_listen_res = struct.Struct("<IIB4I")
+_open_listen_res = struct.Struct("<IIIBBBBI")
 _msg = struct.Struct("<II")
-_msg_to = struct.Struct("<IIII")
+_msg_to = struct.Struct("<IIIII")
 
 
 class SpallocClient(AbstractContextManager, AbstractSpallocClient):
@@ -294,6 +294,7 @@ class _ProxyReceiver(threading.Thread):
         self.__returns = {}
         self.__handlers = {}
         self.__correlation_id = 0
+        self.__closed = False
         self.start()
 
     def run(self):
@@ -308,7 +309,20 @@ class _ProxyReceiver(threading.Thread):
                     # Message is out of protocol
                     continue
             except Exception:  # pylint: disable=broad-except
-                break
+                # If closed, ignore error and get out of here
+                if self.__closed:
+                    break
+
+                # Make someone aware of the error
+                logger.exception("Error in websocket before close")
+
+                # If we are disconnected before closing, make errors happen
+                if not self.__ws.connected:
+                    for rt in self.__returns.values():
+                        rt(None)
+                    for hd in self.__handlers.values():
+                        hd(None)
+                    break
             code, num = _msg.unpack_from(frame, 0)
             if code == ProxyProtocol.MSG:
                 self.dispatch_message(num, frame)
@@ -347,6 +361,18 @@ class _ProxyReceiver(threading.Thread):
         handler = self.__handlers.get(channel_id, None)
         if handler:
             handler(msg)
+
+    def unlisten(self, channel_id):
+        """
+        De-register a listener for a channel
+        """
+        self.__handlers.pop(channel_id)
+
+    def close(self):
+        """
+        Mark receiver closed to avoid errors
+        """
+        self.__closed = True
 
 
 class _SpallocJob(SessionAware, SpallocJob):
@@ -428,7 +454,9 @@ class _SpallocJob(SessionAware, SpallocJob):
         if r.status_code == 204:
             return None
         try:
-            return r.json()["proxy-ref"]
+            url = r.json()["proxy-ref"]
+            logger.info("Connecting to proxy on {}", url)
+            return url
         except KeyError:
             return None
 
@@ -483,6 +511,9 @@ class _SpallocJob(SessionAware, SpallocJob):
         if self.__keepalive_handle:
             self.__keepalive_handle.close()
             self.__keepalive_handle = None
+        if self.__proxy_handle is not None:
+            self.__proxy_thread.close()
+            self.__proxy_handle.close()
         self._delete(self._url, reason=reason)
         logger.info("deleted job at {}", self._url)
 
@@ -580,6 +611,8 @@ class _ProxiedConnection(metaclass=AbstractBase):
             correlation_id = self.__receiver.expect_return(
                 self.__call_queue.put)
             self.__ws.send_binary(packer.pack(proto, correlation_id, *args))
+            if not self._connected:
+                raise IOError("socket closed after send!")
             return unpacker.unpack(self.__call_queue.get())[2:]
 
     @property
@@ -597,6 +630,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
                 self.__handle)
             if channel_id != self.__handle:
                 raise IOError("failed to close proxy socket")
+        self.__receiver.unlisten(self.__handle)
         self.__ws = None
         self.__receiver = None
 
