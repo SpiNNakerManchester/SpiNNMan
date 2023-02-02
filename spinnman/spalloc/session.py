@@ -20,6 +20,7 @@ from typing import Dict, Tuple
 import websocket
 from spinn_utilities.log import FormatAdapter
 from .utils import clean_url
+from spinnman.exceptions import SpallocException
 
 logger = FormatAdapter(getLogger(__name__))
 #: The name of the session cookie issued by Spring Security
@@ -192,6 +193,7 @@ class Session:
 
         :returns: Description of the root of the service, without CSRF data
         :rtype: dict
+        :raises SpollocExcption:
         """
         if self.__token:
             r = requests.get(
@@ -199,7 +201,7 @@ class Session:
                 headers={"Authorization": f"Bearer {self.__token}"},
                 allow_redirects=False, timeout=10)
             if not r.ok:
-                raise Exception(f"Could not renew session: {r.content}")
+                raise SpallocException(f"Could not renew session: {r.content}")
             self._session_id = r.cookies[_SESSION_COOKIE]
         else:
             # Step one: a temporary session so we can log in
@@ -211,7 +213,7 @@ class Session:
                          self.__login_form_url, r.status_code)
             m = csrf_matcher.search(r.text)
             if not m:
-                raise Exception("could not establish temporary session")
+                raise SpallocException("could not establish temporary session")
             csrf = m.group(1)
             session = r.cookies[_SESSION_COOKIE]
 
