@@ -346,3 +346,9 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         :rtype: CPUInfos
         """
         return self._failed_core_states
+
+
+class SpollocExcption(SpinnmanException):
+    """
+    Raised when there is a problem with the Spalloc session or job
+    """
