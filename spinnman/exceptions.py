@@ -348,7 +348,7 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         return self._failed_core_states
 
 
-class SpollocException(SpinnmanException):
+class SpallocException(SpinnmanException):
     """
     Raised when there is a problem with the Spalloc session or job
     """

@@ -45,7 +45,7 @@ from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
 from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_scp_connection import SpallocSCPConnection
-from spinnman.exceptions import SpollocException
+from spinnman.exceptions import SpallocException
 from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(getLogger(__name__))
@@ -477,7 +477,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         while state != SpallocState.READY:
             state = self.wait_for_state_change(state)
             if state == SpallocState.DESTROYED:
-                raise SpollocException("job was unexpectedly destroyed")
+                raise SpallocException("job was unexpectedly destroyed")
 
     @overrides(SpallocJob.destroy)
     def destroy(self, reason="finished"):
@@ -527,13 +527,13 @@ class _SpallocJob(SessionAware, SpallocJob):
     @_keepalive_handle.setter
     def _keepalive_handle(self, handle):
         if self.__keepalive_handle is not None:
-            raise SpollocException("cannot keep job alive from two tasks")
+            raise SpallocException("cannot keep job alive from two tasks")
         self.__keepalive_handle = handle
 
     @overrides(SpallocJob.create_transceiver)
     def create_transceiver(self) -> Transceiver:
         if self.get_state() != SpallocState.READY:
-            raise SpollocException("job not ready to execute scripts")
+            raise SpallocException("job not ready to execute scripts")
         proxies = [
             self.connect_to_board(x, y) for (x, y) in self.get_connections()]
         # Also need a boot connection
