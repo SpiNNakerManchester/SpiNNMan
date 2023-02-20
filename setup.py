@@ -75,7 +75,6 @@ setup(
     install_requires=[
         'SpiNNUtilities == 1!6.0.1',
         'SpiNNMachine == 1!6.0.1',
-        'requests >= 2.4.1',
         'websocket-client'],
     entry_points={
         "console_scripts": [
