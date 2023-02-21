@@ -629,7 +629,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         self.__ws = ws
         self.__receiver = receiver
-        self.__msgs = queue.Queue()
+        self.__msgs = queue.SimpleQueue()
         self.__call_queue = queue.Queue(1)
         self.__call_lock = threading.RLock()
         self.__current_msg = None
@@ -715,7 +715,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     def _is_ready_to_receive(self, timeout=0) -> bool:
         # If we already have a message or the queue peek succeeds, return now
-        if self.__current_msg is not None or self.__msgs.qsize():
+        if self.__current_msg is not None or not self.__msgs.empty():
             return True
         try:
             self.__current_msg = self.__get(timeout)
