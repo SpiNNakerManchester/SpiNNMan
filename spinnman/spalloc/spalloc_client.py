@@ -17,6 +17,7 @@ Implementation of the client for the Spalloc web service.
 
 from logging import getLogger
 from multiprocessing import Process, Queue
+from time import sleep
 from packaging.version import Version
 import queue
 import requests
@@ -53,9 +54,9 @@ _close_req = struct.Struct("<III")
 _open_listen_req = struct.Struct("<II")
 # Open and close share the response structure
 _open_close_res = struct.Struct("<III")
-_open_listen_res = struct.Struct("<IIB4I")
+_open_listen_res = struct.Struct("<IIIBBBBI")
 _msg = struct.Struct("<II")
-_msg_to = struct.Struct("<IIII")
+_msg_to = struct.Struct("<IIIII")
 
 
 class SpallocClient(AbstractContextManager, AbstractSpallocClient):
@@ -282,6 +283,40 @@ class _SpallocMachine(SessionAware, SpallocMachine):
             self.dead_links))
 
 
+class _ProxyPing(threading.Thread):
+    """
+    Sends ping messages to an open websocket
+    """
+
+    def __init__(self, ws, sleep_time=30):
+        super().__init__(daemon=True)
+        self.__ws = ws
+        self.__sleep_time = sleep_time
+        self.__closed = False
+        self.start()
+
+    def run(self):
+        """
+        The handler loop of this thread
+        """
+        while self.__ws.connected:
+            try:
+                self.__ws.ping()
+            except Exception:  # pylint: disable=broad-except
+                # If closed, ignore error and get out of here
+                if self.__closed:
+                    break
+
+                # Make someone aware of the error
+                logger.exception("Error in websocket before close")
+            sleep(self.__sleep_time)
+
+    def close(self):
+        """ Mark as closed to avoid error messages
+        """
+        self.__closed = True
+
+
 class _ProxyReceiver(threading.Thread):
     """
     Receives all messages off an open websocket and dispatches them to
@@ -294,6 +329,7 @@ class _ProxyReceiver(threading.Thread):
         self.__returns = {}
         self.__handlers = {}
         self.__correlation_id = 0
+        self.__closed = False
         self.start()
 
     def run(self):
@@ -308,7 +344,20 @@ class _ProxyReceiver(threading.Thread):
                     # Message is out of protocol
                     continue
             except Exception:  # pylint: disable=broad-except
-                break
+                # If closed, ignore error and get out of here
+                if self.__closed:
+                    break
+
+                # Make someone aware of the error
+                logger.exception("Error in websocket before close")
+
+                # If we are disconnected before closing, make errors happen
+                if not self.__ws.connected:
+                    for rt in self.__returns.values():
+                        rt(None)
+                    for hd in self.__handlers.values():
+                        hd(None)
+                    break
             code, num = _msg.unpack_from(frame, 0)
             if code == ProxyProtocol.MSG:
                 self.dispatch_message(num, frame)
@@ -348,6 +397,18 @@ class _ProxyReceiver(threading.Thread):
         if handler:
             handler(msg)
 
+    def unlisten(self, channel_id):
+        """
+        De-register a listener for a channel
+        """
+        self.__handlers.pop(channel_id)
+
+    def close(self):
+        """
+        Mark receiver closed to avoid errors
+        """
+        self.__closed = True
+
 
 class _SpallocJob(SessionAware, SpallocJob):
     """
@@ -357,7 +418,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     """
     __slots__ = ("__machine_url", "__chip_url",
                  "_keepalive_url", "__keepalive_handle", "__proxy_handle",
-                 "__proxy_thread")
+                 "__proxy_thread", "__proxy_ping")
 
     def __init__(self, session, job_handle):
         """
@@ -372,6 +433,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__keepalive_handle = None
         self.__proxy_handle = None
         self.__proxy_thread = None
+        self.__proxy_ping = None
 
     @overrides(SpallocJob._write_session_credentials_to_db)
     def _write_session_credentials_to_db(self, cur):
@@ -428,7 +490,9 @@ class _SpallocJob(SessionAware, SpallocJob):
         if r.status_code == 204:
             return None
         try:
-            return r.json()["proxy-ref"]
+            url = r.json()["proxy-ref"]
+            logger.info("Connecting to proxy on {}", url)
+            return url
         except KeyError:
             return None
 
@@ -437,6 +501,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             self.__proxy_handle = self._websocket(
                 self.__proxy_url, origin=get_hostname(self._url))
             self.__proxy_thread = _ProxyReceiver(self.__proxy_handle)
+            self.__proxy_ping = _ProxyPing(self.__proxy_handle)
 
     @overrides(SpallocJob.connect_to_board)
     def connect_to_board(self, x, y, port=SCP_SCAMP_PORT):
@@ -464,7 +529,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state):
         while old_state != SpallocState.DESTROYED:
-            obj = self._get(self._url, wait="true").json()
+            obj = self._get(self._url, wait="true", timeout=None).json()
             s = SpallocState[obj["state"]]
             if s != old_state or s == SpallocState.DESTROYED:
                 return s
@@ -483,6 +548,10 @@ class _SpallocJob(SessionAware, SpallocJob):
         if self.__keepalive_handle:
             self.__keepalive_handle.close()
             self.__keepalive_handle = None
+        if self.__proxy_handle is not None:
+            self.__proxy_thread.close()
+            self.__proxy_ping.close()
+            self.__proxy_handle.close()
         self._delete(self._url, reason=reason)
         logger.info("deleted job at {}", self._url)
 
@@ -500,9 +569,14 @@ class _SpallocJob(SessionAware, SpallocJob):
         class Closer(AbstractContextManager):
             def __init__(self):
                 self._queue = Queue(1)
+                self._p = None
 
             def close(self):
                 self._queue.put("quit")
+                # Give it a second, and if it still isn't dead, kill it
+                p.join(1)
+                if p.is_alive():
+                    p.kill()
 
         self._keepalive_handle = Closer()
         # pylint: disable=protected-access
@@ -510,6 +584,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             self._keepalive_url, period, self._keepalive_handle._queue,
             *self._session_credentials), daemon=True)
         p.start()
+        self._keepalive_handle._p = p
         return self._keepalive_handle
 
     @overrides(SpallocJob.where_is_machine)
@@ -554,7 +629,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         self.__ws = ws
         self.__receiver = receiver
-        self.__msgs = queue.Queue()
+        self.__msgs = queue.SimpleQueue()
         self.__call_queue = queue.Queue(1)
         self.__call_lock = threading.RLock()
         self.__current_msg = None
@@ -574,6 +649,8 @@ class _ProxiedConnection(metaclass=AbstractBase):
             correlation_id = self.__receiver.expect_return(
                 self.__call_queue.put)
             self.__ws.send_binary(packer.pack(proto, correlation_id, *args))
+            if not self._connected:
+                raise IOError("socket closed after send!")
             return unpacker.unpack(self.__call_queue.get())[2:]
 
     @property
@@ -591,6 +668,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
                 self.__handle)
             if channel_id != self.__handle:
                 raise IOError("failed to close proxy socket")
+        self.__receiver.unlisten(self.__handle)
         self.__ws = None
         self.__receiver = None
 
@@ -637,7 +715,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     def _is_ready_to_receive(self, timeout=0) -> bool:
         # If we already have a message or the queue peek succeeds, return now
-        if self.__current_msg is not None or self.__msgs.not_empty:
+        if self.__current_msg is not None or not self.__msgs.empty():
             return True
         try:
             self.__current_msg = self.__get(timeout)
