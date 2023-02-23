@@ -423,3 +423,5 @@ apidoc.main([
     "spinnman/messages/spinnaker_boot/boot_data/*",
     # Special case: Don't want that empty package at all.
     *filtered_files(_package_base, _unfiltered_files)])
+
+# See Note at bottom of global doc conf.py
