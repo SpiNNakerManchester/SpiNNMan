@@ -414,4 +414,9 @@ for fl in os.listdir("."):
 os.chdir("../..")  # WARNING! RELATIVE FILENAMES CHANGE MEANING HERE!
 apidoc.main([
     '-o', _output_dir, _package_base,
+    "spinnman/messages/spinnaker_boot/boot_data/*",
+    # Special case: Don't want that empty package at all.
     *excluded_because_in_init(_package_base)])
+
+# See Note at bottom of global doc conf.py
+
