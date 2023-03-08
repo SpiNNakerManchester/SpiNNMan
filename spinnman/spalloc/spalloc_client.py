@@ -642,6 +642,26 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     def _call(self, proto: ProxyProtocol, packer: struct.Struct,
               unpacker: struct.Struct, *args) -> List[int]:
+        """
+        Do a synchronous call.
+
+        :param proto:
+            The protocol message number.
+        :param packer:
+            How to form the protocol message. The first two arguments passed
+            will be the protocol message number and an issued correlation ID
+            (not needed by the caller).
+        :param unpacker:
+            How to extract the expected response.
+        :param args:
+            Additional arguments to pass to the packer.
+        :return:
+            The results from the unpacker *after* the protocol message code and
+            the correlation ID.
+        :raises IOError:
+            If something goes wrong. This could be due to the websocket being
+            closed, or the receipt of an ERROR response.
+        """
         if not self._connected:
             raise IOError("socket closed")
         with self.__call_lock:
@@ -651,7 +671,15 @@ class _ProxiedConnection(metaclass=AbstractBase):
             self.__ws.send_binary(packer.pack(proto, correlation_id, *args))
             if not self._connected:
                 raise IOError("socket closed after send!")
-            return unpacker.unpack(self.__call_queue.get())[2:]
+            reply = self.__call_queue.get()
+            code, _ = _msg.unpack_from(reply, 0)
+            if code == ProxyProtocol.ERROR:
+                # Rest of message is UTF-8 encoded error message string
+                payload = reply[_msg.size:].decode("utf-8")
+                if len(payload):
+                    raise IOError(payload)
+                raise IOError(f"unknown problem with {proto} call")
+            return unpacker.unpack(reply)[2:]
 
     @property
     def _connected(self) -> bool:
