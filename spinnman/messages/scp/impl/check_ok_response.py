@@ -19,7 +19,8 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
 class CheckOKResponse(AbstractSCPResponse):
-    """ An SCP response to a request which returns nothing other than OK
+    """
+    An SCP response to a request which returns nothing other than OK.
     """
     __slots__ = [
         "_command",

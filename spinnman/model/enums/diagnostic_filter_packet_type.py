@@ -16,8 +16,11 @@ from enum import Enum
 
 
 class DiagnosticFilterPacketType(Enum):
-    """ Packet type flags for the diagnostic filters.
-        Note that only one has to match for the counter to be incremented
+    """
+    Packet type flags for the diagnostic filters.
+
+    .. note::
+        Only one has to match for the counter to be incremented.
     """
     #: Packet is multicast
     MULTICAST = (0, "Packet is multicast")

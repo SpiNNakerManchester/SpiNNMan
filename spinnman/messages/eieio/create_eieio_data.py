@@ -17,8 +17,9 @@ from spinnman.messages.eieio.data_messages import (
 
 
 def read_eieio_data_message(data, offset):
-    """ Reads the content of an EIEIO data message and returns an object\
-        identifying the data which was contained in the packet
+    """
+    Reads the content of an EIEIO data message and returns an object
+    identifying the data which was contained in the packet.
 
     :param bytes data: data received from the network as a bytestring
     :param int offset: offset at which the parsing operation should start

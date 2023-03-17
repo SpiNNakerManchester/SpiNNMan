@@ -20,8 +20,9 @@ from spinnman.connections.udp_packet_connections import IPAddressesConnection
 
 
 def locate_connected_machine(handler):
-    """ Locates any SpiNNaker machines IP addresses from the auto-transmitted\
-        packets from non-booted SpiNNaker machines.
+    """
+    Locates any SpiNNaker machines IP addresses from the auto-transmitted
+    packets from non-booted SpiNNaker machines.
 
     :param callable handler:
         A callback that decides whether to stop searching. The callback is

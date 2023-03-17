@@ -21,7 +21,8 @@ _ANTI_FLOOD_DELAY = 0.1
 
 
 class BootConnection(UDPConnection):
-    """ A connection to the SpiNNaker board that uses UDP to for booting
+    """
+    A connection to the SpiNNaker board that uses UDP to for booting.
     """
     __slots__ = []
     _REPR_TEMPLATE = (
@@ -41,7 +42,8 @@ class BootConnection(UDPConnection):
                          remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
     def send_boot_message(self, boot_message):
-        """ Sends a SpiNNaker boot message using this connection.
+        """
+        Sends a SpiNNaker boot message using this connection.
 
         :param SpinnakerBootMessage boot_message: The message to be sent
         :raise SpinnmanIOException:
@@ -53,8 +55,9 @@ class BootConnection(UDPConnection):
         time.sleep(_ANTI_FLOOD_DELAY)
 
     def receive_boot_message(self, timeout=None):
-        """ Receives a boot message from this connection.  Blocks until a\
-            message has been received, or a timeout occurs.
+        """
+        Receives a boot message from this connection.  Blocks until a
+        message has been received, or a timeout occurs.
 
         :param int timeout:
             The time in seconds to wait for the message to arrive; if not

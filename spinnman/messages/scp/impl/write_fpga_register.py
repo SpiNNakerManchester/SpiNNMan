@@ -24,7 +24,8 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class WriteFPGARegister(BMPRequest):
-    """ A request for writing a word to a FPGA (SPI) register.
+    """
+    A request for writing a word to a FPGA (SPI) register.
 
     See the SpI/O project's spinnaker_fpga design's `README`_ for a listing
     of FPGA registers. The SpI/O project can be found on GitHub at:

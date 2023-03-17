@@ -182,7 +182,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         Write the session credentials for the job to the database accessed by
         the given cursor.
 
-        .. note ::
+        .. note::
             May assume that there is a ``proxy_configuration`` table with
             ``kind``, ``name`` and ``value`` columns.
 

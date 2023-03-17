@@ -25,6 +25,9 @@ _REPR_TEMPLATE = "SDPConnection(chip_x={}, chip_y={}, local_host={},"\
 
 
 class SDPConnection(UDPConnection, Listenable):
+    """
+    A connection that talks SpiNNaker Datagram Protocol.
+    """
     __slots__ = [
         "_chip_x",
         "_chip_y"]
@@ -54,8 +57,9 @@ class SDPConnection(UDPConnection, Listenable):
         self._chip_y = chip_y
 
     def receive_sdp_message(self, timeout=None):
-        """ Receives an SDP message from this connection.  Blocks until the\
-            message has been received, or a timeout occurs.
+        """
+        Receives an SDP message from this connection.  Blocks until the
+        message has been received, or a timeout occurs.
 
         :param int timeout:
             The time in seconds to wait for the message to arrive; if not
@@ -75,7 +79,8 @@ class SDPConnection(UDPConnection, Listenable):
         return SDPMessage.from_bytestring(data, 2)
 
     def send_sdp_message(self, sdp_message):
-        """ Sends an SDP message down this connection
+        """
+        Sends an SDP message down this connection.
 
         :param SDPMessage sdp_message: The SDP message to be sent
         :raise SpinnmanIOException:

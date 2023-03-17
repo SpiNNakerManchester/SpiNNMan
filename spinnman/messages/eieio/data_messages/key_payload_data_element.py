@@ -22,7 +22,8 @@ _TWO_WORDS = struct.Struct("<II")
 
 
 class KeyPayloadDataElement(AbstractDataElement):
-    """ A data element that contains a key and a payload
+    """
+    A data element that contains a key and a payload.
     """
     __slots__ = [
         "_key",

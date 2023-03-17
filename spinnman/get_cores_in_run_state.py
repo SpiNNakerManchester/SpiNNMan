@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" This is a script used to check the state of a SpiNNaker machine.
+"""
+This is a script used to check the state of a SpiNNaker machine.
 """
 
 import sys
@@ -63,12 +64,12 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
 
 def _make_transceiver(host, version, bmp_names):
     """
-    :param host: Most to use or None to use test config for all params
+    :param host: Most to use or `None` to use test config for all params
     :type host: str or None
-    :param version: Board version to use (None defaults to 5 unless host is
+    :param version: Board version to use (`None` defaults to 5 unless host is
         192.168.240.253 (spin 3)
     :type version: int or None
-    :param bmp: bmp conenction or None to auto detect (if applicable)
+    :param bmp: bmp connection or `None` to auto detect (if applicable)
     :type bmp: str or None
     :rtype: Transceiver
     """
@@ -100,7 +101,8 @@ def _make_transceiver(host, version, bmp_names):
 
 
 def main(args):
-    """ Runs the script.
+    """
+    Runs the script.
     """
     ap = argparse.ArgumentParser(
         description="Check the state of a SpiNNaker machine.")

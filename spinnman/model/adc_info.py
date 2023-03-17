@@ -26,7 +26,8 @@ _PATTERN = struct.Struct(
 
 
 class ADCInfo(object):
-    """ Container for the ADC data thats been retrieved from an FPGA.
+    """
+    Container for the ADC data thats been retrieved from an FPGA.
     """
     __slots__ = [
         "_fan_0",
@@ -78,7 +79,8 @@ class ADCInfo(object):
 
     @property
     def voltage_1_2c(self):
-        """ Actual voltage of the 1.2V c supply rail
+        """
+        Actual voltage of the 1.2V c supply rail.
 
         :rtype: float
         """
@@ -86,7 +88,8 @@ class ADCInfo(object):
 
     @property
     def voltage_1_2b(self):
-        """ Actual voltage of the 1.2V b supply rail
+        """
+        Actual voltage of the 1.2V b supply rail.
 
         :rtype: float
         """
@@ -94,7 +97,8 @@ class ADCInfo(object):
 
     @property
     def voltage_1_2a(self):
-        """ Actual voltage of the 1.2V a supply rail
+        """
+        Actual voltage of the 1.2V a supply rail.
 
         :rtype: float
         """
@@ -102,7 +106,8 @@ class ADCInfo(object):
 
     @property
     def voltage_1_8(self):
-        """ Actual voltage of the 1.8V supply rail
+        """
+        Actual voltage of the 1.8V supply rail.
 
         :rtype: float
         """
@@ -110,7 +115,8 @@ class ADCInfo(object):
 
     @property
     def voltage_3_3(self):
-        """ Actual voltage of the 3.3V supply rail
+        """
+        Actual voltage of the 3.3V supply rail.
 
         :rtype: float
         """
@@ -118,7 +124,8 @@ class ADCInfo(object):
 
     @property
     def voltage_supply(self):
-        """ Actual voltage of the main power supply (nominally 12V).
+        """
+        Actual voltage of the main power supply (nominally 12V).
 
         :rtype: float
         """
@@ -126,7 +133,8 @@ class ADCInfo(object):
 
     @property
     def temp_top(self):
-        """ temperature top
+        """
+        Temperature top.
 
         :rtype: float
         """
@@ -134,7 +142,8 @@ class ADCInfo(object):
 
     @property
     def temp_btm(self):
-        """ temperature bottom
+        """
+        Temperature bottom.
 
         :rtype: float
         """
@@ -142,7 +151,8 @@ class ADCInfo(object):
 
     @property
     def temp_ext_0(self):
-        """ temperature external 0
+        """
+        Temperature external 0.
 
         :rtype: float or None
         """
@@ -150,7 +160,8 @@ class ADCInfo(object):
 
     @property
     def temp_ext_1(self):
-        """ temperature external 1
+        """
+        Temperature external 1.
 
         :rtype: float or None
         """
@@ -158,7 +169,8 @@ class ADCInfo(object):
 
     @property
     def fan_0(self):
-        """ fan 0
+        """
+        Fan 0.
 
         :rtype: float or None
         """
@@ -166,7 +178,8 @@ class ADCInfo(object):
 
     @property
     def fan_1(self):
-        """ fan 1
+        """
+        Fan 1.
 
         :rtype: float or None
         """

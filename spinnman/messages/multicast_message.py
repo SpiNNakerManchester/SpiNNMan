@@ -14,16 +14,16 @@
 
 
 class MulticastMessage(object):
-    """ A SpiNNaker Multicast message.
+    """
+    A SpiNNaker Multicast message, comprising a key (determining the target
+    locations) and an optional payload.
     """
     __slots__ = [
         "_key",
         "_payload"]
 
     def __init__(self, key, payload=None):
-        """ A multicast message has a key (determining the target locations) \
-            and an optional payload.
-
+        """
         :param int key: The key of the packet
         :param int payload: The optional payload of the packet
         """
@@ -32,7 +32,8 @@ class MulticastMessage(object):
 
     @property
     def key(self):
-        """ The key of the packet
+        """
+        The key of the packet.
 
         :return: The key
         :rtype: int
@@ -41,8 +42,9 @@ class MulticastMessage(object):
 
     @property
     def payload(self):
-        """ The payload of the packet if there is one, or None if there is no\
-            payload
+        """
+        The payload of the packet if there is one, or `None` if there is no
+        payload.
 
         :rtype: int or None
         """

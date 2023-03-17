@@ -19,7 +19,8 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class ExecutableTargets(object):
-    """ Encapsulate the binaries and cores on which to execute them.
+    """
+    Encapsulate the binaries and cores on which to execute them.
     """
     __slots__ = [
         "_all_core_subsets",
@@ -34,7 +35,8 @@ class ExecutableTargets(object):
         self._binary_type_map = defaultdict(OrderedSet)
 
     def add_subsets(self, binary, subsets, executable_type=None):
-        """ Add core subsets to a binary
+        """
+        Add core subsets to a binary.
 
         :param str binary: the path to the binary needed to be executed
         :param ~spinn_machine.CoreSubsets subsets:
@@ -56,7 +58,8 @@ class ExecutableTargets(object):
 
     def add_processor(
             self, binary, chip_x, chip_y, chip_p, executable_type=None):
-        """ Add a processor to the executable targets
+        """
+        Add a processor to the executable targets
 
         :param str binary: the binary path for executable
         :param int chip_x:
@@ -79,7 +82,8 @@ class ExecutableTargets(object):
         self._total_processors += 1
 
     def get_n_cores_for_executable_type(self, executable_type):
-        """ get the number of cores that the executable type is using
+        """
+        Get the number of cores that the executable type is using.
 
         :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
                 executable_type:
@@ -92,7 +96,8 @@ class ExecutableTargets(object):
             for aplx in self._binary_type_map[executable_type])
 
     def get_binaries_of_executable_type(self, executable_type):
-        """ get the binaries of a given a executable type
+        """
+        Get the binaries of a given a executable type.
 
         :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
                 executable_type:
@@ -103,7 +108,8 @@ class ExecutableTargets(object):
         return self._binary_type_map[executable_type]
 
     def executable_types_in_binary_set(self):
-        """ get the executable types in the set of binaries
+        """
+        Get the executable types in the set of binaries.
 
         :return: iterable of the executable types in this binary set.
         :rtype:
@@ -112,7 +118,8 @@ class ExecutableTargets(object):
         return self._binary_type_map.keys()
 
     def get_cores_for_binary(self, binary):
-        """ Get the cores that a binary is to run on
+        """
+        Get the cores that a binary is to run on.
 
         :param str binary: The binary to find the cores for
         """
@@ -120,7 +127,8 @@ class ExecutableTargets(object):
 
     @property
     def binaries(self):
-        """ The binaries of the executables
+        """
+        The binaries of the executables.
 
         :rtype: iterable(str)
         """
@@ -128,7 +136,8 @@ class ExecutableTargets(object):
 
     @property
     def total_processors(self):
-        """ The total number of cores to be loaded
+        """
+        The total number of cores to be loaded.
 
         :rtype: int
         """
@@ -136,7 +145,8 @@ class ExecutableTargets(object):
 
     @property
     def all_core_subsets(self):
-        """ All the core subsets for all the binaries
+        """
+        All the core subsets for all the binaries.
 
         :rtype: ~spinn_machine.CoreSubsets
         """

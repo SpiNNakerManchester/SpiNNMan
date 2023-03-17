@@ -24,10 +24,11 @@ _PATTERN_xxBBI = struct.Struct("<xxBBI")
 
 
 class HostDataRead(EIEIOCommandMessage):
-    """ Packet sent by the host computer to the SpiNNaker system in the\
-        context of the buffering output technique to signal that the host has\
-        completed reading data from the output buffer, and that such space can\
-        be considered free to use again
+    """
+    Packet sent by the host computer to the SpiNNaker system in the
+    context of the buffering output technique to signal that the host has
+    completed reading data from the output buffer, and that such space can
+    be considered free to use again.
     """
     __slots__ = [
         "_acks",
@@ -112,8 +113,9 @@ class HostDataRead(EIEIOCommandMessage):
 
 
 class _HostDataReadHeader(object):
-    """ The HostDataRead contains itself on header with the number of requests\
-        and a sequence number
+    """
+    The HostDataRead contains itself on header with the number of requests
+    and a sequence number.
     """
     __slots__ = [
         "_n_requests",
@@ -133,7 +135,8 @@ class _HostDataReadHeader(object):
 
 
 class _HostDataReadAck(object):
-    """ Contains a set of acks which refer to each of the channels read
+    """
+    Contains a set of acks which refer to each of the channels read.
     """
     __slots__ = [
         "_channel",

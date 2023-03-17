@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class PowerCommand(Enum):
-    """ The SCP Power Commands
+    """
+    The SCP Power Commands.
     """
 
     POWER_OFF = (0, "Power off the machine")

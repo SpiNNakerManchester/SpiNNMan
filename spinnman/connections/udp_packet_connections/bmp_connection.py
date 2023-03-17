@@ -27,8 +27,8 @@ _REPR_TEMPLATE = "BMPConnection(cabinet={}, frame={}, boards={}, " \
 
 
 class BMPConnection(UDPConnection, AbstractSCPConnection):
-    """ A BMP connection which supports queries to the BMP of a SpiNNaker\
-        machine
+    """
+    A BMP connection which supports queries to the BMP of a SpiNNaker machine.
     """
     __slots__ = [
         "_boards",
@@ -50,7 +50,8 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @property
     def cabinet(self):
-        """ The cabinet ID of the BMP
+        """
+        The cabinet ID of the BMP.
 
         :rtype: int
         """
@@ -58,7 +59,8 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @property
     def frame(self):
-        """ The frame ID of the BMP
+        """
+        The frame ID of the BMP.
 
         :rtype: int
         """
@@ -66,7 +68,8 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @property
     def boards(self):
-        """ The set of boards supported by the BMP
+        """
+        The set of boards supported by the BMP.
 
         :rtype: iterable of int
         """
@@ -75,14 +78,16 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
     @property
     @overrides(AbstractSCPConnection.chip_x, extend_doc=False)
     def chip_x(self):
-        """ Defined to satisfy the AbstractSCPConnection - always 0 for a BMP
+        """
+        Defined to satisfy the AbstractSCPConnection - always 0 for a BMP.
         """
         return 0
 
     @property
     @overrides(AbstractSCPConnection.chip_y, extend_doc=False)
     def chip_y(self):
-        """ Defined to satisfy the AbstractSCPConnection - always 0 for a BMP
+        """
+        Defined to satisfy the AbstractSCPConnection - always 0 for a BMP.
         """
         return 0
 

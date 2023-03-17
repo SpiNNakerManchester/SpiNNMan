@@ -14,7 +14,8 @@
 
 
 class IOBuffer(object):
-    """ The contents of IOBUF for a core
+    """
+    The contents of IOBUF for a core.
     """
     __slots__ = [
         "_iobuf",
@@ -34,7 +35,8 @@ class IOBuffer(object):
 
     @property
     def x(self):
-        """ The x-coordinate of the chip containing the core
+        """
+        The x-coordinate of the chip containing the core.
 
         :rtype: int
         """
@@ -42,7 +44,8 @@ class IOBuffer(object):
 
     @property
     def y(self):
-        """ The y-coordinate of the chip containing the core
+        """
+        The y-coordinate of the chip containing the core.
 
         :rtype: int
         """
@@ -50,7 +53,8 @@ class IOBuffer(object):
 
     @property
     def p(self):
-        """ The ID of the core on the chip
+        """
+        The ID of the core on the chip.
 
         :rtype: int
         """
@@ -58,7 +62,8 @@ class IOBuffer(object):
 
     @property
     def iobuf(self):
-        """ The contents of the buffer
+        """
+        The contents of the buffer.
 
         :rtype: str
         """

@@ -16,8 +16,11 @@ from enum import Enum
 
 
 class DiagnosticFilterEmergencyRoutingStatus(Enum):
-    """ Emergency routing status flags for the diagnostic filters.
-        Note that only one has to match for the counter to be incremented
+    """
+    Emergency routing status flags for the diagnostic filters.
+
+    .. note::
+        Only one has to match for the counter to be incremented.
     """
     #: Packet is not emergency routed
     NORMAL = (0, "Packet is not emergency routed")

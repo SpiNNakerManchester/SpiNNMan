@@ -16,7 +16,8 @@ from spinnman.messages.eieio import AbstractEIEIOMessage
 
 
 class EIEIOCommandMessage(AbstractEIEIOMessage):
-    """ An EIEIO command message
+    """
+    An EIEIO command message.
     """
     __slots__ = [
         "_data",

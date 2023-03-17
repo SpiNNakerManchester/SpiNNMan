@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class SCPResult(Enum):
-    """ The SCP Result codes
+    """
+    The SCP Result codes.
     """
     RC_OK = (0x80, "SCPCommand completed OK")
     RC_LEN = (0x81, "Bad packet length")

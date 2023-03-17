@@ -29,7 +29,8 @@ def _get_data(app_id, signal):
 
 
 class AppStop(AbstractSCPRequest):
-    """ An SCP Request to stop an application
+    """
+    An SCP Request to stop an application.
     """
     __slots__ = []
 

@@ -23,7 +23,8 @@ _IPTAG_CLEAR = 3
 
 
 class IPTagClear(AbstractSCPRequest):
-    """ An SCP Request to clear an IP Tag
+    """
+    An SCP Request to clear an IP Tag.
     """
     __slots__ = []
 

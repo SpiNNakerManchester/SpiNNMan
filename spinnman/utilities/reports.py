@@ -22,8 +22,8 @@ _REPORT_NAME = "machine_structure.rpt"
 
 
 def generate_machine_report(report_directory, machine, connections):
-    """ Generate report on the physical structure of the target SpiNNaker \
-        machine.
+    """
+    Generate report on the physical structure of the target SpiNNaker machine.
 
     :param str report_directory: the directory to which reports are stored
     :param ~spinn_machine.Machine machine: the machine python object

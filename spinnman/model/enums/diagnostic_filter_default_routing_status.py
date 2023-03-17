@@ -16,8 +16,11 @@ from enum import Enum
 
 
 class DiagnosticFilterDefaultRoutingStatus(Enum):
-    """ Default routing flags for the diagnostic filters.
-        Note that only one has to match for the counter to be incremented
+    """
+    Default routing flags for the diagnostic filters.
+
+    .. note::
+        Only one has to match for the counter to be incremented.
     """
     #: Packet is to be default routed
     DEFAULT_ROUTED = (0, "Packet is to be default routed")

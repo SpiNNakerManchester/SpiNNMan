@@ -21,10 +21,11 @@ from .check_ok_response import CheckOKResponse
 
 
 class SetLED(AbstractSCPRequest):
-    """ A request to change the state of an SetLED
+    """
+    A request to change the state of an SetLED.
 
-        This class is currently deprecated and untested as there is no
-        known use except for Transceiver.set_led which is itself deprecated.
+    This class is currently deprecated and untested as there is no
+    known use except for Transceiver.set_led which is itself deprecated.
     """
     __slots__ = []
 

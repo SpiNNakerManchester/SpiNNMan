@@ -20,7 +20,8 @@ _SYSTEM_VARIABLES_BOOT_SIZE = 128
 
 
 class _DataType(Enum):
-    """ Enum for data types
+    """
+    Enum for data types.
     """
     BYTE = (1, "<B")
     SHORT = (2, "<H")
@@ -63,7 +64,8 @@ class _Definition(namedtuple("_Definition",
 
 
 class SystemVariableDefinition(Enum):
-    """ Defines the system variables available.
+    """
+    Defines the system variables available.
     """
 
     y = _Definition(
@@ -347,8 +349,9 @@ class SystemVariableDefinition(Enum):
 
 
 class SystemVariableBootValues(object):
-    """ Default values of the system variables that get passed to SpiNNaker\
-        during boot
+    """
+    Default values of the system variables that get passed to SpiNNaker
+    during boot.
     """
     __slot__ = [
         "_values"]

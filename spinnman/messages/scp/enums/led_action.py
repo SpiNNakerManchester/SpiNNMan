@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class LEDAction(Enum):
-    """ The SCP LED actions
+    """
+    The SCP LED actions.
     """
 
     TOGGLE = (1, "Toggle the LED status")

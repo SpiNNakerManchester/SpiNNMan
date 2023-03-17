@@ -33,7 +33,8 @@ _BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES // 4) - 1) << 8
 
 
 class SpinnakerBootMessages(object):
-    """ Represents a set of boot messages to be sent to boot the board
+    """
+    A set of boot messages to be sent to boot the board.
     """
     __slots__ = [
         "_boot_data",
@@ -41,8 +42,7 @@ class SpinnakerBootMessages(object):
         "_no_data_packets"]
 
     def __init__(self, board_version=None, extra_boot_values=None):
-        """ Builds the boot messages needed to boot the SpiNNaker machine
-
+        """
         :param int board_version: The version of the board to be booted
         :param extra_boot_values: Any additional values to be set during boot
         :type extra_boot_values: dict(SystemVariableDefinition, object)
@@ -120,7 +120,8 @@ class SpinnakerBootMessages(object):
         return file_name, file_size
 
     def _get_packet_data(self, block_id):
-        """ Read a packet of data
+        """
+        Read a packet of data.
 
         :param int block_id:
         :rtype: bytes
@@ -131,11 +132,11 @@ class SpinnakerBootMessages(object):
 
     @property
     def messages(self):
-        """ An iterable of message to be sent.
+        """
+        An iterable of message to be sent.
 
         :rtype: iterable(SpinnakerBootMessage)
         """
-
         # Construct and yield the start packet
         yield SpinnakerBootMessage(
             opcode=SpinnakerBootOpCode.FLOOD_FILL_START,

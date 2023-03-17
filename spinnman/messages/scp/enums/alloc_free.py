@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class AllocFree(Enum):
-    """ The SCP Allocation and Free codes
+    """
+    The SCP Allocation and Free codes.
     """
 
     ALLOC_SDRAM = (0, "Allocate SDRAM")

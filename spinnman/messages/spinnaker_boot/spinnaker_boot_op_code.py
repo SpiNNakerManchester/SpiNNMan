@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class SpinnakerBootOpCode(Enum):
-    """ Boot message Operation Codes
+    """
+    Boot message Operation Codes.
     """
 
     HELLO = 0x41

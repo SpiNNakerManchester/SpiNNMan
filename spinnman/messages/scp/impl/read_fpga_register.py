@@ -24,12 +24,14 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class ReadFPGARegister(BMPRequest):
-    """ Requests the data from a FPGA's register
+    """
+    Requests the data from a FPGA's register.
     """
     __slots__ = []
 
     def __init__(self, fpga_num, register, board):
-        """ Sets up a read FPGA register request.
+        """
+        Sets up a read FPGA register request.
 
         :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
         :param int register:
@@ -37,7 +39,6 @@ class ReadFPGARegister(BMPRequest):
             the nearest 32-bit word boundary).
         :param int board: which board to request the FPGA register from
         """
-
         # check to stop people asking for none word aligned memory addresses
         # inverses all bits of a value, so is basically a inverse mask for the
         # value entered.
@@ -53,7 +54,8 @@ class ReadFPGARegister(BMPRequest):
 
 
 class _SCPReadFPGARegisterResponse(BMPResponse):
-    """ An SCP response to a request for the version of software running
+    """
+    An SCP response to a request for the version of software running.
     """
     __slots__ = [
         "_fpga_register"]
@@ -73,7 +75,8 @@ class _SCPReadFPGARegisterResponse(BMPResponse):
 
     @property
     def fpga_register(self):
-        """ The register information received
+        """
+        The register information received.
 
         :rtype: int
         """

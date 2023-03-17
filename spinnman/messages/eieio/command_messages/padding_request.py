@@ -18,7 +18,8 @@ from .eieio_command_header import EIEIOCommandHeader
 
 
 class PaddingRequest(EIEIOCommandMessage):
-    """ Packet used to pad space in the buffering area, if needed
+    """
+    Packet used to pad space in the buffering area, if needed.
     """
     __slots__ = []
 

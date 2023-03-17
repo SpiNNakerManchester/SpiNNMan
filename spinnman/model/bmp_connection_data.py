@@ -14,7 +14,8 @@
 
 
 class BMPConnectionData(object):
-    """ Contains the details of a BMP connection
+    """
+    Contains the details of a BMP connection.
     """
     __slots__ = [
         "_boards",
@@ -33,7 +34,8 @@ class BMPConnectionData(object):
 
     @property
     def cabinet(self):
-        """ Get the cabinet number.
+        """
+        Get the cabinet number.
 
         :rtype: int
         """
@@ -41,7 +43,8 @@ class BMPConnectionData(object):
 
     @property
     def frame(self):
-        """ Get the frame number.
+        """
+        Get the frame number.
 
         :rtype: int
         """
@@ -49,7 +52,8 @@ class BMPConnectionData(object):
 
     @property
     def ip_address(self):
-        """ Get the IP address of the BMP.
+        """
+        Get the IP address of the BMP.
 
         :rtype: str
         """
@@ -57,7 +61,8 @@ class BMPConnectionData(object):
 
     @property
     def boards(self):
-        """ The boards to be addressed.
+        """
+        The boards to be addressed.
 
         :rtype: iterable(int)
         """
@@ -65,7 +70,8 @@ class BMPConnectionData(object):
 
     @property
     def port_num(self):
-        """ The port number associated with this BMP connection.
+        """
+        The port number associated with this BMP connection.
 
         :return: The port number
         """

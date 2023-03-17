@@ -25,8 +25,8 @@ _TABLE_ADDRESS = 0x67800000
 
 
 class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
-    """ A process for loading the multicast routing table on a SpiNNaker\
-        chip.
+    """
+    A process for loading the multicast routing table on a SpiNNaker chip.
     """
     __slots__ = [
         "_base_address"]

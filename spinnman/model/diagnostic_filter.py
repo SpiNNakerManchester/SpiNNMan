@@ -51,11 +51,12 @@ def _read_flags_from_word(word, enum_list, offset):
 
 
 class DiagnosticFilter(object):
-    """ A router diagnostic counter filter, which counts packets passing\
-        through the router with certain properties.  The counter will be\
-        incremented so long as the packet matches one of the values in each\
-        field i.e. one of each of the destinations, sources, payload_statuses,\
-        default_routing_statuses, emergency_routing_statuses and packet_types.
+    """
+    A router diagnostic counter filter, which counts packets passing
+    through the router with certain properties.  The counter will be
+    incremented so long as the packet matches one of the values in each
+    field i.e. one of each of the destinations, sources, payload_statuses,
+    default_routing_statuses, emergency_routing_statuses and packet_types.
     """
     __slots__ = [
         "_default_routing_statuses",
@@ -148,8 +149,8 @@ class DiagnosticFilter(object):
 
     @property
     def filter_word(self):
-        """ A word of data that can be written to the router to set up\
-            the filter
+        """
+        A word of data that can be written to the router to set up the filter.
         """
         data = 0
         if self._enable_interrupt_on_counter_event:

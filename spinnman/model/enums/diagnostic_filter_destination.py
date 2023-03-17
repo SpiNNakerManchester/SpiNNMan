@@ -16,8 +16,11 @@ from enum import Enum
 
 
 class DiagnosticFilterDestination(Enum):
-    """ Destination flags for the diagnostic filters.
-        Note that only one has to match for the counter to be incremented
+    """
+    Destination flags for the diagnostic filters.
+
+    .. note::
+        Only one has to match for the counter to be incremented.
     """
     #: Destination is to dump the packet
     DUMP = (0, "Destination is to dump the packet")
