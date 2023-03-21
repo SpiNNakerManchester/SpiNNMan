@@ -85,23 +85,23 @@ class DiagnosticFilter(object):
             match
         :param list(DiagnosticFilterSource) sources:
             Increment the counter if one or more of the given sources match
-            (or None or empty list to match all)
+            (or `None` or empty list to match all)
         :param list(DiagnosticFilterPayloadStatus) payload_statuses:
             Increment the counter if one or more of the given payload statuses
-            match (or None or empty list to match all)
+            match (or `None` or empty list to match all)
         :param default_routing_statuses:
             Increment the counter if one or more of the given default routing
-            statuses match (or None or empty list to match all)
+            statuses match (or `None` or empty list to match all)
         :type default_routing_statuses:
             list(DiagnosticFilterDefaultRoutingStatus)
         :param emergency_routing_statuses:
             Increment the counter if one or more of the given emergency routing
-            statuses match (or None or empty list to match all)
+            statuses match (or `None` or empty list to match all)
         :type emergency_routing_statuses:
             list(DiagnosticFilterEmergencyRoutingStatus)
         :param list(DiagnosticFilterPacketType) packet_types:
             Increment the counter if one or more of the given packet types
-            match (or None or empty list to match all)
+            match (or `None` or empty list to match all)
         """
         # pylint: disable=too-many-arguments
         self._enable_interrupt_on_counter_event = \

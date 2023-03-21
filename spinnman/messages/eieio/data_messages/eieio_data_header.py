@@ -45,12 +45,12 @@ class EIEIODataHeader(object):
 
         :param EIEIOType eieio_type: the type of message
         :param int tag: the tag of the message (0 by default)
-        :param prefix: the key prefix of the message or None if not prefixed
+        :param prefix: the key prefix of the message or `None` if not prefixed
         :type prefix: int or None
         :param EIEIOPrefix prefix_type:
             the position of the prefix (upper or lower)
         :param payload_base:
-            The base payload to be applied, or None if no base payload
+            The base payload to be applied, or `None` if no base payload
         :type payload_base: int or None
         :param bool is_time:
             True if the payloads should be taken to be timestamps, or False

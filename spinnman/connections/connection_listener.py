@@ -101,9 +101,12 @@ class ConnectionListener(Thread, AbstractContextManager):
 
     def close(self):
         """
-        Closes the listener.  Note that this does not close the provider
-        of the messages; this instead marks the listener as closed.  The
-        listener will not truly stop until the get message call returns.
+        Closes the listener.
+
+        .. note::
+            This does not close the provider of the messages; this instead
+            marks the listener as closed.  The listener will not truly stop
+            until the get message call returns.
         """
         self.__done = True
         self.join()

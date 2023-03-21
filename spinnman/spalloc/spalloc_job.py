@@ -121,8 +121,10 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :param SpallocState old_state:
             The state that we are looking to change out of.
-        :return: The state that the allocation is now in. Note that if the
-            machine gets destroyed, this will not wait for it.
+        :return: The state that the allocation is now in.
+
+            .. note::
+                If the machine gets destroyed, this will not wait for it.
         :rtype: SpallocState
         """
 

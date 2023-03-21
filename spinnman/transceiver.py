@@ -100,7 +100,7 @@ def create_transceiver_from_hostname(
     and then returning the transceiver created with the conjunction of
     the created UDPConnection and the discovered connections.
 
-    :param hostname: The hostname or IP address of the board or None if
+    :param hostname: The hostname or IP address of the board or `None` if
         only the BMP conenctions are of interest
     :type hostname: str or None
     :param number_of_boards: a number of boards expected to be supported, or
@@ -673,7 +673,8 @@ class Transceiver(AbstractContextManager):
         :param int chip_x: the chip's x coordinate to query for SCAMP version
         :param int chip_y: the chip's y coordinate to query for SCAMP version
         :param connection_selector: the connection to send the SCAMP
-            version or none (if none then a random SCAMP connection is used).
+            version or `None` (if `None` then a random SCAMP connection is
+            used).
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         :param int n_retries:
@@ -2201,7 +2202,7 @@ class Transceiver(AbstractContextManager):
 
         :param str board_address:
             The IP address of the Ethernet connection on the board
-        :return: A connection for the given IP address, or None if no such
+        :return: A connection for the given IP address, or `None` if no such
             connection exists
         :rtype: SCAMPConnection
         """
@@ -2212,8 +2213,11 @@ class Transceiver(AbstractContextManager):
         Set up an IP tag.
 
         :param ~spinn_machine.tags.IPTag ip_tag:
-            The tag to set up; note `board_address` can be None, in
-            which case, the tag will be assigned to all boards
+            The tag to set up.
+
+            .. note::
+                `board_address` can be `None`, in which case, the tag will be
+                assigned to all boards.
         :param bool use_sender:
             Optionally use the sender host and port instead of
             the given host and port in the tag
@@ -2282,8 +2286,11 @@ class Transceiver(AbstractContextManager):
         Set up a reverse IP tag.
 
         :param ~spinn_machine.tags.ReverseIPTag reverse_ip_tag:
-            The reverse tag to set up; note `board_address` can be None,
-            in which case, the tag will be assigned to all boards
+            The reverse tag to set up.
+
+            .. note::
+                The `board_address` field can be `None`, in which case, the tag
+                will be assigned to all boards.
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2613,16 +2620,18 @@ class Transceiver(AbstractContextManager):
         Sets a router diagnostic filter in a router.
 
         :param int x:
-            the X address of the router in which this filter is being set
+            The X address of the router in which this filter is being set.
         :param int y:
-            the Y address of the router in which this filter is being set
+            The Y address of the router in which this filter is being set.
         :param int position:
-            the position in the list of filters where this filter is to be
-            added
+            The position in the list of filters where this filter is to be
+            added.
         :param DiagnosticFilter diagnostic_filter:
-            the diagnostic filter being set in the placed, between 0 and 15
-            (note that positions 0 to 11 are used by the default filters,
-            and setting these positions will result in a warning).
+            The diagnostic filter being set in the placed, between 0 and 15.
+
+            .. note::
+                Positions 0 to 11 are used by the default filters,
+                and setting these positions will result in a warning.
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data

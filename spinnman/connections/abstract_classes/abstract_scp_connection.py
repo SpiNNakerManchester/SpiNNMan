@@ -68,10 +68,10 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
 
         Messages must have the following properties:
 
-            * source_port is None or 7
-            * source_cpu is None or 31
-            * source_chip_x is None or 0
-            * source_chip_y is None or 0
+            * source_port is `None` or 7
+            * source_cpu is `None` or 31
+            * source_chip_x is `None` or 0
+            * source_chip_y is `None` or 0
 
         tag in the message is optional; if not set, the default set in the
         constructor will be used.

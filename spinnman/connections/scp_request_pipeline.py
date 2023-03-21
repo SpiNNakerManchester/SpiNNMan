@@ -67,10 +67,10 @@ class SCPRequestPipeLine(object):
         :param SCAMPConnection connection:
             The connection over which the communication is to take place
         :param int n_channels: The number of requests to send before checking
-            for responses.  If None, this will be determined automatically
+            for responses.  If `None`, this will be determined automatically
         :param int intermediate_channel_waits: The number of outstanding
-            responses to wait for before continuing sending requests. If None,
-            this will be determined automatically
+            responses to wait for before continuing sending requests.
+            If `None`, this will be determined automatically
         :param int n_retries: The number of times to resend any packet for any
             reason before an error is triggered
         :param float packet_timeout: The number of elapsed seconds after

@@ -140,6 +140,6 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         Get an SCP response message to be used to process any response
         received.
 
-        :return: An SCP response, or None if no response is required
+        :return: An SCP response, or `None` if no response is required
         :rtype: AbstractSCPResponse
         """

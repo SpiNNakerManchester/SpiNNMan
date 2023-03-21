@@ -39,7 +39,7 @@ class ReadFPGARegister(BMPRequest):
             the nearest 32-bit word boundary).
         :param int board: which board to request the FPGA register from
         """
-        # check to stop people asking for none word aligned memory addresses
+        # check to stop people asking for non-word aligned memory addresses
         # inverses all bits of a value, so is basically a inverse mask for the
         # value entered.
         arg1 = register & (~0x3)

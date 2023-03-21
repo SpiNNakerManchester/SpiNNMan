@@ -39,7 +39,7 @@ def parse_service_url(url: str) -> Tuple[str, str, str]:
     Parses a combined service reference.
 
     :param str url:
-    :return: URL, username (may be None), password (may be None)
+    :return: URL, username (may be `None`), password (may be `None`)
     :rtype: tuple(str,str,str)
     """
     pieces = urlparse(url)

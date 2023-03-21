@@ -109,10 +109,13 @@ class UDPConnection(Connection, Listenable):
     @property
     def __is_closed(self):
         """
-        Is the socket closed? Note that just because a socket is not closed
-        doesn't mean that you're going to be able to successfully write to it
-        or read from it; some failures are only detected on use. But closed
-        sockets definitely behave in certain ways!
+        Is the socket closed?
+
+        .. note::
+            Just because a socket is not closed doesn't mean that you're going
+            to be able to successfully write to it or read from it; some
+            failures are only detected on use. But closed sockets definitely
+            behave in certain ways!
 
         :rtype: bool
         """
@@ -163,7 +166,7 @@ class UDPConnection(Connection, Listenable):
         """
         The remote IP address to which the connection is connected.
 
-        :return: The remote IP address as a dotted string, or None if not
+        :return: The remote IP address as a dotted string, or `None` if not
             connected remotely
         :rtype: str
         """
@@ -174,7 +177,7 @@ class UDPConnection(Connection, Listenable):
         """
         The remote port to which the connection is connected.
 
-        :return: The remote port, or None if not connected remotely
+        :return: The remote port, or `None` if not connected remotely
         :rtype: int
         """
         return self._remote_port
@@ -183,7 +186,7 @@ class UDPConnection(Connection, Listenable):
         """
         Receive data from the connection.
 
-        :param float timeout: The timeout in seconds, or None to wait forever
+        :param float timeout: The timeout in seconds, or `None` to wait forever
         :return: The data received as a bytestring
         :rtype: bytes
         :raise SpinnmanTimeoutException:
@@ -199,7 +202,7 @@ class UDPConnection(Connection, Listenable):
         Receive data from the connection along with the address where the
         data was received from.
 
-        :param float timeout: The timeout, or None to wait forever
+        :param float timeout: The timeout, or `None` to wait forever
         :return: A tuple of the data received and a tuple of the
             (address, port) received from
         :rtype: tuple(bytes, tuple(str, int))

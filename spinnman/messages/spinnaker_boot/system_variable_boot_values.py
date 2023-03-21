@@ -321,7 +321,7 @@ class SystemVariableDefinition(Enum):
             structure where the variable is found
         :param object default:
             The default value assigned to the variable if not overridden
-        :param array_size: The length of the array, or None if not an array
+        :param array_size: The length of the array, or `None` if not an array
         :type array_size: int or None
         """
         # pylint: disable=too-many-arguments
