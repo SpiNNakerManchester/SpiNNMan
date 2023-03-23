@@ -356,7 +356,7 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
         """
         super().__init__(
             "The packet received is being parsed as an EIEIO "
-            f"{parsing_format:s} packet, "
+            f"{parsing_format} packet, "
             "but the content of the packet is invalid")
         self._packet = packet
 
