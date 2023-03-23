@@ -57,7 +57,7 @@ class VersionInfo(object):
             except ValueError as exception:
                 raise SpinnmanInvalidParameterException(
                     "version_data", version_data,
-                    "Incorrect format: {}".format(exception)) from exception
+                    f"Incorrect format: {exception}") from exception
         else:
             name_hardware, _, version = version_data.partition("\0")
             self._version_string = version
@@ -98,7 +98,7 @@ class VersionInfo(object):
     @property
     def x(self):
         """
-        The x-coordinate of the chip where the information was obtained.
+        The X-coordinate of the chip where the information was obtained.
 
         :rtype: int
         """
@@ -107,7 +107,7 @@ class VersionInfo(object):
     @property
     def y(self):
         """
-        The y-coordinate of the chip where the information was obtained.
+        The Y-coordinate of the chip where the information was obtained.
 
         :rtype: int
         """

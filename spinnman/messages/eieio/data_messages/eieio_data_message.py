@@ -140,6 +140,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     def n_elements(self):
         """
         The number of elements in the packet.
+
+        :rtype: int
         """
         return self._header.count
 
@@ -147,6 +149,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     def size(self):
         """
         The size of the packet with the current contents.
+
+        :rtype: int
         """
         ty = self._header.eieio_type
         return (self._header.size +
@@ -213,10 +217,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     @property
     def is_next_element(self):
         """
-        Determine if there is another element to be read.
+        Whether there is another element to be read.
 
-        :return: True if the message was created with data, and there are more
-            elements to be read
         :rtype: bool
         """
         return (self._data is not None and
@@ -271,10 +273,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     def __str__(self):
         if self._data is not None:
-            return "EIEIODataMessage:{}:{}".format(
-                self._header, self._header.count)
-        return "EIEIODataMessage:{}:{}".format(
-            self._header, self._elements)
+            return f"EIEIODataMessage:{self._header}:{self._header.count}"
+        return f"EIEIODataMessage:{self._header}:{self._elements}"
 
     def __repr__(self):
         return self.__str__()

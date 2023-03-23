@@ -71,7 +71,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         """
         The set of boards supported by the BMP.
 
-        :rtype: iterable of int
+        :rtype: iterable(int)
         """
         return self._boards
 

@@ -108,7 +108,7 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         if self._base_address == 0:
             raise SpinnmanInvalidParameterException(
                 "SDRAM Allocation response base address", self._base_address,
-                "Could not allocate {} bytes of SDRAM".format(self._size))
+                f"Could not allocate {self._size} bytes of SDRAM")
 
     @property
     def base_address(self):

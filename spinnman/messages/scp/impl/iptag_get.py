@@ -151,7 +151,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     @property
     def in_use(self):
         """
-        True if the tag is marked as being in use.
+        Whether the tag is marked as being in use.
 
         :rtype: bool
         """
@@ -160,7 +160,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     @property
     def is_temporary(self):
         """
-        True if the tag is temporary.
+        Whether the tag is temporary.
 
         :rtype: bool
         """
@@ -169,8 +169,11 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     @property
     def is_arp(self):
         """
-        True if the tag is in the ARP state (where the MAC address is
-        being looked up - transient state so unlikely).
+        Whether the tag is in the ARP state (where the MAC address is
+        being looked up).
+
+        .. note::
+            This is a transient state; it is unlikely to be observed.
 
         :rtype: bool
         """
@@ -179,7 +182,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     @property
     def is_reverse(self):
         """
-        True if the tag is a reverse tag.
+        Whether the tag is a reverse tag.
 
         :rtype: bool
         """
@@ -188,7 +191,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     @property
     def strip_sdp(self):
         """
-        True if the tag is to strip the SDP header.
+        Whether the tag is to strip the SDP header.
 
         :rtype: bool
         """
@@ -215,7 +218,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     @property
     def spin_chip_x(self):
         """
-        The x-coordinate of the chip on which the tag is defined.
+        The X-coordinate of the chip on which the tag is defined.
 
         :rtype: int
         """
@@ -224,7 +227,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     @property
     def spin_chip_y(self):
         """
-        The y-coordinate of the chip on which the tag is defined.
+        The Y-coordinate of the chip on which the tag is defined.
 
         :rtype: int
         """

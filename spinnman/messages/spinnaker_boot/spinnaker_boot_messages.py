@@ -111,12 +111,12 @@ class SpinnakerBootMessages(object):
         file_size = os.stat(file_name).st_size
         if file_size > _BOOT_IMAGE_MAX_BYTES:
             raise SpinnmanIOException(
-                "The boot file is too big at {} bytes (only files up to 32KB "
-                "are acceptable".format(file_size))
+                f"The boot file is too big at {file_size} bytes "
+                "(only files up to 32KB are acceptable")
         elif file_size % 4 != 0:
             raise SpinnmanIOException(
-                "The boot file size of {} bytes must be divisible by 4".format(
-                    file_size))
+                f"The boot file size of {file_size} bytes "
+                "must be divisible by 4")
         return file_name, file_size
 
     def _get_packet_data(self, block_id):

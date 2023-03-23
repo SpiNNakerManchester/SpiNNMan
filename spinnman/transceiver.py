@@ -292,7 +292,7 @@ class Transceiver(AbstractContextManager):
             if isinstance(conn, BootConnection):
                 if self._boot_send_connection is not None:
                     raise SpinnmanInvalidParameterException(
-                        "connections", "[... {} ...]".format(conn),
+                        "connections", f"[... {conn} ...]",
                         "Only a single SpinnakerBootSender can be"
                         " specified")
                 self._boot_send_connection = conn
@@ -543,8 +543,8 @@ class Transceiver(AbstractContextManager):
                     SYSTEM_VARIABLE_BASE_ADDRESS + ip_addr_item.offset, 4)
             except SpinnmanGenericProcessException:
                 continue
-            ip_address_data = _FOUR_BYTES.unpack_from(data)
-            ip_address = "{}.{}.{}.{}".format(*ip_address_data)
+            ip = _FOUR_BYTES.unpack_from(data)
+            ip_address = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
             logger.info(ip_address)
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
@@ -811,11 +811,10 @@ class Transceiver(AbstractContextManager):
                 not self.is_scamp_version_compabible(
                     version_info.version_number)):
             raise SpinnmanIOException(
-                "The machine is currently booted with {}"
-                " {} which is incompatible with this transceiver, "
-                "required version is {} {}".format(
-                    version_info.name, version_info.version_number,
-                    _SCAMP_NAME, _SCAMP_VERSION))
+                f"The machine is currently booted with {version_info.name}"
+                f" {version_info.version_number} which is incompatible with "
+                "this transceiver, required version is "
+                f"{_SCAMP_NAME} {_SCAMP_VERSION}")
 
         logger.info("Machine communication successful")
 
@@ -1438,7 +1437,7 @@ class Transceiver(AbstractContextManager):
         key = (cabinet, frame)
         if key not in self._bmp_connection_selectors:
             raise SpinnmanInvalidParameterException(
-                "cabinet and frame", "{} and {}".format(cabinet, frame),
+                "cabinet and frame", f"{cabinet} and {frame}",
                 "Unknown combination")
         return self._bmp_connection_selectors[key]
 
@@ -2052,8 +2051,8 @@ class Transceiver(AbstractContextManager):
                                 if ((core_subset.x, core_subset.y, p) not in
                                         cores_in_state.keys()):
                                     logger.warning(
-                                        "waiting on {}:{}:{}".format(
-                                            core_subset.x, core_subset.y, p))
+                                        "waiting on {}:{}:{}",
+                                        core_subset.x, core_subset.y, p)
 
                 # If we're still not in the correct state, wait a bit
                 if processors_ready < len(all_core_subsets):
@@ -2761,7 +2760,7 @@ class Transceiver(AbstractContextManager):
         The number of boards currently configured.
 
         .. warning::
-            This method is currently deprecated and likely to be removed.
+            This property is currently deprecated and likely to be removed.
 
         :rtype: int
         """

@@ -69,6 +69,8 @@ class TokenBucket(object):
     def tokens(self):
         """
         The number of tokens currently in the bucket.
+
+        :rtype: int
         """
         if self._tokens < self._capacity:
             now = time.time()

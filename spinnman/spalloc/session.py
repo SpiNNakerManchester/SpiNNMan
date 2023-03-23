@@ -308,7 +308,7 @@ class SessionAware:
     @property
     def _session_credentials(self):
         """
-        Get the current session credentials.
+        The current session credentials.
         Only supposed to be called by subclasses.
 
         :rtype: tuple(dict(str,str),dict(str,str))
@@ -319,7 +319,7 @@ class SessionAware:
     @property
     def _service_url(self):
         """
-        Get the main service URL.
+        The main service URL.
 
         :rtype: str
         """

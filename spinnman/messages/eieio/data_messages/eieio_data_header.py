@@ -132,12 +132,10 @@ class EIEIODataHeader(object):
     @property
     def bytestring(self):
         """
-        Get a bytestring of the header.
+        The bytestring of the header.
 
-        :return: The header as a bytestring
         :rtype: bytes
         """
-
         # Convert the flags to an int
         data = 0
 
@@ -192,7 +190,6 @@ class EIEIODataHeader(object):
         :return: an EIEIO header
         :rtype: EIEIODataHeader
         """
-
         (count, header_data) = _PATTERN_BB.unpack_from(data, offset)
 
         # Read the flags in the header

@@ -62,8 +62,7 @@ class KeyPayloadDataElement(AbstractDataElement):
                 "eieio_type", eieio_type, "Unknown type")
 
     def __str__(self):
-        return "KeyPayloadDataElement:{}:{}".format(
-            hex(self._key), hex(self._payload))
+        return f"KeyPayloadDataElement:0x{self._key:x}:0x{self._payload:x}"
 
     def __repr__(self):
         return self.__str__()

@@ -39,7 +39,6 @@ class SCPResponseHeader(object):
         """
         The result of the SCP response.
 
-        :return: The result
         :rtype: SCPResult
         """
         return self._result
@@ -47,9 +46,8 @@ class SCPResponseHeader(object):
     @property
     def sequence(self):
         """
-        The sequence number of the SCP response.
+        The sequence number of the SCP response, between 0 and 65535.
 
-        :return: The sequence number of the packet, between 0 and 65535
         :rtype: int
         """
         return self._sequence

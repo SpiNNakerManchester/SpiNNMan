@@ -35,7 +35,7 @@ class BMPConnectionData(object):
     @property
     def cabinet(self):
         """
-        Get the cabinet number.
+        The cabinet number.
 
         :rtype: int
         """
@@ -44,7 +44,7 @@ class BMPConnectionData(object):
     @property
     def frame(self):
         """
-        Get the frame number.
+        The frame number.
 
         :rtype: int
         """
@@ -53,7 +53,7 @@ class BMPConnectionData(object):
     @property
     def ip_address(self):
         """
-        Get the IP address of the BMP.
+        The IP address of the BMP.
 
         :rtype: str
         """

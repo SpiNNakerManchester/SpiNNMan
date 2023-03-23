@@ -443,23 +443,23 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if p > 0:
             self._report_ignore("On chip {} ignoring core {}", xy, p)
             return p
-        else:
-            virtual_map = self._physical_to_virtual_map[xy]
-            if 0-p >= len(virtual_map) or virtual_map[0-p] == 0xFF:
-                self._report_ignore(
-                    "On chip {} physical core {} was not used "
-                    "so ignore is being discarded.".format(xy, -p))
-                return None
-            virtual_p = virtual_map[0-p]
-            if virtual_p == 0:
-                self._report_ignore(
-                    "On chip {} physical core {} was used as the monitor "
-                    "so will NOT be ignored".format(xy, -p))
-                return None
+        virtual_map = self._physical_to_virtual_map[xy]
+        physical = 0 - p
+        if physical >= len(virtual_map) or virtual_map[physical] == 0xFF:
             self._report_ignore(
-                "On chip {} ignoring core {} as it maps to physical "
-                "core {}", xy, virtual_p, 0-p)
-            return virtual_p
+                "On chip {} physical core {} was not used "
+                "so ignore is being discarded.", xy, physical)
+            return None
+        virtual_p = virtual_map[physical]
+        if virtual_p == 0:
+            self._report_ignore(
+                "On chip {} physical core {} was used as the monitor "
+                "so will NOT be ignored", xy, physical)
+            return None
+        self._report_ignore(
+            "On chip {} ignoring core {} as it maps to physical "
+            "core {}", xy, virtual_p, physical)
+        return virtual_p
 
     def _report_ignore(self, message, *args):
         """

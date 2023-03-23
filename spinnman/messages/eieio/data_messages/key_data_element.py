@@ -50,7 +50,7 @@ class KeyDataElement(AbstractDataElement):
                 "eieio_type", eieio_type, "Unknown type")
 
     def __str__(self):
-        return "KeyDataElement:{}".format(hex(self._key))
+        return f"KeyDataElement:0x{self._key:x}"
 
     def __repr__(self):
         return self.__str__()

@@ -69,7 +69,7 @@ class ChipInfo(object):
         self._virtual_core_ids.sort()
 
         ip = bytearray(self._read_value("ethernet_ip_address"))
-        self._ip_address = "{}.{}.{}.{}".format(ip[0], ip[1], ip[2], ip[3])
+        self._ip_address = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
         if self._ip_address == "0.0.0.0":
             self._ip_address = None
 
@@ -77,7 +77,7 @@ class ChipInfo(object):
         item_def = SystemVariableDefinition[item]
         code = item_def.data_type.struct_code
         if item_def.array_size is not None:
-            code = "{}{}".format(item_def.array_size, code)
+            code = f"{item_def.array_size}{code}"
         values = struct.unpack_from(
             code, self._system_data, self._offset + item_def.offset)
         return values[0]
@@ -88,7 +88,7 @@ class ChipInfo(object):
     @property
     def x(self):
         """
-        The x-coordinate of the chip.
+        The X-coordinate of the chip.
 
         :rtype: int
         """
@@ -97,7 +97,7 @@ class ChipInfo(object):
     @property
     def y(self):
         """
-        The y-coordinate of the chip.
+        The Y-coordinate of the chip.
 
         :rtype: int
         """
@@ -106,7 +106,7 @@ class ChipInfo(object):
     @property
     def x_size(self):
         """
-        The number of chips in the x-dimension.
+        The number of chips in the X-dimension.
 
         :rtype: int
         """
@@ -115,7 +115,7 @@ class ChipInfo(object):
     @property
     def y_size(self):
         """
-        The number of chips in the y-dimension.
+        The number of chips in the Y-dimension.
 
         :rtype: int
         """
@@ -124,7 +124,7 @@ class ChipInfo(object):
     @property
     def nearest_ethernet_x(self):
         """
-        The x-coordinate of the nearest chip with Ethernet.
+        The X-coordinate of the nearest chip with Ethernet.
 
         :rtype: int
         """
@@ -133,7 +133,7 @@ class ChipInfo(object):
     @property
     def nearest_ethernet_y(self):
         """
-        The y-coordinate of the nearest chip with Ethernet.
+        The Y-coordinate of the nearest chip with Ethernet.
 
         :rtype: int
         """
@@ -142,7 +142,7 @@ class ChipInfo(object):
     @property
     def is_ethernet_available(self):
         """
-        True if the Ethernet is running on this chip, False otherwise.
+        Whether the Ethernet is running on this chip.
 
         :rtype: bool
         """

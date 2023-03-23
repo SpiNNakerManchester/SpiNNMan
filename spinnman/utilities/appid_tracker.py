@@ -68,6 +68,7 @@ class AppIdTracker(object):
         :raises KeyError: If the ID is out of range
         """
         if id_to_free < self._min_app_id or id_to_free > self._max_app_id:
-            raise KeyError("ID {} out of allowed range of {} to {}".format(
-                id_to_free, self._min_app_id, self._max_app_id))
+            raise KeyError(
+                f"ID {id_to_free} out of allowed range of {self._min_app_id} "
+                f"to {self._max_app_id}")
         self._free_ids.add(id_to_free)

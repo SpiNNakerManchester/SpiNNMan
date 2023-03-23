@@ -193,6 +193,8 @@ class SCPRequestPipeLine(object):
     def n_timeouts(self):
         """
         The number of timeouts that occurred.
+
+        :rtype: int
         """
         return self._n_timeouts
 
@@ -200,6 +202,8 @@ class SCPRequestPipeLine(object):
     def n_channels(self):
         """
         The number of requests to send before checking for responses.
+
+        :rtype: int
         """
         return self._n_channels
 
@@ -207,6 +211,8 @@ class SCPRequestPipeLine(object):
     def n_resent(self):
         """
         The number of packets that have been resent.
+
+        :rtype: int
         """
         return self._n_resent
 
@@ -215,6 +221,8 @@ class SCPRequestPipeLine(object):
         """
         The number of resends due to reasons for which automated retry is
         the correct response in-protocol.
+
+        :rtype: int
         """
         return self._n_retry_code_resent
 

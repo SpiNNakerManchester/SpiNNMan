@@ -46,7 +46,7 @@ class ConnectionListener(Thread, AbstractContextManager):
             connection is to be terminated.
         """
         super().__init__(
-            name="Connection listener for connection {}".format(connection))
+            name=f"Connection listener for connection {connection}")
         self.daemon = True
         self.__connection = connection
         self.__timeout = timeout

@@ -144,9 +144,9 @@ class UDPConnection(Connection, Listenable):
     @property
     def local_ip_address(self):
         """
-        The local IP address to which the connection is bound.
+        The local IP address to which the connection is bound,
+        as a dotted string, e.g., `0.0.0.0`.
 
-        :return: The local IP address as a dotted string, e.g., 0.0.0.0
         :rtype: str
         """
         return self._local_ip_address
@@ -154,9 +154,8 @@ class UDPConnection(Connection, Listenable):
     @property
     def local_port(self):
         """
-        The local port to which the connection is bound.
+        The number of the local port to which the connection is bound.
 
-        :return: The local port number
         :rtype: int
         """
         return self._local_port
@@ -164,10 +163,9 @@ class UDPConnection(Connection, Listenable):
     @property
     def remote_ip_address(self):
         """
-        The remote IP address to which the connection is connected.
+        The remote IP address to which the connection is connected,
+        or `None` if not connected remotely.
 
-        :return: The remote IP address as a dotted string, or `None` if not
-            connected remotely
         :rtype: str
         """
         return self._remote_ip_address
@@ -175,9 +173,9 @@ class UDPConnection(Connection, Listenable):
     @property
     def remote_port(self):
         """
-        The remote port to which the connection is connected.
+        The remote port number to which the connection is connected,
+        or `None` if not connected remotely.
 
-        :return: The remote port, or `None` if not connected remotely
         :rtype: int
         """
         return self._remote_port

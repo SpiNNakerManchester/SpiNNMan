@@ -485,7 +485,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     @property
     def __proxy_url(self):
         """
-        Get the URL for talking to the proxy connection system.
+        The URL for talking to the proxy connection system.
         """
         r = self._get(self._url)
         if r.status_code == 204:

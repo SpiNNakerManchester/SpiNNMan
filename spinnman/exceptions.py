@@ -32,8 +32,8 @@ class SpinnmanInvalidPacketException(SpinnmanException):
         :param str packet_type: The type of packet expected
         :param str problem: The problem with the packet
         """
-        super().__init__("Invalid packet of type {} received: {}".format(
-            packet_type, problem))
+        super().__init__(
+            f"Invalid packet of type {packet_type} received: {problem}")
         self._packet_type = packet_type
         self._problem = problem
 
@@ -41,6 +41,8 @@ class SpinnmanInvalidPacketException(SpinnmanException):
     def packet_type(self):
         """
         The packet type.
+
+        :rtype: str
         """
         return self._packet_type
 
@@ -48,6 +50,8 @@ class SpinnmanInvalidPacketException(SpinnmanException):
     def problem(self):
         """
         The problem with the packet.
+
+        :rtype: str
         """
         return self._problem
 
@@ -75,6 +79,8 @@ class SpinnmanInvalidParameterException(SpinnmanException):
     def parameter(self):
         """
         The parameter with an invalid value.
+
+        :rtype: str
         """
         return self._parameter
 
@@ -89,6 +95,8 @@ class SpinnmanInvalidParameterException(SpinnmanException):
     def problem(self):
         """
         The problem with the parameter value.
+
+        :rtype: str
         """
         return self._problem
 
@@ -116,6 +124,8 @@ class SpinnmanInvalidParameterTypeException(SpinnmanException):
     def parameter(self):
         """
         The parameter with an invalid value.
+
+        :rtype: str
         """
         return self._parameter
 
@@ -130,6 +140,8 @@ class SpinnmanInvalidParameterTypeException(SpinnmanException):
     def problem(self):
         """
         The problem with the parameter value.
+
+        :rtype: str
         """
         return self._problem
 
@@ -150,6 +162,8 @@ class SpinnmanIOException(SpinnmanException):
     def problem(self):
         """
         The problem with IO.
+
+        :rtype: str
         """
         return self._problem
 
@@ -186,6 +200,8 @@ class SpinnmanTimeoutException(SpinnmanException):
     def operation(self):
         """
         The operation that was performed.
+
+        :rtype: str
         """
         return self._operation
 
@@ -193,6 +209,8 @@ class SpinnmanTimeoutException(SpinnmanException):
     def timeout(self):
         """
         The timeout value in seconds.
+
+        :rtype: float
         """
         return self._timeout
 
@@ -220,6 +238,8 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
     def operation(self):
         """
         The operation being performed.
+
+        :rtype: str
         """
         return self._operation
 
@@ -234,6 +254,8 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
     def response(self):
         """
         The unexpected response.
+
+        :rtype: str
         """
         return self._response
 
@@ -333,8 +355,9 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
         :param bytes packet:
         """
         super().__init__(
-            "The packet received is being parsed as an EIEIO {0:s} packet, "
-            "but the content of the packet is invalid".format(parsing_format))
+            "The packet received is being parsed as an EIEIO "
+            f"{parsing_format:s} packet, "
+            "but the content of the packet is invalid")
         self._packet = packet
 
     @property

@@ -101,7 +101,9 @@ class AbstractMultiConnectionProcess:
     @property
     def connection_selector(self):
         """
-        Get the connection selector of the process.
+        The connection selector of the process.
+
+        :rtype: AbstractMultiConnectionProcessConnectionSelector
         """
         return self._conn_selector
 

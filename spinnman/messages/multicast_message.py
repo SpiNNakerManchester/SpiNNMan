@@ -35,7 +35,6 @@ class MulticastMessage(object):
         """
         The key of the packet.
 
-        :return: The key
         :rtype: int
         """
         return self._key

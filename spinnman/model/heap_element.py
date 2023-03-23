@@ -76,7 +76,7 @@ class HeapElement(object):
     @property
     def is_free(self):
         """
-        True if this block is a free block, False otherwise.
+        Whether this block is a free block.
 
         :rtype: bool
         """

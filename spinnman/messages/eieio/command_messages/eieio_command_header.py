@@ -62,7 +62,7 @@ class EIEIOCommandHeader(object):
     @property
     def bytestring(self):
         """
-        Get a bytestring of the header.
+        The bytestring of the header.
 
         :rtype: bytes
         """

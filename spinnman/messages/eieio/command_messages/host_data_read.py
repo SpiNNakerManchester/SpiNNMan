@@ -52,10 +52,9 @@ class HostDataRead(EIEIOCommandMessage):
             raise SpinnmanInvalidPacketException(
                 "SpinnakerRequestReadData",
                 "The format for a SpinnakerRequestReadData packet is "
-                "invalid: {0:d} request(s), {1:d} space(s) read "
-                "defined, {2:d} region(s) defined, {3:d} channel(s) "
-                "defined".format(
-                    n_requests, len(space_read), len(region_id), len(channel)))
+                f"invalid: {n_requests} request(s), {len(space_read)} "
+                f"space(s) read defined, {len(region_id)} region(s) defined, "
+                f"{len(channel)} channel(s) defined")
         super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ))
         self._header = _HostDataReadHeader(n_requests, sequence_no)
         self._acks = _HostDataReadAck(channel, region_id, space_read)

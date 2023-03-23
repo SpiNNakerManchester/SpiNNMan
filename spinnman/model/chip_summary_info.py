@@ -76,9 +76,8 @@ class ChipSummaryInfo(object):
             _TWO_BYTES.unpack_from(chip_summary_data, data_offset)
         data_offset += 2
 
-        ip_data = _FOUR_BYTES.unpack_from(chip_summary_data, data_offset)
-        ethernet_ip_address = "{}.{}.{}.{}".format(
-            ip_data[0], ip_data[1], ip_data[2], ip_data[3])
+        ip = _FOUR_BYTES.unpack_from(chip_summary_data, data_offset)
+        ethernet_ip_address = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
         if ethernet_ip_address != "0.0.0.0":
             self._ethernet_ip_address = ethernet_ip_address
         data_offset += 4
@@ -97,7 +96,7 @@ class ChipSummaryInfo(object):
     @property
     def x(self):
         """
-        The x-coordinate of the chip that this data is from.
+        The X-coordinate of the chip that this data is from.
 
         :rtype: int
         """
@@ -106,7 +105,7 @@ class ChipSummaryInfo(object):
     @property
     def y(self):
         """
-        The y-coordinate of the chip that this data is from.
+        The Y-coordinate of the chip that this data is from.
 
         :rtype: int
         """
@@ -142,7 +141,7 @@ class ChipSummaryInfo(object):
     @property
     def is_ethernet_available(self):
         """
-        Determines if the Ethernet connection is available on this chip.
+        Whether the Ethernet connection is available on this chip.
 
         :rtype: bool
         """
@@ -178,7 +177,7 @@ class ChipSummaryInfo(object):
     @property
     def nearest_ethernet_x(self):
         """
-        The x coordinate of the nearest Ethernet chip.
+        The X-coordinate of the nearest Ethernet chip.
 
         :rtype: int
         """
@@ -187,7 +186,7 @@ class ChipSummaryInfo(object):
     @property
     def nearest_ethernet_y(self):
         """
-        The y coordinate of the nearest Ethernet chip.
+        The Y-coordinate of the nearest Ethernet chip.
 
         :rtype: int
         """
@@ -218,4 +217,4 @@ class ChipSummaryInfo(object):
         return self._parent_link
 
     def __repr__(self):
-        return "x:{} y:{} n_cores:{}".format(self.x, self.y, self.n_cores)
+        return f"x:{self.x} y:{self.y} n_cores:{self.n_cores}"

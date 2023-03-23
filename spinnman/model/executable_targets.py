@@ -167,6 +167,6 @@ class ExecutableTargets(object):
             if self._targets[binary].is_core(chip_x, chip_y, chip_p):
                 return True
 
-        parameter = "x:{} y:{} p:{}".format(chip_x, chip_y, chip_p)
-        problem = "Already associated with a different binary"
-        raise SpinnmanInvalidParameterException(parameter, binary, problem)
+        raise SpinnmanInvalidParameterException(
+            f"x:{chip_x} y:{chip_y} p:{chip_p}", binary,
+            "Already associated with a different binary")
