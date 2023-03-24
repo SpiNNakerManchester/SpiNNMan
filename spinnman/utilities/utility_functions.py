@@ -118,7 +118,7 @@ def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
 
 def reprogram_tag_to_listener(
         connection: UDPConnection, x: int, y: int, ip_address: str, tag: int,
-        strip: bool = True):
+        strip: bool = True, read_response: bool = True):
     """
     Reprogram an IP Tag to send responses to a given connection that is
     not connected to a specific board. Such connections are normally
@@ -136,6 +136,8 @@ def reprogram_tag_to_listener(
     :param int tag: The id of the tag to set
     :param bool strip:
         True if the tag should strip SDP headers from outgoing messages
+    :param bool read_response:
+        True if the response to the reprogramming should be read
     :raises SpinnmanTimeoutException:
         If things time out several times
     """
@@ -148,7 +150,9 @@ def reprogram_tag_to_listener(
     for _ in range(3):
         try:
             connection.send_to(send_data, (ip_address, SCP_SCAMP_PORT))
-            request.get_scp_response().read_bytestring(connection.receive(), 2)
+            if read_response:
+                request.get_scp_response().read_bytestring(
+                    connection.receive(), 2)
             return
         except SpinnmanTimeoutException as e:
             exn = e
