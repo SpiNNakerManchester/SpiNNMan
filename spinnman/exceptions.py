@@ -381,11 +381,11 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         """
         n_cores = len(failed_core_states)
         if n_cores > 10:
-            msg = "waiting for {} cores to reach one of {}".format(
-                n_cores, expected_states)
+            msg = (f"waiting for {n_cores} cores to reach "
+                   f"one of {expected_states}")
         else:
-            msg = "waiting for cores {} to reach one of {}".format(
-                failed_core_states, expected_states)
+            msg = (f"waiting for cores {failed_core_states} to reach "
+                   f"one of {expected_states}")
         super().__init__(msg, timeout, msg)
         self._failed_core_states = failed_core_states
 

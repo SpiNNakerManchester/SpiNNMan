@@ -345,8 +345,8 @@ class Transceiver(AbstractContextManager):
             # isn't valid
             except SpinnmanTimeoutException as e:
                 raise SpinnmanException(
-                    "BMP connection to {} is not responding".format(
-                        conn.remote_ip_address)) from e
+                    f"BMP connection to {conn.remote_ip_address} is "
+                    "not responding") from e
             except Exception:
                 logger.exception("Failed to speak to BMP at {}",
                                  conn.remote_ip_address)
@@ -1366,9 +1366,9 @@ class Transceiver(AbstractContextManager):
                 executable_targets.all_core_subsets, [CPUState.READY])
             if len(cores_ready) > 0:
                 raise SpinnmanException(
-                    "Only {} of {} cores reached ready state: {}".format(
-                        count, executable_targets.total_processors,
-                        self.get_core_status_string(cores_ready)))
+                    f"Only {count} of {executable_targets.total_processors} "
+                    "cores reached ready state: "
+                    f"{self.get_core_status_string(cores_ready)}")
 
         # Send a signal telling the application to start
         self.send_signal(app_id, Signal.START)
@@ -2312,8 +2312,8 @@ class Transceiver(AbstractContextManager):
             raise SpinnmanInvalidParameterException(
                 "reverse_ip_tag.port", reverse_ip_tag.port,
                 "The port number for the reverse IP tag conflicts with"
-                " the SpiNNaker system ports ({} and {})".format(
-                    SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT))
+                f" the SpiNNaker system ports ({SCP_SCAMP_PORT} and "
+                f"{UDP_BOOT_CONNECTION_DEFAULT_PORT})")
 
         # Get the connections - if the tag specifies a connection, use that,
         # otherwise apply the tag to all connections

@@ -54,10 +54,9 @@ def _write_header(f, timestamp, machine, connections):
     """
     f.write("\t\tTarget SpiNNaker Machine Structure\n")
     f.write("\t\t==================================\n")
-    f.write("\nGenerated: {} for target machine '{}'\n\n".format(
-        timestamp, connections))
-    f.write("Machine dimensions (in chips) x : {}  y : {}\n\n".format(
-        machine.width, machine.height))
+    f.write(f"\nGenerated: {timestamp} for target machine '{connections}'\n\n")
+    f.write(f"Machine dimensions (in chips) x : {machine.width}  "
+            f"y : {machine.height}\n\n")
     f.write("\t\tMachine router information\n")
     f.write("\t\t==========================\n")
 
@@ -66,10 +65,10 @@ def _write_chip_router_report(f, chip):
     """
     :param ~spinn_machine.Chip chip:
     """
-    f.write("\nInformation for chip {}:{}\n".format(chip.x, chip.y))
-    f.write("Neighbouring chips \n{}\n".format(
-        chip.router.get_neighbouring_chips_coords()))
+    f.write(f"\nInformation for chip {chip.x}:{chip.y}\n")
+    f.write("Neighbouring chips\n"
+            f"{chip.router.get_neighbouring_chips_coords()}\n")
     f.write("Router list of links for this chip are: \n")
     for link in chip.router.links:
-        f.write("\t{}\n".format(link))
+        f.write(f"\t{link}\n")
     f.write("\t\t==========================\n")

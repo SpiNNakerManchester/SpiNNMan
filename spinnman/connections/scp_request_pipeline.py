@@ -300,13 +300,11 @@ class SCPRequestPipeLine(object):
 
             # Report any other exception
             raise SpinnmanIOException(
-                "Errors sending request {} to {}, {}, {} over {} retries: {}"
-                .format(
-                    request_sent,
-                    request_sent.sdp_header.destination_chip_x,
-                    request_sent.sdp_header.destination_chip_y,
-                    request_sent.sdp_header.destination_cpu,
-                    self._n_retries, self._retry_reason[seq]))
+                f"Errors sending request {request_sent} to "
+                f"{request_sent.sdp_header.destination_chip_x}, "
+                f"{request_sent.sdp_header.destination_chip_y}, "
+                f"{request_sent.sdp_header.destination_cpu} over "
+                f"{self._n_retries} retries: {self._retry_reason[seq]}")
 
         # If the request can be retried, retry it
         self._retries[seq] -= 1
