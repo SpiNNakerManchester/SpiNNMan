@@ -279,9 +279,9 @@ class Transceiver(AbstractContextManager):
         try:
             if SpiNNManDataView.has_machine():
                 return SpiNNManDataView.get_machine().where_is_xy(x, y)
-            return f"No Machine. " \
-                   f"Root IP:{self._scamp_connections[0].remote_ip_address}" \
-                   f"x:{x} y:{y}"
+            return (f"No Machine. "
+                    f"Root IP:{self._scamp_connections[0].remote_ip_address}"
+                    f"x:{x} y:{y}")
         except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
@@ -293,8 +293,7 @@ class Transceiver(AbstractContextManager):
                 if self._boot_send_connection is not None:
                     raise SpinnmanInvalidParameterException(
                         "connections", f"[... {conn} ...]",
-                        "Only a single SpinnakerBootSender can be"
-                        " specified")
+                        "Only a single SpinnakerBootSender can be specified")
                 self._boot_send_connection = conn
 
             # Locate any connections that talk to a BMP
@@ -330,12 +329,10 @@ class Transceiver(AbstractContextManager):
                     version_info.version_number[0] not in _BMP_MAJOR_VERSIONS
                 if fail_version_name or fail_version_num:
                     raise SpinnmanIOException(
-                        "The BMP at {} is running {} {} which is incompatible "
-                        "with this transceiver, required version is {} {}"
-                        .format(
-                            conn.remote_ip_address,
-                            version_info.name, version_info.version_string,
-                            _BMP_NAME, _BMP_MAJOR_VERSIONS))
+                        f"The BMP at {conn.remote_ip_address} is running "
+                        f"{version_info.name} {version_info.version_string} "
+                        "which is incompatible with this transceiver, required"
+                        f" version is {_BMP_NAME} {_BMP_MAJOR_VERSIONS}")
 
                 logger.info("Using BMP at {} with version {} {}",
                             conn.remote_ip_address, version_info.name,
@@ -2722,7 +2719,7 @@ class Transceiver(AbstractContextManager):
         :param int y: The y-coordinate of the chip
         :param bool enable: True (default) if the counters should be enabled
         :param iterable(int) counter_ids:
-            The IDs of the counters to reset (all by default)\
+            The IDs of the counters to reset (all by default)
             and enable if enable is True; each must be between 0 and 15
         :raise SpinnmanIOException:
             If there is an error communicating with the board

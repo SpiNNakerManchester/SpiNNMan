@@ -22,8 +22,6 @@ from spinn_utilities.overrides import overrides
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")
-_REPR_TEMPLATE = "SCAMPConnection(chip_x={}, chip_y={}, local_host={}," \
-    " local_port={}, remote_host={}, remote_port={})"
 
 
 class SCAMPConnection(SDPConnection, AbstractSCPConnection):
@@ -106,6 +104,8 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
             (str(ip_address), SCP_SCAMP_PORT))
 
     def __repr__(self):
-        return _REPR_TEMPLATE.format(
-            self._chip_x, self._chip_y, self.local_ip_address,
-            self.local_port, self.remote_ip_address, self.remote_port)
+        return (
+            f"SCAMPConnection(chip_x={self._chip_x}, chip_y={self._chip_y}, "
+            f"local_host={self.local_ip_address}, local_port={self.local_port}"
+            f", remote_host={self.remote_ip_address}, "
+            f"remote_port={self.remote_port})")

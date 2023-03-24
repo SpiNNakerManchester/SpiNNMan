@@ -22,8 +22,6 @@ from .utils import update_sdp_header_for_udp_send
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")
-_REPR_TEMPLATE = "BMPConnection(cabinet={}, frame={}, boards={}, " \
-    "local_host={}, local_port={}, remote_host={}, remote_port={}"
 
 
 class BMPConnection(UDPConnection, AbstractSCPConnection):
@@ -107,7 +105,9 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         self.send(self.get_scp_data(scp_request))
 
     def __repr__(self):
-        return _REPR_TEMPLATE.format(
-            self._cabinet, self._frame, self._boards,
-            self.local_ip_address, self.local_port, self.remote_ip_address,
-            self.remote_port)
+        return (
+            f"BMPConnection(cabinet={self._cabinet}, frame={self._frame}, "
+            f"boards={self._boards}, local_host={self.local_ip_address}, "
+            f"local_port={self.local_port}, "
+            f"remote_host={self.remote_ip_address}, "
+            f"remote_port={self.remote_port})")
