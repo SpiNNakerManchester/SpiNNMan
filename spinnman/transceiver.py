@@ -763,10 +763,10 @@ class Transceiver(AbstractContextManager):
             Any additional values to set during boot
         :return: The version identifier
         :rtype: VersionInfo
-        :raise: SpinnmanIOException:
+        :raise SpinnmanIOException:
             * If there is a problem booting the board
-            * If the version of software on the board is not compatible with\
-                this transceiver
+            * If the version of software on the board is not compatible with
+              this transceiver
         """
 
         # if the machine sizes not been given, calculate from assumption
@@ -1583,7 +1583,7 @@ class Transceiver(AbstractContextManager):
             * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
-            * A filename of a data file (in which case `is_filename` must be\
+            * A filename of a data file (in which case `is_filename` must be
               set to True)
         :type data:
             ~io.RawIOBase or bytes or bytearray or int or str
@@ -1591,7 +1591,7 @@ class Transceiver(AbstractContextManager):
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray, the length of the bytearray will be\
+            * If `data` is a bytearray, the length of the bytearray will be
               used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the length of the file will be used
@@ -1711,7 +1711,7 @@ class Transceiver(AbstractContextManager):
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray, the length of the bytearray will be\
+            * If `data` is a bytearray, the length of the bytearray will be
               used
             * If `data` is an int, 4 will be used
         :param int offset:
@@ -1764,7 +1764,7 @@ class Transceiver(AbstractContextManager):
             * An instance of RawIOBase
             * A bytearray or bytestring
             * A single integer
-            * A file name of a file to read (in which case `is_filename`\
+            * A file name of a file to read (in which case `is_filename`
               should be set to True)
         :type data:
             ~io.RawIOBase or bytes or bytearray or int or str
@@ -1772,7 +1772,7 @@ class Transceiver(AbstractContextManager):
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray, the length of the bytearray will be\
+            * If `data` is a bytearray, the length of the bytearray will be
               used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the size of the file will be used
@@ -2163,7 +2163,7 @@ class Transceiver(AbstractContextManager):
 
     def set_leds(self, x, y, cpu, led_states):
         """
-        Set SetLED states.
+        Set LED states.
 
         .. warning::
             The set_leds is deprecated and untested due to no known use.
@@ -2241,7 +2241,6 @@ class Transceiver(AbstractContextManager):
                 "The given board address is not recognised")
 
         for connection in connections:
-
             # Convert the host string
             host_string = ip_tag.ip_address
             if host_string in ("localhost", ".", "0.0.0.0"):
@@ -2822,9 +2821,9 @@ class Transceiver(AbstractContextManager):
         process.execute(DoSync(do_sync))
 
     def __str__(self):
-        return "transceiver object connected to {} with {} connections"\
-            .format(self._scamp_connections[0].remote_ip_address,
-                    len(self._all_connections))
+        addr = self._scamp_connections[0].remote_ip_address
+        n = len(self._all_connections)
+        return f"transceiver object connected to {addr} with {n} connections"
 
     def __repr__(self):
         return self.__str__()
