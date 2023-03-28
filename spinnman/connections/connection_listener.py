@@ -56,7 +56,7 @@ class ConnectionListener(Thread, AbstractContextManager):
 
     def __run_step(self, handler):
         """
-        :param callable handler:
+        :param ~collections.abc.Callable handler:
         """
         if self.__connection.is_ready_to_receive(timeout=self.__timeout):
             message = handler()
@@ -93,7 +93,7 @@ class ConnectionListener(Thread, AbstractContextManager):
         """
         Add a callback to be called when a message is received.
 
-        :param callable callback:
+        :param ~collections.abc.Callable callback:
             A callable which takes a single parameter, which is the message
             received; the result of the callback will be ignored.
         """

@@ -140,14 +140,15 @@ class SCPRequestPipeLine(object):
         Add an SCP request to the set to be sent.
 
         :param AbstractSCPRequest request: The SCP request to be sent
-        :param callable callback: A callback function to call when the
-            response has been received; takes a :py:class:`SCPResponse` as a
-            parameter, or `None` if the response doesn't need to be processed
-        :param callable error_callback: A callback function to call when an
-            error is found when processing the message; takes the original
-            :py:class:`AbstractSCPRequest`, the exception caught and a list of
-            tuples of (filename, line number, function name, text) as a
-            traceback
+        :param ~collections.abc.Callable callback:
+            A callback function to call when the response has been received;
+            takes a :py:class:`SCPResponse` as a parameter, or `None` if the
+            response doesn't need to be processed
+        :param ~collections.abc.Callable error_callback:
+            A callback function to call when an error is found when processing
+            the message; takes the original :py:class:`AbstractSCPRequest`, the
+            exception caught and a list of tuples of (filename, line number,
+            function name, text) as a traceback
         """
         # If the connection has not been measured
         if self._n_channels is None:
