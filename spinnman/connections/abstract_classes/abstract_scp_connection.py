@@ -86,7 +86,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
     @abstractproperty
     def chip_x(self):
         """
-        The x-coordinate of the chip at which messages sent down this
+        The X-coordinate of the chip at which messages sent down this
         connection will arrive at first.
 
         :rtype: int
@@ -95,7 +95,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
     @abstractproperty
     def chip_y(self):
         """
-        The y-coordinate of the chip at which messages sent down this
+        The Y-coordinate of the chip at which messages sent down this
         connection will arrive at first.
 
         :rtype: int
