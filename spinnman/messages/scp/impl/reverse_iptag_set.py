@@ -23,7 +23,8 @@ _IPTAG_SET = 1
 
 
 class ReverseIPTagSet(AbstractSCPRequest):
-    """ An SCP Request to set an IP Tag
+    """
+    An SCP Request to set an IP Tag.
     """
     __slots__ = []
 

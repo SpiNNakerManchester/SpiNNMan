@@ -25,10 +25,11 @@ from spinnman.exceptions import SpinnmanTimeoutException
 
 
 def work_out_bmp_from_machine_details(hostname, number_of_boards):
-    """ Work out the BMP connection IP address given the machine details.\
-        This is assumed to be the IP address of the machine, with 1 subtracted\
-        from the final part e.g. if the machine IP address is 192.168.0.5, the\
-        BMP IP address is assumed to be 192.168.0.4
+    """
+    Work out the BMP connection IP address given the machine details.
+    This is assumed to be the IP address of the machine, with 1 subtracted
+    from the final part e.g. if the machine IP address is 192.168.0.5, the
+    BMP IP address is assumed to be 192.168.0.4
 
     :param str hostname: the SpiNNaker machine main hostname or IP address
     :param int number_of_boards: the number of boards in the machine
@@ -54,7 +55,8 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
 
 
 def get_vcpu_address(p):
-    """ Get the address of the vcpu_t structure for the given core
+    """
+    Get the address of the vcpu_t structure for the given core.
 
     :param int p: The core
     :rtype: int
@@ -63,8 +65,9 @@ def get_vcpu_address(p):
 
 
 def send_port_trigger_message(connection, board_address):
-    """ Sends a port trigger message using a connection to (hopefully) open a\
-        port in a NAT and/or firewall to allow incoming packets to be received.
+    """
+    Sends a port trigger message using a connection to (hopefully) open a
+    port in a NAT and/or firewall to allow incoming packets to be received.
 
     :param UDPConnection connection:
         The UDP connection down which the trigger message should be sent
@@ -86,7 +89,8 @@ def send_port_trigger_message(connection, board_address):
 
 
 def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
-    """ Reprogram an IP Tag to send responses to a given SCAMPConnection
+    """
+    Reprogram an IP Tag to send responses to a given SCAMPConnection.
 
     :param SCAMPConnection connection: The connection to target the tag at
     :param int tag: The id of the tag to set

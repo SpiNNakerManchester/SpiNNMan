@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class RouterError(Enum):
-    """ Router error flags
+    """
+    Router error flags.
     """
     #: Error packet detected (0x80000000)
     ERROR = (0x80000000, "Error packet detected")

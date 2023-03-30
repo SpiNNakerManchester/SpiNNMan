@@ -21,7 +21,8 @@ from .check_ok_response import CheckOKResponse
 
 
 class DoSync(AbstractSCPRequest):
-    """ An SCP Request to control synchronization
+    """
+    An SCP Request to control synchronization.
     """
     __slots__ = []
 

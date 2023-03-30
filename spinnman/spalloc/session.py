@@ -72,6 +72,9 @@ def _may_renew(method):
 class Session:
     """
     Manages session credentials for the Spalloc client.
+
+    .. warning::
+        This class does not present a stable API for public consumption.
     """
     __slots__ = (
         "__login_form_url", "__login_submit_url", "__srv_base", "_service_url",
@@ -198,7 +201,8 @@ class Session:
 
         :returns: Description of the root of the service, without CSRF data
         :rtype: dict
-        :raises SpollocExcption:
+        :raises SpallocException:
+            If the session cannot be renewed.
         """
         if self.__token:
             r = requests.get(
@@ -298,6 +302,9 @@ class Session:
 class SessionAware:
     """
     Connects to the session.
+
+    .. warning::
+        This class does not present a stable API for public consumption.
     """
     __slots__ = ("__session", "_url")
 
@@ -308,7 +315,7 @@ class SessionAware:
     @property
     def _session_credentials(self):
         """
-        Get the current session credentials.
+        The current session credentials.
         Only supposed to be called by subclasses.
 
         :rtype: tuple(dict(str,str),dict(str,str))
@@ -319,7 +326,7 @@ class SessionAware:
     @property
     def _service_url(self):
         """
-        Get the main service URL.
+        The main service URL.
 
         :rtype: str
         """

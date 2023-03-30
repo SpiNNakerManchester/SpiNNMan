@@ -14,7 +14,8 @@
 
 
 class CPUInfos(object):
-    """ A set of CPU information objects.
+    """
+    A set of CPU information objects.
     """
     __slots__ = [
         "_cpu_infos"]
@@ -23,7 +24,8 @@ class CPUInfos(object):
         self._cpu_infos = dict()
 
     def add_processor(self, x, y, processor_id, cpu_info):
-        """ Add a processor on a given chip to the set.
+        """
+        Add a processor on a given chip to the set.
 
         :param int x: The x-coordinate of the chip
         :param int y: The y-coordinate of the chip
@@ -34,7 +36,8 @@ class CPUInfos(object):
 
     @property
     def cpu_infos(self):
-        """ The one per core core info.
+        """
+        The one per core core info.
 
         :return: iterable of x,y,p core info
         """
@@ -44,7 +47,8 @@ class CPUInfos(object):
         return iter(self._cpu_infos)
 
     def iteritems(self):
-        """ Get an iterable of (x, y, p), cpu_info
+        """
+        Get an iterable of (x, y, p), cpu_info.
         """
         return iter(self._cpu_infos.items())
 
@@ -55,7 +59,8 @@ class CPUInfos(object):
         return self._cpu_infos.values()
 
     def itervalues(self):
-        """ Get an iterable of cpu_info.
+        """
+        Get an iterable of cpu_info.
         """
         return iter(self._cpu_infos.items())
 
@@ -63,22 +68,26 @@ class CPUInfos(object):
         return self._cpu_infos.keys()
 
     def iterkeys(self):
-        """ Get an iterable of (x, y, p).
+        """
+        Get an iterable of (x, y, p).
         """
         return iter(self._cpu_infos.keys())
 
     def __len__(self):
-        """ The total number of processors that are in these core subsets.
+        """
+        The total number of processors that are in these core subsets.
         """
         return len(self._cpu_infos)
 
     def is_core(self, x, y, p):
-        """ Determine if there is a CPU Info for x, y, p
+        """
+        Determine if there is a CPU Info for x, y, p.
         """
         return (x, y, p) in self._cpu_infos
 
     def get_cpu_info(self, x, y, p):
-        """ Get the information for the given core on the given chip
+        """
+        Get the information for the given core on the given chip.
         """
         return self._cpu_infos[x, y, p]
 

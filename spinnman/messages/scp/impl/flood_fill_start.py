@@ -24,7 +24,8 @@ _NNP_FLOOD_FILL_START = 6
 
 
 class FloodFillStart(AbstractSCPRequest):
-    """ A request to start a flood fill of data
+    """
+    A request to start a flood fill of data.
     """
     __slots__ = []
 

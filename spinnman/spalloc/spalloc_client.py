@@ -98,8 +98,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         visualisers and other third party code participating in the Spinnaker
         Tools Notification Protocol.
 
-        .. note ::
-
+        .. note::
             The job is not verified to exist and be running. The session
             credentials may have expired; if so, the job will be unable to
             regenerate them.
@@ -117,8 +116,9 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         job_url = None
         cookies = {}
         headers = {}
-        for row in conn.execute(
-                """ SELECT kind, name, value FROM proxy_configuration"""):
+        for row in conn.execute("""
+                SELECT kind, name, value FROM proxy_configuration
+                """):
             kind, name, value = row
             if kind == "SPALLOC":
                 if name == "service uri":
@@ -312,7 +312,8 @@ class _ProxyPing(threading.Thread):
             sleep(self.__sleep_time)
 
     def close(self):
-        """ Mark as closed to avoid error messages
+        """
+        Mark as closed to avoid error messages.
         """
         self.__closed = True
 
@@ -484,7 +485,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     @property
     def __proxy_url(self):
         """
-        Get the URL for talking to the proxy connection system.
+        The URL for talking to the proxy connection system.
         """
         r = self._get(self._url)
         if r.status_code == 204:

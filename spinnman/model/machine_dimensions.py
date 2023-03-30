@@ -14,7 +14,8 @@
 
 
 class MachineDimensions(object):
-    """ Represents the size of a machine in chips
+    """
+    Represents the size of a machine in chips.
     """
     __slots__ = [
         "_height",
@@ -30,7 +31,8 @@ class MachineDimensions(object):
 
     @property
     def width(self):
-        """ The width of the machine in chips
+        """
+        The width of the machine in chips.
 
         :rtype: int
         """
@@ -38,7 +40,8 @@ class MachineDimensions(object):
 
     @property
     def height(self):
-        """ The height of the machine in chips
+        """
+        The height of the machine in chips.
 
         :rtype: int
         """

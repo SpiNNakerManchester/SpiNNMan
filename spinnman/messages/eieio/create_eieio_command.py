@@ -21,9 +21,10 @@ from spinnman.constants import EIEIO_COMMAND_IDS
 
 
 def read_eieio_command_message(data, offset):
-    """ Reads the content of an EIEIO command message and returns an object\
-        identifying the command which was contained in the packet, including\
-        any parameter, if required by the command
+    """
+    Reads the content of an EIEIO command message and returns an object
+    identifying the command which was contained in the packet, including
+    any parameter, if required by the command.
 
     :param bytes data: data received from the network as a bytestring
     :param int offset: offset at which the parsing operation should start

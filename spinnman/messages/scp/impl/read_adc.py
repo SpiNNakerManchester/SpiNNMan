@@ -22,12 +22,16 @@ from spinnman.model import ADCInfo
 
 
 class ReadADC(BMPRequest):
-    """ SCP Request for the data from the BMP including voltages and\
-        temperature.
+    """
+    SCP Request for the data from the BMP including voltages and
+    temperature.
 
-        This class is currently deprecated and untested as there is no
-        known use except for Transceiver.read_adc_data which is itself
-        deprecated.
+    This class is currently deprecated and untested as there is no
+    known use except for Transceiver.read_adc_data which is itself
+    deprecated.
+
+    .. note::
+        The equivalent code in Java is *not* deprecated.
     """
     __slots__ = []
 
@@ -46,7 +50,8 @@ class ReadADC(BMPRequest):
 
 
 class _SCPReadADCResponse(BMPResponse):
-    """ An SCP response to a request for ADC information
+    """
+    An SCP response to a request for ADC information.
     """
     __slots__ = [
         "_adc_info"]
@@ -65,6 +70,7 @@ class _SCPReadADCResponse(BMPResponse):
 
     @property
     def adc_info(self):
-        """ The ADC information
+        """
+        The ADC information.
         """
         return self._adc_info

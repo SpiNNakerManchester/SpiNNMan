@@ -22,7 +22,8 @@ _TWO_WORDS = struct.Struct("<II")
 
 
 class KeyPayloadDataElement(AbstractDataElement):
-    """ A data element that contains a key and a payload
+    """
+    A data element that contains a key and a payload.
     """
     __slots__ = [
         "_key",
@@ -61,8 +62,7 @@ class KeyPayloadDataElement(AbstractDataElement):
                 "eieio_type", eieio_type, "Unknown type")
 
     def __str__(self):
-        return "KeyPayloadDataElement:{}:{}".format(
-            hex(self._key), hex(self._payload))
+        return f"KeyPayloadDataElement:0x{self._key:x}:0x{self._payload:x}"
 
     def __repr__(self):
         return self.__str__()

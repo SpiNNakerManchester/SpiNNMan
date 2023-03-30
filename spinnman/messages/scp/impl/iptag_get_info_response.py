@@ -22,7 +22,8 @@ _BYTE_SKIP_BYTE_BYTE = struct.Struct("<Bx2B")
 
 
 class IPTagGetInfoResponse(AbstractSCPResponse):
-    """ An SCP response to a request for information about IP tags
+    """
+    An SCP response to a request for information about IP tags.
     """
     __slots__ = [
         "_fixed_size",
@@ -47,7 +48,8 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
 
     @property
     def transient_timeout(self):
-        """ The timeout for transient IP tags (i.e. responses to SCP commands)
+        """
+        The timeout for transient IP tags (i.e. responses to SCP commands).
 
         :rtype: int
         """
@@ -55,7 +57,8 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
 
     @property
     def pool_size(self):
-        """ The count of the IP tag pool size
+        """
+        The count of the IP tag pool size.
 
         :rtype: int
         """
@@ -63,7 +66,8 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
 
     @property
     def fixed_size(self):
-        """ The count of the number of fixed IP tag entries
+        """
+        The count of the number of fixed IP tag entries.
 
         :rtype: int
         """

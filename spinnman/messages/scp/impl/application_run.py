@@ -23,7 +23,8 @@ _WAIT_FLAG = 0x1 << 18
 
 
 class ApplicationRun(AbstractSCPRequest):
-    """ An SCP request to run an application loaded on a chip
+    """
+    An SCP request to run an application loaded on a chip.
     """
     __slots__ = []
 

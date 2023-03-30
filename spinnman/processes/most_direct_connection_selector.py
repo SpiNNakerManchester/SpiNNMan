@@ -20,7 +20,8 @@ from .abstract_multi_connection_process_connection_selector import (
 
 class MostDirectConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
-    """ A selector that goes for the most direct connection for the message.
+    """
+    A selector that goes for the most direct connection for the message.
     """
     __slots__ = [
         "_connections",

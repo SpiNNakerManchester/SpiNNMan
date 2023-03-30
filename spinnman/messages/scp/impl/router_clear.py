@@ -21,7 +21,8 @@ from .check_ok_response import CheckOKResponse
 
 
 class RouterClear(AbstractSCPRequest):
-    """ A request to clear the router on a chip
+    """
+    A request to clear the router on a chip.
     """
     __slots__ = []
 

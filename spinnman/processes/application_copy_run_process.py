@@ -23,12 +23,13 @@ def _on_same_board(chip_1, chip_2):
 
 
 def _get_next_chips(chips_done):
-    """ Get the chips that are adjacent to the last set of chips, which
-        haven't yet been loaded.  Also returned are the links for each chip,
-        which gives the link which should be read from to get the data.
+    """
+    Get the chips that are adjacent to the last set of chips, which
+    haven't yet been loaded.  Also returned are the links for each chip,
+    which gives the link which should be read from to get the data.
 
     :param set((int,int)) chips_done:
-    The coordinates of chips that have already been done
+        The coordinates of chips that have already been done
     :return: A dict of chip coordinates to link to use, Chip
     :rtype: dict((int,int), (int, Chip))
     """
@@ -47,21 +48,24 @@ def _get_next_chips(chips_done):
 
 
 class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
-    """ Process to start a binary on a subset of cores on a subset of chips
-        of a machine, performed by, on each chip, copying the data from
-        an adjacent chip and then starting the binary.  This goes to each
-        chip in turn, and so detects failures early on, as well as ensuring
-        that the copy and execution is done in the case of success i.e. this
-        ensures that if all commands are successful, the full binary has been
-        copied and started.
+    """
+    Process to start a binary on a subset of cores on a subset of chips
+    of a machine, performed by, on each chip, copying the data from
+    an adjacent chip and then starting the binary.  This goes to each
+    chip in turn, and so detects failures early on, as well as ensuring
+    that the copy and execution is done in the case of success i.e. this
+    ensures that if all commands are successful, the full binary has been
+    copied and started.
 
-        NOTE: The binary must have been loaded to the boot chip before this is
+    .. note::
+        The binary must have been loaded to the boot chip before this is
         called!
     """
     __slots__ = []
 
     def run(self, size, app_id, core_subsets, chksum, wait):
-        """ Run the process.
+        """
+        Run the process.
 
         :param int size: The size of the binary to copy
         :param int app_id: The application id to assign to the running binary

@@ -18,8 +18,9 @@ from .eieio_command_header import EIEIOCommandHeader
 
 
 class EventStopRequest(EIEIOCommandMessage):
-    """ Packet used for the buffering input technique which causes the parser\
-        of the input packet to terminate its execution
+    """
+    Packet used for the buffering input technique which causes the parser
+    of the input packet to terminate its execution.
     """
     __slots__ = []
 

@@ -15,6 +15,9 @@ from enum import IntEnum
 
 
 class ProxyProtocol(IntEnum):
+    """
+    Websocket binary frame type identifiers in the Spalloc Proxy protocol.
+    """
     #: Message relating to opening a channel
     OPEN = 0
     #: Message relating to closing a channel

@@ -25,13 +25,15 @@ _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
 
 
 class EIEIOConnection(UDPConnection, Listenable):
-    """ A UDP connection for sending and receiving raw EIEIO messages.
+    """
+    A UDP connection for sending and receiving raw EIEIO messages.
     """
     __slots__ = []
 
     def receive_eieio_message(self, timeout=None):
-        """ Receives an EIEIO message from this connection.  Blocks until\
-            a message has been received, or a timeout occurs.
+        """
+        Receives an EIEIO message from this connection.  Blocks until
+        a message has been received, or a timeout occurs.
 
         :param int timeout:
             The time in seconds to wait for the message to arrive; if not
@@ -54,7 +56,8 @@ class EIEIOConnection(UDPConnection, Listenable):
         return read_eieio_data_message(data, 0)
 
     def send_eieio_message(self, eieio_message):
-        """ Sends an EIEIO message down this connection
+        """
+        Sends an EIEIO message down this connection.
 
         :param AbstractEIEIOMessage eieio_message:
             The EIEIO message to be sent

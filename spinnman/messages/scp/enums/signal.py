@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class SignalType(Enum):
-    """ The type of signal, determined by how it is transmitted
+    """
+    The type of signal, determined by how it is transmitted.
     """
     MULTICAST = 0
     POINT_TO_POINT = 1
@@ -24,7 +25,8 @@ class SignalType(Enum):
 
 
 class Signal(Enum):
-    """ SCP Signals
+    """
+    SCP Signals.
     """
     INITIALISE = (0, SignalType.NEAREST_NEIGHBOUR)
     POWER_DOWN = (1, SignalType.NEAREST_NEIGHBOUR)

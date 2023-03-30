@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class EIEIOPrefix(Enum):
-    """ Possible prefixing of keys in EIEIO packets
+    """
+    Possible prefixing of keys in EIEIO packets.
     """
     LOWER_HALF_WORD = (0, "apply prefix on lower half of the word")
     UPPER_HALF_WORD = (1, "apply prefix on top half of the word")
