@@ -16,7 +16,8 @@ import time
 
 
 class TokenBucket(object):
-    """ An implementation of the token bucket algorithm. Usage::
+    """
+    An implementation of the token bucket algorithm. Usage::
 
         >>> bucket = TokenBucket(80, 0.5)
         >>> print(bucket.consume(10))
@@ -39,10 +40,11 @@ class TokenBucket(object):
         self._timestamp = time.time()
 
     def consume(self, tokens, block=True):
-        """ Consume tokens from the bucket. Returns True if there were\
-            sufficient tokens.
+        """
+        Consume tokens from the bucket. Returns True if there were
+        sufficient tokens.
 
-        If there are not enough tokens and block is True, sleeps until the\
+        If there are not enough tokens and block is True, sleeps until the
         bucket is replenished enough to satisfy the deficiency.
 
         If there are not enough tokens and block is False, returns False.
@@ -65,7 +67,10 @@ class TokenBucket(object):
 
     @property
     def tokens(self):
-        """ The number of tokens currently in the bucket.
+        """
+        The number of tokens currently in the bucket.
+
+        :rtype: int
         """
         if self._tokens < self._capacity:
             now = time.time()

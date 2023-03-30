@@ -16,8 +16,11 @@ from enum import Enum
 
 
 class DiagnosticFilterSource(Enum):
-    """ Source flags for the diagnostic filters.
-        Note that only one has to match for the counter to be incremented
+    """
+    Source flags for the diagnostic filters.
+
+    .. note::
+        Only one has to match for the counter to be incremented.
     """
     #: Source is a local core
     LOCAL = (0, "Source is a local core")

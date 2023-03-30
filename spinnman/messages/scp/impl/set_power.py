@@ -25,15 +25,16 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 class SetPower(BMPRequest):
-    """ An SCP request for the BMP to power on or power off a rack of boards
+    """
+    An SCP request for the BMP to power on or power off a rack of boards.
     """
     __slots__ = []
 
     def __init__(self, power_command, boards, delay=0.0, board_to_send_to=0):
         """
         .. note::
-            There is currently a bug in the BMP that means some boards don't\
-            respond to power commands not sent to BMP 0. Thus changing the\
+            There is currently a bug in the BMP that means some boards don't
+            respond to power commands not sent to BMP 0. Thus changing the
             board_to_send_to parameter is not recommended!
 
         :param PowerCommand power_command: The power command being sent

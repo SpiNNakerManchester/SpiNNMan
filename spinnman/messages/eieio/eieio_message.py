@@ -15,7 +15,8 @@ from spinn_utilities.abstract_base import abstractproperty, AbstractBase
 
 
 class AbstractEIEIOMessage(object, metaclass=AbstractBase):
-    """ Interface for an EIEIOMessage
+    """
+    Interface for an EIEIOMessage.
     """
 
     __slots__ = ()

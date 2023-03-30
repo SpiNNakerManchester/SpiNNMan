@@ -20,7 +20,8 @@ from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 
 class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
-    """ A process for writing memory on multiple SpiNNaker chips at once.
+    """
+    A process for writing memory on multiple SpiNNaker chips at once.
     """
     __slots__ = []
 

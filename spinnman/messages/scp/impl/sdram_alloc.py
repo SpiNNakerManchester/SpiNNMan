@@ -28,7 +28,8 @@ FLAG_RETRY_TAG = 4
 
 
 class SDRAMAlloc(AbstractSCPRequest):
-    """ An SCP Request to allocate space in the SDRAM space
+    """
+    An SCP Request to allocate space in the SDRAM space.
     """
     __slots__ = [
         "_size"]
@@ -82,7 +83,8 @@ class SDRAMAlloc(AbstractSCPRequest):
 
 
 class _SCPSDRAMAllocResponse(AbstractSCPResponse):
-    """ An SCP response to a request to allocate space in SDRAM
+    """
+    An SCP response to a request to allocate space in SDRAM.
     """
     __slots__ = [
         "_base_address",
@@ -106,11 +108,12 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         if self._base_address == 0:
             raise SpinnmanInvalidParameterException(
                 "SDRAM Allocation response base address", self._base_address,
-                "Could not allocate {} bytes of SDRAM".format(self._size))
+                f"Could not allocate {self._size} bytes of SDRAM")
 
     @property
     def base_address(self):
-        """ The base address allocated, or 0 if none
+        """
+        The base address allocated, or 0 if none.
 
         :rtype: int
         """

@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class BMPInfo(Enum):
-    """ The SCP BMP Information Types
+    """
+    The SCP BMP Information Types.
     """
 
     SERIAL = (0, "Serial information")

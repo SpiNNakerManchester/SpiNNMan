@@ -25,8 +25,9 @@ _TIMEOUT = 1
 
 
 class ConnectionListener(Thread, AbstractContextManager):
-    """ Thread that listens to a connection and calls callbacks with new\
-        messages when they arrive.
+    """
+    Thread that listens to a connection and calls callbacks with new
+    messages when they arrive.
     """
     __slots__ = [
         "__callback_pool",
@@ -45,7 +46,7 @@ class ConnectionListener(Thread, AbstractContextManager):
             connection is to be terminated.
         """
         super().__init__(
-            name="Connection listener for connection {}".format(connection))
+            name=f"Connection listener for connection {connection}")
         self.daemon = True
         self.__connection = connection
         self.__timeout = timeout
@@ -55,7 +56,7 @@ class ConnectionListener(Thread, AbstractContextManager):
 
     def __run_step(self, handler):
         """
-        :param callable handler:
+        :param ~collections.abc.Callable handler:
         """
         if self.__connection.is_ready_to_receive(timeout=self.__timeout):
             message = handler()
@@ -73,7 +74,8 @@ class ConnectionListener(Thread, AbstractContextManager):
             logger.exception("problem in listener call")
 
     def run(self):
-        """ Implements the listening thread.
+        """
+        Implements the listening thread.
         """
         with self.__callback_pool:
             handler = self.__connection.get_receive_method()
@@ -88,18 +90,23 @@ class ConnectionListener(Thread, AbstractContextManager):
                                        exc_info=True)
 
     def add_callback(self, callback):
-        """ Add a callback to be called when a message is received
+        """
+        Add a callback to be called when a message is received.
 
-        :param callable callback:
+        :param ~collections.abc.Callable callback:
             A callable which takes a single parameter, which is the message
             received; the result of the callback will be ignored.
         """
         self.__callbacks.add(callback)
 
     def close(self):
-        """ Closes the listener.  Note that this does not close the provider\
-            of the messages; this instead marks the listener as closed.  The\
-            listener will not truly stop until the get message call returns.
+        """
+        Closes the listener.
+
+        .. note::
+            This does not close the provider of the messages; this instead
+            marks the listener as closed.  The listener will not truly stop
+            until the get message call returns.
         """
         self.__done = True
         self.join()

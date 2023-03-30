@@ -26,7 +26,8 @@ _SCP_DATA_OFFSET = 12
 
 
 class AbstractSCPResponse(object, metaclass=AbstractBase):
-    """ Represents an abstract SCP Response.
+    """
+    Represents an abstract SCP Response.
     """
     __slots__ = [
         "_scp_response_header",
@@ -37,7 +38,8 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         self._scp_response_header = None
 
     def read_bytestring(self, data, offset):
-        """ Reads a packet from a bytestring of data
+        """
+        Reads a packet from a bytestring of data.
 
         :param bytes data: The bytestring to be read
         :param int offset:
@@ -50,7 +52,8 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
 
     @abstractmethod
     def read_data_bytestring(self, data, offset):
-        """ Reads the remainder of the data following the header
+        """
+        Reads the remainder of the data following the header.
 
         :param bytes data: The bytestring to read from
         :param int offset: The offset into the data after the headers
@@ -58,7 +61,8 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
 
     @property
     def sdp_header(self):
-        """ The SDP header from the response
+        """
+        The SDP header from the response.
 
         :rtype: SDPHeader
         """
@@ -66,7 +70,8 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
 
     @property
     def scp_response_header(self):
-        """ The SCP header from the response
+        """
+        The SCP header from the response.
 
         :rtype: SCPResponseHeader
         """

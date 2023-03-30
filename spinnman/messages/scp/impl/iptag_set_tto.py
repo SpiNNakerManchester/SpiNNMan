@@ -23,7 +23,8 @@ _IPTAG_TTO = (4 << 16)
 
 
 class IPTagSetTTO(AbstractSCPRequest):
-    """ An SCP request to set the transient timeout for future SCP requests
+    """
+    An SCP request to set the transient timeout for future SCP requests.
     """
     __slots__ = []
 

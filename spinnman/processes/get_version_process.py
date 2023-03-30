@@ -18,7 +18,8 @@ from spinnman.constants import N_RETRIES
 
 
 class GetVersionProcess(AbstractMultiConnectionProcess):
-    """ A process for getting the version of the machine.
+    """
+    A process for getting the version of the machine.
     """
     __slots__ = [
         "_version_info"]

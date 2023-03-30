@@ -21,7 +21,8 @@ from .check_ok_response import CheckOKResponse
 
 
 class WriteLink(AbstractSCPRequest):
-    """ A request to write memory on a neighbouring chip
+    """
+    A request to write memory on a neighbouring chip.
     """
     __slots__ = [
         "_data_to_write"]

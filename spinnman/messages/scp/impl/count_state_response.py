@@ -22,7 +22,8 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class CountStateResponse(AbstractSCPResponse):
-    """ An SCP response to a request for the number of cores in a given state
+    """
+    An SCP response to a request for the number of cores in a given state.
     """
     __slots__ = [
         "_count"]
@@ -41,7 +42,8 @@ class CountStateResponse(AbstractSCPResponse):
 
     @property
     def count(self):
-        """ The count of the number of cores with the requested state
+        """
+        The count of the number of cores with the requested state.
 
         :rtype: int
         """

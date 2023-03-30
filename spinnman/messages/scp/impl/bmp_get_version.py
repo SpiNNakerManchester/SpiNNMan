@@ -21,7 +21,8 @@ from .get_version_response import GetVersionResponse
 
 
 class BMPGetVersion(BMPRequest):
-    """ An SCP request to read the version of software running on a core
+    """
+    An SCP request to read the version of software running on a core.
     """
 
     def __init__(self, board):

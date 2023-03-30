@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class P2PTableRoute(Enum):
-    """ P2P Routing table routes
+    """
+    P2P Routing table routes.
     """
     EAST = 0b000
     NORTH_EAST = 0b001

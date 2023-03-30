@@ -21,16 +21,16 @@ from .check_ok_response import CheckOKResponse
 
 
 class BMPSetLed(BMPRequest):
-    """ Set the LED(s) of a board to either on, off or toggling
+    """
+    Set the LED(s) of a board to either on, off or toggling.
 
-        This class is currently deprecated and untested as there is no
-        known use except for Transceiver.set_led which is itself deprecated.
+    This class is currently deprecated and untested as there is no
+    known use except for Transceiver.set_led which is itself deprecated.
     """
     __slots__ = []
 
     def __init__(self, led, action, boards):
         """
-
         :param led: Number of the LED or an iterable of LEDs to set the
             state of (0-7)
         :type led: int or list(int)
@@ -40,7 +40,6 @@ class BMPSetLed(BMPRequest):
             also be an iterable of multiple boards (in the same frame).
         :type boards: int or list(int)
         """
-
         # set up the led entry for arg1
         if isinstance(led, int):
             leds = [led]

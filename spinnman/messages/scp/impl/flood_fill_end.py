@@ -25,7 +25,8 @@ _WAIT_FLAG = 0x1 << 18
 
 
 class FloodFillEnd(AbstractSCPRequest):
-    """ A request to start a flood fill of data
+    """
+    A request to start a flood fill of data.
     """
     __slots__ = []
 

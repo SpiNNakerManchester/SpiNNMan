@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class CPUState(Enum):
-    """ SARK CPU States
+    """
+    SARK CPU States.
     """
     #: Dead core
     DEAD = 0

@@ -18,14 +18,16 @@ from spinn_utilities.abstract_base import (
 
 class AbstractMultiConnectionProcessConnectionSelector(
         object, metaclass=AbstractBase):
-    """ A connection selector for multi-connection processes
+    """
+    A connection selector for multi-connection processes.
     """
     __slots__ = []
 
     @abstractmethod
     def get_next_connection(self, message):
-        """ Get the index of the  next connection for the process from a list\
-            of connections.
+        """
+        Get the index of the  next connection for the process from a list
+        of connections.
 
         :param AbstractSCPRequest message: The SCP message to be sent
         :rtype: SCAMPConnection

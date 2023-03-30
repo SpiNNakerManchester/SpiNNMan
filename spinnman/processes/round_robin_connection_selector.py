@@ -19,7 +19,8 @@ from .abstract_multi_connection_process_connection_selector import (
 
 class RoundRobinConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
-    """ A connection selector that just spreads work as evenly as possible.
+    """
+    A connection selector that just spreads work as evenly as possible.
     """
     __slots__ = [
         "_connections",

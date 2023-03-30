@@ -21,7 +21,8 @@ from .check_ok_response import CheckOKResponse
 
 
 class FillRequest(AbstractSCPRequest):
-    """ An SCP request to fill a region of memory on a chip with repeated data
+    """
+    An SCP request to fill a region of memory on a chip with repeated data
     """
     __slots__ = []
 

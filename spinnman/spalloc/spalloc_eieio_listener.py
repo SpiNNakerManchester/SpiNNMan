@@ -109,7 +109,8 @@ class SpallocEIEIOListener(
 
     @abstractproperty
     def local_ip_address(self) -> str:
-        """ The IP address on the server to which the connection is bound.
+        """
+        The IP address on the server to which the connection is bound.
 
         :return: The IP address as a dotted string, e.g., 0.0.0.0
         :rtype: str
@@ -117,7 +118,8 @@ class SpallocEIEIOListener(
 
     @abstractproperty
     def local_port(self) -> int:
-        """ The port on the server to which the connection is bound.
+        """
+        The port on the server to which the connection is bound.
 
         :return: The local port number
         :rtype: int
