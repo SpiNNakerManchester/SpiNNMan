@@ -16,6 +16,7 @@ import os
 from spinn_utilities.config_holder import (
     add_default_cfg, clear_cfg_files)
 from spinn_machine.config_setup import add_spinn_machine_cfg
+from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 
 BASE_CONFIG_FILE = "spinnman.cfg"
 
@@ -30,6 +31,7 @@ def unittest_setup():
     """
     clear_cfg_files(True)
     add_spinnman_cfg()
+    SpiNNManDataWriter.mock()
 
 
 def add_spinnman_cfg():
