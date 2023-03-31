@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,13 +22,11 @@ from .utils import update_sdp_header_for_udp_send
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")
-_REPR_TEMPLATE = "BMPConnection(cabinet={}, frame={}, boards={}, " \
-    "local_host={}, local_port={}, remote_host={}, remote_port={}"
 
 
 class BMPConnection(UDPConnection, AbstractSCPConnection):
-    """ A BMP connection which supports queries to the BMP of a SpiNNaker\
-        machine
+    """
+    A BMP connection which supports queries to the BMP of a SpiNNaker machine.
     """
     __slots__ = [
         "_boards",
@@ -50,7 +48,8 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @property
     def cabinet(self):
-        """ The cabinet ID of the BMP
+        """
+        The cabinet ID of the BMP.
 
         :rtype: int
         """
@@ -58,7 +57,8 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @property
     def frame(self):
-        """ The frame ID of the BMP
+        """
+        The frame ID of the BMP.
 
         :rtype: int
         """
@@ -66,23 +66,26 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @property
     def boards(self):
-        """ The set of boards supported by the BMP
+        """
+        The set of boards supported by the BMP.
 
-        :rtype: iterable of int
+        :rtype: iterable(int)
         """
         return self._boards
 
     @property
     @overrides(AbstractSCPConnection.chip_x, extend_doc=False)
     def chip_x(self):
-        """ Defined to satisfy the AbstractSCPConnection - always 0 for a BMP
+        """
+        Defined to satisfy the AbstractSCPConnection - always 0 for a BMP.
         """
         return 0
 
     @property
     @overrides(AbstractSCPConnection.chip_y, extend_doc=False)
     def chip_y(self):
-        """ Defined to satisfy the AbstractSCPConnection - always 0 for a BMP
+        """
+        Defined to satisfy the AbstractSCPConnection - always 0 for a BMP.
         """
         return 0
 
@@ -102,7 +105,9 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         self.send(self.get_scp_data(scp_request))
 
     def __repr__(self):
-        return _REPR_TEMPLATE.format(
-            self._cabinet, self._frame, self._boards,
-            self.local_ip_address, self.local_port, self.remote_ip_address,
-            self.remote_port)
+        return (
+            f"BMPConnection(cabinet={self._cabinet}, frame={self._frame}, "
+            f"boards={self._boards}, local_host={self.local_ip_address}, "
+            f"local_port={self.local_port}, "
+            f"remote_host={self.remote_ip_address}, "
+            f"remote_port={self.remote_port})")

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,8 @@ from .sdp_header import SDPHeader
 
 
 class SDPMessage(object):
-    """ Wraps up an SDP message with a header and optional data.
+    """
+    Wraps up an SDP message with a header and optional data.
     """
     __slots__ = [
         "_data",
@@ -26,18 +27,18 @@ class SDPMessage(object):
     def __init__(self, sdp_header, data=None, offset=0):
         """
         :param SDPHeader sdp_header: The header of the message
-        :param data: The data of the SDP packet, or None if no data
+        :param data: The data of the SDP packet, or `None` if no data
         :type data: bytes or bytearray or None
         :param int offset: The offset where the valid data starts
         """
-
         self._sdp_header = sdp_header
         self._data = data
         self._offset = offset
 
     @property
     def bytestring(self):
-        """ The bytestring of the message
+        """
+        The bytestring of the message.
 
         :rtype: bytes
         """
@@ -57,7 +58,8 @@ class SDPMessage(object):
 
     @property
     def sdp_header(self):
-        """ The header of the packet
+        """
+        The header of the packet.
 
         :rtype: SDPHeader
         """
@@ -65,7 +67,8 @@ class SDPMessage(object):
 
     @property
     def data(self):
-        """ The data in the packet
+        """
+        The data in the packet.
 
         :rtype: bytes or bytearray or None
         """
@@ -73,7 +76,8 @@ class SDPMessage(object):
 
     @property
     def offset(self):
-        """ The offset where the valid data starts
+        """
+        The offset where the valid data starts.
 
         :rtype: int
         """

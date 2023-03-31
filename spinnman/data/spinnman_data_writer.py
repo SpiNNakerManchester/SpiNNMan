@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,17 +28,17 @@ REPORTS_DIRNAME = "reports"
 
 class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     """
-    See UtilsDataWriter
+    See :py:class:`~spinn_utilities.data.UtilsDataWriter`
 
     This class is designed to only be used directly within the SpiNNMan
-    repository unittests as all methods are available to subclasses
+    repository unit tests as all methods are available to subclasses
     """
     __data = _SpiNNManDataModel()
     __slots__ = []
 
     def _spinnman_mock(self):
         """
-        Like _mock but does not call super class _mock
+        Like _mock but does not call super class _mock.
         This method should only be called by setup (via _setup)
 
         This method should only be called by mock via _mock
@@ -52,7 +52,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def _spinnman_setup(self):
         """
-        Like _setup but does not call super class _setup
+        Like _setup but does not call super class _setup.
 
         This method should only be called by setup (via _setup)
         """
@@ -83,7 +83,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     def _local_soft_reset(self):
         """
         Puts all data back into the state expected at sim.reset but not
-        graph changed
+        graph changed.
 
         Unlike soft_reset this method does not call super classes
 
@@ -98,7 +98,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def set_transceiver(self, transceiver):
         """
-        Sets the transceiver object
+        Sets the transceiver object.
 
         :param Transceiver transceiver:
         :raises TypeError: If the transceiver is not a Transceiver

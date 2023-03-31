@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,8 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class WriteFPGARegister(BMPRequest):
-    """ A request for writing a word to a FPGA (SPI) register.
+    """
+    A request for writing a word to a FPGA (SPI) register.
 
     See the SpI/O project's spinnaker_fpga design's `README`_ for a listing
     of FPGA registers. The SpI/O project can be found on GitHub at:

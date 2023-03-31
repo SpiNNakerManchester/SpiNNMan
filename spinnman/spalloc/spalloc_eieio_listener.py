@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -109,7 +109,8 @@ class SpallocEIEIOListener(
 
     @abstractproperty
     def local_ip_address(self) -> str:
-        """ The IP address on the server to which the connection is bound.
+        """
+        The IP address on the server to which the connection is bound.
 
         :return: The IP address as a dotted string, e.g., 0.0.0.0
         :rtype: str
@@ -117,7 +118,8 @@ class SpallocEIEIOListener(
 
     @abstractproperty
     def local_port(self) -> int:
-        """ The port on the server to which the connection is bound.
+        """
+        The port on the server to which the connection is bound.
 
         :return: The local port number
         :rtype: int
@@ -151,7 +153,7 @@ class SpallocEIEIOListener(
         self.send_to(
             _TWO_SKIP + sdp_message.bytestring, (ip_address, SCP_SCAMP_PORT))
 
-    def update_tag(self, x: int, y: int, tag: int):
+    def update_tag(self, x: int, y: int, tag: int, do_receive: bool = True):
         """
         Update the given tag on the given ethernet chip to send messages to
         this connection.
@@ -159,6 +161,7 @@ class SpallocEIEIOListener(
         :param int x: The ethernet chip's X coordinate
         :param int y: The ethernet chip's Y coordinate
         :param int tag: The tag ID to update
+        :param bool do_receive: Whether to receive the response or not
         :raises SpinnmanTimeoutException:
             If the message isn't handled within a reasonable timeout.
         :raises SpinnmanUnexpectedResponseCodeException:
@@ -172,9 +175,10 @@ class SpallocEIEIOListener(
         for _try in range(_NUM_UPDATE_TAG_TRIES):
             try:
                 self.send_to_chip(data, x, y, SCP_SCAMP_PORT)
-                response_data = self.receive(_UPDATE_TAG_TIMEOUT)
-                request.get_scp_response().read_bytestring(
-                    response_data, len(_TWO_SKIP))
+                if do_receive:
+                    response_data = self.receive(_UPDATE_TAG_TIMEOUT)
+                    request.get_scp_response().read_bytestring(
+                        response_data, len(_TWO_SKIP))
                 return
             except SpinnmanTimeoutException as e:
                 if _try + 1 == _NUM_UPDATE_TAG_TRIES:

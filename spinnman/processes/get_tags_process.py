@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,9 +38,8 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
 
     def __handle_get_tag_response(self, tag, board_address, response):
         if response.in_use:
-            ip_address = response.ip_address
-            host = "{}.{}.{}.{}".format(ip_address[0], ip_address[1],
-                                        ip_address[2], ip_address[3])
+            ip = response.ip_address
+            host = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
             if response.is_reverse:
                 self._tags[tag] = ReverseIPTag(
                     board_address, tag,

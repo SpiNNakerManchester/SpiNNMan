@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,8 @@ _ONE_SHORT = struct.Struct("<H")
 
 
 class ChipSummaryInfo(object):
-    """ Represents the chip summary information read via an SCP command
+    """
+    Represents the chip summary information read via an SCP command.
     """
     __slots__ = [
         "_core_states",
@@ -75,9 +76,8 @@ class ChipSummaryInfo(object):
             _TWO_BYTES.unpack_from(chip_summary_data, data_offset)
         data_offset += 2
 
-        ip_data = _FOUR_BYTES.unpack_from(chip_summary_data, data_offset)
-        ethernet_ip_address = "{}.{}.{}.{}".format(
-            ip_data[0], ip_data[1], ip_data[2], ip_data[3])
+        ip = _FOUR_BYTES.unpack_from(chip_summary_data, data_offset)
+        ethernet_ip_address = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
         if ethernet_ip_address != "0.0.0.0":
             self._ethernet_ip_address = ethernet_ip_address
         data_offset += 4
@@ -95,7 +95,8 @@ class ChipSummaryInfo(object):
 
     @property
     def x(self):
-        """ The x-coordinate of the chip that this data is from
+        """
+        The X-coordinate of the chip that this data is from.
 
         :rtype: int
         """
@@ -103,7 +104,8 @@ class ChipSummaryInfo(object):
 
     @property
     def y(self):
-        """ The y-coordinate of the chip that this data is from
+        """
+        The Y-coordinate of the chip that this data is from.
 
         :rtype: int
         """
@@ -111,7 +113,8 @@ class ChipSummaryInfo(object):
 
     @property
     def n_cores(self):
-        """ The number of cores working on the chip (including monitors)
+        """
+        The number of cores working on the chip (including monitors).
 
         :rtype: int
         """
@@ -119,7 +122,8 @@ class ChipSummaryInfo(object):
 
     @property
     def core_states(self):
-        """ The state of the cores on the chip (list of one per core)
+        """
+        The state of the cores on the chip (list of one per core).
 
         :rtype: list(CPUState)
         """
@@ -127,7 +131,8 @@ class ChipSummaryInfo(object):
 
     @property
     def working_links(self):
-        """ The IDs of the working links outgoing from this chip
+        """
+        The IDs of the working links outgoing from this chip.
 
         :rtype: list(int)
         """
@@ -135,7 +140,8 @@ class ChipSummaryInfo(object):
 
     @property
     def is_ethernet_available(self):
-        """ Determines if the Ethernet connection is available on this chip
+        """
+        Whether the Ethernet connection is available on this chip.
 
         :rtype: bool
         """
@@ -143,7 +149,8 @@ class ChipSummaryInfo(object):
 
     @property
     def n_free_multicast_routing_entries(self):
-        """ The number of multicast routing entries free on this chip
+        """
+        The number of multicast routing entries free on this chip.
 
         :rtype: int
         """
@@ -151,7 +158,8 @@ class ChipSummaryInfo(object):
 
     @property
     def largest_free_sdram_block(self):
-        """ The size of the largest block of free SDRAM in bytes
+        """
+        The size of the largest block of free SDRAM in bytes.
 
         :rtype: int
         """
@@ -159,7 +167,8 @@ class ChipSummaryInfo(object):
 
     @property
     def largest_free_sram_block(self):
-        """ The size of the largest block of free SRAM in bytes
+        """
+        The size of the largest block of free SRAM in bytes.
 
         :rtype: int
         """
@@ -167,7 +176,8 @@ class ChipSummaryInfo(object):
 
     @property
     def nearest_ethernet_x(self):
-        """ The x coordinate of the nearest Ethernet chip
+        """
+        The X-coordinate of the nearest Ethernet chip.
 
         :rtype: int
         """
@@ -175,7 +185,8 @@ class ChipSummaryInfo(object):
 
     @property
     def nearest_ethernet_y(self):
-        """ The y coordinate of the nearest Ethernet chip
+        """
+        The Y-coordinate of the nearest Ethernet chip.
 
         :rtype: int
         """
@@ -183,24 +194,27 @@ class ChipSummaryInfo(object):
 
     @property
     def ethernet_ip_address(self):
-        """ The IP address of the Ethernet if up, or None if not
+        """
+        The IP address of the Ethernet if up, or `None` if not.
 
         :rtype: str
         """
         return self._ethernet_ip_address
 
     def clear_ethernet_ip_address(self):
-        """ Forces the Ethernet IP address to None, in case of an errant chip
+        """
+        Forces the Ethernet IP address to `None`, in case of an errant chip.
         """
         self._ethernet_ip_address = None
 
     @property
     def parent_link(self):
-        """ The link to the parent of the chip in the tree of chips from root
+        """
+        The link to the parent of the chip in the tree of chips from root.
 
         :rtype: int
         """
         return self._parent_link
 
     def __repr__(self):
-        return "x:{} y:{} n_cores:{}".format(self.x, self.y, self.n_cores)
+        return f"x:{self.x} y:{self.y} n_cores:{self.n_cores}"

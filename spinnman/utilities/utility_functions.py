@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,10 +25,11 @@ from spinnman.exceptions import SpinnmanTimeoutException
 
 
 def work_out_bmp_from_machine_details(hostname, number_of_boards):
-    """ Work out the BMP connection IP address given the machine details.\
-        This is assumed to be the IP address of the machine, with 1 subtracted\
-        from the final part e.g. if the machine IP address is 192.168.0.5, the\
-        BMP IP address is assumed to be 192.168.0.4
+    """
+    Work out the BMP connection IP address given the machine details.
+    This is assumed to be the IP address of the machine, with 1 subtracted
+    from the final part e.g. if the machine IP address is 192.168.0.5, the
+    BMP IP address is assumed to be 192.168.0.4
 
     :param str hostname: the SpiNNaker machine main hostname or IP address
     :param int number_of_boards: the number of boards in the machine
@@ -54,7 +55,8 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
 
 
 def get_vcpu_address(p):
-    """ Get the address of the vcpu_t structure for the given core
+    """
+    Get the address of the vcpu_t structure for the given core.
 
     :param int p: The core
     :rtype: int
@@ -63,8 +65,9 @@ def get_vcpu_address(p):
 
 
 def send_port_trigger_message(connection, board_address):
-    """ Sends a port trigger message using a connection to (hopefully) open a\
-        port in a NAT and/or firewall to allow incoming packets to be received.
+    """
+    Sends a port trigger message using a connection to (hopefully) open a
+    port in a NAT and/or firewall to allow incoming packets to be received.
 
     :param UDPConnection connection:
         The UDP connection down which the trigger message should be sent
@@ -86,7 +89,8 @@ def send_port_trigger_message(connection, board_address):
 
 
 def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
-    """ Reprogram an IP Tag to send responses to a given SCAMPConnection
+    """
+    Reprogram an IP Tag to send responses to a given SCAMPConnection.
 
     :param SCAMPConnection connection: The connection to target the tag at
     :param int tag: The id of the tag to set
@@ -114,7 +118,7 @@ def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
 
 def reprogram_tag_to_listener(
         connection: UDPConnection, x: int, y: int, ip_address: str, tag: int,
-        strip: bool = True):
+        strip: bool = True, read_response: bool = True):
     """
     Reprogram an IP Tag to send responses to a given connection that is
     not connected to a specific board. Such connections are normally
@@ -132,6 +136,8 @@ def reprogram_tag_to_listener(
     :param int tag: The id of the tag to set
     :param bool strip:
         True if the tag should strip SDP headers from outgoing messages
+    :param bool read_response:
+        True if the response to the reprogramming should be read
     :raises SpinnmanTimeoutException:
         If things time out several times
     """
@@ -144,7 +150,9 @@ def reprogram_tag_to_listener(
     for _ in range(3):
         try:
             connection.send_to(send_data, (ip_address, SCP_SCAMP_PORT))
-            request.get_scp_response().read_bytestring(connection.receive(), 2)
+            if read_response:
+                request.get_scp_response().read_bytestring(
+                    connection.receive(), 2)
             return
         except SpinnmanTimeoutException as e:
             exn = e

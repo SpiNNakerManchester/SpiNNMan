@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,10 @@ from spinnman.constants import EIEIO_COMMAND_IDS
 
 
 class StartRequests(EIEIOCommandMessage):
-    """ Packet used in the context of buffering input for the host computer to\
-        signal to the SpiNNaker system that, if needed, it is possible to\
-        send more "SpinnakerRequestBuffers" packet
+    """
+    Packet used in the context of buffering input for the host computer to
+    signal to the SpiNNaker system that, if needed, it is possible to
+    send more "SpinnakerRequestBuffers" packet.
     """
     __slots__ = []
 

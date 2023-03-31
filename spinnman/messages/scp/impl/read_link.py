@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,8 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
 class ReadLink(AbstractSCPRequest):
-    """ An SCP request to read a region of memory via a link on a chip
+    """
+    An SCP request to read a region of memory via a link on a chip.
     """
     __slots__ = []
 
@@ -55,8 +56,9 @@ class ReadLink(AbstractSCPRequest):
 
 
 class _SCPReadLinkResponse(AbstractSCPResponse):
-    """ An SCP response to a request to read a region of memory via a link on\
-        a chip
+    """
+    An SCP response to a request to read a region of memory via a link on
+    a chip.
     """
     __slots__ = [
         "_data",
@@ -81,7 +83,8 @@ class _SCPReadLinkResponse(AbstractSCPResponse):
 
     @property
     def data(self):
-        """ The data read
+        """
+        The data read.
 
         :rtype: bytes
         """
@@ -89,7 +92,8 @@ class _SCPReadLinkResponse(AbstractSCPResponse):
 
     @property
     def offset(self):
-        """ The offset where the valid data starts
+        """
+        The offset where the valid data starts.
 
         :rtype: int
         """
@@ -97,7 +101,8 @@ class _SCPReadLinkResponse(AbstractSCPResponse):
 
     @property
     def length(self):
-        """ The length of the valid data
+        """
+        The length of the valid data.
 
         :rtype: int
         """

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,8 +18,8 @@ from spinnman.model.enums.router_error import RouterError
 
 
 class RouterDiagnostics(object):
-    """ Represents a set of diagnostic information available from a chip\
-        router.
+    """
+    Represents a set of diagnostic information available from a chip router.
     """
     __slots__ = [
         "_error_status",
@@ -53,7 +53,8 @@ class RouterDiagnostics(object):
 
     @property
     def mon(self):
-        """ The "mon" part of the control register
+        """
+        The "mon" part of the control register.
 
         :rtype: int
         """
@@ -61,7 +62,8 @@ class RouterDiagnostics(object):
 
     @property
     def wait_1(self):
-        """ The "wait_1" part of the control register
+        """
+        The "wait_1" part of the control register.
 
         :rtype: int
         """
@@ -69,7 +71,8 @@ class RouterDiagnostics(object):
 
     @property
     def wait_2(self):
-        """ The "wait_2" part of the control register
+        """
+        The "wait_2" part of the control register.
 
         :rtype: int
         """
@@ -77,7 +80,8 @@ class RouterDiagnostics(object):
 
     @property
     def error_status(self):
-        """ The error status
+        """
+        The error status.
 
         :rtype: int
         """
@@ -85,7 +89,8 @@ class RouterDiagnostics(object):
 
     @property
     def error_count(self):
-        """ The count of errors
+        """
+        The count of errors.
 
         :rtype: int
         """
@@ -93,7 +98,8 @@ class RouterDiagnostics(object):
 
     @property
     def errors_set(self):
-        """ A list of errors that have been detected
+        """
+        A list of errors that have been detected.
 
         :rtype: list(RouterError)
         """
@@ -102,7 +108,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_local_multicast_packets(self):
-        """ The number of multicast packets received from local cores.
+        """
+        The number of multicast packets received from local cores.
 
         :rtype: int
         """
@@ -110,7 +117,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_external_multicast_packets(self):
-        """ The number of multicast packets received from external links.
+        """
+        The number of multicast packets received from external links.
 
         :rtype: int
         """
@@ -118,7 +126,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_dropped_multicast_packets(self):
-        """ The number of multicast packets received that were dropped.
+        """
+        The number of multicast packets received that were dropped.
 
         :rtype: int
         """
@@ -126,7 +135,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_local_peer_to_peer_packets(self):
-        """ The number of peer-to-peer packets received from local cores.
+        """
+        The number of peer-to-peer packets received from local cores.
 
         :rtype: int
         """
@@ -134,7 +144,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_external_peer_to_peer_packets(self):
-        """ The number of peer-to-peer packets received from external links.
+        """
+        The number of peer-to-peer packets received from external links.
 
         :rtype: int
         """
@@ -142,7 +153,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_dropped_peer_to_peer_packets(self):
-        """ The number of peer-to-peer packets received that were dropped.
+        """
+        The number of peer-to-peer packets received that were dropped.
 
         :rtype: int
         """
@@ -150,7 +162,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_local_nearest_neighbour_packets(self):
-        """ The number of nearest-neighbour packets received from local cores.
+        """
+        The number of nearest-neighbour packets received from local cores.
 
         :rtype: int
         """
@@ -158,8 +171,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_external_nearest_neighbour_packets(self):
-        """ The number of nearest-neighbour packets received from external\
-            links.
+        """
+        The number of nearest-neighbour packets received from external links.
 
         :rtype: int
         """
@@ -167,7 +180,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_dropped_nearest_neighbour_packets(self):
-        """ The number of nearest-neighbour packets received that were dropped.
+        """
+        The number of nearest-neighbour packets received that were dropped.
 
         :rtype: int
         """
@@ -175,7 +189,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_local_fixed_route_packets(self):
-        """ The number of fixed-route packets received from local cores.
+        """
+        The number of fixed-route packets received from local cores.
 
         :rtype: int
         """
@@ -183,7 +198,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_external_fixed_route_packets(self):
-        """ The number of fixed-route packets received from external links.
+        """
+        The number of fixed-route packets received from external links.
 
         :rtype: int
         """
@@ -191,7 +207,8 @@ class RouterDiagnostics(object):
 
     @property
     def n_dropped_fixed_route_packets(self):
-        """ The number of fixed-route packets received that were dropped.
+        """
+        The number of fixed-route packets received that were dropped.
 
         :rtype: int
         """
@@ -199,8 +216,8 @@ class RouterDiagnostics(object):
 
     @property
     def user_0(self):
-        """ The number of packets counted by the user 0 router diagnostic\
-            filter.
+        """
+        The number of packets counted by the user 0 router diagnostic filter.
 
         :rtype: int
         """
@@ -208,8 +225,8 @@ class RouterDiagnostics(object):
 
     @property
     def user_1(self):
-        """ The number of packets counted by the user 1 router diagnostic\
-            filter.
+        """
+        The number of packets counted by the user 1 router diagnostic filter.
 
         :rtype: int
         """
@@ -217,8 +234,8 @@ class RouterDiagnostics(object):
 
     @property
     def user_2(self):
-        """ The number of packets counted by the user 2 router diagnostic\
-            filter.
+        """
+        The number of packets counted by the user 2 router diagnostic filter.
 
         :rtype: int
         """
@@ -226,8 +243,8 @@ class RouterDiagnostics(object):
 
     @property
     def user_3(self):
-        """ The number of packets counted by the user 3 router diagnostic\
-            filter.
+        """
+        The number of packets counted by the user 3 router diagnostic filter.
 
         :rtype: int
         """
@@ -235,7 +252,8 @@ class RouterDiagnostics(object):
 
     @property
     def user_registers(self):
-        """ The values in the user control registers.
+        """
+        The values in the user control registers.
 
         :return: An array of 4 values
         :rtype: list(int)
@@ -246,9 +264,9 @@ class RouterDiagnostics(object):
 
     @property
     def registers(self):
-        """ The values in all of the registers.  Can be used to directly\
-            access the registers if they have been programmed to give\
-            different values
+        """
+        The values in all of the registers.  Can be used to directly access
+        the registers if they have been programmed to give different values.
 
         :return: An array of 16 values
         :rtype: array(int)

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class SCPResult(Enum):
-    """ The SCP Result codes
+    """
+    The SCP Result codes.
     """
     RC_OK = (0x80, "SCPCommand completed OK")
     RC_LEN = (0x81, "Bad packet length")

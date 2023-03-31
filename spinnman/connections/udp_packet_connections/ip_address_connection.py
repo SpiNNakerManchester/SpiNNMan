@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,8 +19,9 @@ _BOOTROM_SPINN_PORT = 54321  # Matches SPINN_PORT in spinnaker_bootROM
 
 
 class IPAddressesConnection(UDPConnection):
-    """ A connection that detects any UDP packet that is transmitted by\
-        SpiNNaker boards prior to boot
+    """
+    A connection that detects any UDP packet that is transmitted by
+    SpiNNaker boards prior to boot.
     """
     __slots__ = []
 

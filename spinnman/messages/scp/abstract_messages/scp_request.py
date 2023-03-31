@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,8 @@ _THREE_WORDS = struct.Struct("<III")
 
 
 class AbstractSCPRequest(object, metaclass=AbstractBase):
-    """ Represents an Abstract SCP Request
+    """
+    Represents an Abstract SCP Request.
     """
     __slots__ = [
         "_argument_1",
@@ -35,17 +36,16 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
     def __init__(self, sdp_header, scp_request_header, argument_1=None,
                  argument_2=None, argument_3=None, data=None):
         """
-
         :param SDPHeader sdp_header: The SDP header of the request
         :param SCPRequestHeader scp_request_header:
             The SCP header of the request
         :param int argument_1:
-            The first argument, or None if no first argument
+            The first argument, or `None` if no first argument
         :param int argument_2:
-            The second argument, or None if no second argument
+            The second argument, or `None` if no second argument
         :param int argument_3:
-            The third argument, or None if no third argument
-        :param data: The optional data, or None if no data
+            The third argument, or `None` if no third argument
+        :param data: The optional data, or `None` if no data
         :type data: bytearray or bytes or None
         """
         # pylint: disable=too-many-arguments
@@ -58,7 +58,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def sdp_header(self):
-        """ The SDP header of the message
+        """
+        The SDP header of the message.
 
         :rtype: SDPHeader
         """
@@ -66,7 +67,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def scp_request_header(self):
-        """ The SCP request header of the message
+        """
+        The SCP request header of the message.
 
         :rtype: SCPRequestHeader
         """
@@ -74,7 +76,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def argument_1(self):
-        """ The first argument, or None if no first argument
+        """
+        The first argument, or `None` if no first argument.
 
         :rtype: int
         """
@@ -82,7 +85,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def argument_2(self):
-        """ The second argument, or None if no second argument
+        """
+        The second argument, or `None` if no second argument.
 
         :rtype: int
         """
@@ -90,7 +94,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def argument_3(self):
-        """ The third argument, or None if no third argument
+        """
+        The third argument, or `None` if no third argument.
 
         :rtype: int
         """
@@ -98,7 +103,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def data(self):
-        """ The data, or None if no data
+        """
+        The data, or `None` if no data.
 
         :rtype: bytearray
         """
@@ -106,7 +112,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def bytestring(self):
-        """ The request as a bytestring
+        """
+        The request as a bytestring.
 
         :rtype: bytes
         """
@@ -129,9 +136,10 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @abstractmethod
     def get_scp_response(self):
-        """ Get an SCP response message to be used to process any response\
-            received
+        """
+        Get an SCP response message to be used to process any response
+        received.
 
-        :return: An SCP response, or None if no response is required
+        :return: An SCP response, or `None` if no response is required
         :rtype: AbstractSCPResponse
         """

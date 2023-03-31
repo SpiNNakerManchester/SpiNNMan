@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,8 @@ import numpy
 
 
 class WriteMemoryProcess(AbstractMultiConnectionProcess):
-    """ A process for writing memory on a SpiNNaker chip.
+    """
+    A process for writing memory on a SpiNNaker chip.
     """
     __slots__ = []
     # pylint: disable=too-many-arguments
@@ -28,7 +29,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
     def write_memory_from_bytearray(
             self, x, y, p, base_address, data, offset, n_bytes,
             get_sum=False):
-        """ Writes memory onto a SpiNNaker chip from a bytearray.
+        """
+        Writes memory onto a SpiNNaker chip from a bytearray.
 
         :param int x:
             The x-coordinate of the chip where the memory is to be written to
@@ -52,8 +54,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
     def write_link_memory_from_bytearray(
             self, x, y, p, link, base_address, data, offset, n_bytes,
             get_sum=False):
-        """ Writes memory onto a neighbour of a SpiNNaker chip from a\
-            bytearray.
+        """
+        Writes memory onto a neighbour of a SpiNNaker chip from a bytearray.
 
         :param int x:
             The x-coordinate of the chip where the memory is to be written to
@@ -78,7 +80,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
 
     def write_memory_from_reader(
             self, x, y, p, base_address, reader, n_bytes, get_sum=False):
-        """ Writes memory onto a SpiNNaker chip from a reader.
+        """
+        Writes memory onto a SpiNNaker chip from a reader.
 
         :param int x:
             The x-coordinate of the chip where the memory is to be written to
@@ -101,7 +104,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
     def write_link_memory_from_reader(
             self, x, y, p, link, base_address, reader, n_bytes,
             get_sum=False):
-        """ Writes memory onto a neighbour of a SpiNNaker chip from a reader.
+        """
+        Writes memory onto a neighbour of a SpiNNaker chip from a reader.
 
         :param int x:
             The x-coordinate of the chip where the memory is to be written to

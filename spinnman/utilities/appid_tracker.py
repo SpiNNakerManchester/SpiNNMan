@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,8 @@ _MAX_APP_ID = 254
 
 
 class AppIdTracker(object):
-    """ A tracker of application IDs to make it easier to allocate new IDs.
+    """
+    A tracker of application IDs to make it easier to allocate new IDs.
     """
     __slots__ = [
         "_free_ids",
@@ -43,14 +44,16 @@ class AppIdTracker(object):
         self._max_app_id = max_app_id
 
     def get_new_id(self):
-        """ Get a new unallocated ID
+        """
+        Get a new unallocated ID
 
         :rtype: int
         """
         return self._free_ids.pop()
 
     def allocate_id(self, allocated_id):
-        """ Allocate a given ID.
+        """
+        Allocate a given ID.
 
         :param int allocated_id: The ID to allocate
         :raises KeyError: If the ID is not present
@@ -58,12 +61,14 @@ class AppIdTracker(object):
         self._free_ids.remove(allocated_id)
 
     def free_id(self, id_to_free):
-        """ Free a given ID.
+        """
+        Free a given ID.
 
         :param int id_to_free: The ID to free
         :raises KeyError: If the ID is out of range
         """
         if id_to_free < self._min_app_id or id_to_free > self._max_app_id:
-            raise KeyError("ID {} out of allowed range of {} to {}".format(
-                id_to_free, self._min_app_id, self._max_app_id))
+            raise KeyError(
+                f"ID {id_to_free} out of allowed range of {self._min_app_id} "
+                f"to {self._max_app_id}")
         self._free_ids.add(id_to_free)

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,10 @@ _PATTERN_B = struct.Struct("<B")
 
 
 class HostDataReadAck(EIEIOCommandMessage):
-    """ Packet sent by the host computer to the SpiNNaker system in the\
-        context of the buffering output technique to signal that the host has\
-        received a request to read data
+    """
+    Packet sent by the host computer to the SpiNNaker system in the
+    context of the buffering output technique to signal that the host has
+    received a request to read data.
     """
     __slots__ = [
         "_sequence_no"]

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -107,7 +107,8 @@ BMP_POST_POWER_ON_SLEEP_TIME = 5.0
 
 
 class EIEIO_COMMAND_IDS(Enum):
-    """ A listing of what SpiNNaker specific EIEIO commands there are.
+    """
+    A listing of what SpiNNaker specific EIEIO commands there are.
     """
     #: Database handshake with external program; not routed via SpiNNaker
     DATABASE = 1
@@ -138,9 +139,9 @@ class EIEIO_COMMAND_IDS(Enum):
 
 
 class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
-    """ The values used by the SCP IP tag time outs. These control how long to\
-        wait for any message request which requires a response, before raising\
-        an error.
+    """
+    The values used by the SCP IP tag time outs. These control how long to wait
+    for any message request which requires a response, before raising an error.
 
     The value is calculated via the following formula:
 
@@ -158,7 +159,8 @@ class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
 
 
 class ROUTER_REGISTER_REGISTERS(Enum):
-    """ The indices to the router registers.
+    """
+    The indices to the router registers.
     """
     LOC_MC = 0
     EXT_MC = 1
@@ -179,8 +181,9 @@ class ROUTER_REGISTER_REGISTERS(Enum):
 
 
 class READ_TYPES(Enum):
-    """ The types of read available from SARK. These values are used to tell\
-        SARK how to read the data in a time efficient manner.
+    """
+    The types of read available from SARK. These values are used to tell
+    SARK how to read the data in a time efficient manner.
     """
     BYTE = 0
     HALF_WORD = 1

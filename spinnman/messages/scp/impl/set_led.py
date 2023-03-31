@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,10 +21,11 @@ from .check_ok_response import CheckOKResponse
 
 
 class SetLED(AbstractSCPRequest):
-    """ A request to change the state of an SetLED
+    """
+    A request to change the state of an SetLED.
 
-        This class is currently deprecated and untested as there is no
-        known use except for Transceiver.set_led which is itself deprecated.
+    This class is currently deprecated and untested as there is no
+    known use except for Transceiver.set_led which is itself deprecated.
     """
     __slots__ = []
 

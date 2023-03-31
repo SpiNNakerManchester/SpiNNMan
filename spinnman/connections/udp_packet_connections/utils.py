@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,8 @@ _SDP_TAG = 0xFF
 
 
 def update_sdp_header_for_udp_send(sdp_header, source_x, source_y):
-    """ Apply defaults to the SDP header for sending over UDP
+    """
+    Apply defaults to the SDP header for sending over UDP.
 
     :param SDPHeader sdp_header: The SDP header values
     """

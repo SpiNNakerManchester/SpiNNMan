@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,16 +40,17 @@ class EIEIODataHeader(object):
     def __init__(self, eieio_type, tag=0, prefix=None,
                  prefix_type=EIEIOPrefix.LOWER_HALF_WORD,
                  payload_base=None, is_time=False, count=0):
-        """ EIEIO header for data packets
+        """
+        EIEIO header for data packets.
 
         :param EIEIOType eieio_type: the type of message
         :param int tag: the tag of the message (0 by default)
-        :param prefix: the key prefix of the message or None if not prefixed
+        :param prefix: the key prefix of the message or `None` if not prefixed
         :type prefix: int or None
         :param EIEIOPrefix prefix_type:
             the position of the prefix (upper or lower)
         :param payload_base:
-            The base payload to be applied, or None if no base payload
+            The base payload to be applied, or `None` if no base payload
         :type payload_base: int or None
         :param bool is_time:
             True if the payloads should be taken to be timestamps, or False
@@ -105,7 +106,8 @@ class EIEIODataHeader(object):
 
     @staticmethod
     def get_header_size(eieio_type, is_prefix=False, is_payload_base=False):
-        """ Get the size of a header with the given parameters
+        """
+        Get the size of a header with the given parameters.
 
         :param EIEIOType eieio_type: the type of message
         :param bool is_prefix: True if there is a prefix, False otherwise
@@ -129,12 +131,11 @@ class EIEIODataHeader(object):
 
     @property
     def bytestring(self):
-        """ Get a bytestring of the header
+        """
+        The bytestring of the header.
 
-        :return: The header as a bytestring
         :rtype: bytes
         """
-
         # Convert the flags to an int
         data = 0
 
@@ -181,14 +182,14 @@ class EIEIODataHeader(object):
 
     @staticmethod
     def from_bytestring(data, offset):
-        """ Read an eieio data header from a bytestring
+        """
+        Read an eieio data header from a bytestring.
 
         :param bytes data: The bytestring to be read
         :param int offset: The offset at which the data starts
         :return: an EIEIO header
         :rtype: EIEIODataHeader
         """
-
         (count, header_data) = _PATTERN_BB.unpack_from(data, offset)
 
         # Read the flags in the header

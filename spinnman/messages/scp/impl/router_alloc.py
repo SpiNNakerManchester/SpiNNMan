@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,8 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class RouterAlloc(AbstractSCPRequest):
-    """ An SCP Request to allocate space for routing entries
+    """
+    An SCP Request to allocate space for routing entries.
     """
     __slots__ = []
 
@@ -57,7 +58,8 @@ class RouterAlloc(AbstractSCPRequest):
 
 
 class _SCPRouterAllocResponse(AbstractSCPResponse):
-    """ An SCP response to a request to allocate router entries
+    """
+    An SCP response to a request to allocate router entries.
     """
     __slots__ = [
         "_base_address"]
@@ -78,7 +80,8 @@ class _SCPRouterAllocResponse(AbstractSCPResponse):
 
     @property
     def base_address(self):
-        """ The base address allocated, or 0 if none
+        """
+        The base address allocated, or 0 if none.
 
         :rtype: int
         """

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class EIEIOType(Enum):
-    """ Possible types of EIEIO packets
+    """
+    Possible types of EIEIO packets.
     """
     KEY_16_BIT = (0, 2, 0, "Indicates that data is keys which are 16 bits")
     KEY_PAYLOAD_16_BIT = (
@@ -39,7 +40,8 @@ class EIEIOType(Enum):
 
     @property
     def key_bytes(self):
-        """ The number of bytes used by each key element
+        """
+        The number of bytes used by each key element.
 
         :rtype: int
         """
@@ -47,7 +49,8 @@ class EIEIOType(Enum):
 
     @property
     def payload_bytes(self):
-        """ The number of bytes used by each payload element
+        """
+        The number of bytes used by each payload element.
 
         :rtype: int
         """
@@ -55,7 +58,8 @@ class EIEIOType(Enum):
 
     @property
     def max_value(self):
-        """ The maximum value of the key or payload (if there is a payload)
+        """
+        The maximum value of the key or payload (if there is a payload).
 
         :rtype: int
         """

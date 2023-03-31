@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,15 +30,16 @@ _next_sequence_lock = RLock()
 
 
 class SCPRequestPipeLine(object):
-    """ Allows a set of SCP requests to be grouped together in a communication\
-        across a number of channels for a given connection.
+    """
+    Allows a set of SCP requests to be grouped together in a communication
+    across a number of channels for a given connection.
 
-        This class implements an SCP windowing, first suggested by Andrew\
-        Mundy. This extends the idea by having both send and receive windows.\
-        These are represented by the n_channels and the\
-        intermediate_channel_waits parameters respectively.  This seems to\
-        help with the timeout issue; when a timeout is received, all requests\
-        for which a reply has not been received can also timeout.
+    This class implements an SCP windowing, first suggested by Andrew Mundy.
+    This extends the idea by having both send and receive windows.
+    These are represented by the n_channels and the
+    intermediate_channel_waits parameters respectively.  This seems to
+    help with the timeout issue; when a timeout is received, all requests
+    for which a reply has not been received can also timeout.
     """
     __slots__ = [
         "_callbacks",
@@ -66,10 +67,10 @@ class SCPRequestPipeLine(object):
         :param SCAMPConnection connection:
             The connection over which the communication is to take place
         :param int n_channels: The number of requests to send before checking
-            for responses.  If None, this will be determined automatically
+            for responses.  If `None`, this will be determined automatically
         :param int intermediate_channel_waits: The number of outstanding
-            responses to wait for before continuing sending requests. If None,
-            this will be determined automatically
+            responses to wait for before continuing sending requests.
+            If `None`, this will be determined automatically
         :param int n_retries: The number of times to resend any packet for any
             reason before an error is triggered
         :param float packet_timeout: The number of elapsed seconds after
@@ -120,8 +121,9 @@ class SCPRequestPipeLine(object):
         # self._token_bucket = TokenBucket(3408, 700000)
 
     def _get_next_sequence_number(self):
-        """ Get the next number from the global sequence, applying appropriate\
-            wrapping rules as the sequence numbers have a fixed number of bits.
+        """
+        Get the next number from the global sequence, applying appropriate
+        wrapping rules as the sequence numbers have a fixed number of bits.
 
         :return: The next number in the sequence.
         :rtype: int
@@ -134,19 +136,20 @@ class SCPRequestPipeLine(object):
         return sequence
 
     def send_request(self, request, callback, error_callback):
-        """ Add an SCP request to the set to be sent
+        """
+        Add an SCP request to the set to be sent.
 
         :param AbstractSCPRequest request: The SCP request to be sent
-        :param callable callback: A callback function to call when the
-            response has been received; takes a :py:class:`SCPResponse` as a
-            parameter, or `None` if the response doesn't need to be processed
-        :param callable error_callback: A callback function to call when an
-            error is found when processing the message; takes the original
-            :py:class:`AbstractSCPRequest`, the exception caught and a list of
-            tuples of (filename, line number, function name, text) as a
-            traceback
+        :param ~collections.abc.Callable callback:
+            A callback function to call when the response has been received;
+            takes a :py:class:`SCPResponse` as a parameter, or `None` if the
+            response doesn't need to be processed
+        :param ~collections.abc.Callable error_callback:
+            A callback function to call when an error is found when processing
+            the message; takes the original :py:class:`AbstractSCPRequest`, the
+            exception caught and a list of tuples of (filename, line number,
+            function name, text) as a traceback
         """
-
         # If the connection has not been measured
         if self._n_channels is None:
             if self._connection.is_ready_to_receive():
@@ -180,31 +183,47 @@ class SCPRequestPipeLine(object):
         self._in_progress += 1
 
     def finish(self):
-        """ Indicate the end of the packets to be sent.  This must be called\
-            to ensure that all responses are received and handled.
+        """
+        Indicate the end of the packets to be sent.  This must be called
+        to ensure that all responses are received and handled.
         """
         while self._in_progress > 0:
             self._do_retrieve(0, self._packet_timeout)
 
     @property
     def n_timeouts(self):
-        """ The number of timeouts that occurred. """
+        """
+        The number of timeouts that occurred.
+
+        :rtype: int
+        """
         return self._n_timeouts
 
     @property
     def n_channels(self):
-        """ The number of requests to send before checking for responses. """
+        """
+        The number of requests to send before checking for responses.
+
+        :rtype: int
+        """
         return self._n_channels
 
     @property
     def n_resent(self):
-        """ The number of packets that have been resent. """
+        """
+        The number of packets that have been resent.
+
+        :rtype: int
+        """
         return self._n_resent
 
     @property
     def n_retry_code_resent(self):
-        """ The number of resends due to reasons for which automated retry is\
-            the correct response in-protocol.
+        """
+        The number of resends due to reasons for which automated retry is
+        the correct response in-protocol.
+
+        :rtype: int
         """
         return self._n_retry_code_resent
 
@@ -282,13 +301,11 @@ class SCPRequestPipeLine(object):
 
             # Report any other exception
             raise SpinnmanIOException(
-                "Errors sending request {} to {}, {}, {} over {} retries: {}"
-                .format(
-                    request_sent,
-                    request_sent.sdp_header.destination_chip_x,
-                    request_sent.sdp_header.destination_chip_y,
-                    request_sent.sdp_header.destination_cpu,
-                    self._n_retries, self._retry_reason[seq]))
+                f"Errors sending request {request_sent} to "
+                f"{request_sent.sdp_header.destination_chip_x}, "
+                f"{request_sent.sdp_header.destination_chip_y}, "
+                f"{request_sent.sdp_header.destination_cpu} over "
+                f"{self._n_retries} retries: {self._retry_reason[seq]}")
 
         # If the request can be retried, retry it
         self._retries[seq] -= 1
@@ -299,12 +316,12 @@ class SCPRequestPipeLine(object):
         self._n_resent += 1
 
     def _do_retrieve(self, n_packets, timeout):
-        """ Receives responses until there are only n_packets responses left
+        """
+        Receives responses until there are only n_packets responses left.
 
         :param int n_packets:
             The number of packets that can remain after running
         """
-
         # While there are still more packets in progress than some threshold
         while self._in_progress > n_packets:
             try:

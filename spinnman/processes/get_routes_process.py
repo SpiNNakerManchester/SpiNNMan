@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,7 +32,8 @@ _ROUTE_ENTRY_PATTERN = struct.Struct("<2xBxIII")
 
 
 class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
-    """ A process for reading the multicast routing table of a SpiNNaker chip.
+    """
+    A process for reading the multicast routing table of a SpiNNaker chip.
     """
     __slots__ = [
         "_app_id",

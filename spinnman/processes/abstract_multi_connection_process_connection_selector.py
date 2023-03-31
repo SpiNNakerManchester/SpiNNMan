@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,14 +18,16 @@ from spinn_utilities.abstract_base import (
 
 class AbstractMultiConnectionProcessConnectionSelector(
         object, metaclass=AbstractBase):
-    """ A connection selector for multi-connection processes
+    """
+    A connection selector for multi-connection processes.
     """
     __slots__ = []
 
     @abstractmethod
     def get_next_connection(self, message):
-        """ Get the index of the  next connection for the process from a list\
-            of connections.
+        """
+        Get the index of the  next connection for the process from a list
+        of connections.
 
         :param AbstractSCPRequest message: The SCP message to be sent
         :rtype: SCAMPConnection

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,9 +21,10 @@ _PATTERN_BBBxBBI = struct.Struct("<BBBxBBI")
 
 
 class SpinnakerRequestBuffers(EIEIOCommandMessage):
-    """ Message used in the context of the buffering input mechanism which is\
-        sent by the SpiNNaker system to the host computer to ask for more data\
-        to inject during the simulation
+    """
+    Message used in the context of the buffering input mechanism which is
+    sent by the SpiNNaker system to the host computer to ask for more data
+    to inject during the simulation.
     """
     __slots__ = [
         "_region_id",

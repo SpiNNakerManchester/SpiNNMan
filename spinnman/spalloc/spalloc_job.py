@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -121,8 +121,10 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :param SpallocState old_state:
             The state that we are looking to change out of.
-        :return: The state that the allocation is now in. Note that if the
-            machine gets destroyed, this will not wait for it.
+        :return: The state that the allocation is now in.
+
+            .. note::
+                If the machine gets destroyed, this will not wait for it.
         :rtype: SpallocState
         """
 
@@ -182,7 +184,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         Write the session credentials for the job to the database accessed by
         the given cursor.
 
-        .. note ::
+        .. note::
             May assume that there is a ``proxy_configuration`` table with
             ``kind``, ``name`` and ``value`` columns.
 

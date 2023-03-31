@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,13 +34,13 @@ def _get_data(app_id, state):
 
 
 class CountState(AbstractSCPRequest):
-    """ An SCP Request to get a count of the cores in a particular state
+    """
+    An SCP Request to get a count of the cores in a particular state.
     """
     __slots__ = []
 
     def __init__(self, app_id, state):
         """
-
         :param int app_id: The ID of the application, between 0 and 255
         :param CPUState state: The state to count
         """

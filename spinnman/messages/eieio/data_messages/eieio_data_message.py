@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,7 +30,8 @@ _TWO_WORDS = struct.Struct("<II")
 
 
 class EIEIODataMessage(AbstractEIEIOMessage):
-    """ An EIEIO Data message.
+    """
+    An EIEIO Data message.
     """
     __slots__ = [
         "_data",
@@ -61,7 +62,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             eieio_type, count=0, data=None, offset=0, key_prefix=None,
             payload_prefix=None, timestamp=None,
             prefix_type=EIEIOPrefix.LOWER_HALF_WORD):
-        """ Create a data message
+        """
+        Create a data message.
 
         :param EIEIOType eieio_type: The type of the message
         :param int count: The number of items in the message
@@ -96,7 +98,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     def min_packet_length(
             eieio_type, is_prefix=False, is_payload_base=False,
             is_timestamp=False):
-        """ The minimum length of a message with the given header, in bytes
+        """
+        The minimum length of a message with the given header, in bytes.
 
         :param EIEIOType eieio_type: the type of message
         :param bool is_prefix: True if there is a prefix, False otherwise
@@ -112,7 +115,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         return header_size + eieio_type.payload_bytes
 
     def get_min_packet_length(self):
-        """ Get the minimum length of a message instance in bytes
+        """
+        Get the minimum length of a message instance in bytes.
 
         :rtype: int
         """
@@ -123,7 +127,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def max_n_elements(self):
-        """ The maximum number of elements that can fit in the packet
+        """
+        The maximum number of elements that can fit in the packet.
 
         :rtype: int
         """
@@ -133,20 +138,27 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def n_elements(self):
-        """ The number of elements in the packet
+        """
+        The number of elements in the packet.
+
+        :rtype: int
         """
         return self._header.count
 
     @property
     def size(self):
-        """ The size of the packet with the current contents
+        """
+        The size of the packet with the current contents.
+
+        :rtype: int
         """
         ty = self._header.eieio_type
         return (self._header.size +
                 (ty.key_bytes + ty.payload_bytes) * self._header.count)
 
     def add_key_and_payload(self, key, payload):
-        """ Adds a key and payload to the packet
+        """
+        Adds a key and payload to the packet.
 
         :param int key: The key to add
         :param int payload: The payload to add
@@ -169,7 +181,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             key, payload, self._header.is_time))
 
     def add_key(self, key):
-        """ Add a key to the packet
+        """
+        Add a key to the packet.
 
         :param int key: The key to add
         :raise SpinnmanInvalidParameterException:
@@ -184,8 +197,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         self.add_element(KeyDataElement(key))
 
     def add_element(self, element):
-        """ Add an element to the message.  The correct type of element must\
-            be added, depending on the header values
+        """
+        Add an element to the message.  The correct type of element must
+        be added, depending on the header values.
 
         :param AbstractDataElement element: The element to be added
         :raise SpinnmanInvalidParameterException:
@@ -202,10 +216,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def is_next_element(self):
-        """ Determine if there is another element to be read
+        """
+        Whether there is another element to be read.
 
-        :return: True if the message was created with data, and there are more
-            elements to be read
         :rtype: bool
         """
         return (self._data is not None and
@@ -213,8 +226,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def next_element(self):
-        """ The next element to be read, or None if no more elements.  The\
-            exact type of element returned depends on the packet type
+        """
+        The next element to be read, or `None` if no more elements.
+        The exact type of element returned depends on the packet type.
 
         :rtype: AbstractDataElement
         """
@@ -259,10 +273,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     def __str__(self):
         if self._data is not None:
-            return "EIEIODataMessage:{}:{}".format(
-                self._header, self._header.count)
-        return "EIEIODataMessage:{}:{}".format(
-            self._header, self._elements)
+            return f"EIEIODataMessage:{self._header}:{self._header.count}"
+        return f"EIEIODataMessage:{self._header}:{self._elements}"
 
     def __repr__(self):
         return self.__str__()

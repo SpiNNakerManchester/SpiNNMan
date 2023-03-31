@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,9 @@ from spinnman.messages.eieio.data_messages import (
 
 
 def read_eieio_data_message(data, offset):
-    """ Reads the content of an EIEIO data message and returns an object\
-        identifying the data which was contained in the packet
+    """
+    Reads the content of an EIEIO data message and returns an object
+    identifying the data which was contained in the packet.
 
     :param bytes data: data received from the network as a bytestring
     :param int offset: offset at which the parsing operation should start

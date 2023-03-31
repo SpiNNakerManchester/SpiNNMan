@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,8 @@
 
 
 class IOBuffer(object):
-    """ The contents of IOBUF for a core
+    """
+    The contents of IOBUF for a core.
     """
     __slots__ = [
         "_iobuf",
@@ -34,7 +35,8 @@ class IOBuffer(object):
 
     @property
     def x(self):
-        """ The x-coordinate of the chip containing the core
+        """
+        The X-coordinate of the chip containing the core.
 
         :rtype: int
         """
@@ -42,7 +44,8 @@ class IOBuffer(object):
 
     @property
     def y(self):
-        """ The y-coordinate of the chip containing the core
+        """
+        The Y-coordinate of the chip containing the core.
 
         :rtype: int
         """
@@ -50,7 +53,8 @@ class IOBuffer(object):
 
     @property
     def p(self):
-        """ The ID of the core on the chip
+        """
+        The ID of the core on the chip.
 
         :rtype: int
         """
@@ -58,7 +62,8 @@ class IOBuffer(object):
 
     @property
     def iobuf(self):
-        """ The contents of the buffer
+        """
+        The contents of the buffer.
 
         :rtype: str
         """
@@ -67,6 +72,5 @@ class IOBuffer(object):
     def __str__(self):
         value = ""
         for line in self._iobuf.split("\n"):
-            value += "{}:{}:{:2n}: {}\n".format(
-                self._x, self._y, self._p, line)
+            value += f"{self._x}:{self._y}:{self._p:2n}: {line}\n"
         return value[:-1]

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,8 @@ from spinnman.model import ChipSummaryInfo
 
 
 class GetChipInfoResponse(AbstractSCPResponse):
-    """ An SCP response to a request for the version of software running
+    """
+    An SCP response to a request for the version of software running.
     """
     __slots__ = [
         "_chip_info"]
@@ -41,7 +42,8 @@ class GetChipInfoResponse(AbstractSCPResponse):
 
     @property
     def chip_info(self):
-        """ The chip information received
+        """
+        The chip information received.
 
         :rtype: ChipSummaryInfo
         """

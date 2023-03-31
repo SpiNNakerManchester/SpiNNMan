@@ -4,13 +4,22 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+"""
+The new Spalloc client implementation. This has the notable distinction of
+including a proxying system that allows creating a transceiver with access to
+the boards of a job despite the client being not within the same firewall/NAT
+security domain as the spalloc-managed service.
+
+The main class in here is :py:class:`~spinnman.spalloc.SpallocClient`.
+"""
 
 from .abstract_spalloc_client import AbstractSpallocClient
 from .spalloc_job import SpallocJob

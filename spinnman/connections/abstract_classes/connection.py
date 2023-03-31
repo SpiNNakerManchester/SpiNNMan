@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,14 +17,16 @@ from spinn_utilities.abstract_context_manager import AbstractContextManager
 
 
 class Connection(AbstractContextManager, metaclass=AbstractBase):
-    """ An abstract connection to the SpiNNaker board over some medium
+    """
+    An abstract connection to the SpiNNaker board over some medium.
     """
 
     __slots__ = ()
 
     @abstractmethod
     def is_connected(self):
-        """ Determines if the medium is connected at this point in time
+        """
+        Determines if the medium is connected at this point in time.
 
         :return: True if the medium is connected, False otherwise
         :rtype: bool
@@ -35,5 +37,6 @@ class Connection(AbstractContextManager, metaclass=AbstractBase):
 
     @abstractmethod
     def close(self):
-        """ Closes the connection
+        """
+        Closes the connection.
         """

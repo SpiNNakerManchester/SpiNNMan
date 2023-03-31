@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,7 +21,8 @@ from .get_version_response import GetVersionResponse
 
 
 class BMPGetVersion(BMPRequest):
-    """ An SCP request to read the version of software running on a core
+    """
+    An SCP request to read the version of software running on a core.
     """
 
     def __init__(self, board):

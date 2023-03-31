@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,12 +28,14 @@ class Listenable(object, metaclass=AbstractBase):
 
     @abstractmethod
     def get_receive_method(self):
-        """ Get the method that receives for this connection.
+        """
+        Get the method that receives for this connection.
         """
 
     @abstractmethod
     def is_ready_to_receive(self, timeout=0):
-        """ Determines if there is an SCP packet to be read without blocking.
+        """
+        Determines if there is an SCP packet to be read without blocking.
 
         :param int timeout:
             The time to wait before returning if the connection is not ready

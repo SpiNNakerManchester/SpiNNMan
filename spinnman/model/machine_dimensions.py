@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,8 @@
 
 
 class MachineDimensions(object):
-    """ Represents the size of a machine in chips
+    """
+    Represents the size of a machine in chips.
     """
     __slots__ = [
         "_height",
@@ -30,7 +31,8 @@ class MachineDimensions(object):
 
     @property
     def width(self):
-        """ The width of the machine in chips
+        """
+        The width of the machine in chips.
 
         :rtype: int
         """
@@ -38,7 +40,8 @@ class MachineDimensions(object):
 
     @property
     def height(self):
-        """ The height of the machine in chips
+        """
+        The height of the machine in chips.
 
         :rtype: int
         """

@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,11 +23,11 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 class _SpiNNManDataModel(object):
     """
-    Singleton data model
+    Singleton data model.
 
     This class should not be accessed directly please use the DataView and
     DataWriter classes.
-    Accessing or editing the data held here directly is NOT SUPPORTED
+    Accessing or editing the data held here directly is *not supported!*
 
     There may be other DataModel classes which sit next to this one and hold
     additional data. The DataView and DataWriter classes will combine these
@@ -57,13 +57,13 @@ class _SpiNNManDataModel(object):
 
     def _clear(self):
         """
-        Clears out all data
+        Clears out all data.
         """
         self._hard_reset()
 
     def _hard_reset(self):
         """
-        Clears out all data that should change after a reset and graaph change
+        Clears out all data that should change after a reset and graph change.
         """
         self._app_id = None
         self._app_id_tracker = None
@@ -79,7 +79,7 @@ class _SpiNNManDataModel(object):
 
     def _soft_reset(self):
         """
-        Clears timing and other data that should changed every reset
+        Clears timing and other data that should changed every reset.
         """
         # Holder for any later additions
 
@@ -88,7 +88,8 @@ class SpiNNManDataView(MachineDataView):
     """
     Adds the extra Methods to the View for SpiNNMan level.
 
-    See UtilsDataView for a more detailed description.
+    See :py:class:`~spinn_utilities.data.UtilsDataView` for a more detailed
+    description.
 
     This class is designed to only be used directly within the SpiNNMan
     repository as all methods are available to subclasses
@@ -102,7 +103,7 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def has_transceiver(cls):
         """
-        Reports if a transceiver is currently set
+        Reports if a transceiver is currently set.
 
         :rtype: bool
         """
@@ -111,7 +112,7 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def get_transceiver(cls):
         """
-        The transceiver description
+        The transceiver description.
 
         :rtype: ~spinnman.transceiver.Transceiver
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
@@ -123,9 +124,10 @@ class SpiNNManDataView(MachineDataView):
 
     @classmethod
     def read_memory(cls, x, y, base_address, length, cpu=0):
-        """ Read some areas of memory (usually SDRAM) from the board.
+        """
+        Read some areas of memory (usually SDRAM) from the board.
 
-        Semantic sugar for transceiver.read_memory
+        Syntactic sugar for `get_transceiver().read_memory()`.
 
         :param int x:
             The x-coordinate of the chip where the memory is to be read from
@@ -160,9 +162,10 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
-        """ Write to the SDRAM on the board.
+        """
+        Write to the SDRAM on the board.
 
-        Semantic sugar for transceiver.read_memory
+        Syntactic sugar for `get_transceiver().write_memory()`.
 
         :param int x:
             The x-coordinate of the chip where the memory is to be written to
@@ -230,9 +233,9 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def get_new_id(cls):
         """
-        Gets a new id from the current app_id_tracker
+        Gets a new id from the current `app_id_tracker`
 
-        previously transceiver.app_id_tracker.get_new_id()
+        previously `get_transceiver().app_id_tracker().get_new_id()`
 
         :rtype: AppIdTracker
         """
@@ -243,9 +246,9 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def free_id(cls, app_id):
         """
-        Frees up an app_id
+        Frees up an app_id.
 
-        previously transceiver.app_id_tracker.free_id(app_id)
+        previously `get_transceiver().app_id_tracker().free_id(app_id)`
 
         :param int app_id:
 
@@ -256,9 +259,9 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def get_scamp_connection_selector(cls):
         """
-        Gets the scamp connection selector from the transceiver
+        Gets the scamp connection selector from the transceiver.
 
-        Semantic sugar for transceiver.scamp_connection_selector
+        Syntactic sugar for `get_transceiver().scamp_connection_selector()`
 
         :rtype: MostDirectConnectionSelector
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:

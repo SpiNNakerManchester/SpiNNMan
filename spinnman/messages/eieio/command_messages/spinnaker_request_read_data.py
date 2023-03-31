@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,9 +27,10 @@ _PATTERN_BBBBII = struct.Struct("<BBBBII")
 
 
 class SpinnakerRequestReadData(EIEIOCommandMessage):
-    """ Message used in the context of the buffering output mechanism which is\
-        sent from the SpiNNaker system to the host computer to signal that\
-        some data is available to be read
+    """
+    Message used in the context of the buffering output mechanism which is
+    sent from the SpiNNaker system to the host computer to signal that
+    some data is available to be read.
     """
     __slots__ = [
         "_header",
@@ -158,8 +159,9 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
 
 
 class _SpinnakerRequestReadDataHeader(object):
-    """ Contains the position of the core in the machine (x, y, p), the number\
-        of requests and a sequence number
+    """
+    Contains the position of the core in the machine (x, y, p), the number
+    of requests and a sequence number.
     """
     __slots__ = [
         "_n_requests",
@@ -196,7 +198,8 @@ class _SpinnakerRequestReadDataHeader(object):
 
 
 class _SpinnakerRequestReadDataRequest(object):
-    """ Contains a set of requests which refer to the channels used
+    """
+    Contains a set of requests which refer to the channels used.
     """
     __slots__ = [
         "_channel",

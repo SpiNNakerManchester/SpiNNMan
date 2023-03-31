@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,8 @@ _ONE_SHORT = struct.Struct("<H")
 
 
 class EIEIOCommandHeader(object):
-    """ EIEIO header for command packets
+    """
+    EIEIO header for command packets.
     """
     __slots__ = [
         "_command"]
@@ -40,7 +41,8 @@ class EIEIOCommandHeader(object):
 
     @staticmethod
     def from_bytestring(data, offset):
-        """ Read an EIEIO command header from a bytestring
+        """
+        Read an EIEIO command header from a bytestring.
 
         :param data: The bytestring to read the data from
         :type data: bytes or bytearray
@@ -59,7 +61,8 @@ class EIEIOCommandHeader(object):
 
     @property
     def bytestring(self):
-        """ Get a bytestring of the header
+        """
+        The bytestring of the header.
 
         :rtype: bytes
         """

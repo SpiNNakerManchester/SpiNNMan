@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" This is a script used to check the state of a SpiNNaker machine.
+"""
+This is a script used to check the state of a SpiNNaker machine.
 """
 
 import sys
@@ -33,12 +34,12 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
     """
     count_finished = txrx.get_core_state_count(app_id, CPUState.FINISHED)
     count_run = txrx.get_core_state_count(app_id, CPUState.RUNNING)
-    print('running: {} finished: {}'.format(count_run, count_finished))
+    print(f'running: {count_run} finished: {count_finished}')
 
     machine = txrx.get_machine_details()
     print(f'machine width: {machine.width} height: {machine.height}')
     if print_all_chips:
-        print('machine chips: {}'.format(list(machine.chips)))
+        print(f'machine chips: {list(machine.chips)}')
 
     all_cores = []
     for chip in machine.chips:
@@ -52,23 +53,23 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
 
     for (x, y, p), _ in cores_running:
         if p not in IGNORED_IDS:
-            print('run core: {} {} {}'.format(x, y, p))
+            print(f'run core: {x} {y} {p}')
 
     for (x, y, p), _ in cores_finished:
-        print('finished core: {} {} {}'.format(x, y, p))
+        print(f'finished core: {x} {y} {p}')
 
     for (x, y, p), _ in cores_watchdog:
-        print('watchdog core: {} {} {}'.format(x, y, p))
+        print(f'watchdog core: {x} {y} {p}')
 
 
 def _make_transceiver(host, version, bmp_names):
     """
-    :param host: Most to use or None to use test config for all params
+    :param host: Most to use or `None` to use test config for all params
     :type host: str or None
-    :param version: Board version to use (None defaults to 5 unless host is
+    :param version: Board version to use (`None` defaults to 5 unless host is
         192.168.240.253 (spin 3)
     :type version: int or None
-    :param bmp: bmp conenction or None to auto detect (if applicable)
+    :param bmp: bmp connection or `None` to auto detect (if applicable)
     :type bmp: str or None
     :rtype: Transceiver
     """
@@ -92,7 +93,7 @@ def _make_transceiver(host, version, bmp_names):
                 version = 5
         auto_detect_bmp = False
 
-    print("talking to SpiNNaker system at {}".format(host))
+    print(f"talking to SpiNNaker system at {host}")
     return create_transceiver_from_hostname(
         host, version,
         bmp_connection_data=bmp_names,
@@ -100,7 +101,8 @@ def _make_transceiver(host, version, bmp_names):
 
 
 def main(args):
-    """ Runs the script.
+    """
+    Runs the script.
     """
     ap = argparse.ArgumentParser(
         description="Check the state of a SpiNNaker machine.")

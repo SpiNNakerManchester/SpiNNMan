@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,7 +19,8 @@ _TWO_SHORTS = struct.Struct("<2H")
 
 
 class SCPResponseHeader(object):
-    """ Represents the header of an SCP Response
+    """
+    Represents the header of an SCP Response.
     """
     __slots__ = [
         "_result",
@@ -35,25 +36,26 @@ class SCPResponseHeader(object):
 
     @property
     def result(self):
-        """ The result of the SCP response
+        """
+        The result of the SCP response.
 
-        :return: The result
         :rtype: SCPResult
         """
         return self._result
 
     @property
     def sequence(self):
-        """ The sequence number of the SCP response
+        """
+        The sequence number of the SCP response, between 0 and 65535.
 
-        :return: The sequence number of the packet, between 0 and 65535
         :rtype: int
         """
         return self._sequence
 
     @staticmethod
     def from_bytestring(data, offset):
-        """ Read a header from a bytestring
+        """
+        Read a header from a bytestring.
 
         :param bytes data: The bytestring to read from
         :param int offset:

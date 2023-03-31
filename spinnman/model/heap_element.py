@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,8 @@
 
 
 class HeapElement(object):
-    """ An element of one of the heaps on SpiNNaker.
+    """
+    An element of one of the heaps on SpiNNaker.
     """
 
     __slots__ = [
@@ -47,7 +48,8 @@ class HeapElement(object):
 
     @property
     def block_address(self):
-        """ The address of the block
+        """
+        The address of the block.
 
         :rtype: int
         """
@@ -55,7 +57,8 @@ class HeapElement(object):
 
     @property
     def next_address(self):
-        """ The address of the next block, or 0 if none
+        """
+        The address of the next block, or 0 if none.
 
         :rtype: int
         """
@@ -63,7 +66,8 @@ class HeapElement(object):
 
     @property
     def size(self):
-        """ The usable size of this block (not including the header)
+        """
+        The usable size of this block (not including the header).
 
         :rtype: int
         """
@@ -71,7 +75,8 @@ class HeapElement(object):
 
     @property
     def is_free(self):
-        """ True if this block is a free block, False otherwise
+        """
+        Whether this block is a free block.
 
         :rtype: bool
         """
@@ -79,7 +84,8 @@ class HeapElement(object):
 
     @property
     def tag(self):
-        """ The tag of the block if allocated, or None if not
+        """
+        The tag of the block if allocated, or `None` if not.
 
         :rtype: int or None
         """
@@ -87,7 +93,8 @@ class HeapElement(object):
 
     @property
     def app_id(self):
-        """ The application ID of the block if allocated, or None if not
+        """
+        The application ID of the block if allocated, or `None` if not.
 
         :rtype: int or None
         """

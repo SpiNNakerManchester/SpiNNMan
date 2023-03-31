@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,11 @@ from spinnman.connections.udp_packet_connections import IPAddressesConnection
 
 
 def locate_connected_machine(handler):
-    """ Locates any SpiNNaker machines IP addresses from the auto-transmitted\
-        packets from non-booted SpiNNaker machines.
+    """
+    Locates any SpiNNaker machines IP addresses from the auto-transmitted
+    packets from non-booted SpiNNaker machines.
 
-    :param callable handler:
+    :param ~collections.abc.Callable handler:
         A callback that decides whether to stop searching. The callback is
         given two arguments: the IP address found and the current time. It
         should return True if the search should cease.

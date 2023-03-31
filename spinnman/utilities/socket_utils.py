@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,7 +25,8 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def get_udp_socket():
-    """ Wrapper round socket() system call to produce UDP/IPv4 sockets.
+    """
+    Wrapper round socket() system call to produce UDP/IPv4 sockets.
     """
     try:
         # Create a UDP Socket
@@ -36,7 +37,8 @@ def get_udp_socket():
 
 
 def get_tcp_socket():
-    """ Wrapper round socket() system call to produce TCP/IPv4 sockets.
+    """
+    Wrapper round socket() system call to produce TCP/IPv4 sockets.
 
     .. note::
         TCP sockets cannot be used to talk to a SpiNNaker board.
@@ -50,7 +52,8 @@ def get_tcp_socket():
 
 
 def set_receive_buffer_size(sock, size):
-    """ Wrapper round setsockopt() system call.
+    """
+    Wrapper round setsockopt() system call.
     """
     try:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_RCVBUF, size)
@@ -62,7 +65,8 @@ def set_receive_buffer_size(sock, size):
 
 
 def bind_socket(sock, host, port):
-    """ Wrapper round bind() system call.
+    """
+    Wrapper round bind() system call.
     """
     try:
         # Bind the socket
@@ -73,7 +77,8 @@ def bind_socket(sock, host, port):
 
 
 def resolve_host(host):
-    """ Wrapper round gethostbyname() system call.
+    """
+    Wrapper round gethostbyname() system call.
     """
     try:
         return socket.gethostbyname(host)
@@ -83,7 +88,8 @@ def resolve_host(host):
 
 
 def connect_socket(sock, remote_address, remote_port):
-    """ Wrapper round connect() system call.
+    """
+    Wrapper round connect() system call.
     """
     try:
         sock.connect((str(remote_address), int(remote_port)))
@@ -93,7 +99,8 @@ def connect_socket(sock, remote_address, remote_port):
 
 
 def get_socket_address(sock):
-    """ Wrapper round getsockname() system call.
+    """
+    Wrapper round getsockname() system call.
     """
     try:
         addr, port = sock.getsockname()

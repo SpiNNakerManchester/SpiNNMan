@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -21,11 +21,13 @@ from spinnman.messages.sdp import SDPHeader, SDPFlag
 
 
 class FixedRouteInit(AbstractSCPRequest):
+    """
+    Sets a fixed route entry.
+    """
     __slots__ = []
 
     def __init__(self, x, y, entry, app_id):
-        """ Sets a fixed route entry
-
+        """
         :param int x: The x-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
         :param int y: The y-coordinate of the chip, between 0 and 255,

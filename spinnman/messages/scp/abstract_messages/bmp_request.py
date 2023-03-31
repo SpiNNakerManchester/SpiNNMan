@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,7 +17,8 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 
 
 class BMPRequest(AbstractSCPRequest):
-    """ An SCP request intended to be sent to a BMP.
+    """
+    An SCP request intended to be sent to a BMP.
     """
     __slots__ = []
 
@@ -43,7 +44,8 @@ class BMPRequest(AbstractSCPRequest):
 
     @staticmethod
     def get_first_board(boards):
-        """ Get the first board ID given a board ID or collection of board IDs
+        """
+        Get the first board ID given a board ID or collection of board IDs.
         """
         if isinstance(boards, int):
             return boards
@@ -51,7 +53,8 @@ class BMPRequest(AbstractSCPRequest):
 
     @staticmethod
     def get_board_mask(boards):
-        """ Get the board mask given a board ID or collection of board IDs
+        """
+        Get the board mask given a board ID or collection of board IDs.
         """
         if isinstance(boards, int):
             return 1 << boards

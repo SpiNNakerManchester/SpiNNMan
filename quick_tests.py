@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -129,12 +129,12 @@ def print_reinjection_status(status):
     print("Reinjected packets:", status.n_reinjected_packets)
     print("Router timeout: {}  emergency timeout {}".format(
         status.router_timeout, status.router_emergency_timeout))
-    print("Re-injecting multicast: {}  point_to_point: {}  nearest_neighbour:"
-          " {}  fixed_route: {}").format(
-              status.is_reinjecting_multicast,
-              status.is_reinjecting_point_to_point,
-              status.is_reinjecting_nearest_neighbour,
-              status.is_reinjecting_fixed_route)
+    print(("Re-injecting multicast: {}  point_to_point: {}  nearest_neighbour:"
+           " {}  fixed_route: {}").format(
+               status.is_reinjecting_multicast,
+               status.is_reinjecting_point_to_point,
+               status.is_reinjecting_nearest_neighbour,
+               status.is_reinjecting_fixed_route))
 
 
 class Section(object):
@@ -349,6 +349,7 @@ def print_transceiver_tests(transceiver):
     with Section("Get Heap"):
         for heap_element in transceiver.get_heap(0, 0):
             print(heap_element)
+
 
 unittest_setup()
 with create_transceiver_from_hostname(
