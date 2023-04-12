@@ -18,6 +18,8 @@ SCP
 SDP
 EIEIO
 Spalloc
+bmpc
+ybug
 
 # Our special words
 defaultable

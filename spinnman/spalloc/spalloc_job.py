@@ -27,7 +27,7 @@ from .spalloc_scp_connection import SpallocSCPConnection
 
 class SpallocJob(object, metaclass=AbstractBase):
     """
-    Represents a job in spalloc.
+    Represents a job in Spalloc.
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """

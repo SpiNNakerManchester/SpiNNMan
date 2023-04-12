@@ -101,14 +101,14 @@ def create_transceiver_from_hostname(
     the created UDPConnection and the discovered connections.
 
     :param hostname: The hostname or IP address of the board or `None` if
-        only the BMP conenctions are of interest
+        only the BMP connections are of interest
     :type hostname: str or None
     :param number_of_boards: a number of boards expected to be supported, or
         ``None``, which defaults to a single board
     :type number_of_boards: int or None
     :param int version: the type of SpiNNaker board used within the SpiNNaker
-        machine being used. If a spinn-5 board, then the version will be 5,
-        spinn-3 would equal 3 and so on.
+        machine being used. If a Spinn-5 board, then the version will be 5,
+        Spinn-3 would equal 3 and so on.
     :param list(BMPConnectionData) bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
     :param bool auto_detect_bmp:
@@ -313,7 +313,7 @@ class Transceiver(AbstractContextManager):
         """
         Check that the BMP connections are actually connected to valid BMPs.
 
-        :raise SpinnmanIOException: when the conn is not linked to a BMP s
+        :raise SpinnmanIOException: when a connection is not linked to a BMP
         """
         # check that the UDP BMP conn is actually connected to a BMP
         # via the sver command
@@ -555,7 +555,8 @@ class Transceiver(AbstractContextManager):
             An exception will be thrown if no initial connections can be
             found to the board.
 
-        :param dict((int,int),str) connections: Dict of x,y to ip address
+        :param dict((int,int),str) connections:
+            Dict of (`x`,`y`) to IP address
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -583,7 +584,7 @@ class Transceiver(AbstractContextManager):
 
     def get_machine_dimensions(self):
         """
-        Get the maximum chip x-coordinate and maximum chip y-coordinate of
+        Get the maximum chip X-coordinate and maximum chip Y-coordinate of
         the chips in the machine.
 
         :return: The dimensions of the machine
@@ -1103,8 +1104,8 @@ class Transceiver(AbstractContextManager):
             known use. Same functionality provided by ybug and bmpc.
             Retained in case needed for hardware debugging.
 
-        :param int x: chip x coord to write new watchdog param to
-        :param int y: chip y coord to write new watchdog param to
+        :param int x: chip X coordinate to write new watchdog parameter to
+        :param int y: chip Y coordinate to write new watchdog parameter to
         :param watch_dog:
             Either a boolean indicating whether to enable (True) or
             disable (False) the watchdog timer, or an int value to set the
@@ -2813,9 +2814,9 @@ class Transceiver(AbstractContextManager):
 
     def control_sync(self, do_sync):
         """
-        Control the synchronization of the chips.
+        Control the synchronisation of the chips.
 
-        :param bool do_sync: Whether to synchonize or not
+        :param bool do_sync: Whether to synchronise or not
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(DoSync(do_sync))

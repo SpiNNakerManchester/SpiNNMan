@@ -280,7 +280,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         Processes the collection of ignore links to remove then from chipinfo.
 
-        Converts any local x, y, IP address to global xy
+        Converts any local (x, y, IP address) to global (x, y)
 
         Discards any ignores which are known to have no
         affect based on the already read chip_info
@@ -290,7 +290,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Logs all actions except for ignores with unused IP addresses
 
         :param ~spinn_machine.Machine machine:
-            An empty machine to handle wraparounds
+            An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreLink.parse_string(
                 get_config_str("Machine", "down_links")):
@@ -329,7 +329,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         Converts the collection of ignore cores into a map of ignore by xy.
 
-        Converts any local x, y ipaddress to global xy
+        Converts any local (x, y, IP address) to global (x, y)
 
         Discards (with log messages) any ignores which are known to have no
         affect based on the already read chip_info
@@ -338,7 +338,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Core numbers <= 0 are assumed to be 0 - physical_id
 
         :param ~spinn_machine.Machine machine:
-            An empty machine to handle wraparounds
+            An empty machine to handle wrap-arounds
         """
         # Convert by ip to global
         for ignore in IgnoreCore.parse_string(
@@ -355,7 +355,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         Processes the collection of ignore chips and discards their chipinfo.
 
-        Converts any local x, y ipaddress to global xy
+        Converts any local (x, y IP address) to global (x, y)
 
         Discards any ignores which are known to have no
         affect based on the already read chip_info
@@ -363,7 +363,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Logs all actions except for ignores with unused IP addresses
 
         :param ~spinn_machine.Machine machine:
-            An empty machine to handle wraparounds
+            An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreChip.parse_string(
                 get_config_str("Machine", "down_chips")):
