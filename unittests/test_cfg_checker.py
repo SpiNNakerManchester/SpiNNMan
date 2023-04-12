@@ -14,7 +14,7 @@
 
 import os
 import unittest
-from spinn_utilities.config_holder import run_config_checks
+from spinn_utilities.config_holder import run_config_checks, set_config
 from spinnman.config_setup import unittest_setup
 
 
@@ -27,4 +27,8 @@ class TestCfgChecker(unittest.TestCase):
         unittests = os.path.dirname(__file__)
         parent = os.path.dirname(unittests)
         spinnman = os.path.join(parent, "spinnman")
+        # These two are intentionally not part of the default config
+        # But are in the board_test_configuration.cfg
+        set_config("Machine", "machinename", "added to default")
+        set_config("Machine", "version", "added to default")
         run_config_checks(directories=[spinnman, unittests])
