@@ -64,7 +64,8 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
 
 def _make_transceiver(host, version, bmp_names):
     """
-    :param host: Most to use or `None` to use test config for all params
+    :param host:
+        Host to use or `None` to use test configuration for all parameters
     :type host: str or None
     :param version: Board version to use (`None` defaults to 5 unless host is
         192.168.240.253 (spin 3)

@@ -16,16 +16,27 @@
 BMP
 SCP
 SDP
+EIEIO
 Spalloc
 
 # Our special words
 defaultable
 routable
+keepalive
 
 # Python packages
 io
+sys
 websocket
 
 # Python types
+BufferedIOBase
 CoreSubset
+CPUInfo
+CPUState
+HeapElement
+RawIOBase
+SCAMPConnection
+SpinnakerBootMessage
+SystemVariableDefinition
 WebSocket

@@ -275,7 +275,7 @@ class SDPHeader(object):
     @property
     def bytestring(self):
         """
-        The header as a bytestring.
+        The header as a byte-string.
 
         :rtype: bytes
         """
@@ -292,9 +292,9 @@ class SDPHeader(object):
     @staticmethod
     def from_bytestring(data, offset):
         """
-        Read the header from a bytestring.
+        Read the header from a byte-string.
 
-        :param data: The bytestring to read the header from
+        :param data: The byte-string to read the header from
         :type data: bytes or bytearray
         :param int offset:
             The offset into the data from which to start reading

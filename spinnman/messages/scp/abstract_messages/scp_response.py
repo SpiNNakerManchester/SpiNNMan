@@ -39,9 +39,9 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
 
     def read_bytestring(self, data, offset):
         """
-        Reads a packet from a bytestring of data.
+        Reads a packet from a byte-string of data.
 
-        :param bytes data: The bytestring to be read
+        :param bytes data: The byte-string to be read
         :param int offset:
             The offset in the data from which the response should be read
         """
@@ -55,7 +55,7 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         """
         Reads the remainder of the data following the header.
 
-        :param bytes data: The bytestring to read from
+        :param bytes data: The byte-string to read from
         :param int offset: The offset into the data after the headers
         """
 

@@ -43,7 +43,8 @@ class SpallocEIEIOListener(
         EIEIOConnection, SpallocProxiedConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO listener sockets.
-    This emulates an EIEOConnection opened with no address specified.
+    This emulates an :py:class:`EIEOConnection` opened with no address
+    specified.
     """
     __slots__ = ()
 
@@ -71,8 +72,9 @@ class SpallocEIEIOListener(
         """
         Get the coordinates of a chip given its IP address.
 
-        :param str ip_address: The IP address of an ethernet chip in the job.
-        :return: Ethernet chip coordinates: X, Y
+        :param str ip_address:
+            The IP address of an Ethernet-enabled chip in the job.
+        :return: Ethernet-enabled chip coordinates: X, Y
         :rtype: tuple(int, int)
         """
 
@@ -84,11 +86,13 @@ class SpallocEIEIOListener(
 
         :param bytes message: The message to send.
         :param int x:
-            The X coordinate of the ethernet chip to send the message to.
+            The X coordinate of the Ethernet-enabled chip to send the message
+            to.
         :param int y:
-            The Y coordinate of the ethernet chip to send the message to.
+            The Y coordinate of the Ethernet-enabled chip to send the message
+            to.
         :param int port:
-            The UDP port on the ethernet chip to send the message to.
+            The UDP port on the Ethernet-enabled chip to send the message to.
             Defaults to the SCP port.
         """
 
@@ -98,9 +102,9 @@ class SpallocEIEIOListener(
 
         :param bytes message: The message to send.
         :param tuple(str,int) address:
-            Where to send it to. Must be the address of an ethernet chip on a
-            board allocated to the job. Does not mean that SpiNNaker is
-            listening on that port (but the SCP port is being listened to if
+            Where to send it to. Must be the address of an Ethernet-enabled
+            chip on a board allocated to the job. Does not mean that SpiNNaker
+            is listening on that port (but the SCP port is being listened to if
             the board is booted).
         """
         ip, port = address
@@ -140,7 +144,8 @@ class SpallocEIEIOListener(
         :param int p:
             The ID of the core to send to.
         :param str ip_address:
-            The IP address of the ethernet chip to route the message via.
+            The IP address of the Ethernet-enabled chip to route the message
+            via.
         """
         sdp_message = SDPMessage(
             SDPHeader(
@@ -155,11 +160,11 @@ class SpallocEIEIOListener(
 
     def update_tag(self, x: int, y: int, tag: int, do_receive: bool = True):
         """
-        Update the given tag on the given ethernet chip to send messages to
-        this connection.
+        Update the given tag on the given Ethernet-enabled chip to send
+        messages to this connection.
 
-        :param int x: The ethernet chip's X coordinate
-        :param int y: The ethernet chip's Y coordinate
+        :param int x: The Ethernet-enabled chip's X coordinate
+        :param int y: The Ethernet-enabled chip's Y coordinate
         :param int tag: The tag ID to update
         :param bool do_receive: Whether to receive the response or not
         :raises SpinnmanTimeoutException:
@@ -189,7 +194,7 @@ class SpallocEIEIOListener(
         Update a tag on a board at a given IP address to send messages to this
         connection.
 
-        :param str ip_address: The address of the ethernet chip
+        :param str ip_address: The address of the Ethernet-enabled chip
         :param int tag: The ID of the tag
         """
         x, y = self._get_chip_coords(ip_address)

@@ -66,8 +66,8 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
         Open a connection to a particular board in the job.
 
-        :param int x: X coordinate of the board's ethernet chip
-        :param int y: Y coordinate of the board's ethernet chip
+        :param int x: X coordinate of the board's Ethernet-enabled chip
+        :param int y: Y coordinate of the board's Ethernet-enabled chip
         :param int port: UDP port to talk to; defaults to the SCP port
         :return: A connection that talks to the board.
         :rtype: SpallocProxiedConnection
@@ -87,8 +87,10 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
         Open an EIEIO connection to a specific board in a job.
 
-        :param int x: The X coordinate of the ethernet chip to connect to
-        :param int y: The Y coordinate of the ethernet chip to connect to
+        :param int x:
+            The X coordinate of the Ethernet-enabled chip to connect to
+        :param int y:
+            The Y coordinate of the Ethernet-enabled chip to connect to
         :return: an EIEIO connection with a board address bound
         :rtype: SpallocEIEIOConnection
         """
@@ -161,7 +163,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         :param int period:
             How often to send a keepalive message (in seconds)
         :return:
-            Some kind of closeable task handle; closing it terminates the task.
+            Some kind of closable task handle; closing it terminates the task.
             Destroying the job will also terminate the task.
         """
 

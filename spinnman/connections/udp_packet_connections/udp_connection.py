@@ -185,7 +185,7 @@ class UDPConnection(Connection, Listenable):
         Receive data from the connection.
 
         :param float timeout: The timeout in seconds, or `None` to wait forever
-        :return: The data received as a bytestring
+        :return: The data received as a byte-string
         :rtype: bytes
         :raise SpinnmanTimeoutException:
             If a timeout occurs before any data is received
@@ -234,7 +234,7 @@ class UDPConnection(Connection, Listenable):
         """
         Send data down this connection.
 
-        :param data: The data to be sent as a bytestring
+        :param data: The data to be sent as a byte-string
         :type data: bytes or bytearray
         :param tuple(str,int) address:
             A tuple of (address, port) to send the data to

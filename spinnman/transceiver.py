@@ -1762,7 +1762,7 @@ class Transceiver(AbstractContextManager):
             The data that is to be written.  Should be one of the following:
 
             * An instance of RawIOBase
-            * A bytearray or bytestring
+            * A byte-string
             * A single integer
             * A file name of a file to read (in which case `is_filename`
               should be set to True)
@@ -1772,8 +1772,8 @@ class Transceiver(AbstractContextManager):
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray, the length of the bytearray will be
-              used
+            * If `data` is a bytearray or bytes, the length of the bytearray
+              will be used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the size of the file will be used
         :param int offset:

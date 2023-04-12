@@ -38,7 +38,7 @@ class SDPMessage(object):
     @property
     def bytestring(self):
         """
-        The bytestring of the message.
+        The byte-string of the message.
 
         :rtype: bytes
         """
