@@ -20,6 +20,7 @@ EIEIO
 Spalloc
 bmpc
 ybug
+txrx
 
 # Our special words
 defaultable
@@ -32,11 +33,13 @@ sys
 websocket
 
 # Python types
+BMPConnectionData
 BufferedIOBase
 CoreSubset
 CPUInfo
 CPUState
 HeapElement
+IOBuffer
 RawIOBase
 SCAMPConnection
 SpinnakerBootMessage

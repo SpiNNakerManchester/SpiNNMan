@@ -327,7 +327,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _preprocess_ignore_cores(self, machine):
         """
-        Converts the collection of ignore cores into a map of ignore by xy.
+        Converts the collection of ignore cores into a map of ignore by x,y.
 
         Converts any local (x, y, IP address) to global (x, y)
 
