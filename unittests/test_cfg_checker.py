@@ -27,8 +27,4 @@ class TestCfgChecker(unittest.TestCase):
     def test_config_checks(self):
         unittests = os.path.dirname(__file__)
         spinnman_dir = spinnman.__path__[0]
-        # These two are intentionally not part of the default config
-        # But are in the board_test_configuration.cfg
-        set_config("Machine", "machinename", "added to default")
-        set_config("Machine", "version", "added to default")
         run_config_checks(directories=[spinnman_dir, unittests])
