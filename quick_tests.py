@@ -37,7 +37,7 @@ from spinnman.messages.scp.impl import ReadMemory
 from spinnman.model.enums import (
     DiagnosticFilterDestination, DiagnosticFilterPacketType)
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
-from board_test_configuration import BoardTestConfiguration
+from spinnman.board_test_configuration import BoardTestConfiguration
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)

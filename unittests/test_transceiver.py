@@ -24,7 +24,7 @@ from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
 from spinnman.connections.udp_packet_connections import (
     BootConnection, SCAMPConnection)
 import spinnman.transceiver as transceiver
-from board_test_configuration import BoardTestConfiguration
+from spinnman.board_test_configuration import BoardTestConfiguration
 
 board_config = BoardTestConfiguration()
 ver = 5  # Guess?
