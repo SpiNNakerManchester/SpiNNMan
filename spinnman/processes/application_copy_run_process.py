@@ -36,14 +36,12 @@ def _get_next_chips(chips_done):
     next_chips = dict()
     for x, y in chips_done:
         chip = SpiNNManDataView.get_chip_at(x, y)
-        for link in chip.router.links:
-            chip_coords = (link.destination_x, link.destination_y)
-            if chip_coords not in chips_done and chip_coords not in next_chips:
-                next_chip = SpiNNManDataView.get_chip_at(*chip_coords)
-                opp_link = (link.source_link_id + 3) % 6
-                next_chips[chip_coords] = (opp_link, next_chip)
-                # Only let one thing copy from this chip
-                break
+        link = chip.router.get_link(chip.parent_link)
+        chip_coords = (link.destination_x, link.destination_y)
+        if chip_coords not in chips_done and chip_coords not in next_chips:
+            next_chip = SpiNNManDataView.get_chip_at(*chip_coords)
+            opp_link = (link.source_link_id + 3) % 6
+            next_chips[chip_coords] = (opp_link, next_chip)
     return next_chips
 
 
