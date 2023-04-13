@@ -14,7 +14,7 @@
 
 import os
 import unittest
-from spinn_utilities.config_holder import run_config_checks, set_config
+from spinn_utilities.config_holder import run_config_checks
 import spinnman
 from spinnman.config_setup import unittest_setup
 
