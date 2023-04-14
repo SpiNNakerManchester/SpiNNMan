@@ -38,7 +38,8 @@ class BoardTestConfiguration(object):
         self.auto_detect_bmp = None
 
         self._config = configparser.RawConfigParser()
-        config_file = os.path.join(os.path.dirname(__file__), "test.cfg")
+        config_file = os.path.join(
+            os.path.dirname(__file__), "board_test_configuration.cfg")
         self._config.read(config_file)
 
     def set_up_local_virtual_board(self):
