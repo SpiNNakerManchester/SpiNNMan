@@ -22,6 +22,7 @@ from .fixed_connection_selector import FixedConnectionSelector
 from .get_heap_process import GetHeapProcess
 from .get_cpu_info_process import GetCPUInfoProcess
 from .get_machine_process import GetMachineProcess
+from .get_n_cores_in_state_process import GetNCoresInStateProcess
 from .get_routes_process import GetMultiCastRoutesProcess
 from .get_tags_process import GetTagsProcess
 from .get_version_process import GetVersionProcess
@@ -46,7 +47,8 @@ __all__ = ["AbstractMultiConnectionProcessConnectionSelector",
            "AbstractMultiConnectionProcess",
            "ApplicationRunProcess", "ApplicationCopyRunProcess",
            "DeAllocSDRAMProcess", "GetCPUInfoProcess", "GetHeapProcess",
-           "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
+           "GetMachineProcess", "GetMultiCastRoutesProcess",
+           "GetNCoresInStateProcess", "GetTagsProcess",
            "GetVersionProcess", "LoadFixedRouteRoutingEntryProcess",
            "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
            "ReadFixedRouteRoutingEntryProcess", "ReadIOBufProcess",

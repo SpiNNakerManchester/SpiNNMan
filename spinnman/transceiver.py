@@ -37,7 +37,7 @@ from spinnman.constants import (
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
     ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES, SCP_TIMEOUT_COUNT)
+    BOOT_RETRIES)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
@@ -66,7 +66,8 @@ from spinnman.processes import (
     ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
-    MostDirectConnectionSelector, ApplicationCopyRunProcess)
+    MostDirectConnectionSelector, ApplicationCopyRunProcess,
+    GetNCoresInStateProcess)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
 
@@ -1194,10 +1195,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(
-            self._scamp_connection_selector, timeout=SCP_TIMEOUT_COUNT)
-        response = process.execute(CountState(app_id, state))
-        return response.count  # pylint: disable=no-member
+        process = GetNCoresInStateProcess(self._scamp_connection_selector)
+        return process.get_n_cores_in_state(app_id, state)
 
     def execute(
             self, x, y, processors, executable, app_id, n_bytes=None,
