@@ -22,7 +22,7 @@ from spinnman.constants import SCP_TIMEOUT, N_RETRIES
 MAX_SEQUENCE = 65536
 RETRY_CODES = frozenset([
     SCPResult.RC_TIMEOUT, SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_LEN,
-    SCPResult.RC_P2P_NOREPLY])
+    SCPResult.RC_P2P_NOREPLY, SCPResult.RC_P2P_BUSY])
 
 # Keep a global track of the sequence numbers used
 _next_sequence = 0
