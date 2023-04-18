@@ -37,7 +37,7 @@ from spinnman.constants import (
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
     ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES)
+    BOOT_RETRIES, SCP_TIMEOUT_COUNT)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
@@ -1194,7 +1194,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
+        process = SendSingleCommandProcess(
+            self._scamp_connection_selector, timeout=SCP_TIMEOUT_COUNT)
         response = process.execute(CountState(app_id, state))
         return response.count  # pylint: disable=no-member
 
