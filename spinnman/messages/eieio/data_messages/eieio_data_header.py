@@ -132,7 +132,7 @@ class EIEIODataHeader(object):
     @property
     def bytestring(self):
         """
-        The bytestring of the header.
+        The byte-string of the header.
 
         :rtype: bytes
         """
@@ -183,9 +183,9 @@ class EIEIODataHeader(object):
     @staticmethod
     def from_bytestring(data, offset):
         """
-        Read an eieio data header from a bytestring.
+        Read an EIEIO data header from a byte-string.
 
-        :param bytes data: The bytestring to be read
+        :param bytes data: The byte-string to be read
         :param int offset: The offset at which the data starts
         :return: an EIEIO header
         :rtype: EIEIODataHeader

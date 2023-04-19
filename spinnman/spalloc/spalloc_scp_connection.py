@@ -33,7 +33,8 @@ class SpallocSCPConnection(
         metaclass=AbstractBase):
     """
     The socket interface supported by proxied sockets. The socket will always
-    be talking to a specific board. This emulates a SCAMPConnection.
+    be talking to a specific board. This emulates a
+    :py:class:`SCAMPConnection`.
     """
     __slots__ = ()
 

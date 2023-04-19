@@ -35,9 +35,9 @@ class ChipInfo(object):
     def __init__(self, system_data, offset):
         """
         :param bytes system_data:
-            An bytestring retrieved from SDRAM on the board
+            A byte-string retrieved from SDRAM on the board
         :param int offset:
-            The offset into the bytestring where the actual data starts
+            The offset into the byte-string where the actual data starts
         :raise SpinnmanInvalidParameterException:
             If the data doesn't contain valid system data information
         """

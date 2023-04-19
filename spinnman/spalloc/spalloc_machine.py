@@ -18,7 +18,7 @@ from spinn_utilities.abstract_base import AbstractBase, abstractproperty
 
 class SpallocMachine(object, metaclass=AbstractBase):
     """
-    Represents a spalloc-controlled machine.
+    Represents a Spalloc-controlled machine.
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """

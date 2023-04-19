@@ -113,7 +113,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
     @property
     def bytestring(self):
         """
-        The request as a bytestring.
+        The request as a byte-string.
 
         :rtype: bytes
         """

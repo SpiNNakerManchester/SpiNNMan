@@ -135,7 +135,7 @@ class _HostDataReadHeader(object):
 
 class _HostDataReadAck(object):
     """
-    Contains a set of acks which refer to each of the channels read.
+    Contains a set of ACKs which refer to each of the channels read.
     """
     __slots__ = [
         "_channel",
