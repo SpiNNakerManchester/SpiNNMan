@@ -41,9 +41,9 @@ class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
         :rtype: int
         """
         machine = SpiNNManDataView.get_machine()
-        for c_x, c_y in machine.chip_coordinates:
+        for chip in machine.ethernet_connected_chips:
             self._send_request(
-                CountState(c_x, c_y, app_id, state),
+                CountState(chip.x, chip.y, app_id, state),
                 self.__handle_response)
         self._finish()
         self.check_for_error()
