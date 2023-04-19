@@ -20,6 +20,7 @@ import sys
 import argparse
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinn_machine import CoreSubsets, CoreSubset
+from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.model.enums import CPUState
 
 SCAMP_ID = 0
@@ -75,12 +76,7 @@ def _make_transceiver(host, version, bmp_names):
     :rtype: Transceiver
     """
     if host is None:
-        try:
-            from board_test_configuration import BoardTestConfiguration
-            config = BoardTestConfiguration()
-        except ImportError:
-            print("cannot read board test configuration")
-            sys.exit(1)
+        config = BoardTestConfiguration()
         config.set_up_remote_board()
         host = config.remotehost
         version = config.board_version
