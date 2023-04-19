@@ -27,7 +27,7 @@ from .spalloc_scp_connection import SpallocSCPConnection
 
 class SpallocJob(object, metaclass=AbstractBase):
     """
-    Represents a job in spalloc.
+    Represents a job in Spalloc.
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
@@ -66,8 +66,8 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
         Open a connection to a particular board in the job.
 
-        :param int x: X coordinate of the board's ethernet chip
-        :param int y: Y coordinate of the board's ethernet chip
+        :param int x: X coordinate of the board's Ethernet-enabled chip
+        :param int y: Y coordinate of the board's Ethernet-enabled chip
         :param int port: UDP port to talk to; defaults to the SCP port
         :return: A connection that talks to the board.
         :rtype: SpallocProxiedConnection
@@ -87,8 +87,10 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
         Open an EIEIO connection to a specific board in a job.
 
-        :param int x: The X coordinate of the ethernet chip to connect to
-        :param int y: The Y coordinate of the ethernet chip to connect to
+        :param int x:
+            The X coordinate of the Ethernet-enabled chip to connect to
+        :param int y:
+            The Y coordinate of the Ethernet-enabled chip to connect to
         :return: an EIEIO connection with a board address bound
         :rtype: SpallocEIEIOConnection
         """
@@ -121,8 +123,10 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :param SpallocState old_state:
             The state that we are looking to change out of.
-        :return: The state that the allocation is now in. Note that if the
-            machine gets destroyed, this will not wait for it.
+        :return: The state that the allocation is now in.
+
+            .. note::
+                If the machine gets destroyed, this will not wait for it.
         :rtype: SpallocState
         """
 
@@ -159,7 +163,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         :param int period:
             How often to send a keepalive message (in seconds)
         :return:
-            Some kind of closeable task handle; closing it terminates the task.
+            Some kind of closable task handle; closing it terminates the task.
             Destroying the job will also terminate the task.
         """
 
@@ -182,7 +186,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         Write the session credentials for the job to the database accessed by
         the given cursor.
 
-        .. note ::
+        .. note::
             May assume that there is a ``proxy_configuration`` table with
             ``kind``, ``name`` and ``value`` columns.
 

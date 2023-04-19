@@ -31,7 +31,8 @@ def _get_data(app_id, signal):
 
 
 class SendSignal(AbstractSCPRequest):
-    """ An SCP Request to send a signal to cores
+    """
+    An SCP Request to send a signal to cores.
     """
     __slots__ = []
 

@@ -19,7 +19,7 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.scp.impl import GetVersion, ReadLink, ReadMemory
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
-from board_test_configuration import BoardTestConfiguration
+from spinnman.board_test_configuration import BoardTestConfiguration
 
 board_config = BoardTestConfiguration()
 

@@ -15,6 +15,18 @@ from enum import IntEnum
 
 
 class SpallocState(IntEnum):
+    """
+    The possible states of a Spalloc Job.
+
+    Jobs start as `QUEUED`, then move to `POWER` once they've been allocated.
+    Once the job's boards have been switched on and the hardware stabilised,
+    the job moves to state `READY`. (It goes back to `POWER` if you tell it to
+    switch off or on; this is not recommended.) Finally, it goes to `DESTROYED`
+    once the job is completed in any way.
+
+    The `UNKNOWN` state is used when something odd is going on. It should
+    normally be ignored.
+    """
     #: The job is in an unknown state.
     UNKNOWN = 0
     #: The job is queued waiting for allocation.

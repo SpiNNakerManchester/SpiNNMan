@@ -24,10 +24,11 @@ _PATTERN_xxBBI = struct.Struct("<xxBBI")
 
 
 class HostDataRead(EIEIOCommandMessage):
-    """ Packet sent by the host computer to the SpiNNaker system in the\
-        context of the buffering output technique to signal that the host has\
-        completed reading data from the output buffer, and that such space can\
-        be considered free to use again
+    """
+    Packet sent by the host computer to the SpiNNaker system in the
+    context of the buffering output technique to signal that the host has
+    completed reading data from the output buffer, and that such space can
+    be considered free to use again.
     """
     __slots__ = [
         "_acks",
@@ -51,10 +52,9 @@ class HostDataRead(EIEIOCommandMessage):
             raise SpinnmanInvalidPacketException(
                 "SpinnakerRequestReadData",
                 "The format for a SpinnakerRequestReadData packet is "
-                "invalid: {0:d} request(s), {1:d} space(s) read "
-                "defined, {2:d} region(s) defined, {3:d} channel(s) "
-                "defined".format(
-                    n_requests, len(space_read), len(region_id), len(channel)))
+                f"invalid: {n_requests} request(s), {len(space_read)} "
+                f"space(s) read defined, {len(region_id)} region(s) defined, "
+                f"{len(channel)} channel(s) defined")
         super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ))
         self._header = _HostDataReadHeader(n_requests, sequence_no)
         self._acks = _HostDataReadAck(channel, region_id, space_read)
@@ -112,8 +112,9 @@ class HostDataRead(EIEIOCommandMessage):
 
 
 class _HostDataReadHeader(object):
-    """ The HostDataRead contains itself on header with the number of requests\
-        and a sequence number
+    """
+    The HostDataRead contains itself on header with the number of requests
+    and a sequence number.
     """
     __slots__ = [
         "_n_requests",
@@ -133,7 +134,8 @@ class _HostDataReadHeader(object):
 
 
 class _HostDataReadAck(object):
-    """ Contains a set of acks which refer to each of the channels read
+    """
+    Contains a set of ACKs which refer to each of the channels read.
     """
     __slots__ = [
         "_channel",

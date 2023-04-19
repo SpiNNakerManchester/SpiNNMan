@@ -14,7 +14,8 @@
 
 
 class BMPConnectionData(object):
-    """ Contains the details of a BMP connection
+    """
+    Contains the details of a BMP connection.
     """
     __slots__ = [
         "_boards",
@@ -33,7 +34,8 @@ class BMPConnectionData(object):
 
     @property
     def cabinet(self):
-        """ Get the cabinet number.
+        """
+        The cabinet number.
 
         :rtype: int
         """
@@ -41,7 +43,8 @@ class BMPConnectionData(object):
 
     @property
     def frame(self):
-        """ Get the frame number.
+        """
+        The frame number.
 
         :rtype: int
         """
@@ -49,7 +52,8 @@ class BMPConnectionData(object):
 
     @property
     def ip_address(self):
-        """ Get the IP address of the BMP.
+        """
+        The IP address of the BMP.
 
         :rtype: str
         """
@@ -57,7 +61,8 @@ class BMPConnectionData(object):
 
     @property
     def boards(self):
-        """ The boards to be addressed.
+        """
+        The boards to be addressed.
 
         :rtype: iterable(int)
         """
@@ -65,16 +70,16 @@ class BMPConnectionData(object):
 
     @property
     def port_num(self):
-        """ The port number associated with this BMP connection.
+        """
+        The port number associated with this BMP connection.
 
         :return: The port number
         """
         return self._port_num
 
     def __str__(self):
-        return "{}:{}:{}:{}:{}".format(
-            self._cabinet, self._frame, self._ip_address, self._boards,
-            self._port_num)
+        return (f"{self._cabinet}:{self._frame}:{self._ip_address}:"
+                f"{self._boards}:{self._port_num}")
 
     def __repr__(self):
         return self.__str__()

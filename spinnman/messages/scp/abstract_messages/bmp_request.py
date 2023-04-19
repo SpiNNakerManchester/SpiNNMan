@@ -17,7 +17,8 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 
 
 class BMPRequest(AbstractSCPRequest):
-    """ An SCP request intended to be sent to a BMP.
+    """
+    An SCP request intended to be sent to a BMP.
     """
     __slots__ = []
 
@@ -43,7 +44,8 @@ class BMPRequest(AbstractSCPRequest):
 
     @staticmethod
     def get_first_board(boards):
-        """ Get the first board ID given a board ID or collection of board IDs
+        """
+        Get the first board ID given a board ID or collection of board IDs.
         """
         if isinstance(boards, int):
             return boards
@@ -51,7 +53,8 @@ class BMPRequest(AbstractSCPRequest):
 
     @staticmethod
     def get_board_mask(boards):
-        """ Get the board mask given a board ID or collection of board IDs
+        """
+        Get the board mask given a board ID or collection of board IDs.
         """
         if isinstance(boards, int):
             return 1 << boards

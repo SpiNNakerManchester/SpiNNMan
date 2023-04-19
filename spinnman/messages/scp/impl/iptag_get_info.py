@@ -24,7 +24,8 @@ _IPTAG_MAX = 255
 
 
 class IPTagGetInfo(AbstractSCPRequest):
-    """ An SCP Request information about IP tags
+    """
+    An SCP Request information about IP tags.
     """
     __slots__ = []
 

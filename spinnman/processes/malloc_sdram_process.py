@@ -17,7 +17,8 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess):
-    """ A process for allocating a block of SDRAM on a SpiNNaker chip.
+    """
+    A process for allocating a block of SDRAM on a SpiNNaker chip.
     """
     __slots__ = [
         "_base_address"]
@@ -35,7 +36,8 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
         self._base_address = response.base_address
 
     def malloc_sdram(self, x, y, size, app_id, tag):
-        """ Allocate space in the SDRAM space.
+        """
+        Allocate space in the SDRAM space.
 
         :param int x:
         :param int y:
@@ -51,7 +53,8 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
 
     @property
     def base_address(self):
-        """ The address of the allocated memory block.
+        """
+        The address of the allocated memory block.
 
         :rtype: int
         """

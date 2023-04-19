@@ -22,7 +22,7 @@ from spinnman.model import BMPConnectionData
 
 _LOCALHOST = "127.0.0.1"
 # Microsoft invalid IP address. For more details see:
-# http://answers.microsoft.com/en-us/windows/forum/windows_vista-networking/invalid-ip-address-169254xx/ce096728-e2b7-4d54-80cc-52a4ed342870
+# https://answers.microsoft.com/en-us/windows/forum/windows_vista-networking/invalid-ip-address-169254xx/ce096728-e2b7-4d54-80cc-52a4ed342870
 _NOHOST = "169.254.254.254"
 _PORT = 54321
 
@@ -38,7 +38,8 @@ class BoardTestConfiguration(object):
         self.auto_detect_bmp = None
 
         self._config = configparser.RawConfigParser()
-        config_file = os.path.join(os.path.dirname(__file__), "test.cfg")
+        config_file = os.path.join(
+            os.path.dirname(__file__), "board_test_configuration.cfg")
         self._config.read(config_file)
 
     def set_up_local_virtual_board(self):

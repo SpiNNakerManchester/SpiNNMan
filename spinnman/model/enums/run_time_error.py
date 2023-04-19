@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class RunTimeError(Enum):
-    """ SARK Run time errors
+    """
+    SARK Run time errors.
     """
     #: No error
     NONE = 0

@@ -25,7 +25,8 @@ _WAIT_FLAG = 0x1 << 18
 
 
 class AppCopyRun(AbstractSCPRequest):
-    """ An SCP request to copy an application and start it
+    """
+    An SCP request to copy an application and start it.
     """
     __slots__ = ["__link"]
 

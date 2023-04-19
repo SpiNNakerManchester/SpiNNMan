@@ -14,7 +14,7 @@
 
 import unittest
 from spinn_machine.tags import IPTag
-from board_test_configuration import BoardTestConfiguration
+from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
 
 board_config = BoardTestConfiguration()

@@ -39,7 +39,7 @@ def parse_service_url(url: str) -> Tuple[str, str, str]:
     Parses a combined service reference.
 
     :param str url:
-    :return: URL, username (may be None), password (may be None)
+    :return: URL, username (may be `None`), password (may be `None`)
     :rtype: tuple(str,str,str)
     """
     pieces = urlparse(url)
@@ -63,7 +63,7 @@ def get_hostname(url: str) -> str:
 def is_server_address(
         address: str, additional_schemes: Iterable[str] = ()) -> bool:
     """
-    Test if the given address is a likely spalloc server URL.
+    Test if the given address is a likely Spalloc server URL.
 
     :param str address: The address to check
     :param ~collections.abc.Iterable(str) additional_schemes:

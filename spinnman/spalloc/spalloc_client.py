@@ -95,11 +95,10 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
-        visualisers and other third party code participating in the Spinnaker
+        visualisers and other third party code participating in the SpiNNaker
         Tools Notification Protocol.
 
-        .. note ::
-
+        .. note::
             The job is not verified to exist and be running. The session
             credentials may have expired; if so, the job will be unable to
             regenerate them.
@@ -117,8 +116,9 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         job_url = None
         cookies = {}
         headers = {}
-        for row in conn.execute(
-                """ SELECT kind, name, value FROM proxy_configuration"""):
+        for row in conn.execute("""
+                SELECT kind, name, value FROM proxy_configuration
+                """):
             kind, name, value = row
             if kind == "SPALLOC":
                 if name == "service uri":
@@ -222,7 +222,7 @@ def _SpallocKeepalive(url, interval, term_queue, cookies, headers):
 
 class _SpallocMachine(SessionAware, SpallocMachine):
     """
-    Represents a spalloc-controlled machine.
+    Represents a Spalloc-controlled machine.
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
@@ -312,7 +312,8 @@ class _ProxyPing(threading.Thread):
             sleep(self.__sleep_time)
 
     def close(self):
-        """ Mark as closed to avoid error messages
+        """
+        Mark as closed to avoid error messages.
         """
         self.__closed = True
 
@@ -412,7 +413,7 @@ class _ProxyReceiver(threading.Thread):
 
 class _SpallocJob(SessionAware, SpallocJob):
     """
-    Represents a job in spalloc.
+    Represents a job in Spalloc.
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
@@ -484,7 +485,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     @property
     def __proxy_url(self):
         """
-        Get the URL for talking to the proxy connection system.
+        The URL for talking to the proxy connection system.
         """
         r = self._get(self._url)
         if r.status_code == 204:

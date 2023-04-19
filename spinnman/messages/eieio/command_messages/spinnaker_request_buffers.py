@@ -21,9 +21,10 @@ _PATTERN_BBBxBBI = struct.Struct("<BBBxBBI")
 
 
 class SpinnakerRequestBuffers(EIEIOCommandMessage):
-    """ Message used in the context of the buffering input mechanism which is\
-        sent by the SpiNNaker system to the host computer to ask for more data\
-        to inject during the simulation
+    """
+    Message used in the context of the buffering input mechanism which is
+    sent by the SpiNNaker system to the host computer to ask for more data
+    to inject during the simulation.
     """
     __slots__ = [
         "_region_id",

@@ -19,7 +19,8 @@ from .abstract_multi_connection_process_connection_selector import (
 
 class FixedConnectionSelector(
         AbstractMultiConnectionProcessConnectionSelector):
-    """ A connection selector that only uses a single connection.
+    """
+    A connection selector that only uses a single connection.
     """
     __slots__ = ("__connection", )
 

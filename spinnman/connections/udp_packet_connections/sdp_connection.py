@@ -20,11 +20,12 @@ from .utils import update_sdp_header_for_udp_send
 from spinnman.connections.abstract_classes import Listenable
 
 _TWO_SKIP = struct.Struct("<2x")
-_REPR_TEMPLATE = "SDPConnection(chip_x={}, chip_y={}, local_host={},"\
-    " local_port={}, remote_host={}, remote_port={})"
 
 
 class SDPConnection(UDPConnection, Listenable):
+    """
+    A connection that talks SpiNNaker Datagram Protocol.
+    """
     __slots__ = [
         "_chip_x",
         "_chip_y"]
@@ -54,8 +55,9 @@ class SDPConnection(UDPConnection, Listenable):
         self._chip_y = chip_y
 
     def receive_sdp_message(self, timeout=None):
-        """ Receives an SDP message from this connection.  Blocks until the\
-            message has been received, or a timeout occurs.
+        """
+        Receives an SDP message from this connection.  Blocks until the
+        message has been received, or a timeout occurs.
 
         :param int timeout:
             The time in seconds to wait for the message to arrive; if not
@@ -75,7 +77,8 @@ class SDPConnection(UDPConnection, Listenable):
         return SDPMessage.from_bytestring(data, 2)
 
     def send_sdp_message(self, sdp_message):
-        """ Sends an SDP message down this connection
+        """
+        Sends an SDP message down this connection.
 
         :param SDPMessage sdp_message: The SDP message to be sent
         :raise SpinnmanIOException:
@@ -94,6 +97,8 @@ class SDPConnection(UDPConnection, Listenable):
         return self.receive_sdp_message
 
     def __repr__(self):
-        return _REPR_TEMPLATE.format(
-            self._chip_x, self._chip_y, self.local_ip_address,
-            self.local_port, self.remote_ip_address, self.remote_port)
+        return (
+            f"SDPConnection(chip_x={self._chip_x}, chip_y={self._chip_y}, "
+            f"local_host={self.local_ip_address}, local_port={self.local_port}"
+            f", remote_host={self.remote_ip_address}, "
+            f"remote_port={self.remote_port})")

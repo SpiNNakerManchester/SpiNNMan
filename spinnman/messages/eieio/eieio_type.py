@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class EIEIOType(Enum):
-    """ Possible types of EIEIO packets
+    """
+    Possible types of EIEIO packets.
     """
     KEY_16_BIT = (0, 2, 0, "Indicates that data is keys which are 16 bits")
     KEY_PAYLOAD_16_BIT = (
@@ -39,7 +40,8 @@ class EIEIOType(Enum):
 
     @property
     def key_bytes(self):
-        """ The number of bytes used by each key element
+        """
+        The number of bytes used by each key element.
 
         :rtype: int
         """
@@ -47,7 +49,8 @@ class EIEIOType(Enum):
 
     @property
     def payload_bytes(self):
-        """ The number of bytes used by each payload element
+        """
+        The number of bytes used by each payload element.
 
         :rtype: int
         """
@@ -55,7 +58,8 @@ class EIEIOType(Enum):
 
     @property
     def max_value(self):
-        """ The maximum value of the key or payload (if there is a payload)
+        """
+        The maximum value of the key or payload (if there is a payload).
 
         :rtype: int
         """

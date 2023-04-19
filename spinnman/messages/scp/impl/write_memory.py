@@ -22,7 +22,8 @@ from .check_ok_response import CheckOKResponse
 
 
 class WriteMemory(AbstractSCPRequest):
-    """ A request to write memory on a chip
+    """
+    A request to write memory on a chip.
     """
     __slots__ = [
         "_data_to_write"]

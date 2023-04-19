@@ -22,7 +22,8 @@ BOOT_MESSAGE_VERSION = 1
 
 
 class SpinnakerBootMessage(object):
-    """ A message used for booting the board
+    """
+    A message used for booting the board.
     """
     __slots__ = [
         "_data",
@@ -60,7 +61,8 @@ class SpinnakerBootMessage(object):
 
     @property
     def opcode(self):
-        """ The operation of this packet
+        """
+        The operation of this packet.
 
         :rtype: SpinnakerBootOpCode
         """
@@ -68,7 +70,8 @@ class SpinnakerBootMessage(object):
 
     @property
     def operand_1(self):
-        """ The first operand
+        """
+        The first operand.
 
         :rtype: int
         """
@@ -76,7 +79,8 @@ class SpinnakerBootMessage(object):
 
     @property
     def operand_2(self):
-        """ The second operand
+        """
+        The second operand.
 
         :rtype: int
         """
@@ -84,7 +88,8 @@ class SpinnakerBootMessage(object):
 
     @property
     def operand_3(self):
-        """ The third operand
+        """
+        The third operand.
 
         :rtype: int
         """
@@ -92,7 +97,8 @@ class SpinnakerBootMessage(object):
 
     @property
     def data(self):
-        """ The data, or None if no data
+        """
+        The data, or `None` if no data.
 
         :rtype: bytes or bytearray
         """
@@ -100,7 +106,8 @@ class SpinnakerBootMessage(object):
 
     @property
     def bytestring(self):
-        """ The message as a bytestring
+        """
+        The message as a byte-string.
 
         :rtype: bytes
         """

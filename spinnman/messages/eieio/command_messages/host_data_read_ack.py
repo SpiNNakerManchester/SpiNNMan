@@ -21,9 +21,10 @@ _PATTERN_B = struct.Struct("<B")
 
 
 class HostDataReadAck(EIEIOCommandMessage):
-    """ Packet sent by the host computer to the SpiNNaker system in the\
-        context of the buffering output technique to signal that the host has\
-        received a request to read data
+    """
+    Packet sent by the host computer to the SpiNNaker system in the
+    context of the buffering output technique to signal that the host has
+    received a request to read data.
     """
     __slots__ = [
         "_sequence_no"]

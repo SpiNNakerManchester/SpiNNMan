@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class SCPCommand(Enum):
-    """ The SCP Commands
+    """
+    The SCP Commands.
     """
     CMD_VER = (0, "Get SCAMP Version")
     CMD_RUN = 1

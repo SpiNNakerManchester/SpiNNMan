@@ -20,7 +20,8 @@ _ONE_SHORT = struct.Struct("<H")
 
 
 class EIEIOCommandHeader(object):
-    """ EIEIO header for command packets
+    """
+    EIEIO header for command packets.
     """
     __slots__ = [
         "_command"]
@@ -40,9 +41,10 @@ class EIEIOCommandHeader(object):
 
     @staticmethod
     def from_bytestring(data, offset):
-        """ Read an EIEIO command header from a bytestring
+        """
+        Read an EIEIO command header from a byte-string.
 
-        :param data: The bytestring to read the data from
+        :param data: The byte-string to read the data from
         :type data: bytes or bytearray
         :param int offset: The offset where the valid data starts
         :return: an EIEIO command header
@@ -59,7 +61,8 @@ class EIEIOCommandHeader(object):
 
     @property
     def bytestring(self):
-        """ Get a bytestring of the header
+        """
+        The byte-string of the header.
 
         :rtype: bytes
         """

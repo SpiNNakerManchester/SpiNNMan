@@ -18,7 +18,8 @@ from spinnman.processes import AbstractMultiConnectionProcess
 
 
 class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
-    """ Load a fixed route routing entry onto a chip.
+    """
+    Load a fixed route routing entry onto a chip.
     """
     __slots__ = []
 

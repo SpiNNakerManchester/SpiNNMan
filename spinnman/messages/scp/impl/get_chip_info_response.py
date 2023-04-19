@@ -20,7 +20,8 @@ from spinnman.model import ChipSummaryInfo
 
 
 class GetChipInfoResponse(AbstractSCPResponse):
-    """ An SCP response to a request for the version of software running
+    """
+    An SCP response to a request for the version of software running.
     """
     __slots__ = [
         "_chip_info"]
@@ -41,7 +42,8 @@ class GetChipInfoResponse(AbstractSCPResponse):
 
     @property
     def chip_info(self):
-        """ The chip information received
+        """
+        The chip information received.
 
         :rtype: ChipSummaryInfo
         """

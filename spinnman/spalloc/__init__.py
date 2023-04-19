@@ -12,6 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+The new Spalloc client implementation. This has the notable distinction of
+including a proxying system that allows creating a transceiver with access to
+the boards of a job despite the client being not within the same firewall/NAT
+security domain as the Spalloc-managed service.
+
+The main class in here is :py:class:`~spinnman.spalloc.SpallocClient`.
+"""
+
 from .abstract_spalloc_client import AbstractSpallocClient
 from .spalloc_job import SpallocJob
 from .spalloc_machine import SpallocMachine

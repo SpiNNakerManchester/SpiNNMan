@@ -21,7 +21,8 @@ from .get_chip_info_response import GetChipInfoResponse
 
 
 class GetChipInfo(AbstractSCPRequest):
-    """ An SCP request to read the chip information from a core
+    """
+    An SCP request to read the chip information from a core.
     """
     __slots__ = []
 

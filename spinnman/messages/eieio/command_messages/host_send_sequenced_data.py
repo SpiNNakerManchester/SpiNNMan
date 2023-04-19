@@ -22,9 +22,10 @@ _PATTERN_BB = struct.Struct("<BB")
 
 
 class HostSendSequencedData(EIEIOCommandMessage):
-    """ Packet sent from the host to the SpiNNaker system in the context of\
-        buffering input mechanism to identify packet which needs to be stored\
-        in memory for future use
+    """
+    Packet sent from the host to the SpiNNaker system in the context of
+    buffering input mechanism to identify packet which needs to be stored
+    in memory for future use.
     """
     __slots__ = [
         "_eieio_data_message",

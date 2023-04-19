@@ -19,6 +19,7 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
     """
+    .. warning::
         This class is currently deprecated and untested as there is no
         known use except for Transceiver.free_sdram and free_sdram_by_app_id
         which are both themselves deprecated.
@@ -57,4 +58,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
     @property
     def no_blocks_freed(self):
+        """
+        :rtype: int
+        """
         return self._no_blocks_freed

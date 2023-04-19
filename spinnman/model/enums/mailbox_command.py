@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class MailboxCommand(Enum):
-    """ Commands sent between an application and the monitor processor
+    """
+    Commands sent between an application and the monitor processor.
     """
     #: The mailbox is idle
     SHM_IDLE = (0, "The mailbox is idle")

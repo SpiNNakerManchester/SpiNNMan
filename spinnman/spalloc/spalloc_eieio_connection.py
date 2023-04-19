@@ -41,7 +41,8 @@ class SpallocEIEIOConnection(
         EIEIOConnection, SpallocProxiedConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO connected sockets.
-    This emulates an EIEOConnection opened with a remote address specified.
+    This emulates an :py:class:`EIEOConnection` opened with a remote address
+    specified.
     """
     __slots__ = ()
 
@@ -82,12 +83,14 @@ class SpallocEIEIOConnection(
         :rtype: tuple(int,int)
         """
 
-    def update_tag(self, tag: int):
+    def update_tag(self, tag: int, do_receive: bool = True):
         """
-        Update the given tag on the connected ethernet chip to send messages to
-        this connection.
+        Update the given tag on the connected Ethernet-enabled chip to send
+        messages to this connection.
 
         :param int tag: The tag ID to update
+        :param bool do_receive:
+            Whether to do the reception of the response or not
         :raises SpinnmanTimeoutException:
             If the message isn't handled within a reasonable timeout.
         :raises SpinnmanUnexpectedResponseCodeException:
@@ -102,9 +105,10 @@ class SpallocEIEIOConnection(
         for _try in range(_NUM_UPDATE_TAG_TRIES):
             try:
                 self.send(data)
-                response_data = self.receive(_UPDATE_TAG_TIMEOUT)
-                request.get_scp_response().read_bytestring(
-                    response_data, len(_TWO_SKIP))
+                if do_receive:
+                    response_data = self.receive(_UPDATE_TAG_TIMEOUT)
+                    request.get_scp_response().read_bytestring(
+                        response_data, len(_TWO_SKIP))
                 return
             except SpinnmanTimeoutException as e:
                 if _try + 1 == _NUM_UPDATE_TAG_TRIES:

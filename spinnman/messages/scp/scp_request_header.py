@@ -18,10 +18,11 @@ _TWO_SHORTS = struct.Struct("<2H")
 
 
 class SCPRequestHeader(object):
-    """ Represents the header of an SCP Request
-        Each optional parameter in the constructor can be set to a value other\
-        than None once, after which it is immutable.  It is an error to set a\
-        parameter that is not currently None.
+    """
+    Represents the header of an SCP Request
+    Each optional parameter in the constructor can be set to a value other
+    than `None` once, after which it is immutable.  It is an error to set a
+    parameter that is not currently `None`.
     """
     __slots__ = [
         "_command",
@@ -29,10 +30,9 @@ class SCPRequestHeader(object):
 
     def __init__(self, command, sequence=0):
         """
-
         :param SCPCommand command: The SCP command
         :param int sequence:
-            The number of the SCP packet in order of all packets\
+            The number of the SCP packet in order of all packets
             sent or received, between 0 and 65535
         :raise SpinnmanInvalidParameterException:
             If one of the parameters is incorrect
@@ -42,7 +42,8 @@ class SCPRequestHeader(object):
 
     @property
     def command(self):
-        """ The command of the SCP packet
+        """
+        The command of the SCP packet.
 
         :rtype: SCPCommand
         """
@@ -50,7 +51,8 @@ class SCPRequestHeader(object):
 
     @property
     def sequence(self):
-        """ The sequence number of the SCP packet, between 0 and 65535
+        """
+        The sequence number of the SCP packet, between 0 and 65535.
 
         :rtype: int
         """
@@ -58,7 +60,8 @@ class SCPRequestHeader(object):
 
     @sequence.setter
     def sequence(self, sequence):
-        """ Set the sequence number of the SCP packet
+        """
+        Set the sequence number of the SCP packet.
 
         :param int sequence: The sequence number to set, between 0 and 65535
         :raise SpinnmanInvalidParameterException:
@@ -68,7 +71,8 @@ class SCPRequestHeader(object):
 
     @property
     def bytestring(self):
-        """ The header as a bytestring
+        """
+        The header as a byte-string.
 
         :rtype: bytes
         """
