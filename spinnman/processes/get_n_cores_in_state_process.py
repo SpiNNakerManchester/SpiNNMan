@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from spinnman.messages.scp.impl import CountState
-from spinnman.data.spinnman_data_view import SpiNNManDataView
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
