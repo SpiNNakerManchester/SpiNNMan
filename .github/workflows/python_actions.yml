@@ -36,7 +36,6 @@ jobs:
       with:
         repository: SpiNNakerManchester/SupportScripts
         path: support
-        ref: spell-chucking
     - name: Install pip, etc
       uses: ./support/actions/python-tools
 
@@ -63,8 +62,6 @@ jobs:
       uses: ./support/actions/pylint
       with: 
         package: spinnman
-        exitcheck: 39
-        # Enable spell checking
         language: en_GB
 
   validate:
@@ -85,7 +82,6 @@ jobs:
       with:
         repository: SpiNNakerManchester/SupportScripts
         path: support
-        ref: spell-chucking
     - name: Install pip, etc
       uses: ./support/actions/python-tools
     - name: Install Spinnaker Dependencies
