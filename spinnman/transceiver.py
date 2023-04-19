@@ -1175,13 +1175,14 @@ class Transceiver(AbstractContextManager):
         core_subsets.add_processor(x, y, p)
         return next(self.get_iobuf(core_subsets))
 
-    def get_core_state_count(self, app_id, state):
+    def get_core_state_count(self, app_id, state, xys=None):
         """
         Get a count of the number of cores which have a given state.
 
         :param int app_id:
             The ID of the application from which to get the count.
         :param CPUState state: The state count to get
+        :param list(int,int) xys: The chips to query, or None for all
         :return: A count of the cores with the given status
         :rtype: int
         :raise SpinnmanIOException:
@@ -1196,7 +1197,13 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         process = GetNCoresInStateProcess(self._scamp_connection_selector)
-        return process.get_n_cores_in_state(app_id, state)
+        chip_xys = xys
+        if xys is None:
+            machine = SpiNNManDataView.get_machine()
+            chip_xys = [(ch.x, ch.y)
+                        for ch in machine.ethernet_connected_chips]
+
+        return process.get_n_cores_in_state(chip_xys, app_id, state)
 
     def execute(
             self, x, y, processors, executable, app_id, n_bytes=None,

@@ -33,18 +33,16 @@ class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
     def __handle_response(self, response):
         self._n_cores += response.count
 
-    def get_n_cores_in_state(self, app_id, state):
+    def get_n_cores_in_state(self, xys, app_id, state):
         """
-        :param ~spinn_machine.CoreSubsets core_subsets:
+        :param list(int,int) xys:
         :param int app_id:
         :param int state:
         :rtype: int
         """
-        machine = SpiNNManDataView.get_machine()
-        for chip in machine.ethernet_connected_chips:
+        for c_x, c_y in xys:
             self._send_request(
-                CountState(chip.x, chip.y, app_id, state),
-                self.__handle_response)
+                CountState(c_x, c_y, app_id, state), self.__handle_response)
         self._finish()
         self.check_for_error()
 
