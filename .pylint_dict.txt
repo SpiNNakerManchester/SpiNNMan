@@ -1,4 +1,4 @@
-# Copyright (c) 2017 The University of Manchester
+# Copyright (c) 2023 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import unittest
-from spinn_utilities.config_holder import run_config_checks
-import spinnman
-from spinnman.config_setup import unittest_setup
+# Our abbreviations/names
+Spalloc
+bmpc
+ybug
+txrx
 
+# Our special words
+keepalive
 
-class TestCfgChecker(unittest.TestCase):
+# Python packages
+websocket
 
-    def setUp(self):
-        unittest_setup()
-
-    def test_config_checks(self):
-        unittests = os.path.dirname(__file__)
-        spinnman_dir = spinnman.__path__[0]
-        run_config_checks(directories=[spinnman_dir, unittests])
+# Python types
+BMPConnectionData
+BufferedIOBase
+CoreSubset
+CPUInfo
+CPUState
+HeapElement
+IOBuffer
+RawIOBase
+SCAMPConnection
+SpinnakerBootMessage
+SystemVariableDefinition
+WebSocket

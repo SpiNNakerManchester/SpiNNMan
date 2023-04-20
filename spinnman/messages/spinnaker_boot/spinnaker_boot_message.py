@@ -107,7 +107,7 @@ class SpinnakerBootMessage(object):
     @property
     def bytestring(self):
         """
-        The message as a bytestring.
+        The message as a byte-string.
 
         :rtype: bytes
         """

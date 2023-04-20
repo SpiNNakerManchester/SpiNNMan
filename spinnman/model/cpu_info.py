@@ -54,7 +54,7 @@ class CPUInfo(object):
         :param int x: The x-coordinate of a chip
         :param int y: The y-coordinate of a chip
         :param int p: The ID of a core on the chip
-        :param bytes cpu_data: A bytestring received from SDRAM on the board
+        :param bytes cpu_data: A byte-string received from SDRAM on the board
         :param int offset:
         """
         # pylint: disable=too-many-arguments

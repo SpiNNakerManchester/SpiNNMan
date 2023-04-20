@@ -41,7 +41,8 @@ class SpallocEIEIOConnection(
         EIEIOConnection, SpallocProxiedConnection, metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO connected sockets.
-    This emulates an EIEOConnection opened with a remote address specified.
+    This emulates an :py:class:`EIEOConnection` opened with a remote address
+    specified.
     """
     __slots__ = ()
 
@@ -84,8 +85,8 @@ class SpallocEIEIOConnection(
 
     def update_tag(self, tag: int, do_receive: bool = True):
         """
-        Update the given tag on the connected ethernet chip to send messages to
-        this connection.
+        Update the given tag on the connected Ethernet-enabled chip to send
+        messages to this connection.
 
         :param int tag: The tag ID to update
         :param bool do_receive:

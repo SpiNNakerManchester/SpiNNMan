@@ -186,8 +186,8 @@ class SpiNNManDataView(MachineDataView):
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray, the length of the bytearray will be\
-              used
+            * If `data` is a byte string (bytearray or bytes), the length of\
+              the byte string will be used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the length of the file will be used
         :param int offset: The offset from which the valid data begins
@@ -220,7 +220,7 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def get_app_id(cls):
         """
-        Gets the main app id used by the transceiver.
+        Gets the main app_id used by the transceiver.
 
         This method will create a new app_id if one has not yet been created.
 
@@ -251,7 +251,6 @@ class SpiNNManDataView(MachineDataView):
         previously `get_transceiver().app_id_tracker().free_id(app_id)`
 
         :param int app_id:
-
         """
         if cls.__data._app_id_tracker:
             cls.__data._app_id_tracker.free_id(app_id)
@@ -259,7 +258,7 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def get_scamp_connection_selector(cls):
         """
-        Gets the scamp connection selector from the transceiver.
+        Gets the SCAMP connection selector from the transceiver.
 
         Syntactic sugar for `get_transceiver().scamp_connection_selector()`
 

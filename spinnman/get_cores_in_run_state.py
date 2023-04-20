@@ -20,6 +20,7 @@ import sys
 import argparse
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinn_machine import CoreSubsets, CoreSubset
+from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.model.enums import CPUState
 
 SCAMP_ID = 0
@@ -64,7 +65,8 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
 
 def _make_transceiver(host, version, bmp_names):
     """
-    :param host: Most to use or `None` to use test config for all params
+    :param host:
+        Host to use or `None` to use test configuration for all parameters
     :type host: str or None
     :param version: Board version to use (`None` defaults to 5 unless host is
         192.168.240.253 (spin 3)
@@ -74,12 +76,7 @@ def _make_transceiver(host, version, bmp_names):
     :rtype: Transceiver
     """
     if host is None:
-        try:
-            from board_test_configuration import BoardTestConfiguration
-            config = BoardTestConfiguration()
-        except ImportError:
-            print("cannot read board test configuration")
-            sys.exit(1)
+        config = BoardTestConfiguration()
         config.set_up_remote_board()
         host = config.remotehost
         version = config.board_version

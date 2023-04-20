@@ -95,7 +95,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
-        visualisers and other third party code participating in the Spinnaker
+        visualisers and other third party code participating in the SpiNNaker
         Tools Notification Protocol.
 
         .. note::
@@ -222,7 +222,7 @@ def _SpallocKeepalive(url, interval, term_queue, cookies, headers):
 
 class _SpallocMachine(SessionAware, SpallocMachine):
     """
-    Represents a spalloc-controlled machine.
+    Represents a Spalloc-controlled machine.
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
@@ -413,7 +413,7 @@ class _ProxyReceiver(threading.Thread):
 
 class _SpallocJob(SessionAware, SpallocJob):
     """
-    Represents a job in spalloc.
+    Represents a job in Spalloc.
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """

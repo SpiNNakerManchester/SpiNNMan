@@ -72,7 +72,7 @@ class SCPRequestHeader(object):
     @property
     def bytestring(self):
         """
-        The header as a bytestring.
+        The header as a byte-string.
 
         :rtype: bytes
         """

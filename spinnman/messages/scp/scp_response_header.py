@@ -55,9 +55,9 @@ class SCPResponseHeader(object):
     @staticmethod
     def from_bytestring(data, offset):
         """
-        Read a header from a bytestring.
+        Read a header from a byte-string.
 
-        :param bytes data: The bytestring to read from
+        :param bytes data: The byte-string to read from
         :param int offset:
         """
         result, sequence = _TWO_SHORTS.unpack_from(data, offset)
