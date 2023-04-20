@@ -52,13 +52,18 @@ extensions = [
     'sphinx.ext.intersphinx'
 ]
 
+# Which version of other SpiNNaker docs do we refer to?
+spinnaker_doc_version = "latest"
+
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.8', None),
     'spinn_utilities': (
-        'https://spinnutils.readthedocs.io/en/latest/', None),
+        f'https://spinnutils.readthedocs.io/en/{spinnaker_doc_version}/',
+        None),
     'spinn_machine': (
-        'https://spinnmachine.readthedocs.io/en/latest/', None),
-    # WARNING! This is a forward reference!
+        f'https://spinnmachine.readthedocs.io/en/{spinnaker_doc_version}/',
+        None),
+    # WARNING! This is a forward reference! Do not use version in it
     'spinn_front_end_common': (
         'https://spinnfrontendcommon.readthedocs.io/en/latest/', None),
 }
