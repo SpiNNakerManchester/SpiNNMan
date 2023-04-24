@@ -41,7 +41,7 @@ class ExecutableTargets(object):
         :param str binary: the path to the binary needed to be executed
         :param ~spinn_machine.CoreSubsets subsets:
             the subset of cores that the binary needs to be loaded on
-        :param ~spinn_machine.model.enum.ExecutableType executable_type:
+        :param ~spinnman.model.enum.ExecutableType executable_type:
             The type of this executable.
             ``None`` means don't record it.
         """
@@ -66,7 +66,7 @@ class ExecutableTargets(object):
         :param int chip_y:
             the coordinate on the machine in terms of y for the chip
         :param int chip_p: the processor ID to place this executable on
-        :param ~spinn_machine.model.enum.ExecutableType executable_type:
+        :param ~spinnman.model.enum.ExecutableType executable_type:
             the executable type for locating n cores of
         """
         if self.known(binary, chip_x, chip_y, chip_p):
@@ -83,7 +83,7 @@ class ExecutableTargets(object):
         """
         Get the number of cores that the executable type is using.
 
-        :param ~spinn_machine.model.enum.ExecutableType executable_type:
+        :param ~spinnman.model.enum.ExecutableType executable_type:
         :return: the number of cores using this executable type
         :rtype: int
         """
@@ -95,7 +95,7 @@ class ExecutableTargets(object):
         """
         Get the binaries of a given a executable type.
 
-        :param ~spinn_machine.model.enum.ExecutableType executable_type:
+        :param ~spinnman.model.enum.ExecutableType executable_type:
             the executable type enum value
         :return: iterable of binaries with that executable type
         :rtype: iterable(str)
@@ -108,7 +108,7 @@ class ExecutableTargets(object):
 
         :return: iterable of the executable types in this binary set.
         :rtype:
-            iterable(~spinn_machine.model.enum.ExecutableType)
+            iterable(~spinnman.model.enum.ExecutableType)
         """
         return self._binary_type_map.keys()
 
