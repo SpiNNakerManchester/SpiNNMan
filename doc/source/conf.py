@@ -63,9 +63,6 @@ intersphinx_mapping = {
     'spinn_machine': (
         f'https://spinnmachine.readthedocs.io/en/{spinnaker_doc_version}/',
         None),
-    # WARNING! This is a forward reference! Do not use version in it
-    'spinn_front_end_common': (
-        'https://spinnfrontendcommon.readthedocs.io/en/latest/', None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
