@@ -38,10 +38,8 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def _spinnman_mock(self):
         """
-        Like _mock but does not call super class _mock.
-        This method should only be called by setup (via _setup)
-
-        This method should only be called by mock via _mock
+        Like :py:meth:`_mock` but does not call superclass `_mock`.
+        This method should only be called by `mock` via `_mock`
         """
         self.__data._clear()
 
@@ -52,9 +50,9 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def _spinnman_setup(self):
         """
-        Like _setup but does not call super class _setup.
+        Like :py:meth:`_setup` but does not call superclass `_setup`.
 
-        This method should only be called by setup (via _setup)
+        This method should only be called by `setup` (via `_setup`)
         """
         self.__data._clear()
 
@@ -66,7 +64,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     def _local_hard_reset(self):
         """
         Puts spinnman data back into the state expected at graph changed and
-            sim.reset
+        `sim.reset`.
 
         Unlike hard_reset this method does not call super classes
 
@@ -82,10 +80,10 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def _local_soft_reset(self):
         """
-        Puts all data back into the state expected at sim.reset but not
+        Puts all data back into the state expected at `sim.reset` but not
         graph changed.
 
-        Unlike soft_reset this method does not call super classes
+        Unlike soft_reset this method does not call superclasses
 
         This method should only be called by soft_reset (via _soft_reset)
         """

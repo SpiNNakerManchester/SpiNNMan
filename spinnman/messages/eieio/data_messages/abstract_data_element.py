@@ -25,10 +25,10 @@ class AbstractDataElement(object, metaclass=AbstractBase):
     @abstractmethod
     def get_bytestring(self, eieio_type):
         """
-        Get a bytestring for the given type
+        Get a byte-string for the given type
 
         :param EIEIOType eieio_type: The type of the message being written
-        :return: A bytestring for the element
+        :return: A byte-string for the element
         :rtype: bytes
         :raise SpinnmanInvalidParameterException:
             If the type is incompatible with the element

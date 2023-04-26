@@ -26,7 +26,7 @@ def read_eieio_command_message(data, offset):
     identifying the command which was contained in the packet, including
     any parameter, if required by the command.
 
-    :param bytes data: data received from the network as a bytestring
+    :param bytes data: data received from the network as a byte-string
     :param int offset: offset at which the parsing operation should start
     :return: an object which inherits from EIEIOCommandMessage which contains
         parsed data received from the network

@@ -126,13 +126,14 @@ def reprogram_tag_to_listener(
 
     :param UDPConnection connection: The connection to target the tag at
     :param int x:
-        The X coordinate of the ethernet chip that should send to the
+        The X coordinate of the Ethernet-enabled chip that should send to the
         connection
     :param int y:
-        The Y coordinate of the ethernet chip that should send to the
+        The Y coordinate of the Ethernet-enabled chip that should send to the
         connection
     :param str ip_address:
-        The IP address of the ethernet chip that should be given the message
+        The IP address of the Ethernet-enabled chip that should be given the
+        message
     :param int tag: The id of the tag to set
     :param bool strip:
         True if the tag should strip SDP headers from outgoing messages
