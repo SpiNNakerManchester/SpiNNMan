@@ -17,6 +17,8 @@ from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
+APP_COPY_RUN_TIMEOUT = 6.0
+
 
 def _on_same_board(chip_1, chip_2):
     return (chip_1.nearest_ethernet_x == chip_2.nearest_ethernet_x and
@@ -78,6 +80,10 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         called!
     """
     __slots__ = []
+
+    def __init__(self, next_connection_selector, timeout=APP_COPY_RUN_TIMEOUT):
+        AbstractMultiConnectionProcess.__init__(
+            self, next_connection_selector, timeout=timeout)
 
     def run(self, size, app_id, core_subsets, chksum, wait):
         """
