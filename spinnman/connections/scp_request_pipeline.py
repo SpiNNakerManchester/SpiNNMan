@@ -294,6 +294,7 @@ class SCPRequestPipeLine(object):
     def _resend(self, seq, request_sent, reason):
         if self._retries[seq] <= 0:
             # Report timeouts as timeout exception
+            self._retry_reason[seq].append(reason)
             if all(reason == "timeout" for reason in self._retry_reason[seq]):
                 raise SpinnmanTimeoutException(
                     request_sent,
