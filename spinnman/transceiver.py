@@ -947,21 +947,6 @@ class Transceiver(AbstractContextManager):
             data_item.data_type.struct_code,
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
-    @staticmethod
-    def get_user_0_register_address_from_core(p):
-        """
-        Get the address of user 0 for a given processor on the board.
-
-        .. note::
-            Conventionally, user_0 usually holds the address of the table of
-            memory regions.
-
-        :param int p: The ID of the processor to get the user 0 address from
-        :return: The address for user 0 register for this processor
-        :rtype: int
-        """
-        return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
-
     def read_user_0(self, x, y, p):
         """
         Get the contents of the user_0 register for the given processor.
@@ -1006,8 +991,61 @@ class Transceiver(AbstractContextManager):
         addr = self.get_user_1_register_address_from_core(p)
         return self.read_word(x, y, addr)
 
-    @staticmethod
-    def get_user_1_register_address_from_core(p):
+    def read_user_2(self, x, y, p):
+        """
+        Get the contents of the user_2 register for the given processor.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        addr = self.get_user_2_register_address_from_core(p)
+        return self.read_word(x, y, addr)
+
+    def read_user_3(self, x, y, p):
+        """
+        Get the contents of the user_3 register for the given processor.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        addr = self.get_user_3_register_address_from_core(p)
+        return self.read_word(x, y, addr)
+
+    def get_user_0_register_address_from_core(self, p):
+        """
+        Get the address of user 0 for a given processor on the board.
+
+        .. note::
+            Conventionally, user_0 usually holds the address of the table of
+            memory regions.
+
+        :param int p: The ID of the processor to get the user 0 address from
+        :return: The address for user 0 register for this processor
+        :rtype: int
+        """
+        return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
+
+    def get_user_1_register_address_from_core(self, p):
         """
         Get the address of user 1 for a given processor on the board.
 
@@ -1017,8 +1055,7 @@ class Transceiver(AbstractContextManager):
         """
         return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
-    @staticmethod
-    def get_user_2_register_address_from_core(p):
+    def get_user_2_register_address_from_core(self, p):
         """
         Get the address of user 2 for a given processor on the board.
 
@@ -1028,8 +1065,7 @@ class Transceiver(AbstractContextManager):
         """
         return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
 
-    @staticmethod
-    def get_user_3_register_address_from_core(p):
+    def get_user_3_register_address_from_core(self, p):
         """
         Get the address of user 3 for a given processor on the board.
 
@@ -1681,6 +1717,46 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         addr = self.get_user_1_register_address_from_core(p)
+        self.write_memory(x, y, addr, int(value))
+
+    def write_user_2(self, x, y, p, value):
+        """
+        Write to the user_2 register for the given processor.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :param int value: The value to write
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        addr = self.get_user_2_register_address_from_core(p)
+        self.write_memory(x, y, addr, int(value))
+
+    def write_user_3(self, x, y, p, value):
+        """
+        Write to the user_3 register for the given processor.
+
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :param int value: The value to write
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        addr = self.get_user_3_register_address_from_core(p)
         self.write_memory(x, y, addr, int(value))
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
