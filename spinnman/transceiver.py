@@ -968,8 +968,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_0_register_address_from_core(p)
-        return self.read_word(x, y, addr)
+        return self.read_word(x, y, self._user_0_register(p))
 
     def read_user_1(self, x, y, p):
         """
@@ -988,8 +987,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_1_register_address_from_core(p)
-        return self.read_word(x, y, addr)
+        return self.read_word(x, y, self._user_1_register(p))
 
     def read_user_2(self, x, y, p):
         """
@@ -1008,8 +1006,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_2_register_address_from_core(p)
-        return self.read_word(x, y, addr)
+        return self.read_word(x, y, self._user_2_register(p))
 
     def read_user_3(self, x, y, p):
         """
@@ -1028,10 +1025,9 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_3_register_address_from_core(p)
-        return self.read_word(x, y, addr)
+        return self.read_word(x, y, self._user_3_register(p))
 
-    def get_user_0_register_address_from_core(self, p):
+    def _user_0_register(self, p):
         """
         Get the address of user 0 for a given processor on the board.
 
@@ -1045,7 +1041,7 @@ class Transceiver(AbstractContextManager):
         """
         return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
 
-    def get_user_1_register_address_from_core(self, p):
+    def _user_1_register(self, p):
         """
         Get the address of user 1 for a given processor on the board.
 
@@ -1055,7 +1051,7 @@ class Transceiver(AbstractContextManager):
         """
         return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
 
-    def get_user_2_register_address_from_core(self, p):
+    def _user_2_register(self, p):
         """
         Get the address of user 2 for a given processor on the board.
 
@@ -1065,7 +1061,7 @@ class Transceiver(AbstractContextManager):
         """
         return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
 
-    def get_user_3_register_address_from_core(self, p):
+    def _user_3_register(self, p):
         """
         Get the address of user 3 for a given processor on the board.
 
@@ -1696,8 +1692,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_0_register_address_from_core(p)
-        self.write_memory(x, y, addr, int(value))
+        self.write_memory(x, y, self._user_0_register(p), int(value))
 
     def write_user_1(self, x, y, p, value):
         """
@@ -1716,8 +1711,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_1_register_address_from_core(p)
-        self.write_memory(x, y, addr, int(value))
+        self.write_memory(x, y, self._user_1_register(p), int(value))
 
     def write_user_2(self, x, y, p, value):
         """
@@ -1736,8 +1730,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_2_register_address_from_core(p)
-        self.write_memory(x, y, addr, int(value))
+        self.write_memory(x, y, self._user_2_register(p), int(value))
 
     def write_user_3(self, x, y, p, value):
         """
@@ -1756,8 +1749,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_3_register_address_from_core(p)
-        self.write_memory(x, y, addr, int(value))
+        self.write_memory(x, y, self._user_3_register(p), int(value))
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
                                n_bytes=None, offset=0, cpu=0):
