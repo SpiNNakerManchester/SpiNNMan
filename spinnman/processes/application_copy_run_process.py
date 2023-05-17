@@ -25,7 +25,7 @@ def _on_same_board(chip_1, chip_2):
             chip_1.nearest_ethernet_y == chip_2.nearest_ethernet_y)
 
 
-def _get_next_chips(chips_done, parent_chips):
+def _get_next_chips(chips_done, parent_chips, machine):
     """
     Get the chips that are adjacent to the last set of chips, which
     haven't yet been loaded.  Also returned are the links for each chip,
@@ -42,6 +42,7 @@ def _get_next_chips(chips_done, parent_chips):
     next_chips = list()
     for eth_chip in chips_done:
         for c_x, c_y in chips_done[eth_chip]:
+            chip_xy = machine.get_chip_at(c_x, c_y)
             last_done = None
             for chip in parent_chips[c_x, c_y]:
                 eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
@@ -53,7 +54,7 @@ def _get_next_chips(chips_done, parent_chips):
                     break
             # Only copy once from this board this round
             if (last_done is not None and
-                    not _on_same_board(last_done, eth_chip)):
+                    not _on_same_board(last_done, chip_xy)):
                 break
 
     return next_chips
@@ -111,7 +112,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         chips_done = defaultdict(list)
         chips_done[boot_chip.x, boot_chip.y].append((boot_chip.x, boot_chip.y))
         parent_chips = _compute_parent_chips(machine)
-        next_chips = _get_next_chips(chips_done, parent_chips)
+        next_chips = _get_next_chips(chips_done, parent_chips, machine)
 
         while next_chips:
             # Do all the chips at the current level
@@ -124,4 +125,4 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
                 chips_done[eth].append((chip.x, chip.y))
             self._finish()
             self.check_for_error()
-            next_chips = _get_next_chips(chips_done, parent_chips)
+            next_chips = _get_next_chips(chips_done, parent_chips, machine)
