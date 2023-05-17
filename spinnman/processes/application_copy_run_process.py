@@ -41,21 +41,20 @@ def _get_next_chips(chips_done, parent_chips, machine):
     """
     next_chips = list()
     for eth_chip in chips_done:
+        off_board_copy_done = False
         for c_x, c_y in chips_done[eth_chip]:
             chip_xy = machine.get_chip_at(c_x, c_y)
-            last_done = None
             for chip in parent_chips[c_x, c_y]:
+                on_same_board = _on_same_board(chip, chip_xy)
                 eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
                 if (eth not in chips_done or
                         (chip.x, chip.y) not in chips_done[eth]):
-                    next_chips.append(chip)
-                    last_done = chip
-                    # Only do one copy from each chip at a time
-                    break
-            # Only copy once from this board this round
-            if (last_done is not None and
-                    not _on_same_board(last_done, chip_xy)):
-                break
+                    if on_same_board or not off_board_copy_done:
+                        next_chips.append(chip)
+                        if not on_same_board:
+                            off_board_copy_done = True
+                        # Only do one copy from each chip at a time
+                        break
 
     return next_chips
 
