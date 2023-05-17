@@ -109,7 +109,8 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         """
         machine = SpiNNManDataView.get_machine()
         boot_chip = machine.boot_chip
-        chips_done = {(boot_chip.x, boot_chip.y): [(boot_chip.x, boot_chip.y)]}
+        chips_done = defaultdict(list)
+        chips_done[boot_chip.x, boot_chip.y].append((boot_chip.x, boot_chip.y))
         parent_chips = _compute_parent_chips(machine)
         next_chips = _get_next_chips(chips_done, parent_chips, machine)
 
