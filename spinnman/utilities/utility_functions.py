@@ -19,8 +19,6 @@ from spinnman.messages.sdp import SDPMessage, SDPHeader, SDPFlag
 from spinnman.constants import SCP_SCAMP_PORT, CPU_INFO_BYTES, CPU_INFO_OFFSET
 from spinnman.connections.udp_packet_connections import (
     SCAMPConnection, UDPConnection)
-from spinnman.connections.udp_packet_connections.utils import (
-    update_sdp_header_for_udp_send)
 from spinnman.exceptions import SpinnmanTimeoutException
 
 
@@ -83,7 +81,7 @@ def send_port_trigger_message(connection, board_address):
     trigger_message = SDPMessage(SDPHeader(
         flags=SDPFlag.REPLY_NOT_EXPECTED, tag=0, destination_port=3,
         destination_cpu=0, destination_chip_x=0, destination_chip_y=0))
-    update_sdp_header_for_udp_send(trigger_message.sdp_header, 0, 0)
+    trigger_message.sdp_header.update_for_send(0, 0)
     connection.send_to(
         trigger_message.bytestring, (board_address, SCP_SCAMP_PORT))
 
@@ -145,7 +143,7 @@ def reprogram_tag_to_listener(
     request = IPTagSet(
         x, y, [0, 0, 0, 0], 0, tag,
         strip=strip, use_sender=True)
-    update_sdp_header_for_udp_send(request.sdp_header, x, y)
+    request.sdp_header.update_for_send(x, y)
     send_data = b'\0\0' + request.bytestring
     exn = None
     for _ in range(3):

@@ -16,7 +16,6 @@ import struct
 from spinn_utilities.overrides import overrides
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from .udp_connection import UDPConnection
-from .utils import update_sdp_header_for_udp_send
 from spinnman.connections.abstract_classes import Listenable
 
 _TWO_SKIP = struct.Struct("<2x")
@@ -86,10 +85,9 @@ class SDPConnection(UDPConnection, Listenable):
         """
         # If a reply is expected, the connection should
         if sdp_message.sdp_header.flags == SDPFlag.REPLY_EXPECTED:
-            update_sdp_header_for_udp_send(
-                sdp_message.sdp_header, self._chip_x, self._chip_y)
+            sdp_message.sdp_header.update_for_send(self._chip_x, self._chip_y)
         else:
-            update_sdp_header_for_udp_send(sdp_message.sdp_header, 0, 0)
+            sdp_message.sdp_header.update_for_send(0, 0)
         self.send(_TWO_SKIP.pack() + sdp_message.bytestring)
 
     @overrides(Listenable.get_receive_method)

@@ -16,7 +16,6 @@ import struct
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
 from .sdp_connection import SDPConnection
-from .utils import update_sdp_header_for_udp_send
 from spinnman.connections.abstract_classes import AbstractSCPConnection
 from spinn_utilities.overrides import overrides
 
@@ -28,7 +27,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
     """
     A UDP connection to SCAMP on the board.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(
             self, chip_x=255, chip_y=255, local_host=None, local_port=None,
@@ -80,7 +79,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
             x = self._chip_x
         if y is None:
             y = self._chip_y
-        update_sdp_header_for_udp_send(scp_request.sdp_header, x, y)
+        scp_request.sdp_header.update_for_send(x, y)
         return _TWO_SKIP.pack() + scp_request.bytestring
 
     @overrides(AbstractSCPConnection.receive_scp_response)

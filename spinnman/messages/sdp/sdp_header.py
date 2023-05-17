@@ -18,6 +18,9 @@ from spinnman.data import SpiNNManDataView
 
 N_BYTES = 8
 _EIGHT_BYTES = struct.Struct("<8B")
+_SDP_SOURCE_PORT = 7
+_SDP_SOURCE_CPU = 31
+_SDP_TAG = 0xFF
 
 
 class SDPHeader(object):
@@ -319,3 +322,18 @@ class SDPHeader(object):
                 return chip.get_physical_core_string(
                     self._destination_cpu)
         return ""
+
+    def update_for_send(self, source_x, source_y):
+        """
+        Apply defaults to the header for sending over UDP.
+
+        :param int source_x:
+            Where the packet is deemed to originate: X coordinate
+        :param int source_y:
+            Where the packet is deemed to originate: Y coordinate
+        """
+        self.tag = _SDP_TAG
+        self.source_port = _SDP_SOURCE_PORT
+        self.source_cpu = _SDP_SOURCE_CPU
+        self.source_chip_x = source_x
+        self.source_chip_y = source_y

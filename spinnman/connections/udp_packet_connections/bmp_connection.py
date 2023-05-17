@@ -18,7 +18,6 @@ from .udp_connection import UDPConnection
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.connections.abstract_classes import AbstractSCPConnection
-from .utils import update_sdp_header_for_udp_send
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")
@@ -91,7 +90,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @overrides(AbstractSCPConnection.get_scp_data)
     def get_scp_data(self, scp_request):
-        update_sdp_header_for_udp_send(scp_request.sdp_header, 0, 0)
+        scp_request.sdp_header.update_for_send(0, 0)
         return _TWO_SKIP.pack() + scp_request.bytestring
 
     @overrides(AbstractSCPConnection.receive_scp_response)

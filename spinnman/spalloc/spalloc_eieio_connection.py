@@ -17,12 +17,10 @@ API of the client for the Spalloc web service.
 
 import struct
 from typing import Tuple
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractproperty)
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import Listenable
-from spinnman.connections.udp_packet_connections import (
-    update_sdp_header_for_udp_send, EIEIOConnection)
+from spinnman.connections.udp_packet_connections import EIEIOConnection
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.eieio import (
     AbstractEIEIOMessage,
@@ -75,7 +73,8 @@ class SpallocEIEIOConnection(
     def get_receive_method(self):
         return self.receive_eieio_message
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def _coords(self) -> Tuple[int, int]:
         """
         The X, Y coordinates of the chip this connection is connected to.
@@ -100,7 +99,7 @@ class SpallocEIEIOConnection(
         request = IPTagSet(
             x, y, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
         request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
-        update_sdp_header_for_udp_send(request.sdp_header, x, y)
+        request.sdp_header.update_for_send(x, y)
         data = _TWO_SKIP + request.bytestring
         for _try in range(_NUM_UPDATE_TAG_TRIES):
             try:
