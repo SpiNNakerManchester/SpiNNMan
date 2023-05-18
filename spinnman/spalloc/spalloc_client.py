@@ -24,8 +24,8 @@ import requests
 import sqlite3
 import struct
 import threading
-from typing import Dict, List, Tuple
-from websocket import WebSocket
+from typing import Dict, Collection, Tuple, cast
+from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
@@ -91,7 +91,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
-    def open_job_from_database(conn: sqlite3.Cursor) -> SpallocJob:
+    def open_job_from_database(conn: sqlite3.Cursor) -> SpallocJob | None:
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
@@ -589,11 +589,12 @@ class _SpallocJob(SessionAware, SpallocJob):
         return self._keepalive_handle
 
     @overrides(SpallocJob.where_is_machine)
-    def where_is_machine(self, x: int, y: int) -> Tuple[int, int, int]:
+    def where_is_machine(self, x: int, y: int) -> Tuple[int, int, int] | None:
         r = self._get(self.__chip_url, x=int(x), y=int(y))
         if r.status_code == 204:
             return None
-        return tuple(r.json()["physical-board-coordinates"])
+        return cast(Tuple[int, int, int], tuple(
+            r.json()["physical-board-coordinates"]))
 
     @property
     def _keepalive_handle(self):
@@ -630,10 +631,10 @@ class _ProxiedConnection(metaclass=AbstractBase):
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         self.__ws = ws
         self.__receiver = receiver
-        self.__msgs = queue.SimpleQueue()
-        self.__call_queue = queue.Queue(1)
+        self.__msgs: queue.SimpleQueue = queue.SimpleQueue()
+        self.__call_queue: queue.Queue = queue.Queue(1)
         self.__call_lock = threading.RLock()
-        self.__current_msg = None
+        self.__current_msg: bytes | None = None
         self.__handle = self._open_connection()
         self.__receiver.listen(self.__handle, self.__msgs.put)
 
@@ -642,7 +643,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         pass
 
     def _call(self, proto: ProxyProtocol, packer: struct.Struct,
-              unpacker: struct.Struct, *args) -> List[int]:
+              unpacker: struct.Struct, *args) -> Collection[int]:
         if not self._connected:
             raise IOError("socket closed")
         with self.__call_lock:
@@ -774,8 +775,8 @@ class _ProxiedUnboundConnection(
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         super().__init__(ws, receiver)
-        self.__addr = None
-        self.__port = None
+        self.__addr: str | None = None
+        self.__port: int | None = None
 
     @overrides(_ProxiedConnection._open_connection)
     def _open_connection(self) -> int:
@@ -786,11 +787,11 @@ class _ProxiedUnboundConnection(
         return handle
 
     @property
-    def _addr(self) -> str:
+    def _addr(self) -> str | None:
         return self.__addr if self._connected else None
 
     @property
-    def _port(self) -> int:
+    def _port(self) -> int | None:
         return self.__port if self._connected else None
 
     @overrides(Connection.is_connected)
@@ -888,12 +889,12 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
 
     @property
     @overrides(SpallocEIEIOListener.local_ip_address)
-    def local_ip_address(self) -> str:
+    def local_ip_address(self) -> str | None:
         return self._addr
 
     @property
     @overrides(SpallocEIEIOListener.local_port)
-    def local_port(self) -> int:
+    def local_port(self) -> int | None:
         return self._port
 
     @overrides(SpallocEIEIOListener._get_chip_coords)

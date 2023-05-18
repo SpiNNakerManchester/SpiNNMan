@@ -56,7 +56,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job(
-            self, num_boards: int = 1, machine_name: str = None,
+            self, num_boards: int = 1, machine_name: str | None = None,
             keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a specified number of boards.
@@ -75,7 +75,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job_rect(
-            self, width: int, height: int, machine_name: str = None,
+            self, width: int, height: int, machine_name: str | None = None,
             keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a rectangle of boards.
@@ -96,9 +96,10 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job_board(
-            self, triad: Tuple[int, int, int] = None,
-            physical: Tuple[int, int, int] = None, ip_address: str = None,
-            machine_name: str = None, keepalive: int = 45) -> SpallocJob:
+            self, triad: Tuple[int, int, int] | None = None,
+            physical: Tuple[int, int, int] | None = None,
+            ip_address: str | None = None, machine_name: str | None = None,
+            keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a specific board. At least one of ``triad``,
         ``physical`` and ``ip_address`` must be not ``None``.

@@ -34,9 +34,9 @@ def clean_url(url: str) -> str:
     return urlunparse(parts)
 
 
-def parse_service_url(url: str) -> Tuple[str, str, str]:
+def parse_service_url(url: str) -> Tuple[str, str | None, str | None]:
     """
-    Parses a combined service reference.
+    Parses a combined service reference. Must include a hostname.
 
     :param str url:
     :return: URL, username (may be `None`), password (may be `None`)
@@ -46,6 +46,8 @@ def parse_service_url(url: str) -> Tuple[str, str, str]:
     user = pieces.username
     password = pieces.password
     netloc = pieces.hostname
+    if netloc is None:
+        raise ValueError("URL must have a hostname")
     if pieces.port is not None:
         netloc += f":{pieces.port}"
     url = urlunparse((
@@ -56,8 +58,12 @@ def parse_service_url(url: str) -> Tuple[str, str, str]:
 def get_hostname(url: str) -> str:
     """
     Parses a URL and extracts the hostname part.
+    A hostname must be present.
     """
-    return urlsplit(url).hostname
+    netloc = urlsplit(url).hostname
+    if netloc is None:
+        raise ValueError("URL must have a hostname")
+    return netloc
 
 
 def is_server_address(

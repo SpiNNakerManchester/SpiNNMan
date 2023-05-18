@@ -15,8 +15,8 @@ from functools import wraps
 from logging import getLogger
 import re
 import requests
-from typing import Dict, Tuple
-import websocket
+from typing import Dict, Tuple, cast
+import websocket  # type: ignore
 from spinn_utilities.log import FormatAdapter
 from .utils import clean_url
 from spinnman.exceptions import SpallocException
@@ -33,11 +33,11 @@ def _may_renew(method):
         """
         :param ~requests.PreparedRequest req:
         """
-        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
+        print('{} {}\n{}\r\n{}\r\n\r\n{}'.format(
             '>>>>>>>>>>>START>>>>>>>>>>>',
-            req.method + ' ' + req.url,
+            req.method, req.url,
             '\r\n'.join('{}: {}'.format(*kv) for kv in req.headers.items()),
-            req.body if req.body else ""))
+            cast(str, req.body) if req.body else ""))
 
     def pp_resp(resp: requests.Response):
         """
@@ -83,8 +83,10 @@ class Session:
 
     def __init__(
             self, service_url: str,
-            username: str = None, password: str = None, token: str = None,
-            session_credentials: Tuple[Dict[str, str], Dict[str, str]] = None):
+            username: str | None = None, password: str | None = None,
+            token: str | None = None,
+            session_credentials: Tuple[Dict[str, str], Dict[str, str]] | None =
+            None):
         """
         :param str service_url: The reference to the service.
             *Should not* include a username or password in it.
@@ -210,7 +212,8 @@ class Session:
                 headers={"Authorization": f"Bearer {self.__token}"},
                 allow_redirects=False, timeout=10)
             if not r.ok:
-                raise SpallocException(f"Could not renew session: {r.content}")
+                raise SpallocException(
+                    f"Could not renew session: {cast(str, r.content)}")
             self._session_id = r.cookies[_SESSION_COOKIE]
         else:
             # Step one: a temporary session so we can log in
@@ -264,8 +267,8 @@ class Session:
         return cookies, headers
 
     def websocket(
-            self, url: str, header: dict = None, cookie: str = None,
-            **kwargs) -> websocket.WebSocket:
+            self, url: str, header: dict | None = None,
+            cookie: str | None = None, **kwargs) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.
