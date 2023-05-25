@@ -24,6 +24,7 @@ class BMPGetVersion(BMPRequest):
     """
     An SCP request to read the version of software running on a core.
     """
+    __slots__ = ()
 
     def __init__(self, board):
         """

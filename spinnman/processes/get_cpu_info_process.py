@@ -21,8 +21,7 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess):
-    __slots__ = [
-        "_cpu_info"]
+    __slots__ = ("_cpu_info", )
 
     def __init__(self, connection_selector):
         """

@@ -23,8 +23,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
 
     __slots__ = (
         # the fixed route routing entry from the response
-        "_route",
-    )
+        "_route", )
 
     def __init__(self, connection_selector):
         """

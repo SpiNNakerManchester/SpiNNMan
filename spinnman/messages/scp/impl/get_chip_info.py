@@ -24,7 +24,7 @@ class GetChipInfo(AbstractSCPRequest):
     """
     An SCP request to read the chip information from a core.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, with_size=False):
         """

@@ -29,12 +29,12 @@ class ConnectionListener(Thread, AbstractContextManager):
     Thread that listens to a connection and calls callbacks with new
     messages when they arrive.
     """
-    __slots__ = [
+    __slots__ = (
         "__callback_pool",
         "__callbacks",
         "__connection",
         "__done",
-        "__timeout"]
+        "__timeout")
 
     def __init__(self, connection, n_processes=_POOL_SIZE, timeout=_TIMEOUT):
         """

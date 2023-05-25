@@ -22,9 +22,9 @@ class SCPResponseHeader(object):
     """
     Represents the header of an SCP Response.
     """
-    __slots__ = [
+    __slots__ = (
         "_result",
-        "_sequence"]
+        "_sequence")
 
     def __init__(self, result=None, sequence=None):
         """

@@ -26,7 +26,7 @@ class IPTagSetTTO(AbstractSCPRequest):
     """
     An SCP request to set the transient timeout for future SCP requests.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, tag_timeout):
         """

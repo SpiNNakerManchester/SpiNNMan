@@ -28,7 +28,7 @@ class AbstractMultiConnectionProcess:
     A process for talking to SpiNNaker efficiently that uses multiple
     connections in communication if relevant.
     """
-    __slots__ = [
+    __slots__ = (
         "_error_requests",
         "_exceptions",
         "_tracebacks",
@@ -38,7 +38,7 @@ class AbstractMultiConnectionProcess:
         "_n_retries",
         "_conn_selector",
         "_scp_request_pipelines",
-        "_timeout"]
+        "_timeout")
 
     def __init__(self, next_connection_selector,
                  n_retries=N_RETRIES, timeout=SCP_TIMEOUT, n_channels=8,

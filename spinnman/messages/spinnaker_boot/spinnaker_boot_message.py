@@ -25,13 +25,13 @@ class SpinnakerBootMessage(object):
     """
     A message used for booting the board.
     """
-    __slots__ = [
+    __slots__ = (
         "_data",
         "_offset",
         "_opcode",
         "_operand_1",
         "_operand_2",
-        "_operand_3"]
+        "_operand_3")
 
     def __init__(self, opcode, operand_1, operand_2, operand_3, data=None,
                  offset=0):

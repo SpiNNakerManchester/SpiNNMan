@@ -28,8 +28,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
     """
     An SCP Request to free space in the SDRAM.
     """
-    __slots__ = [
-        "_read_n_blocks_freed"]
+    __slots__ = "_read_n_blocks_freed",
 
     def __init__(self, x, y, app_id, base_address=None):
         """
@@ -77,9 +76,9 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
     """
     An SCP response to a request to deallocate SDRAM.
     """
-    __slots__ = [
+    __slots__ = (
         "_number_of_blocks_freed",
-        "_read_n_blocks_freed"]
+        "_read_n_blocks_freed")
 
     def __init__(self, read_n_blocks_freed=False):
         """

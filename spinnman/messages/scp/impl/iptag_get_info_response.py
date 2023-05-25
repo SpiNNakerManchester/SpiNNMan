@@ -25,10 +25,10 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
     """
     An SCP response to a request for information about IP tags.
     """
-    __slots__ = [
+    __slots__ = (
         "_fixed_size",
         "_pool_size",
-        "_tto"]
+        "_tto")
 
     def __init__(self):
         super().__init__()

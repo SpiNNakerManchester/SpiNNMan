@@ -19,10 +19,10 @@ class SDPMessage(object):
     """
     Wraps up an SDP message with a header and optional data.
     """
-    __slots__ = [
+    __slots__ = (
         "_data",
         "_offset",
-        "_sdp_header"]
+        "_sdp_header")
 
     def __init__(self, sdp_header, data=None, offset=0):
         """

@@ -316,13 +316,13 @@ def print_transceiver_tests(transceiver):
 
     with Section("Test writing bytearrays and ints to write_neighbour_memory "
                  "and extracting them"):
-        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=inputdata)
+        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, inputdata)
         data = struct.unpack(
             "<Q", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 8))[0]
         if data != 123456789123456789:
             raise ValueError("values are not identical")
 
-        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=123456789)
+        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, 123456789)
         data = struct.unpack(
             "<I", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 4))[0]
         if data != 123456789:

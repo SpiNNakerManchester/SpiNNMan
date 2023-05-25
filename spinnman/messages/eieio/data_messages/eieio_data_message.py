@@ -33,12 +33,12 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     """
     An EIEIO Data message.
     """
-    __slots__ = [
+    __slots__ = (
         "_data",
         "_elements",
         "_elements_read",
         "_header",
-        "_offset"]
+        "_offset")
 
     def __init__(self, eieio_header, data=None, offset=0):
         """

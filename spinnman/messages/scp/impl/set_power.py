@@ -28,7 +28,7 @@ class SetPower(BMPRequest):
     """
     An SCP request for the BMP to power on or power off a rack of boards.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, power_command, boards, delay=0.0, board_to_send_to=0):
         """

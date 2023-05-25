@@ -23,8 +23,7 @@ class GetVersionResponse(AbstractSCPResponse):
     """
     An SCP response to a request for the version of software running.
     """
-    __slots__ = [
-        "_version_info"]
+    __slots__ = "_version_info",
 
     def __init__(self):
         super().__init__()

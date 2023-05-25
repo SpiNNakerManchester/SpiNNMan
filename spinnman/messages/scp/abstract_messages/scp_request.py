@@ -22,13 +22,13 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
     """
     Represents an Abstract SCP Request.
     """
-    __slots__ = [
+    __slots__ = (
         "_argument_1",
         "_argument_2",
         "_argument_3",
         "_data",
         "_scp_request_header",
-        "_sdp_header"]
+        "_sdp_header")
 
     DEFAULT_DEST_X_COORD = 255
     DEFAULT_DEST_Y_COORD = 255

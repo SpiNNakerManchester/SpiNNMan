@@ -30,7 +30,7 @@ class SDPHeader(object):
     than `None` once, after which it is immutable.  It is an error to set a
     parameter that is not currently `None`.
     """
-    __slots__ = [
+    __slots__ = (
         "_destination_chip_x",
         "_destination_chip_y",
         "_destination_cpu",
@@ -40,7 +40,7 @@ class SDPHeader(object):
         "_source_chip_y",
         "_source_cpu",
         "_source_port",
-        "_tag"]
+        "_tag")
 
     def __init__(self, flags=None, tag=None,
                  destination_port=None, destination_cpu=None,

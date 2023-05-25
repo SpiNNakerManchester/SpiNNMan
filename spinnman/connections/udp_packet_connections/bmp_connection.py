@@ -27,10 +27,10 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
     """
     A BMP connection which supports queries to the BMP of a SpiNNaker machine.
     """
-    __slots__ = [
+    __slots__ = (
         "_boards",
         "_cabinet",
-        "_frame"]
+        "_frame")
 
     def __init__(self, connection_data):
         """

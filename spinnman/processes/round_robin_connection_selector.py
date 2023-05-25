@@ -22,9 +22,9 @@ class RoundRobinConnectionSelector(
     """
     A connection selector that just spreads work as evenly as possible.
     """
-    __slots__ = [
+    __slots__ = (
         "_connections",
-        "_next_connection_index"]
+        "_next_connection_index")
 
     def __init__(self, connections):
         """

@@ -41,7 +41,7 @@ class SCPRequestPipeLine(object):
     help with the timeout issue; when a timeout is received, all requests
     for which a reply has not been received can also timeout.
     """
-    __slots__ = [
+    __slots__ = (
         "_callbacks",
         "_connection",
         "_error_callbacks",
@@ -58,7 +58,7 @@ class SCPRequestPipeLine(object):
         "_requests",
         "_retries",
         "_send_time",
-        "_times_sent"]
+        "_times_sent")
 
     def __init__(self, connection, n_channels=1,
                  intermediate_channel_waits=0,

@@ -19,5 +19,4 @@ class BMPResponse(AbstractSCPResponse):
     """
     Represents an SCP request that's tailored for the BMP connection.
     """
-
     __slots__ = ()

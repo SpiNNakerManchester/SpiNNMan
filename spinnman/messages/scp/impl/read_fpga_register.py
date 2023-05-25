@@ -27,7 +27,7 @@ class ReadFPGARegister(BMPRequest):
     """
     Requests the data from a FPGA's register.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, fpga_num, register, board):
         """
@@ -57,8 +57,7 @@ class _SCPReadFPGARegisterResponse(BMPResponse):
     """
     An SCP response to a request for the version of software running.
     """
-    __slots__ = [
-        "_fpga_register"]
+    __slots__ = "_fpga_register",
 
     def __init__(self):
         super().__init__()

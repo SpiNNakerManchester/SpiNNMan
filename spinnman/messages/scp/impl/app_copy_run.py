@@ -28,7 +28,7 @@ class AppCopyRun(AbstractSCPRequest):
     """
     An SCP request to copy an application and start it.
     """
-    __slots__ = ["__link"]
+    __slots__ = "__link",
 
     def __init__(self, x, y, link, size, app_id, processors, chksum,
                  wait=False):

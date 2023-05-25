@@ -29,8 +29,7 @@ class FixedRouteRead(AbstractSCPRequest):
     """
     Gets a fixed route entry.
     """
-
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, app_id):
         """

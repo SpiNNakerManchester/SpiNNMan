@@ -30,9 +30,9 @@ class HostDataRead(EIEIOCommandMessage):
     completed reading data from the output buffer, and that such space can
     be considered free to use again.
     """
-    __slots__ = [
+    __slots__ = (
         "_acks",
-        "_header"]
+        "_header")
 
     def __init__(
             self, n_requests, sequence_no, channel, region_id, space_read):

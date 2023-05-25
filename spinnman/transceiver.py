@@ -54,7 +54,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
-    CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
+    CountState, WriteMemory, SetLED, SendSignal, AppStop,
     IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
@@ -90,7 +90,8 @@ _EXECUTABLE_ADDRESS = 0x67800000
 
 
 def create_transceiver_from_hostname(
-        hostname, version, bmp_connection_data=None, number_of_boards=None,
+        hostname, version, /, *,
+        bmp_connection_data=None, number_of_boards=None,
         auto_detect_bmp=False):
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
@@ -172,7 +173,7 @@ class Transceiver(AbstractContextManager):
         the multiple calls may be made separately over the set of given
         connections.
     """
-    __slots__ = [
+    __slots__ = (
         "_all_connections",
         "_bmp_connection_selectors",
         "_bmp_connections",
@@ -190,10 +191,9 @@ class Transceiver(AbstractContextManager):
         "_scamp_connections",
         "_udp_scamp_connections",
         "_version",
-        "_width"]
+        "_width")
 
-    def __init__(
-            self, version, connections=None):
+    def __init__(self, version, connections=None):
         """
         :param int version: The version of the board being connected to
         :param list(Connection) connections:
@@ -349,8 +349,8 @@ class Transceiver(AbstractContextManager):
                                  conn.remote_ip_address)
                 raise
 
-    def _check_connection(
-            self, connection_selector, chip_x, chip_y):
+    @staticmethod
+    def _check_connection(connection_selector, chip_x, chip_y):
         """
         Check that the given connection to the given chip works.
 
@@ -664,7 +664,7 @@ class Transceiver(AbstractContextManager):
     def get_scamp_version(
             self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-            connection_selector=None, n_retries=N_RETRIES):
+            connection_selector=None, *, n_retries=N_RETRIES):
         """
         Get the version of SCAMP which is running on the board.
 
@@ -691,16 +691,11 @@ class Transceiver(AbstractContextManager):
         process = GetVersionProcess(connection_selector, n_retries)
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
-    def boot_board(
-            self, number_of_boards=None, width=None, height=None,
-            extra_boot_values=None):
+    def boot_board(self, extra_boot_values=None):
         """
         Attempt to boot the board. No check is performed to see if the
         board is already booted.
 
-        :param number_of_boards: this parameter is deprecated
-        :param width: this parameter is deprecated
-        :param height: this parameter is deprecated
         :param dict(SystemVariableDefinition,object) extra_boot_values:
             extra values to set during boot
         :raise SpinnmanInvalidParameterException:
@@ -708,11 +703,6 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         """
-        if (width is not None or height is not None or
-                number_of_boards is not None):
-            logger.warning(
-                "The width, height and number_of_boards are no longer"
-                " supported, and might be removed in a future version")
         if not self._boot_send_connection:
             # No can do. Can't boot without a boot connection.
             raise SpinnmanIOException("no boot connection available")
@@ -744,21 +734,12 @@ class Transceiver(AbstractContextManager):
         # version is irrelevant
         return version[1] > _SCAMP_VERSION[1]
 
-    def ensure_board_is_ready(
-            self, number_of_boards=None, width=None, height=None,
-            n_retries=5, extra_boot_values=None):
+    def ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
         """
         Ensure that the board is ready to interact with this version of the
         transceiver. Boots the board if not already booted and verifies that
         the version of SCAMP running is compatible with this transceiver.
 
-        :param number_of_boards:
-            this parameter is deprecated and will be ignored
-        :type number_of_boards: int or None
-        :param width: this parameter is deprecated and will be ignored
-        :type width: int or None
-        :param height: this parameter is deprecated and will be ignored
-        :type height: int or None
         :param int n_retries: The number of times to retry booting
         :param dict(SystemVariableDefinition,object) extra_boot_values:
             Any additional values to set during boot
@@ -769,26 +750,16 @@ class Transceiver(AbstractContextManager):
             * If the version of software on the board is not compatible with
               this transceiver
         """
-
-        # if the machine sizes not been given, calculate from assumption
-        if (width is not None or height is not None or
-                number_of_boards is not None):
-            logger.warning(
-                "The width, height and number_of_boards are no longer"
-                " supported, and might be removed in a future version")
-
         # try to get a SCAMP version once
         logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None
         else:
             version_info = self._try_to_find_scamp_and_boot(
-                INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards,
-                width, height, extra_boot_values)
+                INITIAL_FIND_SCAMP_RETRIES_COUNT, extra_boot_values)
 
         # If we fail to get a SCAMP version this time, try other things
         if version_info is None and self._bmp_connections:
-
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
             self.power_on_machine()
@@ -799,12 +770,11 @@ class Transceiver(AbstractContextManager):
 
             # retry to get a SCAMP version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
-                n_retries, number_of_boards, width, height, extra_boot_values)
+                n_retries, extra_boot_values)
 
         # verify that the version is the expected one for this transceiver
         if version_info is None:
-            raise SpinnmanIOException(
-                "Failed to communicate with the machine")
+            raise SpinnmanIOException("Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
                 not self.is_scamp_version_compabible(
                     version_info.version_number)):
@@ -841,20 +811,11 @@ class Transceiver(AbstractContextManager):
         return (version_info.x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
                 and version_info.y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD)
 
-    def _try_to_find_scamp_and_boot(
-            self, tries_to_go, number_of_boards, width, height,
-            extra_boot_values):
+    def _try_to_find_scamp_and_boot(self, tries_to_go, extra_boot_values):
         """
         Try to detect if SCAMP is running, and if not, boot the machine.
 
         :param int tries_to_go: how many attempts should be supported
-        :param number_of_boards:
-            the number of boards that this machine is built out of;
-            this parameter is deprecated
-        :param width: The width of the machine in chips;
-            this parameter is deprecated
-        :param height: The height of the machine in chips;
-            this parameter is deprecated
         :param dict(SystemVariableDefinition,object) extra_boot_values:
             Any additional values to set during boot
         :return: version info
@@ -873,8 +834,7 @@ class Transceiver(AbstractContextManager):
             except SpinnmanGenericProcessException as e:
                 if isinstance(e.exception, SpinnmanTimeoutException):
                     logger.info("Attempting to boot machine")
-                    self.boot_board(
-                        number_of_boards, width, height, extra_boot_values)
+                    self.boot_board(extra_boot_values)
                     current_tries_to_go -= 1
                 elif isinstance(e.exception, SpinnmanIOException):
                     raise SpinnmanIOException(
@@ -883,8 +843,7 @@ class Transceiver(AbstractContextManager):
                     raise
             except SpinnmanTimeoutException:
                 logger.info("Attempting to boot machine")
-                self.boot_board(
-                    number_of_boards, width, height, extra_boot_values)
+                self.boot_board(extra_boot_values)
                 current_tries_to_go -= 1
             except SpinnmanIOException as e:
                 raise SpinnmanIOException(
@@ -930,8 +889,7 @@ class Transceiver(AbstractContextManager):
                         chip.x, chip.y, processor.processor_id)
 
         process = GetCPUInfoProcess(self._scamp_connection_selector)
-        cpu_info = process.get_cpu_info(core_subsets)
-        return cpu_info
+        return process.get_cpu_info(core_subsets)
 
     def _get_sv_data(self, x, y, data_item):
         """
@@ -1152,7 +1110,7 @@ class Transceiver(AbstractContextManager):
         if isinstance(watch_dog, bool):
             value_to_set = WATCHDOG.default if watch_dog else 0
 
-        # build data holder
+        # build data holder, a single byte
         data = _ONE_BYTE.pack(value_to_set)
 
         # write data
@@ -1231,68 +1189,6 @@ class Transceiver(AbstractContextManager):
         response = process.execute(CountState(app_id, state))
         return response.count  # pylint: disable=no-member
 
-    def execute(
-            self, x, y, processors, executable, app_id, n_bytes=None,
-            wait=False, is_filename=False):
-        """
-        Start an executable running on a single chip.
-
-        .. warning::
-            This method is currently deprecated and likely to be removed.
-
-        :param int x:
-            The x-coordinate of the chip on which to run the executable
-        :param int y:
-            The y-coordinate of the chip on which to run the executable
-        :param list(int) processors:
-            The cores on the chip on which to run the application
-        :param executable:
-            The data that is to be executed. Should be one of the following:
-
-            * An instance of RawIOBase
-            * A bytearray/bytes
-            * A filename of a file containing the executable (in which case
-              `is_filename` must be set to True)
-        :type executable:
-            ~io.RawIOBase or bytes or bytearray or str
-        :param int app_id:
-            The ID of the application with which to associate the executable
-        :param int n_bytes:
-            The size of the executable data in bytes. If not specified:
-
-            * If executable is an RawIOBase, an error is raised
-            * If executable is a bytearray, the length of the bytearray will
-              be used
-            * If executable is an int, 4 will be used
-            * If executable is a str, the length of the file will be used
-        :param bool wait:
-            True if the binary should enter a "wait" state on loading
-        :param bool is_filename: True if executable is a filename
-        :raise SpinnmanIOException:
-            * If there is an error communicating with the board
-            * If there is an error reading the executable
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If x, y, p does not lead to a valid core
-            * If app_id is an invalid application ID
-            * If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        warn_once(logger, "The Transceiver's execute method is deprecated "
-                          "likely to be removed.")
-        # Lock against updates
-        with self._chip_execute_lock(x, y):
-            # Write the executable
-            self.write_memory(
-                x, y, _EXECUTABLE_ADDRESS, executable, n_bytes,
-                is_filename=is_filename)
-
-            # Request the start of the executable
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(ApplicationRun(app_id, x, y, processors, wait))
-
     def _get_next_nearest_neighbour_id(self):
         with self._nearest_neighbour_lock:
             next_nearest_neighbour_id = (self._nearest_neighbour_id + 1) % 127
@@ -1300,8 +1196,8 @@ class Transceiver(AbstractContextManager):
         return next_nearest_neighbour_id
 
     def execute_flood(
-            self, core_subsets, executable, app_id, n_bytes=None, wait=False,
-            is_filename=False):
+            self, core_subsets, executable, app_id, *,
+            n_bytes=None, wait=False):
         """
         Start an executable running on multiple places on the board.  This
         will be optimised based on the selected cores, but it may still
@@ -1314,8 +1210,7 @@ class Transceiver(AbstractContextManager):
 
             * An instance of RawIOBase
             * A bytearray
-            * A filename of an executable (in which case `is_filename` must be
-              set to True)
+            * A filename of an executable
         :type executable:
             ~io.RawIOBase or bytes or bytearray or str
         :param int app_id:
@@ -1326,11 +1221,9 @@ class Transceiver(AbstractContextManager):
             * If `executable` is an RawIOBase, an error is raised
             * If `executable` is a bytearray, the length of the bytearray will
               be used
-            * If `executable` is an int, 4 will be used
             * If `executable` is a str, the length of the file will be used
         :param bool wait:
             True if the processors should enter a "wait" state on loading
-        :param bool is_filename: True if the data is a filename
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
@@ -1346,12 +1239,15 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        if isinstance(executable, int):
+            # No executable is 4 bytes long
+            raise TypeError("executable may not be int")
         # Lock against other executable's
         with self._flood_execute_lock():
             # Flood fill the system with the binary
             n_bytes, chksum = self.write_memory(
-                0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes,
-                is_filename=is_filename, get_sum=True)
+                0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes=n_bytes,
+                get_sum=True)
 
             # Execute the binary on the cores on 0, 0 if required
             if core_subsets.is_chip(0, 0):
@@ -1383,8 +1279,7 @@ class Transceiver(AbstractContextManager):
         # Execute each of the binaries and get them in to a "wait" state
         for binary in executable_targets.binaries:
             core_subsets = executable_targets.get_cores_for_binary(binary)
-            self.execute_flood(
-                core_subsets, binary, app_id, wait=True, is_filename=True)
+            self.execute_flood(core_subsets, str(binary), app_id, wait=True)
 
         # Sleep to allow cores to get going
         time.sleep(0.5)
@@ -1393,7 +1288,7 @@ class Transceiver(AbstractContextManager):
         count = self.get_core_state_count(app_id, CPUState.READY)
         if count < executable_targets.total_processors:
             cores_ready = self.get_cores_not_in_state(
-                executable_targets.all_core_subsets, [CPUState.READY])
+                executable_targets.all_core_subsets, {CPUState.READY})
             if len(cores_ready) > 0:
                 raise SpinnmanException(
                     f"Only {count} of {executable_targets.total_processors} "
@@ -1423,6 +1318,7 @@ class Transceiver(AbstractContextManager):
         Power on a set of boards in the machine.
 
         :param int boards: The board or boards to power on
+        :type boards: list(int) or int
         :param int cabinet: the ID of the cabinet containing the frame, or 0
             if the frame is not in a cabinet
         :param int frame: the ID of the frame in the cabinet containing the
@@ -1451,6 +1347,7 @@ class Transceiver(AbstractContextManager):
         Power off a set of boards in the machine.
 
         :param int boards: The board or boards to power off
+        :type boards: list(int) or int
         :param int cabinet: the ID of the cabinet containing the frame, or 0
             if the frame is not in a cabinet
         :param int frame: the ID of the frame in the cabinet containing the
@@ -1464,12 +1361,12 @@ class Transceiver(AbstractContextManager):
         :param int frame:
         :rtype: FixedConnectionSelector
         """
-        key = (cabinet, frame)
-        if key not in self._bmp_connection_selectors:
+        sel = self._bmp_connection_selectors.get((cabinet, frame))
+        if not sel:
             raise SpinnmanInvalidParameterException(
                 "cabinet and frame", f"{cabinet} and {frame}",
                 "Unknown combination")
-        return self._bmp_connection_selectors[key]
+        return sel
 
     def _power(self, power_command, boards=0, cabinet=0, frame=0):
         """
@@ -1477,11 +1374,15 @@ class Transceiver(AbstractContextManager):
 
         :param PowerCommand power_command: The power command to send
         :param boards: The board or boards to send the command to
+        :type boards: list(int) or int
         :param int cabinet: the ID of the cabinet containing the frame, or 0
             if the frame is not in a cabinet
         :param int frame: the ID of the frame in the cabinet containing the
             board(s), or 0 if the board is not in a frame
         """
+        if not self._bmp_connection_selectors:
+            warn_once(
+                logger, "No BMP connections so power control unavailable")
         connection_selector = self._bmp_connection(cabinet, frame)
         timeout = (
             BMP_POWER_ON_TIMEOUT
@@ -1600,8 +1501,8 @@ class Transceiver(AbstractContextManager):
         response = process.execute(BMPGetVersion(board))
         return response.version_info  # pylint: disable=no-member
 
-    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
-                     cpu=0, is_filename=False, get_sum=False):
+    def write_memory(self, x, y, base_address, data, *, cpu=0,
+                     n_bytes=None, offset=0, get_sum=False):
         """
         Write to the SDRAM on the board.
 
@@ -1616,8 +1517,7 @@ class Transceiver(AbstractContextManager):
             * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
-            * A filename of a data file (in which case `is_filename` must be
-              set to True)
+            * A string - the filename of a data file
         :type data:
             ~io.RawIOBase or bytes or bytearray or int or str
         :param int n_bytes:
@@ -1630,7 +1530,6 @@ class Transceiver(AbstractContextManager):
             * If `data` is a str, the length of the file will be used
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
-        :param bool is_filename: True if `data` is a filename
         :param bool get_sum: whether to return a checksum or 0
         :return: The number of bytes written, the checksum (0 if get_sum=False)
         :rtype: int, int
@@ -1653,7 +1552,7 @@ class Transceiver(AbstractContextManager):
         if isinstance(data, io.RawIOBase):
             chksum = process.write_memory_from_reader(
                 x, y, cpu, base_address, data, n_bytes, get_sum)
-        elif isinstance(data, str) and is_filename:
+        elif isinstance(data, str):
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
             with open(data, "rb") as reader:
@@ -1751,7 +1650,7 @@ class Transceiver(AbstractContextManager):
         """
         self.write_memory(x, y, self._user_3_register(p), int(value))
 
-    def write_neighbour_memory(self, x, y, link, base_address, data,
+    def write_neighbour_memory(self, x, y, link, base_address, data, *,
                                n_bytes=None, offset=0, cpu=0):
         """
         Write to the memory of a neighbouring chip using a LINK_READ SCP
@@ -1819,9 +1718,8 @@ class Transceiver(AbstractContextManager):
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data, offset, n_bytes)
 
-    def write_memory_flood(
-            self, base_address, data, n_bytes=None, offset=0,
-            is_filename=False):
+    def write_memory_flood(self, base_address, data, *,
+                           n_bytes=None, offset=0, is_filename=False):
         """
         Write to the SDRAM of all chips.
 
@@ -2037,10 +1935,10 @@ class Transceiver(AbstractContextManager):
             logger.info(self.__where_is_xy(x, y))
 
     def wait_for_cores_to_be_in_state(
-            self, all_core_subsets, app_id, cpu_states, timeout=None,
-            time_between_polls=0.1,
-            error_states=frozenset({
-                CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),
+            self, all_core_subsets, app_id, cpu_states, *,
+            timeout=None, time_between_polls=0.1,
+            error_states=frozenset((
+                CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check=100, progress_bar=None):
         """
         Waits for the specified cores running the given application to be

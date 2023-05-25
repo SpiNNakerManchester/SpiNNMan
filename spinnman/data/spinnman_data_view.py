@@ -96,7 +96,7 @@ class SpiNNManDataView(MachineDataView):
     """
 
     __data = _SpiNNManDataModel()
-    __slots__ = []
+    __slots__ = ()
 
     # transceiver methods
 
@@ -160,8 +160,8 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver") from ex
 
     @classmethod
-    def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
-                     cpu=0, is_filename=False):
+    def write_memory(cls, x, y, base_address, data, *,
+                     n_bytes=None, offset=0, cpu=0):
         """
         Write to the SDRAM on the board.
 
@@ -178,8 +178,7 @@ class SpiNNManDataView(MachineDataView):
             * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
-            * A filename of a data file (in which case `is_filename` must be\
-              set to True)
+            * A filename of a data file
         :type data:
             ~io.RawIOBase or bytes or bytearray or int or str
         :param int n_bytes:
@@ -192,7 +191,6 @@ class SpiNNManDataView(MachineDataView):
             * If `data` is a str, the length of the file will be used
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
-        :param bool is_filename: True if `data` is a filename
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         :raise SpinnmanIOException:
@@ -213,7 +211,8 @@ class SpiNNManDataView(MachineDataView):
         if cls.__data._transceiver is None:
             raise cls._exception("transceiver")
         return cls.__data._transceiver.write_memory(
-            x, y, base_address, data, n_bytes, offset, cpu, is_filename)
+            x, y, base_address, data,
+            n_bytes=n_bytes, offset=offset, cpu=cpu)
 
     # app_id methods
 

@@ -49,7 +49,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     """
     A process for getting the machine details over a set of connections.
     """
-    __slots__ = [
+    __slots__ = (
         "_chip_info",
         # Used if there are any ignores with ip addresses
         # Holds a mapping from ip to board root (x,y)
@@ -60,7 +60,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Holds a mapping from (x,y) to a mapping of physical to virtual core
         "_virtual_to_physical_map",
         # Holds a mapping from (x,y) to a mapping of virtual to physical core
-        "_physical_to_virtual_map"]
+        "_physical_to_virtual_map")
 
     def __init__(self, connection_selector):
         """

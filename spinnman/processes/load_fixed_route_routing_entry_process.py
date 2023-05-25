@@ -21,7 +21,7 @@ class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
     """
     Load a fixed route routing entry onto a chip.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def load_fixed_route(self, x, y, fixed_route, app_id=0):
         """

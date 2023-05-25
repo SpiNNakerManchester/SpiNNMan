@@ -24,7 +24,7 @@ class RouterClear(AbstractSCPRequest):
     """
     A request to clear the router on a chip.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y):
         """

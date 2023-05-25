@@ -25,8 +25,7 @@ class WriteMemory(AbstractSCPRequest):
     """
     A request to write memory on a chip.
     """
-    __slots__ = [
-        "_data_to_write"]
+    __slots__ = "_data_to_write",
 
     def __init__(self, x, y, base_address, data, cpu=0):
         """

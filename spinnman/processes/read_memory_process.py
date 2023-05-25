@@ -22,8 +22,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
     """
     A process for reading memory on a SpiNNaker chip.
     """
-    __slots__ = [
-        "_view"]
+    __slots__ = ("_view", )
 
     def __init__(self, connection_selector):
         """

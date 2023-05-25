@@ -17,8 +17,10 @@ from spinnman.constants import SCP_TIMEOUT
 
 
 class SendSingleCommandProcess(AbstractMultiConnectionProcess):
-    __slots__ = [
-        "_response"]
+    """
+    A process that sends a single command and waits for a simple response.
+    """
+    __slots__ = ("_response", )
 
     def __init__(self, connection_selector, n_retries=3, timeout=SCP_TIMEOUT):
         """

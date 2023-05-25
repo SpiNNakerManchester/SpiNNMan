@@ -27,7 +27,7 @@ class IPTagGetInfo(AbstractSCPRequest):
     """
     An SCP Request information about IP tags.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y):
         """

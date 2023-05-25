@@ -27,7 +27,7 @@ class SetLED(AbstractSCPRequest):
     This class is currently deprecated and untested as there is no
     known use except for Transceiver.set_led which is itself deprecated.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, cpu, led_states):
         """

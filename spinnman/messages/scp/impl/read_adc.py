@@ -33,7 +33,7 @@ class ReadADC(BMPRequest):
     .. note::
         The equivalent code in Java is *not* deprecated.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, board):
         """
@@ -53,8 +53,7 @@ class _SCPReadADCResponse(BMPResponse):
     """
     An SCP response to a request for ADC information.
     """
-    __slots__ = [
-        "_adc_info"]
+    __slots__ = "_adc_info",
 
     def __init__(self):
         super().__init__()

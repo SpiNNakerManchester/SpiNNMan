@@ -22,9 +22,9 @@ class CheckOKResponse(AbstractSCPResponse):
     """
     An SCP response to a request which returns nothing other than OK.
     """
-    __slots__ = [
+    __slots__ = (
         "_command",
-        "_operation"]
+        "_operation")
 
     def __init__(self, operation, command):
         """

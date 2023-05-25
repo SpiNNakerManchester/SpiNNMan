@@ -24,7 +24,7 @@ class GetVersion(AbstractSCPRequest):
     """
     An SCP request to read the version of software running on a core.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, p):
         """

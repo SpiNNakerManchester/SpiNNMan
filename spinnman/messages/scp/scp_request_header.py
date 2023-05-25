@@ -24,9 +24,9 @@ class SCPRequestHeader(object):
     than `None` once, after which it is immutable.  It is an error to set a
     parameter that is not currently `None`.
     """
-    __slots__ = [
+    __slots__ = (
         "_command",
-        "_sequence"]
+        "_sequence")
 
     def __init__(self, command, sequence=0):
         """

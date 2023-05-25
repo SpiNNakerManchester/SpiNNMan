@@ -34,7 +34,7 @@ class SendSignal(AbstractSCPRequest):
     """
     An SCP Request to send a signal to cores.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, app_id, signal):
         """

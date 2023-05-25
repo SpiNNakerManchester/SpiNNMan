@@ -31,12 +31,12 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
     A process for reading IOBUF memory (mostly log messages) from a
     SpiNNaker core.
     """
-    __slots__ = [
+    __slots__ = (
         "_extra_reads",
         "_iobuf",
         "_iobuf_address",
         "_iobuf_view",
-        "_next_reads"]
+        "_next_reads")
 
     def __init__(self, connection_selector):
         """

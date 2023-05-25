@@ -24,7 +24,7 @@ class FixedRouteInit(AbstractSCPRequest):
     """
     Sets a fixed route entry.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, entry, app_id):
         """

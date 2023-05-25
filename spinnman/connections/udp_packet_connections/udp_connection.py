@@ -46,13 +46,13 @@ class UDPConnection(Connection, Listenable):
     SDP messages have lower maximum lengths.
     """
 
-    __slots__ = [
+    __slots__ = (
         "_can_send",
         "_local_ip_address",
         "_local_port",
         "_remote_ip_address",
         "_remote_port",
-        "_socket"]
+        "_socket")
 
     def __init__(self, local_host=None, local_port=None, remote_host=None,
                  remote_port=None):

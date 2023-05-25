@@ -20,8 +20,7 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
     """
     A process for allocating a block of SDRAM on a SpiNNaker chip.
     """
-    __slots__ = [
-        "_base_address"]
+    __slots__ = ("_base_address", )
 
     def __init__(self, connection_selector):
         """

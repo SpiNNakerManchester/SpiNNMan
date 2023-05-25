@@ -24,7 +24,7 @@ class DoSync(AbstractSCPRequest):
     """
     An SCP Request to control synchronization.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, do_sync):
         """

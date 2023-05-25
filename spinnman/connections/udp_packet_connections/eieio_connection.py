@@ -28,7 +28,7 @@ class EIEIOConnection(UDPConnection, Listenable):
     """
     A UDP connection for sending and receiving raw EIEIO messages.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def receive_eieio_message(self, timeout=None):
         """

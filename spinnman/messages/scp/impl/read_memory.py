@@ -26,7 +26,7 @@ class ReadMemory(AbstractSCPRequest):
     """
     An SCP request to read a region of memory on a chip.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, base_address, size, cpu=0):
         """
@@ -62,10 +62,10 @@ class _SCPReadMemoryResponse(AbstractSCPResponse):
     """
     An SCP response to a request to read a region of memory on a chip.
     """
-    __slots__ = [
+    __slots__ = (
         "_data",
         "_length",
-        "_offset"]
+        "_offset")
 
     def __init__(self):
         super().__init__()

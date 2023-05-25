@@ -35,9 +35,9 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
     """
     A process for reading the multicast routing table of a SpiNNaker chip.
     """
-    __slots__ = [
+    __slots__ = (
         "_app_id",
-        "_entries"]
+        "_entries")
 
     def __init__(self, connection_selector, app_id=None):
         """

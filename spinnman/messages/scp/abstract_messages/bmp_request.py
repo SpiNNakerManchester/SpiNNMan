@@ -20,7 +20,7 @@ class BMPRequest(AbstractSCPRequest):
     """
     An SCP request intended to be sent to a BMP.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, boards, scp_request_header, argument_1=None,
                  argument_2=None, argument_3=None, data=None):

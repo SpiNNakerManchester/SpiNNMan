@@ -21,7 +21,7 @@ class AbstractMultiConnectionProcessConnectionSelector(
     """
     A connection selector for multi-connection processes.
     """
-    __slots__ = []
+    __slots__ = ()
 
     @abstractmethod
     def get_next_connection(self, message):

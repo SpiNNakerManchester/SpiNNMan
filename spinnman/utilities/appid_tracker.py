@@ -20,10 +20,10 @@ class AppIdTracker(object):
     """
     A tracker of application IDs to make it easier to allocate new IDs.
     """
-    __slots__ = [
+    __slots__ = (
         "_free_ids",
         "_max_app_id",
-        "_min_app_id"]
+        "_min_app_id")
 
     # Keep a class-global reference to the free ID range, so IDs are
     # allocated globally

@@ -25,10 +25,10 @@ class KeyPayloadDataElement(AbstractDataElement):
     """
     A data element that contains a key and a payload.
     """
-    __slots__ = [
+    __slots__ = (
         "_key",
         "_payload",
-        "_payload_is_timestamp"]
+        "_payload_is_timestamp")
 
     def __init__(self, key, payload, payload_is_timestamp=False):
         self._key = key

@@ -25,10 +25,10 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
     """
     A process for reading the diagnostic data block from a SpiNNaker router.
     """
-    __slots__ = [
+    __slots__ = (
         "_control_register",
         "_error_status",
-        "_register_values"]
+        "_register_values")
 
     def __init__(self, connection_selector):
         """

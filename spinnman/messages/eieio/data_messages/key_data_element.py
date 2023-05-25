@@ -25,8 +25,7 @@ class KeyDataElement(AbstractDataElement):
     """
     A data element that contains just a key.
     """
-    __slots__ = [
-        "_key"]
+    __slots__ = "_key",
 
     def __init__(self, key):
         self._key = key

@@ -32,7 +32,7 @@ class IPTagGet(AbstractSCPRequest):
     """
     An SCP Request to get an IP tag.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, tag):
         """

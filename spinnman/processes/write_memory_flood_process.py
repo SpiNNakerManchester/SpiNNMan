@@ -23,7 +23,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
     """
     A process for writing memory on multiple SpiNNaker chips at once.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, next_connection_selector):
         AbstractMultiConnectionProcess.__init__(

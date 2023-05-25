@@ -27,10 +27,10 @@ class FloodFillData(AbstractSCPRequest):
     """
     A request to start a flood fill of data.
     """
-    __slots__ = [
+    __slots__ = (
         "_data_to_write",
         "_offset",
-        "_size"]
+        "_size")
 
     def __init__(self, nearest_neighbour_id, block_no, base_address, data,
                  offset=0, length=None):

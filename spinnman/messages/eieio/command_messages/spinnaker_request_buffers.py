@@ -26,11 +26,11 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
     sent by the SpiNNaker system to the host computer to ask for more data
     to inject during the simulation.
     """
-    __slots__ = [
+    __slots__ = (
         "_region_id",
         "_sequence_no",
         "_space_available",
-        "_p", "_x", "_y"]
+        "_p", "_x", "_y")
 
     def __init__(self, x, y, p, region_id, sequence_no, space_available):
         # pylint: disable=too-many-arguments

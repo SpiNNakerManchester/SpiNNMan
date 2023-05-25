@@ -28,10 +28,10 @@ _ELEMENT_HEADER = struct.Struct("<II")
 
 
 class GetHeapProcess(AbstractMultiConnectionProcess):
-    __slots__ = [
+    __slots__ = (
         "_blocks",
         "_heap_address",
-        "_next_block_address"]
+        "_next_block_address")
 
     def __init__(self, connection_selector):
         """

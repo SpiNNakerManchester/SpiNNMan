@@ -25,8 +25,7 @@ class CountStateResponse(AbstractSCPResponse):
     """
     An SCP response to a request for the number of cores in a given state.
     """
-    __slots__ = [
-        "_count"]
+    __slots__ = "_count",
 
     def __init__(self):
         super().__init__()

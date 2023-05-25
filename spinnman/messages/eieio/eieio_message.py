@@ -18,7 +18,6 @@ class AbstractEIEIOMessage(object, metaclass=AbstractBase):
     """
     Interface for an EIEIOMessage.
     """
-
     __slots__ = ()
 
     @abstractproperty

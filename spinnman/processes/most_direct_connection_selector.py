@@ -23,25 +23,23 @@ class MostDirectConnectionSelector(
     """
     A selector that goes for the most direct connection for the message.
     """
-    __slots__ = [
+    __slots__ = (
         "_connections",
-        "_first_connection"]
+        "_lead_connection")
 
-    # pylint: disable=super-init-not-called
     def __init__(self, connections):
         """
         :param list(SCAMPConnection) connections:
             The connections to be used
         """
         self._connections = dict()
-        self._first_connection = None
-        for connection in connections:
-            if connection.chip_x == 0 and connection.chip_y == 0:
-                self._first_connection = connection
-            self._connections[
-                (connection.chip_x, connection.chip_y)] = connection
-        if self._first_connection is None:
-            self._first_connection = next(iter(connections))
+        self._lead_connection = None
+        for conn in connections:
+            if conn.chip_x == 0 and conn.chip_y == 0:
+                self._lead_connection = conn
+            self._connections[conn.chip_x, conn.chip_y] = conn
+        if self._lead_connection is None:
+            self._lead_connection = next(iter(connections))
 
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
@@ -52,12 +50,9 @@ class MostDirectConnectionSelector(
             return self._connections[key]
 
         if not SpiNNManDataView.has_machine() or len(self._connections) == 1:
-            return self._first_connection
+            return self._lead_connection
 
         x, y = key
         key = SpiNNManDataView.get_nearest_ethernet(x, y)
 
-        if key in self._connections:
-            return self._connections[key]
-        else:
-            return self._first_connection
+        return self._connections.get(key, self._lead_connection)

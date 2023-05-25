@@ -34,7 +34,7 @@ class WriteFPGARegister(BMPRequest):
     .. _README: https://github.com/SpiNNakerManchester/spio/\
                 blob/master/designs/spinnaker_fpgas/README.md#spi-interface
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, fpga_num, addr, value, board):
         """

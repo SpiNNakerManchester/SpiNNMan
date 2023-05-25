@@ -25,7 +25,7 @@ class RouterInit(AbstractSCPRequest):
     """
     A request to initialize the router on a chip.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, n_entries, table_address, base_address, app_id):
         """

@@ -27,7 +27,7 @@ class FloodFillStart(AbstractSCPRequest):
     """
     A request to start a flood fill of data.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, nearest_neighbour_id, n_blocks, x=None, y=None):
         """

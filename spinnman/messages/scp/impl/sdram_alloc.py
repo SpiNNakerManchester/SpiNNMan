@@ -31,8 +31,7 @@ class SDRAMAlloc(AbstractSCPRequest):
     """
     An SCP Request to allocate space in the SDRAM space.
     """
-    __slots__ = [
-        "_size"]
+    __slots__ = "_size",
 
     def __init__(self, x, y, app_id, size, tag=None, retry_tag=True):
         """
@@ -86,9 +85,9 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
     """
     An SCP response to a request to allocate space in SDRAM.
     """
-    __slots__ = [
+    __slots__ = (
         "_base_address",
-        "_size"]
+        "_size")
 
     def __init__(self, size):
         super().__init__()

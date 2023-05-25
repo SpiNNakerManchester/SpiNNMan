@@ -34,7 +34,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     repository unit tests as all methods are available to subclasses
     """
     __data = _SpiNNManDataModel()
-    __slots__ = []
+    __slots__ = ()
 
     def _spinnman_mock(self):
         """

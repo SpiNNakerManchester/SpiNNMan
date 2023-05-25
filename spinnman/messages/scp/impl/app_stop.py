@@ -32,7 +32,7 @@ class AppStop(AbstractSCPRequest):
     """
     An SCP Request to stop an application.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, app_id):
         """

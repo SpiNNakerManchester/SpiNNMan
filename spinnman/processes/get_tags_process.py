@@ -19,9 +19,9 @@ from spinnman.messages.scp.impl import IPTagGetInfo, IPTagGet
 
 
 class GetTagsProcess(AbstractMultiConnectionProcess):
-    __slots__ = [
+    __slots__ = (
         "_tags",
-        "_tag_info"]
+        "_tag_info")
 
     def __init__(self, connection_selector):
         """

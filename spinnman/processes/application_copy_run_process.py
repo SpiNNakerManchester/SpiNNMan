@@ -28,10 +28,10 @@ def _get_next_chips(chips_done):
     haven't yet been loaded.  Also returned are the links for each chip,
     which gives the link which should be read from to get the data.
 
-    :param set((int,int)) chips_done:
+    :param set(tuple(int,int)) chips_done:
         The coordinates of chips that have already been done
     :return: A dict of chip coordinates to link to use, Chip
-    :rtype: dict((int,int), (int, Chip))
+    :rtype: dict(tuple(int,int), tuple(int, Chip))
     """
     next_chips = dict()
     for x, y in chips_done:
@@ -61,7 +61,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         The binary must have been loaded to the boot chip before this is
         called!
     """
-    __slots__ = []
+    __slots__ = ()
 
     def run(self, size, app_id, core_subsets, chksum, wait):
         """
@@ -75,7 +75,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
             Whether to put the binary in "wait" mode or run it straight away
         """
         boot_chip = SpiNNManDataView.get_machine().boot_chip
-        chips_done = set([(boot_chip.x, boot_chip.y)])
+        chips_done = {(boot_chip.x, boot_chip.y)}
         next_chips = _get_next_chips(chips_done)
 
         while next_chips:

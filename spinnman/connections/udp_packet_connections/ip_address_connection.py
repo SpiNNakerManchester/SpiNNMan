@@ -23,7 +23,7 @@ class IPAddressesConnection(UDPConnection):
     A connection that detects any UDP packet that is transmitted by
     SpiNNaker boards prior to boot.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, local_host=None,
                  local_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):

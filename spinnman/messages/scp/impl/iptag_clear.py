@@ -26,7 +26,7 @@ class IPTagClear(AbstractSCPRequest):
     """
     An SCP Request to clear an IP Tag.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, tag):
         """

@@ -353,8 +353,7 @@ class SystemVariableBootValues(object):
     Default values of the system variables that get passed to SpiNNaker
     during boot.
     """
-    __slot__ = [
-        "_values"]
+    __slot__ = "_values",
 
     def __init__(self, hardware_version=None, led_0=None):
         # Create a dict of variable values

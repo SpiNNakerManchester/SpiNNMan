@@ -26,7 +26,7 @@ class ApplicationRun(AbstractSCPRequest):
     """
     An SCP request to run an application loaded on a chip.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, app_id, x, y, processors, wait=False):
         """

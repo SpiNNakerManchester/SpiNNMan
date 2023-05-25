@@ -24,7 +24,7 @@ class BootConnection(UDPConnection):
     """
     A connection to the SpiNNaker board that uses UDP to for booting.
     """
-    __slots__ = []
+    __slots__ = ()
     _REPR_TEMPLATE = (
         "BootConnection(local_host={}, local_port={}, remote_host={}, "
         "remote_port={})")

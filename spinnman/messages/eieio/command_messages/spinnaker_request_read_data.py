@@ -32,9 +32,9 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
     sent from the SpiNNaker system to the host computer to signal that
     some data is available to be read.
     """
-    __slots__ = [
+    __slots__ = (
         "_header",
-        "_requests"]
+        "_requests")
 
     def __init__(self, x, y, p, region_id, sequence_no, n_requests,
                  channel, start_address, space_to_be_read):

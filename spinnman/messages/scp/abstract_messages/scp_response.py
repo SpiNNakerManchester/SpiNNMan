@@ -29,9 +29,9 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
     """
     Represents an abstract SCP Response.
     """
-    __slots__ = [
+    __slots__ = (
         "_scp_response_header",
-        "_sdp_header"]
+        "_sdp_header")
 
     def __init__(self):
         self._sdp_header = None

@@ -24,8 +24,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         known use except for Transceiver.free_sdram and free_sdram_by_app_id
         which are both themselves deprecated.
     """
-    __slots__ = [
-        "_no_blocks_freed"]
+    __slots__ = ("_no_blocks_freed", )
 
     def __init__(self, connection_selector):
         """

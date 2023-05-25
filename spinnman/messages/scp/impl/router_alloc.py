@@ -29,7 +29,7 @@ class RouterAlloc(AbstractSCPRequest):
     """
     An SCP Request to allocate space for routing entries.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, app_id, n_entries):
         """
@@ -61,8 +61,7 @@ class _SCPRouterAllocResponse(AbstractSCPResponse):
     """
     An SCP response to a request to allocate router entries.
     """
-    __slots__ = [
-        "_base_address"]
+    __slots__ = "_base_address",
 
     def __init__(self):
         """

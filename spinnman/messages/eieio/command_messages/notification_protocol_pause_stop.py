@@ -24,7 +24,7 @@ class NotificationProtocolPauseStop(EIEIOCommandMessage):
     This message is not sent to SpiNNaker boards but rather to an auxiliary
     tool (e.g., data visualiser).
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self):
         super().__init__(EIEIOCommandHeader(

@@ -25,9 +25,9 @@ class SDPConnection(UDPConnection, Listenable):
     """
     A connection that talks SpiNNaker Datagram Protocol.
     """
-    __slots__ = [
+    __slots__ = (
         "_chip_x",
-        "_chip_y"]
+        "_chip_y")
 
     def __init__(self, chip_x=None, chip_y=None, local_host=None,
                  local_port=None, remote_host=None, remote_port=None):

@@ -26,7 +26,7 @@ class IPTagSet(AbstractSCPRequest):
     """
     An SCP Request to set an IP Tag.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, x, y, host, port, tag, strip, use_sender=False):
         """
