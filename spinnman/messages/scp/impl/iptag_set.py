@@ -28,7 +28,8 @@ class IPTagSet(AbstractSCPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, x, y, host, port, tag, strip, use_sender=False):
+    def __init__(self, x, y, host, port, tag, *,
+                 strip=False, use_sender=False):
         """
         :param int x: The x-coordinate of a chip, between 0 and 255
         :param int y: The y-coordinate of a chip, between 0 and 255

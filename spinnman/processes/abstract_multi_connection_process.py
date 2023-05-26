@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import logging
 import sys
 from spinn_utilities.log import FormatAdapter
@@ -97,6 +98,31 @@ class AbstractMultiConnectionProcess:
     def _finish(self):
         for request_pipeline in self._scp_request_pipelines.values():
             request_pipeline.finish()
+
+    @contextlib.contextmanager
+    def _collect_responses(self, *, print_exception=False, check_error=True):
+        """
+        A simple context for calls. Lets you do this::
+
+            with self._collect_responses():
+                self._send_request(...)
+
+        instead of this::
+
+            self._send_request(...)
+            self._finish()
+            self.check_for_error()
+
+        :param bool print_exception:
+            Whether to log errors as well as raising
+        :param bool check_error:
+            Whether to check for errors; if not, caller must handle
+        """
+        yield self
+        for request_pipeline in self._scp_request_pipelines.values():
+            request_pipeline.finish()
+        if check_error and self._exceptions:
+            self.check_for_error(print_exception=print_exception)
 
     @property
     def connection_selector(self):

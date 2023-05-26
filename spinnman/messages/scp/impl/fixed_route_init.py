@@ -26,7 +26,7 @@ class FixedRouteInit(AbstractSCPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, x, y, entry, app_id):
+    def __init__(self, x, y, entry, app_id=0):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions

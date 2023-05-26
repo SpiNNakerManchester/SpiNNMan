@@ -47,10 +47,9 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         # deallocate space in the SDRAM
         if base_address is None:
             callback = self._handle_sdram_alloc_response
-        self._send_request(SDRAMDeAlloc(x, y, app_id, base_address),
-                           callback=callback)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(SDRAMDeAlloc(x, y, app_id, base_address),
+                               callback=callback)
 
     def _handle_sdram_alloc_response(self, response):
         self._no_blocks_freed = response.number_of_blocks_freed

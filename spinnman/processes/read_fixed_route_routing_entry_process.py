@@ -50,8 +50,7 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
             routes.  If not specified, defaults to 0.
         :rtype: ~spinn_machine.FixedRouteEntry
         """
-        self._send_request(FixedRouteRead(x, y, app_id),
-                           self.__handle_read_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(FixedRouteRead(x, y, app_id),
+                               self.__handle_read_response)
         return self._route

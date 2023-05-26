@@ -21,8 +21,7 @@ class GetVersionProcess(AbstractMultiConnectionProcess):
     """
     A process for getting the version of the machine.
     """
-    __slots__ = [
-        "_version_info"]
+    __slots__ = "_version_info",
 
     def __init__(self, connection_selector, n_retries=N_RETRIES):
         """
@@ -46,9 +45,6 @@ class GetVersionProcess(AbstractMultiConnectionProcess):
         :param int p:
         :rtype: VersionInfo
         """
-        self._send_request(GetVersion(x=x, y=y, p=p),
-                           self._get_response)
-        self._finish()
-
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(GetVersion(x=x, y=y, p=p), self._get_response)
         return self._version_info

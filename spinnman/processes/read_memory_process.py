@@ -69,16 +69,14 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
         self._view = memoryview(data)
         n_bytes = length
         offset = 0
-        while n_bytes > 0:
-            bytes_to_get = min((n_bytes, UDP_MESSAGE_MAX_SIZE))
-            self._send_request(
-                packet_class(
-                    base_address=base_address + offset, size=bytes_to_get),
-                functools.partial(self.__handle_response, offset))
-            n_bytes -= bytes_to_get
-            offset += bytes_to_get
-
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            while n_bytes > 0:
+                bytes_to_get = min((n_bytes, UDP_MESSAGE_MAX_SIZE))
+                self._send_request(
+                    packet_class(
+                        base_address=base_address + offset, size=bytes_to_get),
+                    functools.partial(self.__handle_response, offset))
+                n_bytes -= bytes_to_get
+                offset += bytes_to_get
 
         return data

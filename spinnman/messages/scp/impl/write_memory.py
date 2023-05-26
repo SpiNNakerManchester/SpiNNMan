@@ -27,7 +27,7 @@ class WriteMemory(AbstractSCPRequest):
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, x, y, base_address, data, cpu=0):
+    def __init__(self, x, y, base_address, data, *, cpu=0):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions
@@ -38,6 +38,9 @@ class WriteMemory(AbstractSCPRequest):
         :param data: between 1 and 256 bytes of data to write;
             this is not checked due to speed restrictions
         :type data: bytearray or bytes
+        :param int cpu:
+            The CPU core to use, normally 0 (only needed when writing ITCM or
+            DTCM)
         """
         # pylint: disable=too-many-arguments
         size = len(data)

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-import functools
+from functools import partial
 from spinnman.messages.scp.impl import ReadMemory
 from spinn_machine import MulticastRoutingEntry, Router
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
@@ -80,13 +80,13 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         """
         # Create the read requests
         offset = 0
-        for _ in range(_N_READS):
-            self._send_request(
-                ReadMemory(
-                    x, y, base_address + (offset * 16), UDP_MESSAGE_MAX_SIZE),
-                functools.partial(self.__handle_response, offset))
-            offset += _ENTRIES_PER_READ
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            for _ in range(_N_READS):
+                self._send_request(
+                    ReadMemory(
+                        x, y, base_address + (offset * 16),
+                        UDP_MESSAGE_MAX_SIZE),
+                    partial(self.__handle_response, offset))
+                offset += _ENTRIES_PER_READ
 
         return [entry for entry in self._entries if entry is not None]

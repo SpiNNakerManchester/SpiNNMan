@@ -52,7 +52,7 @@ class ConnectionListener(Thread, AbstractContextManager):
         self.__timeout = timeout
         self.__callback_pool = ThreadPoolExecutor(max_workers=n_processes)
         self.__done = False
-        self.__callbacks = set()
+        self.__callbacks = []
 
     def __run_step(self, handler):
         """
@@ -97,7 +97,7 @@ class ConnectionListener(Thread, AbstractContextManager):
             A callable which takes a single parameter, which is the message
             received; the result of the callback will be ignored.
         """
-        self.__callbacks.add(callback)
+        self.__callbacks.append(callback)
 
     def close(self):
         """

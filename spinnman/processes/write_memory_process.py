@@ -18,6 +18,8 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 import numpy
 
+_UNSIGNED_WORD = 0xFFFFFFFF
+
 
 class WriteMemoryProcess(AbstractMultiConnectionProcess):
     """
@@ -132,44 +134,42 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             get_sum):
         offset = 0
         n_bytes_to_write = int(n_bytes)
-        while n_bytes_to_write > 0:
-            bytes_to_send = min((n_bytes_to_write, UDP_MESSAGE_MAX_SIZE))
-            data_array = data[data_offset:data_offset + bytes_to_send]
+        with self._collect_responses():
+            while n_bytes_to_write > 0:
+                bytes_to_send = min(n_bytes_to_write, UDP_MESSAGE_MAX_SIZE)
+                data_array = data[data_offset:data_offset + bytes_to_send]
 
-            self._send_request(packet_class(
-                base_address=base_address + offset, data=data_array))
+                self._send_request(packet_class(
+                    base_address=base_address + offset, data=data_array))
 
-            n_bytes_to_write -= bytes_to_send
-            offset += bytes_to_send
-            data_offset += bytes_to_send
-        self._finish()
-        self.check_for_error()
+                n_bytes_to_write -= bytes_to_send
+                offset += bytes_to_send
+                data_offset += bytes_to_send
         if not get_sum:
             return 0
         np_data = numpy.array(data, dtype="uint8")
         np_sum = int(numpy.sum(np_data.view("uint32"), dtype="uint32"))
-        return np_sum & 0xFFFFFFFF
+        return np_sum & _UNSIGNED_WORD
 
     def _write_memory_from_reader(
             self, base_address, reader, n_bytes, packet_class, with_sum):
         offset = 0
         n_bytes_to_write = int(n_bytes)
         chksum = 0
-        while n_bytes_to_write > 0:
-            data_array = reader.read(
-                min((n_bytes_to_write, UDP_MESSAGE_MAX_SIZE)))
-            bytes_to_send = len(data_array)
-            self._send_request(packet_class(
-                base_address=base_address + offset, data=data_array))
+        with self._collect_responses():
+            while n_bytes_to_write > 0:
+                data_array = reader.read(
+                    min(n_bytes_to_write, UDP_MESSAGE_MAX_SIZE))
+                bytes_to_send = len(data_array)
+                self._send_request(packet_class(
+                    base_address=base_address + offset, data=data_array))
 
-            n_bytes_to_write -= bytes_to_send
-            offset += bytes_to_send
+                n_bytes_to_write -= bytes_to_send
+                offset += bytes_to_send
 
-            if with_sum:
-                np_data = numpy.frombuffer(data_array, dtype="uint8")
-                np_sum = int(numpy.sum(np_data.view("uint32")))
-                chksum = (chksum + np_sum) & 0xFFFFFFFF
+                if with_sum:
+                    np_data = numpy.frombuffer(data_array, dtype="uint8")
+                    np_sum = int(numpy.sum(np_data.view("uint32")))
+                    chksum = (chksum + np_sum) & _UNSIGNED_WORD
 
-        self._finish()
-        self.check_for_error()
         return chksum

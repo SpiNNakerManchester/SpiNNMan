@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import functools
+from functools import partial
 from spinn_machine.tags import ReverseIPTag, IPTag
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.messages.scp.impl import IPTagGetInfo, IPTagGet
@@ -59,23 +59,21 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
             list(~spinn_machine.tags.IPTag or ~spinn_machine.tags.ReverseIPTag)
         """
         # Get the tag information, without which we cannot continue
-        self._send_request(IPTagGetInfo(
-            connection.chip_x, connection.chip_y),
-            self.__handle_tag_info_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(IPTagGetInfo(
+                connection.chip_x, connection.chip_y),
+                self.__handle_tag_info_response)
 
         # Get the tags themselves
         n_tags = self._tag_info.pool_size + self._tag_info.fixed_size
         self._tags = [None] * n_tags
-        for tag in range(n_tags):
-            self._send_request(IPTagGet(
-                connection.chip_x, connection.chip_y, tag),
-                functools.partial(
-                    self.__handle_get_tag_response, tag,
-                    connection.remote_ip_address))
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            for tag in range(n_tags):
+                self._send_request(IPTagGet(
+                    connection.chip_x, connection.chip_y, tag),
+                    partial(
+                        self.__handle_get_tag_response, tag,
+                        connection.remote_ip_address))
 
         # Return the tags
         return [tag for tag in self._tags if tag is not None]

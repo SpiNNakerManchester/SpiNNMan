@@ -120,7 +120,8 @@ class SCPRequestPipeLine(object):
         # self._token_bucket = TokenBucket(43750, 4375000)
         # self._token_bucket = TokenBucket(3408, 700000)
 
-    def _get_next_sequence_number(self):
+    @staticmethod
+    def __get_next_sequence_number():
         """
         Get the next number from the global sequence, applying appropriate
         wrapping rules as the sequence numbers have a fixed number of bits.
@@ -165,7 +166,7 @@ class SCPRequestPipeLine(object):
                 self._intermediate_channel_waits, self._packet_timeout)
 
         # Get the next sequence to be used
-        sequence = self._get_next_sequence_number()
+        sequence = self.__get_next_sequence_number()
 
         # Update the packet and store required details
         request.scp_request_header.sequence = sequence
@@ -296,8 +297,7 @@ class SCPRequestPipeLine(object):
             # Report timeouts as timeout exception
             if all(reason == "timeout" for reason in self._retry_reason[seq]):
                 raise SpinnmanTimeoutException(
-                    request_sent,
-                    self._packet_timeout)
+                    request_sent, self._packet_timeout)
 
             # Report any other exception
             raise SpinnmanIOException(

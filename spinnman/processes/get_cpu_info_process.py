@@ -40,15 +40,12 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
         :param ~spinn_machine.CoreSubsets core_subsets:
         :rtype: list(CPUInfo)
         """
-        for core_subset in core_subsets:
-            x = core_subset.x
-            y = core_subset.y
-
-            for p in core_subset.processor_ids:
-                self._send_request(
-                    ReadMemory(x, y, get_vcpu_address(p), CPU_INFO_BYTES),
-                    functools.partial(self.__handle_response, x, y, p))
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            for core_subset in core_subsets:
+                x, y = core_subset.x, core_subset.y
+                for p in core_subset.processor_ids:
+                    self._send_request(
+                        ReadMemory(x, y, get_vcpu_address(p), CPU_INFO_BYTES),
+                        functools.partial(self.__handle_response, x, y, p))
 
         return self._cpu_info

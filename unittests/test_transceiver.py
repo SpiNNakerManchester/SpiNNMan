@@ -69,9 +69,7 @@ class TestTransceiver(unittest.TestCase):
 
     def test_create_new_transceiver_one_connection(self):
         board_config.set_up_remote_board()
-        connections = set()
-        connections.add(SCAMPConnection(
-            remote_host=board_config.remotehost))
+        connections = {SCAMPConnection(remote_host=board_config.remotehost)}
         with transceiver.Transceiver(ver, connections=connections) as trans:
             assert trans.get_connections() == connections
 

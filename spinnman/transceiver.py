@@ -221,8 +221,7 @@ class Transceiver(AbstractContextManager):
             connections = list()
 
         # A set of all connection - used for closing
-        self._all_connections = set()
-        self._all_connections.update(connections)
+        self._all_connections = set(connections)
 
         # A boot send connection - there can only be one in the current system,
         # or otherwise bad things can happen!
@@ -578,7 +577,7 @@ class Transceiver(AbstractContextManager):
         calls to discover_connections.  No further discovery is done here.
 
         :return: An iterable of connections known to the transceiver
-        :rtype: list(Connection)
+        :rtype: iterable(Connection)
         """
         return self._all_connections
 

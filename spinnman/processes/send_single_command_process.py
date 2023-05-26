@@ -40,7 +40,6 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess):
         :param AbstractSCPRequest request:
         :rtype: AbstractSCPResponse
         """
-        self._send_request(request, self.__handle_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(request, self.__handle_response)
         return self._response

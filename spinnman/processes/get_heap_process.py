@@ -60,12 +60,10 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
             self._blocks.append(HeapElement(
                 block_address, self._next_block_address, free))
 
-    def _read_address(self, chip_address, address, size, callback):
-        (x, y) = chip_address
-        self._send_request(
-            ReadMemory(x, y, address, size), callback)
-        self._finish()
-        self.check_for_error()
+    def __read_address(self, chip_address, address, size, callback):
+        x, y = chip_address
+        with self._collect_responses():
+            self._send_request(ReadMemory(x, y, address, size), callback)
 
     def get_heap(self, chip_address, pointer=HEAP_ADDRESS):
         """
@@ -73,15 +71,15 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         :param SystemVariableDefinition pointer:
         :rtype: list(HeapElement)
         """
-        self._read_address(
+        self.__read_address(
             chip_address, SYSTEM_VARIABLE_BASE_ADDRESS + pointer.offset,
             pointer.data_type.value, self._read_heap_address_response)
 
-        self._read_address(
+        self.__read_address(
             chip_address, self._heap_address, 8, self._read_heap_pointer)
 
         while self._next_block_address != 0:
-            self._read_address(
+            self.__read_address(
                 chip_address, self._next_block_address, 8,
                 functools.partial(
                     self._read_next_block, self._next_block_address))

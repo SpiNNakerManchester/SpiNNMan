@@ -45,10 +45,9 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
         :param int tag:
         """
         # pylint: disable=too-many-arguments
-        self._send_request(SDRAMAlloc(x, y, app_id, size, tag),
-                           self._handle_sdram_alloc_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(SDRAMAlloc(x, y, app_id, size, tag),
+                               self._handle_sdram_alloc_response)
 
     @property
     def base_address(self):

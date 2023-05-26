@@ -147,31 +147,25 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess):
         :rtype: iterable(IOBuffer)
         """
         # Get the iobuf address for each core
-        for core_subset in core_subsets:
-            x = core_subset.x
-            y = core_subset.y
-            for p in core_subset.processor_ids:
-                self._request_iobuf_address(iobuf_size, x, y, p)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            for core_subset in core_subsets:
+                x, y = core_subset.x, core_subset.y
+                for p in core_subset.processor_ids:
+                    self._request_iobuf_address(iobuf_size, x, y, p)
 
         # Run rounds of the process until reading is complete
         while self._extra_reads or self._next_reads:
-            # Process the extra iobuf reads needed
-            while self._extra_reads:
-                self._request_iobuf_region_tail(self._extra_reads.pop())
+            with self._collect_responses():
+                # Process the extra iobuf reads needed
+                while self._extra_reads:
+                    self._request_iobuf_region_tail(self._extra_reads.pop())
 
-            # Process the next iobuf reads needed
-            while self._next_reads:
-                self._request_iobuf_region(self._next_reads.pop())
-
-            # Finish this round
-            self._finish()
-            self.check_for_error()
+                # Process the next iobuf reads needed
+                while self._next_reads:
+                    self._request_iobuf_region(self._next_reads.pop())
 
         for core_subset in core_subsets:
-            x = core_subset.x
-            y = core_subset.y
+            x, y = core_subset.x, core_subset.y
             for p in core_subset.processor_ids:
                 iobuf = ""
                 for item in self._iobuf[x, y, p].values():

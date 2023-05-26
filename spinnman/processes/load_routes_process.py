@@ -73,18 +73,15 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             x, y, 0, _TABLE_ADDRESS, routing_data, 0, len(routing_data))
 
         # Allocate space in the router table
-        self._send_request(RouterAlloc(x, y, app_id, n_entries),
-                           self.__handle_router_alloc_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(RouterAlloc(x, y, app_id, n_entries),
+                               self.__handle_router_alloc_response)
         if self._base_address == 0:
             raise SpinnmanInvalidParameterException(
                 "Allocation base address", str(self._base_address),
                 "Not enough space to allocate the entries")
 
         # Load the entries
-        self._send_request(
-            RouterInit(
+        with self._collect_responses():
+            self._send_request(RouterInit(
                 x, y, n_entries, _TABLE_ADDRESS, self._base_address, app_id))
-        self._finish()
-        self.check_for_error()

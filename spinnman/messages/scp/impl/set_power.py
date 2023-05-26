@@ -30,7 +30,8 @@ class SetPower(BMPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, power_command, boards, delay=0.0, board_to_send_to=0):
+    def __init__(
+            self, power_command, boards, *, delay=0.0, board_to_send_to=0):
         """
         .. note::
             There is currently a bug in the BMP that means some boards don't
@@ -50,7 +51,6 @@ class SetPower(BMPRequest):
             .. note::
                 Leave this at the default because of hardware bugs.
         """
-
         if board_to_send_to != 0:
             logger.warning(
                 "There is currently a bug in the BMP that means some boards"

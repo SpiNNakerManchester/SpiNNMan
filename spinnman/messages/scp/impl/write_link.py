@@ -26,18 +26,18 @@ class WriteLink(AbstractSCPRequest):
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, x, y, link, base_address, data, cpu=0):
+    def __init__(self, x, y, link, base_address, data, *, cpu=0):
         """
         :param int x: The x-coordinate of the chip whose neighbour will be
             written to, between 0 and 255
         :param int y: The y-coordinate of the chip whose neighbour will be
             written to, between 0 and 255
-        :param int cpu: The CPU core to use, normally 0
-            (or if a BMP, the board slot number)
         :param int link: The link number to write to between 0 and 5
             (or if a BMP, the FPGA between 0 and 2)
         :param int base_address: The base_address to start writing to
         :param bytes data: Up to 256 bytes of data to write
+        :param int cpu: The CPU core to use, normally 0
+            (or if a BMP, the board slot number)
         """
         # pylint: disable=too-many-arguments
         super().__init__(

@@ -60,14 +60,13 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
         :param int y:
         :rtype: RouterDiagnostics
         """
-        self._send_request(ReadMemory(x, y, 0xe1000000, 4),
-                           self.__handle_control_register_response)
-        self._send_request(ReadMemory(x, y, 0xe1000014, 4),
-                           self.__handle_error_status_response)
-        self._send_request(ReadMemory(x, y, 0xe1000300, 16 * 4),
-                           self.__handle_register_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(ReadMemory(x, y, 0xe1000000, 4),
+                               self.__handle_control_register_response)
+            self._send_request(ReadMemory(x, y, 0xe1000014, 4),
+                               self.__handle_error_status_response)
+            self._send_request(ReadMemory(x, y, 0xe1000300, 16 * 4),
+                               self.__handle_register_response)
 
         return RouterDiagnostics(self._control_register, self._error_status,
                                  self._register_values)
