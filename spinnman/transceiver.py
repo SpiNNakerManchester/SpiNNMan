@@ -90,7 +90,7 @@ _EXECUTABLE_ADDRESS = 0x67800000
 
 
 def create_transceiver_from_hostname(
-        hostname, version, /, *,
+        hostname, version, *,
         bmp_connection_data=None, number_of_boards=None,
         auto_detect_bmp=False):
     """

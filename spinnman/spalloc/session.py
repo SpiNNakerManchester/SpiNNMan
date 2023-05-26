@@ -15,7 +15,7 @@ from functools import wraps
 from logging import getLogger
 import re
 import requests
-from typing import Dict, Tuple, cast
+from typing import Dict, Tuple, cast, Optional
 import websocket  # type: ignore
 from spinn_utilities.log import FormatAdapter
 from .utils import clean_url
@@ -83,10 +83,10 @@ class Session:
 
     def __init__(
             self, service_url: str,
-            username: str | None = None, password: str | None = None,
-            token: str | None = None,
-            session_credentials: Tuple[Dict[str, str], Dict[str, str]] | None =
-            None):
+            username: Optional[str] = None, password: Optional[str] = None,
+            token: Optional[str] = None,
+            session_credentials: Optional[
+                Tuple[Dict[str, str], Dict[str, str]]] = None):
         """
         :param str service_url: The reference to the service.
             *Should not* include a username or password in it.
@@ -267,8 +267,8 @@ class Session:
         return cookies, headers
 
     def websocket(
-            self, url: str, header: dict | None = None,
-            cookie: str | None = None, **kwargs) -> websocket.WebSocket:
+            self, url: str, header: Optional[dict] = None,
+            cookie: Optional[str] = None, **kwargs) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.

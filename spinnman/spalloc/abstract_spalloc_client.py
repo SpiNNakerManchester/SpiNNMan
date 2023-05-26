@@ -16,7 +16,7 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Dict, Iterable, Tuple
+from typing import Dict, Iterable, Tuple, Optional
 from spinn_utilities.abstract_base import (AbstractBase, abstractmethod)
 from .spalloc_machine import SpallocMachine
 from .spalloc_job import SpallocJob
@@ -56,7 +56,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job(
-            self, num_boards: int = 1, machine_name: str | None = None,
+            self, num_boards: int = 1, machine_name: Optional[str] = None,
             keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a specified number of boards.
@@ -75,7 +75,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job_rect(
-            self, width: int, height: int, machine_name: str | None = None,
+            self, width: int, height: int, machine_name: Optional[str] = None,
             keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a rectangle of boards.
@@ -96,9 +96,10 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job_board(
-            self, triad: Tuple[int, int, int] | None = None,
-            physical: Tuple[int, int, int] | None = None,
-            ip_address: str | None = None, machine_name: str | None = None,
+            self, triad: Optional[Tuple[int, int, int]] = None,
+            physical: Optional[Tuple[int, int, int]] = None,
+            ip_address: Optional[str] = None,
+            machine_name: Optional[str] = None,
             keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a specific board. At least one of ``triad``,

@@ -15,7 +15,7 @@
 Miscellaneous utilities for working with URLs relating to the Spalloc Client.
 """
 
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Optional
 from urllib.parse import urlparse, urlsplit, urlunparse
 
 
@@ -34,7 +34,7 @@ def clean_url(url: str) -> str:
     return urlunparse(parts)
 
 
-def parse_service_url(url: str) -> Tuple[str, str | None, str | None]:
+def parse_service_url(url: str) -> Tuple[str, Optional[str], Optional[str]]:
     """
     Parses a combined service reference. Must include a hostname.
 

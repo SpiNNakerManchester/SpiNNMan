@@ -24,7 +24,7 @@ import requests
 import sqlite3
 import struct
 import threading
-from typing import Dict, Collection, Tuple, cast
+from typing import Dict, Collection, Tuple, cast, Optional
 from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
@@ -91,7 +91,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
-    def open_job_from_database(conn: sqlite3.Cursor) -> SpallocJob | None:
+    def open_job_from_database(conn: sqlite3.Cursor) -> Optional[SpallocJob]:
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
@@ -589,7 +589,8 @@ class _SpallocJob(SessionAware, SpallocJob):
         return self._keepalive_handle
 
     @overrides(SpallocJob.where_is_machine)
-    def where_is_machine(self, x: int, y: int) -> Tuple[int, int, int] | None:
+    def where_is_machine(self, x: int, y: int) -> Optional[
+            Tuple[int, int, int]]:
         r = self._get(self.__chip_url, x=int(x), y=int(y))
         if r.status_code == 204:
             return None
@@ -634,7 +635,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         self.__msgs: queue.SimpleQueue = queue.SimpleQueue()
         self.__call_queue: queue.Queue = queue.Queue(1)
         self.__call_lock = threading.RLock()
-        self.__current_msg: bytes | None = None
+        self.__current_msg: Optional[bytes] = None
         self.__handle = self._open_connection()
         self.__receiver.listen(self.__handle, self.__msgs.put)
 
@@ -775,8 +776,8 @@ class _ProxiedUnboundConnection(
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         super().__init__(ws, receiver)
-        self.__addr: str | None = None
-        self.__port: int | None = None
+        self.__addr: Optional[str] = None
+        self.__port: Optional[int] = None
 
     @overrides(_ProxiedConnection._open_connection)
     def _open_connection(self) -> int:
@@ -787,11 +788,11 @@ class _ProxiedUnboundConnection(
         return handle
 
     @property
-    def _addr(self) -> str | None:
+    def _addr(self) -> Optional[str]:
         return self.__addr if self._connected else None
 
     @property
-    def _port(self) -> int | None:
+    def _port(self) -> Optional[int]:
         return self.__port if self._connected else None
 
     @overrides(Connection.is_connected)
@@ -889,12 +890,12 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
 
     @property
     @overrides(SpallocEIEIOListener.local_ip_address)
-    def local_ip_address(self) -> str | None:
+    def local_ip_address(self) -> Optional[str]:
         return self._addr
 
     @property
     @overrides(SpallocEIEIOListener.local_port)
-    def local_port(self) -> int | None:
+    def local_port(self) -> Optional[int]:
         return self._port
 
     @overrides(SpallocEIEIOListener._get_chip_coords)
