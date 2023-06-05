@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import namedtuple
 import struct
+from typing import NamedTuple, Union, Optional
 from enum import Enum
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
@@ -51,16 +51,15 @@ class _DataType(Enum):
         return self._value_ == 16
 
 
-class _Definition(namedtuple("_Definition",
-                             "offset, data_type, default, array_size, doc")):
+class _Definition(NamedTuple):
     """
-    helper class that contains a definition for a variable.
+    A definition for a particular variable.
     """
-
-    def __new__(cls, data_type, offset, default=0, array_size=None, doc=""):
-        # pylint: disable=too-many-arguments
-        return super().__new__(
-            cls, offset, data_type, default, array_size, doc)
+    data_type: _DataType
+    offset: int
+    default: Union[int, bytes] = 0
+    array_size: Optional[int] = None
+    doc: str = ""
 
 
 class SystemVariableDefinition(Enum):
