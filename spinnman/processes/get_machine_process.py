@@ -21,8 +21,7 @@ from spinn_utilities.config_holder import (
     get_config_bool, get_config_int, get_config_str)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import (
-    Router, Chip, SDRAM, Link, machine_from_size)
+from spinn_machine import (Router, Chip, Link, machine_from_size)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
 from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
@@ -118,12 +117,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if (max_sdram_size is not None and
                 sdram_size > max_sdram_size):
             sdram_size = max_sdram_size
-        sdram = SDRAM(size=sdram_size)
 
         # Create the chip
         return Chip(
             x=chip_info.x, y=chip_info.y, n_processors=n_cores,
-            router=router, sdram=sdram,
+            router=router, sdram=sdram_size,
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y,
