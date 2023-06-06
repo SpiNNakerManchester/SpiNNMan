@@ -313,7 +313,9 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0xfc,
         doc="A word of padding")
 
-    def __init__(self, offset, data_type, default, array_size, doc):
+    def __init__(
+            self, data_type: _DataType, offset: int,
+            default: Union[int, bytes], array_size: Optional[int], doc: str):
         """
         :param _DataType data_type: The data type of the variable
         :param int offset: The offset from the start of the system variable
@@ -324,10 +326,10 @@ class SystemVariableDefinition(Enum):
         :type array_size: int or None
         """
         # pylint: disable=too-many-arguments
-        self._data_type = data_type
-        self._offset = offset
-        self._default = default
-        self._array_size = array_size
+        self._data_type: _DataType = data_type
+        self._offset: int = offset
+        self._default: Union[int, bytes] = default
+        self._array_size: Optional[int] = array_size
         self.__doc__ = doc
 
     @property
