@@ -11,40 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from collections import defaultdict
+from functools import partial
+import logging
+from typing import Dict, Set
+from spinn_utilities.log import FormatAdapter
+from spinn_machine import Chip
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-
-
-def _on_same_board(chip_1, chip_2):
-    return (chip_1.nearest_ethernet_x == chip_2.nearest_ethernet_x and
-            chip_1.nearest_ethernet_y == chip_2.nearest_ethernet_y)
-
-
-def _get_next_chips(chips_done):
-    """
-    Get the chips that are adjacent to the last set of chips, which
-    haven't yet been loaded.  Also returned are the links for each chip,
-    which gives the link which should be read from to get the data.
-
-    :param set(tuple(int,int)) chips_done:
-        The coordinates of chips that have already been done
-    :return: A dict of chip coordinates to link to use, Chip
-    :rtype: dict(tuple(int,int), tuple(int, Chip))
-    """
-    next_chips = dict()
-    for x, y in chips_done:
-        chip = SpiNNManDataView.get_chip_at(x, y)
-        for link in chip.router.links:
-            chip_coords = (link.destination_x, link.destination_y)
-            if chip_coords not in chips_done and chip_coords not in next_chips:
-                next_chip = SpiNNManDataView.get_chip_at(*chip_coords)
-                opp_link = (link.source_link_id + 3) % 6
-                next_chips[chip_coords] = (opp_link, next_chip)
-                # Only let one thing copy from this chip
-                break
-    return next_chips
+logger = FormatAdapter(logging.getLogger(__name__))
 
 
 class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
@@ -61,9 +37,39 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         The binary must have been loaded to the boot chip before this is
         called!
     """
-    __slots__ = ()
+    __slots__ = ("__chips_done", "__blacklisted_links")
 
-    def run(self, size, app_id, core_subsets, chksum, wait):
+    def __get_next_chips(self) -> Dict[Chip, int]:
+        """
+        Get the chips that are adjacent to the last set of chips, which
+        haven't yet been loaded.  Also returned are the links for each chip,
+        which gives the link which should be read from to get the data.
+
+        :return: An iterable of pairs of link to use, and the chip it goes to
+            (or rather its X and Y coordinates; the chip is otherwise
+            unneeded).
+            The link is which link to copy *from,* and the chip is the *target*
+            of the copy.
+        :rtype: iterable(tuple(int, int, int))
+        """
+        next_chips = dict()
+        for chip in self.__chips_done:
+            for link in chip.router.links:
+                next_chip = SpiNNManDataView.get_chip_at(
+                    link.destination_x, link.destination_y)
+                if next_chip not in self.__chips_done and (
+                        next_chip not in next_chips):
+                    # Get the opposite of the link direction
+                    next_link = (link.source_link_id + 3) % 6
+                    if next_chip not in self.__blacklisted_links or (
+                            next_link not in self.__blacklisted_links[
+                                next_chip]):
+                        next_chips[next_chip] = next_link
+                        # Only let one thing copy from this chip
+                        break
+        return next_chips
+
+    def run(self, size, app_id, core_subsets, chksum, wait) -> None:
         """
         Run the process.
 
@@ -74,18 +80,43 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         :param bool wait:
             Whether to put the binary in "wait" mode or run it straight away
         """
+        # pylint: disable=attribute-defined-outside-init
         boot_chip = SpiNNManDataView.get_machine().boot_chip
-        chips_done = {(boot_chip.x, boot_chip.y)}
-        next_chips = _get_next_chips(chips_done)
+        self.__chips_done: Dict[Chip, int] = dict()
+        self.__blacklisted_links: Dict[Chip, Set[int]] = defaultdict(set)
+        # We use a dict to get reliable iteration order; values unimportant
+        self.__chips_done[boot_chip] = 0
 
-        while next_chips:
+        while (next_chips := self.__get_next_chips()):
             # Do all the chips at the current level
             with self._collect_responses():
-                for link, chip in next_chips.values():
+                for chip, link in next_chips.items():
                     subset = core_subsets.get_core_subset_for_chip(
                         chip.x, chip.y)
                     self._send_request(AppCopyRun(
                         chip.x, chip.y, link, size, app_id,
-                        subset.processor_ids, chksum, wait))
-                    chips_done.add((chip.x, chip.y))
-            next_chips = _get_next_chips(chips_done)
+                        subset.processor_ids, chksum, wait),
+                        partial(self.__chip_done, chip),
+                        partial(self.__chip_err, chip, link))
+
+    def __chip_done(self, chip: Chip):
+        """
+        Mark the chip as done, and thus eligible to be a source for copying
+        from.
+        """
+        self.__chips_done[chip] = 1
+
+    def __chip_err(
+            self, chip: Chip, link: int, request, exception, tb, connection):
+        """
+        This link not working? Blacklist it (for this process, not generally).
+        Pass through to the standard error handler if the chip isn't reachable
+        in a reliable fashion at all (i.e., all links into the chip are
+        exhausted).
+        """
+        self.__blacklisted_links[chip].add(link)
+        logger.debug("chip {},{} link {} failed due to {}",
+                     chip.x, chip.y, link, str(exception))
+        # pylint: disable=protected-access
+        if len(self.__blacklisted_links[chip]) == len(chip.router._links):
+            self._receive_error(request, exception, tb, connection)
