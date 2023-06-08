@@ -11,11 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import annotations
 import logging
+from typing import Optional, Union, TYPE_CHECKING
 from spinn_utilities.log import FormatAdapter
 from spinn_machine.data import MachineDataView
 from spinnman.utilities.appid_tracker import AppIdTracker
+if TYPE_CHECKING:
+    from io import RawIOBase
+    from spinnman.processes import MostDirectConnectionSelector
+    from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 # pylint: disable=protected-access
@@ -101,7 +106,7 @@ class SpiNNManDataView(MachineDataView):
     # transceiver methods
 
     @classmethod
-    def has_transceiver(cls):
+    def has_transceiver(cls) -> bool:
         """
         Reports if a transceiver is currently set.
 
@@ -110,7 +115,7 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver is not None
 
     @classmethod
-    def get_transceiver(cls):
+    def get_transceiver(cls) -> Transceiver:
         """
         The transceiver description.
 
@@ -123,7 +128,8 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver
 
     @classmethod
-    def read_memory(cls, x, y, base_address, length, cpu=0):
+    def read_memory(
+            cls, x: int, y: int, base_address: int, length: int, cpu: int = 0):
         """
         Read some areas of memory (usually SDRAM) from the board.
 
@@ -160,8 +166,10 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver") from ex
 
     @classmethod
-    def write_memory(cls, x, y, base_address, data, *,
-                     n_bytes=None, offset=0, cpu=0):
+    def write_memory(
+            cls, x: int, y: int, base_address: int, data: Union[
+                RawIOBase, bytes, bytearray, int, str], *,
+            n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0):
         """
         Write to the SDRAM on the board.
 
@@ -217,7 +225,7 @@ class SpiNNManDataView(MachineDataView):
     # app_id methods
 
     @classmethod
-    def get_app_id(cls):
+    def get_app_id(cls) -> int:
         """
         Gets the main app_id used by the transceiver.
 
@@ -230,7 +238,7 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._app_id
 
     @classmethod
-    def get_new_id(cls):
+    def get_new_id(cls) -> int:
         """
         Gets a new id from the current `app_id_tracker`
 
@@ -243,7 +251,7 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._app_id_tracker.get_new_id()
 
     @classmethod
-    def free_id(cls, app_id):
+    def free_id(cls, app_id: int):
         """
         Frees up an app_id.
 
@@ -255,7 +263,7 @@ class SpiNNManDataView(MachineDataView):
             cls.__data._app_id_tracker.free_id(app_id)
 
     @classmethod
-    def get_scamp_connection_selector(cls):
+    def get_scamp_connection_selector(cls) -> MostDirectConnectionSelector:
         """
         Gets the SCAMP connection selector from the transceiver.
 

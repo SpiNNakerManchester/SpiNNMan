@@ -13,9 +13,11 @@
 # limitations under the License.
 
 from collections import defaultdict
+from typing import Dict, Iterable, Optional, Set, cast
 from spinn_utilities.ordered_set import OrderedSet
 from spinn_machine import CoreSubsets
 from spinnman.exceptions import SpinnmanInvalidParameterException
+from .enums import ExecutableType
 
 
 class ExecutableTargets(object):
@@ -28,13 +30,20 @@ class ExecutableTargets(object):
         "_total_processors",
         "_binary_type_map"]
 
-    def __init__(self):
-        self._targets = dict()
+    __EMPTY_SUBSET = CoreSubsets()
+
+    def __init__(self) -> None:
+        self._targets: Dict[str, CoreSubsets] = dict()
         self._total_processors = 0
         self._all_core_subsets = CoreSubsets()
-        self._binary_type_map = defaultdict(OrderedSet)
+        self._binary_type_map: Dict[
+            ExecutableType, Set[str]] = defaultdict(
+                # Need to pretend!
+                lambda: cast(Set, OrderedSet()))
 
-    def add_subsets(self, binary, subsets, executable_type=None):
+    def add_subsets(
+            self, binary: str, subsets: CoreSubsets,
+            executable_type: Optional[ExecutableType] = None):
         """
         Add core subsets to a binary.
 
@@ -56,7 +65,8 @@ class ExecutableTargets(object):
             self._binary_type_map[executable_type].add(binary)
 
     def add_processor(
-            self, binary, chip_x, chip_y, chip_p, executable_type=None):
+            self, binary: str, chip_x: int, chip_y: int, chip_p: int,
+            executable_type: Optional[ExecutableType] = None):
         """
         Add a processor to the executable targets
 
@@ -79,7 +89,8 @@ class ExecutableTargets(object):
         self._all_core_subsets.add_processor(chip_x, chip_y, chip_p)
         self._total_processors += 1
 
-    def get_n_cores_for_executable_type(self, executable_type):
+    def get_n_cores_for_executable_type(
+            self, executable_type: ExecutableType) -> int:
         """
         Get the number of cores that the executable type is using.
 
@@ -91,7 +102,8 @@ class ExecutableTargets(object):
             len(self.get_cores_for_binary(aplx))
             for aplx in self._binary_type_map[executable_type])
 
-    def get_binaries_of_executable_type(self, executable_type):
+    def get_binaries_of_executable_type(
+            self, executable_type: ExecutableType) -> Iterable[str]:
         """
         Get the binaries of a given a executable type.
 
@@ -102,7 +114,7 @@ class ExecutableTargets(object):
         """
         return self._binary_type_map[executable_type]
 
-    def executable_types_in_binary_set(self):
+    def executable_types_in_binary_set(self) -> Iterable[ExecutableType]:
         """
         Get the executable types in the set of binaries.
 
@@ -112,16 +124,17 @@ class ExecutableTargets(object):
         """
         return self._binary_type_map.keys()
 
-    def get_cores_for_binary(self, binary):
+    def get_cores_for_binary(self, binary: str) -> CoreSubsets:
         """
         Get the cores that a binary is to run on.
 
         :param str binary: The binary to find the cores for
+        :rtype: ~spinn_machine.CoreSubsets
         """
-        return self._targets.get(binary)
+        return self._targets.get(binary, self.__EMPTY_SUBSET)
 
     @property
-    def binaries(self):
+    def binaries(self) -> Iterable[str]:
         """
         The binaries of the executables.
 
@@ -130,7 +143,7 @@ class ExecutableTargets(object):
         return self._targets.keys()
 
     @property
-    def total_processors(self):
+    def total_processors(self) -> int:
         """
         The total number of cores to be loaded.
 
@@ -139,7 +152,7 @@ class ExecutableTargets(object):
         return self._total_processors
 
     @property
-    def all_core_subsets(self):
+    def all_core_subsets(self) -> CoreSubsets:
         """
         All the core subsets for all the binaries.
 
@@ -147,7 +160,7 @@ class ExecutableTargets(object):
         """
         return self._all_core_subsets
 
-    def known(self, binary, chip_x, chip_y, chip_p):
+    def known(self, binary, chip_x, chip_y, chip_p) -> bool:
         """
         :param str binary:
         :param int chip_x:
