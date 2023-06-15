@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import Dict, Iterable, Optional, Set, cast
+from typing import Collection, Dict, Iterable, Optional, Set, cast
 from spinn_utilities.ordered_set import OrderedSet
 from spinn_machine import CoreSubsets
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -134,7 +134,7 @@ class ExecutableTargets(object):
         return self._targets.get(binary, self.__EMPTY_SUBSET)
 
     @property
-    def binaries(self) -> Iterable[str]:
+    def binaries(self) -> Collection[str]:
         """
         The binaries of the executables.
 
