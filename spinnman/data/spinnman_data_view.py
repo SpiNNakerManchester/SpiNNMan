@@ -123,6 +123,36 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver
 
     @classmethod
+    def get_cpu_information_from_core(cls, x, y, p):
+        """
+        Get information about a specific processor on the board.
+
+        Syntactic sugar for `get_transceiver().read_memory()`.
+
+        :param int x: The x-coordinate of the chip containing the processor
+        :param int y: The y-coordinate of the chip containing the processor
+        :param int p: The ID of the processor to get the information about
+        :return: The CPU information for the selected core
+        :rtype: CPUInfo
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If x, y, p is not a valid processor
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.get_cpu_information_from_core(
+                x, y, p)
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
+
+    @classmethod
     def read_memory(cls, x, y, base_address, length, cpu=0):
         """
         Read some areas of memory (usually SDRAM) from the board.
@@ -156,6 +186,41 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.read_memory(
                 x, y, base_address, length, cpu)
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
+
+    @classmethod
+    def read_word(cls, x, y, base_address, cpu=0):
+        """
+        Read a word (usually of SDRAM) from the board.
+
+        Syntactic sugar for `get_transceiver().read_word()`.
+        :param int x:
+            The x-coordinate of the chip where the word is to be read from
+        :param int y:
+            The y-coordinate of the chip where the word is to be read from
+        :param int base_address:
+            The address (usually in SDRAM) where the word to be read starts
+        :param int cpu:
+            the core ID used to read the word; should usually be 0 when reading
+            from SDRAM, but may be other values when reading from DTCM.
+        :return: The unsigned integer value at ``base_address``
+        :rtype: int
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If one of `x`, `y`, `cpu` or `base_address` is invalid
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.read_word(
+                x, y, base_address, cpu)
         except AttributeError as ex:
             raise cls._exception("transceiver") from ex
 
