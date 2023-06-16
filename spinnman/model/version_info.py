@@ -15,9 +15,11 @@
 import re
 import struct
 from time import localtime, asctime
+from typing import Tuple, cast
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
+_V = Tuple[int, int, int]
 
 
 class VersionInfo(object):
@@ -33,7 +35,7 @@ class VersionInfo(object):
         "_version_string",
         "_x", "_y", "_p"]
 
-    def __init__(self, version_data, offset=0):
+    def __init__(self, version_data: bytes, offset: int = 0):
         """
         :param bytes version_data:
             bytes from an SCP packet containing version information
@@ -47,29 +49,31 @@ class VersionInfo(object):
             version_no, self._build_date) = _VERSION_PATTERN.unpack_from(
                 memoryview(version_data), offset)
 
-        version_data = version_data[offset + 12:-1].decode("utf-8")
+        version_str = version_data[offset + 12:-1].decode("utf-8")
 
+        self._version_number: _V
         if version_no < 0xFFFF:
             try:
                 self._version_number = (version_no // 100, version_no % 100, 0)
-                self._name, self._hardware = version_data.split("/")
-                self._version_string = version_data
+                self._name, self._hardware = version_str.split("/")
+                self._version_string = version_str
             except ValueError as exception:
                 raise SpinnmanInvalidParameterException(
-                    "version_data", version_data,
+                    "version_data", version_str,
                     f"Incorrect format: {exception}") from exception
         else:
-            name_hardware, _, version = version_data.partition("\0")
+            name_hardware, _, version = version_str.partition("\0")
             self._version_string = version
             matches = re.match(r"(\d+)\.(\d+)\.(\d+)", version)
             if matches is None:
                 raise SpinnmanInvalidParameterException(
                     "version", version, "Cannot be parsed")
-            self._version_number = tuple(map(int, matches.group(1, 2, 3)))
+            self._version_number = cast(_V, tuple(
+                map(int, matches.group(1, 2, 3))))
             self._name, self._hardware = name_hardware.rstrip("\0").split("/")
 
     @property
-    def name(self):
+    def name(self) -> str:
         """
         The name of the software.
 
@@ -78,7 +82,7 @@ class VersionInfo(object):
         return self._name
 
     @property
-    def version_number(self):
+    def version_number(self) -> _V:
         """
         The version number of the software.
 
@@ -87,7 +91,7 @@ class VersionInfo(object):
         return self._version_number
 
     @property
-    def hardware(self):
+    def hardware(self) -> str:
         """
         The hardware being run on.
 
@@ -96,7 +100,7 @@ class VersionInfo(object):
         return self._hardware
 
     @property
-    def x(self):
+    def x(self) -> int:
         """
         The X-coordinate of the chip where the information was obtained.
 
@@ -105,7 +109,7 @@ class VersionInfo(object):
         return self._x
 
     @property
-    def y(self):
+    def y(self) -> int:
         """
         The Y-coordinate of the chip where the information was obtained.
 
@@ -114,7 +118,7 @@ class VersionInfo(object):
         return self._y
 
     @property
-    def p(self):
+    def p(self) -> int:
         """
         The processor ID of the processor where the information was obtained.
 
@@ -123,7 +127,7 @@ class VersionInfo(object):
         return self._p
 
     @property
-    def build_date(self):
+    def build_date(self) -> int:
         """
         The build date of the software, in seconds since 1st January 1970.
 
@@ -132,7 +136,7 @@ class VersionInfo(object):
         return self._build_date
 
     @property
-    def version_string(self):
+    def version_string(self) -> str:
         """
         The version information as text.
 
@@ -140,7 +144,7 @@ class VersionInfo(object):
         """
         return self._version_string
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "[Version: {} {} at {}:{}:{}:{} (built {})]".format(
             self._name, self._version_string, self._hardware, self._x, self._y,
             self._p, asctime(localtime(self._build_date)))

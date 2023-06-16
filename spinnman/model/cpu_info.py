@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Sequence
 from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
 CPU_INFO_BYTES = 128
@@ -49,7 +50,7 @@ class CPUInfo(object):
         "_user",
         "_x", "_y", "_p"]
 
-    def __init__(self, x, y, p, cpu_data, offset):
+    def __init__(self, x: int, y: int, p: int, cpu_data: bytes, offset: int):
         """
         :param int x: The x-coordinate of a chip
         :param int y: The y-coordinate of a chip
@@ -84,7 +85,8 @@ class CPUInfo(object):
             self._application_name = self._application_name[0:index]
         self._application_name = self._application_name.decode('ascii')
 
-        self._registers = _REGISTERS_PATTERN.unpack_from(registers)
+        self._registers: Sequence[int] = _REGISTERS_PATTERN.unpack_from(
+            registers)
         self._run_time_error = RunTimeError(run_time_error)
         self._state = CPUState(state)
 
@@ -95,9 +97,9 @@ class CPUInfo(object):
         self._user = [user0, user1, user2, user3]
 
     @property
-    def x(self):
+    def x(self) -> int:
         """
-        The x-coordinate of the chip containing the core.
+        The X-coordinate of the chip containing the core.
 
         :return: The x-coordinate of the chip
         :rtype: int
@@ -105,7 +107,7 @@ class CPUInfo(object):
         return self._x
 
     @property
-    def y(self):
+    def y(self) -> int:
         """
         The y-coordinate of the chip containing the core.
 
@@ -115,7 +117,7 @@ class CPUInfo(object):
         return self._y
 
     @property
-    def p(self):
+    def p(self) -> int:
         """
         The ID of the core on the chip.
 
@@ -125,7 +127,7 @@ class CPUInfo(object):
         return self._p
 
     @property
-    def state(self):
+    def state(self) -> CPUState:
         """
         The current state of the core.
 
@@ -135,7 +137,7 @@ class CPUInfo(object):
         return self._state
 
     @property
-    def physical_cpu_id(self):
+    def physical_cpu_id(self) -> int:
         """
         The physical ID of this processor.
 
@@ -145,7 +147,7 @@ class CPUInfo(object):
         return self._physical_cpu_id
 
     @property
-    def application_name(self):
+    def application_name(self) -> str:
         """
         The name of the application running on the core.
 
@@ -155,7 +157,7 @@ class CPUInfo(object):
         return self._application_name
 
     @property
-    def application_id(self):
+    def application_id(self) -> int:
         """
         The ID of the application running on the core.
 
@@ -165,7 +167,7 @@ class CPUInfo(object):
         return self._application_id
 
     @property
-    def time(self):
+    def time(self) -> int:
         """
         The time at which the application started.
 
@@ -175,7 +177,7 @@ class CPUInfo(object):
         return self._time
 
     @property
-    def run_time_error(self):
+    def run_time_error(self) -> RunTimeError:
         """
         The reason for a run time error.
 
@@ -185,7 +187,7 @@ class CPUInfo(object):
         return self._run_time_error
 
     @property
-    def application_mailbox_command(self):
+    def application_mailbox_command(self) -> MailboxCommand:
         """
         The command currently in the mailbox being sent from the monitor
         processor to the application.
@@ -196,7 +198,7 @@ class CPUInfo(object):
         return self._application_mailbox_command
 
     @property
-    def application_mailbox_data_address(self):
+    def application_mailbox_data_address(self) -> int:
         """
         The address of the data in SDRAM for the application mailbox.
 
@@ -206,7 +208,7 @@ class CPUInfo(object):
         return self._application_mailbox_data_address
 
     @property
-    def monitor_mailbox_command(self):
+    def monitor_mailbox_command(self) -> MailboxCommand:
         """
         The command currently in the mailbox being sent from the
         application to the monitor processor.
@@ -217,7 +219,7 @@ class CPUInfo(object):
         return self._monitor_mailbox_command
 
     @property
-    def monitor_mailbox_data_address(self):
+    def monitor_mailbox_data_address(self) -> int:
         """
         The address of the data in SDRAM of the monitor mailbox.
 
@@ -227,7 +229,7 @@ class CPUInfo(object):
         return self._monitor_mailbox_data_address
 
     @property
-    def software_error_count(self):
+    def software_error_count(self) -> int:
         """
         The number of software errors counted.
 
@@ -237,7 +239,7 @@ class CPUInfo(object):
         return self._software_error_count
 
     @property
-    def software_source_filename_address(self):
+    def software_source_filename_address(self) -> str:
         """
         The address of the filename of the software source.
 
@@ -247,7 +249,7 @@ class CPUInfo(object):
         return self._software_source_filename_address
 
     @property
-    def software_source_line_number(self):
+    def software_source_line_number(self) -> int:
         """
         The line number of the software source.
 
@@ -257,7 +259,7 @@ class CPUInfo(object):
         return self._software_source_line_number
 
     @property
-    def processor_state_register(self):
+    def processor_state_register(self) -> int:
         """
         The value in the processor state register (PSR).
 
@@ -267,7 +269,7 @@ class CPUInfo(object):
         return self._processor_state_register
 
     @property
-    def stack_pointer(self):
+    def stack_pointer(self) -> int:
         """
         The current stack pointer value (SP).
 
@@ -277,7 +279,7 @@ class CPUInfo(object):
         return self._stack_pointer
 
     @property
-    def link_register(self):
+    def link_register(self) -> int:
         """
         The current link register value (LR).
 
@@ -287,7 +289,7 @@ class CPUInfo(object):
         return self._link_register
 
     @property
-    def registers(self):
+    def registers(self) -> Sequence[int]:
         """
         The current register values (r0 - r7).
 
@@ -297,7 +299,7 @@ class CPUInfo(object):
         return self._registers
 
     @property
-    def user(self):
+    def user(self) -> Sequence[int]:
         """
         The current user values (user0 - user3).
 
@@ -307,7 +309,7 @@ class CPUInfo(object):
         return self._user
 
     @property
-    def iobuf_address(self):
+    def iobuf_address(self) -> int:
         """
         The address of the IOBUF buffer in SDRAM.
 
@@ -317,7 +319,7 @@ class CPUInfo(object):
         return self._iobuf_address
 
     @property
-    def software_version(self):
+    def software_version(self) -> int:
         """
         The software version.
 
@@ -326,7 +328,7 @@ class CPUInfo(object):
         """
         return self._software_version
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "{}:{}:{:02n} ({:02n}) {:18} {:16s} {:3n}".format(
             self.x, self.y, self.p, self.physical_cpu_id, self._state.name,
             self._application_name, self._application_id)

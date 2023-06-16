@@ -13,12 +13,11 @@
 # limitations under the License.
 from __future__ import annotations
 import logging
-from typing import Optional, Union, TYPE_CHECKING
+from typing import BinaryIO, Optional, Tuple, Union, TYPE_CHECKING
 from spinn_utilities.log import FormatAdapter
 from spinn_machine.data import MachineDataView
 from spinnman.utilities.appid_tracker import AppIdTracker
 if TYPE_CHECKING:
-    from io import RawIOBase
     from spinnman.processes import MostDirectConnectionSelector
     from spinnman.transceiver import Transceiver
 
@@ -51,7 +50,7 @@ class _SpiNNManDataModel(object):
         "_transceiver",
     ]
 
-    def __new__(cls):
+    def __new__(cls) -> _SpiNNManDataModel:
         if cls.__singleton:
             return cls.__singleton
         obj = object.__new__(cls)
@@ -60,29 +59,30 @@ class _SpiNNManDataModel(object):
         obj._clear()
         return obj
 
-    def _clear(self):
+    def _clear(self) -> None:
         """
         Clears out all data.
         """
         self._hard_reset()
 
-    def _hard_reset(self):
+    def _hard_reset(self) -> None:
         """
         Clears out all data that should change after a reset and graph change.
         """
-        self._app_id = None
-        self._app_id_tracker = None
+        self._app_id: Optional[int] = None
+        self._app_id_tracker: Optional[AppIdTracker] = None
         self._soft_reset()
-        self._scamp_connection_selector = None
+        self._scamp_connection_selector: Optional[
+            MostDirectConnectionSelector] = None
         if self._transceiver:
             try:
                 self._transceiver.close()
             except Exception as ex:  # pylint: disable=broad-except
                 logger.exception(
                     f"Error {ex} when closing the transceiver ignored")
-        self._transceiver = None
+        self._transceiver: Optional[Transceiver] = None
 
-    def _soft_reset(self):
+    def _soft_reset(self) -> None:
         """
         Clears timing and other data that should changed every reset.
         """
@@ -129,7 +129,8 @@ class SpiNNManDataView(MachineDataView):
 
     @classmethod
     def read_memory(
-            cls, x: int, y: int, base_address: int, length: int, cpu: int = 0):
+            cls, x: int, y: int, base_address: int, length: int,
+            cpu: int = 0) -> bytes:
         """
         Read some areas of memory (usually SDRAM) from the board.
 
@@ -160,7 +161,7 @@ class SpiNNManDataView(MachineDataView):
             If a response indicates an error during the exchange
         """
         try:
-            return cls.__data._transceiver.read_memory(
+            return cls.get_transceiver().read_memory(
                 x, y, base_address, length, cpu)
         except AttributeError as ex:
             raise cls._exception("transceiver") from ex
@@ -168,8 +169,9 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def write_memory(
             cls, x: int, y: int, base_address: int, data: Union[
-                RawIOBase, bytes, bytearray, int, str], *,
-            n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0):
+                BinaryIO, bytes, bytearray, int, str], *,
+            n_bytes: Optional[int] = None, offset: int = 0,
+            cpu: int = 0) -> Tuple[int, int]:
         """
         Write to the SDRAM on the board.
 
@@ -218,7 +220,7 @@ class SpiNNManDataView(MachineDataView):
         """
         if cls.__data._transceiver is None:
             raise cls._exception("transceiver")
-        return cls.__data._transceiver.write_memory(
+        return cls.get_transceiver().write_memory(
             x, y, base_address, data,
             n_bytes=n_bytes, offset=offset, cpu=cpu)
 

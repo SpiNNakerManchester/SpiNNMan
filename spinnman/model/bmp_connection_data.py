@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Iterable, List
 
 
 class BMPConnectionData(object):
@@ -24,16 +25,18 @@ class BMPConnectionData(object):
         "_ip_address",
         "_port_num"]
 
-    def __init__(self, cabinet, frame, ip_address, boards, port_num):
+    def __init__(
+            self, cabinet: int, frame: int, ip_address: str,
+            boards: List[int], port_num: int):
         # pylint: disable=too-many-arguments
         self._cabinet = cabinet
         self._frame = frame
         self._ip_address = ip_address
-        self._boards = boards
+        self._boards = tuple(boards)
         self._port_num = port_num
 
     @property
-    def cabinet(self):
+    def cabinet(self) -> int:
         """
         The cabinet number.
 
@@ -42,7 +45,7 @@ class BMPConnectionData(object):
         return self._cabinet
 
     @property
-    def frame(self):
+    def frame(self) -> int:
         """
         The frame number.
 
@@ -51,7 +54,7 @@ class BMPConnectionData(object):
         return self._frame
 
     @property
-    def ip_address(self):
+    def ip_address(self) -> str:
         """
         The IP address of the BMP.
 
@@ -60,7 +63,7 @@ class BMPConnectionData(object):
         return self._ip_address
 
     @property
-    def boards(self):
+    def boards(self) -> Iterable[int]:
         """
         The boards to be addressed.
 
@@ -69,7 +72,7 @@ class BMPConnectionData(object):
         return self._boards
 
     @property
-    def port_num(self):
+    def port_num(self) -> int:
         """
         The port number associated with this BMP connection.
 
@@ -77,9 +80,9 @@ class BMPConnectionData(object):
         """
         return self._port_num
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"{self._cabinet}:{self._frame}:{self._ip_address}:"
                 f"{self._boards}:{self._port_num}")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()

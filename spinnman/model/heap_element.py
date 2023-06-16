@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
 
 
 class HeapElement(object):
@@ -31,7 +32,7 @@ class HeapElement(object):
         "_app_id"
     ]
 
-    def __init__(self, block_address, next_address, free):
+    def __init__(self, block_address: int, next_address: int, free: int):
         """
         :param int block_address: The address of this element on the heap
         :param int next_address: The address of the next element on the heap
@@ -40,14 +41,14 @@ class HeapElement(object):
         self._block_address = block_address
         self._next_address = next_address
         self._is_free = (free & 0xFFFF0000) != 0xFFFF0000
-        self._tag = None
-        self._app_id = None
+        self._tag: Optional[int] = None
+        self._app_id: Optional[int] = None
         if not self._is_free:
             self._tag = free & 0xFF
             self._app_id = (free >> 8) & 0xFF
 
     @property
-    def block_address(self):
+    def block_address(self) -> int:
         """
         The address of the block.
 
@@ -56,7 +57,7 @@ class HeapElement(object):
         return self._block_address
 
     @property
-    def next_address(self):
+    def next_address(self) -> int:
         """
         The address of the next block, or 0 if none.
 
@@ -65,7 +66,7 @@ class HeapElement(object):
         return self._next_address
 
     @property
-    def size(self):
+    def size(self) -> int:
         """
         The usable size of this block (not including the header).
 
@@ -74,7 +75,7 @@ class HeapElement(object):
         return self._next_address - self._block_address - 8
 
     @property
-    def is_free(self):
+    def is_free(self) -> bool:
         """
         Whether this block is a free block.
 
@@ -83,7 +84,7 @@ class HeapElement(object):
         return self._is_free
 
     @property
-    def tag(self):
+    def tag(self) -> Optional[int]:
         """
         The tag of the block if allocated, or `None` if not.
 
@@ -92,7 +93,7 @@ class HeapElement(object):
         return self._tag
 
     @property
-    def app_id(self):
+    def app_id(self) -> Optional[int]:
         """
         The application ID of the block if allocated, or `None` if not.
 
@@ -100,9 +101,11 @@ class HeapElement(object):
         """
         return self._app_id
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self._is_free:
             return "FREE  0x{:8X} SIZE: {:9d}".format(
                 self._block_address, self.size)
+        assert self._tag is not None
+        assert self._app_id is not None
         return "BLOCK 0x{:8X} SIZE: {:9d} TAG: {:3d} APP_ID: {:3d}".format(
             self._block_address, self.size, self._tag, self._app_id)

@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Dict, Iterable, Iterator, Tuple
+from .cpu_info import CPUInfo
 
 
 class CPUInfos(object):
@@ -20,10 +22,11 @@ class CPUInfos(object):
     __slots__ = [
         "_cpu_infos"]
 
-    def __init__(self):
-        self._cpu_infos = dict()
+    def __init__(self) -> None:
+        self._cpu_infos: Dict[Tuple[int, int, int], CPUInfo] = dict()
 
-    def add_processor(self, x, y, processor_id, cpu_info):
+    def add_processor(self, x: int, y: int, processor_id: int,
+                      cpu_info: CPUInfo):
         """
         Add a processor on a given chip to the set.
 
@@ -35,7 +38,7 @@ class CPUInfos(object):
         self._cpu_infos[x, y, processor_id] = cpu_info
 
     @property
-    def cpu_infos(self):
+    def cpu_infos(self) -> Iterator[Tuple[Tuple[int, int, int], CPUInfo]]:
         """
         The one per core core info.
 
@@ -43,57 +46,57 @@ class CPUInfos(object):
         """
         return iter(self._cpu_infos.items())
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Tuple[int, int, int]]:
         return iter(self._cpu_infos)
 
-    def iteritems(self):
+    def iteritems(self) -> Iterator[Tuple[Tuple[int, int, int], CPUInfo]]:
         """
         Get an iterable of (x, y, p), cpu_info.
         """
         return iter(self._cpu_infos.items())
 
-    def items(self):
+    def items(self) -> Iterable[Tuple[Tuple[int, int, int], CPUInfo]]:
         return self._cpu_infos.items()
 
-    def values(self):
+    def values(self) -> Iterable[CPUInfo]:
         return self._cpu_infos.values()
 
-    def itervalues(self):
+    def itervalues(self) -> Iterator[CPUInfo]:
         """
         Get an iterable of cpu_info.
         """
-        return iter(self._cpu_infos.items())
+        return iter(self._cpu_infos.values())
 
-    def keys(self):
+    def keys(self) -> Iterable[Tuple[int, int, int]]:
         return self._cpu_infos.keys()
 
-    def iterkeys(self):
+    def iterkeys(self) -> Iterator[Tuple[int, int, int]]:
         """
         Get an iterable of (x, y, p).
         """
         return iter(self._cpu_infos.keys())
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         The total number of processors that are in these core subsets.
         """
         return len(self._cpu_infos)
 
-    def is_core(self, x, y, p):
+    def is_core(self, x: int, y: int, p: int) -> bool:
         """
         Determine if there is a CPU Info for x, y, p.
         """
         return (x, y, p) in self._cpu_infos
 
-    def get_cpu_info(self, x, y, p):
+    def get_cpu_info(self, x: int, y: int, p: int) -> CPUInfo:
         """
         Get the information for the given core on the given chip.
         """
         return self._cpu_infos[x, y, p]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str([f"{x}, {y}, {p} (ph: {info.physical_cpu_id})"
                     for (x, y, p), info in self._cpu_infos.items()])
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()

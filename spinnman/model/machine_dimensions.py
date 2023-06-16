@@ -21,7 +21,7 @@ class MachineDimensions(object):
         "_height",
         "_width"]
 
-    def __init__(self, width, height):
+    def __init__(self, width: int, height: int):
         """
         :param int width: The width of the machine in chips
         :param int height: The height of the machine in chips
@@ -30,7 +30,7 @@ class MachineDimensions(object):
         self._height = height
 
     @property
-    def width(self):
+    def width(self) -> int:
         """
         The width of the machine in chips.
 
@@ -39,7 +39,7 @@ class MachineDimensions(object):
         return self._width
 
     @property
-    def height(self):
+    def height(self) -> int:
         """
         The height of the machine in chips.
 

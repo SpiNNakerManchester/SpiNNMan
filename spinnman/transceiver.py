@@ -300,7 +300,9 @@ class Transceiver(AbstractContextManager):
         except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
-    def _identify_connections(self, connections: Iterable[Connection]):
+    def _identify_connections(
+            self, connections: Iterable[Connection]
+            ) -> MostDirectConnectionSelector:
         for conn in connections:
 
             # locate the only boot send conn
