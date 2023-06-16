@@ -18,6 +18,7 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.transceiver import Transceiver
+from spinnman.connections.udp_packet_connections import UDPConnection
 from .spalloc_state import SpallocState
 from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
@@ -96,7 +97,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def open_listener_connection(self) -> SpallocEIEIOListener:
+    def open_eieio_listener_connection(self) -> SpallocEIEIOListener:
         """
         Open a listening EIEIO connection to the job's boards. Messages cannot
         be sent on this connection unless you say which board to send to, but
@@ -105,6 +106,18 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :return: an EIEIO connection with no board address bound
         :rtype: SpallocEIEIOListener
+        """
+
+    @abstractmethod
+    def open_udp_listener_connection(self) -> UDPConnection:
+        """
+        Open a listening UDP connection to the job's boards. Messages cannot
+        be sent on this connection unless you say which board to send to, but
+        they can be received from all boards. You can also get the *server*
+        side connection information so you can program that into a tag.
+
+        :return: a UDP connection with no board address bound
+        :rtype: UDPConnection
         """
 
     @abstractmethod
