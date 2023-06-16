@@ -30,9 +30,12 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
+from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
+from spinnman.exceptions import SpallocException
+from spinnman.transceiver import Transceiver
 from .spalloc_state import SpallocState
 from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware
@@ -45,8 +48,6 @@ from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
 from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_scp_connection import SpallocSCPConnection
-from spinnman.exceptions import SpallocException
-from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(getLogger(__name__))
 _open_req = struct.Struct("<IIIII")
@@ -521,10 +522,16 @@ class _SpallocJob(SessionAware, SpallocJob):
         return _ProxiedEIEIOConnection(
             self.__proxy_handle, self.__proxy_thread, x, y, SCP_SCAMP_PORT)
 
-    @overrides(SpallocJob.open_listener_connection)
-    def open_listener_connection(self):
+    @overrides(SpallocJob.open_eieio_listener_connection)
+    def open_eieio_listener_connection(self):
         self.__init_proxy()
         return _ProxiedEIEIOListener(
+            self.__proxy_handle, self.__proxy_thread, self.get_connections())
+
+    @overrides(SpallocJob.open_udp_listener_connection)
+    def open_udp_listener_connection(self):
+        self.__init_proxy()
+        return _ProxiedUDPListener(
             self.__proxy_handle, self.__proxy_thread, self.get_connections())
 
     @overrides(SpallocJob.wait_for_state_change)
@@ -902,3 +909,32 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
 
     def __str__(self):
         return f"EIEIOConnection[proxied](local:{self._addr}:{self._port})"
+
+
+class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
+    __slots__ = ("__conns", )
+
+    def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
+                 conns: Dict[Tuple[int, int], str]):
+        super().__init__(ws, receiver)
+        # Invert the map
+        self.__conns = {ip: xy for (xy, ip) in conns.items()}
+
+    @overrides(UDPConnection.send_to)
+    def send_to(self, data: bytes, address: Tuple[str, int]):
+        ip, port = address
+        x, y = self.__conns[ip]
+        self._send_to(data, x, y, port)
+
+    @property
+    @overrides(UDPConnection.local_ip_address)
+    def local_ip_address(self) -> str:
+        return self._addr
+
+    @property
+    @overrides(UDPConnection.local_port)
+    def local_port(self) -> int:
+        return self._port
+
+    def __str__(self):
+        return f"UDPConnection[proxied](local:{self._addr}:{self._port})"
