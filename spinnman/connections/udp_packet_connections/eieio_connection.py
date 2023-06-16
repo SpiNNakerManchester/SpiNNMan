@@ -13,11 +13,13 @@
 # limitations under the License.
 
 import struct
+from typing import Callable, Optional
 from .udp_connection import UDPConnection
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.messages.eieio import (
     read_eieio_command_message, read_eieio_data_message)
 from spinn_utilities.overrides import overrides
+from spinnman.messages.eieio import AbstractEIEIOMessage
 
 _ONE_SHORT = struct.Struct("<H")
 _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
@@ -30,7 +32,8 @@ class EIEIOConnection(UDPConnection, Listenable):
     """
     __slots__ = ()
 
-    def receive_eieio_message(self, timeout=None):
+    def receive_eieio_message(
+            self, timeout: Optional[float] = None) -> AbstractEIEIOMessage:
         """
         Receives an EIEIO message from this connection.  Blocks until
         a message has been received, or a timeout occurs.
@@ -55,7 +58,7 @@ class EIEIOConnection(UDPConnection, Listenable):
             return read_eieio_command_message(data, 0)
         return read_eieio_data_message(data, 0)
 
-    def send_eieio_message(self, eieio_message):
+    def send_eieio_message(self, eieio_message: AbstractEIEIOMessage):
         """
         Sends an EIEIO message down this connection.
 
@@ -66,14 +69,17 @@ class EIEIOConnection(UDPConnection, Listenable):
         """
         self.send(eieio_message.bytestring)
 
-    def send_eieio_message_to(self, eieio_message, ip_address, port):
+    def send_eieio_message_to(
+            self, eieio_message: AbstractEIEIOMessage,
+            ip_address: str, port: int):
         self.send_to(eieio_message.bytestring, (ip_address, port))
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self):
+    def get_receive_method(self) -> Callable[
+            [Optional[float]], AbstractEIEIOMessage]:
         return self.receive_eieio_message
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return _REPR_TEMPLATE.format(
             self.local_ip_address, self.local_port,
             self.remote_ip_address, self.remote_port)

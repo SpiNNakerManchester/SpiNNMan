@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterable, List
+from typing import Sequence
 
 
 class BMPConnectionData(object):
@@ -27,7 +27,7 @@ class BMPConnectionData(object):
 
     def __init__(
             self, cabinet: int, frame: int, ip_address: str,
-            boards: List[int], port_num: int):
+            boards: Sequence[int], port_num: int):
         # pylint: disable=too-many-arguments
         self._cabinet = cabinet
         self._frame = frame
@@ -63,7 +63,7 @@ class BMPConnectionData(object):
         return self._ip_address
 
     @property
-    def boards(self) -> Iterable[int]:
+    def boards(self) -> Sequence[int]:
         """
         The boards to be addressed.
 

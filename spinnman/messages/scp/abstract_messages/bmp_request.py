@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Iterable, Union
 from .scp_request import AbstractSCPRequest
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 
@@ -52,7 +52,7 @@ class BMPRequest(AbstractSCPRequest):
         return min(boards)
 
     @staticmethod
-    def get_board_mask(boards):
+    def get_board_mask(boards: Union[int, Iterable[int]]):
         """
         Get the board mask given a board ID or collection of board IDs.
         """

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Callable, Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from .udp_connection import UDPConnection
@@ -29,8 +30,12 @@ class SDPConnection(UDPConnection, Listenable):
         "_chip_x",
         "_chip_y")
 
-    def __init__(self, chip_x=None, chip_y=None, local_host=None,
-                 local_port=None, remote_host=None, remote_port=None):
+    def __init__(
+            self, chip_x: Optional[int] = None, chip_y: Optional[int] = None,
+            local_host: Optional[str] = None,
+            local_port: Optional[int] = None,
+            remote_host: Optional[str] = None,
+            remote_port: Optional[int] = None):
         """
         :param int chip_x: The optional x-coordinate of the chip at the remote
             end of the connection. If not specified, it will not be possible
@@ -53,7 +58,8 @@ class SDPConnection(UDPConnection, Listenable):
         self._chip_x = chip_x
         self._chip_y = chip_y
 
-    def receive_sdp_message(self, timeout=None):
+    def receive_sdp_message(
+            self, timeout: Optional[float] = None) -> SDPMessage:
         """
         Receives an SDP message from this connection.  Blocks until the
         message has been received, or a timeout occurs.
@@ -75,7 +81,7 @@ class SDPConnection(UDPConnection, Listenable):
         data = self.receive(timeout)
         return SDPMessage.from_bytestring(data, 2)
 
-    def send_sdp_message(self, sdp_message):
+    def send_sdp_message(self, sdp_message: SDPMessage):
         """
         Sends an SDP message down this connection.
 
@@ -91,10 +97,10 @@ class SDPConnection(UDPConnection, Listenable):
         self.send(_TWO_SKIP.pack() + sdp_message.bytestring)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self):
+    def get_receive_method(self) -> Callable[[Optional[float]], SDPMessage]:
         return self.receive_sdp_message
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"SDPConnection(chip_x={self._chip_x}, chip_y={self._chip_y}, "
             f"local_host={self.local_ip_address}, local_port={self.local_port}"

@@ -13,7 +13,9 @@
 # limitations under the License.
 
 from enum import Enum
+from typing import Tuple, Sequence
 from spinnman.model.enums import CPUState
+_ET = Tuple[int, Sequence[CPUState], Sequence[CPUState], bool, str]
 
 
 class ExecutableType(Enum):
@@ -23,14 +25,14 @@ class ExecutableType(Enum):
     """
 
     #: Runs immediately without waiting for barrier and then exits.
-    RUNNING = (
+    RUNNING: _ET = (
         0,
         [CPUState.RUNNING],
         [CPUState.FINISHED],
         False,
         "Runs immediately without waiting for barrier and then exits")
     #: Calls ``spin1_start(SYNC_WAIT)`` and then eventually ``spin1_exit()``.
-    SYNC = (
+    SYNC: _ET = (
         1,
         [CPUState.SYNC0],
         [CPUState.FINISHED],
@@ -38,7 +40,7 @@ class ExecutableType(Enum):
         "Calls spin1_start(SYNC_WAIT) and then eventually spin1_exit()")
     #: Calls ``simulation_run()`` and ``simulation_exit()`` /
     #: ``simulation_handle_pause_resume()``.
-    USES_SIMULATION_INTERFACE = (
+    USES_SIMULATION_INTERFACE: _ET = (
         2,
         [CPUState.SYNC0, CPUState.SYNC1, CPUState.PAUSED, CPUState.READY],
         [CPUState.READY],
@@ -47,7 +49,7 @@ class ExecutableType(Enum):
         "simulation_handle_pause_resume()")
     #: Situation where there user has supplied no application but for some
     #: reason still wants to run.
-    NO_APPLICATION = (
+    NO_APPLICATION: _ET = (
         3,
         [],
         [],
@@ -55,15 +57,16 @@ class ExecutableType(Enum):
         "Situation where there user has supplied no application but for "
         "some reason still wants to run")
     #: Runs immediately without waiting for barrier and never ends.
-    SYSTEM = (
+    SYSTEM: _ET = (
         4,
         [CPUState.RUNNING],
         [CPUState.RUNNING],
         True,
         "Runs immediately without waiting for barrier and never ends")
 
-    def __new__(cls, value, start_state, end_state,
-                supports_auto_pause_and_resume, doc=""):
+    def __new__(cls, value: int, start_state: Sequence[CPUState],
+                end_state: Sequence[CPUState],
+                supports_auto_pause_and_resume: bool, doc=""):
         # pylint: disable=protected-access, too-many-arguments
         obj = object.__new__(cls)
         obj._value_ = value

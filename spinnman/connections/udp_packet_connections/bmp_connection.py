@@ -13,11 +13,14 @@
 # limitations under the License.
 
 import struct
+from typing import Sequence, Tuple
 from spinn_utilities.overrides import overrides
 from .udp_connection import UDPConnection
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.connections.abstract_classes import AbstractSCPConnection
+from spinnman.model import BMPConnectionData
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")
@@ -32,7 +35,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         "_cabinet",
         "_frame")
 
-    def __init__(self, connection_data):
+    def __init__(self, connection_data: BMPConnectionData):
         """
         :param BMPConnectionData connection_data:
             The description of what to connect to.
@@ -46,7 +49,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         self._boards = connection_data.boards
 
     @property
-    def cabinet(self):
+    def cabinet(self) -> int:
         """
         The cabinet ID of the BMP.
 
@@ -55,7 +58,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         return self._cabinet
 
     @property
-    def frame(self):
+    def frame(self) -> int:
         """
         The frame ID of the BMP.
 
@@ -64,7 +67,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         return self._frame
 
     @property
-    def boards(self):
+    def boards(self) -> Sequence[int]:
         """
         The set of boards supported by the BMP.
 
@@ -74,7 +77,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @property
     @overrides(AbstractSCPConnection.chip_x, extend_doc=False)
-    def chip_x(self):
+    def chip_x(self) -> int:
         """
         Defined to satisfy the AbstractSCPConnection - always 0 for a BMP.
         """
@@ -82,25 +85,26 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     @property
     @overrides(AbstractSCPConnection.chip_y, extend_doc=False)
-    def chip_y(self):
+    def chip_y(self) -> int:
         """
         Defined to satisfy the AbstractSCPConnection - always 0 for a BMP.
         """
         return 0
 
     @overrides(AbstractSCPConnection.get_scp_data)
-    def get_scp_data(self, scp_request):
+    def get_scp_data(self, scp_request: AbstractSCPRequest) -> bytes:
         scp_request.sdp_header.update_for_send(0, 0)
         return _TWO_SKIP.pack() + scp_request.bytestring
 
     @overrides(AbstractSCPConnection.receive_scp_response)
-    def receive_scp_response(self, timeout=1.0):
+    def receive_scp_response(self, timeout=1.0) -> Tuple[
+            SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
     @overrides(AbstractSCPConnection.send_scp_request)
-    def send_scp_request(self, scp_request):
+    def send_scp_request(self, scp_request: AbstractSCPRequest):
         self.send(self.get_scp_data(scp_request))
 
     def __repr__(self):

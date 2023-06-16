@@ -24,7 +24,7 @@ class Connection(AbstractContextManager, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def is_connected(self):
+    def is_connected(self) -> bool:
         """
         Determines if the medium is connected at this point in time.
 
@@ -36,7 +36,7 @@ class Connection(AbstractContextManager, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def close(self):
+    def close(self) -> None:
         """
         Closes the connection.
         """

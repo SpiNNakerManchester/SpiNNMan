@@ -18,13 +18,14 @@ apply some consistency to things.
 
 import logging
 import socket
+from typing import Optional, Tuple
 from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-def get_udp_socket():
+def get_udp_socket() -> socket.socket:
     """
     Wrapper round socket() system call to produce UDP/IPv4 sockets.
     """
@@ -36,7 +37,7 @@ def get_udp_socket():
             f"Error setting up socket: {e}") from e
 
 
-def get_tcp_socket():
+def get_tcp_socket() -> socket.socket:
     """
     Wrapper round socket() system call to produce TCP/IPv4 sockets.
 
@@ -51,7 +52,7 @@ def get_tcp_socket():
             f"Error setting up socket: {e}") from e
 
 
-def set_receive_buffer_size(sock, size):
+def set_receive_buffer_size(sock: socket.socket, size: int):
     """
     Wrapper round setsockopt() system call.
     """
@@ -64,7 +65,7 @@ def set_receive_buffer_size(sock, size):
                        "receive buffer", exc_info=True)
 
 
-def bind_socket(sock, host, port):
+def bind_socket(sock: socket.socket, host: str, port: int):
     """
     Wrapper round bind() system call.
     """
@@ -76,7 +77,7 @@ def bind_socket(sock, host, port):
             f"Error binding socket to {host}:{port}: {e}") from e
 
 
-def resolve_host(host):
+def resolve_host(host: str) -> str:
     """
     Wrapper round gethostbyname() system call.
     """
@@ -87,7 +88,7 @@ def resolve_host(host):
             f"Error getting IP address for {host}: {e}") from e
 
 
-def connect_socket(sock, remote_address, remote_port):
+def connect_socket(sock: socket.socket, remote_address: str, remote_port: int):
     """
     Wrapper round connect() system call.
     """
@@ -98,7 +99,7 @@ def connect_socket(sock, remote_address, remote_port):
             f"Error connecting to {remote_address}:{remote_port}: {e}") from e
 
 
-def get_socket_address(sock):
+def get_socket_address(sock: socket.socket) -> Tuple[str, int]:
     """
     Wrapper round getsockname() system call.
     """
@@ -113,7 +114,8 @@ def get_socket_address(sock):
         raise SpinnmanIOException(f"Error querying socket: {e}") from e
 
 
-def receive_message(sock, timeout, size):
+def receive_message(
+        sock: socket.socket, timeout: Optional[float], size: int) -> bytes:
     """
     Wrapper round recv() system call.
     """
@@ -126,7 +128,9 @@ def receive_message(sock, timeout, size):
         raise SpinnmanIOException(f"Error receiving: {e}") from e
 
 
-def receive_message_and_address(sock, timeout, size):
+def receive_message_and_address(
+        sock: socket.socket, timeout: Optional[float], size: int) -> Tuple[
+            bytes, Tuple[str, int]]:
     """
     Wrapper round recvfrom() system call.
     """
@@ -139,7 +143,7 @@ def receive_message_and_address(sock, timeout, size):
         raise SpinnmanIOException(f"Error receiving: {e}") from e
 
 
-def send_message(sock, data):
+def send_message(sock: socket.socket, data: bytes):
     """
     Wrapper round send() system call.
     """
@@ -149,7 +153,8 @@ def send_message(sock, data):
         raise SpinnmanIOException(f"Error sending: {e}") from e
 
 
-def send_message_to_address(sock, data, address):
+def send_message_to_address(
+        sock: socket.socket, data: bytes, address: Tuple[str, int]):
     """
     Wrapper round sendto() system call.
     """

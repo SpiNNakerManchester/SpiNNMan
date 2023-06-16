@@ -25,8 +25,8 @@ import struct
 from threading import Condition, RLock
 import time
 from typing import (
-    BinaryIO, Dict, Iterable, Iterator, List, Optional, Set, Tuple, TypeVar,
-    Union, cast)
+    BinaryIO, Dict, Iterable, Iterator, List, Optional, Sequence, Set, Tuple,
+    TypeVar, Union, cast)
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
@@ -635,6 +635,7 @@ class Transceiver(AbstractContextManager):
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
                     2))
+        assert self._width is not None and self._height is not None
         return MachineDimensions(self._width, self._height)
 
     def get_machine_details(self) -> Machine:
@@ -654,7 +655,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         # Get the width and height of the machine
-        self.get_machine_dimensions()
+        dims = self.get_machine_dimensions()
 
         # Get the coordinates of the boot chip
         version_info = self.get_scamp_version()
@@ -663,7 +664,7 @@ class Transceiver(AbstractContextManager):
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector)
         machine = get_machine_process.get_machine_details(
-            version_info.x, version_info.y, self._width, self._height)
+            version_info.x, version_info.y, dims.width, dims.height)
 
         # Work out and add the SpiNNaker links and FPGA links
         machine.add_spinnaker_links()
@@ -1357,7 +1358,7 @@ class Transceiver(AbstractContextManager):
                           bmp_connection.frame)
         return True
 
-    def power_on(self, boards: Union[int, List[int]] = 0,
+    def power_on(self, boards: Union[int, Iterable[int]] = 0,
                  cabinet: int = 0, frame: int = 0):
         """
         Power on a set of boards in the machine.
@@ -1387,7 +1388,7 @@ class Transceiver(AbstractContextManager):
                            bmp_connection.frame)
         return True
 
-    def power_off(self, boards: Union[int, List[int]] = 0,
+    def power_off(self, boards: Union[int, Iterable[int]] = 0,
                   cabinet: int = 0, frame: int = 0):
         """
         Power off a set of boards in the machine.
@@ -1417,7 +1418,7 @@ class Transceiver(AbstractContextManager):
 
     def _power(
             self, power_command: PowerCommand,
-            boards: Union[int, List[int]] = 0,
+            boards: Union[int, Iterable[int]] = 0,
             cabinet: int = 0, frame: int = 0):
         """
         Send a power request to the machine.
@@ -1989,7 +1990,8 @@ class Transceiver(AbstractContextManager):
                 "You are calling a app stop on a turned off machine. "
                 "Please fix and try again")
 
-    def __log_where_is_info(self, cpu_infos: Iterable[CPUInfo]):
+    def __log_where_is_info(self, cpu_infos: Iterable[
+            Union[CPUInfo, Sequence[int]]]):
         """
         Logs the where_is info for each chip in cpu_infos.
 
@@ -1997,10 +1999,10 @@ class Transceiver(AbstractContextManager):
         """
         xys = set()
         for cpu_info in cpu_infos:
-            if isinstance(cpu_info, tuple):
-                xys.add((cpu_info[0], cpu_info[1]))
-            else:
+            if isinstance(cpu_info, CPUInfo):
                 xys.add((cpu_info.x, cpu_info.y))
+            else:
+                xys.add((cpu_info[0], cpu_info[1]))
         for (x, y) in xys:
             logger.info(self.__where_is_xy(x, y))
 

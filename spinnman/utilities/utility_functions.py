@@ -22,7 +22,8 @@ from spinnman.connections.udp_packet_connections import (
 from spinnman.exceptions import SpinnmanTimeoutException
 
 
-def work_out_bmp_from_machine_details(hostname, number_of_boards):
+def work_out_bmp_from_machine_details(
+        hostname: str, number_of_boards: int) -> BMPConnectionData:
     """
     Work out the BMP connection IP address given the machine details.
     This is assumed to be the IP address of the machine, with 1 subtracted
@@ -49,7 +50,7 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
                              boards=board_range, port_num=SCP_SCAMP_PORT)
 
 
-def get_vcpu_address(p):
+def get_vcpu_address(p: int) -> int:
     """
     Get the address of the vcpu_t structure for the given core.
 
@@ -59,7 +60,8 @@ def get_vcpu_address(p):
     return CPU_INFO_OFFSET + (CPU_INFO_BYTES * p)
 
 
-def send_port_trigger_message(connection, board_address):
+def send_port_trigger_message(
+        connection: UDPConnection, board_address: str):
     """
     Sends a port trigger message using a connection to (hopefully) open a
     port in a NAT and/or firewall to allow incoming packets to be received.
