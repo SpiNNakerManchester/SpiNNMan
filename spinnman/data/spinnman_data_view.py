@@ -312,6 +312,21 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver.write_memory(
             x, y, base_address, data, n_bytes, offset, cpu, is_filename)
 
+    @classmethod
+    def update_provenance_and_exit(cls, processor, core_subset):
+        """
+        Sends a command to update prevenance and exit
+
+        Syntactic sugar for `get_transceiver().update_provenance_and_exit`.
+
+        :param int processor:
+        :param ~.CoreSubset core_subset:
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.update_provenance_and_exit(
+            processor, core_subset)
+
     # app_id methods
 
     @classmethod

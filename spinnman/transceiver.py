@@ -45,7 +45,8 @@ from spinnman.exceptions import (
     SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
-from spinnman.model.enums import CPUState
+from spinnman.model.enums import (
+    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES)
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
@@ -56,6 +57,7 @@ from spinnman.messages.scp.impl import (
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
     CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
     IPTagSet, IPTagClear, RouterClear, DoSync)
+from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
@@ -2820,6 +2822,29 @@ class Transceiver(AbstractContextManager):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(DoSync(do_sync))
+
+    def update_provenance_and_exit(self, processor, core_subset):
+        """
+        Sends a command to update prevenance and exit
+
+        :param int processor:
+        :param ~.CoreSubset core_subset:
+        """
+        app_id = SpiNNManDataView.get_app_id()
+        byte_data = _ONE_WORD.pack(
+            SDP_RUNNING_MESSAGE_CODES
+                .SDP_UPDATE_PROVENCE_REGION_AND_EXIT.value)
+        # Send these signals to make sure the application isn't stuck
+        self.send_signal(app_id, Signal.SYNC0)
+        self.send_signal(app_id, Signal.SYNC1)
+        self.send_sdp_message(SDPMessage(
+            sdp_header=SDPHeader(
+                flags=SDPFlag.REPLY_NOT_EXPECTED,
+                destination_port=SDP_PORTS.RUNNING_COMMAND_SDP_PORT.value,
+                destination_cpu=processor,
+                destination_chip_x=core_subset.x,
+                destination_chip_y=core_subset.y),
+            data=byte_data))
 
     def __str__(self):
         addr = self._scamp_connections[0].remote_ip_address
