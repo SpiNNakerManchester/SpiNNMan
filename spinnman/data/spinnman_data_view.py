@@ -257,6 +257,28 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver") from ex
 
     @classmethod
+    def read_cores_in_state(cls, all_core_subsets, states):
+        """
+        Get all cores that are in a given state or set of states.
+
+        Syntactic sugar for `get_transceiver().get_cores_in_state`.
+
+        :param ~spinn_machine.CoreSubsets all_core_subsets:
+            The cores to filter
+        :param states: The state or states to filter on
+        :type states: CPUState or set(CPUState)
+        :return: Core subsets object containing cores in the given state(s)
+        :rtype: CPUInfos
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        """
+        try:
+            return cls.__data._transceiver.get_cores_in_state(
+                all_core_subsets, states)
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
+
+    @classmethod
     def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
         """
