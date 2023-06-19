@@ -335,6 +335,32 @@ class SpiNNManDataView(MachineDataView):
             x, y, base_address, data, n_bytes, offset, cpu, is_filename)
 
     @classmethod
+    def write_signal(cls, app_id, signal):
+        """
+        Writes/ Sends a signal to an application.
+
+        Syntactic sugar for `get_transceiver().send_signal`.
+
+        :param int app_id: The ID of the application to send to
+        :param Signal signal: The signal to send
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If signal is not a valid signal
+            * If app_id is not a valid application ID
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.send_signal(app_id, signal)
+
+    @classmethod
     def update_provenance_and_exit(cls, processor, core_subset):
         """
         Sends a command to update prevenance and exit
