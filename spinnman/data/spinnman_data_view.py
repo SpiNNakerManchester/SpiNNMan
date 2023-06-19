@@ -365,9 +365,10 @@ class SpiNNManDataView(MachineDataView):
         :param set(CPUState) cpu_states:
             The expected states once the applications are ready; success is
             when each application is in one of these states
-        :param float timeout:
+        :param timeout:
             The amount of time to wait in seconds for the cores to reach one
-            of the states
+            of the states.
+        :tpye timeout: float or None
         :param set(CPUState) error_states:
             Set of states that the application can be in that indicate an
             error, and so should raise an exception.
@@ -382,9 +383,30 @@ class SpiNNManDataView(MachineDataView):
         """
         if cls.__data._transceiver is None:
             raise cls._exception("transceiver")
-        return cls.__data._transceiver.ait_for_cores_to_be_in_state(
+        return cls.__data._transceiver.wait_for_cores_to_be_in_state(
             all_core_subsets, app_id, cpu_states, timeout,
             error_states, progress_bar)
+
+    @classmethod
+    def clear_router_diagnostic_counters(cls, x, y):
+        """
+        Clear router diagnostic information on a chip.
+
+        :param int x: The x-coordinate of the chip
+        :param int y: The y-coordinate of the chip
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If a packet is received that has invalid parameters or a counter
+            ID is out of range
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.clear_router_diagnostic_counters(x, y)
 
     # app_id methods
 
