@@ -123,11 +123,42 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver
 
     @classmethod
-    def get_cpu_information_from_core(cls, x, y, p):
+    def read_core_state_count(cls, app_id, state):
+        """
+        Get a count of the number of cores which have a given state.
+
+        Syntactic sugar for `get_transceiver().get_core_state_count`.
+
+        :param int app_id:
+            The ID of the application from which to get the count.
+        :param CPUState state: The state count to get
+        :return: A count of the cores with the given status
+        :rtype: int
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If state is not a valid status
+            * If app_id is not a valid application ID
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.get_core_state_count(app_id, state)
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
+
+    @classmethod
+    def read_cpu_information_from_core(cls, x, y, p):
         """
         Get information about a specific processor on the board.
 
-        Syntactic sugar for `get_transceiver().read_memory()`.
+        Syntactic sugar for
+        `get_transceiver().get_cpu_information_from_core()`.
 
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
@@ -195,6 +226,7 @@ class SpiNNManDataView(MachineDataView):
         Read a word (usually of SDRAM) from the board.
 
         Syntactic sugar for `get_transceiver().read_word()`.
+
         :param int x:
             The x-coordinate of the chip where the word is to be read from
         :param int y:
