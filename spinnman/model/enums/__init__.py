@@ -26,10 +26,13 @@ from .mailbox_command import MailboxCommand
 from .p2p_table_route import P2PTableRoute
 from .run_time_error import RunTimeError
 from .router_error import RouterError
+from .sdp_ports import SDP_PORTS
+from .sdp_running_message_codes import SDP_RUNNING_MESSAGE_CODES
 
 __all__ = ["CPUState", "DiagnosticFilterDefaultRoutingStatus",
            "DiagnosticFilterDestination",
            "DiagnosticFilterEmergencyRoutingStatus",
            "DiagnosticFilterPacketType", "DiagnosticFilterPayloadStatus",
            "DiagnosticFilterSource", "ExecutableType", "MailboxCommand",
-           "P2PTableRoute", "RouterError", "RunTimeError"]
+           "P2PTableRoute", "RouterError", "RunTimeError", "SDP_PORTS",
+           "SDP_RUNNING_MESSAGE_CODES"]
