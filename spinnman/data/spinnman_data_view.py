@@ -343,11 +343,48 @@ class SpiNNManDataView(MachineDataView):
 
         :param int processor:
         :param ~.CoreSubset core_subset:
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
         """
         if cls.__data._transceiver is None:
             raise cls._exception("transceiver")
         return cls.__data._transceiver.update_provenance_and_exit(
             processor, core_subset)
+
+    @classmethod
+    def wait_for_cores_to_be_in_state(
+            cls, all_core_subsets, app_id, cpu_states, timeout,
+            error_states=None, progress_bar=None):
+        """
+        Waits for the specified cores running the given application to be
+        in some target state or states. Handles failures.
+
+        :param ~spinn_machine.CoreSubsets all_core_subsets:
+            the cores to check are in a given sync state
+        :param int app_id: the application ID that being used by the simulation
+        :param set(CPUState) cpu_states:
+            The expected states once the applications are ready; success is
+            when each application is in one of these states
+        :param float timeout:
+            The amount of time to wait in seconds for the cores to reach one
+            of the states
+        :param set(CPUState) error_states:
+            Set of states that the application can be in that indicate an
+            error, and so should raise an exception.
+            If None will use defaults defined in Transceiver method
+        :type error_states: None or set(CPUState)
+        :param progress_bar: Possible progress bar to update.
+        :type progress_bar: ~spinn_utilities.progress_bar.ProgressBar or None
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanTimeoutException:
+            If a timeout is specified and exceeded.
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.ait_for_cores_to_be_in_state(
+            all_core_subsets, app_id, cpu_states, timeout,
+            error_states, progress_bar)
 
     # app_id methods
 

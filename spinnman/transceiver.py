@@ -1971,11 +1971,8 @@ class Transceiver(AbstractContextManager):
             logger.info(self.__where_is_xy(x, y))
 
     def wait_for_cores_to_be_in_state(
-            self, all_core_subsets, app_id, cpu_states, timeout=None,
-            time_between_polls=0.1,
-            error_states=frozenset({
-                CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),
-            counts_between_full_check=100, progress_bar=None):
+            self, all_core_subsets, app_id, cpu_states, timeout,
+            error_states=None, progress_bar=None):
         """
         Waits for the specified cores running the given application to be
         in some target state or states. Handles failures.
@@ -1986,16 +1983,15 @@ class Transceiver(AbstractContextManager):
         :param set(CPUState) cpu_states:
             The expected states once the applications are ready; success is
             when each application is in one of these states
-        :param float timeout:
+        :param timeout:
             The amount of time to wait in seconds for the cores to reach one
-            of the states
-        :param float time_between_polls: Time between checking the state
+            of the states.
+        :tpye timeout: float or None
         :param set(CPUState) error_states:
             Set of states that the application can be in that indicate an
-            error, and so should raise an exception
-        :param int counts_between_full_check:
-            The number of times to use the count signal before instead using
-            the full CPU state check
+            error, and so should raise an exception.
+            Defaults to RUN_TIME_EXCEPTION and WATCHDOG
+        :type error_states: None or  set(CPUState)
         :param progress_bar: Possible progress bar to update.
         :type progress_bar: ~spinn_utilities.progress_bar.ProgressBar or None
         :raise SpinnmanTimeoutException:
@@ -2005,7 +2001,12 @@ class Transceiver(AbstractContextManager):
         processors_ready = 0
         max_processors_ready = 0
         timeout_time = None if timeout is None else time.time() + timeout
+        time_between_polls = 0.1
+        counts_between_full_check = 100
         tries = 0
+        if error_states is None:
+            error_states = frozenset({
+                CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG})
         while (processors_ready < len(all_core_subsets) and
                (timeout_time is None or time.time() < timeout_time)):
 
