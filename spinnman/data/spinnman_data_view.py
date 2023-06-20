@@ -361,21 +361,24 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver.send_signal(app_id, signal)
 
     @classmethod
-    def update_provenance_and_exit(cls, processor, core_subset):
+    def write_update_provenance_and_exit(cls, x, y, p):
         """
         Sends a command to update prevenance and exit
 
         Syntactic sugar for `get_transceiver().update_provenance_and_exit`.
 
-        :param int processor:
-        :param ~.CoreSubset core_subset:
+        :param int x:
+            The x-coordinate of the core
+        :param int y:
+            The y-coordinate of the core
+        :param int p:
+            The processor on the core
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """
         if cls.__data._transceiver is None:
             raise cls._exception("transceiver")
-        return cls.__data._transceiver.update_provenance_and_exit(
-            processor, core_subset)
+        return cls.__data._transceiver.update_provenance_and_exit(x, y, p)
 
     @classmethod
     def wait_for_cores_to_be_in_state(
