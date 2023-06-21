@@ -253,6 +253,35 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver") from ex
 
     @classmethod
+    def read_router_diagnostics(cls, x, y):
+        """
+        Get router diagnostic information from a chip.
+
+        Syntactic sugar for `get_transceiver().get_router_diagnostics`.
+
+        :param int x:
+            The x-coordinate of the chip from which to get the information
+        :param int y:
+            The y-coordinate of the chip from which to get the information
+        :return: The router diagnostic information
+        :rtype: RouterDiagnostics
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.get_router_diagnostics(x, y)
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
+
+    @classmethod
     def read_word(cls, x, y, base_address, cpu=0):
         """
         Read a word (usually of SDRAM) from the board.
