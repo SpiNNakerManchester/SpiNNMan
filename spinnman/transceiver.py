@@ -1320,7 +1320,7 @@ class Transceiver(AbstractContextManager):
                 raise SpinnmanException(
                     f"Only {count} of {executable_targets.total_processors} "
                     "cores reached ready state: "
-                    f"{self.get_core_status_string(cores_ready)}")
+                    f"{cores_ready.get_status_string()}")
 
         # Send a signal telling the application to start
         self.send_signal(app_id, Signal.START)
@@ -2037,7 +2037,7 @@ class Transceiver(AbstractContextManager):
         :param states: The state or states to filter on
         :type states: CPUState or set(CPUState)
         :return: Core subsets object containing cores not in the given state(s)
-        :rtype: ~spinn_machine.CoreSubsets
+        :rtype: CPUInfos
         """
         core_infos = self.get_cpu_information(all_core_subsets)
         cores_not_in_state = CPUInfos()
@@ -2050,33 +2050,6 @@ class Transceiver(AbstractContextManager):
                 cores_not_in_state.add_processor(
                     core_info.x, core_info.y, core_info.p, core_info)
         return cores_not_in_state
-
-    def get_core_status_string(self, cpu_infos):
-        """
-        Get a string indicating the status of the given cores.
-
-        :param CPUInfos cpu_infos: A CPUInfos objects
-        :rtype: str
-        """
-        break_down = "\n"
-        for (x, y, p), core_info in cpu_infos.cpu_infos:
-            if core_info.state == CPUState.RUN_TIME_EXCEPTION:
-                break_down += "    {}:{}:{} (ph: {}) in state {}:{}\n".format(
-                    x, y, p, core_info.physical_cpu_id, core_info.state.name,
-                    core_info.run_time_error.name)
-                break_down += "        r0={}, r1={}, r2={}, r3={}\n".format(
-                    core_info.registers[0], core_info.registers[1],
-                    core_info.registers[2], core_info.registers[3])
-                break_down += "        r4={}, r5={}, r6={}, r7={}\n".format(
-                    core_info.registers[4], core_info.registers[5],
-                    core_info.registers[6], core_info.registers[7])
-                break_down += "        PSR={}, SP={}, LR={}\n".format(
-                    core_info.processor_state_register,
-                    core_info.stack_pointer, core_info.link_register)
-            else:
-                break_down += "    {}:{}:{} in state {}\n".format(
-                    x, y, p, core_info.state.name)
-        return break_down
 
     def send_signal(self, app_id, signal):
         """
