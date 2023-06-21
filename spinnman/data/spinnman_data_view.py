@@ -221,6 +221,38 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver") from ex
 
     @classmethod
+    def write_multicast_routes(cls, x, y, app_id=None):
+        """
+        Get the current multicast routes set up on a chip.
+
+        Syntactic sugar for `get_transceiver().get_multicast_routes`.
+
+        :param int x:
+            The x-coordinate of the chip from which to get the routes
+        :param int y:
+            The y-coordinate of the chip from which to get the routes
+        :param int app_id:
+            The ID of the application to filter the routes for. If
+            not specified, will return all routes
+        :return: An iterable of multicast routes
+        :rtype: list(~spinn_machine.MulticastRoutingEntry)
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.get_multicast_routes(x, y, app_id)
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
+
+    @classmethod
     def read_word(cls, x, y, base_address, cpu=0):
         """
         Read a word (usually of SDRAM) from the board.
