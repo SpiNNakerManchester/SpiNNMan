@@ -388,6 +388,8 @@ class SpiNNManDataView(MachineDataView):
         Waits for the specified cores running the given application to be
         in some target state or states. Handles failures.
 
+        Syntactic sugar for `get_transceiver().wait_for_cores_to_be_in_state`.
+
         :param ~spinn_machine.CoreSubsets all_core_subsets:
             the cores to check are in a given sync state
         :param int app_id: the application ID that being used by the simulation
@@ -421,8 +423,13 @@ class SpiNNManDataView(MachineDataView):
         """
         Clear router diagnostic information on a chip.
 
+        Syntactic sugar for
+        `get_transceiver().clear_router_diagnostic_counters`.
+
         :param int x: The x-coordinate of the chip
         :param int y: The y-coordinate of the chip
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -436,6 +443,30 @@ class SpiNNManDataView(MachineDataView):
         if cls.__data._transceiver is None:
             raise cls._exception("transceiver")
         return cls.__data._transceiver.clear_router_diagnostic_counters(x, y)
+
+    @classmethod
+    def malloc_sdram(cls, x, y, size, app_id, tag=None):
+        """
+        Allocates a chunk of SDRAM on a chip on the machine.
+
+        Syntactic sugar for `get_transceiver().malloc_sdram`.
+
+        :param int x: The x-coordinate of the chip onto which to ask for memory
+        :param int y: The y-coordinate of the chip onto which to ask for memory
+        :param int size: the amount of memory to allocate in bytes
+        :param int app_id: The ID of the application with which to associate
+            the routes.  If not specified, defaults to 0.
+        :param int tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can
+            be looked up by a SpiNNaker application to discover the address of
+            the allocated block. If `0` then no tag is applied.
+        :return: the base address of the allocated memory
+        :rtype: int
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.malloc_sdram(x, y, size, app_id, tag)
 
     # app_id methods
 
