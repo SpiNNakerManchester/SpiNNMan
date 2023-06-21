@@ -13,10 +13,10 @@
 # limitations under the License.
 
 import struct
+from spinnman.constants import CPU_USER_0_START_ADDRESS
 from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
 CPU_INFO_BYTES = 128
-CPU_USER_0_START_ADDRESS = 112
 
 _INFO_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
 _REGISTERS_PATTERN = struct.Struct("<IIIIIIII")

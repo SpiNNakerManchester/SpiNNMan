@@ -279,6 +279,38 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver") from ex
 
     @classmethod
+    def read_user(cls, user, x, y, p):
+        """
+        Get the contents of this user register for the given processor.
+
+        Syntactic sugar for `get_transceiver().read_user`.
+
+        .. note::
+            Conventionally, user_0 usually holds the address of the table of
+            memory regions.
+
+        :param int user: The user number to get the address for
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :rtype: int
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.read_user(user, x, y, p)
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
+
+    @classmethod
     def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
         """
@@ -379,6 +411,37 @@ class SpiNNManDataView(MachineDataView):
         if cls.__data._transceiver is None:
             raise cls._exception("transceiver")
         return cls.__data._transceiver.update_provenance_and_exit(x, y, p)
+
+    @classmethod
+    def write_user(cls, user, x, y, p, value):
+        """
+        Write to this user register for the given processor.
+
+        Syntactic sugar for `get_transceiver().write_user`.
+
+        .. note::
+            Conventionally, user_0 usually holds the address of the table of
+            memory regions.
+
+        :param int user: The user to write to
+        :param int x: X coordinate of the chip
+        :param int y: Y coordinate of the chip
+        :param int p: Virtual processor identifier on the chip
+        :param int value: The value to write
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.write_user(user, x, y, p, value)
 
     @classmethod
     def wait_for_cores_to_be_in_state(
