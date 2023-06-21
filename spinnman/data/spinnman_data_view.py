@@ -400,6 +400,62 @@ class SpiNNManDataView(MachineDataView):
             x, y, base_address, data, n_bytes, offset, cpu, is_filename)
 
     @classmethod
+    def write_clear_multicast_routes(cls, x, y):
+        """
+        Remove all the multicast routes on a chip.
+
+        Syntactic sugar for `get_transceiver().clear_multicast_routes`.
+
+        :param int x: The x-coordinate of the chip on which to clear the routes
+        :param int y: The y-coordinate of the chip on which to clear the routes
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.clear_multicast_routes(x, y)
+
+    @classmethod
+    def write_multicast_routes(cls, x, y, routes, app_id):
+        """
+        Load a set of multicast routes on to a chip.
+
+        Syntactic sugar for `get_transceiver().load_multicast_routes`.
+
+        :param int x:
+            The x-coordinate of the chip onto which to load the routes
+        :param int y:
+            The y-coordinate of the chip onto which to load the routes
+        :param iterable(~spinn_machine.MulticastRoutingEntry) routes:
+            An iterable of multicast routes to load
+        :param int app_id: The ID of the application with which to associate
+            the routes.  If not specified, defaults to 0.
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If any of the routes are invalid
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.load_multicast_routes(
+            x, y, routes, app_id)
+
+    @classmethod
     def write_signal(cls, app_id, signal):
         """
         Writes/ Sends a signal to an application.
