@@ -311,6 +311,39 @@ class SpiNNManDataView(MachineDataView):
             raise cls._exception("transceiver") from ex
 
     @classmethod
+    def write_fixed_route(cls, x, y, fixed_route, app_id):
+        """
+        Loads a fixed route routing table entry onto a chip's router.
+
+        Syntactic sugar for `get_transceiver().write_fixed_route`.
+
+        :param int x:
+            The x-coordinate of the chip onto which to load the routes
+        :param int y:
+            The y-coordinate of the chip onto which to load the routes
+        :param ~spinn_machine.FixedRouteEntry fixed_route:
+            the route for the fixed route entry on this chip
+        :param int app_id: The ID of the application with which to associate
+            the routes.  If not specified, defaults to 0.
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If any of the routes are invalid
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.load_fixed_route(
+                x, y, fixed_route, app_id)
+        except AttributeError as ex:
+            raise cls._exception("transceiver") from ex
+
+    @classmethod
     def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
         """
