@@ -393,6 +393,30 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver.send_signal(app_id, signal)
 
     @classmethod
+    def write_stop_application(cls, app_id):
+        """
+        Sends a stop request for an app_id.
+
+        Syntactic sugar for `get_transceiver().stop_application`.
+
+        :param int app_id: The ID of the application to send to
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If app_id is not a valid application ID
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        if cls.__data._transceiver is None:
+            raise cls._exception("transceiver")
+        return cls.__data._transceiver.stop_application(app_id)
+
+    @classmethod
     def write_update_provenance_and_exit(cls, x, y, p):
         """
         Sends a command to update prevenance and exit
