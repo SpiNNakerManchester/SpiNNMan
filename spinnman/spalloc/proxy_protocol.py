@@ -28,3 +28,5 @@ class ProxyProtocol(IntEnum):
     OPEN_UNBOUND = 3
     #: Message sent on an unbound channel to a given board
     MSG_TO = 4
+    #: Message relating to an error when opening or closing a channel
+    ERROR = 5

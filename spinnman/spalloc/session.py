@@ -129,6 +129,7 @@ class Session:
         :param str url:
         :param int timeout:
         :rtype: ~requests.Response
+        :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
         cookies = {_SESSION_COOKIE: self._session_id}
@@ -147,6 +148,7 @@ class Session:
         :param int timeout:
         :param dict jsonobj:
         :rtype: ~requests.Response
+        :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
         cookies, headers = self._credentials
@@ -166,6 +168,7 @@ class Session:
         :param str data:
         :param int timeout:
         :rtype: ~requests.Response
+        :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
         cookies, headers = self._credentials
@@ -185,6 +188,7 @@ class Session:
 
         :param str url:
         :rtype: ~requests.Response
+        :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
         cookies, headers = self._credentials
