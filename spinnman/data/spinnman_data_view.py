@@ -214,7 +214,7 @@ class SpiNNManDataView(MachineDataView):
             If a response indicates an error during the exchange
         """
         try:
-            return cls.__data._transceiver.read_iobuf(core_subsets)
+            return cls.__data._transceiver.get_iobuf(core_subsets)
         except AttributeError as ex:
            if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
