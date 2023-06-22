@@ -389,6 +389,67 @@ class SpiNNManDataView(MachineDataView):
             raise
 
     @classmethod
+    def write_flood(
+            cls, core_subsets, executable, app_id, n_bytes=None, wait=False,
+            is_filename=False):
+        """
+        Start an executable running on multiple places on the board.  This
+        will be optimised based on the selected cores, but it may still
+        require a number of communications with the board to execute.
+
+        Syntactic sugar for `get_transceiver().execute_flood`.
+
+        :param ~spinn_machine.CoreSubsets core_subsets:
+            Which cores on which chips to start the executable
+        :param executable:
+            The data that is to be executed. Should be one of the following:
+
+            * An instance of RawIOBase
+            * A bytearray
+            * A filename of an executable (in which case `is_filename` must be
+              set to True)
+        :type executable:
+            ~io.RawIOBase or bytes or bytearray or str
+        :param int app_id:
+            The ID of the application with which to associate the executable
+        :param int n_bytes:
+            The size of the executable data in bytes. If not specified:
+
+            * If `executable` is an RawIOBase, an error is raised
+            * If `executable` is a bytearray, the length of the bytearray will
+              be used
+            * If `executable` is an int, 4 will be used
+            * If `executable` is a str, the length of the file will be used
+        :param bool wait:
+            True if the processors should enter a "wait" state on loading
+        :param bool is_filename: True if the data is a filename
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            * If there is an error communicating with the board
+            * If there is an error reading the executable
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If one of the specified cores is not valid
+            * If `app_id` is an invalid application ID
+            * If a packet is received that has invalid parameters
+            * If `executable` is an RawIOBase but `n_bytes` is not specified
+            * If `executable` is an int and `n_bytes` is more than 4
+            * If `n_bytes` is less than 0
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.lood(
+                core_subsets, executable, app_id, n_bytes=None, wait=False,
+                is_filename=False)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
+
+    @classmethod
     def write_ip_tag(cls, ip_tag, use_sender=False):
         """
         Set up an IP tag.
