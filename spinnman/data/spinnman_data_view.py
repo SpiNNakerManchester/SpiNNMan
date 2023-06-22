@@ -150,7 +150,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.get_core_state_count(app_id, state)
         except AttributeError as ex:
-            raise cls._exception("transceiver") from ex
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def read_cpu_information_from_core(cls, x, y, p):
@@ -181,7 +183,9 @@ class SpiNNManDataView(MachineDataView):
             return cls.__data._transceiver.get_cpu_information_from_core(
                 x, y, p)
         except AttributeError as ex:
-            raise cls._exception("transceiver") from ex
+           if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def read_memory(cls, x, y, base_address, length, cpu=0):
@@ -218,7 +222,9 @@ class SpiNNManDataView(MachineDataView):
             return cls.__data._transceiver.read_memory(
                 x, y, base_address, length, cpu)
         except AttributeError as ex:
-            raise cls._exception("transceiver") from ex
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def read_router_diagnostics(cls, x, y):
@@ -247,7 +253,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.get_router_diagnostics(x, y)
         except AttributeError as ex:
-            raise cls._exception("transceiver") from ex
+               if cls.__data._transceiver is None:
+                    raise cls._exception("transceiver") from ex
+                raise
 
     @classmethod
     def read_word(cls, x, y, base_address, cpu=0):
@@ -283,7 +291,9 @@ class SpiNNManDataView(MachineDataView):
             return cls.__data._transceiver.read_word(
                 x, y, base_address, cpu)
         except AttributeError as ex:
-            raise cls._exception("transceiver") from ex
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def read_cores_in_state(cls, all_core_subsets, states):
@@ -305,7 +315,9 @@ class SpiNNManDataView(MachineDataView):
             return cls.__data._transceiver.get_cores_in_state(
                 all_core_subsets, states)
         except AttributeError as ex:
-            raise cls._exception("transceiver") from ex
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def read_user(cls, user, x, y, p):
@@ -337,7 +349,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.read_user(user, x, y, p)
         except AttributeError as ex:
-            raise cls._exception("transceiver") from ex
+           if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+           raise
 
     @classmethod
     def write_fixed_route(cls, x, y, fixed_route, app_id):
@@ -370,7 +384,9 @@ class SpiNNManDataView(MachineDataView):
             return cls.__data._transceiver.load_fixed_route(
                 x, y, fixed_route, app_id)
         except AttributeError as ex:
-            raise cls._exception("transceiver") from ex
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
@@ -423,10 +439,13 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.write_memory(
-            x, y, base_address, data, n_bytes, offset, cpu, is_filename)
+        try:
+            return cls.__data._transceiver.write_memory(
+                x, y, base_address, data, n_bytes, offset, cpu, is_filename)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def write_clear_multicast_routes(cls, x, y):
@@ -448,9 +467,12 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.clear_multicast_routes(x, y)
+        try:
+            return cls.__data._transceiver.clear_multicast_routes(x, y)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def write_multicast_routes(cls, x, y, routes, app_id):
@@ -479,10 +501,13 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.load_multicast_routes(
-            x, y, routes, app_id)
+        try:
+            return cls.__data._transceiver.load_multicast_routes(
+                x, y, routes, app_id)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def write_signal(cls, app_id, signal):
@@ -506,9 +531,12 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.send_signal(app_id, signal)
+        try:
+            return cls.__data._transceiver.send_signal(app_id, signal)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def write_stop_application(cls, app_id):
@@ -530,9 +558,12 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.stop_application(app_id)
+        try:
+            return cls.__data._transceiver.stop_application(app_id)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def write_update_provenance_and_exit(cls, x, y, p):
@@ -550,9 +581,12 @@ class SpiNNManDataView(MachineDataView):
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.update_provenance_and_exit(x, y, p)
+        try:
+            return cls.__data._transceiver.update_provenance_and_exit(x, y, p)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def write_user(cls, user, x, y, p, value):
@@ -617,11 +651,14 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanTimeoutException:
             If a timeout is specified and exceeded.
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.wait_for_cores_to_be_in_state(
-            all_core_subsets, app_id, cpu_states, timeout,
-            error_states, progress_bar)
+        try:
+            return cls.__data._transceiver.wait_for_cores_to_be_in_state(
+                all_core_subsets, app_id, cpu_states, timeout,
+                error_states, progress_bar)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def clear_router_diagnostic_counters(cls, x, y):
@@ -645,9 +682,13 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.clear_router_diagnostic_counters(x, y)
+        try:
+            return cls.__data._transceiver.clear_router_diagnostic_counters(
+                x, y)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def malloc_sdram(cls, x, y, size, app_id, tag=None):
@@ -669,9 +710,13 @@ class SpiNNManDataView(MachineDataView):
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.malloc_sdram(x, y, size, app_id, tag)
+        try:
+            return cls.__data._transceiver.malloc_sdram(
+                x, y, size, app_id, tag)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     # app_id methods
 
