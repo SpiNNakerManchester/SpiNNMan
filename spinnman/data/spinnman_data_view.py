@@ -185,7 +185,7 @@ class SpiNNManDataView(MachineDataView):
         except AttributeError as ex:
            if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
-            raise
+           raise
 
     @classmethod
     def read_memory(cls, x, y, base_address, length, cpu=0):
@@ -255,7 +255,7 @@ class SpiNNManDataView(MachineDataView):
         except AttributeError as ex:
                if cls.__data._transceiver is None:
                     raise cls._exception("transceiver") from ex
-                raise
+               raise
 
     @classmethod
     def read_word(cls, x, y, base_address, cpu=0):
