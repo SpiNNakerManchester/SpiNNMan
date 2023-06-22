@@ -353,6 +353,30 @@ class SpiNNManDataView(MachineDataView):
             raise
 
     @classmethod
+    def read_cores_not_in_state(cls, all_core_subsets, states):
+        """
+        Get all cores that are in a given state or set of states.
+
+        Syntactic sugar for `get_transceiver().get_cores_not_in_state`.
+
+        :param ~spinn_machine.CoreSubsets all_core_subsets:
+            The cores to filter
+        :param states: The state or states to filter on
+        :type states: CPUState or set(CPUState)
+        :return: Core subsets object containing cores in the given state(s)
+        :rtype: CPUInfos
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        """
+        try:
+            return cls.__data._transceiver.get_cores_not_in_state(
+                all_core_subsets, states)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
+
+    @classmethod
     def read_user(cls, user, x, y, p):
         """
         Get the contents of this user register for the given processor.
@@ -474,9 +498,8 @@ class SpiNNManDataView(MachineDataView):
             If a response indicates an error during the exchange
         """
         try:
-            return cls.__data._transceiver.lood(
-                core_subsets, executable, app_id, n_bytes=None, wait=False,
-                is_filename=False)
+            return cls.__data._transceiver.execute_flood(
+                core_subsets, executable, app_id, n_bytes, wait, is_filename)
         except AttributeError as ex:
             if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
