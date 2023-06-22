@@ -965,8 +965,8 @@ class Transceiver(AbstractContextManager):
         if user < 0 or user > CPU_MAX_USER:
             raise ValueError(
                 f"Incorrect user number {user}")
-        return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS + \
-               CPU_USER_OFFSET * user
+        return (get_vcpu_address(p) + CPU_USER_0_START_ADDRESS +
+                CPU_USER_OFFSET * user)
 
     def read_user(self, user, x, y, p):
         """

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from spinnman.constants import CPU_USER_0_START_ADDRESS
 from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
 CPU_INFO_BYTES = 128
