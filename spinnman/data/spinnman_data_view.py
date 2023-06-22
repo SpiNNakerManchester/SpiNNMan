@@ -474,7 +474,7 @@ class SpiNNManDataView(MachineDataView):
             If a response indicates an error during the exchange
         """
         try:
-            return cls.__data._transceiver.lood(
+            return cls.__data._transceiver.execute_flood(
                 core_subsets, executable, app_id, n_bytes=None, wait=False,
                 is_filename=False)
         except AttributeError as ex:
