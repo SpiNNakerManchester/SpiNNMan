@@ -43,21 +43,14 @@ class Signal(Enum):
     USER_2 = (12, SignalType.MULTICAST)
     USER_3 = (13, SignalType.MULTICAST)
 
-    def __new__(cls, value, signal_type, doc=""):
-        # pylint: disable=protected-access, unused-argument
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
-
-    def __init__(self, value, signal_type, doc=""):
+    def __init__(self, value, signal_type) -> None:
         """
         :param int value: The value used for the signal
         :param SignalType signal_type: The "type" of the signal
         """
         self._value_ = value
         self._signal_type = signal_type
-        self.__doc__ = doc
 
     @property
-    def signal_type(self):
+    def signal_type(self) -> SignalType:
         return self._signal_type

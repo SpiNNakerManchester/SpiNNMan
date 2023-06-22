@@ -26,7 +26,7 @@ _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
     "remote_host={}, remote_port={})"
 
 
-class EIEIOConnection(UDPConnection, Listenable):
+class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
     """
     A UDP connection for sending and receiving raw EIEIO messages.
     """

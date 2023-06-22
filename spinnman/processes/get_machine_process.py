@@ -17,11 +17,12 @@ from contextlib import suppress
 import logging
 import functools
 from os.path import join
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, cast
 from spinn_utilities.config_holder import (
     get_config_bool, get_config_int, get_config_str)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.typing.coords import XY
 from spinn_machine import (Router, Chip, Link, machine_from_size)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
 from spinn_machine import Machine
@@ -41,7 +42,6 @@ from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import \
     AbstractMultiConnectionProcessConnectionSelector
-_XY = Tuple[int, int]
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -50,7 +50,8 @@ REPORT_FILE = "Ignores_report.rpt"
 P_TO_V = SystemVariableDefinition.physical_to_virtual_core_map
 V_TO_P = SystemVariableDefinition.virtual_to_physical_core_map
 P_TO_V_ADDR = SYSTEM_VARIABLE_BASE_ADDRESS + P_TO_V.offset
-P_MAPS_SIZE = P_TO_V.array_size + V_TO_P.array_size
+_P_TO_V_SIZE = cast(int, P_TO_V.array_size)
+P_MAPS_SIZE = _P_TO_V_SIZE + cast(int, V_TO_P.array_size)
 
 
 class GetMachineProcess(AbstractMultiConnectionProcess):
@@ -79,19 +80,19 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         super().__init__(connection_selector)
 
-        self._ignore_cores_map: Dict[_XY, Set[int]] = defaultdict(set)
+        self._ignore_cores_map: Dict[XY, Set[int]] = defaultdict(set)
 
         self._p2p_column_data: List[Tuple[bytes, int]] = list()
 
         # A dictionary of (x, y) -> ChipInfo
-        self._chip_info: Dict[_XY, ChipSummaryInfo] = dict()
+        self._chip_info: Dict[XY, ChipSummaryInfo] = dict()
 
         # Set ethernets to None meaning not computed yet
-        self._ethernets: Optional[Dict[str, _XY]] = None
+        self._ethernets: Optional[Dict[str, XY]] = None
 
         # Maps between virtual and physical cores
-        self._virtual_to_physical_map: Dict[_XY, bytes] = dict()
-        self._physical_to_virtual_map: Dict[_XY, bytes] = dict()
+        self._virtual_to_physical_map: Dict[XY, bytes] = dict()
+        self._physical_to_virtual_map: Dict[XY, bytes] = dict()
 
     def _make_chip(self, chip_info: ChipSummaryInfo, machine: Machine) -> Chip:
         """
@@ -187,10 +188,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         data = scp_read_response.data
         off = scp_read_response.offset
-        self._physical_to_virtual_map[x, y] = bytearray(
-            data[off:P_TO_V.array_size + off])
-        off += P_TO_V.array_size
-        self._virtual_to_physical_map[x, y] = bytearray(data[off:])
+        self._physical_to_virtual_map[x, y] = data[off:_P_TO_V_SIZE + off]
+        off += _P_TO_V_SIZE
+        self._virtual_to_physical_map[x, y] = data[off:]
 
     def _receive_error(
             self, request: AbstractSCPRequest, exception, tb, connection):
@@ -401,7 +401,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _ignores_local_to_global(
             self, local_x: int, local_y: int, ip_address: str,
-            machine: Machine) -> Optional[_XY]:
+            machine: Machine) -> Optional[XY]:
         """
         :param int local_x:
         :param int local_y:
@@ -433,7 +433,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 "in this machine", global_xy)
             return None
 
-    def _ethernet_by_ipaddress(self, ip_address: str) -> Optional[_XY]:
+    def _ethernet_by_ipaddress(self, ip_address: str) -> Optional[XY]:
         """
         :param str ip_address:
         :rtype: tuple(int,int)
@@ -446,7 +446,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                         (chip_info.x, chip_info.y)
         return self._ethernets.get(ip_address, None)
 
-    def _get_virtual_p(self, xy: _XY, p: int) -> Optional[int]:
+    def _get_virtual_p(self, xy: XY, p: int) -> Optional[int]:
         """
         :param tuple(int,int) xy:
         :param int p:

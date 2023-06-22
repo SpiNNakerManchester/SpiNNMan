@@ -20,13 +20,13 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .get_chip_info_response import GetChipInfoResponse
 
 
-class GetChipInfo(AbstractSCPRequest):
+class GetChipInfo(AbstractSCPRequest[GetChipInfoResponse]):
     """
     An SCP request to read the chip information from a core.
     """
     __slots__ = ()
 
-    def __init__(self, x, y, with_size=False):
+    def __init__(self, x: int, y: int, with_size: bool = False):
         """
         :param int x:
             The x-coordinate of the chip to read from, between 0 and 255
@@ -51,5 +51,5 @@ class GetChipInfo(AbstractSCPRequest):
             argument_1=argument_1)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> GetChipInfoResponse:
         return GetChipInfoResponse()

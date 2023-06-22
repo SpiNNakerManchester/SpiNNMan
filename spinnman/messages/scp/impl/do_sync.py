@@ -20,13 +20,13 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
 
 
-class DoSync(AbstractSCPRequest):
+class DoSync(AbstractSCPRequest[CheckOKResponse]):
     """
     An SCP Request to control synchronization.
     """
     __slots__ = ()
 
-    def __init__(self, do_sync):
+    def __init__(self, do_sync: bool):
         """
         :param bool do_sync: Whether to synchronize or not
         """
@@ -40,5 +40,5 @@ class DoSync(AbstractSCPRequest):
             argument_1=int(do_sync))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Control Synchronization", "CMD_SYNC")

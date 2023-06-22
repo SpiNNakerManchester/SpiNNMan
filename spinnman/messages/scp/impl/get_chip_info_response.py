@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
@@ -25,12 +25,12 @@ class GetChipInfoResponse(AbstractSCPResponse):
     """
     __slots__ = "_chip_info",
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._chip_info = None
+        self._chip_info: Optional[ChipSummaryInfo] = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -40,10 +40,11 @@ class GetChipInfoResponse(AbstractSCPResponse):
             self.sdp_header.source_chip_y,)
 
     @property
-    def chip_info(self):
+    def chip_info(self) -> ChipSummaryInfo:
         """
         The chip information received.
 
         :rtype: ChipSummaryInfo
         """
+        assert self._chip_info is not None
         return self._chip_info

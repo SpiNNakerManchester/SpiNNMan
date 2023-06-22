@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Iterable, Optional
 from spinn_utilities.overrides import overrides
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp import SCPRequestHeader
@@ -24,14 +24,15 @@ from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
 _WAIT_FLAG = 0x1 << 18
 
 
-class AppCopyRun(AbstractSCPRequest):
+class AppCopyRun(AbstractSCPRequest[CheckOKResponse]):
     """
     An SCP request to copy an application and start it.
     """
     __slots__ = "__link",
 
-    def __init__(self, x, y, link, size, app_id, processors, chksum,
-                 wait=False):
+    def __init__(self, x: int, y: int, link: int, size: int, app_id: int,
+                 processors: Optional[Iterable[int]],
+                 chksum: int, wait: bool = False):
         """
         :param int x:
             The x-coordinate of the chip to read from, between 0 and 255
@@ -73,7 +74,7 @@ class AppCopyRun(AbstractSCPRequest):
         return f"{super(AppCopyRun, self).__repr__()} (Link {self.__link})"
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse(
             f"Application Copy Run (Link {self.__link})",
             SCPCommand.CMD_APP_COPY_RUN)

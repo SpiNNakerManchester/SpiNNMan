@@ -25,8 +25,8 @@ import struct
 from threading import Condition, RLock
 import time
 from typing import (
-    BinaryIO, Dict, Iterable, Iterator, List, Optional, Sequence, Set, Tuple,
-    TypeVar, Union, cast)
+    BinaryIO, Dict, FrozenSet, Iterable, Iterator, List, Optional, Sequence,
+    Tuple, TypeVar, Union, cast)
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
@@ -940,8 +940,9 @@ class Transceiver(AbstractContextManager):
         """
         addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
         if data_item.data_type.is_byte_array:
+            size = cast(int, data_item.array_size)
             # Do not need to decode the bytes of a byte array
-            return self.read_memory(x, y, addr, data_item.array_size)
+            return self.read_memory(x, y, addr, size)
         return struct.unpack_from(
             data_item.data_type.struct_code,
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
@@ -1151,7 +1152,7 @@ class Transceiver(AbstractContextManager):
         value_to_set = watch_dog
         WATCHDOG = SystemVariableDefinition.software_watchdog_count
         if isinstance(watch_dog, bool):
-            value_to_set = WATCHDOG.default if watch_dog else 0
+            value_to_set = cast(int, WATCHDOG.default) if watch_dog else 0
 
         # build data holder, a single byte
         data = _ONE_BYTE.pack(value_to_set)
@@ -1333,7 +1334,8 @@ class Transceiver(AbstractContextManager):
         count = self.get_core_state_count(app_id, CPUState.READY)
         if count < executable_targets.total_processors:
             cores_ready = self.get_cores_not_in_state(
-                executable_targets.all_core_subsets, {CPUState.READY})
+                executable_targets.all_core_subsets,
+                frozenset({CPUState.READY}))
             if len(cores_ready) > 0:
                 raise SpinnmanException(
                     f"Only {count} of {executable_targets.total_processors} "
@@ -2008,7 +2010,7 @@ class Transceiver(AbstractContextManager):
 
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets: CoreSubsets, app_id: int,
-            cpu_states: Set[CPUState], *,
+            cpu_states: FrozenSet[CPUState], *,
             timeout: Optional[float] = None,
             time_between_polls: float = 0.1,
             error_states=frozenset((
@@ -2110,8 +2112,8 @@ class Transceiver(AbstractContextManager):
                     timeout, cpu_states, cores_not_in_state)
 
     def get_cores_in_state(
-            self, all_core_subsets: CoreSubsets, states: Union[
-                CPUState, Set[CPUState]]) -> CPUInfos:
+            self, all_core_subsets: Optional[CoreSubsets], states: Union[
+                CPUState, FrozenSet[CPUState]]) -> CPUInfos:
         """
         Get all cores that are in a given state or set of states.
 
@@ -2137,7 +2139,7 @@ class Transceiver(AbstractContextManager):
 
     def get_cores_not_in_state(
             self, all_core_subsets: CoreSubsets, states: Union[
-                CPUState, Set[CPUState]]) -> CPUInfos:
+                CPUState, FrozenSet[CPUState]]) -> CPUInfos:
         """
         Get all cores that are not in a given state or set of states.
 

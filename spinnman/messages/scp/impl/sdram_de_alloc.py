@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
@@ -24,13 +25,57 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 _ONE_WORD = struct.Struct("<I")
 
 
-class SDRAMDeAlloc(AbstractSCPRequest):
+class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
+    """
+    An SCP response to a request to deallocate SDRAM.
+    """
+    __slots__ = (
+        "_number_of_blocks_freed",
+        "_read_n_blocks_freed")
+
+    def __init__(self, read_n_blocks_freed: bool = False):
+        """
+        """
+        super().__init__()
+        self._number_of_blocks_freed = 0
+        self._read_n_blocks_freed = read_n_blocks_freed
+
+    @overrides(AbstractSCPResponse.read_data_bytestring)
+    def read_data_bytestring(self, data: bytes, offset: int):
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "SDRAM deallocation", "CMD_DEALLOC", result.name)
+        if self._read_n_blocks_freed:
+            self._number_of_blocks_freed = _ONE_WORD.unpack_from(
+                data, offset)[0]
+
+            # check that the base address is not null (0 in python case) as
+            # this reflects a issue in command on SpiNNaker side
+            if self._number_of_blocks_freed == 0:
+                raise SpinnmanUnexpectedResponseCodeException(
+                    "SDRAM deallocation response base address", "CMD_DEALLOC",
+                    result.name)
+
+    @property
+    def number_of_blocks_freed(self) -> int:
+        """
+        The number of allocated blocks that have been freed from the
+        app_id given.
+
+        :rtype: int
+        """
+        return self._number_of_blocks_freed
+
+
+class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
     """
     An SCP Request to free space in the SDRAM.
     """
     __slots__ = "_read_n_blocks_freed",
 
-    def __init__(self, x, y, app_id, base_address=None):
+    def __init__(self, x: int, y: int, *, app_id: Optional[int],
+                 base_address: Optional[int] = None):
         """
         :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
@@ -55,6 +100,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
                 argument_2=base_address)
             self._read_n_blocks_freed = False
         else:
+            assert app_id is not None
             super().__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
@@ -68,48 +114,5 @@ class SDRAMDeAlloc(AbstractSCPRequest):
             self._read_n_blocks_freed = True
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> _SCPSDRAMDeAllocResponse:
         return _SCPSDRAMDeAllocResponse(self._read_n_blocks_freed)
-
-
-class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
-    """
-    An SCP response to a request to deallocate SDRAM.
-    """
-    __slots__ = (
-        "_number_of_blocks_freed",
-        "_read_n_blocks_freed")
-
-    def __init__(self, read_n_blocks_freed=False):
-        """
-        """
-        super().__init__()
-        self._number_of_blocks_freed = None
-        self._read_n_blocks_freed = read_n_blocks_freed
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "SDRAM deallocation", "CMD_DEALLOC", result.name)
-        if self._read_n_blocks_freed:
-            self._number_of_blocks_freed = _ONE_WORD.unpack_from(
-                data, offset)[0]
-
-            # check that the base address is not null (0 in python case) as
-            # this reflects a issue in command on SpiNNaker side
-            if self._number_of_blocks_freed == 0:
-                raise SpinnmanUnexpectedResponseCodeException(
-                    "SDRAM deallocation response base address", "CMD_DEALLOC",
-                    result.name)
-
-    @property
-    def number_of_blocks_freed(self):
-        """
-        The number of allocated blocks that have been freed from the
-        app_id given.
-
-        :rtype: int
-        """
-        return self._number_of_blocks_freed

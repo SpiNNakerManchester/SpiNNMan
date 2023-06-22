@@ -35,7 +35,7 @@ _REPR_TEMPLATE = "UDPConnection(local={}:{}, remote={}:{})"
 _MSG_MAX = 300
 
 
-class UDPConnection(Connection, Listenable):
+class UDPConnection(Connection, Listenable[bytes]):
     """
     A connection that routes messages via UDP to some remote host.
 

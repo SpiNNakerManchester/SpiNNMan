@@ -15,9 +15,10 @@ from functools import wraps
 from logging import getLogger
 import re
 import requests
-from typing import Dict, Tuple, cast, Optional
+from typing import Dict, Tuple, cast, Optional, Union
 import websocket  # type: ignore
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.typing.json import JsonArray, JsonObject
 from .utils import clean_url
 from spinnman.exceptions import SpallocException
 
@@ -115,7 +116,7 @@ class Session:
                     self.__csrf_header = key
                     self.__csrf = value
 
-    def __handle_error_or_return(self, response):
+    def __handle_error_or_return(self, response: requests.Response):
         code = response.status_code
         if code >= 200 and code < 400:
             return response
@@ -140,8 +141,8 @@ class Session:
         return self.__handle_error_or_return(r)
 
     @_may_renew
-    def post(self, url: str, jsonobj: dict, timeout: int = 10,
-             **kwargs) -> requests.Response:
+    def post(self, url: str, jsonobj: Union[JsonObject, JsonArray],
+             timeout: int = 10, **kwargs) -> requests.Response:
         """
         Do an HTTP ``POST`` in the session.
 
@@ -196,7 +197,7 @@ class Session:
         logger.debug("DELETE {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
-    def renew(self) -> dict:
+    def renew(self) -> JsonObject:
         """
         Renews the session, logging the user into it so that state modification
         operations can be performed.
@@ -247,9 +248,9 @@ class Session:
             # We don't need to follow that redirect
 
         # Step three: get the basic service data and new CSRF token
-        obj = self.get(self.__srv_base).json()
-        self.__csrf_header = obj["csrf-header"]
-        self.__csrf = obj["csrf-token"]
+        obj: JsonObject = self.get(self.__srv_base).json()
+        self.__csrf_header = cast(str, obj["csrf-header"])
+        self.__csrf = cast(str, obj["csrf-token"])
         del obj["csrf-header"]
         del obj["csrf-token"]
         return obj

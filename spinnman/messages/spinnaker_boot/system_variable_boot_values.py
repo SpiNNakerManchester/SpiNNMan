@@ -29,17 +29,9 @@ class _DataType(Enum):
     LONG = (8, "<Q")
     BYTE_ARRAY = (16, "s")
 
-    def __new__(cls, value, struct_code, doc=""):
-        # pylint: disable=protected-access, unused-argument
-        obj = object.__new__(cls)
-        obj._value_ = value
-        obj._struct_code = struct_code
-        return obj
-
-    def __init__(self, value, struct_code, doc=""):
+    def __init__(self, value, struct_code):
         self._value_ = value
         self._struct_code = struct_code
-        self.__doc__ = doc
 
     @property
     def struct_code(self):
@@ -241,15 +233,15 @@ class SystemVariableDefinition(Enum):
         doc="The fourth user variable")
     status_map = _Definition(
         _DataType.BYTE_ARRAY, offset=0x80, array_size=20,
-        default=bytes(bytearray(20)),
+        default=bytes(20),
         doc="The status map set during SCAMP boot")
     physical_to_virtual_core_map = _Definition(
         _DataType.BYTE_ARRAY, offset=0x94, array_size=20,
-        default=bytes(bytearray(20)),
+        default=bytes(20),
         doc="The physical core ID to virtual core ID map")
     virtual_to_physical_core_map = _Definition(
         _DataType.BYTE_ARRAY, offset=0xa8, array_size=20,
-        default=bytes(bytearray(20)),
+        default=bytes(20),
         doc="The virtual core ID to physical core ID map")
     n_working_cores = _Definition(
         _DataType.BYTE, offset=0xbc,
@@ -301,7 +293,7 @@ class SystemVariableDefinition(Enum):
         doc="The monitor incoming mailbox flags")
     ethernet_ip_address = _Definition(
         _DataType.BYTE_ARRAY, offset=0xf0, array_size=4,
-        default=bytes(bytearray(4)),
+        default=bytes(4),
         doc="The IP address of the chip")
     fixed_route_copy = _Definition(
         _DataType.INT, offset=0xf4,
@@ -333,19 +325,19 @@ class SystemVariableDefinition(Enum):
         self.__doc__ = doc
 
     @property
-    def data_type(self):
+    def data_type(self) -> _DataType:
         return self._data_type
 
     @property
-    def array_size(self):
+    def array_size(self) -> Optional[int]:
         return self._array_size
 
     @property
-    def offset(self):
+    def offset(self) -> int:
         return self._offset
 
     @property
-    def default(self):
+    def default(self) -> Union[int, bytes]:
         return self._default
 
 

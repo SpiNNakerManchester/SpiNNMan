@@ -21,13 +21,14 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
 
 
-class RouterInit(AbstractSCPRequest):
+class RouterInit(AbstractSCPRequest[CheckOKResponse]):
     """
     A request to initialize the router on a chip.
     """
     __slots__ = ()
 
-    def __init__(self, x, y, n_entries, table_address, base_address, app_id):
+    def __init__(self, x: int, y: int, n_entries: int, table_address: int,
+                 base_address: int, app_id: int):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255
         :param int y: The y-coordinate of the chip, between 0 and 255
@@ -67,5 +68,5 @@ class RouterInit(AbstractSCPRequest):
             argument_2=table_address, argument_3=base_address)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("RouterInit", "CMD_RTR")

@@ -21,13 +21,68 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
-class ReadLink(AbstractSCPRequest):
+class _SCPReadLinkResponse(AbstractSCPResponse):
+    """
+    An SCP response to a request to read a region of memory via a link on
+    a chip.
+    """
+    __slots__ = (
+        "_data",
+        "_length",
+        "_offset")
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._data = b''
+        self._offset = 0
+        self._length = 0
+
+    @overrides(AbstractSCPResponse.read_data_bytestring)
+    def read_data_bytestring(self, data: bytes, offset: int):
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "ReadLink", "CMD_READ_LINK", result.name)
+        self._data = data
+        self._offset = offset
+        self._length = len(data) - offset
+
+    @property
+    def data(self) -> bytes:
+        """
+        The data read.
+
+        :rtype: bytes
+        """
+        return self._data
+
+    @property
+    def offset(self) -> int:
+        """
+        The offset where the valid data starts.
+
+        :rtype: int
+        """
+        return self._offset
+
+    @property
+    def length(self) -> int:
+        """
+        The length of the valid data.
+
+        :rtype: int
+        """
+        return self._length
+
+
+class ReadLink(AbstractSCPRequest[_SCPReadLinkResponse]):
     """
     An SCP request to read a region of memory via a link on a chip.
     """
     __slots__ = ()
 
-    def __init__(self, x, y, link, base_address, size, cpu=0):
+    def __init__(self, x: int, y: int, link: int, base_address: int,
+                 size: int, cpu: int = 0):
         """
         :param int x:
             The x-coordinate of the chip to read from, between 0 and 255
@@ -51,59 +106,5 @@ class ReadLink(AbstractSCPRequest):
             argument_1=base_address, argument_2=size, argument_3=link)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> _SCPReadLinkResponse:
         return _SCPReadLinkResponse()
-
-
-class _SCPReadLinkResponse(AbstractSCPResponse):
-    """
-    An SCP response to a request to read a region of memory via a link on
-    a chip.
-    """
-    __slots__ = (
-        "_data",
-        "_length",
-        "_offset")
-
-    def __init__(self):
-        super().__init__()
-        self._data = None
-        self._offset = None
-        self._length = None
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "ReadLink", "CMD_READ_LINK", result.name)
-        self._data = data
-        self._offset = offset
-        self._length = len(data) - offset
-
-    @property
-    def data(self):
-        """
-        The data read.
-
-        :rtype: bytes
-        """
-        return self._data
-
-    @property
-    def offset(self):
-        """
-        The offset where the valid data starts.
-
-        :rtype: int
-        """
-        return self._offset
-
-    @property
-    def length(self):
-        """
-        The length of the valid data.
-
-        :rtype: int
-        """
-        return self._length

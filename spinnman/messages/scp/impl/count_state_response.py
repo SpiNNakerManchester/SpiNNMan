@@ -32,7 +32,7 @@ class CountStateResponse(AbstractSCPResponse):
         self._count = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -40,7 +40,7 @@ class CountStateResponse(AbstractSCPResponse):
         self._count = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
-    def count(self):
+    def count(self) -> int:
         """
         The count of the number of cores with the requested state.
 

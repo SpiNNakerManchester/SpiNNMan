@@ -16,7 +16,7 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Tuple
+from typing import Callable, Optional, Tuple
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod, abstractproperty)
 from spinn_utilities.overrides import overrides
@@ -30,6 +30,7 @@ from spinnman.messages.eieio import (
 from spinnman.messages.sdp import SDPMessage, SDPFlag, SDPHeader
 from spinnman.messages.scp.impl import IPTagSet
 from .spalloc_proxied_connection import SpallocProxiedConnection
+# mypy: disable-error-code=empty-body
 
 _ONE_SHORT = struct.Struct("<H")
 _TWO_SHORTS = struct.Struct("<2H")
@@ -48,7 +49,8 @@ class SpallocEIEIOListener(
     __slots__ = ()
 
     @overrides(EIEIOConnection.receive_eieio_message)
-    def receive_eieio_message(self, timeout=None):
+    def receive_eieio_message(
+            self, timeout: Optional[float] = None) -> AbstractEIEIOMessage:
         data = self.receive(timeout)
         header = _ONE_SHORT.unpack_from(data)[0]
         if header & 0xC000 == 0x4000:
@@ -56,7 +58,8 @@ class SpallocEIEIOListener(
         return read_eieio_data_message(data, 0)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self):
+    def get_receive_method(self) -> Callable[
+            [Optional[float]], AbstractEIEIOMessage]:
         return self.receive_eieio_message
 
     @overrides(SpallocProxiedConnection.send)
@@ -111,7 +114,7 @@ class SpallocEIEIOListener(
         self.send_to_chip(data, x, y, port)
 
     @abstractproperty
-    def local_ip_address(self) -> str:
+    def local_ip_address(self) -> str:  # type: ignore[override]
         """
         The IP address on the server to which the connection is bound.
 
@@ -120,7 +123,7 @@ class SpallocEIEIOListener(
         """
 
     @abstractproperty
-    def local_port(self) -> int:
+    def local_port(self) -> int:  # type: ignore[override]
         """
         The port on the server to which the connection is bound.
 

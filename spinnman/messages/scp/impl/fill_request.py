@@ -20,13 +20,14 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .check_ok_response import CheckOKResponse
 
 
-class FillRequest(AbstractSCPRequest):
+class FillRequest(AbstractSCPRequest[CheckOKResponse]):
     """
     An SCP request to fill a region of memory on a chip with repeated data
     """
     __slots__ = ()
 
-    def __init__(self, x, y, base_address, data, size):
+    def __init__(
+            self, x: int, y: int, base_address: int, data: int, size: int):
         """
         :param int x:
             The x-coordinate of the chip to read from, between 0 and 255
@@ -48,5 +49,5 @@ class FillRequest(AbstractSCPRequest):
             argument_3=size)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Fill", SCPCommand.CMD_FILL)

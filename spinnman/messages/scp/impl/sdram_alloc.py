@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
@@ -27,13 +28,52 @@ _ONE_WORD = struct.Struct("<I")
 FLAG_RETRY_TAG = 4
 
 
-class SDRAMAlloc(AbstractSCPRequest):
+class _SCPSDRAMAllocResponse(AbstractSCPResponse):
+    """
+    An SCP response to a request to allocate space in SDRAM.
+    """
+    __slots__ = (
+        "_base_address",
+        "_size")
+
+    def __init__(self, size: int):
+        super().__init__()
+        self._size = size
+        self._base_address: Optional[int] = None
+
+    @overrides(AbstractSCPResponse.read_data_bytestring)
+    def read_data_bytestring(self, data, offset):
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "SDRAM Allocation", "CMD_ALLOC", result.name)
+        self._base_address = _ONE_WORD.unpack_from(data, offset)[0]
+
+        # check that the base address is not null (0 in python case) as
+        # this reflects a issue in the command on SpiNNaker side
+        if self._base_address == 0:
+            raise SpinnmanInvalidParameterException(
+                "SDRAM Allocation response base address", self._base_address,
+                f"Could not allocate {self._size} bytes of SDRAM")
+
+    @property
+    def base_address(self) -> int:
+        """
+        The base address allocated, or 0 if none.
+
+        :rtype: int
+        """
+        return self._base_address or 0
+
+
+class SDRAMAlloc(AbstractSCPRequest[_SCPSDRAMAllocResponse]):
     """
     An SCP Request to allocate space in the SDRAM space.
     """
     __slots__ = "_size",
 
-    def __init__(self, x, y, app_id, size, tag=None, retry_tag=True):
+    def __init__(self, x: int, y: int, app_id: int, size: int,
+                 tag: Optional[int] = None, retry_tag: bool = True):
         """
         :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
@@ -77,43 +117,5 @@ class SDRAMAlloc(AbstractSCPRequest):
         self._size = size
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> _SCPSDRAMAllocResponse:
         return _SCPSDRAMAllocResponse(self._size)
-
-
-class _SCPSDRAMAllocResponse(AbstractSCPResponse):
-    """
-    An SCP response to a request to allocate space in SDRAM.
-    """
-    __slots__ = (
-        "_base_address",
-        "_size")
-
-    def __init__(self, size):
-        super().__init__()
-        self._size = size
-        self._base_address = None
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "SDRAM Allocation", "CMD_ALLOC", result.name)
-        self._base_address = _ONE_WORD.unpack_from(data, offset)[0]
-
-        # check that the base address is not null (0 in python case) as
-        # this reflects a issue in the command on SpiNNaker side
-        if self._base_address == 0:
-            raise SpinnmanInvalidParameterException(
-                "SDRAM Allocation response base address", self._base_address,
-                f"Could not allocate {self._size} bytes of SDRAM")
-
-    @property
-    def base_address(self):
-        """
-        The base address allocated, or 0 if none.
-
-        :rtype: int
-        """
-        return self._base_address

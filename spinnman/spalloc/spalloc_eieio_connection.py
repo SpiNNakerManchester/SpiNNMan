@@ -16,7 +16,7 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Tuple
+from typing import Callable, Optional, Tuple
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import Listenable
@@ -36,7 +36,8 @@ _UPDATE_TAG_TIMEOUT = 1.0
 
 
 class SpallocEIEIOConnection(
-        EIEIOConnection, SpallocProxiedConnection, metaclass=AbstractBase):
+        EIEIOConnection, SpallocProxiedConnection,
+        Listenable[AbstractEIEIOMessage], metaclass=AbstractBase):
     """
     The socket interface supported by proxied EIEIO connected sockets.
     This emulates an :py:class:`EIEOConnection` opened with a remote address
@@ -62,7 +63,8 @@ class SpallocEIEIOConnection(
         self.send(_TWO_SKIP + sdp_message.bytestring)
 
     @overrides(EIEIOConnection.receive_eieio_message)
-    def receive_eieio_message(self, timeout=None):
+    def receive_eieio_message(
+            self, timeout: Optional[float] = None) -> AbstractEIEIOMessage:
         data = self.receive(timeout)
         header = _ONE_SHORT.unpack_from(data)[0]
         if header & 0xC000 == 0x4000:
@@ -70,7 +72,8 @@ class SpallocEIEIOConnection(
         return read_eieio_data_message(data, 0)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self):
+    def get_receive_method(self) -> Callable[
+            [Optional[float]], AbstractEIEIOMessage]:
         return self.receive_eieio_message
 
     @property

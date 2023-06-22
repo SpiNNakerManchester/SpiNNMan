@@ -25,38 +25,6 @@ from spinnman.messages.sdp import SDPHeader, SDPFlag
 _ONE_WORD = struct.Struct("<I")
 
 
-class FixedRouteRead(AbstractSCPRequest):
-    """
-    Gets a fixed route entry.
-    """
-    __slots__ = ()
-
-    def __init__(self, x, y, app_id):
-        """
-        :param int x: The x-coordinate of the chip, between 0 and 255,
-            this is not checked due to speed restrictions
-        :param int y: The y-coordinate of the chip, between 0 and 255,
-            this is not checked due to speed restrictions
-        :param int app_id:
-            The ID of the application with which to associate the routes.
-            If not specified, defaults to 0.
-        :raise SpinnmanInvalidParameterException:
-            * If x is out of range
-            * If y is out of range
-        """
-        super().__init__(
-            SDPHeader(
-                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=x,
-                destination_chip_y=y),
-            SCPRequestHeader(command=SCPCommand.CMD_RTR),
-            argument_1=(app_id << 8) | 3, argument_2=1 << 31)
-
-    @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
-        return _FixedRouteResponse()
-
-
 class _FixedRouteResponse(AbstractSCPResponse):
     """
     response for the fixed route read
@@ -89,3 +57,35 @@ class _FixedRouteResponse(AbstractSCPResponse):
             if self._route & (1 << link_id) != 0:
                 link_ids.append(link_id)
         return FixedRouteEntry(processor_ids, link_ids)
+
+
+class FixedRouteRead(AbstractSCPRequest[_FixedRouteResponse]):
+    """
+    Gets a fixed route entry.
+    """
+    __slots__ = ()
+
+    def __init__(self, x: int, y: int, app_id: int):
+        """
+        :param int x: The x-coordinate of the chip, between 0 and 255,
+            this is not checked due to speed restrictions
+        :param int y: The y-coordinate of the chip, between 0 and 255,
+            this is not checked due to speed restrictions
+        :param int app_id:
+            The ID of the application with which to associate the routes.
+            If not specified, defaults to 0.
+        :raise SpinnmanInvalidParameterException:
+            * If x is out of range
+            * If y is out of range
+        """
+        super().__init__(
+            SDPHeader(
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                destination_cpu=0, destination_chip_x=x,
+                destination_chip_y=y),
+            SCPRequestHeader(command=SCPCommand.CMD_RTR),
+            argument_1=(app_id << 8) | 3, argument_2=1 << 31)
+
+    @overrides(AbstractSCPRequest.get_scp_response)
+    def get_scp_response(self) -> _FixedRouteResponse:
+        return _FixedRouteResponse()

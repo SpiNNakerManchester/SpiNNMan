@@ -15,9 +15,18 @@
 import sys
 from threading import RLock
 import time
+from typing import Any, Callable, Dict, Generic, List, TypeVar
+from typing_extensions import TypeAlias
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
 from spinnman.constants import SCP_TIMEOUT, N_RETRIES
+from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
+_R = TypeVar("_R", bound=AbstractSCPResponse)
+_CB: TypeAlias = Callable[[_R], None]
+_ECB: TypeAlias = Callable[
+    [AbstractSCPRequest[_R], Exception, Any, SCAMPConnection], None]
 
 MAX_SEQUENCE = 65536
 RETRY_CODES = frozenset([
@@ -29,7 +38,7 @@ _next_sequence = 0
 _next_sequence_lock = RLock()
 
 
-class SCPRequestPipeLine(object):
+class SCPRequestPipeLine(Generic[_R]):
     """
     Allows a set of SCP requests to be grouped together in a communication
     across a number of channels for a given connection.
@@ -57,10 +66,9 @@ class SCPRequestPipeLine(object):
         "_request_data",
         "_requests",
         "_retries",
-        "_send_time",
-        "_times_sent")
+        "_send_time")
 
-    def __init__(self, connection, n_channels=1,
+    def __init__(self, connection: SCAMPConnection, n_channels=1,
                  intermediate_channel_waits=0,
                  n_retries=N_RETRIES, packet_timeout=SCP_TIMEOUT):
         """
@@ -89,23 +97,20 @@ class SCPRequestPipeLine(object):
                 self._intermediate_channel_waits = 0
 
         # A dictionary of sequence number -> requests in progress
-        self._requests = dict()
-        self._request_data = dict()
-
-        # A dictionary of sequence number -> time at which sequence was sent
-        self._times_sent = dict()
+        self._requests: Dict[int, AbstractSCPRequest] = dict()
+        self._request_data: Dict[int, bytes] = dict()
 
         # A dictionary of sequence number -> number of retries for the packet
-        self._retries = dict()
+        self._retries: Dict[int, int] = dict()
 
         # A dictionary of sequence number -> callback function for response
-        self._callbacks = dict()
+        self._callbacks: Dict[int, _CB] = dict()
 
         # A dictionary of sequence number -> callback function for errors
-        self._error_callbacks = dict()
+        self._error_callbacks: Dict[int, _ECB] = dict()
 
         # A dictionary of sequence number -> retry reason
-        self._retry_reason = dict()
+        self._retry_reason: Dict[int, List[str]] = dict()
 
         # The number of responses outstanding
         self._in_progress = 0
@@ -121,7 +126,7 @@ class SCPRequestPipeLine(object):
         # self._token_bucket = TokenBucket(3408, 700000)
 
     @staticmethod
-    def __get_next_sequence_number():
+    def __get_next_sequence_number() -> int:
         """
         Get the next number from the global sequence, applying appropriate
         wrapping rules as the sequence numbers have a fixed number of bits.
@@ -136,7 +141,9 @@ class SCPRequestPipeLine(object):
             _next_sequence = (sequence + 1) % MAX_SEQUENCE
         return sequence
 
-    def send_request(self, request, callback, error_callback):
+    def send_request(
+            self, request: AbstractSCPRequest[_R], callback: _CB,
+            error_callback: _ECB):
         """
         Add an SCP request to the set to be sent.
 
@@ -183,7 +190,7 @@ class SCPRequestPipeLine(object):
         self._connection.send(request_data)
         self._in_progress += 1
 
-    def finish(self):
+    def finish(self) -> None:
         """
         Indicate the end of the packets to be sent.  This must be called
         to ensure that all responses are received and handled.
@@ -192,7 +199,7 @@ class SCPRequestPipeLine(object):
             self._do_retrieve(0, self._packet_timeout)
 
     @property
-    def n_timeouts(self):
+    def n_timeouts(self) -> int:
         """
         The number of timeouts that occurred.
 
@@ -201,7 +208,7 @@ class SCPRequestPipeLine(object):
         return self._n_timeouts
 
     @property
-    def n_channels(self):
+    def n_channels(self) -> int:
         """
         The number of requests to send before checking for responses.
 
@@ -210,7 +217,7 @@ class SCPRequestPipeLine(object):
         return self._n_channels
 
     @property
-    def n_resent(self):
+    def n_resent(self) -> int:
         """
         The number of packets that have been resent.
 
@@ -219,7 +226,7 @@ class SCPRequestPipeLine(object):
         return self._n_resent
 
     @property
-    def n_retry_code_resent(self):
+    def n_retry_code_resent(self) -> int:
         """
         The number of resends due to reasons for which automated retry is
         the correct response in-protocol.
@@ -228,7 +235,7 @@ class SCPRequestPipeLine(object):
         """
         return self._n_retry_code_resent
 
-    def _remove_record(self, seq):
+    def _remove_record(self, seq: int) -> None:
         if seq in self._requests:
             del self._requests[seq]
         del self._request_data[seq]
@@ -237,7 +244,7 @@ class SCPRequestPipeLine(object):
         del self._error_callbacks[seq]
         del self._retry_reason[seq]
 
-    def _single_retrieve(self, timeout):
+    def _single_retrieve(self, timeout: float):
         # Receive the next response
         result, seq, raw_data, offset = \
             self._connection.receive_scp_response(timeout)
@@ -274,7 +281,7 @@ class SCPRequestPipeLine(object):
                 # Remove the sequence from the outstanding responses
                 self._remove_record(seq)
 
-    def _handle_receive_timeout(self):
+    def _handle_receive_timeout(self) -> None:
         self._n_timeouts += 1
 
         # If there is a timeout, all packets remaining are resent
@@ -292,10 +299,10 @@ class SCPRequestPipeLine(object):
         for seq in to_remove:
             self._remove_record(seq)
 
-    def _resend(self, seq, request_sent, reason):
+    def _resend(self, seq: int, request_sent, reason: str):
         if self._retries[seq] <= 0:
             # Report timeouts as timeout exception
-            if all(reason == "timeout" for reason in self._retry_reason[seq]):
+            if all(rr == "timeout" for rr in self._retry_reason[seq]):
                 raise SpinnmanTimeoutException(
                     request_sent, self._packet_timeout)
 
@@ -315,7 +322,7 @@ class SCPRequestPipeLine(object):
         self._connection.send(self._request_data[seq])
         self._n_resent += 1
 
-    def _do_retrieve(self, n_packets, timeout):
+    def _do_retrieve(self, n_packets: int, timeout: float):
         """
         Receives responses until there are only n_packets responses left.
 

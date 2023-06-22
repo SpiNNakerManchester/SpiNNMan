@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Callable, Tuple
+from typing import Callable, Optional, Tuple
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import Listenable
@@ -41,11 +41,12 @@ class SpallocSCPConnection(
         super(SpallocSCPConnection, self).__init__(x, y)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable:
+    def get_receive_method(self) -> Callable[[Optional[float]], SDPMessage]:
         return self.receive_sdp_message
 
     @overrides(SCAMPConnection.receive_sdp_message)
-    def receive_sdp_message(self, timeout=None) -> SDPMessage:
+    def receive_sdp_message(
+            self, timeout: Optional[float] = None) -> SDPMessage:
         data = self.receive(timeout)
         return SDPMessage.from_bytestring(data, 2)
 

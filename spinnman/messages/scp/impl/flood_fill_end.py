@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Iterable, Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -24,14 +24,15 @@ _NNP_FLOOD_FILL_END = 15
 _WAIT_FLAG = 0x1 << 18
 
 
-class FloodFillEnd(AbstractSCPRequest):
+class FloodFillEnd(AbstractSCPRequest[CheckOKResponse]):
     """
     A request to start a flood fill of data.
     """
     __slots__ = ()
 
     def __init__(
-            self, nearest_neighbour_id, app_id=0, processors=None, wait=False):
+            self, nearest_neighbour_id: int, app_id: int = 0,
+            processors: Optional[Iterable[int]] = None, wait: bool = False):
         """
 
         :param int nearest_neighbour_id:
@@ -63,5 +64,5 @@ class FloodFillEnd(AbstractSCPRequest):
             argument_1=key, argument_2=data, argument_3=_NNP_FORWARD_RETRY)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Flood Fill", "CMD_NNP:NNP_FFS")

@@ -697,7 +697,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         else:
             return self.__msgs.get(timeout=timeout)[_msg.size:]
 
-    def _receive(self, timeout=None) -> bytes:
+    def _receive(self, timeout: Optional[float] = None) -> bytes:
         if self.__current_msg is not None:
             try:
                 return self.__current_msg
@@ -759,11 +759,11 @@ class _ProxiedBidirectionalConnection(
         self._send(data)
 
     @overrides(SpallocProxiedConnection.receive)
-    def receive(self, timeout=None) -> bytes:
+    def receive(self, timeout: Optional[float] = None) -> bytes:
         return self._receive(timeout)
 
     @overrides(Listenable.is_ready_to_receive)
-    def is_ready_to_receive(self, timeout=0) -> bool:
+    def is_ready_to_receive(self, timeout: float = 0) -> bool:
         return self._is_ready_to_receive(timeout)
 
 
@@ -809,11 +809,11 @@ class _ProxiedUnboundConnection(
         raise IOError("socket is not open for sending")
 
     @overrides(SpallocProxiedConnection.receive)
-    def receive(self, timeout=None) -> bytes:
+    def receive(self, timeout: Optional[float] = None) -> bytes:
         return self._receive(timeout)
 
     @overrides(Listenable.is_ready_to_receive)
-    def is_ready_to_receive(self, timeout=0) -> bool:
+    def is_ready_to_receive(self, timeout: float = 0) -> bool:
         return self._is_ready_to_receive(timeout)
 
 

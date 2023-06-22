@@ -21,13 +21,14 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
 
 
-class WriteMemory(AbstractSCPRequest):
+class WriteMemory(AbstractSCPRequest[CheckOKResponse]):
     """
     A request to write memory on a chip.
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, x, y, base_address, data, *, cpu=0):
+    def __init__(self, x: int, y: int, base_address: int, data: bytes, *,
+                 cpu: int = 0):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions
@@ -57,9 +58,9 @@ class WriteMemory(AbstractSCPRequest):
         self._data_to_write = data
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         return super().bytestring + bytes(self._data_to_write)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("WriteMemory", "CMD_WRITE")

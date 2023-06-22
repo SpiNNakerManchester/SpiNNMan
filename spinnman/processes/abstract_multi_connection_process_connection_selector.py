@@ -14,6 +14,8 @@
 
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod)
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 
 
 class AbstractMultiConnectionProcessConnectionSelector(
@@ -24,7 +26,8 @@ class AbstractMultiConnectionProcessConnectionSelector(
     __slots__ = ()
 
     @abstractmethod
-    def get_next_connection(self, message):
+    def get_next_connection(
+            self, message: AbstractSCPRequest) -> SCAMPConnection:
         """
         Get the index of the  next connection for the process from a list
         of connections.

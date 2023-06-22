@@ -17,7 +17,7 @@ API of the client for the Spalloc web service.
 
 import struct
 import time
-from typing import Callable
+from typing import Callable, Optional
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import Listenable
@@ -35,7 +35,8 @@ _UPDATE_TAG_TIMEOUT = 1.0
 
 
 class SpallocBootConnection(
-        BootConnection, SpallocProxiedConnection, metaclass=AbstractBase):
+        BootConnection, SpallocProxiedConnection,
+        Listenable[SpinnakerBootMessage], metaclass=AbstractBase):
     """
     The socket interface supported by proxied boot sockets. The socket will
     always be talking to the root board of a job.
@@ -51,7 +52,8 @@ class SpallocBootConnection(
         time.sleep(_ANTI_FLOOD_DELAY)
 
     @overrides(BootConnection.receive_boot_message)
-    def receive_boot_message(self, timeout=None) -> SpinnakerBootMessage:
+    def receive_boot_message(
+            self, timeout: Optional[float] = None) -> SpinnakerBootMessage:
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)
 

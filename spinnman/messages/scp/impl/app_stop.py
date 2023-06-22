@@ -28,13 +28,13 @@ def _get_data(app_id, signal):
     return data
 
 
-class AppStop(AbstractSCPRequest):
+class AppStop(AbstractSCPRequest[CheckOKResponse]):
     """
     An SCP Request to stop an application.
     """
     __slots__ = ()
 
-    def __init__(self, app_id):
+    def __init__(self, app_id: int):
         """
         :param int app_id: The ID of the application, between 0 and 255
         """
@@ -50,5 +50,5 @@ class AppStop(AbstractSCPRequest):
             argument_3=(1 << 31) + (0x3f << 8))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Send Stop", "CMD_NNP")

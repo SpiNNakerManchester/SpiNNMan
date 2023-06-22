@@ -17,18 +17,20 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
+from spinnman.constants import IPTAG_TIME_OUT_WAIT_TIMES
 from .iptag_get_info_response import IPTagGetInfoResponse
 
 _IPTAG_TTO = (4 << 16)
 
 
-class IPTagSetTTO(AbstractSCPRequest):
+class IPTagSetTTO(AbstractSCPRequest[IPTagGetInfoResponse]):
     """
     An SCP request to set the transient timeout for future SCP requests.
     """
     __slots__ = ()
 
-    def __init__(self, x, y, tag_timeout):
+    def __init__(self, x: int, y: int,
+                 tag_timeout: IPTAG_TIME_OUT_WAIT_TIMES):
         """
         :param int x: The x-coordinate of the chip to run on, between 0 and 255
         :param int y: The y-coordinate of the chip to run on, between 0 and 255
@@ -42,5 +44,5 @@ class IPTagSetTTO(AbstractSCPRequest):
             argument_1=_IPTAG_TTO, argument_2=tag_timeout.value)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> IPTagGetInfoResponse:
         return IPTagGetInfoResponse()

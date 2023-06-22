@@ -23,28 +23,13 @@ class DiagnosticFilterEmergencyRoutingStatus(Enum):
         Only one has to match for the counter to be incremented.
     """
     #: Packet is not emergency routed
-    NORMAL = (0, "Packet is not emergency routed")
+    NORMAL = 0
     #: Packet is in first hop of emergency route; packet should also have been
     #: sent here by normal routing
-    FIRST_STAGE_COMBINED = (1, "Packet is in first hop of emergency route;"
-                               " packet should also have been sent here by"
-                               " normal routing")
+    FIRST_STAGE_COMBINED = 1
     #: Packet is in first hop of emergency route; packet wouldn't have reached
     #: this router without emergency routing
-    FIRST_STAGE = (2, "Packet is in first hop of emergency route; packet"
-                      " wouldn't have reached this router without emergency"
-                      " routing")
+    FIRST_STAGE = 2
     #: Packet is in last hop of emergency route and should now return to normal
     #: routing
-    SECOND_STAGE = (3, "Packet is in last hop of emergency route and should"
-                       " now return to normal routing")
-
-    def __new__(cls, value, doc=""):
-        # pylint: disable=protected-access, unused-argument
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
-
-    def __init__(self, value, doc=""):
-        self._value_ = value
-        self.__doc__ = doc
+    SECOND_STAGE = 3

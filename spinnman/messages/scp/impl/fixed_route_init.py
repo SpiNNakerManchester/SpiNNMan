@@ -20,13 +20,13 @@ from .check_ok_response import CheckOKResponse
 from spinnman.messages.sdp import SDPHeader, SDPFlag
 
 
-class FixedRouteInit(AbstractSCPRequest):
+class FixedRouteInit(AbstractSCPRequest[CheckOKResponse]):
     """
     Sets a fixed route entry.
     """
     __slots__ = ()
 
-    def __init__(self, x, y, entry, app_id=0):
+    def __init__(self, x: int, y: int, entry: int, app_id: int = 0):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
@@ -49,5 +49,5 @@ class FixedRouteInit(AbstractSCPRequest):
             argument_1=(app_id << 8) | 3, argument_2=entry)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("RouterInit", "CMD_RTR")

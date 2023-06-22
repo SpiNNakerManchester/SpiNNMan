@@ -22,7 +22,7 @@ from spinnman.connections.abstract_classes import Listenable
 _TWO_SKIP = struct.Struct("<2x")
 
 
-class SDPConnection(UDPConnection, Listenable):
+class SDPConnection(UDPConnection, Listenable[SDPMessage]):
     """
     A connection that talks SpiNNaker Datagram Protocol.
     """

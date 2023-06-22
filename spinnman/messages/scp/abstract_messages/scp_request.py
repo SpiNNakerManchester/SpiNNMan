@@ -11,14 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import annotations
 import struct
+from typing import Generic, Optional, TypeVar, TYPE_CHECKING
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from .scp_response import AbstractSCPResponse
+if TYPE_CHECKING:
+    from spinnman.messages.sdp import SDPHeader
+    from spinnman.messages.scp.scp_request_header import SCPRequestHeader
+_R = TypeVar("_R", bound=AbstractSCPResponse)
 
 _THREE_WORDS = struct.Struct("<III")
 
 
-class AbstractSCPRequest(object, metaclass=AbstractBase):
+class AbstractSCPRequest(Generic[_R], metaclass=AbstractBase):
     """
     Represents an Abstract SCP Request.
     """
@@ -33,8 +39,12 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
     DEFAULT_DEST_X_COORD = 255
     DEFAULT_DEST_Y_COORD = 255
 
-    def __init__(self, sdp_header, scp_request_header, argument_1=None,
-                 argument_2=None, argument_3=None, data=None):
+    def __init__(
+            self, sdp_header: SDPHeader, scp_request_header: SCPRequestHeader,
+            argument_1: Optional[int] = None,
+            argument_2: Optional[int] = None,
+            argument_3: Optional[int] = None,
+            data: Optional[bytes] = None):
         """
         :param SDPHeader sdp_header: The SDP header of the request
         :param SCPRequestHeader scp_request_header:
@@ -57,7 +67,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         self._data = data
 
     @property
-    def sdp_header(self):
+    def sdp_header(self) -> SDPHeader:
         """
         The SDP header of the message.
 
@@ -66,7 +76,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         return self._sdp_header
 
     @property
-    def scp_request_header(self):
+    def scp_request_header(self) -> SCPRequestHeader:
         """
         The SCP request header of the message.
 
@@ -75,7 +85,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         return self._scp_request_header
 
     @property
-    def argument_1(self):
+    def argument_1(self) -> Optional[int]:
         """
         The first argument, or `None` if no first argument.
 
@@ -84,7 +94,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         return self._argument_1
 
     @property
-    def argument_2(self):
+    def argument_2(self) -> Optional[int]:
         """
         The second argument, or `None` if no second argument.
 
@@ -93,7 +103,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         return self._argument_2
 
     @property
-    def argument_3(self):
+    def argument_3(self) -> Optional[int]:
         """
         The third argument, or `None` if no third argument.
 
@@ -102,7 +112,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         return self._argument_3
 
     @property
-    def data(self):
+    def data(self) -> Optional[bytes]:
         """
         The data, or `None` if no data.
 
@@ -111,7 +121,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         return self._data
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         """
         The request as a byte-string.
 
@@ -135,7 +145,7 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
         return self.__repr__()
 
     @abstractmethod
-    def get_scp_response(self):
+    def get_scp_response(self) -> _R:
         """
         Get an SCP response message to be used to process any response
         received.
