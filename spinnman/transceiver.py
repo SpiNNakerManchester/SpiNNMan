@@ -948,6 +948,20 @@ class Transceiver(AbstractContextManager):
             data_item.data_type.struct_code,
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
+    def get_clock_drift(self, x, y):
+        """
+        Get the clock drift
+
+        :param int x: The x-coordinate of the chip to get drift for
+        :param int y: The y-coordinate of the chip to get drift for
+        """
+        DRIFT_FP = 1 << 17
+
+        drift = self._get_sv_data(x, y, SystemVariableDefinition.clock_drift)
+        drift = struct.unpack("<i", struct.pack("<I", drift))[0]
+        drift = drift / DRIFT_FP
+        return drift
+
     @staticmethod
     def get_user_register_address_from_core(user, p):
         """
