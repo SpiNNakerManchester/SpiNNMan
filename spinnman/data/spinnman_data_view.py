@@ -389,6 +389,107 @@ class SpiNNManDataView(MachineDataView):
             raise
 
     @classmethod
+    def write_ip_tag(cls, ip_tag, use_sender=False):
+        """
+        Set up an IP tag.
+
+        Syntactic sugar for `get_transceiver().set_ip_tag`.
+
+        :param ~spinn_machine.tags.IPTag ip_tag:
+            The tag to set up.
+
+            .. note::
+                `board_address` can be `None`, in which case, the tag will be
+                assigned to all boards.
+        :param bool use_sender:
+            Optionally use the sender host and port instead of
+            the given host and port in the tag
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If the IP tag fields are incorrect
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.set_ip_tag(ip_tag, use_sender)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
+
+    @classmethod
+    def write_reverse_ip_tag(cls, reverse_ip_tag):
+        """
+        Set up a reverse IP tag.
+
+        Syntactic sugar for `get_transceiver().set_reverse_ip_tag`.
+
+        :param ~spinn_machine.tags.ReverseIPTag reverse_ip_tag:
+            The reverse tag to set up.
+
+            .. note::
+                The `board_address` field can be `None`, in which case, the tag
+                will be assigned to all boards.
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If the reverse IP tag fields are incorrect
+            * If a packet is received that has invalid parameters
+            * If the UDP port is one that is already used by SpiNNaker for
+                system functions
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.set_reverse_ip_tag(reverse_ip_tag)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
+
+    @classmethod
+    def write_clear_ip_tag(cls, tag, board_address=None):
+        """
+        Clear the setting of an IP tag.
+
+        Syntactic sugar for `get_transceiver().clear_ip_tag`.
+
+        :param int tag: The tag ID
+        :param str board_address:
+            Board address where the tag should be cleared.
+            If not specified, all AbstractSCPConnection connections will send
+            the message to clear the tag
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If the tag is not a valid tag
+            * If the connection cannot send SDP messages
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.clear_ip_tag(tag, board_address)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
+
+    @classmethod
     def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
                      cpu=0, is_filename=False):
         """
