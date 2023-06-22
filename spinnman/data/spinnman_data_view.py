@@ -188,6 +188,39 @@ class SpiNNManDataView(MachineDataView):
            raise
 
     @classmethod
+    def read_iobuf(cls, core_subsets=None):
+        """
+        Get the contents of the IOBUF buffer for a number of processors.
+
+        Syntactic sugar for `get_transceiver().read_iobuf`.
+
+        :param ~spinn_machine.CoreSubsets core_subsets:
+            A set of chips and cores from which to get the buffers. If not
+            specified, the buffers from all of the cores on all of the chips
+            on the board are obtained.
+        :return: An iterable of the buffers, which may not be in the order
+            of core_subsets
+        :rtype: iterable(IOBuffer)
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If chip_and_cores contains invalid items
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.read_iobuf(core_subsets)
+        except AttributeError as ex:
+           if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+           raise
+
+    @classmethod
     def read_memory(cls, x, y, base_address, length, cpu=0):
         """
         Read some areas of memory (usually SDRAM) from the board.
