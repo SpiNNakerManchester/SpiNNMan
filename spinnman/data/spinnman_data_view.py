@@ -510,6 +510,48 @@ class SpiNNManDataView(MachineDataView):
             raise
 
     @classmethod
+    def write_router_diagnostic_filter(
+            cls, x, y, position, diagnostic_filter):
+        """
+        Sets a router diagnostic filter in a router.
+
+        Syntactic sugar for `get_transceiver().set_router_diagnostic_filter`.
+
+        :param int x:
+            The X address of the router in which this filter is being set.
+        :param int y:
+            The Y address of the router in which this filter is being set.
+        :param int position:
+            The position in the list of filters where this filter is to be
+            added.
+        :param DiagnosticFilter diagnostic_filter:
+            The diagnostic filter being set in the placed, between 0 and 15.
+
+            .. note::
+                Positions 0 to 11 are used by the default filters,
+                and setting these positions will result in a warning.
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        :raise SpinnmanIOException:
+            * If there is an error communicating with the board
+            * If there is an error reading the data
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If x, y does not lead to a valid chip
+            * If position is less than 0 or more than 15
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        try:
+            return cls.__data._transceiver.set_router_diagnostic_filter(
+                x, y, position, diagnostic_filter)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
+
+    @classmethod
     def write_signal(cls, app_id, signal):
         """
         Writes/ Sends a signal to an application.
