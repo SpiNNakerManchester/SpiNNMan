@@ -15,7 +15,8 @@
 import sys
 from threading import RLock
 import time
-from typing import Any, Callable, Dict, Generic, List, TypeVar
+from types import TracebackType
+from typing import Callable, Dict, Generic, List, Optional, TypeVar, cast
 from typing_extensions import TypeAlias
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
@@ -26,7 +27,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 _R = TypeVar("_R", bound=AbstractSCPResponse)
 _CB: TypeAlias = Callable[[_R], None]
 _ECB: TypeAlias = Callable[
-    [AbstractSCPRequest[_R], Exception, Any, SCAMPConnection], None]
+    [AbstractSCPRequest[_R], Exception, TracebackType, SCAMPConnection], None]
 
 MAX_SEQUENCE = 65536
 RETRY_CODES = frozenset([
@@ -104,7 +105,7 @@ class SCPRequestPipeLine(Generic[_R]):
         self._retries: Dict[int, int] = dict()
 
         # A dictionary of sequence number -> callback function for response
-        self._callbacks: Dict[int, _CB] = dict()
+        self._callbacks: Dict[int, Optional[_CB]] = dict()
 
         # A dictionary of sequence number -> callback function for errors
         self._error_callbacks: Dict[int, _ECB] = dict()
@@ -142,7 +143,7 @@ class SCPRequestPipeLine(Generic[_R]):
         return sequence
 
     def send_request(
-            self, request: AbstractSCPRequest[_R], callback: _CB,
+            self, request: AbstractSCPRequest[_R], callback: Optional[_CB],
             error_callback: _ECB):
         """
         Add an SCP request to the set to be sent.
@@ -262,7 +263,8 @@ class SCPRequestPipeLine(Generic[_R]):
                     self._n_retry_code_resent += 1
                 except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
-                        request_sent, e, sys.exc_info()[2],
+                        request_sent, e,
+                        cast(TracebackType, sys.exc_info()[2]),
                         self._connection)
                     self._remove_record(seq)
             else:
@@ -271,11 +273,13 @@ class SCPRequestPipeLine(Generic[_R]):
                 try:
                     response = request_sent.get_scp_response()
                     response.read_bytestring(raw_data, offset)
-                    if self._callbacks[seq] is not None:
-                        self._callbacks[seq](response)
+                    cb = self._callbacks[seq]
+                    if cb is not None:
+                        cb(response)
                 except Exception as e:  # pylint: disable=broad-except
                     self._error_callbacks[seq](
-                        request_sent, e, sys.exc_info()[2],
+                        request_sent, e,
+                        cast(TracebackType, sys.exc_info()[2]),
                         self._connection)
 
                 # Remove the sequence from the outstanding responses
@@ -292,7 +296,7 @@ class SCPRequestPipeLine(Generic[_R]):
                 self._resend(seq, request_sent, "timeout")
             except Exception as e:  # pylint: disable=broad-except
                 self._error_callbacks[seq](
-                    request_sent, e, sys.exc_info()[2],
+                    request_sent, e, cast(TracebackType, sys.exc_info()[2]),
                     self._connection)
                 to_remove.append(seq)
 

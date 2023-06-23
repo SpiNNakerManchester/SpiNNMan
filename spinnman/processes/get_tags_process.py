@@ -13,9 +13,16 @@
 # limitations under the License.
 
 from functools import partial
-from spinn_machine.tags import ReverseIPTag, IPTag
+from typing import List, Optional
+from spinn_machine.tags import AbstractTag, ReverseIPTag, IPTag
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from spinnman.messages.scp.impl import IPTagGetInfo, IPTagGet
+from spinnman.messages.scp.impl.iptag_get import IPTagGet, IPTagGetResponse
+from spinnman.messages.scp.impl.iptag_get_info import IPTagGetInfo
+from spinnman.messages.scp.impl.iptag_get_info_response import (
+    IPTagGetInfoResponse)
+from spinnman.connections.udp_packet_connections import SCAMPConnection
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 
 
 class GetTagsProcess(AbstractMultiConnectionProcess):
@@ -23,20 +30,22 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         "_tags",
         "_tag_info")
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector:
+                 AbstractMultiConnectionProcessConnectionSelector):
         """
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector)
-        self._tag_info = None
-        self._tags = None
+        self._tag_info: Optional[IPTagGetInfoResponse] = None
+        self._tags: List[Optional[AbstractTag]] = []
 
-    def __handle_tag_info_response(self, response):
+    def __handle_tag_info_response(self, response: IPTagGetInfoResponse):
         self._tag_info = response
 
-    def __handle_get_tag_response(self, tag, board_address, response):
+    def __handle_get_tag_response(
+            self, tag: int, board_address, response: IPTagGetResponse):
         if response.in_use:
             ip = response.ip_address
             host = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
@@ -52,7 +61,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
                     response.sdp_header.source_chip_y, tag, host,
                     response.port, response.strip_sdp)
 
-    def get_tags(self, connection):
+    def get_tags(self, connection: SCAMPConnection) -> List[AbstractTag]:
         """
         :param SCAMPConnection connection:
         :rtype:
@@ -63,6 +72,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
             self._send_request(IPTagGetInfo(
                 connection.chip_x, connection.chip_y),
                 self.__handle_tag_info_response)
+        assert self._tag_info is not None
 
         # Get the tags themselves
         n_tags = self._tag_info.pool_size + self._tag_info.fixed_size

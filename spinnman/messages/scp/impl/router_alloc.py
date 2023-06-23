@@ -26,7 +26,7 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 _ONE_WORD = struct.Struct("<I")
 
 
-class _SCPRouterAllocResponse(AbstractSCPResponse):
+class RouterAllocResponse(AbstractSCPResponse):
     """
     An SCP response to a request to allocate router entries.
     """
@@ -54,7 +54,7 @@ class _SCPRouterAllocResponse(AbstractSCPResponse):
         return self._base_address or 0
 
 
-class RouterAlloc(AbstractSCPRequest[_SCPRouterAllocResponse]):
+class RouterAlloc(AbstractSCPRequest[RouterAllocResponse]):
     """
     An SCP Request to allocate space for routing entries.
     """
@@ -82,5 +82,5 @@ class RouterAlloc(AbstractSCPRequest[_SCPRouterAllocResponse]):
             argument_2=n_entries)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> _SCPRouterAllocResponse:
-        return _SCPRouterAllocResponse()
+    def get_scp_response(self) -> RouterAllocResponse:
+        return RouterAllocResponse()

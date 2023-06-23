@@ -25,8 +25,9 @@ import struct
 from threading import Condition, RLock
 import time
 from typing import (
-    BinaryIO, Dict, FrozenSet, Iterable, Iterator, List, Optional, Sequence,
-    Tuple, TypeVar, Union, cast)
+    BinaryIO, Collection, Dict, FrozenSet, Iterable,
+    Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, cast)
+from typing_extensions import TypeAlias
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
@@ -59,7 +60,7 @@ from spinnman.messages.sdp import SDPMessage
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
-from spinnman.messages.scp.enums import Signal, PowerCommand
+from spinnman.messages.scp.enums import Signal, PowerCommand, LEDAction
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
@@ -81,8 +82,14 @@ from spinnman.processes import (
     AbstractMultiConnectionProcessConnectionSelector)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
+from spinnman.messages.scp.impl import CheckOKResponse
+from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
+from spinnman.messages.scp.impl.get_chip_info_response import (
+    GetChipInfoResponse)
 
 _Conn = TypeVar("_Conn", bound=Connection)
+_R = TypeVar("_R", bound=AbstractSCPResponse)
+_BasicProcess: TypeAlias = SendSingleCommandProcess[CheckOKResponse]
 logger = FormatAdapter(logging.getLogger(__name__))
 
 _SCAMP_NAME = "SC&MP"
@@ -254,7 +261,7 @@ class Transceiver(AbstractContextManager):
 
         # build connection selectors for the processes.
         self._bmp_connection_selectors: Dict[
-            Tuple[int, int], FixedConnectionSelector] = dict()
+            Tuple[int, int], FixedConnectionSelector[BMPConnection]] = dict()
         self._scamp_connection_selector = \
             self._identify_connections(connections)
 
@@ -384,7 +391,8 @@ class Transceiver(AbstractContextManager):
         """
         for _ in range(_CONNECTION_CHECK_RETRIES):
             try:
-                sender = SendSingleCommandProcess(connection_selector)
+                sender: SendSingleCommandProcess[GetChipInfoResponse] = \
+                    SendSingleCommandProcess(connection_selector)
                 chip_info = sender.execute(  # pylint: disable=no-member
                     GetChipInfo(chip_x, chip_y)).chip_info
                 if not chip_info.is_ethernet_available:
@@ -745,6 +753,14 @@ class Transceiver(AbstractContextManager):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
+    def __call(self, req: AbstractSCPRequest[_R], **kwargs) -> _R:
+        """
+        Wrapper that makes doing simple SCP calls easier.
+        """
+        proc: SendSingleCommandProcess[_R] = SendSingleCommandProcess(
+            self._scamp_connection_selector, **kwargs)
+        return proc.execute(req)
+
     @staticmethod
     def is_scamp_version_compabible(version: Tuple[int, int, int]) -> bool:
         """
@@ -824,8 +840,7 @@ class Transceiver(AbstractContextManager):
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
         for scamp_connection in self._scamp_connections:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(IPTagSetTTO(
+            self.__call(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
 
@@ -898,7 +913,8 @@ class Transceiver(AbstractContextManager):
         return version_info
 
     def get_cpu_information(
-            self, core_subsets: Optional[CoreSubsets] = None) -> List[CPUInfo]:
+            self, core_subsets: Optional[CoreSubsets] = None
+            ) -> Sequence[CPUInfo]:
         """
         Get information about the processors on the board.
 
@@ -1122,6 +1138,13 @@ class Transceiver(AbstractContextManager):
                 AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                 AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                 SystemVariableDefinition.iobuf_size))
+        # Get all the cores if the subsets are not given
+        if core_subsets is None:
+            core_subsets = CoreSubsets()
+            for chip in SpiNNManDataView.get_machine().chips:
+                for processor in chip.processors:
+                    core_subsets.add_processor(
+                        chip.x, chip.y, processor.processor_id)
 
         # read iobuf from machine
         process = ReadIOBufProcess(self._scamp_connection_selector)
@@ -1229,9 +1252,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        response = process.execute(CountState(app_id, state))
-        return response.count  # pylint: disable=no-member
+        return self.__call(CountState(app_id, state)).count
 
     def _get_next_nearest_neighbour_id(self) -> int:
         with self._nearest_neighbour_lock:
@@ -1418,6 +1439,16 @@ class Transceiver(AbstractContextManager):
                 "Unknown combination")
         return sel
 
+    def __bmp_call(
+            self, cabinet: int, frame: int, req: AbstractSCPRequest[_R],
+            **kwargs) -> _R:
+        """
+        Wrapper that makes doing simple BMP calls easier.
+        """
+        proc: SendSingleCommandProcess[_R] = SendSingleCommandProcess(
+            self._bmp_connection(cabinet, frame), **kwargs)
+        return proc.execute(req)
+
     def _power(
             self, power_command: PowerCommand,
             boards: Union[int, Iterable[int]] = 0,
@@ -1436,21 +1467,21 @@ class Transceiver(AbstractContextManager):
         if not self._bmp_connection_selectors:
             warn_once(
                 logger, "No BMP connections so power control unavailable")
-        connection_selector = self._bmp_connection(cabinet, frame)
         timeout = (
             BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
             else BMP_TIMEOUT)
-        process = SendSingleCommandProcess(
-            connection_selector, timeout=timeout, n_retries=0)
-        process.execute(SetPower(power_command, boards))
+        self.__bmp_call(cabinet, frame, SetPower(power_command, boards),
+                        timeout=timeout, n_retries=0)
         self._machine_off = power_command == PowerCommand.POWER_OFF
 
         # Sleep for 5 seconds if the machine has just been powered on
         if not self._machine_off:
             time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
-    def set_led(self, led, action, board, cabinet, frame):
+    def set_led(
+            self, led: Union[int, Iterable[int]], action: LEDAction,
+            board: int, cabinet: int, frame: int):
         """
         Set the LED state of a board in the machine.
 
@@ -1473,9 +1504,7 @@ class Transceiver(AbstractContextManager):
         """
         warn_once(logger, "The set_led method is deprecated and "
                   "untested due to no known use.")
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
-        process.execute(BMPSetLed(led, action, board))
+        self.__bmp_call(cabinet, frame, BMPSetLed(led, action, board))
 
     def read_fpga_register(
             self, fpga_num: int, register: int, cabinet: int, frame: int,
@@ -1494,11 +1523,10 @@ class Transceiver(AbstractContextManager):
         :return: the register data
         :rtype: int
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame), timeout=1.0)
-        response = process.execute(
-            ReadFPGARegister(fpga_num, register, board))
-        return response.fpga_register  # pylint: disable=no-member
+        response = self.__bmp_call(
+            cabinet, frame, ReadFPGARegister(fpga_num, register, board),
+            timeout=1.0)
+        return response.fpga_register
 
     def write_fpga_register(
             self, fpga_num: int, register: int, value: int,
@@ -1516,9 +1544,8 @@ class Transceiver(AbstractContextManager):
         :param int frame: the frame this is targeting
         :param int board: which board to write the FPGA register to
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
-        process.execute(
+        self.__bmp_call(
+            cabinet, frame,
             WriteFPGARegister(fpga_num, register, value, board))
 
     def read_adc_data(self, board: int, cabinet: int, frame: int) -> ADCInfo:
@@ -1538,10 +1565,8 @@ class Transceiver(AbstractContextManager):
         """
         warn_once(logger, "The read_adc_data method is deprecated and "
                   "untested due to no known use.")
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
-        response = process.execute(ReadADC(board))
-        return response.adc_info  # pylint: disable=no-member
+        response = self.__bmp_call(cabinet, frame, ReadADC(board))
+        return response.adc_info
 
     def read_bmp_version(
             self, board: int, cabinet: int, frame: int) -> VersionInfo:
@@ -1553,10 +1578,8 @@ class Transceiver(AbstractContextManager):
         :param int board: which board to request the data from
         :return: the sver from the BMP
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
-        response = process.execute(BMPGetVersion(board))
-        return response.version_info  # pylint: disable=no-member
+        response = self.__bmp_call(cabinet, frame, BMPGetVersion(board))
+        return response.version_info
 
     def write_memory(
             self, x: int, y: int, base_address: int,
@@ -1612,7 +1635,8 @@ class Transceiver(AbstractContextManager):
         if isinstance(data, io.RawIOBase):
             assert n_bytes is not None
             chksum = process.write_memory_from_reader(
-                x, y, cpu, base_address, data, n_bytes, get_sum)
+                x, y, cpu, base_address, cast(BinaryIO, data), n_bytes,
+                get_sum)
         elif isinstance(data, str):
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
@@ -1772,7 +1796,7 @@ class Transceiver(AbstractContextManager):
         if isinstance(data, io.RawIOBase):
             assert n_bytes is not None
             process.write_link_memory_from_reader(
-                x, y, cpu, link, base_address, data, n_bytes)
+                x, y, cpu, link, base_address, cast(BinaryIO, data), n_bytes)
         elif isinstance(data, int):
             n_bytes = 4
             data_to_write = _ONE_WORD.pack(data)
@@ -1833,8 +1857,13 @@ class Transceiver(AbstractContextManager):
             # Start the flood fill
             nearest_neighbour_id = self._get_next_nearest_neighbour_id()
             if isinstance(data, io.RawIOBase):
+                if n_bytes is None:
+                    raise SpinnmanInvalidParameterException(
+                        "n_bytes", n_bytes,
+                        "must not be None when an IO stream is used")
                 process.write_memory_from_reader(
-                    nearest_neighbour_id, base_address, data, n_bytes)
+                    nearest_neighbour_id, base_address, cast(BinaryIO, data),
+                    n_bytes)
             elif isinstance(data, str):
                 if n_bytes is None:
                     n_bytes = os.stat(data).st_size
@@ -1844,7 +1873,7 @@ class Transceiver(AbstractContextManager):
             elif isinstance(data, int):
                 data_to_write = _ONE_WORD.pack(data)
                 process.write_memory_from_bytearray(
-                    nearest_neighbour_id, base_address, data_to_write, 0)
+                    nearest_neighbour_id, base_address, data_to_write)
             else:
                 assert isinstance(data, (bytes, bytearray))
                 if n_bytes is None:
@@ -1985,8 +2014,7 @@ class Transceiver(AbstractContextManager):
         """
 
         if not self._machine_off:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(AppStop(app_id))
+            self.__call(AppStop(app_id))
         else:
             logger.warning(
                 "You are calling a app stop on a turned off machine. "
@@ -2206,8 +2234,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(SendSignal(app_id, signal))
+        self.__call(SendSignal(app_id, signal))
 
     def set_leds(self, x: int, y: int, cpu: int, led_states):
         """
@@ -2234,8 +2261,7 @@ class Transceiver(AbstractContextManager):
         try:
             warn_once(logger, "The set_leds is deprecated and "
                       "untested due to no known use.")
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(SetLED(x, y, cpu, led_states))
+            self.__call(SetLED(x, y, cpu, led_states))
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
@@ -2297,8 +2323,7 @@ class Transceiver(AbstractContextManager):
             ip_string = socket.gethostbyname(host_string)
             ip_address = bytearray(socket.inet_aton(ip_string))
 
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(IPTagSet(
+            self.__call(IPTagSet(
                 connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
                 ip_tag.tag, strip=ip_tag.strip_sdp, use_sender=use_sender))
 
@@ -2372,8 +2397,7 @@ class Transceiver(AbstractContextManager):
                 "The given board address is not recognised")
 
         for connection in connections:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(ReverseIPTagSet(
+            self.__call(ReverseIPTagSet(
                 connection.chip_x, connection.chip_y,
                 reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
                 reverse_ip_tag.destination_p,
@@ -2401,8 +2425,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         for conn in self.__get_connection_list(board_address=board_address):
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(IPTagClear(conn.chip_x, conn.chip_y, tag))
+            self.__call(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
     def get_tags(self, connection: Optional[SCAMPConnection] = None
                  ) -> Iterable[AbstractTag]:
@@ -2502,7 +2525,7 @@ class Transceiver(AbstractContextManager):
             raise
 
     def load_multicast_routes(
-            self, x: int, y: int, routes: Iterable[MulticastRoutingEntry],
+            self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
             app_id: int):
         """
         Load a set of multicast routes on to a chip.
@@ -2610,8 +2633,8 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         try:
-            base_address = self._get_sv_data(
-                x, y, SystemVariableDefinition.router_table_copy_address)
+            base_address = cast(int, self._get_sv_data(
+                x, y, SystemVariableDefinition.router_table_copy_address))
             process = GetMultiCastRoutesProcess(
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)
@@ -2635,8 +2658,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         try:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(RouterClear(x, y))
+            self.__call(RouterClear(x, y))
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
@@ -2725,8 +2747,7 @@ class Transceiver(AbstractContextManager):
             ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
             position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(WriteMemory(
+        self.__call(WriteMemory(
             x, y, memory_position, _ONE_WORD.pack(data_to_send)))
 
     def get_router_diagnostic_filter(
@@ -2761,9 +2782,7 @@ class Transceiver(AbstractContextManager):
                 ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
                 position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-            process = SendSingleCommandProcess(
-                self._scamp_connection_selector)
-            response = process.execute(ReadMemory(x, y, memory_position, 4))
+            response = self.__call(ReadMemory(x, y, memory_position, 4))
             return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
             # pylint: disable=no-member
@@ -2806,8 +2825,7 @@ class Transceiver(AbstractContextManager):
             if enable:
                 for counter_id in counter_ids:
                     clear_data |= 1 << counter_id + 16
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(WriteMemory(
+            self.__call(WriteMemory(
                 x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
         except Exception:
             logger.info(self.__where_is_xy(x, y))
@@ -2861,7 +2879,7 @@ class Transceiver(AbstractContextManager):
             self, x: int, y: int,
             heap: SystemVariableDefinition = (
                 SystemVariableDefinition.sdram_heap_address)
-            ) -> List[HeapElement]:
+            ) -> Sequence[HeapElement]:
         """
         Get the contents of the given heap on a given chip.
 
@@ -2884,8 +2902,7 @@ class Transceiver(AbstractContextManager):
 
         :param bool do_sync: Whether to synchronise or not
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(DoSync(do_sync))
+        self.__call(DoSync(do_sync))
 
     def __str__(self) -> str:
         addr = self._scamp_connections[0].remote_ip_address

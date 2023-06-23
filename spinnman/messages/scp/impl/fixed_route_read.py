@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import List
 from spinn_utilities.overrides import overrides
 from spinn_machine import FixedRouteEntry
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -33,12 +34,12 @@ class _FixedRouteResponse(AbstractSCPResponse):
         # the fixed route router entry
         "_route"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._route = None
+        self._route = 0
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -47,13 +48,13 @@ class _FixedRouteResponse(AbstractSCPResponse):
         self._route = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
-    def route(self):
-        processor_ids = list()
-        for processor_id in range(0, 26):
+    def route(self) -> FixedRouteEntry:
+        processor_ids: List[int] = list()
+        for processor_id in range(26):
             if self._route & (1 << (6 + processor_id)) != 0:
                 processor_ids.append(processor_id)
-        link_ids = list()
-        for link_id in range(0, 6):
+        link_ids: List[int] = list()
+        for link_id in range(6):
             if self._route & (1 << link_id) != 0:
                 link_ids.append(link_id)
         return FixedRouteEntry(processor_ids, link_ids)

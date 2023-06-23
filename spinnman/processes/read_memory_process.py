@@ -13,32 +13,41 @@
 # limitations under the License.
 
 import functools
+from typing import Callable
 from spinnman.messages.scp.impl import ReadLink, ReadMemory
+from spinnman.messages.scp.impl.read_memory import Response
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 
 
-class ReadMemoryProcess(AbstractMultiConnectionProcess):
+class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
     """
     A process for reading memory on a SpiNNaker chip.
     """
     __slots__ = ("_view", )
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector:
+                 AbstractMultiConnectionProcessConnectionSelector):
         """
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector)
-        self._view = None
+        self._view = memoryview(b'')
 
-    def __handle_response(self, offset, response):
+    def __handle_response(self, offset: int, response: Response):
         self._view[offset:offset + response.length] = response.data[
             response.offset:response.offset + response.length]
 
-    def read_memory(self, x, y, p, base_address, length):
+    def read_memory(self, x: int, y: int, p: int, base_address: int,
+                    length: int) -> bytes:
         """
+        Read some memory from a core.
+
         :param int x:
         :param int y:
         :param int p:
@@ -50,8 +59,11 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
             base_address, length,
             functools.partial(ReadMemory, x=x, y=y, cpu=p))
 
-    def read_link_memory(self, x, y, p, link, base_address, length):
+    def read_link_memory(self, x: int, y: int, p: int, link: int,
+                         base_address: int, length: int) -> bytes:
         """
+        Read some memory from the neighbour of a core.
+
         :param int x:
         :param int y:
         :param int p:
@@ -64,19 +76,22 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
             base_address, length,
             functools.partial(ReadLink, x=x, y=y, cpu=p, link=link))
 
-    def _read_memory(self, base_address, length, packet_class):
+    def _read_memory(
+            self, base_address: int, length: int,
+            packet_class: Callable[
+                [int, int], AbstractSCPRequest[Response]]) -> bytes:
         data = bytearray(length)
         self._view = memoryview(data)
         n_bytes = length
         offset = 0
+
         with self._collect_responses():
             while n_bytes > 0:
                 bytes_to_get = min((n_bytes, UDP_MESSAGE_MAX_SIZE))
                 self._send_request(
-                    packet_class(
-                        base_address=base_address + offset, size=bytes_to_get),
+                    packet_class(base_address + offset, bytes_to_get),
                     functools.partial(self.__handle_response, offset))
                 n_bytes -= bytes_to_get
                 offset += bytes_to_get
 
-        return data
+        return bytes(data)

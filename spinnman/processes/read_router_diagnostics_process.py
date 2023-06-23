@@ -13,15 +13,18 @@
 # limitations under the License.
 
 import struct
-from spinnman.messages.scp.impl import ReadMemory
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinnman.model import RouterDiagnostics
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 
 _N_REGISTERS = 16
 _ONE_WORD = struct.Struct("<I")
 
 
-class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
+class ReadRouterDiagnosticsProcess(
+        AbstractMultiConnectionProcess[Response]):
     """
     A process for reading the diagnostic data block from a SpiNNaker router.
     """
@@ -30,31 +33,32 @@ class ReadRouterDiagnosticsProcess(AbstractMultiConnectionProcess):
         "_error_status",
         "_register_values")
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector:
+                 AbstractMultiConnectionProcessConnectionSelector):
         """
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector)
-        self._control_register = None
-        self._error_status = None
+        self._control_register = 0
+        self._error_status = 0
         self._register_values = [0] * _N_REGISTERS
 
-    def __handle_control_register_response(self, response):
+    def __handle_control_register_response(self, response: Response):
         self._control_register = _ONE_WORD.unpack_from(
             response.data, response.offset)[0]
 
-    def __handle_error_status_response(self, response):
+    def __handle_error_status_response(self, response: Response):
         self._error_status = _ONE_WORD.unpack_from(
             response.data, response.offset)[0]
 
-    def __handle_register_response(self, response):
+    def __handle_register_response(self, response: Response):
         for register in range(_N_REGISTERS):
             self._register_values[register] = _ONE_WORD.unpack_from(
                 response.data, response.offset + (register * 4))[0]
 
-    def get_router_diagnostics(self, x, y):
+    def get_router_diagnostics(self, x: int, y: int) -> RouterDiagnostics:
         """
         :param int x:
         :param int y:

@@ -36,7 +36,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
 from spinnman.messages.scp.impl.get_chip_info_response import (
     GetChipInfoResponse)
-from spinnman.messages.scp.impl.read_memory import _SCPReadMemoryResponse
+from spinnman.messages.scp.impl.read_memory import Response
 from spinnman.model import ChipSummaryInfo, P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
@@ -163,10 +163,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 chip_info.n_free_multicast_routing_entries))
 
     def __receive_p2p_data(
-            self, column: int, scp_read_response: _SCPReadMemoryResponse):
+            self, column: int, scp_read_response: Response):
         """
         :param int column:
-        :param _SCPReadMemoryResponse scp_read_response:
+        :param Response scp_read_response:
         """
         self._p2p_column_data[column] = (
             scp_read_response.data, scp_read_response.offset)
@@ -180,11 +180,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._chip_info[chip_info.x, chip_info.y] = chip_info
 
     def _receive_p_maps(
-            self, x: int, y: int, scp_read_response: _SCPReadMemoryResponse):
+            self, x: int, y: int, scp_read_response: Response):
         """
         Receive the physical-to-virtual and virtual-to-physical maps.
 
-        :param _SCPReadMemoryResponse scp_read_response:
+        :param Response scp_read_response:
         """
         data = scp_read_response.data
         off = scp_read_response.offset

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Optional
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.scp import SCPResponseHeader
@@ -33,11 +33,11 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         "_scp_response_header",
         "_sdp_header")
 
-    def __init__(self):
-        self._sdp_header = None
-        self._scp_response_header = None
+    def __init__(self) -> None:
+        self._sdp_header: Optional[SDPHeader] = None
+        self._scp_response_header: Optional[SCPResponseHeader] = None
 
-    def read_bytestring(self, data, offset):
+    def read_bytestring(self, data: bytes, offset: int):
         """
         Reads a packet from a byte-string of data.
 
@@ -66,6 +66,7 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
 
         :rtype: SDPHeader
         """
+        assert self._sdp_header is not None, "no response read"
         return self._sdp_header
 
     @property
@@ -75,4 +76,5 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
 
         :rtype: SCPResponseHeader
         """
+        assert self._scp_response_header is not None, "no response read"
         return self._scp_response_header

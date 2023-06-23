@@ -85,9 +85,9 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         """
         # pylint: disable=arguments-differ
         if x is None:
-            x = self._chip_x
+            x = self.chip_x
         if y is None:
-            y = self._chip_y
+            y = self.chip_y
         scp_request.sdp_header.update_for_send(x, y)
         return _TWO_SKIP.pack() + scp_request.bytestring
 

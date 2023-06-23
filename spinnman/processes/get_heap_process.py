@@ -12,13 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import struct
 import functools
+import struct
+from typing import Callable, List, Sequence
+from spinn_utilities.typing.coords import XY
 from spinnman.processes import AbstractMultiConnectionProcess
 from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.model import HeapElement
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-from spinnman.messages.scp.impl import ReadMemory
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 
 
 HEAP_ADDRESS = SystemVariableDefinition.sdram_heap_address
@@ -27,13 +31,14 @@ _HEAP_POINTER = struct.Struct("<4xI")
 _ELEMENT_HEADER = struct.Struct("<II")
 
 
-class GetHeapProcess(AbstractMultiConnectionProcess):
+class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
     __slots__ = (
         "_blocks",
         "_heap_address",
         "_next_block_address")
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector:
+                 AbstractMultiConnectionProcessConnectionSelector):
         """
         :param connection_selector:
         :type connection_selector:
@@ -41,31 +46,35 @@ class GetHeapProcess(AbstractMultiConnectionProcess):
         """
         super().__init__(connection_selector)
 
-        self._heap_address = None
-        self._next_block_address = None
-        self._blocks = list()
+        self._heap_address = 0
+        self._next_block_address = 0
+        self._blocks: List[HeapElement] = list()
 
-    def _read_heap_address_response(self, response):
+    def _read_heap_address_response(self, response: Response):
         self._heap_address = _ADDRESS.unpack_from(
             response.data, response.offset)[0]
 
-    def _read_heap_pointer(self, response):
+    def _read_heap_pointer(self, response: Response):
         self._next_block_address = _HEAP_POINTER.unpack_from(
             response.data, response.offset)[0]
 
-    def _read_next_block(self, block_address, response):
+    def _read_next_block(self, block_address: int, response: Response):
         self._next_block_address, free = _ELEMENT_HEADER.unpack_from(
             response.data, response.offset)
         if self._next_block_address != 0:
             self._blocks.append(HeapElement(
                 block_address, self._next_block_address, free))
 
-    def __read_address(self, chip_address, address, size, callback):
+    def __read_address(
+            self, chip_address: XY, address: int, size: int,
+            callback: Callable[[Response], None]):
         x, y = chip_address
         with self._collect_responses():
             self._send_request(ReadMemory(x, y, address, size), callback)
 
-    def get_heap(self, chip_address, pointer=HEAP_ADDRESS):
+    def get_heap(self, chip_address: XY,
+                 pointer: SystemVariableDefinition = HEAP_ADDRESS
+                 ) -> Sequence[HeapElement]:
         """
         :param tuple(int,int) chip_address: x, y
         :param SystemVariableDefinition pointer:

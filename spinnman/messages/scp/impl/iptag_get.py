@@ -28,7 +28,7 @@ _IPTAG_GET = 2
 _IPTAG_FORMAT = struct.Struct("<4s6s3HIH3B")
 
 
-class _SCPIPTagGetResponse(AbstractSCPResponse):
+class IPTagGetResponse(AbstractSCPResponse):
     """
     An SCP response to a request for an IP tags.
     """
@@ -223,7 +223,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._spin_cpu
 
 
-class IPTagGet(AbstractSCPRequest[_SCPIPTagGetResponse]):
+class IPTagGet(AbstractSCPRequest[IPTagGetResponse]):
     """
     An SCP Request to get an IP tag.
     """
@@ -245,5 +245,5 @@ class IPTagGet(AbstractSCPRequest[_SCPIPTagGetResponse]):
             argument_2=1)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> _SCPIPTagGetResponse:
-        return _SCPIPTagGetResponse()
+    def get_scp_response(self) -> IPTagGetResponse:
+        return IPTagGetResponse()

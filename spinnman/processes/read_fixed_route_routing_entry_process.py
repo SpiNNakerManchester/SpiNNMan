@@ -14,6 +14,9 @@
 
 from spinnman.messages.scp.impl.fixed_route_read import FixedRouteRead
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
+from spinn_machine.fixed_route_entry import FixedRouteEntry
 
 
 class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
@@ -25,7 +28,8 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         # the fixed route routing entry from the response
         "_route", )
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector:
+                 AbstractMultiConnectionProcessConnectionSelector):
         """
         :param connection_selector: the SC&MP connection selector
         :type connection_selector:
@@ -37,7 +41,8 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
     def __handle_read_response(self, response):
         self._route = response.route
 
-    def read_fixed_route(self, x, y, app_id=0):
+    def read_fixed_route(
+            self, x: int, y: int, app_id: int = 0) -> FixedRouteEntry:
         """
         Read the fixed route entry installed on a particular chip's router.
 
@@ -53,4 +58,5 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         with self._collect_responses():
             self._send_request(FixedRouteRead(x, y, app_id),
                                self.__handle_read_response)
+        assert self._route is not None
         return self._route

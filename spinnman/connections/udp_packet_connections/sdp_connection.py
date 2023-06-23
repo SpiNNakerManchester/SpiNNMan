@@ -18,6 +18,7 @@ from spinn_utilities.overrides import overrides
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from .udp_connection import UDPConnection
 from spinnman.connections.abstract_classes import Listenable
+from spinnman.exceptions import SpinnmanUnsupportedOperationException
 
 _TWO_SKIP = struct.Struct("<2x")
 
@@ -89,6 +90,9 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
         :raise SpinnmanIOException:
             If there is an error sending the message.
         """
+        if self._chip_x is None or self._chip_y is None:
+            raise SpinnmanUnsupportedOperationException(
+                "send on receive-only connection")
         # If a reply is expected, the connection should
         if sdp_message.sdp_header.flags == SDPFlag.REPLY_EXPECTED:
             sdp_message.sdp_header.update_for_send(self._chip_x, self._chip_y)

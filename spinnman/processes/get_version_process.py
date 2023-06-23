@@ -11,34 +11,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Optional
 from spinnman.messages.scp.impl import GetVersion
-from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import N_RETRIES
+from spinnman.model import VersionInfo
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
+from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 
 
-class GetVersionProcess(AbstractMultiConnectionProcess):
+class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):
     """
     A process for getting the version of the machine.
     """
     __slots__ = "_version_info",
 
-    def __init__(self, connection_selector, n_retries=N_RETRIES):
+    def __init__(self, connection_selector:
+                 AbstractMultiConnectionProcessConnectionSelector,
+                 n_retries: int = N_RETRIES):
         """
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector, n_retries)
-        self._version_info = None
+        self._version_info: Optional[VersionInfo] = None
 
-    def _get_response(self, version_response):
+    def _get_response(self, version_response: GetVersionResponse):
         """
         :param GetVersionResponse version_response:
         """
         self._version_info = version_response.version_info
 
-    def get_version(self, x, y, p):
+    def get_version(self, x: int, y: int, p: int) -> VersionInfo:
         """
         :param int x:
         :param int y:
@@ -47,4 +53,5 @@ class GetVersionProcess(AbstractMultiConnectionProcess):
         """
         with self._collect_responses():
             self._send_request(GetVersion(x=x, y=y, p=p), self._get_response)
+        assert self._version_info is not None
         return self._version_info

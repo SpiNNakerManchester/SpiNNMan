@@ -14,16 +14,19 @@
 from collections import defaultdict
 from functools import partial
 import logging
+from types import TracebackType
 from typing import Dict, Set
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import Chip
+from spinn_machine import Chip, CoreSubsets
 from spinnman.data import SpiNNManDataView
-from spinnman.messages.scp.impl import AppCopyRun
+from spinnman.messages.scp.impl import AppCopyRun, CheckOKResponse
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
+class ApplicationCopyRunProcess(
+        AbstractMultiConnectionProcess[CheckOKResponse]):
     """
     Process to start a binary on a subset of cores on a subset of chips
     of a machine, performed by, on each chip, copying the data from
@@ -45,14 +48,10 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         haven't yet been loaded.  Also returned are the links for each chip,
         which gives the link which should be read from to get the data.
 
-        :return: An iterable of pairs of link to use, and the chip it goes to
-            (or rather its X and Y coordinates; the chip is otherwise
-            unneeded).
-            The link is which link to copy *from,* and the chip is the *target*
-            of the copy.
-        :rtype: iterable(tuple(int, int, int))
+        :return: An dictionary from *target* chips to the link to copy *from*.
+        :rtype: iterable(dict(Chip, int))
         """
-        next_chips = dict()
+        next_chips: Dict[Chip, int] = dict()
         for chip in self.__chips_done:
             for link in chip.router.links:
                 next_chip = SpiNNManDataView.get_chip_at(
@@ -69,7 +68,8 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
                         break
         return next_chips
 
-    def run(self, size, app_id, core_subsets, chksum, wait) -> None:
+    def run(self, size: int, app_id: int, core_subsets: CoreSubsets,
+            chksum: int, wait: bool):
         """
         Run the process.
 
@@ -107,7 +107,9 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         self.__chips_done[chip] = 1
 
     def __chip_err(
-            self, chip: Chip, link: int, request, exception, tb, connection):
+            self, chip: Chip, link: int, request: AppCopyRun,
+            exception: Exception, tb: TracebackType,
+            connection: SCAMPConnection):
         """
         This link not working? Blacklist it (for this process, not generally).
         Pass through to the standard error handler if the chip isn't reachable

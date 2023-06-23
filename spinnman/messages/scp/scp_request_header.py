@@ -13,35 +13,31 @@
 # limitations under the License.
 
 import struct
+from spinnman.messages.scp.enums import SCPCommand
 
 _TWO_SHORTS = struct.Struct("<2H")
 
 
 class SCPRequestHeader(object):
     """
-    Represents the header of an SCP Request
-    Each optional parameter in the constructor can be set to a value other
-    than `None` once, after which it is immutable.  It is an error to set a
-    parameter that is not currently `None`.
+    Represents the header of an SCP Request.
     """
     __slots__ = (
         "_command",
         "_sequence")
 
-    def __init__(self, command, sequence=0):
+    def __init__(self, command: SCPCommand, sequence: int = 0):
         """
         :param SCPCommand command: The SCP command
         :param int sequence:
             The number of the SCP packet in order of all packets
             sent or received, between 0 and 65535
-        :raise SpinnmanInvalidParameterException:
-            If one of the parameters is incorrect
         """
         self._command = command
         self._sequence = sequence
 
     @property
-    def command(self):
+    def command(self) -> SCPCommand:
         """
         The command of the SCP packet.
 
@@ -50,7 +46,7 @@ class SCPRequestHeader(object):
         return self._command
 
     @property
-    def sequence(self):
+    def sequence(self) -> int:
         """
         The sequence number of the SCP packet, between 0 and 65535.
 
@@ -59,18 +55,16 @@ class SCPRequestHeader(object):
         return self._sequence
 
     @sequence.setter
-    def sequence(self, sequence):
+    def sequence(self, sequence: int):
         """
         Set the sequence number of the SCP packet.
 
         :param int sequence: The sequence number to set, between 0 and 65535
-        :raise SpinnmanInvalidParameterException:
-            If the sequence is out of range, or if it has already been set
         """
         self._sequence = sequence
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         """
         The header as a byte-string.
 

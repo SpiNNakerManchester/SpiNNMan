@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
@@ -35,17 +35,17 @@ class ReadADC(BMPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, board):
+    def __init__(self, board: int):
         """
         :param int board: which board to request the ADC register from
         """
         super().__init__(
             board,
             SCPRequestHeader(command=SCPCommand.CMD_BMP_INFO),
-            argument_1=BMPInfo.ADC)
+            argument_1=BMPInfo.ADC.value)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> '_SCPReadADCResponse':
         return _SCPReadADCResponse()
 
 
@@ -55,12 +55,12 @@ class _SCPReadADCResponse(BMPResponse):
     """
     __slots__ = "_adc_info",
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._adc_info = None
+        self._adc_info: Optional[ADCInfo] = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -68,8 +68,9 @@ class _SCPReadADCResponse(BMPResponse):
         self._adc_info = ADCInfo(data, offset)
 
     @property
-    def adc_info(self):
+    def adc_info(self) -> ADCInfo:
         """
         The ADC information.
         """
+        assert self._adc_info is not None, "response not yet read"
         return self._adc_info

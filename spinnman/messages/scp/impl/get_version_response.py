@@ -38,11 +38,10 @@ class GetVersionResponse(AbstractSCPResponse):
         self._version_info = VersionInfo(data, offset)
 
     @property
-    def version_info(self) -> VersionInfo:
+    def version_info(self) -> Optional[VersionInfo]:
         """
         The version information received.
 
         :rtype: VersionInfo
         """
-        assert self._version_info is not None
         return self._version_info

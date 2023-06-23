@@ -14,68 +14,13 @@
 
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse)
-from spinnman.messages.scp.enums import SCPCommand, SCPResult
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from .read_memory import Response
 
 
-class _SCPReadLinkResponse(AbstractSCPResponse):
-    """
-    An SCP response to a request to read a region of memory via a link on
-    a chip.
-    """
-    __slots__ = (
-        "_data",
-        "_length",
-        "_offset")
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._data = b''
-        self._offset = 0
-        self._length = 0
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data: bytes, offset: int):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "ReadLink", "CMD_READ_LINK", result.name)
-        self._data = data
-        self._offset = offset
-        self._length = len(data) - offset
-
-    @property
-    def data(self) -> bytes:
-        """
-        The data read.
-
-        :rtype: bytes
-        """
-        return self._data
-
-    @property
-    def offset(self) -> int:
-        """
-        The offset where the valid data starts.
-
-        :rtype: int
-        """
-        return self._offset
-
-    @property
-    def length(self) -> int:
-        """
-        The length of the valid data.
-
-        :rtype: int
-        """
-        return self._length
-
-
-class ReadLink(AbstractSCPRequest[_SCPReadLinkResponse]):
+class ReadLink(AbstractSCPRequest[Response]):
     """
     An SCP request to read a region of memory via a link on a chip.
     """
@@ -106,5 +51,5 @@ class ReadLink(AbstractSCPRequest[_SCPReadLinkResponse]):
             argument_1=base_address, argument_2=size, argument_3=link)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> _SCPReadLinkResponse:
-        return _SCPReadLinkResponse()
+    def get_scp_response(self) -> Response:
+        return Response("ReadLink", "CMD_LINK_READ")

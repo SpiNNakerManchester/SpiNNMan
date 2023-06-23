@@ -13,15 +13,18 @@
 # limitations under the License.
 
 import functools
-from spinnman.messages.scp.impl import WriteLink, WriteMemory
-from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+from typing import BinaryIO, Callable
 import numpy
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.impl import WriteLink, WriteMemory
+from spinnman.messages.scp.impl import CheckOKResponse
+from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 _UNSIGNED_WORD = 0xFFFFFFFF
 
 
-class WriteMemoryProcess(AbstractMultiConnectionProcess):
+class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     """
     A process for writing memory on a SpiNNaker chip.
     """
@@ -29,8 +32,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
     # pylint: disable=too-many-arguments
 
     def write_memory_from_bytearray(
-            self, x, y, p, base_address, data, offset, n_bytes,
-            get_sum=False):
+            self, x: int, y: int, p: int, base_address: int, data: bytes,
+            offset: int, n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a SpiNNaker chip from a bytearray.
 
@@ -54,8 +57,9 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             functools.partial(WriteMemory, x=x, y=y, cpu=p), get_sum)
 
     def write_link_memory_from_bytearray(
-            self, x, y, p, link, base_address, data, offset, n_bytes,
-            get_sum=False):
+            self, x: int, y: int, p: int, link: int, base_address: int,
+            data: bytes, offset: int, n_bytes: int,
+            get_sum: bool = False) -> int:
         """
         Writes memory onto a neighbour of a SpiNNaker chip from a bytearray.
 
@@ -81,7 +85,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             functools.partial(WriteLink, x=x, y=y, cpu=p, link=link), get_sum)
 
     def write_memory_from_reader(
-            self, x, y, p, base_address, reader, n_bytes, get_sum=False):
+            self, x: int, y: int, p: int, base_address: int, reader: BinaryIO,
+            n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a SpiNNaker chip from a reader.
 
@@ -104,8 +109,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             functools.partial(WriteMemory, x=x, y=y, cpu=p), get_sum)
 
     def write_link_memory_from_reader(
-            self, x, y, p, link, base_address, reader, n_bytes,
-            get_sum=False):
+            self, x: int, y: int, p: int, link: int, base_address: int,
+            reader: BinaryIO, n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a neighbour of a SpiNNaker chip from a reader.
 
@@ -130,8 +135,10 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
             functools.partial(WriteLink, x=x, y=y, cpu=p, link=link), get_sum)
 
     def _write_memory_from_bytearray(
-            self, base_address, data, data_offset, n_bytes, packet_class,
-            get_sum):
+            self, base_address: int, data: bytes, data_offset: int,
+            n_bytes: int, packet_class: Callable[
+                [int, bytes], AbstractSCPRequest[CheckOKResponse]],
+            get_sum: bool) -> int:
         offset = 0
         n_bytes_to_write = int(n_bytes)
         with self._collect_responses():
@@ -139,8 +146,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
                 bytes_to_send = min(n_bytes_to_write, UDP_MESSAGE_MAX_SIZE)
                 data_array = data[data_offset:data_offset + bytes_to_send]
 
-                self._send_request(packet_class(
-                    base_address=base_address + offset, data=data_array))
+                self._send_request(
+                    packet_class(base_address + offset, data_array))
 
                 n_bytes_to_write -= bytes_to_send
                 offset += bytes_to_send
@@ -152,7 +159,10 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
         return np_sum & _UNSIGNED_WORD
 
     def _write_memory_from_reader(
-            self, base_address, reader, n_bytes, packet_class, with_sum):
+            self, base_address: int, reader: BinaryIO, n_bytes: int,
+            packet_class: Callable[
+                [int, bytes], AbstractSCPRequest[CheckOKResponse]],
+            with_sum: bool) -> int:
         offset = 0
         n_bytes_to_write = int(n_bytes)
         chksum = 0
@@ -162,7 +172,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess):
                     min(n_bytes_to_write, UDP_MESSAGE_MAX_SIZE))
                 bytes_to_send = len(data_array)
                 self._send_request(packet_class(
-                    base_address=base_address + offset, data=data_array))
+                    base_address + offset, data_array))
 
                 n_bytes_to_write -= bytes_to_send
                 offset += bytes_to_send

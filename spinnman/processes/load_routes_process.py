@@ -13,11 +13,16 @@
 # limitations under the License.
 
 import struct
+from typing import Collection
 from spinn_machine import Router
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl import RouterInit, RouterAlloc
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
+from spinnman.messages.scp.impl.router_alloc import RouterAllocResponse
 from .write_memory_process import WriteMemoryProcess
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 
 _ROUTE_PATTERN = struct.Struct("<H2xIII")
 _END_PATTERN = struct.Struct("<IIII")
@@ -30,19 +35,22 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = ("_base_address", )
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector:
+                 AbstractMultiConnectionProcessConnectionSelector):
         """
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector)
-        self._base_address = None
+        self._base_address = 0
 
-    def __handle_router_alloc_response(self, response):
+    def __handle_router_alloc_response(self, response: RouterAllocResponse):
         self._base_address = response.base_address
 
-    def load_routes(self, x, y, routes, app_id):
+    def load_routes(
+            self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
+            app_id: int):
         """
         :param int x:
         :param int y:

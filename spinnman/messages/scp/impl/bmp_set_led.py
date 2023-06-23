@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Iterable, Union
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, BMPRequest)
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.abstract_messages.bmp_request import Boards
+from spinnman.messages.scp.enums import SCPCommand, LEDAction
 from .check_ok_response import CheckOKResponse
 
 
@@ -29,7 +30,8 @@ class BMPSetLed(BMPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, led, action, boards):
+    def __init__(self, led: Union[int, Iterable[int]], action: LEDAction,
+                 boards: Boards):
         """
         :param led: Number of the LED or an iterable of LEDs to set the
             state of (0-7)
@@ -44,7 +46,7 @@ class BMPSetLed(BMPRequest):
         if isinstance(led, int):
             leds = [led]
         else:
-            leds = led
+            leds = list(led)
 
         # LED setting actions
         arg1 = sum(action.value << (led * 2) for led in leds)
@@ -59,5 +61,5 @@ class BMPSetLed(BMPRequest):
             argument_1=arg1, argument_2=arg2)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Set the LEDs of a board", "CMD_LED")

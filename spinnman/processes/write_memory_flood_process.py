@@ -13,36 +13,42 @@
 # limitations under the License.
 
 import math
+from typing import Optional, BinaryIO
 from spinnman.messages.scp.impl import (
     FloodFillEnd, FloodFillStart, FloodFillData)
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+from spinnman.messages.scp.impl import CheckOKResponse
+from .abstract_multi_connection_process_connection_selector import (
+    AbstractMultiConnectionProcessConnectionSelector)
 
 
-class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
+class WriteMemoryFloodProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     """
     A process for writing memory on multiple SpiNNaker chips at once.
     """
     __slots__ = ()
 
-    def __init__(self, next_connection_selector):
+    def __init__(self, next_connection_selector:
+                 AbstractMultiConnectionProcessConnectionSelector):
         AbstractMultiConnectionProcess.__init__(
             self, next_connection_selector, n_channels=3,
             intermediate_channel_waits=2)
 
-    def _start_flood_fill(self, n_bytes, nearest_neighbour_id):
+    def _start_flood_fill(self, n_bytes: int, nearest_neighbour_id: int):
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /
                                  UDP_MESSAGE_MAX_SIZE))
         with self._collect_responses():
             self._send_request(
                 FloodFillStart(nearest_neighbour_id, n_blocks))
 
-    def _end_flood_fill(self, nearest_neighbour_id):
+    def _end_flood_fill(self, nearest_neighbour_id: int):
         with self._collect_responses():
             self._send_request(FloodFillEnd(nearest_neighbour_id))
 
-    def write_memory_from_bytearray(self, nearest_neighbour_id, base_address,
-                                    data, offset, n_bytes=None):
+    def write_memory_from_bytearray(
+            self, nearest_neighbour_id: int, base_address: int,
+            data: bytes, offset: int = 0, n_bytes: Optional[int] = None):
         """
         :param int nearest_neighbour_id:
         :param int base_address:
@@ -74,8 +80,9 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
         self._end_flood_fill(nearest_neighbour_id)
 
-    def write_memory_from_reader(self, nearest_neighbour_id, base_address,
-                                 reader, n_bytes):
+    def write_memory_from_reader(
+            self, nearest_neighbour_id: int, base_address: int,
+            reader: BinaryIO, n_bytes: int):
         """
         :param int nearest_neighbour_id:
         :param int base_address:

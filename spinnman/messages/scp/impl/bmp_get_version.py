@@ -26,7 +26,7 @@ class BMPGetVersion(BMPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, board):
+    def __init__(self, board: int):
         """
         :param int board: The board to get the version from
         :raise SpinnmanInvalidParameterException:
@@ -37,5 +37,5 @@ class BMPGetVersion(BMPRequest):
             board, SCPRequestHeader(command=SCPCommand.CMD_VER))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> GetVersionResponse:
         return GetVersionResponse()

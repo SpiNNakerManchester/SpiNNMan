@@ -11,8 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import List
 from spinn_utilities.overrides import overrides
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 from .abstract_multi_connection_process_connection_selector import (
     AbstractMultiConnectionProcessConnectionSelector)
 
@@ -26,7 +27,7 @@ class RoundRobinConnectionSelector(
         "_connections",
         "_next_connection_index")
 
-    def __init__(self, connections):
+    def __init__(self, connections: List[SCAMPConnection]):
         """
         :param list(SCAMPConnection) connections:
             The connections to be used
@@ -36,7 +37,7 @@ class RoundRobinConnectionSelector(
 
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
-    def get_next_connection(self, message):
+    def get_next_connection(self, message) -> SCAMPConnection:
         index = self._next_connection_index
         self._next_connection_index = (index + 1) % len(self._connections)
         return self._connections[index]

@@ -36,7 +36,7 @@ class WriteFPGARegister(BMPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, fpga_num, addr, value, board):
+    def __init__(self, fpga_num: int, addr: int, value: int, board: int):
         """
         :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
         :param int addr: Register address to read or write to (will be rounded
@@ -50,5 +50,5 @@ class WriteFPGARegister(BMPRequest):
             data=_ONE_WORD.pack(value))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Send FPGA register write", "CMD_LINK_WRITE")

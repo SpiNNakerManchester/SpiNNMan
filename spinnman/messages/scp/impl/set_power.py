@@ -17,7 +17,8 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, BMPRequest)
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.abstract_messages.bmp_request import Boards
+from spinnman.messages.scp.enums import SCPCommand, PowerCommand
 from spinnman.messages.scp import SCPRequestHeader
 from .check_ok_response import CheckOKResponse
 
@@ -31,7 +32,8 @@ class SetPower(BMPRequest):
     __slots__ = ()
 
     def __init__(
-            self, power_command, boards, *, delay=0.0, board_to_send_to=0):
+            self, power_command: PowerCommand, boards: Boards, *,
+            delay=0.0, board_to_send_to=0):
         """
         .. note::
             There is currently a bug in the BMP that means some boards don't
@@ -66,5 +68,5 @@ class SetPower(BMPRequest):
             argument_1=arg1, argument_2=arg2)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("powering request", "CMD_BMP_POWER")

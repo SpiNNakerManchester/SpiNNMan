@@ -22,26 +22,31 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.constants import address_length_dtype
 
 
-class _SCPReadMemoryResponse(AbstractSCPResponse):
+class Response(AbstractSCPResponse):
     """
     An SCP response to a request to read a region of memory on a chip.
     """
     __slots__ = (
         "_data",
         "_length",
-        "_offset")
+        "_offset",
+        "__op",
+        "__cmd")
 
-    def __init__(self):
+    def __init__(self, operation: str, command: str) -> None:
         super().__init__()
         self._data = b''
         self._length = 0
         self._offset = 0
+        self.__op = operation
+        self.__cmd = command
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
+        assert self._scp_response_header is not None
         if self._scp_response_header.result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                "Read", "CMD_READ", self._scp_response_header.result)
+                self.__op, self.__cmd, self._scp_response_header.result)
         self._data = data
         self._offset = offset
         self._length = len(data) - offset
@@ -77,7 +82,7 @@ class _SCPReadMemoryResponse(AbstractSCPResponse):
         return self._length
 
 
-class ReadMemory(AbstractSCPRequest[_SCPReadMemoryResponse]):
+class ReadMemory(AbstractSCPRequest[Response]):
     """
     An SCP request to read a region of memory on a chip.
     """
@@ -110,5 +115,5 @@ class ReadMemory(AbstractSCPRequest[_SCPReadMemoryResponse]):
                 (base_address % 4, size % 4)].value)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> _SCPReadMemoryResponse:
-        return _SCPReadMemoryResponse()
+    def get_scp_response(self) -> Response:
+        return Response("Read", "CMD_READ")

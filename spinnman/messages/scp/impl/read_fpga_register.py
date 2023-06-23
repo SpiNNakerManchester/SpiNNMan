@@ -29,7 +29,7 @@ class ReadFPGARegister(BMPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, fpga_num, register, board):
+    def __init__(self, fpga_num: int, register: int, board: int):
         """
         Sets up a read FPGA register request.
 
@@ -49,7 +49,7 @@ class ReadFPGARegister(BMPRequest):
             argument_1=arg1, argument_2=4, argument_3=fpga_num)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> '_SCPReadFPGARegisterResponse':
         return _SCPReadFPGARegisterResponse()
 
 
@@ -59,12 +59,12 @@ class _SCPReadFPGARegisterResponse(BMPResponse):
     """
     __slots__ = "_fpga_register",
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._fpga_register = None
+        self._fpga_register = 0
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -73,7 +73,7 @@ class _SCPReadFPGARegisterResponse(BMPResponse):
         self._fpga_register = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
-    def fpga_register(self):
+    def fpga_register(self) -> int:
         """
         The register information received.
 

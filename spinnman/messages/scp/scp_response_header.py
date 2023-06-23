@@ -26,7 +26,7 @@ class SCPResponseHeader(object):
         "_result",
         "_sequence")
 
-    def __init__(self, result=None, sequence=None):
+    def __init__(self, result, sequence):
         """
         :param SCPResult result:
         :param int sequence:
@@ -35,7 +35,7 @@ class SCPResponseHeader(object):
         self._sequence = sequence
 
     @property
-    def result(self):
+    def result(self) -> SCPResult:
         """
         The result of the SCP response.
 
@@ -44,7 +44,7 @@ class SCPResponseHeader(object):
         return self._result
 
     @property
-    def sequence(self):
+    def sequence(self) -> int:
         """
         The sequence number of the SCP response, between 0 and 65535.
 
@@ -53,7 +53,7 @@ class SCPResponseHeader(object):
         return self._sequence
 
     @staticmethod
-    def from_bytestring(data, offset):
+    def from_bytestring(data: bytes, offset: int) -> 'SCPResponseHeader':
         """
         Read a header from a byte-string.
 

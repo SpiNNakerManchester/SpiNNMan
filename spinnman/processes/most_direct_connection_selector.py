@@ -11,9 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Dict, List
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XY
 from spinnman.data import SpiNNManDataView
+from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .abstract_multi_connection_process_connection_selector import (
     AbstractMultiConnectionProcessConnectionSelector)
 
@@ -27,23 +30,25 @@ class MostDirectConnectionSelector(
         "_connections",
         "_lead_connection")
 
-    def __init__(self, connections):
+    def __init__(self, connections: List[SCAMPConnection]):
         """
         :param list(SCAMPConnection) connections:
             The connections to be used
         """
-        self._connections = dict()
-        self._lead_connection = None
+        self._connections: Dict[XY, SCAMPConnection] = dict()
+        lead_connection = None
         for conn in connections:
             if conn.chip_x == 0 and conn.chip_y == 0:
-                self._lead_connection = conn
+                lead_connection = conn
             self._connections[conn.chip_x, conn.chip_y] = conn
-        if self._lead_connection is None:
-            self._lead_connection = next(iter(connections))
+        if lead_connection is None:
+            lead_connection = next(iter(connections))
+        self._lead_connection = lead_connection
 
     @overrides(
         AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
-    def get_next_connection(self, message):
+    def get_next_connection(
+            self, message: AbstractSCPRequest) -> SCAMPConnection:
         key = (message.sdp_header.destination_chip_x,
                message.sdp_header.destination_chip_y)
         if key in self._connections:

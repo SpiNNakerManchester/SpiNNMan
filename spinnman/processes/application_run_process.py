@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinnman.messages.scp.impl import ApplicationRun
+from spinnman.messages.scp.impl import ApplicationRun, CheckOKResponse
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinn_machine.core_subsets import CoreSubsets
 
 
-class ApplicationRunProcess(AbstractMultiConnectionProcess):
+class ApplicationRunProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     __slots__ = ()
 
-    def run(self, app_id, core_subsets, wait):
+    def run(self, app_id: int, core_subsets: CoreSubsets, wait: bool):
         with self._collect_responses():
             for core_subset in core_subsets:
                 self._send_request(ApplicationRun(

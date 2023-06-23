@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Dict
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -29,7 +29,7 @@ class SetLED(AbstractSCPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, x, y, cpu, led_states):
+    def __init__(self, x: int, y: int, cpu: int, led_states: Dict[int, int]):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255
         :param int y: The y-coordinate of the chip, between 0 and 255
@@ -51,5 +51,5 @@ class SetLED(AbstractSCPRequest):
             argument_1=encoded_led_states)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Set SetLED", "CMD_LED")
