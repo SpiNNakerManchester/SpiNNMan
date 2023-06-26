@@ -521,6 +521,24 @@ class SpiNNManDataView(MachineDataView):
            raise
 
     @classmethod
+    def write_control_sync(cls, do_sync):
+        """
+        Control the synchronisation of the chips.
+
+        Syntactic sugar for `get_transceiver().read_user`.
+
+        :param bool do_sync: Whether to synchronise or not
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        """
+        try:
+            return cls.__data._transceiver.control_sync(do_sync)
+        except AttributeError as ex:
+           if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+           raise
+
+    @classmethod
     def write_fixed_route(cls, x, y, fixed_route, app_id):
         """
         Loads a fixed route routing table entry onto a chip's router.
