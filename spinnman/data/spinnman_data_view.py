@@ -190,9 +190,9 @@ class SpiNNManDataView(MachineDataView):
             return cls.__data._transceiver.get_cpu_information_from_core(
                 x, y, p)
         except AttributeError as ex:
-           if cls.__data._transceiver is None:
+            if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
-           raise
+            raise
 
     @classmethod
     def read_fixed_route(cls, x, y, app_id):
@@ -213,9 +213,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.read_fixed_route(x, y, app_id)
         except AttributeError as ex:
-           if cls.__data._transceiver is None:
+            if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
-           raise
+            raise
 
     @classmethod
     def read_iobuf(cls, core_subsets=None):
@@ -246,9 +246,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.get_iobuf(core_subsets)
         except AttributeError as ex:
-           if cls.__data._transceiver is None:
+            if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
-           raise
+            raise
 
     @classmethod
     def read_memory(cls, x, y, base_address, length, cpu=0):
@@ -351,9 +351,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.get_router_diagnostics(x, y)
         except AttributeError as ex:
-               if cls.__data._transceiver is None:
-                    raise cls._exception("transceiver") from ex
-               raise
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def read_core_tags(cls, connection=None):
@@ -383,9 +383,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.get_tags(connection)
         except AttributeError as ex:
-               if cls.__data._transceiver is None:
-                    raise cls._exception("transceiver") from ex
-               raise
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
 
     @classmethod
     def read_word(cls, x, y, base_address, cpu=0):
@@ -503,9 +503,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.read_user(user, x, y, p)
         except AttributeError as ex:
-           if cls.__data._transceiver is None:
+            if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
-           raise
+        raise
 
     @classmethod
     def write_control_sync(cls, do_sync):
@@ -521,9 +521,9 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.control_sync(do_sync)
         except AttributeError as ex:
-           if cls.__data._transceiver is None:
+            if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
-           raise
+            raise
 
     @classmethod
     def write_fixed_route(cls, x, y, fixed_route, app_id):
