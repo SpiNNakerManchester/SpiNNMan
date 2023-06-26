@@ -123,6 +123,26 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver
 
     @classmethod
+    def read_clock_drift(cls, x, y):
+        """
+        Get the clock drift
+
+        Syntactic sugar for `get_transceiver().get_core_state_count`.
+
+        :param int x: The x-coordinate of the chip to get drift for
+        :param int y: The y-coordinate of the chip to get drift for
+        :rtype: int
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        """
+        try:
+            return cls.__data._transceiver.get_clock_drift(x, y)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
+
+
     def read_core_state_count(cls, app_id, state):
         """
         Get a count of the number of cores which have a given state.

@@ -954,6 +954,8 @@ class Transceiver(AbstractContextManager):
 
         :param int x: The x-coordinate of the chip to get drift for
         :param int y: The y-coordinate of the chip to get drift for
+        :rtype: int
+
         """
         DRIFT_FP = 1 << 17
 
