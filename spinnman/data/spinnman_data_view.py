@@ -651,6 +651,26 @@ class SpiNNManDataView(MachineDataView):
             raise
 
     @classmethod
+    def write_sdp_message(cls, message, connection=None):
+        """
+        Sends an SDP message using one of the connections.
+
+        Syntactic sugar for `get_transceiver().send_sdp_messag`.
+
+        :param SDPMessage message: The message to send
+        :param SDPConnection connection: An optional connection to use
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the transceiver is currently unavailable
+        """
+        try:
+            return cls.__data._transceiver.send_sdp_message(
+                message, connection)
+        except AttributeError as ex:
+            if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+            raise
+
+    @classmethod
     def write_reverse_ip_tag(cls, reverse_ip_tag):
         """
         Set up a reverse IP tag.
