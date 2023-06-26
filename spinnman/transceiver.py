@@ -49,7 +49,7 @@ from spinnman.model.enums import (
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
-from spinnman.messages.scp.enums import PowerCommand
+from spinnman.messages.scp.enums import PowerCommand, Signal
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
