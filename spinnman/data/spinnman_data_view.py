@@ -369,7 +369,7 @@ class SpiNNManDataView(MachineDataView):
                raise
 
     @classmethod
-    def read_tags(cls, connection=None):
+    def read_core_tags(cls, connection=None):
         """
         Get the current set of tags that have been set on the board.
 
