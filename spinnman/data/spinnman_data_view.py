@@ -505,7 +505,7 @@ class SpiNNManDataView(MachineDataView):
         except AttributeError as ex:
             if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
-        raise
+            raise
 
     @classmethod
     def write_control_sync(cls, do_sync):
