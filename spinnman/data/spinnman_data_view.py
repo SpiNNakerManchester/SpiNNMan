@@ -142,7 +142,7 @@ class SpiNNManDataView(MachineDataView):
                 raise cls._exception("transceiver") from ex
             raise
 
-
+    @classmethod
     def read_core_state_count(cls, app_id, state):
         """
         Get a count of the number of cores which have a given state.
@@ -202,6 +202,29 @@ class SpiNNManDataView(MachineDataView):
         try:
             return cls.__data._transceiver.get_cpu_information_from_core(
                 x, y, p)
+        except AttributeError as ex:
+           if cls.__data._transceiver is None:
+                raise cls._exception("transceiver") from ex
+           raise
+
+    @classmethod
+    def read_fixed_route(cls, x, y, app_id):
+        """
+        Reads a fixed route routing table entry from a chip's router.
+
+        Syntactic sugar for `get_transceiver().read_fixed_route`.
+
+        :param int x:
+            The x-coordinate of the chip onto which to load the routes
+        :param int y:
+            The y-coordinate of the chip onto which to load the routes
+        :param int app_id:
+            The ID of the application with which to associate the
+            routes.  If not specified, defaults to 0.
+        :return: the route as a fixed route entry
+        """
+        try:
+            return cls.__data._transceiver.read_fixed_route(x, y, app_id)
         except AttributeError as ex:
            if cls.__data._transceiver is None:
                 raise cls._exception("transceiver") from ex
