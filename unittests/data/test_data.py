@@ -38,7 +38,7 @@ class TestData(unittest.TestCase):
         # Use manual_check to verify this without dependency
         SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
-            SpiNNManDataView.get_transceiver()
+            SpiNNManDataView.get_machine()
 
     def test_mock(self):
         SpiNNManDataWriter.mock()
@@ -48,11 +48,8 @@ class TestData(unittest.TestCase):
 
     def test_transceiver(self):
         writer = SpiNNManDataWriter.setup()
-        with self.assertRaises(DataNotYetAvialable):
-            SpiNNManDataView.get_transceiver()
         self.assertFalse(SpiNNManDataView.has_transceiver())
         writer.set_transceiver(MockTranceiver())
-        SpiNNManDataView.get_transceiver()
         self.assertTrue(SpiNNManDataView.has_transceiver())
         with self.assertRaises(TypeError):
             writer.set_transceiver("bacon")

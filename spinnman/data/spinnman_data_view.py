@@ -110,19 +110,6 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver is not None
 
     @classmethod
-    def get_transceiver(cls):
-        """
-        The transceiver description.
-
-        :rtype: ~spinnman.transceiver.Transceiver
-        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
-            If the transceiver is currently unavailable
-        """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver
-
-    @classmethod
     def read_clock_drift(cls, x, y):
         """
         Get the clock drift
