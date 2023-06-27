@@ -13,16 +13,19 @@
 # limitations under the License.
 
 import functools
+import struct
 from spinnman.model import CPUInfo
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl import ReadMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
+_INFO_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
+
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess):
     __slots__ = [
-        "_cpu_info"]
+        "_cpu_infos"]
 
     def __init__(self, connection_selector):
         """
@@ -31,10 +34,14 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector)
-        self._cpu_info = list()
+        self._cpu_infos = list()
+
+    def _filter_and_add_repsonse(self, x, y, p, cpu_data):
+        self._cpu_infos.append(CPUInfo(x, y, p, cpu_data))
 
     def __handle_response(self, x, y, p, response):
-        self._cpu_info.append(CPUInfo(x, y, p, response.data, response.offset))
+        cpu_data = _INFO_PATTERN.unpack_from(response.data, response.offset)
+        self._filter_and_add_repsonse(x, y, p, cpu_data)
 
     def get_cpu_info(self, core_subsets):
         """
@@ -52,4 +59,4 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
         self._finish()
         self.check_for_error()
 
-        return self._cpu_info
+        return self._cpu_infos

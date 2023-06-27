@@ -21,6 +21,8 @@ from .de_alloc_sdram_process import DeAllocSDRAMProcess
 from .fixed_connection_selector import FixedConnectionSelector
 from .get_heap_process import GetHeapProcess
 from .get_cpu_info_process import GetCPUInfoProcess
+from .get_exclude_cpu_info_process import GetExcludeCPUInfoProcess
+from .get_include_cpu_info_process import GetIncludeCPUInfoProcess
 from .get_machine_process import GetMachineProcess
 from .get_routes_process import GetMultiCastRoutesProcess
 from .get_tags_process import GetTagsProcess
@@ -45,7 +47,9 @@ __all__ = ["AbstractMultiConnectionProcessConnectionSelector",
            "RoundRobinConnectionSelector",
            "AbstractMultiConnectionProcess",
            "ApplicationRunProcess", "ApplicationCopyRunProcess",
-           "DeAllocSDRAMProcess", "GetCPUInfoProcess", "GetHeapProcess",
+           "DeAllocSDRAMProcess", "GetCPUInfoProcess",
+           "GetExcludeCPUInfoProcess", "GetIncludeCPUInfoProcess",
+           "GetHeapProcess",
            "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
            "GetVersionProcess", "LoadFixedRouteRoutingEntryProcess",
            "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
