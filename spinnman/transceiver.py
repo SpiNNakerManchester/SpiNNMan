@@ -910,8 +910,14 @@ class Transceiver(AbstractContextManager):
             A set of chips and cores from which to get the
             information. If not specified, the information from all of the
             cores on all of the chips on the board are obtained.
-        :return: An iterable of the CPU information for the selected cores, or
-            all cores if core_subsets is not specified
+        :param states: The state or states to filter on (if any)
+        :type states: None, CPUState or collection(CPUState)
+        :param bool include:
+            If True includes only infos in the requested state(s).
+            If False includes only infos NOT in the requested state(s).
+            Ignored if states is None.
+        :return: The CPU information for the selected cores and States, or
+            all cores/states  if core_subsets/states is not specified
         :rtype: ~spinnman.model.CPUInfos
         :raise SpinnmanIOException:
             If there is an error communicating with the board
