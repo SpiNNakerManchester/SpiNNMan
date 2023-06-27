@@ -901,7 +901,7 @@ class Transceiver(AbstractContextManager):
             logger.info("Found board with version {}", version_info)
         return version_info
 
-    def get_cpu_information(
+    def get_cpu_infos(
             self, core_subsets=None, states=None, include=True):
         """
         Get information about the processors on the board.
@@ -912,7 +912,7 @@ class Transceiver(AbstractContextManager):
             cores on all of the chips on the board are obtained.
         :return: An iterable of the CPU information for the selected cores, or
             all cores if core_subsets is not specified
-        :rtype: list(CPUInfo)
+        :rtype: CPUInfos
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -1075,7 +1075,8 @@ class Transceiver(AbstractContextManager):
         """
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        return next(iter(self.get_cpu_information(core_subsets)))
+        cpu_infos = self.get_cpu_infos(core_subsets)
+        return cpu_infos.get_cpu_info(x, y, p)
 
     def get_iobuf(self, core_subsets=None):
         """
@@ -1210,6 +1211,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        a = self.get_cpu_infos(states=state)
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(CountState(app_id, state))
         return response.count  # pylint: disable=no-member
@@ -2003,7 +2005,7 @@ class Transceiver(AbstractContextManager):
                     if error_cores > 0:
                         is_error = True
                 if is_error:
-                    error_core_states = self.get_cpu_information(
+                    error_core_states = self.get_cpu_infos(
                         all_core_subsets, error_states, True)
                     if len(error_core_states) > 0:
                         self.__log_where_is_info(error_core_states)
@@ -2014,7 +2016,7 @@ class Transceiver(AbstractContextManager):
                 # do a full check if required
                 tries += 1
                 if tries >= counts_between_full_check:
-                    cores_in_state = self.self.get_cpu_information(
+                    cores_in_state = self.self.get_cpu_infos(
                         all_core_subsets, cpu_states, True)
                     processors_ready = len(cores_in_state)
                     tries = 0
@@ -2036,7 +2038,7 @@ class Transceiver(AbstractContextManager):
 
         # If we haven't reached the final state, do a final full check
         if processors_ready < len(all_core_subsets):
-            cores_not_in_state = self.get_cpu_information(
+            cores_not_in_state = self.get_cpu_infos(
                 all_core_subsets, cpu_states, False)
 
             # If we are sure we haven't reached the final state,

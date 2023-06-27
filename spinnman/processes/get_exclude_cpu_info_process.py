@@ -33,4 +33,4 @@ class GetExcludeCPUInfoProcess(GetCPUInfoProcess):
     def _filter_and_add_repsonse(self, x, y, p, cpu_data):
         state = CPUState(cpu_data[6])
         if state not in self._states:
-            self._cpu_infos.append(CPUInfo(x, y, p, cpu_data))
+            self._cpu_infos.add_info(CPUInfo(x, y, p, cpu_data))

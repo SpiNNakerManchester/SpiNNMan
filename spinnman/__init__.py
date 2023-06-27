@@ -124,7 +124,7 @@ Use Cases
   determine if a simulation is complete or has gone into an error state.
 
 * :py:meth:`~spinnman.transceiver.Transceiver.get_iobuf`,
-  :py:meth:`~spinnman.transceiver.Transceiver.get_cpu_information` and
+  :py:meth:`~spinnman.transceiver.Transceiver.get_cpu_infos` and
   :py:meth:`~spinnman.transceiver.Transceiver.get_router_diagnostics` are used
   to diagnose a problem with a simulation.
 

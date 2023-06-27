@@ -14,7 +14,7 @@
 
 import functools
 import struct
-from spinnman.model import CPUInfo
+from spinnman.model import CPUInfo, CPUInfos
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl import ReadMemory
@@ -34,10 +34,10 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector)
-        self._cpu_infos = list()
+        self._cpu_infos = CPUInfos()
 
     def _filter_and_add_repsonse(self, x, y, p, cpu_data):
-        self._cpu_infos.append(CPUInfo(x, y, p, cpu_data))
+        self._cpu_infos.add_info(CPUInfo(x, y, p, cpu_data))
 
     def __handle_response(self, x, y, p, response):
         cpu_data = _INFO_PATTERN.unpack_from(response.data, response.offset)

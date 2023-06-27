@@ -23,6 +23,9 @@ class CPUInfos(object):
     def __init__(self):
         self._cpu_infos = dict()
 
+    def add_info(self, cpu_info):
+        self._cpu_infos[cpu_info.x, cpu_info.y, cpu_info.p] = cpu_info
+
     def add_processor(self, x, y, processor_id, cpu_info):
         """
         Add a processor on a given chip to the set.
@@ -90,6 +93,13 @@ class CPUInfos(object):
         Get the information for the given core on the given chip.
         """
         return self._cpu_infos[x, y, p]
+
+    def infos_for_state(self, state):
+        for_state = CPUInfos()
+        for info in self._cpu_infos.values():
+            if info.state == state:
+                for_state.add_info(info)
+        return for_state
 
     def __str__(self):
         return str([f"{x}, {y}, {p} (ph: {info.physical_cpu_id})"
