@@ -11,15 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+from typing import Any, List
 from spinn_utilities.overrides import overrides
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 
-class RoundRobinConnectionSelector(
-        AbstractMultiConnectionProcessConnectionSelector):
+class RoundRobinConnectionSelector(ConnectionSelector):
     """
     A connection selector that just spreads work as evenly as possible.
     """
@@ -35,9 +34,8 @@ class RoundRobinConnectionSelector(
         self._connections = connections
         self._next_connection_index = 0
 
-    @overrides(
-        AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
-    def get_next_connection(self, message) -> SCAMPConnection:
+    @overrides(ConnectionSelector.get_next_connection)
+    def get_next_connection(self, message: Any) -> SCAMPConnection:
         index = self._next_connection_index
         self._next_connection_index = (index + 1) % len(self._connections)
         return self._connections[index]

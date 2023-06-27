@@ -20,7 +20,7 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 
 class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
@@ -29,12 +29,9 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
     """
     __slots__ = ("_view", )
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
         self._view = memoryview(b'')

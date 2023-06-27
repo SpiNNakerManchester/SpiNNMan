@@ -14,15 +14,13 @@
 from typing import Any, Generic, TypeVar
 from spinn_utilities.overrides import overrides
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 from spinnman.connections.udp_packet_connections import (
     SCAMPConnection, BMPConnection)
 _Conn = TypeVar("_Conn", SCAMPConnection, BMPConnection)
 
 
-class FixedConnectionSelector(
-        AbstractMultiConnectionProcessConnectionSelector,
-        Generic[_Conn]):
+class FixedConnectionSelector(ConnectionSelector, Generic[_Conn]):
     """
     A connection selector that only uses a single connection.
     """
@@ -35,7 +33,6 @@ class FixedConnectionSelector(
         """
         self.__connection: _Conn = connection
 
-    @overrides(
-        AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
+    @overrides(ConnectionSelector.get_next_connection)
     def get_next_connection(self, message: Any) -> _Conn:
         return self.__connection

@@ -53,7 +53,7 @@ from spinnman.exceptions import (
     SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
 from spinnman.model import (
-    ADCInfo, CPUInfo, CPUInfos, DiagnosticFilter, ExecutableTargets,
+    ADCInfo, CPUInfo, CPUInfos, DiagnosticFilter,
     HeapElement, IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
 from spinnman.model.enums import CPUState
 from spinnman.messages.sdp import SDPMessage
@@ -79,13 +79,14 @@ from spinnman.processes import (
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess,
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
 from spinnman.messages.scp.impl import CheckOKResponse
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.impl.get_chip_info_response import (
     GetChipInfoResponse)
+from spinnman.model.chip_summary_info import ChipSummaryInfo
 
 _Conn = TypeVar("_Conn", bound=Connection)
 _R = TypeVar("_R", bound=AbstractSCPResponse)
@@ -375,20 +376,19 @@ class Transceiver(AbstractContextManager):
 
     @staticmethod
     def _check_connection(
-            connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector,
-            chip_x: int, chip_y: int):
+            connection: SCAMPConnection) -> Optional[ChipSummaryInfo]:
         """
         Check that the given connection to the given chip works.
 
-        :param connection_selector: the connection selector to use
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
+            the connection selector to use
         :param int chip_x: the chip x coordinate to try to talk to
         :param int chip_y: the chip y coordinate to try to talk to
         :return: True if a valid response is received, False otherwise
         :rtype: ChipInfo or None
         """
+        chip_x, chip_y = connection.chip_x, connection.chip_y
+        connection_selector = FixedConnectionSelector(connection)
         for _ in range(_CONNECTION_CHECK_RETRIES):
             try:
                 sender: SendSingleCommandProcess[GetChipInfoResponse] = \
@@ -529,8 +529,8 @@ class Transceiver(AbstractContextManager):
         conn = SCAMPConnection(remote_host=ip_address, chip_x=x, chip_y=y)
 
         # check if it works
-        chip_info = self._check_connection(FixedConnectionSelector(conn), x, y)
-        if chip_info is not None:
+        chip_info = self._check_connection(conn)
+        if chip_info is not None and chip_info.ethernet_ip_address is not None:
             self._all_connections.add(conn)
             self._udp_scamp_connections[chip_info.ethernet_ip_address] = conn
             self._scamp_connections.append(conn)
@@ -702,19 +702,16 @@ class Transceiver(AbstractContextManager):
     def get_scamp_version(
             self, chip_x: int = AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y: int = AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-            connection_selector: Optional[
-                AbstractMultiConnectionProcessConnectionSelector] = None, *,
+            connection_selector: Optional[ConnectionSelector] = None, *,
             n_retries: int = N_RETRIES) -> VersionInfo:
         """
         Get the version of SCAMP which is running on the board.
 
         :param int chip_x: the chip's x coordinate to query for SCAMP version
         :param int chip_y: the chip's y coordinate to query for SCAMP version
-        :param connection_selector: the connection to send the SCAMP
-            version or `None` (if `None` then a random SCAMP connection is
-            used).
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
+            the connection to send the SCAMP version
+            or `None` (if `None` then a random SCAMP connection is used).
         :param int n_retries:
         :return: The version identifier
         :rtype: VersionInfo
@@ -844,10 +841,8 @@ class Transceiver(AbstractContextManager):
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
 
-            chip_info = self._check_connection(
-                FixedConnectionSelector(scamp_connection),
-                scamp_connection.chip_x, scamp_connection.chip_y)
-            if chip_info is not None:
+            chip_info = self._check_connection(scamp_connection)
+            if chip_info is not None and chip_info.ethernet_ip_address:
                 self._udp_scamp_connections[chip_info.ethernet_ip_address] = \
                     scamp_connection
 
@@ -1327,44 +1322,6 @@ class Transceiver(AbstractContextManager):
             copy_run = ApplicationCopyRunProcess(
                 self._scamp_connection_selector)
             copy_run.run(n_bytes, app_id, core_subsets, chksum, wait)
-
-    def execute_application(
-            self, executable_targets: ExecutableTargets, app_id: int):
-        """
-        Execute a set of binaries that make up a complete application on
-        specified cores, wait for them to be ready and then start all of the
-        binaries.
-
-        .. note::
-            This will get the binaries into c_main but will not signal the
-            barrier.
-
-        :param ExecutableTargets executable_targets:
-            The binaries to be executed and the cores to execute them on
-        :param int app_id: The app_id to give this application
-        """
-        # Execute each of the binaries and get them in to a "wait" state
-        for binary in executable_targets.binaries:
-            core_subsets = executable_targets.get_cores_for_binary(binary)
-            self.execute_flood(core_subsets, str(binary), app_id, wait=True)
-
-        # Sleep to allow cores to get going
-        time.sleep(0.5)
-
-        # Check that the binaries have reached a wait state
-        count = self.get_core_state_count(app_id, CPUState.READY)
-        if count < executable_targets.total_processors:
-            cores_ready = self.get_cores_not_in_state(
-                executable_targets.all_core_subsets,
-                frozenset({CPUState.READY}))
-            if len(cores_ready) > 0:
-                raise SpinnmanException(
-                    f"Only {count} of {executable_targets.total_processors} "
-                    "cores reached ready state: "
-                    f"{self.get_core_status_string(cores_ready)}")
-
-        # Send a signal telling the application to start
-        self.send_signal(app_id, Signal.START)
 
     def power_on_machine(self) -> bool:
         """

@@ -43,6 +43,7 @@ class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):
             How long to wait for a message to be received before timing out.
             If `None`, will wait indefinitely (or until the connection is
             closed).
+        :type timeout: int or float or None
         :return: The received message.
         :raises SpinnmanTimeoutException:
             If a timeout happens

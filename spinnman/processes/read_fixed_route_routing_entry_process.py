@@ -11,15 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from spinnman.messages.scp.impl.fixed_route_read import FixedRouteRead
+from typing import Optional
+from spinnman.messages.scp.impl.fixed_route_read import (
+    FixedRouteRead, _FixedRouteResponse)
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 from spinn_machine.fixed_route_entry import FixedRouteEntry
 
 
-class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
+class ReadFixedRouteRoutingEntryProcess(
+        AbstractMultiConnectionProcess[_FixedRouteResponse]):
     """
     A process for reading a fixed route routing table entry.
     """
@@ -28,17 +30,15 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         # the fixed route routing entry from the response
         "_route", )
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector: the SC&MP connection selector
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
+            the SC&MP connection selector
         """
         super().__init__(connection_selector)
-        self._route = None
+        self._route: Optional[FixedRouteEntry] = None
 
-    def __handle_read_response(self, response):
+    def __handle_read_response(self, response: _FixedRouteResponse):
         self._route = response.route
 
     def read_fixed_route(

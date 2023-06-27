@@ -17,7 +17,7 @@ from spinnman.constants import N_RETRIES
 from spinnman.model import VersionInfo
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 
 
@@ -27,13 +27,10 @@ class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):
     """
     __slots__ = "_version_info",
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector,
+    def __init__(self, connection_selector: ConnectionSelector,
                  n_retries: int = N_RETRIES):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector, n_retries)
         self._version_info: Optional[VersionInfo] = None

@@ -19,7 +19,7 @@ from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinn_machine import MulticastRoutingEntry, Router
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 # There are 1024 entries in a routing table
@@ -42,13 +42,10 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
         "_app_id",
         "_entries")
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector,
+    def __init__(self, connection_selector: ConnectionSelector,
                  app_id: Optional[int] = None):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         :param int app_id:
         """
         super().__init__(connection_selector)
@@ -70,7 +67,8 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
             Router.convert_spinnaker_route_to_routing_ids(route)
 
         self._entries[route_no + offset] = MulticastRoutingEntry(
-            key, mask, processor_ids, link_ids, False)
+            key, mask, processor_ids=processor_ids, link_ids=link_ids,
+            defaultable=False)
 
     def __handle_response(self, offset: int, response: Response):
         for route_no in range(_ENTRIES_PER_READ):

@@ -18,8 +18,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 
 
-class AbstractMultiConnectionProcessConnectionSelector(
-        object, metaclass=AbstractBase):
+class ConnectionSelector(object, metaclass=AbstractBase):
     """
     A connection selector for multi-connection processes.
     """

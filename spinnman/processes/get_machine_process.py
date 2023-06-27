@@ -41,7 +41,7 @@ from spinnman.model import ChipSummaryInfo, P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import \
-    AbstractMultiConnectionProcessConnectionSelector
+    ConnectionSelector
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -71,12 +71,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Holds a mapping from (x,y) to a mapping of virtual to physical core
         "_physical_to_virtual_map")
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
 
@@ -400,7 +397,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                             inv_xy, inv_link, global_xy)
 
     def _ignores_local_to_global(
-            self, local_x: int, local_y: int, ip_address: str,
+            self, local_x: int, local_y: int, ip_address: Optional[str],
             machine: Machine) -> Optional[XY]:
         """
         :param int local_x:

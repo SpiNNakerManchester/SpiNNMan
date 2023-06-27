@@ -28,7 +28,7 @@ _ONE_WORD = struct.Struct("<I")
 FLAG_RETRY_TAG = 4
 
 
-class _SCPSDRAMAllocResponse(AbstractSCPResponse):
+class _AllocResponse(AbstractSCPResponse):
     """
     An SCP response to a request to allocate space in SDRAM.
     """
@@ -66,7 +66,7 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         return self._base_address or 0
 
 
-class SDRAMAlloc(AbstractSCPRequest[_SCPSDRAMAllocResponse]):
+class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
     """
     An SCP Request to allocate space in the SDRAM space.
     """
@@ -117,5 +117,5 @@ class SDRAMAlloc(AbstractSCPRequest[_SCPSDRAMAllocResponse]):
         self._size = size
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> _SCPSDRAMAllocResponse:
-        return _SCPSDRAMAllocResponse(self._size)
+    def get_scp_response(self) -> _AllocResponse:
+        return _AllocResponse(self._size)

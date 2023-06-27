@@ -25,7 +25,7 @@ from spinnman.constants import SCP_TIMEOUT, N_RETRIES
 from spinnman.exceptions import (
     SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, AbstractSCPResponse)
@@ -53,15 +53,12 @@ class AbstractMultiConnectionProcess(Generic[_R]):
         "_scp_request_pipelines",
         "_timeout")
 
-    def __init__(self, next_connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector,
+    def __init__(self, next_connection_selector: ConnectionSelector,
                  n_retries: int = N_RETRIES, timeout: float = SCP_TIMEOUT,
                  n_channels: int = 8, intermediate_channel_waits: int = 7):
         """
-        :param next_connection_selector:
+        :param ConnectionSelector next_connection_selector:
             How to choose the connection.
-        :type next_connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
         :param int n_retries:
             The number of retries of a message to use. Passed to
             :py:class:`SCPRequestPipeLine`
@@ -144,12 +141,11 @@ class AbstractMultiConnectionProcess(Generic[_R]):
             self.check_for_error(print_exception=print_exception)
 
     @property
-    def connection_selector(
-            self) -> AbstractMultiConnectionProcessConnectionSelector:
+    def connection_selector(self) -> ConnectionSelector:
         """
         The connection selector of the process.
 
-        :rtype: AbstractMultiConnectionProcessConnectionSelector
+        :rtype: ConnectionSelector
         """
         return self._conn_selector
 

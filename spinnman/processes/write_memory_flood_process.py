@@ -20,7 +20,7 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 from spinnman.messages.scp.impl import CheckOKResponse
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 
 class WriteMemoryFloodProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
@@ -29,11 +29,9 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     """
     __slots__ = ()
 
-    def __init__(self, next_connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
-        AbstractMultiConnectionProcess.__init__(
-            self, next_connection_selector, n_channels=3,
-            intermediate_channel_waits=2)
+    def __init__(self, connection_selector: ConnectionSelector):
+        super().__init__(
+            connection_selector, n_channels=3, intermediate_channel_waits=2)
 
     def _start_flood_fill(self, n_bytes: int, nearest_neighbour_id: int):
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /

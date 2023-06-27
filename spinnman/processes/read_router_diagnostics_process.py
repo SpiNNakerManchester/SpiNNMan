@@ -17,7 +17,7 @@ from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinnman.model import RouterDiagnostics
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 _N_REGISTERS = 16
 _ONE_WORD = struct.Struct("<I")
@@ -33,12 +33,9 @@ class ReadRouterDiagnosticsProcess(
         "_error_status",
         "_register_values")
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
         self._control_register = 0

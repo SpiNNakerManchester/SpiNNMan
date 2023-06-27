@@ -16,7 +16,8 @@ from typing import Optional
 from spinnman.messages.scp.impl.sdram_de_alloc import (
     SDRAMDeAlloc, _SCPSDRAMDeAllocResponse)
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from spinnman.processes import AbstractMultiConnectionProcessConnectionSelector
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 
 
 class DeAllocSDRAMProcess(
@@ -29,12 +30,9 @@ class DeAllocSDRAMProcess(
     """
     __slots__ = ("_no_blocks_freed", )
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
         self._no_blocks_freed: Optional[int] = None

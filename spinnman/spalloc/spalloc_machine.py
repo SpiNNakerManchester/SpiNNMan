@@ -68,3 +68,6 @@ class SpallocMachine(object, metaclass=AbstractBase):
         :return: width, height
         :rtype: tuple(int,int)
         """
+
+# TODO: Add in where-is operations
+# Not yet done because not needed immediately for toolchain

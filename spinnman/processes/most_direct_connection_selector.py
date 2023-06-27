@@ -18,11 +18,10 @@ from spinnman.data import SpiNNManDataView
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 
-class MostDirectConnectionSelector(
-        AbstractMultiConnectionProcessConnectionSelector):
+class MostDirectConnectionSelector(ConnectionSelector):
     """
     A selector that goes for the most direct connection for the message.
     """
@@ -45,8 +44,7 @@ class MostDirectConnectionSelector(
             lead_connection = next(iter(connections))
         self._lead_connection = lead_connection
 
-    @overrides(
-        AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
+    @overrides(ConnectionSelector.get_next_connection)
     def get_next_connection(
             self, message: AbstractSCPRequest) -> SCAMPConnection:
         key = (message.sdp_header.destination_chip_x,

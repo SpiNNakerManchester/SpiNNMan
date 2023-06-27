@@ -24,6 +24,8 @@ from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE, CPU_IOBUF_ADDRESS_OFFSET
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 
 #: (x, y, p, n, base_address, size, offset)
 _ExtraRegion: TypeAlias = Tuple[XYP, int, int, int, int]
@@ -46,11 +48,9 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         "_iobuf_view",
         "_next_reads")
 
-    def __init__(self, connection_selector) -> None:
+    def __init__(self, connection_selector: ConnectionSelector) -> None:
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
 

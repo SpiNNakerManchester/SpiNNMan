@@ -12,26 +12,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinnman.messages.scp.impl import SDRAMAlloc
+from spinnman.messages.scp.impl.sdram_alloc import SDRAMAlloc, _AllocResponse
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 
 
-class MallocSDRAMProcess(AbstractMultiConnectionProcess):
+class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
     """
     A process for allocating a block of SDRAM on a SpiNNaker chip.
     """
     __slots__ = ("_base_address", )
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
         self._base_address = 0
 
-    def __handle_sdram_alloc_response(self, response):
+    def __handle_sdram_alloc_response(self, response: _AllocResponse):
         self._base_address = response.base_address
 
     def malloc_sdram(self, x: int, y: int, size: int, app_id: int, tag: int):

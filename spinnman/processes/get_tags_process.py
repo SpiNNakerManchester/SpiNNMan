@@ -22,7 +22,7 @@ from spinnman.messages.scp.impl.iptag_get_info_response import (
     IPTagGetInfoResponse)
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 
 class GetTagsProcess(AbstractMultiConnectionProcess):
@@ -30,12 +30,9 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         "_tags",
         "_tag_info")
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
         self._tag_info: Optional[IPTagGetInfoResponse] = None

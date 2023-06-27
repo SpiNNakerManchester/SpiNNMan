@@ -22,7 +22,7 @@ from spinnman.model import HeapElement
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 
 HEAP_ADDRESS = SystemVariableDefinition.sdram_heap_address
@@ -37,12 +37,9 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
         "_heap_address",
         "_next_block_address")
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
 

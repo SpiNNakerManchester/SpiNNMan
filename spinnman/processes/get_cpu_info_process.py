@@ -21,18 +21,15 @@ from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
     __slots__ = ("_cpu_info", )
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
         self._cpu_info: List[CPUInfo] = list()

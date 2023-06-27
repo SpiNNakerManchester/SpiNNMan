@@ -22,7 +22,7 @@ from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinnman.messages.scp.impl.router_alloc import RouterAllocResponse
 from .write_memory_process import WriteMemoryProcess
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 _ROUTE_PATTERN = struct.Struct("<H2xIII")
 _END_PATTERN = struct.Struct("<IIII")
@@ -35,12 +35,9 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = ("_base_address", )
 
-    def __init__(self, connection_selector:
-                 AbstractMultiConnectionProcessConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
         self._base_address = 0
