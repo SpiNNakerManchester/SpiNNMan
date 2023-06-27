@@ -2015,7 +2015,7 @@ class Transceiver(AbstractContextManager):
                 # do a full check if required
                 tries += 1
                 if tries >= counts_between_full_check:
-                    cores_in_state = self.self.get_cpu_infos(
+                    cores_in_state = self.get_cpu_infos(
                         all_core_subsets, cpu_states, True)
                     processors_ready = len(cores_in_state)
                     tries = 0
