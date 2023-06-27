@@ -44,7 +44,7 @@ from spinnman.exceptions import (
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
     SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
-from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
+from spinnman.model import DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.spinnaker_boot import (
@@ -912,7 +912,7 @@ class Transceiver(AbstractContextManager):
             cores on all of the chips on the board are obtained.
         :return: An iterable of the CPU information for the selected cores, or
             all cores if core_subsets is not specified
-        :rtype: CPUInfos
+        :rtype: ~spinnman.model.CPUInfos
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -1211,7 +1211,6 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        a = self.get_cpu_infos(states=state)
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(CountState(app_id, state))
         return response.count  # pylint: disable=no-member
@@ -2052,7 +2051,7 @@ class Transceiver(AbstractContextManager):
         """
         Get a string indicating the status of the given cores.
 
-        :param CPUInfos cpu_infos: A CPUInfos objects
+        :param ~spinnman.model.CPUInfos cpu_infos: A CPUInfos objects
         :rtype: str
         """
         break_down = "\n"
