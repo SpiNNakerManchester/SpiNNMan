@@ -168,7 +168,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             create["nmpi-collab"] = self.__collab
         if self.__nmpi_job is not None:
             create["nmpi-job-id"] = self.__nmpi_job
-        r = self.__session.post(self.__jobs_url, create)
+        r = self.__session.post(self.__jobs_url, create, timeout=30)
         url = r.headers["Location"]
         return _SpallocJob(self.__session, url)
 
