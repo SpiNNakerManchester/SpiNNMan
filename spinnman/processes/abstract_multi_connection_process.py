@@ -29,14 +29,18 @@ from .abstract_multi_connection_process_connection_selector import (
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, AbstractSCPResponse)
-_R = TypeVar("_R", bound=AbstractSCPResponse)
-_ECB: TypeAlias = Callable[
-    [AbstractSCPRequest[_R], Exception, TracebackType, SCAMPConnection], None]
+#: Type of responses.
+#: :meta private:
+R = TypeVar("R", bound=AbstractSCPResponse)
+#: Error handling callback.
+#: :meta private:
+ECB: TypeAlias = Callable[
+    [AbstractSCPRequest[R], Exception, TracebackType, SCAMPConnection], None]
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class AbstractMultiConnectionProcess(Generic[_R]):
+class AbstractMultiConnectionProcess(Generic[R]):
     """
     A process for talking to SpiNNaker efficiently that uses multiple
     connections in communication if relevant.
@@ -73,19 +77,19 @@ class AbstractMultiConnectionProcess(Generic[_R]):
         """
         self._exceptions: List[Exception] = []
         self._tracebacks: List[TracebackType] = []
-        self._error_requests: List[AbstractSCPRequest[_R]] = []
+        self._error_requests: List[AbstractSCPRequest[R]] = []
         self._connections: List[SCAMPConnection] = []
         self._scp_request_pipelines: Dict[
-            SCAMPConnection, SCPRequestPipeLine[_R]] = dict()
+            SCAMPConnection, SCPRequestPipeLine[R]] = dict()
         self._n_retries = n_retries
         self._timeout = timeout
         self._n_channels = n_channels
         self._intermediate_channel_waits = intermediate_channel_waits
         self._conn_selector = next_connection_selector
 
-    def _send_request(self, request: AbstractSCPRequest[_R],
-                      callback: Optional[Callable[[_R], None]] = None,
-                      error_callback: Optional[_ECB] = None):
+    def _send_request(self, request: AbstractSCPRequest[R],
+                      callback: Optional[Callable[[R], None]] = None,
+                      error_callback: Optional[ECB] = None):
         if error_callback is None:
             error_callback = self._receive_error
         connection = self._conn_selector.get_next_connection(request)
@@ -99,7 +103,7 @@ class AbstractMultiConnectionProcess(Generic[_R]):
             request, callback, error_callback)
 
     def _receive_error(
-            self, request: AbstractSCPRequest[_R], exception: Exception,
+            self, request: AbstractSCPRequest[R], exception: Exception,
             tb: TracebackType, connection: SCAMPConnection):
         self._error_requests.append(request)
         self._exceptions.append(exception)

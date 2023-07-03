@@ -18,10 +18,12 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
-_R = TypeVar("_R", bound=AbstractSCPResponse)
+#: Type of responses.
+#: :meta private:
+R = TypeVar("R", bound=AbstractSCPResponse)
 
 
-class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[_R]):
+class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
     """
     A process that sends a single command and waits for a simple response.
     """
@@ -40,12 +42,12 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[_R]):
         """
         super().__init__(
             connection_selector, n_retries=n_retries, timeout=timeout)
-        self._response: Optional[_R] = None
+        self._response: Optional[R] = None
 
-    def __handle_response(self, response: _R):
+    def __handle_response(self, response: R):
         self._response = response
 
-    def execute(self, request: AbstractSCPRequest[_R]) -> _R:
+    def execute(self, request: AbstractSCPRequest[R]) -> R:
         """
         :param AbstractSCPRequest request:
         :rtype: AbstractSCPResponse

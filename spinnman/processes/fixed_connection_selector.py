@@ -17,22 +17,25 @@ from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
 from spinnman.connections.udp_packet_connections import (
     SCAMPConnection, BMPConnection)
-_Conn = TypeVar("_Conn", SCAMPConnection, BMPConnection)
+
+#: Type of connections selected between.
+#: :meta private:
+Conn = TypeVar("Conn", SCAMPConnection, BMPConnection)
 
 
-class FixedConnectionSelector(ConnectionSelector, Generic[_Conn]):
+class FixedConnectionSelector(ConnectionSelector, Generic[Conn]):
     """
     A connection selector that only uses a single connection.
     """
     __slots__ = ("__connection", )
 
-    def __init__(self, connection: _Conn):
+    def __init__(self, connection: Conn):
         """
         :param SCAMPConnection connection:
             The connection to be used
         """
-        self.__connection: _Conn = connection
+        self.__connection: Conn = connection
 
     @overrides(ConnectionSelector.get_next_connection)
-    def get_next_connection(self, message: Any) -> _Conn:
+    def get_next_connection(self, message: Any) -> Conn:
         return self.__connection

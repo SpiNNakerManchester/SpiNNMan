@@ -88,8 +88,13 @@ from spinnman.messages.scp.impl.get_chip_info_response import (
     GetChipInfoResponse)
 from spinnman.model.chip_summary_info import ChipSummaryInfo
 
-_Conn = TypeVar("_Conn", bound=Connection)
-_R = TypeVar("_R", bound=AbstractSCPResponse)
+#: Type of a connection.
+#: :meta private:
+Conn = TypeVar("Conn", bound=Connection)
+#: Type of a response.
+#: :meta private:
+R = TypeVar("R", bound=AbstractSCPResponse)
+
 _BasicProcess: TypeAlias = SendSingleCommandProcess[CheckOKResponse]
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -452,7 +457,7 @@ class Transceiver(AbstractContextManager):
 
     @staticmethod
     def _get_random_connection(
-            connections: Optional[List[_Conn]]) -> Optional[_Conn]:
+            connections: Optional[List[Conn]]) -> Optional[Conn]:
         """
         Returns the given connection, or else picks one at random.
 
@@ -750,11 +755,11 @@ class Transceiver(AbstractContextManager):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
-    def __call(self, req: AbstractSCPRequest[_R], **kwargs) -> _R:
+    def __call(self, req: AbstractSCPRequest[R], **kwargs) -> R:
         """
         Wrapper that makes doing simple SCP calls easier.
         """
-        proc: SendSingleCommandProcess[_R] = SendSingleCommandProcess(
+        proc: SendSingleCommandProcess[R] = SendSingleCommandProcess(
             self._scamp_connection_selector, **kwargs)
         return proc.execute(req)
 
@@ -1397,12 +1402,12 @@ class Transceiver(AbstractContextManager):
         return sel
 
     def __bmp_call(
-            self, cabinet: int, frame: int, req: AbstractSCPRequest[_R],
-            **kwargs) -> _R:
+            self, cabinet: int, frame: int, req: AbstractSCPRequest[R],
+            **kwargs) -> R:
         """
         Wrapper that makes doing simple BMP calls easier.
         """
-        proc: SendSingleCommandProcess[_R] = SendSingleCommandProcess(
+        proc: SendSingleCommandProcess[R] = SendSingleCommandProcess(
             self._bmp_connection(cabinet, frame), **kwargs)
         return proc.execute(req)
 

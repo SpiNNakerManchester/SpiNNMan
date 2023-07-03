@@ -19,12 +19,13 @@ from .scp_response import AbstractSCPResponse
 if TYPE_CHECKING:
     from spinnman.messages.sdp import SDPHeader
     from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-_R = TypeVar("_R", bound=AbstractSCPResponse)
+#: :meta private:
+R = TypeVar("R", bound=AbstractSCPResponse)
 
 _THREE_WORDS = struct.Struct("<III")
 
 
-class AbstractSCPRequest(Generic[_R], metaclass=AbstractBase):
+class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
     """
     Represents an Abstract SCP Request.
     """
@@ -145,7 +146,7 @@ class AbstractSCPRequest(Generic[_R], metaclass=AbstractBase):
         return self.__repr__()
 
     @abstractmethod
-    def get_scp_response(self) -> _R:
+    def get_scp_response(self) -> R:
         """
         Get an SCP response message to be used to process any response
         received.

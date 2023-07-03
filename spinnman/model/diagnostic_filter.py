@@ -13,12 +13,13 @@
 # limitations under the License.
 from __future__ import annotations
 from enum import Enum
-from typing import List, TypeVar
+from typing import List, Type, TypeVar
 from spinnman.model.enums import (
     DiagnosticFilterDestination, DiagnosticFilterSource,
     DiagnosticFilterPayloadStatus, DiagnosticFilterDefaultRoutingStatus,
     DiagnosticFilterEmergencyRoutingStatus, DiagnosticFilterPacketType)
-_E = TypeVar("_E", bound=Enum)
+#: :meta private:
+E = TypeVar("E", bound=Enum)
 
 # Bit offsets of the various fields in the filter word
 _PACKET_TYPE_OFFSET = 0
@@ -33,10 +34,10 @@ _ENABLE_INTERRUPT_OFFSET = 30
 
 # Uses an enum to set flags in the filter word from a given offset
 def _set_flags_in_word(
-        word: int, enum_list: List[_E], enum_type: type[_E],
+        word: int, enum_list: List[E], enum_type: Type[E],
         offset: int) -> int:
     if enum_list is None:
-        enum_values: List[_E] = list()
+        enum_values: List[E] = list()
     else:
         enum_values = list(enum_list)
     if not enum_values:
@@ -48,8 +49,8 @@ def _set_flags_in_word(
 
 # Uses an enum to read flags in the filter word from a given offset
 def _read_flags_from_word(
-        word: int, enum_list: type[_E], offset: int) -> List[_E]:
-    flags: List[_E] = list()
+        word: int, enum_list: Type[E], offset: int) -> List[E]:
+    flags: List[E] = list()
     for enum_value in enum_list:
         if word & 1 << (enum_value.value + offset) != 0:
             flags.append(enum_value)

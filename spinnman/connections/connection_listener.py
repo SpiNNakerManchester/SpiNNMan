@@ -21,13 +21,14 @@ from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import SpinnmanEOFException
 from spinnman.connections.abstract_classes import Listenable
 
-_T = TypeVar("_T")
+#: :meta private:
+T = TypeVar("T")
 logger = FormatAdapter(logging.getLogger(__name__))
 _POOL_SIZE = 4
 _TIMEOUT = 1
 
 
-class ConnectionListener(Thread, AbstractContextManager, Generic[_T]):
+class ConnectionListener(Thread, AbstractContextManager, Generic[T]):
     """
     Thread that listens to a connection and calls callbacks with new
     messages when they arrive.
@@ -39,7 +40,7 @@ class ConnectionListener(Thread, AbstractContextManager, Generic[_T]):
         "__done",
         "__timeout")
 
-    def __init__(self, connection: Listenable[_T],
+    def __init__(self, connection: Listenable[T],
                  n_processes: int = _POOL_SIZE, timeout: float = _TIMEOUT):
         """
         :param Listenable connection: A connection to listen to
@@ -56,9 +57,9 @@ class ConnectionListener(Thread, AbstractContextManager, Generic[_T]):
         self.__timeout = timeout
         self.__callback_pool = ThreadPoolExecutor(max_workers=n_processes)
         self.__done = False
-        self.__callbacks: List[Callable[[_T], None]] = []
+        self.__callbacks: List[Callable[[T], None]] = []
 
-    def __run_step(self, handler: Callable[[], _T]):
+    def __run_step(self, handler: Callable[[], T]):
         """
         :param ~collections.abc.Callable handler:
         """
@@ -94,7 +95,7 @@ class ConnectionListener(Thread, AbstractContextManager, Generic[_T]):
                         logger.warning("problem when dispatching message",
                                        exc_info=True)
 
-    def add_callback(self, callback: Callable[[_T], None]):
+    def add_callback(self, callback: Callable[[T], None]):
         """
         Add a callback to be called when a message is received.
 

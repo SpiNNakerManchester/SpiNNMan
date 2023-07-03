@@ -24,10 +24,17 @@ from spinnman.constants import SCP_TIMEOUT, N_RETRIES
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
-_R = TypeVar("_R", bound=AbstractSCPResponse)
-_CB: TypeAlias = Callable[[_R], None]
-_ECB: TypeAlias = Callable[
-    [AbstractSCPRequest[_R], Exception, TracebackType, SCAMPConnection], None]
+
+#: Type of responses.
+#: :meta private:
+R = TypeVar("R", bound=AbstractSCPResponse)
+#: Type of response-accepting callbacks.
+#: :meta private:
+CB: TypeAlias = Callable[[R], None]
+#: Type of error-handling callbacks.
+#: :meta private:
+ECB: TypeAlias = Callable[
+    [AbstractSCPRequest[R], Exception, TracebackType, SCAMPConnection], None]
 
 MAX_SEQUENCE = 65536
 RETRY_CODES = frozenset([
@@ -39,7 +46,7 @@ _next_sequence = 0
 _next_sequence_lock = RLock()
 
 
-class SCPRequestPipeLine(Generic[_R]):
+class SCPRequestPipeLine(Generic[R]):
     """
     Allows a set of SCP requests to be grouped together in a communication
     across a number of channels for a given connection.
@@ -105,10 +112,10 @@ class SCPRequestPipeLine(Generic[_R]):
         self._retries: Dict[int, int] = dict()
 
         # A dictionary of sequence number -> callback function for response
-        self._callbacks: Dict[int, Optional[_CB]] = dict()
+        self._callbacks: Dict[int, Optional[CB]] = dict()
 
         # A dictionary of sequence number -> callback function for errors
-        self._error_callbacks: Dict[int, _ECB] = dict()
+        self._error_callbacks: Dict[int, ECB] = dict()
 
         # A dictionary of sequence number -> retry reason
         self._retry_reason: Dict[int, List[str]] = dict()
@@ -143,8 +150,8 @@ class SCPRequestPipeLine(Generic[_R]):
         return sequence
 
     def send_request(
-            self, request: AbstractSCPRequest[_R], callback: Optional[_CB],
-            error_callback: _ECB):
+            self, request: AbstractSCPRequest[R], callback: Optional[CB],
+            error_callback: ECB):
         """
         Add an SCP request to the set to be sent.
 
