@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from typing import Set, Tuple
-from spinn_utilities.abstract_base import AbstractBase, abstractproperty
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
 class SpallocMachine(object, metaclass=AbstractBase):
@@ -24,43 +24,50 @@ class SpallocMachine(object, metaclass=AbstractBase):
     """
     __slots__ = ()
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self) -> str:
         """
         The name of the machine.
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def tags(self) -> Set[str]:
         """
         The tags of the machine.
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def width(self) -> int:
         """
         The width of the machine, in boards.
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def height(self) -> int:
         """
         The height of the machine, in boards.
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def dead_boards(self) -> list:
         """
         The dead or out-of-service boards of the machine.
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def dead_links(self) -> list:
         """
         The dead or out-of-service links of the machine.
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def area(self) -> Tuple[int, int]:
         """
         Area of machine, in boards.

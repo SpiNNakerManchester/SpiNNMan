@@ -17,8 +17,7 @@ API of the client for the Spalloc web service.
 
 import struct
 from typing import Callable, Optional, Tuple
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod, abstractproperty)
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.connections.udp_packet_connections import EIEIOConnection
@@ -58,7 +57,7 @@ class SpallocEIEIOListener(
         return read_eieio_data_message(data, 0)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable[
+    def get_receive_method(self) -> Callable[  # type: ignore[override]
             [Optional[float]], AbstractEIEIOMessage]:
         return self.receive_eieio_message
 
@@ -113,7 +112,8 @@ class SpallocEIEIOListener(
         x, y = self._get_chip_coords(ip)
         self.send_to_chip(data, x, y, port)
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def local_ip_address(self) -> str:  # type: ignore[override]
         """
         The IP address on the server to which the connection is bound.
@@ -122,7 +122,8 @@ class SpallocEIEIOListener(
         :rtype: str
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def local_port(self) -> int:  # type: ignore[override]
         """
         The port on the server to which the connection is bound.

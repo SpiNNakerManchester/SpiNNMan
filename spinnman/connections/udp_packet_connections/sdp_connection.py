@@ -101,7 +101,8 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
         self.send(_TWO_SKIP.pack() + sdp_message.bytestring)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable[[Optional[float]], SDPMessage]:
+    def get_receive_method(self) -> Callable[  # type: ignore[override]
+            [Optional[float]], SDPMessage]:
         return self.receive_sdp_message
 
     def __repr__(self) -> str:

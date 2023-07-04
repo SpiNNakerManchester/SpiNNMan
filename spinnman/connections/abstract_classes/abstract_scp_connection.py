@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Optional, Tuple
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod, abstractproperty)
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .connection import Connection
@@ -86,7 +85,8 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
             If there is an error sending the message
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def chip_x(self) -> int:
         """
         The X-coordinate of the chip at which messages sent down this
@@ -95,7 +95,8 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         :rtype: int
         """
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def chip_y(self) -> int:
         """
         The Y-coordinate of the chip at which messages sent down this

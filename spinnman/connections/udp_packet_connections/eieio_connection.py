@@ -75,7 +75,7 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
         self.send_to(eieio_message.bytestring, (ip_address, port))
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable[
+    def get_receive_method(self) -> Callable[  # type: ignore[override]
             [Optional[float]], AbstractEIEIOMessage]:
         return self.receive_eieio_message
 

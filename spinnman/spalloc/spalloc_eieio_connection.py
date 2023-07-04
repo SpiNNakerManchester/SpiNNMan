@@ -72,7 +72,7 @@ class SpallocEIEIOConnection(
         return read_eieio_data_message(data, 0)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable[
+    def get_receive_method(self) -> Callable[  # type: ignore[override]
             [Optional[float]], AbstractEIEIOMessage]:
         return self.receive_eieio_message
 

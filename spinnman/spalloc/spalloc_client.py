@@ -937,13 +937,13 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
 
     @property
     @overrides(SpallocEIEIOListener.local_ip_address)
-    def local_ip_address(self) -> Optional[str]:
-        return self._addr
+    def local_ip_address(self) -> str:
+        return self._addr or "0.0.0.0"
 
     @property
     @overrides(SpallocEIEIOListener.local_port)
-    def local_port(self) -> Optional[int]:
-        return self._port
+    def local_port(self) -> int:
+        return self._port or 0
 
     @overrides(SpallocEIEIOListener._get_chip_coords)
     def _get_chip_coords(self, ip_address: str) -> Tuple[int, int]:

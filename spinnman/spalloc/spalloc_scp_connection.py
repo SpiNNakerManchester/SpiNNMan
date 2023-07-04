@@ -41,7 +41,8 @@ class SpallocSCPConnection(
         super(SpallocSCPConnection, self).__init__(x, y)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable[[Optional[float]], SDPMessage]:
+    def get_receive_method(self) -> Callable[  # type: ignore[override]
+            [Optional[float]], SDPMessage]:
         return self.receive_sdp_message
 
     @overrides(SCAMPConnection.receive_sdp_message)
