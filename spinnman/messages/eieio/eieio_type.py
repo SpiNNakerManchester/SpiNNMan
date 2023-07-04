@@ -35,6 +35,13 @@ class EIEIOType(Enum):
         self._payload_bytes = payload_bytes
 
     @property
+    def encoded_value(self) -> int:
+        """
+        The encoded value representing the type.
+        """
+        return cast(int, self._value_)
+
+    @property
     def key_bytes(self) -> int:
         """
         The number of bytes used by each key element.
