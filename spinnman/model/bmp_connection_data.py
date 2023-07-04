@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Sequence
+from typing import Optional, Sequence
 
 
 class BMPConnectionData(object):
@@ -27,7 +27,7 @@ class BMPConnectionData(object):
 
     def __init__(
             self, cabinet: int, frame: int, ip_address: str,
-            boards: Sequence[int], port_num: int):
+            boards: Sequence[int], port_num: Optional[int]):
         # pylint: disable=too-many-arguments
         self._cabinet = cabinet
         self._frame = frame
@@ -72,7 +72,7 @@ class BMPConnectionData(object):
         return self._boards
 
     @property
-    def port_num(self) -> int:
+    def port_num(self) -> Optional[int]:
         """
         The port number associated with this BMP connection.
 

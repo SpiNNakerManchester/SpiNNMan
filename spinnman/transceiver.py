@@ -33,6 +33,7 @@ from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_utilities.progress_bar import ProgressBar
+from spinn_utilities.typing.coords import XY
 from spinn_machine import (
     CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
 from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
@@ -588,8 +589,7 @@ class Transceiver(AbstractContextManager):
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._scamp_connections)
 
-    def add_scamp_connections(
-            self, connections: Dict[Tuple[int, int], str]):
+    def add_scamp_connections(self, connections: Dict[XY, str]):
         """
         Check connections to the board and store these for future use.
 
