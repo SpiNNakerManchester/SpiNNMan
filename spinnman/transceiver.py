@@ -46,6 +46,7 @@ from spinnman.exceptions import (
     SpiNNManCoresNotInStateException)
 from spinnman.model import DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import CPUState
+from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
@@ -1356,6 +1357,43 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             process.run(n_bytes, app_id, core_subsets, chksum, wait)
 
+    def execute_application(self, executable_targets, app_id):
+        """
+        Execute a set of binaries that make up a complete application on
+        specified cores, wait for them to be ready and then start all of the
+        binaries.
+
+        .. note::
+            This will get the binaries into c_main but will not signal the
+            barrier.
+
+        :param ExecutableTargets executable_targets:
+            The binaries to be executed and the cores to execute them on
+        :param int app_id: The app_id to give this application
+        """
+        # Execute each of the binaries and get them in to a "wait" state
+        for binary in executable_targets.binaries:
+            core_subsets = executable_targets.get_cores_for_binary(binary)
+            self.execute_flood(
+                core_subsets, binary, app_id, wait=True, is_filename=True)
+
+        # Sleep to allow cores to get going
+        time.sleep(0.5)
+
+        # Check that the binaries have reached a wait state
+        count = self.get_core_state_count(app_id, CPUState.READY)
+        if count < executable_targets.total_processors:
+            cores_ready = self.get_cores_not_in_state(
+                executable_targets.all_core_subsets, [CPUState.READY])
+            if len(cores_ready) > 0:
+                raise SpinnmanException(
+                    f"Only {count} of {executable_targets.total_processors} "
+                    "cores reached ready state: "
+                    f"{cores_ready.get_status_string()}")
+
+        # Send a signal telling the application to start
+        self.send_signal(app_id, Signal.START)
+
     def power_on_machine(self):
         """
         Power on the whole machine.
@@ -2053,32 +2091,52 @@ class Transceiver(AbstractContextManager):
                 raise SpiNNManCoresNotInStateException(
                     timeout, cpu_states, cores_not_in_state)
 
-    def get_core_status_string(self, cpu_infos):
+    def get_cores_in_state(self, all_core_subsets, states):
         """
-        Get a string indicating the status of the given cores.
+        Get all cores that are in a given state or set of states.
 
-        :param ~spinnman.model.CPUInfos cpu_infos: A CPUInfos objects
-        :rtype: str
+        :param ~spinn_machine.CoreSubsets all_core_subsets:
+            The cores to filter
+        :param states: The state or states to filter on
+        :type states: CPUState or set(CPUState)
+        :return: Core subsets object containing cores in the given state(s)
+        :rtype: CPUInfos
         """
-        break_down = "\n"
-        for (x, y, p), core_info in cpu_infos.cpu_infos:
-            if core_info.state == CPUState.RUN_TIME_EXCEPTION:
-                break_down += "    {}:{}:{} (ph: {}) in state {}:{}\n".format(
-                    x, y, p, core_info.physical_cpu_id, core_info.state.name,
-                    core_info.run_time_error.name)
-                break_down += "        r0={}, r1={}, r2={}, r3={}\n".format(
-                    core_info.registers[0], core_info.registers[1],
-                    core_info.registers[2], core_info.registers[3])
-                break_down += "        r4={}, r5={}, r6={}, r7={}\n".format(
-                    core_info.registers[4], core_info.registers[5],
-                    core_info.registers[6], core_info.registers[7])
-                break_down += "        PSR={}, SP={}, LR={}\n".format(
-                    core_info.processor_state_register,
-                    core_info.stack_pointer, core_info.link_register)
-            else:
-                break_down += "    {}:{}:{} in state {}\n".format(
-                    x, y, p, core_info.state.name)
-        return break_down
+        core_infos = self.get_cpu_information(all_core_subsets)
+        cores_in_state = CPUInfos()
+        for core_info in core_infos:
+            if hasattr(states, "__iter__"):
+                if core_info.state in states:
+                    cores_in_state.add_processor(
+                        core_info.x, core_info.y, core_info.p, core_info)
+            elif core_info.state == states:
+                cores_in_state.add_processor(
+                    core_info.x, core_info.y, core_info.p, core_info)
+
+        return cores_in_state
+
+    def get_cores_not_in_state(self, all_core_subsets, states):
+        """
+        Get all cores that are not in a given state or set of states.
+
+        :param ~spinn_machine.CoreSubsets all_core_subsets:
+            The cores to filter
+        :param states: The state or states to filter on
+        :type states: CPUState or set(CPUState)
+        :return: Core subsets object containing cores not in the given state(s)
+        :rtype: CPUInfos
+        """
+        core_infos = self.get_cpu_information(all_core_subsets)
+        cores_not_in_state = CPUInfos()
+        for core_info in core_infos:
+            if hasattr(states, "__iter__"):
+                if core_info.state not in states:
+                    cores_not_in_state.add_processor(
+                        core_info.x, core_info.y, core_info.p, core_info)
+            elif core_info.state != states:
+                cores_not_in_state.add_processor(
+                    core_info.x, core_info.y, core_info.p, core_info)
+        return cores_not_in_state
 
     def send_signal(self, app_id, signal):
         """
@@ -2648,17 +2706,12 @@ class Transceiver(AbstractContextManager):
             logger.info(self.__where_is_xy(x, y))
             raise
 
-    def clear_router_diagnostic_counters(self, x, y, enable=True,
-                                         counter_ids=None):
+    def clear_router_diagnostic_counters(self, x, y):
         """
         Clear router diagnostic information on a chip.
 
         :param int x: The x-coordinate of the chip
         :param int y: The y-coordinate of the chip
-        :param bool enable: True (default) if the counters should be enabled
-        :param iterable(int) counter_ids:
-            The IDs of the counters to reset (all by default)
-            and enable if enable is True; each must be between 0 and 15
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2670,21 +2723,10 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         try:
-            if counter_ids is None:
-                counter_ids = range(0, 16)
-            clear_data = 0
-            for counter_id in counter_ids:
-                if counter_id < 0 or counter_id > 15:
-                    raise SpinnmanInvalidParameterException(
-                        "counter_id", counter_id,
-                        "Diagnostic counter IDs must be between 0 and 15")
-                clear_data |= 1 << counter_id
-            if enable:
-                for counter_id in counter_ids:
-                    clear_data |= 1 << counter_id + 16
             process = SendSingleCommandProcess(self._scamp_connection_selector)
+            # Clear all
             process.execute(WriteMemory(
-                x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
+                x, y, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
