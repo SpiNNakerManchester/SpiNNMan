@@ -955,6 +955,19 @@ class Transceiver(AbstractContextManager):
         cpu_info = process.get_cpu_info(core_subsets)
         return cpu_info
 
+    def get_clock_drift(self, x, y):
+        """
+        Get the clock drift
+        :param int x: The x-coordinate of the chip to get drift for
+        :param int y: The y-coordinate of the chip to get drift for
+        """
+        DRIFT_FP = 1 << 17
+
+        drift = self._get_sv_data(x, y, SystemVariableDefinition.clock_drift)
+        drift = struct.unpack("<i", struct.pack("<I", drift))[0]
+        drift = drift / DRIFT_FP
+        return drift
+
     def _get_sv_data(self, x, y, data_item):
         """
         :param int x:
