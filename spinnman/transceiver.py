@@ -49,7 +49,7 @@ from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
-from spinnman.messages.scp.enums import Signal, PowerCommand
+from spinnman.messages.scp.enums import PowerCommand
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
@@ -1333,43 +1333,6 @@ class Transceiver(AbstractContextManager):
             process = ApplicationCopyRunProcess(
                 self._scamp_connection_selector)
             process.run(n_bytes, app_id, core_subsets, chksum, wait)
-
-    def execute_application(self, executable_targets, app_id):
-        """
-        Execute a set of binaries that make up a complete application on
-        specified cores, wait for them to be ready and then start all of the
-        binaries.
-
-        .. note::
-            This will get the binaries into c_main but will not signal the
-            barrier.
-
-        :param ExecutableTargets executable_targets:
-            The binaries to be executed and the cores to execute them on
-        :param int app_id: The app_id to give this application
-        """
-        # Execute each of the binaries and get them in to a "wait" state
-        for binary in executable_targets.binaries:
-            core_subsets = executable_targets.get_cores_for_binary(binary)
-            self.execute_flood(
-                core_subsets, binary, app_id, wait=True, is_filename=True)
-
-        # Sleep to allow cores to get going
-        time.sleep(0.5)
-
-        # Check that the binaries have reached a wait state
-        count = self.get_core_state_count(app_id, CPUState.READY)
-        if count < executable_targets.total_processors:
-            cores_ready = self.get_cores_not_in_state(
-                executable_targets.all_core_subsets, [CPUState.READY])
-            if len(cores_ready) > 0:
-                raise SpinnmanException(
-                    f"Only {count} of {executable_targets.total_processors} "
-                    "cores reached ready state: "
-                    f"{self.get_core_status_string(cores_ready)}")
-
-        # Send a signal telling the application to start
-        self.send_signal(app_id, Signal.START)
 
     def power_on_machine(self):
         """
