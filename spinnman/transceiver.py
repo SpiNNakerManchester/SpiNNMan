@@ -2684,17 +2684,12 @@ class Transceiver(AbstractContextManager):
             logger.info(self.__where_is_xy(x, y))
             raise
 
-    def clear_router_diagnostic_counters(self, x, y, enable=True,
-                                         counter_ids=None):
+    def clear_router_diagnostic_counters(self, x, y):
         """
         Clear router diagnostic information on a chip.
 
         :param int x: The x-coordinate of the chip
         :param int y: The y-coordinate of the chip
-        :param bool enable: True (default) if the counters should be enabled
-        :param iterable(int) counter_ids:
-            The IDs of the counters to reset (all by default)
-            and enable if enable is True; each must be between 0 and 15
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2706,21 +2701,10 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         try:
-            if counter_ids is None:
-                counter_ids = range(0, 16)
-            clear_data = 0
-            for counter_id in counter_ids:
-                if counter_id < 0 or counter_id > 15:
-                    raise SpinnmanInvalidParameterException(
-                        "counter_id", counter_id,
-                        "Diagnostic counter IDs must be between 0 and 15")
-                clear_data |= 1 << counter_id
-            if enable:
-                for counter_id in counter_ids:
-                    clear_data |= 1 << counter_id + 16
             process = SendSingleCommandProcess(self._scamp_connection_selector)
+            # Clear all
             process.execute(WriteMemory(
-                x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
+                x, y, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
