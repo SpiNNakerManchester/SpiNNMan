@@ -1383,8 +1383,9 @@ class Transceiver(AbstractContextManager):
         # Check that the binaries have reached a wait state
         count = self.get_core_state_count(app_id, CPUState.READY)
         if count < executable_targets.total_processors:
-            cores_ready = self.get_cores_not_in_state(
-                executable_targets.all_core_subsets, [CPUState.READY])
+            cores_ready = self.get_cpu_infos(
+                executable_targets.all_core_subsets, [CPUState.READY],
+                include=False)
             if len(cores_ready) > 0:
                 raise SpinnmanException(
                     f"Only {count} of {executable_targets.total_processors} "
@@ -2090,30 +2091,6 @@ class Transceiver(AbstractContextManager):
                 self.__log_where_is_info(cores_not_in_state)
                 raise SpiNNManCoresNotInStateException(
                     timeout, cpu_states, cores_not_in_state)
-
-    def get_cores_in_state(self, all_core_subsets, states):
-        """
-        Get all cores that are in a given state or set of states.
-
-        :param ~spinn_machine.CoreSubsets all_core_subsets:
-            The cores to filter
-        :param states: The state or states to filter on
-        :type states: CPUState or set(CPUState)
-        :return: Core subsets object containing cores in the given state(s)
-        :rtype: CPUInfos
-        """
-        core_infos = self.get_cpu_information(all_core_subsets)
-        cores_in_state = CPUInfos()
-        for core_info in core_infos:
-            if hasattr(states, "__iter__"):
-                if core_info.state in states:
-                    cores_in_state.add_processor(
-                        core_info.x, core_info.y, core_info.p, core_info)
-            elif core_info.state == states:
-                cores_in_state.add_processor(
-                    core_info.x, core_info.y, core_info.p, core_info)
-
-        return cores_in_state
 
     def get_cores_not_in_state(self, all_core_subsets, states):
         """
