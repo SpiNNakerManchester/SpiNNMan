@@ -2092,29 +2092,6 @@ class Transceiver(AbstractContextManager):
                 raise SpiNNManCoresNotInStateException(
                     timeout, cpu_states, cores_not_in_state)
 
-    def get_cores_not_in_state(self, all_core_subsets, states):
-        """
-        Get all cores that are not in a given state or set of states.
-
-        :param ~spinn_machine.CoreSubsets all_core_subsets:
-            The cores to filter
-        :param states: The state or states to filter on
-        :type states: CPUState or set(CPUState)
-        :return: Core subsets object containing cores not in the given state(s)
-        :rtype: CPUInfos
-        """
-        core_infos = self.get_cpu_information(all_core_subsets)
-        cores_not_in_state = CPUInfos()
-        for core_info in core_infos:
-            if hasattr(states, "__iter__"):
-                if core_info.state not in states:
-                    cores_not_in_state.add_processor(
-                        core_info.x, core_info.y, core_info.p, core_info)
-            elif core_info.state != states:
-                cores_not_in_state.add_processor(
-                    core_info.x, core_info.y, core_info.p, core_info)
-        return cores_not_in_state
-
     def send_signal(self, app_id, signal):
         """
         Send a signal to an application.
