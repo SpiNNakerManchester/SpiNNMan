@@ -14,6 +14,8 @@
 from typing import Dict, Iterable, Iterator, Tuple
 from .cpu_info import CPUInfo
 
+from spinnman.model.enums import CPUState
+
 
 class CPUInfos(object):
     """
@@ -93,6 +95,32 @@ class CPUInfos(object):
         Get the information for the given core on the given chip.
         """
         return self._cpu_infos[x, y, p]
+
+    def get_status_string(self) -> str:
+        """
+        Get a string indicating the status of the given cores.
+
+        :rtype: str
+        """
+        break_down = "\n"
+        for (x, y, p), core_info in self.cpu_infos:
+            if core_info.state == CPUState.RUN_TIME_EXCEPTION:
+                break_down += "    {}:{}:{} (ph: {}) in state {}:{}\n".format(
+                    x, y, p, core_info.physical_cpu_id, core_info.state.name,
+                    core_info.run_time_error.name)
+                break_down += "        r0={}, r1={}, r2={}, r3={}\n".format(
+                    core_info.registers[0], core_info.registers[1],
+                    core_info.registers[2], core_info.registers[3])
+                break_down += "        r4={}, r5={}, r6={}, r7={}\n".format(
+                    core_info.registers[4], core_info.registers[5],
+                    core_info.registers[6], core_info.registers[7])
+                break_down += "        PSR={}, SP={}, LR={}\n".format(
+                    core_info.processor_state_register,
+                    core_info.stack_pointer, core_info.link_register)
+            else:
+                break_down += "    {}:{}:{} in state {}\n".format(
+                    x, y, p, core_info.state.name)
+        return break_down
 
     def __str__(self) -> str:
         return str([f"{x}, {y}, {p} (ph: {info.physical_cpu_id})"
