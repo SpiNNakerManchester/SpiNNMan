@@ -2797,6 +2797,7 @@ class Transceiver(AbstractContextManager):
     def update_provenance_and_exit(self, x, y, p):
         """
         Sends a command to update prevenance and exit
+
         :param int x:
             The x-coordinate of the core
         :param int y:
