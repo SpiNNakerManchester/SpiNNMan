@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from enum import Enum
 import struct
+from typing import Union
+from typing_extensions import TypeAlias
 from spinnman.messages.scp.enums import SCPCommand
 
 _TWO_SHORTS = struct.Struct("<2H")
+_Command: TypeAlias = Union[SCPCommand, Enum]
 
 
 class SCPRequestHeader(object):
@@ -26,7 +30,7 @@ class SCPRequestHeader(object):
         "_command",
         "_sequence")
 
-    def __init__(self, command: SCPCommand, sequence: int = 0):
+    def __init__(self, command: _Command, sequence: int = 0):
         """
         :param SCPCommand command: The SCP command
         :param int sequence:
@@ -37,7 +41,7 @@ class SCPRequestHeader(object):
         self._sequence = sequence
 
     @property
-    def command(self) -> SCPCommand:
+    def command(self) -> _Command:
         """
         The command of the SCP packet.
 
