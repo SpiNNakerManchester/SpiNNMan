@@ -1605,7 +1605,7 @@ class Transceiver(AbstractContextManager):
                 x, y, cpu, base_address, data, offset, n_bytes, get_sum)
         return n_bytes, chksum
 
-    def write_user(self, x, y, p, value, user):
+    def write_user(self, x, y, p, user, value):
         """
         Write to the this user register for the given processor.
 
