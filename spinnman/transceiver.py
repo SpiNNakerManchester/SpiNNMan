@@ -43,7 +43,7 @@ from spinnman.exceptions import (
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
     SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
-from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
+from spinnman.model import DiagnosticFilter, MachineDimensions
 from spinnman.model.enums import (
     CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES)
 from spinnman.messages.scp.enums import Signal
