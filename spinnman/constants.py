@@ -58,16 +58,13 @@ CPU_INFO_OFFSET = 0xe5007000
 CPU_INFO_BYTES = 128
 
 #: The address at which user0 register starts
-CPU_USER_0_START_ADDRESS = 112
+CPU_USER_START_ADDRESS = 112
 
-#: The address at which user1 register starts
-CPU_USER_1_START_ADDRESS = 116
+# The number of bytes the user start address moves each time
+CPU_USER_OFFSET = 4
 
-#: The address at which user2 register starts
-CPU_USER_2_START_ADDRESS = 120
-
-#: The address at which user3 register starts
-CPU_USER_3_START_ADDRESS = 124
+# The largest user number
+CPU_MAX_USER = 3
 
 #: The address at which the iobuf address starts
 CPU_IOBUF_ADDRESS_OFFSET = 88
