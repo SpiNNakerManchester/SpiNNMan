@@ -961,7 +961,7 @@ class Transceiver(AbstractContextManager):
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
     @staticmethod
-    def __get_user_register_address_from_core(user, p):
+    def __get_user_register_address_from_core(p, user):
         """
         Get the address of user 0 for a given processor on the board.
 
@@ -969,8 +969,8 @@ class Transceiver(AbstractContextManager):
             Conventionally, user_0 usually holds the address of the table of
             memory regions.
 
-        :param int user: The user number to get the address for
         :param int p: The ID of the processor to get the user 0 address from
+        :param int user: The user number to get the address for
         :return: The address for user 0 register for this processor
         :rtype: int
         """
@@ -980,7 +980,7 @@ class Transceiver(AbstractContextManager):
         return (get_vcpu_address(p) + CPU_USER_START_ADDRESS +
                 CPU_USER_OFFSET * user)
 
-    def read_user(self, user, x, y, p):
+    def read_user(self, x, y, p, user):
         """
         Get the contents of the this user register for the given processor.
 
@@ -988,10 +988,10 @@ class Transceiver(AbstractContextManager):
             Conventionally, user_0 usually holds the address of the table of
             memory regions.
 
-        :param int user: The user number to get the address for
         :param int x: X coordinate of the chip
         :param int y: Y coordinate of the chip
         :param int p: Virtual processor identifier on the chip
+        :param int user: The user number to read data for
         :rtype: int
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -1002,7 +1002,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.__get_user_register_address_from_core(user, p)
+        addr = self.__get_user_register_address_from_core(p, user)
         return self.read_word(x, y, addr)
 
     def get_cpu_information_from_core(self, x, y, p):
@@ -1605,7 +1605,7 @@ class Transceiver(AbstractContextManager):
                 x, y, cpu, base_address, data, offset, n_bytes, get_sum)
         return n_bytes, chksum
 
-    def write_user(self, user, x, y, p, value):
+    def write_user(self, x, y, p, value, user):
         """
         Write to the this user register for the given processor.
 
@@ -1616,6 +1616,7 @@ class Transceiver(AbstractContextManager):
         :param int x: X coordinate of the chip
         :param int y: Y coordinate of the chip
         :param int p: Virtual processor identifier on the chip
+        :param int user: The user number of write data for
         :param int value: The value to write
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -1626,7 +1627,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.__get_user_register_address_from_core(user, p)
+        addr = self.__get_user_register_address_from_core(p, user)
         self.write_memory(x, y, addr, int(value))
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
