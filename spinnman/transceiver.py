@@ -44,9 +44,11 @@ from spinnman.exceptions import (
     SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
-from spinnman.model.enums import CPUState
+from spinnman.model.enums import (
+    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES)
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
+from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
 from spinnman.messages.scp.enums import PowerCommand
@@ -2724,6 +2726,26 @@ class Transceiver(AbstractContextManager):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(DoSync(do_sync))
+
+    def update_provenance_and_exit(self, x, y, p):
+        """
+        Sends a command to update prevenance and exit
+
+        :param int x:
+            The x-coordinate of the core
+        :param int y:
+            The y-coordinate of the core
+        :param int p:
+            The processor on the core
+        """
+        # Send these signals to make sure the application isn't stuck
+        self.send_sdp_message(SDPMessage(
+            sdp_header=SDPHeader(
+                flags=SDPFlag.REPLY_NOT_EXPECTED,
+                destination_port=SDP_PORTS.RUNNING_COMMAND_SDP_PORT.value,
+                destination_chip_x=x, destination_chip_y=y, destination_cpu=p),
+            data=_ONE_WORD.pack(SDP_RUNNING_MESSAGE_CODES
+                                .SDP_UPDATE_PROVENCE_REGION_AND_EXIT.value)))
 
     def __str__(self):
         addr = self._scamp_connections[0].remote_ip_address
