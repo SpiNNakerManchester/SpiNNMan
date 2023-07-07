@@ -439,7 +439,7 @@ class _ProxyReceiver(threading.Thread):
         self.__closed = True
 
 
-class __Closer(AbstractContextManager):
+class _Closer(AbstractContextManager):
     __slots__ = ("queue", "p")
 
     def __init__(self):
@@ -474,7 +474,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
         self._keepalive_url = self._url + "keepalive"
-        self.__keepalive_handle: Optional[__Closer] = None
+        self.__keepalive_handle: Optional[_Closer] = None
         self.__proxy_handle: Optional[WebSocket] = None
         self.__proxy_thread: Optional[_ProxyReceiver] = None
         self.__proxy_ping: Optional[_ProxyPing] = None
@@ -624,7 +624,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             Tricky! *Cannot* be done with a thread, as the main thread is known
             to do significant amounts of CPU-intensive work.
         """
-        self._keepalive_handle = __Closer()
+        self._keepalive_handle = _Closer()
         # pylint: disable=protected-access
         p = Process(target=_SpallocKeepalive, args=(
             self._keepalive_url, 0 + period, self._keepalive_handle.queue,
@@ -643,11 +643,11 @@ class _SpallocJob(SessionAware, SpallocJob):
             r.json()["physical-board-coordinates"]))
 
     @property
-    def _keepalive_handle(self) -> Optional[__Closer]:
+    def _keepalive_handle(self) -> Optional[_Closer]:
         return self.__keepalive_handle
 
     @_keepalive_handle.setter
-    def _keepalive_handle(self, handle: __Closer):
+    def _keepalive_handle(self, handle: _Closer):
         if self.__keepalive_handle is not None:
             raise SpallocException("cannot keep job alive from two tasks")
         self.__keepalive_handle = handle
