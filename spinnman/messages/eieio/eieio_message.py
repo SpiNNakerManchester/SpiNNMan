@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Union
+from __future__ import annotations
+from typing import Union, TYPE_CHECKING
 from spinn_utilities.abstract_base import abstractmethod, AbstractBase
-from spinnman.messages.eieio.command_messages.eieio_command_header import (
-    EIEIOCommandHeader)
-from spinnman.messages.eieio.data_messages.eieio_data_header import (
-    EIEIODataHeader)
+if TYPE_CHECKING:
+    from spinnman.messages.eieio.command_messages import EIEIOCommandHeader
+    from spinnman.messages.eieio.data_messages import EIEIODataHeader
 
 
 class AbstractEIEIOMessage(object, metaclass=AbstractBase):
