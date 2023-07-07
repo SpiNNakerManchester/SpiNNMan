@@ -15,7 +15,7 @@
 import unittest
 import struct
 from spinn_machine import virtual_machine
-from spinnman.config_setup import unittest_setup, setup_spin1
+from spinnman.config_setup import unittest_setup
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.transceiver import Transceiver
 from spinnman import constants
@@ -57,8 +57,7 @@ class MockWriteTransceiver(Transceiver):
 class TestTransceiver(unittest.TestCase):
 
     def setUp(self):
-        unittest_setup()
-        setup_spin1()
+        unittest_setup(board_type=1)
 
     def test_create_new_transceiver_to_board(self):
         board_config.set_up_remote_board()

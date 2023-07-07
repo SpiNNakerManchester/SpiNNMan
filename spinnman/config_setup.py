@@ -16,47 +16,39 @@ import os
 from spinn_utilities.config_holder import (
     add_default_cfg, clear_cfg_files)
 from spinn_machine.config_setup import add_spinn_machine_cfg
-from spinn_machine.config_setup import setup_spin1 as machine_spin1
-from spinn_machine.config_setup import setup_spin2 as machine_spin2
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 
 BASE_CONFIG_FILE = "spinnman.cfg"
 
 
-def unittest_setup():
+def unittest_setup(board_type=None):
     """
     Resets the configurations so only the local default configuration is
     included.
 
     .. note::
         This file should only be called from `SpiNNMan/unittests`.
+
+    :param board_type: Value to say how to confuire the system.
+        This includes defining what a VirtualMachine would be
+        Can be 1 for Spin1 boards, 2 for Spin2 boards or
+        None if the test do not depend on knowing the board type.
+    :type board_type: None or int
     """
     clear_cfg_files(True)
-    add_spinnman_cfg()
     SpiNNManDataWriter.mock()
+    add_spinnman_cfg(board_type)
 
 
-def add_spinnman_cfg():
+def add_spinnman_cfg(board_type):
     """
     Add the local configuration and all dependent configuration files.
+
+    :param board_type: Value to say how to confuire the system.
+        This includes defining what a VirtualMachine would be
+        Can be 1 for Spin1 boards, 2 for Spin2 boards or
+        None if the test do not depend on knowing the board type.
+    :type board_type: None or int
     """
-    add_spinn_machine_cfg()  # This add its dependencies too
+    add_spinn_machine_cfg(board_type)  # This add its dependencies too
     add_default_cfg(os.path.join(os.path.dirname(__file__), BASE_CONFIG_FILE))
-
-
-def setup_spin1():
-    """
-    Changes any board type settings to the Values required for a Spin1 board
-
-    :raises SpinnMachineException: If called after a Machine has been created
-    """
-    machine_spin1()
-
-
-def setup_spin2():
-    """
-    Changes any board type settings to the Values required for a Spin2 board
-
-    :raises SpinnMachineException: If called after a Machine has been created
-    """
-    machine_spin2()
