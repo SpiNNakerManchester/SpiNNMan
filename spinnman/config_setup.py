@@ -21,7 +21,7 @@ from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 BASE_CONFIG_FILE = "spinnman.cfg"
 
 
-def unittest_setup(board_type=None):
+def unittest_setup(*, board_type=None):
     """
     Resets the configurations so only the local default configuration is
     included.
