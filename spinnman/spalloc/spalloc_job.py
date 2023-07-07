@@ -13,9 +13,11 @@
 # limitations under the License.
 
 from sqlite3 import Cursor
-from typing import Dict, Tuple
+from typing import Dict, Optional, Tuple
+from typing_extensions import Self
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
+from spinn_utilities.typing.coords import XY
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections import UDPConnection
@@ -41,24 +43,27 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :rtype: SpallocState
         """
+        raise NotImplementedError
 
     @abstractmethod
-    def get_root_host(self) -> str:
+    def get_root_host(self) -> Optional[str]:
         """
         Get the IP address for talking to the machine.
 
         :return: The IP address, or ``None`` if not allocated.
         :rtype: str or None
         """
+        raise NotImplementedError
 
     @abstractmethod
-    def get_connections(self) -> Dict[Tuple[int, int], str]:
+    def get_connections(self) -> Dict[XY, str]:
         """
         Get the mapping from board coordinates to IP addresses.
 
-        :return: (x,y)->IP mapping, or ``None`` if not allocated
-        :rtype: dict(tuple(int,int), str) or None
+        :return: (x,y)->IP mapping; empty if not allocated
+        :rtype: dict(tuple(int,int), str)
         """
+        raise NotImplementedError
 
     @abstractmethod
     def connect_to_board(
@@ -73,6 +78,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         :return: A connection that talks to the board.
         :rtype: SpallocProxiedConnection
         """
+        raise NotImplementedError
 
     @abstractmethod
     def connect_for_booting(self) -> SpallocBootConnection:
@@ -82,6 +88,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         :return: a boot connection
         :rtype: SpallocBootConnection
         """
+        raise NotImplementedError
 
     @abstractmethod
     def open_eieio_connection(self, x: int, y: int) -> SpallocEIEIOConnection:
@@ -95,6 +102,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         :return: an EIEIO connection with a board address bound
         :rtype: SpallocEIEIOConnection
         """
+        raise NotImplementedError
 
     @abstractmethod
     def open_eieio_listener_connection(self) -> SpallocEIEIOListener:
@@ -107,6 +115,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         :return: an EIEIO connection with no board address bound
         :rtype: SpallocEIEIOListener
         """
+        raise NotImplementedError
 
     @abstractmethod
     def open_udp_listener_connection(self) -> UDPConnection:
@@ -119,6 +128,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         :return: a UDP connection with no board address bound
         :rtype: UDPConnection
         """
+        raise NotImplementedError
 
     @abstractmethod
     def create_transceiver(self) -> Transceiver:
@@ -128,6 +138,7 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :rtype: Transceiver
         """
+        raise NotImplementedError
 
     @abstractmethod
     def wait_for_state_change(self, old_state: SpallocState) -> SpallocState:
@@ -142,6 +153,7 @@ class SpallocJob(object, metaclass=AbstractBase):
                 If the machine gets destroyed, this will not wait for it.
         :rtype: SpallocState
         """
+        raise NotImplementedError
 
     @abstractmethod
     def wait_until_ready(self):
@@ -150,6 +162,7 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :raises Exception: If the allocation is destroyed
         """
+        raise NotImplementedError
 
     @abstractmethod
     def destroy(self, reason: str = "finished"):
@@ -158,12 +171,14 @@ class SpallocJob(object, metaclass=AbstractBase):
 
         :param str reason: Why the job is being destroyed.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def keepalive(self):
         """
         Signal the job that we want it to stay alive for a while longer.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def launch_keepalive_task(
@@ -179,6 +194,7 @@ class SpallocJob(object, metaclass=AbstractBase):
             Some kind of closable task handle; closing it terminates the task.
             Destroying the job will also terminate the task.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def where_is_machine(self, x: int, y: int) -> Tuple[int, int, int]:
@@ -192,6 +208,7 @@ class SpallocJob(object, metaclass=AbstractBase):
             the chip lies outside the allocation.
         :rtype: tuple(int,int,int) or None
         """
+        raise NotImplementedError
 
     @abstractmethod
     def _write_session_credentials_to_db(self, cur: Cursor):
@@ -206,8 +223,9 @@ class SpallocJob(object, metaclass=AbstractBase):
         :param ~sqlite3.Cursor cur:
             The open cursor to the database.
         """
+        raise NotImplementedError
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         """
         Return self on entering context.
         """

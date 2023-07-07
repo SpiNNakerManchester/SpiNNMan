@@ -35,6 +35,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         :return: True if there is an SCP packet to be read
         :rtype: bool
         """
+        raise NotImplementedError
 
     @abstractmethod
     def receive_scp_response(self, timeout: Optional[float] = 1.0) -> Tuple[
@@ -55,6 +56,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         :raise SpinnmanTimeoutException:
             If there is a timeout before a message is received
         """
+        raise NotImplementedError
 
     @abstractmethod
     def get_scp_data(self, scp_request: AbstractSCPRequest) -> bytes:
@@ -62,6 +64,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         Returns the data of an SCP request as it would be sent down this
         connection.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def send_scp_request(self, scp_request: AbstractSCPRequest):
@@ -84,6 +87,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         :raise SpinnmanIOException:
             If there is an error sending the message
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -94,6 +98,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
 
         :rtype: int
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -104,3 +109,4 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
 
         :rtype: int
         """
+        raise NotImplementedError

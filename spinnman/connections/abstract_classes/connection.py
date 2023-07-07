@@ -34,9 +34,11 @@ class Connection(AbstractContextManager, metaclass=AbstractBase):
             If there is an error when determining the connectivity of the
             medium.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def close(self) -> None:
         """
         Closes the connection.
         """
+        raise NotImplementedError

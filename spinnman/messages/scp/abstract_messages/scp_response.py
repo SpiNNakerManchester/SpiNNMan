@@ -58,6 +58,7 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         :param bytes data: The byte-string to read from
         :param int offset: The offset into the data after the headers
         """
+        raise NotImplementedError
 
     @property
     def sdp_header(self) -> SDPHeader:

@@ -24,11 +24,16 @@ import requests
 import sqlite3
 import struct
 import threading
-from typing import Dict, Collection, Tuple, cast, Optional
+from typing import (
+    Callable, Collection, Dict, FrozenSet, Iterable, List, Optional, Tuple,
+    Union, cast)
+from typing_extensions import TypeAlias
 from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.typing.coords import XY
+from spinn_utilities.typing.json import JsonObject
 from spinn_utilities.overrides import overrides
 from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
@@ -68,8 +73,9 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                  "__machines_url", "__jobs_url", "version")
 
     def __init__(
-            self, service_url, username=None, password=None,
-            bearer_token=None):
+            self, service_url: str,
+            username: Optional[str] = None, password: Optional[str] = None,
+            bearer_token: Optional[str] = None):
         """
         :param str service_url: The reference to the service.
             May have username and password supplied as part of the network
@@ -82,9 +88,10 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         """
         if username is None and password is None:
             service_url, username, password = parse_service_url(service_url)
-        self.__session = Session(service_url, username, password, bearer_token)
+        self.__session: Optional[Session] = Session(
+            service_url, username, password, bearer_token)
         obj = self.__session.renew()
-        v = obj["version"]
+        v = cast(JsonObject, obj["version"])
         self.version = Version(
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
         self.__machines_url = obj["machines-ref"]
@@ -137,12 +144,15 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         return _SpallocJob(session, job_url)
 
     @overrides(AbstractSpallocClient.list_machines)
-    def list_machines(self):
+    def list_machines(self) -> Dict[str, SpallocMachine]:
+        assert self.__session
         obj = self.__session.get(self.__machines_url).json()
-        return {m["name"]: _SpallocMachine(self, m) for m in obj["machines"]}
+        return {m["name"]: _SpallocMachine(self.__session, m)
+                for m in obj["machines"]}
 
     @overrides(AbstractSpallocClient.list_jobs)
-    def list_jobs(self, deleted=False):
+    def list_jobs(self, deleted: bool = False) -> Iterable[SpallocJob]:
+        assert self.__session
         obj = self.__session.get(
             self.__jobs_url,
             deleted=("true" if deleted else "false")).json()
@@ -153,7 +163,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                 break
             obj = self.__session.get(obj["next"]).json()
 
-    def _create(self, create, machine_name):
+    def _create(self, create, machine_name) -> SpallocJob:
+        assert self.__session
         if machine_name:
             create["machine-name"] = machine_name
         else:
@@ -163,14 +174,20 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         return _SpallocJob(self.__session, url)
 
     @overrides(AbstractSpallocClient.create_job)
-    def create_job(self, num_boards=1, machine_name=None, keepalive=45):
+    def create_job(
+            self, num_boards: int = 1,
+            machine_name: Optional[str] = None,
+            keepalive: int = 45) -> SpallocJob:
         return self._create({
             "num-boards": int(num_boards),
             "keepalive-interval": f"PT{int(keepalive)}S"
         }, machine_name)
 
     @overrides(AbstractSpallocClient.create_job_rect)
-    def create_job_rect(self, width, height, machine_name=None, keepalive=45):
+    def create_job_rect(
+            self, width: int, height: int,
+            machine_name: Optional[str] = None,
+            keepalive: int = 45) -> SpallocJob:
         return self._create({
             "dimensions": {
                 "width": int(width),
@@ -182,7 +199,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     @overrides(AbstractSpallocClient.create_job_board)
     def create_job_board(
             self, triad=None, physical=None, ip_address=None,
-            machine_name=None, keepalive=45):
+            machine_name=None, keepalive=45) -> SpallocJob:
+        board: Dict[str, Union[int, str]]
         if triad:
             x, y, z = triad
             board = {"x": int(x), "y": int(y), "z": int(z)}
@@ -199,7 +217,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             "keepalive-interval": f"PT{int(keepalive)}S"
         }, machine_name)
 
-    def close(self):
+    def close(self) -> None:
         # pylint: disable=protected-access
         if self.__session is not None:
             self.__session._purge()
@@ -236,52 +254,52 @@ class _SpallocMachine(SessionAware, SpallocMachine):
     __slots__ = ("__name", "__tags", "__width", "__height",
                  "__dead_boards", "__dead_links")
 
-    def __init__(self, session, machine_data):
+    def __init__(self, session: Session, machine_data: JsonObject):
         """
         :param _Session session:
         :param dict machine_data:
         """
-        super().__init__(session, machine_data["uri"])
-        self.__name = machine_data["name"]
-        self.__tags = frozenset(machine_data["tags"])
-        self.__width = machine_data["width"]
-        self.__height = machine_data["height"]
-        self.__dead_boards = machine_data["dead-boards"]
-        self.__dead_links = machine_data["dead-links"]
+        super().__init__(session, cast(str, machine_data["uri"]))
+        self.__name = cast(str, machine_data["name"])
+        self.__tags = frozenset(cast(List[str], machine_data["tags"]))
+        self.__width = cast(int, machine_data["width"])
+        self.__height = cast(int, machine_data["height"])
+        self.__dead_boards = cast(list, machine_data["dead-boards"])
+        self.__dead_links = cast(list, machine_data["dead-links"])
 
     @property
     @overrides(SpallocMachine.name)
-    def name(self):
+    def name(self) -> str:
         return self.__name
 
     @property
     @overrides(SpallocMachine.tags)
-    def tags(self):
+    def tags(self) -> FrozenSet[str]:
         return self.__tags
 
     @property
     @overrides(SpallocMachine.width)
-    def width(self):
+    def width(self) -> int:
         return self.__width
 
     @property
     @overrides(SpallocMachine.height)
-    def height(self):
+    def height(self) -> int:
         return self.__height
 
     @property
     @overrides(SpallocMachine.dead_boards)
-    def dead_boards(self):
+    def dead_boards(self) -> list:
         return self.__dead_boards
 
     @property
     @overrides(SpallocMachine.dead_links)
-    def dead_links(self):
+    def dead_links(self) -> list:
         return self.__dead_links
 
     @property
     @overrides(SpallocMachine.area)
-    def area(self):
+    def area(self) -> Tuple[int, int]:
         return (self.width, self.height)
 
     def __repr__(self):
@@ -325,28 +343,31 @@ class _ProxyPing(threading.Thread):
         self.__closed = True
 
 
+_WSCB: TypeAlias = Callable[[Optional[bytes]], None]
+
+
 class _ProxyReceiver(threading.Thread):
     """
     Receives all messages off an open websocket and dispatches them to
     registered listeners.
     """
 
-    def __init__(self, ws):
+    def __init__(self, ws: WebSocket):
         super().__init__(daemon=True)
         self.__ws = ws
-        self.__returns = {}
-        self.__handlers = {}
+        self.__returns: Dict[int, _WSCB] = {}
+        self.__handlers: Dict[int, _WSCB] = {}
         self.__correlation_id = 0
         self.__closed = False
         self.start()
 
-    def run(self):
+    def run(self) -> None:
         """
         The handler loop of this thread.
         """
         while self.__ws.connected:
             try:
-                result = self.__ws.recv_data()
+                result: Tuple[int, bytes] = self.__ws.recv_data()
                 frame = result[1]
                 if len(frame) < _msg.size:
                     # Message is out of protocol
@@ -372,7 +393,7 @@ class _ProxyReceiver(threading.Thread):
             else:
                 self.dispatch_return(num, frame)
 
-    def expect_return(self, handler) -> int:
+    def expect_return(self, handler: _WSCB) -> int:
         """
         Register a one-shot listener for a call-like message's return.
 
@@ -383,7 +404,7 @@ class _ProxyReceiver(threading.Thread):
         self.__returns[c] = handler
         return c
 
-    def listen(self, channel_id: int, handler):
+    def listen(self, channel_id: int, handler: _WSCB):
         """
         Register a persistent listener for one-way messages.
         """
@@ -401,21 +422,36 @@ class _ProxyReceiver(threading.Thread):
         """
         Dispatch a received one-way message.
         """
-        handler = self.__handlers.get(channel_id, None)
+        handler = self.__handlers.get(channel_id)
         if handler:
             handler(msg)
 
-    def unlisten(self, channel_id):
+    def unlisten(self, channel_id: int):
         """
         De-register a listener for a channel
         """
         self.__handlers.pop(channel_id)
 
-    def close(self):
+    def close(self) -> None:
         """
         Mark receiver closed to avoid errors
         """
         self.__closed = True
+
+
+class __Closer(AbstractContextManager):
+    __slots__ = ("queue", "p")
+
+    def __init__(self):
+        self.queue = Queue(1)
+        self.p = None
+
+    def close(self):
+        self.queue.put("quit")
+        # Give it a second, and if it still isn't dead, kill it
+        self.p.join(1)
+        if self.p.is_alive():
+            self.p.kill()
 
 
 class _SpallocJob(SessionAware, SpallocJob):
@@ -428,7 +464,7 @@ class _SpallocJob(SessionAware, SpallocJob):
                  "_keepalive_url", "__keepalive_handle", "__proxy_handle",
                  "__proxy_thread", "__proxy_ping")
 
-    def __init__(self, session, job_handle):
+    def __init__(self, session: Session, job_handle: str):
         """
         :param _Session session:
         :param str job_handle:
@@ -438,13 +474,13 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
         self._keepalive_url = self._url + "keepalive"
-        self.__keepalive_handle = None
-        self.__proxy_handle = None
-        self.__proxy_thread = None
-        self.__proxy_ping = None
+        self.__keepalive_handle: Optional[__Closer] = None
+        self.__proxy_handle: Optional[WebSocket] = None
+        self.__proxy_thread: Optional[_ProxyReceiver] = None
+        self.__proxy_ping: Optional[_ProxyPing] = None
 
     @overrides(SpallocJob._write_session_credentials_to_db)
-    def _write_session_credentials_to_db(self, cur):
+    def _write_session_credentials_to_db(self, cur: sqlite3.Cursor):
         config = {}
         config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
@@ -463,12 +499,12 @@ class _SpallocJob(SessionAware, SpallocJob):
             """, [(k1, k2, v) for (k1, k2), v in config.items()])
 
     @overrides(SpallocJob.get_state)
-    def get_state(self):
+    def get_state(self) -> SpallocState:
         obj = self._get(self._url).json()
         return SpallocState[obj["state"]]
 
     @overrides(SpallocJob.get_root_host)
-    def get_root_host(self):
+    def get_root_host(self) -> Optional[str]:
         r = self._get(self.__machine_url)
         if r.status_code == 204:
             return None
@@ -480,17 +516,17 @@ class _SpallocJob(SessionAware, SpallocJob):
         return None
 
     @overrides(SpallocJob.get_connections)
-    def get_connections(self):
+    def get_connections(self) -> Dict[XY, str]:
         r = self._get(self.__machine_url)
         if r.status_code == 204:
-            return None
+            return {}
         return {
             (int(x), int(y)): str(host)
             for ((x, y), host) in r.json()["connections"]
         }
 
     @property
-    def __proxy_url(self):
+    def __proxy_url(self) -> Optional[str]:
         """
         The URL for talking to the proxy connection system.
         """
@@ -504,46 +540,50 @@ class _SpallocJob(SessionAware, SpallocJob):
         except KeyError:
             return None
 
-    def __init_proxy(self):
+    def __init_proxy(self) -> _ProxyReceiver:
         if self.__proxy_handle is None or not self.__proxy_handle.connected:
+            if self.__proxy_url is None:
+                raise ValueError("no proxy available")
             self.__proxy_handle = self._websocket(
                 self.__proxy_url, origin=get_hostname(self._url))
             self.__proxy_thread = _ProxyReceiver(self.__proxy_handle)
             self.__proxy_ping = _ProxyPing(self.__proxy_handle)
+        assert self.__proxy_thread is not None
+        return self.__proxy_thread
 
     @overrides(SpallocJob.connect_to_board)
-    def connect_to_board(self, x, y, port=SCP_SCAMP_PORT):
-        self.__init_proxy()
+    def connect_to_board(
+            self, x: int, y: int,
+            port: int = SCP_SCAMP_PORT) -> SpallocSCPConnection:
+        proxy = self.__init_proxy()
         return _ProxiedSCAMPConnection(
-            self.__proxy_handle, self.__proxy_thread,
-            int(x), int(y), int(port))
+            self.__proxy_handle, proxy, int(x), int(y), int(port))
 
     @overrides(SpallocJob.connect_for_booting)
-    def connect_for_booting(self):
-        self.__init_proxy()
-        return _ProxiedBootConnection(self.__proxy_handle, self.__proxy_thread)
+    def connect_for_booting(self) -> SpallocBootConnection:
+        proxy = self.__init_proxy()
+        return _ProxiedBootConnection(self.__proxy_handle, proxy)
 
     @overrides(SpallocJob.open_eieio_connection)
-    def open_eieio_connection(self, x, y):
-        self.__init_proxy()
+    def open_eieio_connection(self, x: int, y: int) -> SpallocEIEIOConnection:
+        proxy = self.__init_proxy()
         return _ProxiedEIEIOConnection(
-            self.__proxy_handle, self.__proxy_thread,
-            int(x), int(y), SCP_SCAMP_PORT)
+            self.__proxy_handle, proxy, int(x), int(y), SCP_SCAMP_PORT)
 
     @overrides(SpallocJob.open_eieio_listener_connection)
-    def open_eieio_listener_connection(self):
-        self.__init_proxy()
+    def open_eieio_listener_connection(self) -> SpallocEIEIOListener:
+        proxy = self.__init_proxy()
         return _ProxiedEIEIOListener(
-            self.__proxy_handle, self.__proxy_thread, self.get_connections())
+            self.__proxy_handle, proxy, self.get_connections())
 
     @overrides(SpallocJob.open_udp_listener_connection)
-    def open_udp_listener_connection(self):
-        self.__init_proxy()
+    def open_udp_listener_connection(self) -> UDPConnection:
+        proxy = self.__init_proxy()
         return _ProxiedUDPListener(
-            self.__proxy_handle, self.__proxy_thread, self.get_connections())
+            self.__proxy_handle, proxy, self.get_connections())
 
     @overrides(SpallocJob.wait_for_state_change)
-    def wait_for_state_change(self, old_state):
+    def wait_for_state_change(self, old_state: SpallocState) -> SpallocState:
         while old_state != SpallocState.DESTROYED:
             obj = self._get(self._url, wait="true", timeout=None).json()
             s = SpallocState[obj["state"]]
@@ -552,7 +592,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         return old_state
 
     @overrides(SpallocJob.wait_until_ready)
-    def wait_until_ready(self):
+    def wait_until_ready(self) -> None:
         state = SpallocState.UNKNOWN
         while state != SpallocState.READY:
             state = self.wait_for_state_change(state)
@@ -560,47 +600,37 @@ class _SpallocJob(SessionAware, SpallocJob):
                 raise SpallocException("job was unexpectedly destroyed")
 
     @overrides(SpallocJob.destroy)
-    def destroy(self, reason="finished"):
+    def destroy(self, reason: str = "finished") -> None:
         if self.__keepalive_handle:
             self.__keepalive_handle.close()
             self.__keepalive_handle = None
         if self.__proxy_handle is not None:
-            self.__proxy_thread.close()
-            self.__proxy_ping.close()
+            if self.__proxy_thread:
+                self.__proxy_thread.close()
+            if self.__proxy_ping:
+                self.__proxy_ping.close()
             self.__proxy_handle.close()
         self._delete(self._url, reason=str(reason))
         logger.info("deleted job at {}", self._url)
 
     @overrides(SpallocJob.keepalive)
-    def keepalive(self):
+    def keepalive(self) -> None:
         self._put(self._keepalive_url, "alive")
 
     @overrides(SpallocJob.launch_keepalive_task)
-    def launch_keepalive_task(self, period=30):
+    def launch_keepalive_task(self, period: float = 30):
         """
         .. note::
             Tricky! *Cannot* be done with a thread, as the main thread is known
             to do significant amounts of CPU-intensive work.
         """
-        class Closer(AbstractContextManager):
-            def __init__(self):
-                self._queue = Queue(1)
-                self._p = None
-
-            def close(self):
-                self._queue.put("quit")
-                # Give it a second, and if it still isn't dead, kill it
-                p.join(1)
-                if p.is_alive():
-                    p.kill()
-
-        self._keepalive_handle = Closer()
+        self._keepalive_handle = __Closer()
         # pylint: disable=protected-access
         p = Process(target=_SpallocKeepalive, args=(
-            self._keepalive_url, 0 + period, self._keepalive_handle._queue,
+            self._keepalive_url, 0 + period, self._keepalive_handle.queue,
             *self._session_credentials), daemon=True)
         p.start()
-        self._keepalive_handle._p = p
+        self._keepalive_handle.p = p
         return self._keepalive_handle
 
     @overrides(SpallocJob.where_is_machine)
@@ -613,11 +643,11 @@ class _SpallocJob(SessionAware, SpallocJob):
             r.json()["physical-board-coordinates"]))
 
     @property
-    def _keepalive_handle(self):
+    def _keepalive_handle(self) -> Optional[__Closer]:
         return self.__keepalive_handle
 
     @_keepalive_handle.setter
-    def _keepalive_handle(self, handle):
+    def _keepalive_handle(self, handle: __Closer):
         if self.__keepalive_handle is not None:
             raise SpallocException("cannot keep job alive from two tasks")
         self.__keepalive_handle = handle
@@ -626,7 +656,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     def create_transceiver(self) -> Transceiver:
         if self.get_state() != SpallocState.READY:
             raise SpallocException("job not ready to execute scripts")
-        proxies = [
+        proxies: List[Connection] = [
             self.connect_to_board(x, y) for (x, y) in self.get_connections()]
         # Also need a boot connection
         proxies.append(self.connect_for_booting())
@@ -645,8 +675,8 @@ class _ProxiedConnection(metaclass=AbstractBase):
     """
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
-        self.__ws = ws
-        self.__receiver = receiver
+        self.__ws: Optional[WebSocket] = ws
+        self.__receiver: Optional[_ProxyReceiver] = receiver
         self.__msgs: queue.SimpleQueue = queue.SimpleQueue()
         self.__call_queue: queue.Queue = queue.Queue(1)
         self.__call_lock = threading.RLock()
@@ -656,7 +686,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     @abstractmethod
     def _open_connection(self) -> int:
-        pass
+        raise NotImplementedError
 
     def _call(self, proto: ProxyProtocol, packer: struct.Struct,
               unpacker: struct.Struct, *args) -> Collection[int]:
@@ -682,6 +712,10 @@ class _ProxiedConnection(metaclass=AbstractBase):
         """
         if not self._connected:
             raise IOError("socket closed")
+        if not self.__receiver:
+            raise IOError("socket closed")
+        if not self.__ws:
+            raise IOError("socket closed")
         with self.__call_lock:
             # All calls via websocket use correlation_id
             correlation_id = self.__receiver.expect_return(
@@ -701,32 +735,37 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     @property
     def _connected(self) -> bool:
-        return self.__ws and self.__ws.connected
+        return bool(self.__ws and self.__ws.connected)
 
-    def _throw_if_closed(self):
+    def _throw_if_closed(self) -> None:
         if not self._connected:
             raise IOError("socket closed")
 
-    def _close(self):
+    def _close(self) -> None:
         if self._connected:
             channel_id, = self._call(
                 ProxyProtocol.CLOSE, _close_req, _open_close_res,
                 self.__handle)
             if channel_id != self.__handle:
                 raise IOError("failed to close proxy socket")
-        self.__receiver.unlisten(self.__handle)
+        if self.__receiver:
+            self.__receiver.unlisten(self.__handle)
         self.__ws = None
         self.__receiver = None
 
     def _send(self, message: bytes):
         self._throw_if_closed()
         # Put the header on the front and send it
+        if not self.__ws:
+            raise IOError("socket closed")
         self.__ws.send_binary(_msg.pack(
             ProxyProtocol.MSG, self.__handle) + message)
 
     def _send_to(self, message: bytes, x: int, y: int, port: int):
         self._throw_if_closed()
         # Put the header on the front and send it
+        if not self.__ws:
+            raise IOError("socket closed")
         self.__ws.send_binary(_msg_to.pack(
             ProxyProtocol.MSG_TO, self.__handle, x, y, port) + message)
 
@@ -759,7 +798,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
                 self._throw_if_closed()
                 raise SpinnmanTimeoutException("receive", timeout) from e
 
-    def _is_ready_to_receive(self, timeout=0) -> bool:
+    def _is_ready_to_receive(self, timeout: float = 0) -> bool:
         # If we already have a message or the queue peek succeeds, return now
         if self.__current_msg is not None or not self.__msgs.empty():
             return True
@@ -845,11 +884,11 @@ class _ProxiedUnboundConnection(
         return self._connected
 
     @overrides(Connection.close)
-    def close(self):
+    def close(self) -> None:
         self._close()
 
     @overrides(SpallocProxiedConnection.send)
-    def send(self, data: bytes):
+    def send(self, data: bytes) -> None:
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
@@ -902,7 +941,7 @@ class _ProxiedEIEIOConnection(
 
     @property
     @overrides(SpallocEIEIOConnection._coords)
-    def _coords(self):
+    def _coords(self) -> XY:
         return self.__chip_x, self.__chip_y
 
     def send_to(
@@ -923,7 +962,7 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
     __slots__ = ("__conns", )
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
-                 conns: Dict[Tuple[int, int], str]):
+                 conns: Dict[XY, str]):
         super().__init__(ws, receiver)
         # Invert the map
         self.__conns = {ip: xy for (xy, ip) in conns.items()}
@@ -946,7 +985,7 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
         return self._port or 0
 
     @overrides(SpallocEIEIOListener._get_chip_coords)
-    def _get_chip_coords(self, ip_address: str) -> Tuple[int, int]:
+    def _get_chip_coords(self, ip_address: str) -> XY:
         return self.__conns[str(ip_address)]
 
     def __str__(self):
@@ -957,7 +996,7 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
     __slots__ = ("__conns", )
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
-                 conns: Dict[Tuple[int, int], str]):
+                 conns: Dict[XY, str]):
         super().__init__(ws, receiver)
         # Invert the map
         self.__conns = {ip: xy for (xy, ip) in conns.items()}

@@ -33,6 +33,7 @@ class Listenable(Generic[T], metaclass=AbstractBase):
         """
         Get the method that receives for this connection.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def is_ready_to_receive(self, timeout: float = 0) -> bool:
@@ -44,3 +45,4 @@ class Listenable(Generic[T], metaclass=AbstractBase):
         :return: True if there is an SCP packet to be read
         :rtype: bool
         """
+        raise NotImplementedError

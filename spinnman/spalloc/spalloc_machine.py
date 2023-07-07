@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Set, Tuple
+from typing import FrozenSet, Tuple
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
@@ -30,13 +30,15 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
         The name of the machine.
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
-    def tags(self) -> Set[str]:
+    def tags(self) -> FrozenSet[str]:
         """
         The tags of the machine.
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -44,6 +46,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
         The width of the machine, in boards.
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -51,6 +54,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
         The height of the machine, in boards.
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -58,6 +62,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
         The dead or out-of-service boards of the machine.
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -65,6 +70,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         """
         The dead or out-of-service links of the machine.
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -75,6 +81,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         :return: width, height
         :rtype: tuple(int,int)
         """
+        raise NotImplementedError
 
 # TODO: Add in where-is operations
 # Not yet done because not needed immediately for toolchain

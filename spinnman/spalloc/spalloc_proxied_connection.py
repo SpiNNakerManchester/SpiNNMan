@@ -32,6 +32,7 @@ class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):
 
         :param data: The message to send.
         """
+        raise NotImplementedError
 
     @abstractmethod
     def receive(self, timeout: Optional[float] = None) -> bytes:
@@ -48,3 +49,4 @@ class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):
         :raises SpinnmanTimeoutException:
             If a timeout happens
         """
+        raise NotImplementedError

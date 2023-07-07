@@ -17,7 +17,7 @@ API of the client for the Spalloc web service.
 
 import struct
 from typing import Dict, Iterable, Tuple, Optional
-from spinn_utilities.abstract_base import (AbstractBase, abstractmethod)
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from .spalloc_machine import SpallocMachine
 from .spalloc_job import SpallocJob
 
@@ -43,6 +43,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
             Mapping from machine names to handles for working with a machine.
         :rtype: dict(str,SpallocMachine)
         """
+        raise NotImplementedError
 
     @abstractmethod
     def list_jobs(self, deleted: bool = False) -> Iterable[SpallocJob]:
@@ -53,6 +54,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: The jobs known to the server.
         :rtype: ~typing.Iterable(SpallocJob)
         """
+        raise NotImplementedError
 
     @abstractmethod
     def create_job(
@@ -72,6 +74,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
+        raise NotImplementedError
 
     @abstractmethod
     def create_job_rect(
@@ -93,6 +96,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
+        raise NotImplementedError
 
     @abstractmethod
     def create_job_board(
@@ -120,3 +124,4 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
+        raise NotImplementedError

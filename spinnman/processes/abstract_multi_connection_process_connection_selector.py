@@ -34,3 +34,4 @@ class ConnectionSelector(object, metaclass=AbstractBase):
         :param AbstractSCPRequest message: The SCP message to be sent
         :rtype: SCAMPConnection
         """
+        raise NotImplementedError

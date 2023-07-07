@@ -19,6 +19,7 @@ import struct
 from typing import Callable, Optional, Tuple
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XY
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.connections.udp_packet_connections import EIEIOConnection
 from spinnman.constants import SCP_SCAMP_PORT
@@ -69,7 +70,7 @@ class SpallocEIEIOListener(
         """
 
     @abstractmethod
-    def _get_chip_coords(self, ip_address: str) -> Tuple[int, int]:
+    def _get_chip_coords(self, ip_address: str) -> XY:
         """
         Get the coordinates of a chip given its IP address.
 
@@ -78,6 +79,7 @@ class SpallocEIEIOListener(
         :return: Ethernet-enabled chip coordinates: X, Y
         :rtype: tuple(int, int)
         """
+        raise NotImplementedError
 
     @abstractmethod
     def send_to_chip(
@@ -96,6 +98,7 @@ class SpallocEIEIOListener(
             The UDP port on the Ethernet-enabled chip to send the message to.
             Defaults to the SCP port.
         """
+        raise NotImplementedError
 
     def send_to(self, data: bytes, address: Tuple[str, int]):
         """
@@ -121,6 +124,7 @@ class SpallocEIEIOListener(
         :return: The IP address as a dotted string, e.g., 0.0.0.0
         :rtype: str
         """
+        raise NotImplementedError
 
     @property
     @abstractmethod
@@ -131,6 +135,7 @@ class SpallocEIEIOListener(
         :return: The local port number
         :rtype: int
         """
+        raise NotImplementedError
 
     def send_eieio_message_to_core(
             self, eieio_message: AbstractEIEIOMessage, x: int, y: int, p: int,

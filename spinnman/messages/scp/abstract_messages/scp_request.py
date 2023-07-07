@@ -154,3 +154,4 @@ class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
         :return: An SCP response, or `None` if no response is required
         :rtype: AbstractSCPResponse
         """
+        raise NotImplementedError

@@ -16,9 +16,10 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XY
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.connections.udp_packet_connections import EIEIOConnection
 from spinnman.exceptions import SpinnmanTimeoutException
@@ -78,12 +79,13 @@ class SpallocEIEIOConnection(
 
     @property
     @abstractmethod
-    def _coords(self) -> Tuple[int, int]:
+    def _coords(self) -> XY:
         """
         The X, Y coordinates of the chip this connection is connected to.
 
         :rtype: tuple(int,int)
         """
+        raise NotImplementedError
 
     def update_tag(self, tag: int, do_receive: bool = True):
         """
