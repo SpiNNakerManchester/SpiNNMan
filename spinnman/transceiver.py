@@ -56,17 +56,21 @@ from spinnman.model import (
     ADCInfo, CPUInfo, CPUInfos, DiagnosticFilter,
     ChipSummaryInfo, ExecutableTargets,
     HeapElement, IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
-from spinnman.model.enums import CPUState
-from spinnman.messages.sdp import SDPMessage
-from spinnman.messages.spinnaker_boot import (
-    SystemVariableDefinition, SpinnakerBootMessages)
+from spinnman.model.enums import (
+    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES)
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest, AbstractSCPResponse)
 from spinnman.messages.scp.enums import Signal, PowerCommand, LEDAction
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
-    CountState, WriteMemory, SetLED, SendSignal, AppStop,
+    CountState, WriteMemory, SetLED, SendSignal, AppStop, CheckOKResponse,
     IPTagSet, IPTagClear, RouterClear, DoSync, GetChipInfo)
+from spinnman.messages.scp.impl.get_chip_info_response import (
+    GetChipInfoResponse)
+from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
+from spinnman.messages.spinnaker_boot import (
+    SystemVariableDefinition, SpinnakerBootMessages)
 from spinnman.connections.abstract_classes import Connection
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection, SDPConnection)
@@ -82,10 +86,6 @@ from spinnman.processes import (
     ConnectionSelector)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
-from spinnman.messages.scp.impl import CheckOKResponse
-from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
-from spinnman.messages.scp.impl.get_chip_info_response import (
-    GetChipInfoResponse)
 
 #: Type of a connection.
 #: :meta private:
@@ -2739,6 +2739,26 @@ class Transceiver(AbstractContextManager):
         :param bool do_sync: Whether to synchronise or not
         """
         self.__call(DoSync(do_sync))
+
+    def update_provenance_and_exit(self, x: int, y: int, p: int):
+        """
+        Sends a command to update prevenance and exit
+
+        :param int x:
+            The x-coordinate of the core
+        :param int y:
+            The y-coordinate of the core
+        :param int p:
+            The processor on the core
+        """
+        # Send these signals to make sure the application isn't stuck
+        self.send_sdp_message(SDPMessage(
+            sdp_header=SDPHeader(
+                flags=SDPFlag.REPLY_NOT_EXPECTED,
+                destination_port=SDP_PORTS.RUNNING_COMMAND_SDP_PORT.value,
+                destination_chip_x=x, destination_chip_y=y, destination_cpu=p),
+            data=_ONE_WORD.pack(SDP_RUNNING_MESSAGE_CODES
+                                .SDP_UPDATE_PROVENCE_REGION_AND_EXIT.value)))
 
     def __str__(self) -> str:
         addr = self._scamp_connections[0].remote_ip_address
