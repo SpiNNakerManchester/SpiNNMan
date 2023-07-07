@@ -14,7 +14,7 @@
 
 import unittest
 from spinn_utilities.exceptions import (DataNotYetAvialable)
-from spinnman.config_setup import unittest_setup
+from spinnman.config_setup import unittest_setup, setup_spin1
 from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.transceiver import Transceiver
@@ -32,6 +32,7 @@ class TestData(unittest.TestCase):
 
     def setUp(cls):
         unittest_setup()
+        setup_spin1()
 
     def test_setup(self):
         # What happens before setup depends on the previous test
@@ -42,6 +43,7 @@ class TestData(unittest.TestCase):
 
     def test_mock(self):
         SpiNNManDataWriter.mock()
+
         # check there is a
         #   value not what it is
         SpiNNManDataView.get_machine()

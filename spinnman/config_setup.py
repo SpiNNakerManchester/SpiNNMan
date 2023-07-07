@@ -16,6 +16,8 @@ import os
 from spinn_utilities.config_holder import (
     add_default_cfg, clear_cfg_files)
 from spinn_machine.config_setup import add_spinn_machine_cfg
+from spinn_machine.config_setup import setup_spin1 as machine_spin1
+from spinn_machine.config_setup import setup_spin2 as machine_spin2
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 
 BASE_CONFIG_FILE = "spinnman.cfg"
@@ -40,3 +42,21 @@ def add_spinnman_cfg():
     """
     add_spinn_machine_cfg()  # This add its dependencies too
     add_default_cfg(os.path.join(os.path.dirname(__file__), BASE_CONFIG_FILE))
+
+
+def setup_spin1():
+    """
+    Changes any board type settings to the Values required for a Spin1 board
+
+    :raises SpinnMachineException: If called after a Machine has been created
+    """
+    machine_spin1()
+
+
+def setup_spin2():
+    """
+    Changes any board type settings to the Values required for a Spin2 board
+
+    :raises SpinnMachineException: If called after a Machine has been created
+    """
+    machine_spin2()
