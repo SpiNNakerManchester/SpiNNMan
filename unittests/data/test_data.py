@@ -27,6 +27,11 @@ class MockTranceiver(Transceiver):
         Hide normal init
         """
 
+    def close(self):
+        """
+        Hide normal close
+        """
+
 
 class TestData(unittest.TestCase):
 
