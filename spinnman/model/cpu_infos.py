@@ -110,13 +110,13 @@ class CPUInfos(object):
         """
         return self._cpu_infos[x, y, p]
 
-    def infos_for_state(self, state: CPUState):
+    def infos_for_state(self, state: CPUState) -> 'CPUInfos':
         """
         Creates a new CpuInfos object with Just the Infos that match the state.
 
         :param ~spinnman.model.enums.CPUState state:
         :return: New Infos object with the filtered infos if any
-        :rtype: CPUInfo
+        :rtype: CPUInfos
         """
         for_state = CPUInfos()
         for info in self._cpu_infos.values():
