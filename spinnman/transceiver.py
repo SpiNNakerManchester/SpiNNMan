@@ -31,8 +31,7 @@ from spinn_machine import CoreSubsets
 from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
-    CPU_USER_0_START_ADDRESS, CPU_USER_1_START_ADDRESS,
-    CPU_USER_2_START_ADDRESS, CPU_USER_3_START_ADDRESS,
+    CPU_MAX_USER, CPU_USER_OFFSET, CPU_USER_START_ADDRESS,
     IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, SYSTEM_VARIABLE_BASE_ADDRESS,
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
@@ -45,11 +44,14 @@ from spinnman.exceptions import (
     SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
 from spinnman.model import CPUInfos, DiagnosticFilter, MachineDimensions
-from spinnman.model.enums import CPUState
+from spinnman.model.enums import (
+    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES)
+from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
+from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
-from spinnman.messages.scp.enums import Signal, PowerCommand
+from spinnman.messages.scp.enums import PowerCommand
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
@@ -933,6 +935,19 @@ class Transceiver(AbstractContextManager):
         cpu_info = process.get_cpu_info(core_subsets)
         return cpu_info
 
+    def get_clock_drift(self, x, y):
+        """
+        Get the clock drift
+        :param int x: The x-coordinate of the chip to get drift for
+        :param int y: The y-coordinate of the chip to get drift for
+        """
+        DRIFT_FP = 1 << 17
+
+        drift = self._get_sv_data(x, y, SystemVariableDefinition.clock_drift)
+        drift = struct.unpack("<i", struct.pack("<I", drift))[0]
+        drift = drift / DRIFT_FP
+        return drift
+
     def _get_sv_data(self, x, y, data_item):
         """
         :param int x:
@@ -948,7 +963,7 @@ class Transceiver(AbstractContextManager):
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
     @staticmethod
-    def get_user_0_register_address_from_core(p):
+    def __get_user_register_address_from_core(p, user):
         """
         Get the address of user 0 for a given processor on the board.
 
@@ -957,14 +972,19 @@ class Transceiver(AbstractContextManager):
             memory regions.
 
         :param int p: The ID of the processor to get the user 0 address from
+        :param int user: The user number to get the address for
         :return: The address for user 0 register for this processor
         :rtype: int
         """
-        return get_vcpu_address(p) + CPU_USER_0_START_ADDRESS
+        if user < 0 or user > CPU_MAX_USER:
+            raise ValueError(
+                f"Incorrect user number {user}")
+        return (get_vcpu_address(p) + CPU_USER_START_ADDRESS +
+                CPU_USER_OFFSET * user)
 
-    def read_user_0(self, x, y, p):
+    def read_user(self, x, y, p, user):
         """
-        Get the contents of the user_0 register for the given processor.
+        Get the contents of the this user register for the given processor.
 
         .. note::
             Conventionally, user_0 usually holds the address of the table of
@@ -973,6 +993,7 @@ class Transceiver(AbstractContextManager):
         :param int x: X coordinate of the chip
         :param int y: Y coordinate of the chip
         :param int p: Virtual processor identifier on the chip
+        :param int user: The user number to read data for
         :rtype: int
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -983,61 +1004,8 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_0_register_address_from_core(p)
+        addr = self.__get_user_register_address_from_core(p, user)
         return self.read_word(x, y, addr)
-
-    def read_user_1(self, x, y, p):
-        """
-        Get the contents of the user_1 register for the given processor.
-
-        :param int x: X coordinate of the chip
-        :param int y: Y coordinate of the chip
-        :param int p: Virtual processor identifier on the chip
-        :rtype: int
-        :raise SpinnmanIOException:
-            If there is an error communicating with the board
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            If x, y, p does not identify a valid processor
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        addr = self.get_user_1_register_address_from_core(p)
-        return self.read_word(x, y, addr)
-
-    @staticmethod
-    def get_user_1_register_address_from_core(p):
-        """
-        Get the address of user 1 for a given processor on the board.
-
-        :param int p: The ID of the processor to get the user 1 address from
-        :return: The address for user 1 register for this processor
-        :rtype: int
-        """
-        return get_vcpu_address(p) + CPU_USER_1_START_ADDRESS
-
-    @staticmethod
-    def get_user_2_register_address_from_core(p):
-        """
-        Get the address of user 2 for a given processor on the board.
-
-        :param int p: The ID of the processor to get the user 2 address from
-        :return: The address for user 2 register for this processor
-        :rtype: int
-        """
-        return get_vcpu_address(p) + CPU_USER_2_START_ADDRESS
-
-    @staticmethod
-    def get_user_3_register_address_from_core(p):
-        """
-        Get the address of user 3 for a given processor on the board.
-
-        :param int p: The ID of the processor to get the user 3 address from
-        :return: The address for user 3 register for this processor
-        :rtype: int
-        """
-        return get_vcpu_address(p) + CPU_USER_3_START_ADDRESS
 
     def get_cpu_information_from_core(self, x, y, p):
         """
@@ -1366,7 +1334,7 @@ class Transceiver(AbstractContextManager):
                 raise SpinnmanException(
                     f"Only {count} of {executable_targets.total_processors} "
                     "cores reached ready state: "
-                    f"{self.get_core_status_string(cores_ready)}")
+                    f"{cores_ready.get_status_string()}")
 
         # Send a signal telling the application to start
         self.send_signal(app_id, Signal.START)
@@ -1639,9 +1607,9 @@ class Transceiver(AbstractContextManager):
                 x, y, cpu, base_address, data, offset, n_bytes, get_sum)
         return n_bytes, chksum
 
-    def write_user_0(self, x, y, p, value):
+    def write_user(self, x, y, p, user, value):
         """
-        Write to the user_0 register for the given processor.
+        Write to the this user register for the given processor.
 
         .. note::
             Conventionally, user_0 usually holds the address of the table of
@@ -1650,6 +1618,7 @@ class Transceiver(AbstractContextManager):
         :param int x: X coordinate of the chip
         :param int y: Y coordinate of the chip
         :param int p: Virtual processor identifier on the chip
+        :param int user: The user number of write data for
         :param int value: The value to write
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -1660,27 +1629,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        addr = self.get_user_0_register_address_from_core(p)
-        self.write_memory(x, y, addr, int(value))
-
-    def write_user_1(self, x, y, p, value):
-        """
-        Write to the user_1 register for the given processor.
-
-        :param int x: X coordinate of the chip
-        :param int y: Y coordinate of the chip
-        :param int p: Virtual processor identifier on the chip
-        :param int value: The value to write
-        :raise SpinnmanIOException:
-            If there is an error communicating with the board
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            If x, y, p does not identify a valid processor
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        addr = self.get_user_1_register_address_from_core(p)
+        addr = self.__get_user_register_address_from_core(p, user)
         self.write_memory(x, y, addr, int(value))
 
     def write_neighbour_memory(self, x, y, link, base_address, data,
@@ -2101,7 +2050,7 @@ class Transceiver(AbstractContextManager):
         :param states: The state or states to filter on
         :type states: CPUState or set(CPUState)
         :return: Core subsets object containing cores not in the given state(s)
-        :rtype: ~spinn_machine.CoreSubsets
+        :rtype: CPUInfos
         """
         core_infos = self.get_cpu_information(all_core_subsets)
         cores_not_in_state = CPUInfos()
@@ -2114,33 +2063,6 @@ class Transceiver(AbstractContextManager):
                 cores_not_in_state.add_processor(
                     core_info.x, core_info.y, core_info.p, core_info)
         return cores_not_in_state
-
-    def get_core_status_string(self, cpu_infos):
-        """
-        Get a string indicating the status of the given cores.
-
-        :param CPUInfos cpu_infos: A CPUInfos objects
-        :rtype: str
-        """
-        break_down = "\n"
-        for (x, y, p), core_info in cpu_infos.cpu_infos:
-            if core_info.state == CPUState.RUN_TIME_EXCEPTION:
-                break_down += "    {}:{}:{} (ph: {}) in state {}:{}\n".format(
-                    x, y, p, core_info.physical_cpu_id, core_info.state.name,
-                    core_info.run_time_error.name)
-                break_down += "        r0={}, r1={}, r2={}, r3={}\n".format(
-                    core_info.registers[0], core_info.registers[1],
-                    core_info.registers[2], core_info.registers[3])
-                break_down += "        r4={}, r5={}, r6={}, r7={}\n".format(
-                    core_info.registers[4], core_info.registers[5],
-                    core_info.registers[6], core_info.registers[7])
-                break_down += "        PSR={}, SP={}, LR={}\n".format(
-                    core_info.processor_state_register,
-                    core_info.stack_pointer, core_info.link_register)
-            else:
-                break_down += "    {}:{}:{} in state {}\n".format(
-                    x, y, p, core_info.state.name)
-        return break_down
 
     def send_signal(self, app_id, signal):
         """
@@ -2710,17 +2632,12 @@ class Transceiver(AbstractContextManager):
             logger.info(self.__where_is_xy(x, y))
             raise
 
-    def clear_router_diagnostic_counters(self, x, y, enable=True,
-                                         counter_ids=None):
+    def clear_router_diagnostic_counters(self, x, y):
         """
         Clear router diagnostic information on a chip.
 
         :param int x: The x-coordinate of the chip
         :param int y: The y-coordinate of the chip
-        :param bool enable: True (default) if the counters should be enabled
-        :param iterable(int) counter_ids:
-            The IDs of the counters to reset (all by default)
-            and enable if enable is True; each must be between 0 and 15
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2732,21 +2649,10 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         try:
-            if counter_ids is None:
-                counter_ids = range(0, 16)
-            clear_data = 0
-            for counter_id in counter_ids:
-                if counter_id < 0 or counter_id > 15:
-                    raise SpinnmanInvalidParameterException(
-                        "counter_id", counter_id,
-                        "Diagnostic counter IDs must be between 0 and 15")
-                clear_data |= 1 << counter_id
-            if enable:
-                for counter_id in counter_ids:
-                    clear_data |= 1 << counter_id + 16
             process = SendSingleCommandProcess(self._scamp_connection_selector)
+            # Clear all
             process.execute(WriteMemory(
-                x, y, 0xf100002c, _ONE_WORD.pack(clear_data)))
+                x, y, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
@@ -2820,6 +2726,26 @@ class Transceiver(AbstractContextManager):
         """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(DoSync(do_sync))
+
+    def update_provenance_and_exit(self, x, y, p):
+        """
+        Sends a command to update prevenance and exit
+
+        :param int x:
+            The x-coordinate of the core
+        :param int y:
+            The y-coordinate of the core
+        :param int p:
+            The processor on the core
+        """
+        # Send these signals to make sure the application isn't stuck
+        self.send_sdp_message(SDPMessage(
+            sdp_header=SDPHeader(
+                flags=SDPFlag.REPLY_NOT_EXPECTED,
+                destination_port=SDP_PORTS.RUNNING_COMMAND_SDP_PORT.value,
+                destination_chip_x=x, destination_chip_y=y, destination_cpu=p),
+            data=_ONE_WORD.pack(SDP_RUNNING_MESSAGE_CODES
+                                .SDP_UPDATE_PROVENCE_REGION_AND_EXIT.value)))
 
     def __str__(self):
         addr = self._scamp_connections[0].remote_ip_address
