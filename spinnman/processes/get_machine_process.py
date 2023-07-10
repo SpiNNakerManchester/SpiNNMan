@@ -21,9 +21,9 @@ from spinn_utilities.config_holder import (
     get_config_bool, get_config_int, get_config_str)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import (Router, Chip, Link, machine_from_size)
+from spinn_utilities.logger_utils import warn_once
+from spinn_machine import (Router, Chip, Link,  Machine, machine_from_size)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
-from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
@@ -112,11 +112,22 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
-        max_sdram_size = get_config_int(
+        cfg_sdram_size = get_config_int(
             "Machine", "max_sdram_allowed_per_chip")
-        if (max_sdram_size is not None and
-                sdram_size > max_sdram_size):
-            sdram_size = max_sdram_size
+        if sdram_size != cfg_sdram_size:
+            if sdram_size > cfg_sdram_size:
+                warn_once(
+                    logger,
+                    f"SDRAM to be used reduced from {sdram_size} to "
+                    f"{cfg_sdram_size} due to max_sdram_allowed_per_chip"
+                    f" found in cfg")
+                sdram_size = cfg_sdram_size
+            if sdram_size < cfg_sdram_size:
+                warn_once(
+                    logger,
+                    f"SDRAM reported on the machine is {sdram_size}. "
+                    f"This is less than the expected {cfg_sdram_size}, "
+                    f"so mean cause unexpected behaviour")
 
         # Create the chip
         return Chip(
