@@ -77,7 +77,8 @@ from spinnman.connections.udp_packet_connections import (
 from spinnman.processes import (
     DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
-    GetCPUInfoProcess, ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
+    GetCPUInfoProcess, GetExcludeCPUInfoProcess, GetIncludeCPUInfoProcess,
+    ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
     LoadFixedRouteRoutingEntryProcess, FixedConnectionSelector,
     ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
@@ -912,9 +913,10 @@ class Transceiver(AbstractContextManager):
             logger.info("Found board with version {}", version_info)
         return version_info
 
-    def get_cpu_information(
-            self, core_subsets: Optional[CoreSubsets] = None
-            ) -> Sequence[CPUInfo]:
+    def get_cpu_infos(
+            self, core_subsets: Optional[CoreSubsets] = None,
+            states: Union[CPUState, Iterable[CPUState], None] = None,
+            include: bool = True) -> CPUInfos:
         """
         Get information about the processors on the board.
 
@@ -922,9 +924,15 @@ class Transceiver(AbstractContextManager):
             A set of chips and cores from which to get the
             information. If not specified, the information from all of the
             cores on all of the chips on the board are obtained.
-        :return: An iterable of the CPU information for the selected cores, or
-            all cores if core_subsets is not specified
-        :rtype: list(CPUInfo)
+        :param states: The state or states to filter on (if any)
+        :type states: None, CPUState or iterable(CPUState)
+        :param bool include:
+            If `True` includes only infos in the requested state(s).
+            If `False` includes only infos *not* in the requested state(s).
+            Ignored if states is `None`.
+        :return: The CPU information for the selected cores and States, or
+            all cores/states  if core_subsets/states is not specified
+        :rtype: ~spinnman.model.CPUInfos
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -943,7 +951,20 @@ class Transceiver(AbstractContextManager):
                     core_subsets.add_processor(
                         chip.x, chip.y, processor.processor_id)
 
-        process = GetCPUInfoProcess(self._scamp_connection_selector)
+        if states is None:
+            process = GetCPUInfoProcess(self._scamp_connection_selector)
+        else:
+            if isinstance(states, CPUState):
+                state_set = frozenset((states, ))
+            else:
+                state_set = frozenset(states)
+            if include:
+                process = GetIncludeCPUInfoProcess(
+                    self._scamp_connection_selector, state_set)
+            else:
+                process = GetExcludeCPUInfoProcess(
+                    self._scamp_connection_selector, state_set)
+
         return process.get_cpu_info(core_subsets)
 
     def get_clock_drift(self, x: int, y: int) -> float:
@@ -1042,7 +1063,8 @@ class Transceiver(AbstractContextManager):
         """
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        return next(iter(self.get_cpu_information(core_subsets)))
+        cpu_infos = self.get_cpu_infos(core_subsets)
+        return cpu_infos.get_cpu_info(x, y, p)
 
     def get_iobuf(self, core_subsets: Optional[CoreSubsets] = None
                   ) -> Iterable[IOBuffer]:
@@ -1288,8 +1310,9 @@ class Transceiver(AbstractContextManager):
         # Check that the binaries have reached a wait state
         count = self.get_core_state_count(app_id, CPUState.READY)
         if count < executable_targets.total_processors:
-            cores_ready = self.get_cores_not_in_state(
-                executable_targets.all_core_subsets, CPUState.READY)
+            cores_ready = self.get_cpu_infos(
+                executable_targets.all_core_subsets, CPUState.READY,
+                include=False)
             if len(cores_ready) > 0:
                 raise SpinnmanException(
                     f"Only {count} of {executable_targets.total_processors} "
@@ -1984,8 +2007,8 @@ class Transceiver(AbstractContextManager):
                     if error_cores > 0:
                         is_error = True
                 if is_error:
-                    error_core_states = self.get_cores_in_state(
-                        all_core_subsets, error_states)
+                    error_core_states = self.get_cpu_infos(
+                        all_core_subsets, error_states, True)
                     if len(error_core_states) > 0:
                         self.__log_where_is_info(error_core_states)
                         raise SpiNNManCoresNotInStateException(
@@ -1995,8 +2018,8 @@ class Transceiver(AbstractContextManager):
                 # do a full check if required
                 tries += 1
                 if tries >= counts_between_full_check:
-                    cores_in_state = self.get_cores_in_state(
-                        all_core_subsets, target_states)
+                    cores_in_state = self.get_cpu_infos(
+                        all_core_subsets, cpu_states, include=True)
                     processors_ready = len(cores_in_state)
                     tries = 0
 
@@ -2017,8 +2040,8 @@ class Transceiver(AbstractContextManager):
 
         # If we haven't reached the final state, do a final full check
         if processors_ready < len(all_core_subsets):
-            cores_not_in_state = self.get_cores_not_in_state(
-                all_core_subsets, target_states)
+            cores_not_in_state = self.get_cpu_infos(
+                all_core_subsets, cpu_states, include=False)
 
             # If we are sure we haven't reached the final state,
             # report a timeout error
@@ -2026,50 +2049,6 @@ class Transceiver(AbstractContextManager):
                 self.__log_where_is_info(cores_not_in_state)
                 raise SpiNNManCoresNotInStateException(
                     timeout, target_states, cores_not_in_state)
-
-    def get_cores_in_state(
-            self, all_core_subsets: Optional[CoreSubsets],
-            states: _States) -> CPUInfos:
-        """
-        Get all cores that are in a given state or set of states.
-
-        :param ~spinn_machine.CoreSubsets all_core_subsets:
-            The cores to filter
-        :param states: The state or states to filter on
-        :type states: CPUState or set(CPUState)
-        :return: Core subsets object containing cores in the given state(s)
-        :rtype: CPUInfos
-        """
-        core_infos = self.get_cpu_information(all_core_subsets)
-        cores_in_state = CPUInfos()
-        cpu_states = self.__state_set(states)
-        for core_info in core_infos:
-            if core_info.state in cpu_states:
-                cores_in_state.add_processor(
-                    core_info.x, core_info.y, core_info.p, core_info)
-        return cores_in_state
-
-    def get_cores_not_in_state(
-            self, all_core_subsets: CoreSubsets,
-            states: _States) -> CPUInfos:
-        """
-        Get all cores that are not in a given state or set of states.
-
-        :param ~spinn_machine.CoreSubsets all_core_subsets:
-            The cores to filter
-        :param states: The state or states to filter on
-        :type states: CPUState or set(CPUState)
-        :return: Core subsets object containing cores not in the given state(s)
-        :rtype: CPUInfos
-        """
-        core_infos = self.get_cpu_information(all_core_subsets)
-        cores_not_in_state = CPUInfos()
-        cpu_states = self.__state_set(states)
-        for core_info in core_infos:
-            if core_info.state not in cpu_states:
-                cores_not_in_state.add_processor(
-                    core_info.x, core_info.y, core_info.p, core_info)
-        return cores_not_in_state
 
     def send_signal(self, app_id: int, signal: Signal):
         """

@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import functools
-from typing import List, Sequence
+import struct
 from spinn_machine import CoreSubsets
-from spinnman.model import CPUInfo
+from spinnman.model import CPUInfo, CPUInfos
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
@@ -23,24 +23,31 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
 
+_INFO_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
+
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
-    __slots__ = ("_cpu_info", )
+    __slots__ = ("_cpu_infos", )
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
         :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
-        self._cpu_info: List[CPUInfo] = list()
+        self._cpu_infos = CPUInfos()
+
+    def _filter_and_add_repsonse(
+            self, x: int, y: int, p: int, cpu_data: bytes):
+        self._cpu_infos.add_info(CPUInfo(x, y, p, cpu_data))
 
     def __handle_response(self, x: int, y: int, p: int, response: Response):
-        self._cpu_info.append(CPUInfo(x, y, p, response.data, response.offset))
+        cpu_data = _INFO_PATTERN.unpack_from(response.data, response.offset)
+        self._filter_and_add_repsonse(x, y, p, cpu_data)
 
-    def get_cpu_info(self, core_subsets: CoreSubsets) -> Sequence[CPUInfo]:
+    def get_cpu_info(self, core_subsets: CoreSubsets) -> CPUInfos:
         """
         :param ~spinn_machine.CoreSubsets core_subsets:
-        :rtype: list(CPUInfo)
+        :rtype: CPUInfos
         """
         with self._collect_responses():
             for core_subset in core_subsets:
@@ -50,4 +57,4 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
                         ReadMemory(x, y, get_vcpu_address(p), CPU_INFO_BYTES),
                         functools.partial(self.__handle_response, x, y, p))
 
-        return self._cpu_info
+        return self._cpu_infos

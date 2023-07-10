@@ -27,15 +27,25 @@ class CPUInfos(object):
     def __init__(self) -> None:
         self._cpu_infos: Dict[Tuple[int, int, int], CPUInfo] = dict()
 
+    def add_info(self, cpu_info: CPUInfo):
+        """
+        Add a info on using its core coordinates.
+
+        :param ~spinnman.model.CPUInfo cpu_info:
+        """
+        self._cpu_infos[cpu_info.x, cpu_info.y, cpu_info.p] = cpu_info
+
     def add_processor(self, x: int, y: int, processor_id: int,
                       cpu_info: CPUInfo):
         """
-        Add a processor on a given chip to the set.
+        Add a info on a given core.
 
         :param int x: The x-coordinate of the chip
         :param int y: The y-coordinate of the chip
         :param int processor_id: A processor ID
-        :param CPUInfo cpu_info: The CPU information for the core
+        :param CPUInfo cpu_info:
+            The CPU information for the core.
+            Not checked so could be None at test own risk
         """
         self._cpu_infos[x, y, processor_id] = cpu_info
 
@@ -45,6 +55,7 @@ class CPUInfos(object):
         The one per core core info.
 
         :return: iterable of x,y,p core info
+        :rtype: iterable(~spinnman.model.CPUInfo)
         """
         return iter(self._cpu_infos.items())
 
@@ -54,6 +65,7 @@ class CPUInfos(object):
     def iteritems(self) -> Iterator[Tuple[Tuple[int, int, int], CPUInfo]]:
         """
         Get an iterable of (x, y, p), cpu_info.
+        :rtype: (iterable(tuple(int, int, int),  ~spinnman.model.CPUInfo)
         """
         return iter(self._cpu_infos.items())
 
@@ -92,9 +104,25 @@ class CPUInfos(object):
 
     def get_cpu_info(self, x: int, y: int, p: int) -> CPUInfo:
         """
-        Get the information for the given core on the given chip.
+        Get the information for the given core on the given core
+
+        :rtype: CpuInfo
         """
         return self._cpu_infos[x, y, p]
+
+    def infos_for_state(self, state: CPUState):
+        """
+        Creates a new CpuInfos object with Just the Infos that match the state.
+
+        :param ~spinnman.model.enums.CPUState state:
+        :return: New Infos object with the filtered infos if any
+        :rtype: CPUInfo
+        """
+        for_state = CPUInfos()
+        for info in self._cpu_infos.values():
+            if info.state == state:
+                for_state.add_info(info)
+        return for_state
 
     def get_status_string(self) -> str:
         """

@@ -50,13 +50,12 @@ class CPUInfo(object):
         "_user",
         "_x", "_y", "_p"]
 
-    def __init__(self, x: int, y: int, p: int, cpu_data: bytes, offset: int):
+    def __init__(self, x: int, y: int, p: int, cpu_data: bytes):
         """
         :param int x: The x-coordinate of a chip
         :param int y: The y-coordinate of a chip
         :param int p: The ID of a core on the chip
-        :param bytes cpu_data: A byte-string received from SDRAM on the board
-        :param int offset:
+        :param tuple cpu_data: A byte-string received from SDRAM on the board
         """
         # pylint: disable=too-many-arguments
         self._x = x
@@ -78,7 +77,7 @@ class CPUInfo(object):
          self._iobuf_address, self._software_version,                # 2I  88
          # skipped                                                   # 16x 96
          user0, user1, user2, user3                                  # 4I  112
-         ) = _INFO_PATTERN.unpack_from(cpu_data, offset)
+         ) = cpu_data
 
         index = self._application_name.find(b'\0')
         if index != -1:
