@@ -66,11 +66,12 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     """
     __slots__ = ("__session",
                  "__machines_url", "__jobs_url", "version",
-                 "__group", "__collab", "__nmpi_job")
+                 "__group", "__collab", "__nmpi_job", "__nmpi_user")
 
     def __init__(
             self, service_url, username=None, password=None,
-            bearer_token=None, group=None, collab=None, nmpi_job=None):
+            bearer_token=None, group=None, collab=None, nmpi_job=None,
+            nmpi_user=None):
         """
         :param str service_url: The reference to the service.
             May have username and password supplied as part of the network
@@ -93,6 +94,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         self.__group = group
         self.__collab = collab
         self.__nmpi_job = nmpi_job
+        self.__nmpi_user = nmpi_user
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
@@ -168,6 +170,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             create["nmpi-collab"] = self.__collab
         if self.__nmpi_job is not None:
             create["nmpi-job-id"] = self.__nmpi_job
+            if self.__nmpi_user is not None:
+                create["owner"] = self.__nmpi_user
         r = self.__session.post(self.__jobs_url, create, timeout=30)
         url = r.headers["Location"]
         return _SpallocJob(self.__session, url)
