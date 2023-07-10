@@ -236,7 +236,8 @@ def print_transceiver_tests(transceiver):
 
     with Section("Load Routes"):
         routes = [MulticastRoutingEntry(0x10000000, 0xFFFF7000,
-                  (1, 2, 3, 4, 5), (0, 1, 2), False)]
+                  processor_ids=(1, 2, 3, 4, 5), link_ids=(0, 1, 2),
+                  defaultable=False)]
         transceiver.load_multicast_routes(0, 0, routes, app_id)
         routes = transceiver.get_multicast_routes(0, 0, app_id)
         for route in routes:

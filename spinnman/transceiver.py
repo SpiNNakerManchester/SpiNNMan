@@ -40,7 +40,7 @@ from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
-    CPU_MAX_USER, CPU_USER_OFFSET, CPU_USER_START_ADDRESS,
+    CPU_USER_OFFSET, CPU_USER_START_ADDRESS,
     IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, SYSTEM_VARIABLE_BASE_ADDRESS,
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
@@ -57,7 +57,7 @@ from spinnman.model import (
     ChipSummaryInfo, ExecutableTargets,
     HeapElement, IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
 from spinnman.model.enums import (
-    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES)
+    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, AbstractSCPResponse)
 from spinnman.messages.scp.enums import Signal, PowerCommand, LEDAction
@@ -977,7 +977,7 @@ class Transceiver(AbstractContextManager):
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
     @staticmethod
-    def __get_user_register_address_from_core(p: int, user: int):
+    def __get_user_register_address_from_core(p: int, user: UserRegister):
         """
         Get the address of user *N* for a given processor on the board.
 
@@ -990,13 +990,13 @@ class Transceiver(AbstractContextManager):
         :return: The address for user N register for this processor
         :rtype: int
         """
-        if user < 0 or user > CPU_MAX_USER:
+        if not (UserRegister.USER_0 <= user <= UserRegister.USER_3):
             raise ValueError(
                 f"Incorrect user number {user}")
         return (get_vcpu_address(p) + CPU_USER_START_ADDRESS +
                 CPU_USER_OFFSET * user)
 
-    def read_user(self, x: int, y: int, p: int, user: int):
+    def read_user(self, x: int, y: int, p: int, user: UserRegister):
         """
         Get the contents of the this user register for the given processor.
 
@@ -1590,7 +1590,8 @@ class Transceiver(AbstractContextManager):
                 x, y, cpu, base_address, data, offset, n_bytes, get_sum)
         return n_bytes, chksum
 
-    def write_user(self, x: int, y: int, p: int, user: int, value: int):
+    def write_user(
+            self, x: int, y: int, p: int, user: UserRegister, value: int):
         """
         Write to the user *N* "register" for the given processor.
 
@@ -1761,7 +1762,7 @@ class Transceiver(AbstractContextManager):
                     nearest_neighbour_id, base_address, data, offset, n_bytes)
 
     def read_memory(
-            self, x: int, y: int, base_address: int, length: int,
+            self, x: int, y: int, base_address: int, length: int, *,
             cpu: int = 0) -> bytes:
         """
         Read some areas of memory (usually SDRAM) from the board.
@@ -1796,7 +1797,7 @@ class Transceiver(AbstractContextManager):
             raise
 
     def read_word(
-            self, x: int, y: int, base_address: int, cpu: int = 0) -> int:
+            self, x: int, y: int, base_address: int, *, cpu: int = 0) -> int:
         """
         Read a word (usually of SDRAM) from the board.
 
@@ -1831,7 +1832,7 @@ class Transceiver(AbstractContextManager):
             raise
 
     def read_neighbour_memory(
-            self, x: int, y: int, link: int, base_address: int, length: int,
+            self, x: int, y: int, link: int, base_address: int, length: int, *,
             cpu: int = 0) -> bytes:
         """
         Read some areas of memory on a neighbouring chip using a LINK_READ
@@ -1847,13 +1848,13 @@ class Transceiver(AbstractContextManager):
             The x-coordinate of the chip whose neighbour is to be read from
         :param int y:
             The y-coordinate of the chip whose neighbour is to be read from
-        :param int cpu:
-            The CPU to use, typically 0 (or if a BMP, the slot number)
         :param int link:
             The link index to send the request to (or if BMP, the FPGA number)
         :param int base_address:
             The address in SDRAM where the region of memory to be read starts
         :param int length: The length of the data to be read in bytes
+        :param int cpu:
+            The CPU to use, typically 0 (or if a BMP, the slot number)
         :return: An iterable of chunks of data read in order
         :rtype: bytes
         :raise SpinnmanIOException:

@@ -129,7 +129,7 @@ class SpiNNManDataView(MachineDataView):
 
     @classmethod
     def read_memory(
-            cls, x: int, y: int, base_address: int, length: int,
+            cls, x: int, y: int, base_address: int, length: int, *,
             cpu: int = 0) -> bytes:
         """
         Read some areas of memory (usually SDRAM) from the board.
@@ -162,7 +162,7 @@ class SpiNNManDataView(MachineDataView):
         """
         try:
             return cls.get_transceiver().read_memory(
-                x, y, base_address, length, cpu)
+                x, y, base_address, length, cpu=cpu)
         except AttributeError as ex:
             raise cls._exception("transceiver") from ex
 

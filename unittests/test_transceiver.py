@@ -14,6 +14,7 @@
 
 import unittest
 import struct
+from spinn_utilities.overrides import overrides
 from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
@@ -43,12 +44,15 @@ class MockWriteTransceiver(Transceiver):
     def _update_machine(self):
         self._machine = self.get_machine_details()
 
+    @overrides(Transceiver.write_memory)
     def write_memory(
-            self, x, y, base_address, data, n_bytes=None, offset=0,
-            cpu=0, is_filename=False):
+            self, x, y, base_address, data, *,
+            n_bytes=None, offset=0, cpu=0, get_sum=False):
         print("Doing write to", x, y)
         self.written_memory.append(
-            (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
+            (x, y, base_address, data, n_bytes, offset, cpu,
+             isinstance(data, str)))
+        return len(data), 0
 
     def close(self):
         pass
