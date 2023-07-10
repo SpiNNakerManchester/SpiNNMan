@@ -16,16 +16,15 @@ import logging
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, BMPRequest)
+    AbstractSCPRequest, BMPRequest, BMPOKResponse)
 from spinnman.messages.scp.abstract_messages.bmp_request import Boards
 from spinnman.messages.scp.enums import SCPCommand, PowerCommand
 from spinnman.messages.scp import SCPRequestHeader
-from .check_ok_response import CheckOKResponse
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class SetPower(BMPRequest):
+class SetPower(BMPRequest[BMPOKResponse]):
     """
     An SCP request for the BMP to power on or power off a rack of boards.
     """
@@ -68,5 +67,5 @@ class SetPower(BMPRequest):
             argument_1=arg1, argument_2=arg2)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> CheckOKResponse:
-        return CheckOKResponse("powering request", "CMD_BMP_POWER")
+    def get_scp_response(self) -> BMPOKResponse:
+        return BMPOKResponse("powering request", SCPCommand.CMD_BMP_POWER)

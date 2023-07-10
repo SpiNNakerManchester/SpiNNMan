@@ -13,14 +13,14 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
+from spinnman.model import VersionInfo
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, BMPRequest)
+    AbstractSCPRequest, BMPRequest, BMPResponse)
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
-from .get_version_response import GetVersionResponse
 
 
-class BMPGetVersion(BMPRequest):
+class BMPGetVersion(BMPRequest['_BMPVersion']):
     """
     An SCP request to read the version of software running on a core.
     """
@@ -37,5 +37,19 @@ class BMPGetVersion(BMPRequest):
             board, SCPRequestHeader(command=SCPCommand.CMD_VER))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> GetVersionResponse:
-        return GetVersionResponse()
+    def get_scp_response(self) -> '_BMPVersion':
+        return _BMPVersion("Read BMP version", SCPCommand.CMD_VER)
+
+
+class _BMPVersion(BMPResponse[VersionInfo]):
+    def _parse_payload(self, data: bytes, offset: int) -> VersionInfo:
+        return VersionInfo(data, offset)
+
+    @property
+    def version_info(self) -> VersionInfo:
+        """
+        The version information received.
+
+        :rtype: VersionInfo
+        """
+        return self._value

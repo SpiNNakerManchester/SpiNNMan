@@ -15,15 +15,14 @@
 import struct
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse, BMPRequest, BMPResponse)
-from spinnman.messages.scp.enums import SCPCommand, SCPResult
+    AbstractSCPRequest, BMPRequest, BMPResponse)
+from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 _ONE_WORD = struct.Struct("<I")
 
 
-class ReadFPGARegister(BMPRequest):
+class ReadFPGARegister(BMPRequest['_SCPReadFPGARegisterResponse']):
     """
     Requests the data from a FPGA's register.
     """
@@ -50,27 +49,16 @@ class ReadFPGARegister(BMPRequest):
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self) -> '_SCPReadFPGARegisterResponse':
-        return _SCPReadFPGARegisterResponse()
+        return _SCPReadFPGARegisterResponse(
+            "Read FPGA register", SCPCommand.CMD_LINK_READ)
 
 
-class _SCPReadFPGARegisterResponse(BMPResponse):
+class _SCPReadFPGARegisterResponse(BMPResponse[int]):
     """
     An SCP response to a request for the version of software running.
     """
-    __slots__ = "_fpga_register",
-
-    def __init__(self) -> None:
-        super().__init__()
-        self._fpga_register = 0
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data: bytes, offset: int):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "Read FPGA register", "CMD_LINK_READ", result.name)
-
-        self._fpga_register = _ONE_WORD.unpack_from(data, offset)[0]
+    def _parse_payload(self, data: bytes, offset: int) -> int:
+        return _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
     def fpga_register(self) -> int:
@@ -79,4 +67,4 @@ class _SCPReadFPGARegisterResponse(BMPResponse):
 
         :rtype: int
         """
-        return self._fpga_register
+        return self._value

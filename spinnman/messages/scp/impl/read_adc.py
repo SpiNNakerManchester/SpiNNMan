@@ -11,17 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse, BMPRequest, BMPResponse)
-from spinnman.messages.scp.enums import BMPInfo, SCPCommand, SCPResult
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+    AbstractSCPRequest, BMPRequest, BMPResponse)
+from spinnman.messages.scp.enums import BMPInfo, SCPCommand
 from spinnman.model import ADCInfo
 
 
-class ReadADC(BMPRequest):
+class ReadADC(BMPRequest['_SCPReadADCResponse']):
     """
     SCP Request for the data from the BMP including voltages and
     temperature.
@@ -46,31 +44,21 @@ class ReadADC(BMPRequest):
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self) -> '_SCPReadADCResponse':
-        return _SCPReadADCResponse()
+        return _SCPReadADCResponse("Read ADC", SCPCommand.CMD_BMP_INFO)
 
 
-class _SCPReadADCResponse(BMPResponse):
+class _SCPReadADCResponse(BMPResponse[ADCInfo]):
     """
     An SCP response to a request for ADC information.
     """
-    __slots__ = "_adc_info",
+    __slots__ = ()
 
-    def __init__(self) -> None:
-        super().__init__()
-        self._adc_info: Optional[ADCInfo] = None
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data: bytes, offset: int):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "ADC", "CMD_ADC", result.name)
-        self._adc_info = ADCInfo(data, offset)
+    def _parse_payload(self, data: bytes, offset: int) -> ADCInfo:
+        return ADCInfo(data, offset)
 
     @property
     def adc_info(self) -> ADCInfo:
         """
         The ADC information.
         """
-        assert self._adc_info is not None, "response not yet read"
-        return self._adc_info
+        return self._value

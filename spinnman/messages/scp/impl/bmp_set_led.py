@@ -15,13 +15,12 @@ from typing import Iterable, Union
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, BMPRequest)
+    AbstractSCPRequest, BMPRequest, BMPOKResponse)
 from spinnman.messages.scp.abstract_messages.bmp_request import Boards
 from spinnman.messages.scp.enums import SCPCommand, LEDAction
-from .check_ok_response import CheckOKResponse
 
 
-class BMPSetLed(BMPRequest):
+class BMPSetLed(BMPRequest[BMPOKResponse]):
     """
     Set the LED(s) of a board to either on, off or toggling.
 
@@ -61,5 +60,5 @@ class BMPSetLed(BMPRequest):
             argument_1=arg1, argument_2=arg2)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> CheckOKResponse:
-        return CheckOKResponse("Set the LEDs of a board", "CMD_LED")
+    def get_scp_response(self) -> BMPOKResponse:
+        return BMPOKResponse("Set the LEDs of a board", SCPCommand.CMD_LED)

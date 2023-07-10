@@ -15,15 +15,14 @@
 import struct
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, BMPRequest)
+    AbstractSCPRequest, BMPRequest, BMPOKResponse)
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
-from .check_ok_response import CheckOKResponse
 
 _ONE_WORD = struct.Struct("<I")
 
 
-class WriteFPGARegister(BMPRequest):
+class WriteFPGARegister(BMPRequest[BMPOKResponse]):
     """
     A request for writing a word to a FPGA (SPI) register.
 
@@ -50,5 +49,6 @@ class WriteFPGARegister(BMPRequest):
             data=_ONE_WORD.pack(value))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> CheckOKResponse:
-        return CheckOKResponse("Send FPGA register write", "CMD_LINK_WRITE")
+    def get_scp_response(self) -> BMPOKResponse:
+        return BMPOKResponse(
+            "Send FPGA register write", SCPCommand.CMD_LINK_WRITE)

@@ -850,6 +850,10 @@ class _ProxiedBidirectionalConnection(
     def is_ready_to_receive(self, timeout: float = 0) -> bool:
         return self._is_ready_to_receive(timeout)
 
+    @abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError
+
 
 class _ProxiedUnboundConnection(
         _ProxiedConnection, SpallocProxiedConnection):
@@ -899,6 +903,10 @@ class _ProxiedUnboundConnection(
     @overrides(Listenable.is_ready_to_receive)
     def is_ready_to_receive(self, timeout: float = 0) -> bool:
         return self._is_ready_to_receive(timeout)
+
+    @abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError
 
 
 class _ProxiedSCAMPConnection(
