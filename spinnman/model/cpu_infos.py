@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Dict, Iterable, Iterator, Tuple
+from spinn_utilities.typing.coords import XYP
 from .cpu_info import CPUInfo
 
 from spinnman.model.enums import CPUState
@@ -25,7 +26,7 @@ class CPUInfos(object):
         "_cpu_infos"]
 
     def __init__(self) -> None:
-        self._cpu_infos: Dict[Tuple[int, int, int], CPUInfo] = dict()
+        self._cpu_infos: Dict[XYP, CPUInfo] = dict()
 
     def add_info(self, cpu_info: CPUInfo):
         """
@@ -50,7 +51,7 @@ class CPUInfos(object):
         self._cpu_infos[x, y, processor_id] = cpu_info
 
     @property
-    def cpu_infos(self) -> Iterator[Tuple[Tuple[int, int, int], CPUInfo]]:
+    def cpu_infos(self) -> Iterator[Tuple[XYP, CPUInfo]]:
         """
         The one per core core info.
 
@@ -59,17 +60,17 @@ class CPUInfos(object):
         """
         return iter(self._cpu_infos.items())
 
-    def __iter__(self) -> Iterator[Tuple[int, int, int]]:
+    def __iter__(self) -> Iterator[XYP]:
         return iter(self._cpu_infos)
 
-    def iteritems(self) -> Iterator[Tuple[Tuple[int, int, int], CPUInfo]]:
+    def iteritems(self) -> Iterator[Tuple[XYP, CPUInfo]]:
         """
         Get an iterable of (x, y, p), cpu_info.
         :rtype: (iterable(tuple(int, int, int),  ~spinnman.model.CPUInfo)
         """
         return iter(self._cpu_infos.items())
 
-    def items(self) -> Iterable[Tuple[Tuple[int, int, int], CPUInfo]]:
+    def items(self) -> Iterable[Tuple[XYP, CPUInfo]]:
         return self._cpu_infos.items()
 
     def values(self) -> Iterable[CPUInfo]:
@@ -81,10 +82,10 @@ class CPUInfos(object):
         """
         return iter(self._cpu_infos.values())
 
-    def keys(self) -> Iterable[Tuple[int, int, int]]:
+    def keys(self) -> Iterable[XYP]:
         return self._cpu_infos.keys()
 
-    def iterkeys(self) -> Iterator[Tuple[int, int, int]]:
+    def iterkeys(self) -> Iterator[XYP]:
         """
         Get an iterable of (x, y, p).
         """

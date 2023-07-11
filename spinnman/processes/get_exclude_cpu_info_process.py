@@ -29,9 +29,6 @@ class GetExcludeCPUInfoProcess(GetCPUInfoProcess):
         super().__init__(connection_selector)
         self.__states = states
 
-    @overrides(GetCPUInfoProcess._filter_and_add_repsonse)
-    def _filter_and_add_repsonse(
-            self, x: int, y: int, p: int, cpu_data: bytes):
-        state = CPUState(cpu_data[6])
-        if state not in self.__states:
-            self._cpu_infos.add_info(CPUInfo(x, y, p, cpu_data))
+    @overrides(GetCPUInfoProcess._is_desired)
+    def _is_desired(self, cpu_info: CPUInfo):
+        return cpu_info.state not in self.__states

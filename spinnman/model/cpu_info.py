@@ -13,44 +13,64 @@
 # limitations under the License.
 
 import struct
-from typing import Sequence
+from typing import Sequence, Tuple
+from typing_extensions import TypeAlias
 from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
+#: Size of `vcpu_t` in SARK.
 CPU_INFO_BYTES = 128
 CPU_USER_0_START_ADDRESS = 112
+#: Offset into data of byte of processor state field.
+STATE_FIELD_OFFSET = 48
 
-_INFO_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
+#: Corresponds to vcpu_t in sark.h
+_VCPU_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
+_vcpu_t: TypeAlias = Tuple[
+    bytes,             # 32s - r0-r7
+    int, int, int,     # 3I  - psr, sp, lr
+    int, int,          # 2B  - RT error code, Physical CPU
+    int, int,          # 2B  - CPU state, Application ID
+    int, int,          # 2I  - mbox msg MP->AP, mbox msg AP->MP
+    int, int,          # 2B  - mbox command MP->AP, mbox command AP->MP
+    int,               # H   - SW error count (saturating)
+    int, int, int,     # 3I  - SW source filename, Source line, Time of loading
+    bytes,             # 16s - Application name
+    int, int,          # 2I  - IO buffer in SDRAM (or 0)
+    #                    16x - Padding
+    int, int, int, int]  # 4I- User0, User1, User2, User3
 _REGISTERS_PATTERN = struct.Struct("<IIIIIIII")
 
 
 class CPUInfo(object):
     """
     Represents information about the state of a CPU.
+
+    This is the content of the `vcpu_t` for the processor, maintained by SARK.
     """
     __slots__ = [
         "_application_id",
         "_application_mailbox_command",
-        "_application_mailbox_data_address",
+        "__app_mailbox",
         "_application_name",
         "_iobuf_address",
-        "_link_register",
+        "__lr",
         "_monitor_mailbox_command",
-        "_monitor_mailbox_data_address",
+        "__monitor_mailbox",
         "_physical_cpu_id",
-        "_processor_state_register",
+        "__psr",
         "_registers",
         "_run_time_error",
         "_software_error_count",
-        "_software_source_filename_address",
-        "_software_source_line_number",
+        "__filename_address",
+        "__line_number",
         "_software_version",
-        "_stack_pointer",
+        "__sp",
         "_state",
-        "_time",
+        "__time",
         "_user",
         "_x", "_y", "_p"]
 
-    def __init__(self, x: int, y: int, p: int, cpu_data: bytes):
+    def __init__(self, x: int, y: int, p: int, cpu_data: _vcpu_t):
         """
         :param int x: The x-coordinate of a chip
         :param int y: The y-coordinate of a chip
@@ -58,42 +78,34 @@ class CPUInfo(object):
         :param tuple cpu_data: A byte-string received from SDRAM on the board
         """
         # pylint: disable=too-many-arguments
-        self._x = x
-        self._y = y
-        self._p = p
+        self._x, self._y, self._p = x, y, p
 
-        (registers,                                                  # 32s 0
-         self._processor_state_register, self._stack_pointer,
-         self._link_register,                                        # 3I  32
-         run_time_error, self._physical_cpu_id,                      # 2B  44
-         state, self._application_id,                                # 2B  46
-         self._application_mailbox_data_address,
-         self._monitor_mailbox_data_address,                         # 2I  48
-         application_mailbox_command, monitor_mailbox_command,       # 2B  56
-         self._software_error_count,                                 # H   58
-         self._software_source_filename_address,
-         self._software_source_line_number, self._time,              # 3I  60
-         self._application_name,                                     # 16s 72
-         self._iobuf_address, self._software_version,                # 2I  88
-         # skipped                                                   # 16x 96
-         user0, user1, user2, user3                                  # 4I  112
+        (registers,                                                 # 32s 0
+         self.__psr, self.__sp, self.__lr,                          # 3I  32
+         run_time_error, self._physical_cpu_id,                     # 2B  44
+         state, self._application_id,                               # 2B  46
+         self.__app_mailbox, self.__monitor_mailbox,                # 2I  48
+         app_mailbox_cmd, mon_mailbox_cmd,                          # 2B  56
+         self._software_error_count,                                # H   58
+         self.__filename_address, self.__line_number, self.__time,  # 3I  60
+         app_name,                                                  # 16s 72
+         self._iobuf_address, self._software_version,               # 2I  88
+         # skipped                                                  # 16x 96
+         user0, user1, user2, user3                                 # 4I  112
          ) = cpu_data
 
-        index = self._application_name.find(b'\0')
+        index = app_name.find(b'\0')
         if index != -1:
-            self._application_name = self._application_name[0:index]
-        self._application_name = self._application_name.decode('ascii')
+            app_name = app_name[:index]
+        self._application_name = app_name.decode('ascii')
 
-        self._registers: Sequence[int] = _REGISTERS_PATTERN.unpack_from(
-            registers)
+        self._registers: Sequence[int] = _REGISTERS_PATTERN.unpack(registers)
         self._run_time_error = RunTimeError(run_time_error)
         self._state = CPUState(state)
 
-        self._application_mailbox_command = MailboxCommand(
-            application_mailbox_command)
-        self._monitor_mailbox_command = MailboxCommand(
-            monitor_mailbox_command)
-        self._user = [user0, user1, user2, user3]
+        self._application_mailbox_command = MailboxCommand(app_mailbox_cmd)
+        self._monitor_mailbox_command = MailboxCommand(mon_mailbox_cmd)
+        self._user = (user0, user1, user2, user3)
 
     @property
     def x(self) -> int:
@@ -173,7 +185,7 @@ class CPUInfo(object):
         :return: The time in seconds since 00:00:00 on the 1st January 1970
         :rtype: int
         """
-        return self._time
+        return self.__time
 
     @property
     def run_time_error(self) -> RunTimeError:
@@ -204,7 +216,7 @@ class CPUInfo(object):
         :return: The address of the data
         :rtype: int
         """
-        return self._application_mailbox_data_address
+        return self.__app_mailbox
 
     @property
     def monitor_mailbox_command(self) -> MailboxCommand:
@@ -225,12 +237,12 @@ class CPUInfo(object):
         :return: The address of the data
         :rtype: int
         """
-        return self._monitor_mailbox_data_address
+        return self.__monitor_mailbox
 
     @property
     def software_error_count(self) -> int:
         """
-        The number of software errors counted.
+        The number of software errors counted. Saturating.
 
         :return: The number of software errors
         :rtype: int
@@ -238,14 +250,14 @@ class CPUInfo(object):
         return self._software_error_count
 
     @property
-    def software_source_filename_address(self) -> str:
+    def software_source_filename_address(self) -> int:
         """
         The address of the filename of the software source.
 
-        :return: The filename
-        :rtype: str
+        :return: The filename address
+        :rtype: int
         """
-        return self._software_source_filename_address
+        return self.__filename_address
 
     @property
     def software_source_line_number(self) -> int:
@@ -255,7 +267,7 @@ class CPUInfo(object):
         :return: The line number
         :rtype: int
         """
-        return self._software_source_line_number
+        return self.__line_number
 
     @property
     def processor_state_register(self) -> int:
@@ -265,7 +277,7 @@ class CPUInfo(object):
         :return: The PSR value
         :rtype: int
         """
-        return self._processor_state_register
+        return self.__psr
 
     @property
     def stack_pointer(self) -> int:
@@ -275,7 +287,7 @@ class CPUInfo(object):
         :return: The SP value
         :rtype: int
         """
-        return self._stack_pointer
+        return self.__sp
 
     @property
     def link_register(self) -> int:
@@ -285,7 +297,7 @@ class CPUInfo(object):
         :return: The LR value
         :rtype: int
         """
-        return self._link_register
+        return self.__lr
 
     @property
     def registers(self) -> Sequence[int]:
