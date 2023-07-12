@@ -27,6 +27,7 @@ from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
+from spinnman.data import SpiNNManDataView
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition)
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -94,7 +95,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :rtype: ~spinn_machine.Chip
         """
         # Create the down cores set if any
-        n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
+        n_cores = \
+            SpiNNManDataView.get_machine_version().max_cores_per_chip
+        n_cores = min(chip_info.n_cores, n_cores)
         core_states = chip_info.core_states
         down_cores = self._ignore_cores_map.get(
             (chip_info.x, chip_info.y), None)
