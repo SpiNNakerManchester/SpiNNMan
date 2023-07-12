@@ -23,7 +23,6 @@ from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (Router, Chip, Link, machine_from_size)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
-from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
