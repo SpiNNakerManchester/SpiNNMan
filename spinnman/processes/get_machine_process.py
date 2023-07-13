@@ -21,7 +21,7 @@ from spinn_utilities.config_holder import (
     get_config_bool, get_config_int, get_config_str)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import (Router, Chip, Link, machine_from_size)
+from spinn_machine import (Router, Chip, Link)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
@@ -235,7 +235,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
-        machine = machine_from_size(width, height)
+        version = SpiNNManDataView.get_machine_version()
+        machine = version.create_machine(width, height)
         self._preprocess_ignore_chips(machine)
         self._process_ignore_links(machine)
         self._preprocess_ignore_cores(machine)
