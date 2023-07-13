@@ -532,8 +532,8 @@ class Transceiver(AbstractContextManager):
         dims = self.get_machine_dimensions()
 
         # Find all the new connections via the machine Ethernet-connected chips
-        geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
-        for x, y in geometry.get_potential_ethernet_chips(
+        version = SpiNNManDataView.get_machine_version()
+        for x, y in version.get_potential_ethernet_chips(
                 dims.width, dims.height):
             ip_addr_item = SystemVariableDefinition.ethernet_ip_address
             try:
