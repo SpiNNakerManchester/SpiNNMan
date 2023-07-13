@@ -39,7 +39,7 @@ class MockWriteTransceiver(Transceiver):
         self.written_memory = list()
 
     def get_machine_details(self):
-        return virtual_machine(2, 2)
+        return virtual_machine(8, 8)
 
     def _update_machine(self):
         self._machine = self.get_machine_details()
