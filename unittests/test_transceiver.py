@@ -112,7 +112,7 @@ class TestTransceiver(unittest.TestCase):
 
             assert trans.is_connected()
             print(trans.get_scamp_version())
-            print(trans.get_cpu_information())
+            print(trans.get_cpu_infos())
 
     def test_boot_board(self):
         board_config.set_up_remote_board()
