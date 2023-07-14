@@ -644,9 +644,7 @@ class Transceiver(AbstractContextManager):
         machine.add_fpga_links()
 
         if self._boot_send_connection:
-            logger.info("Detected a machine on IP address {} which has {}",
-                        machine.boot_chip.ip_address,
-                        machine.cores_and_link_output_string())
+            logger.info(f"Detected {machine.summary_string()}")
         return machine
 
     def is_connected(self, connection=None):
