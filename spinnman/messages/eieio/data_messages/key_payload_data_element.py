@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from spinn_utilities.overrides import overrides
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.eieio import EIEIOType
 from .abstract_data_element import AbstractDataElement
@@ -30,24 +31,25 @@ class KeyPayloadDataElement(AbstractDataElement):
         "_payload",
         "_payload_is_timestamp")
 
-    def __init__(self, key, payload, payload_is_timestamp=False):
+    def __init__(self, key: int, payload: int, payload_is_timestamp=False):
         self._key = key
         self._payload = payload
         self._payload_is_timestamp = payload_is_timestamp
 
     @property
-    def key(self):
+    def key(self) -> int:
         return self._key
 
     @property
-    def payload(self):
+    def payload(self) -> int:
         return self._payload
 
     @property
-    def payload_is_timestamp(self):
+    def payload_is_timestamp(self) -> bool:
         return self._payload_is_timestamp
 
-    def get_bytestring(self, eieio_type):
+    @overrides(AbstractDataElement.get_bytestring)
+    def get_bytestring(self, eieio_type: EIEIOType) -> bytes:
         if eieio_type.payload_bytes == 0:
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type,

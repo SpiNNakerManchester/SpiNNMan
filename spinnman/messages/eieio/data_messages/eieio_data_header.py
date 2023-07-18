@@ -87,11 +87,11 @@ class EIEIODataHeader(object):
         return self._payload_base
 
     @property
-    def is_time(self):
+    def is_time(self) -> bool:
         return self._is_time
 
     @property
-    def count(self):
+    def count(self) -> int:
         return self._count
 
     @count.setter
@@ -99,7 +99,7 @@ class EIEIODataHeader(object):
         self._count = count
 
     @property
-    def size(self):
+    def size(self) -> int:
         return EIEIODataHeader.get_header_size(
             self._eieio_type, self._prefix is not None,
             self._payload_base is not None)
@@ -123,14 +123,14 @@ class EIEIODataHeader(object):
             size += eieio_type.key_bytes
         return size
 
-    def increment_count(self):
+    def increment_count(self) -> None:
         self._count += 1
 
-    def reset_count(self):
+    def reset_count(self) -> None:
         self._count = 0
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         """
         The byte-string of the header.
 
@@ -181,7 +181,7 @@ class EIEIODataHeader(object):
             "EIEIODataMessage", "unexpected EIEIO type code")
 
     @staticmethod
-    def from_bytestring(data, offset):
+    def from_bytestring(data: bytes, offset: int) -> 'EIEIODataHeader':
         """
         Read an EIEIO data header from a byte-string.
 
@@ -208,8 +208,8 @@ class EIEIODataHeader(object):
 
         # Convert the flags into types
         # pylint: disable=no-value-for-parameter
-        eieio_type = EIEIOType(message_type)
-        prefix_type = EIEIOPrefix(format_flag)
+        eieio_type = EIEIOType[message_type]
+        prefix_type = EIEIOPrefix[format_flag]
 
         prefix = None
         payload_prefix = None
