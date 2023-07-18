@@ -213,6 +213,30 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             "keepalive-interval": f"PT{int(keepalive)}S"
         }, machine_name)
 
+    @overrides(AbstractSpallocClient.create_job_rect_at_board)
+    def create_job_rect_at_board(
+            self, width, height, triad=None, physical=None, ip_address=None,
+            machine_name=None, keepalive=45):
+        if triad:
+            x, y, z = triad
+            board = {"x": int(x), "y": int(y), "z": int(z)}
+        elif physical:
+            c, f, b = physical
+            board = {"cabinet": int(c), "frame": int(f), "board": int(b)}
+        elif ip_address:
+            board = {"address": str(ip_address)}
+        else:
+            raise KeyError("at least one of triad, physical and ip_address "
+                           "must be given")
+        return self._create({
+            "dimensions": {
+                "width": int(width),
+                "height": int(height)
+            },
+            "board": board,
+            "keepalive-interval": f"PT{int(keepalive)}S"
+        }, machine_name)
+
     def close(self):
         # pylint: disable=protected-access
         if self.__session is not None:
