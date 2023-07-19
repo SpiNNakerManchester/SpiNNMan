@@ -19,6 +19,7 @@ from logging import getLogger
 from multiprocessing import Process, Queue
 from time import sleep
 from packaging.version import Version
+from urllib.parse import urlparse, urlunparse, ParseResult
 import queue
 import requests
 import sqlite3
@@ -60,6 +61,17 @@ _msg = struct.Struct("<II")
 _msg_to = struct.Struct("<IIIII")
 
 
+def fix_url(url):
+    parts = urlparse(url)
+    if parts.scheme != 'https':
+        parts = ParseResult("https", parts.netloc, parts.path,
+                            parts.params, parts. query, parts.fragment)
+    if not parts.path.endswith("/"):
+        parts = ParseResult(parts.scheme, parts.netloc, parts.path + "/",
+                            parts.params, parts.query, parts.fragment)
+    return urlunparse(parts)
+
+
 class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     """
     Basic client library for talking to new Spalloc.
@@ -89,8 +101,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         v = obj["version"]
         self.version = Version(
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
-        self.__machines_url = obj["machines-ref"]
-        self.__jobs_url = obj["jobs-ref"]
+        self.__machines_url = fix_url(obj["machines-ref"])
+        self.__jobs_url = fix_url(obj["jobs-ref"])
         self.__group = group
         self.__collab = collab
         self.__nmpi_job = nmpi_job
@@ -154,7 +166,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             deleted=("true" if deleted else "false")).json()
         while obj["jobs"]:
             for u in obj["jobs"]:
-                yield _SpallocJob(self.__session, u)
+                yield _SpallocJob(self.__session, fix_url(u))
             if "next" not in obj:
                 break
             obj = self.__session.get(obj["next"]).json()
@@ -174,7 +186,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                 create["owner"] = self.__nmpi_user
         r = self.__session.post(self.__jobs_url, create, timeout=30)
         url = r.headers["Location"]
-        return _SpallocJob(self.__session, url)
+        return _SpallocJob(self.__session, fix_url(url))
 
     @overrides(AbstractSpallocClient.create_job)
     def create_job(self, num_boards=1, machine_name=None, keepalive=45):
@@ -583,7 +595,11 @@ class _SpallocJob(SessionAware, SpallocJob):
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state):
         while old_state != SpallocState.DESTROYED:
-            obj = self._get(self._url, wait="true", timeout=None).json()
+            print("Trying", self._url)
+            resp = self._get(self._url, wait="true", timeout=None)
+            print("Response", resp)
+            obj = resp.json()
+            print("Response obj:", obj)
             s = SpallocState[obj["state"]]
             if s != old_state or s == SpallocState.DESTROYED:
                 return s
