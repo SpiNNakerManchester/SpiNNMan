@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Callable, Generic, Optional, TypeVar
+from typing import Callable, Generic, TypeVar
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 #: :meta private:
 T = TypeVar("T")
@@ -29,7 +29,7 @@ class Listenable(Generic[T], metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def get_receive_method(self) -> Callable[[Optional[float]], T]:
+    def get_receive_method(self) -> Callable[[], T]:
         """
         Get the method that receives for this connection.
         """

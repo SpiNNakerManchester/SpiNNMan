@@ -58,5 +58,6 @@ class SpallocBootConnection(
         return SpinnakerBootMessage.from_bytestring(data, 0)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable:
+    def get_receive_method(  # type: ignore[override]
+            self) -> Callable[[], SpinnakerBootMessage]:
         return self.receive_boot_message

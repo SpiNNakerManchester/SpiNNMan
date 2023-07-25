@@ -87,6 +87,7 @@ from spinnman.processes import (
     ConnectionSelector)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
+from spinnman.model.bmp_connection_data import BMPConnectionData
 
 #: Type of a connection.
 #: :meta private:
@@ -117,9 +118,10 @@ _EXECUTABLE_ADDRESS = 0x67800000
 
 
 def create_transceiver_from_hostname(
-        hostname, version, *,
-        bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False):
+        hostname: Optional[str], version: int, *,
+        bmp_connection_data: Optional[List[BMPConnectionData]] = None,
+        number_of_boards: Optional[int] = None,
+        auto_detect_bmp: bool = False) -> 'Transceiver':
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -157,19 +159,24 @@ def create_transceiver_from_hostname(
     """
     if hostname is not None:
         logger.info("Creating transceiver for {}", hostname)
-    connections = list()
+    connections: List[Connection] = []
 
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
     # machine, then an assumption can be made that the BMP is at -1 on the
     # final value of the IP address
     if (version >= 4 and auto_detect_bmp is True and
             (bmp_connection_data is None or not bmp_connection_data)):
+        if hostname is None:
+            raise ValueError("hostname is required if deriving BMP details")
+        if number_of_boards is None or number_of_boards < 1:
+            raise ValueError(
+                "number_of_boards is required if deriving BMP details")
         bmp_connection_data = [
             work_out_bmp_from_machine_details(hostname, number_of_boards)]
 
     # handle BMP connections
     if bmp_connection_data is not None:
-        bmp_ip_list = list()
+        bmp_ip_list: List[Optional[str]] = []
         for conn_data in bmp_connection_data:
             bmp_connection = BMPConnection(conn_data)
             connections.append(bmp_connection)

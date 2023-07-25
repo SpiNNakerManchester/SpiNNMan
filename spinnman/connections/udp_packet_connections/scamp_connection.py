@@ -92,7 +92,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         return _TWO_SKIP.pack() + scp_request.bytestring
 
     @overrides(AbstractSCPConnection.receive_scp_response)
-    def receive_scp_response(self, timeout: float = 1.0) -> Tuple[
+    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> Tuple[
             SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)

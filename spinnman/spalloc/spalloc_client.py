@@ -15,6 +15,7 @@
 Implementation of the client for the Spalloc web service.
 """
 
+from contextlib import AbstractContextManager, contextmanager
 from logging import getLogger
 from multiprocessing import Process, Queue
 from time import sleep
@@ -25,12 +26,13 @@ import sqlite3
 import struct
 import threading
 from typing import (
-    Callable, Collection, Dict, FrozenSet, Iterable, List, Optional, Tuple,
-    Union, cast)
+    Callable, Collection, Dict, FrozenSet, Iterable, Iterator, List, Optional,
+    Tuple, Union, cast)
 from typing_extensions import TypeAlias
 from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinn_utilities.abstract_context_manager import AbstractContextManager
+from spinn_utilities.abstract_context_manager import (
+    AbstractContextManager as ACM)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject
@@ -65,7 +67,7 @@ _msg = struct.Struct("<II")
 _msg_to = struct.Struct("<IIIII")
 
 
-class SpallocClient(AbstractContextManager, AbstractSpallocClient):
+class SpallocClient(ACM, AbstractSpallocClient):
     """
     Basic client library for talking to new Spalloc.
     """
@@ -243,6 +245,12 @@ def _SpallocKeepalive(url, interval, term_queue, cookies, headers):
             break
         except queue.Empty:
             continue
+        # On ValueError or OSError, just terminate the keepalive process
+        # They happen when the term_queue is directly closed
+        except ValueError:
+            break
+        except OSError:
+            break
 
 
 class _SpallocMachine(SessionAware, SpallocMachine):
@@ -439,21 +447,6 @@ class _ProxyReceiver(threading.Thread):
         self.__closed = True
 
 
-class _Closer(AbstractContextManager):
-    __slots__ = ("queue", "p")
-
-    def __init__(self):
-        self.queue = Queue(1)
-        self.p = None
-
-    def close(self):
-        self.queue.put("quit")
-        # Give it a second, and if it still isn't dead, kill it
-        self.p.join(1)
-        if self.p.is_alive():
-            self.p.kill()
-
-
 class _SpallocJob(SessionAware, SpallocJob):
     """
     Represents a job in Spalloc.
@@ -474,7 +467,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
         self._keepalive_url = self._url + "keepalive"
-        self.__keepalive_handle: Optional[_Closer] = None
+        self.__keepalive_handle: Optional[Queue] = None
         self.__proxy_handle: Optional[WebSocket] = None
         self.__proxy_thread: Optional[_ProxyReceiver] = None
         self.__proxy_ping: Optional[_ProxyPing] = None
@@ -617,21 +610,34 @@ class _SpallocJob(SessionAware, SpallocJob):
     def keepalive(self) -> None:
         self._put(self._keepalive_url, "alive")
 
-    @overrides(SpallocJob.launch_keepalive_task)
-    def launch_keepalive_task(self, period: float = 30):
+    @overrides(SpallocJob.launch_keepalive_task, extend_doc=True)
+    def launch_keepalive_task(
+            self, period: float = 30) -> AbstractContextManager[Process]:
         """
         .. note::
             Tricky! *Cannot* be done with a thread, as the main thread is known
             to do significant amounts of CPU-intensive work.
         """
-        self._keepalive_handle = _Closer()
-        # pylint: disable=protected-access
+        if self.__keepalive_handle is not None:
+            raise SpallocException("cannot keep job alive from two tasks")
+        q: Queue = Queue(1)
         p = Process(target=_SpallocKeepalive, args=(
-            self._keepalive_url, 0 + period, self._keepalive_handle.queue,
+            self._keepalive_url, 0 + period, q,
             *self._session_credentials), daemon=True)
         p.start()
-        self._keepalive_handle.p = p
-        return self._keepalive_handle
+        self.__keepalive_handle = q
+        return self.__closer(q, p)
+
+    @contextmanager
+    def __closer(self, q: Queue, p: Process) -> Iterator[Process]:
+        try:
+            yield p
+        finally:
+            q.put("quit")
+            # Give it a second, and if it still isn't dead, kill it
+            p.join(1)
+            if p.is_alive():
+                p.kill()
 
     @overrides(SpallocJob.where_is_machine)
     def where_is_machine(self, x: int, y: int) -> Optional[
@@ -643,11 +649,11 @@ class _SpallocJob(SessionAware, SpallocJob):
             r.json()["physical-board-coordinates"]))
 
     @property
-    def _keepalive_handle(self) -> Optional[_Closer]:
+    def _keepalive_handle(self) -> Optional[Queue]:
         return self.__keepalive_handle
 
     @_keepalive_handle.setter
-    def _keepalive_handle(self, handle: _Closer):
+    def _keepalive_handle(self, handle: Queue):
         if self.__keepalive_handle is not None:
             raise SpallocException("cannot keep job alive from two tasks")
         self.__keepalive_handle = handle

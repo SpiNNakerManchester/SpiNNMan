@@ -23,7 +23,7 @@ from spinnman.connections.udp_packet_connections import (
 Conn = TypeVar("Conn", SCAMPConnection, BMPConnection)
 
 
-class FixedConnectionSelector(ConnectionSelector, Generic[Conn]):
+class FixedConnectionSelector(ConnectionSelector[Conn], Generic[Conn]):
     """
     A connection selector that only uses a single connection.
     """

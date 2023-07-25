@@ -16,11 +16,10 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
-from spinnman.connections.abstract_classes import Listenable
 from spinnman.connections.udp_packet_connections import EIEIOConnection
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
@@ -56,11 +55,6 @@ class SpallocEIEIOListener(
         if header & 0xC000 == 0x4000:
             return read_eieio_command_message(data, 0)
         return read_eieio_data_message(data, 0)
-
-    @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable[  # type: ignore[override]
-            [Optional[float]], AbstractEIEIOMessage]:
-        return self.receive_eieio_message
 
     @overrides(SpallocProxiedConnection.send)
     def send(self, data):

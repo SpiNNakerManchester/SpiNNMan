@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from contextlib import AbstractContextManager
 from sqlite3 import Cursor
 from typing import Dict, Optional, Tuple
 from typing_extensions import Self
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.typing.coords import XY
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.transceiver import Transceiver
@@ -197,7 +197,8 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError
 
     @abstractmethod
-    def where_is_machine(self, x: int, y: int) -> Tuple[int, int, int]:
+    def where_is_machine(self, x: int, y: int) -> Optional[
+            Tuple[int, int, int]]:
         """
         Get the *physical* coordinates of the board hosting the given chip.
 

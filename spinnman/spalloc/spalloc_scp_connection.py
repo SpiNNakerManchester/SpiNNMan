@@ -13,10 +13,9 @@
 # limitations under the License.
 
 import struct
-from typing import Callable, Optional, Tuple
+from typing import Optional, Tuple
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
-from spinnman.connections.abstract_classes import Listenable
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.messages.sdp import SDPMessage, SDPFlag
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -39,11 +38,6 @@ class SpallocSCPConnection(
 
     def __init__(self, x, y):
         super(SpallocSCPConnection, self).__init__(x, y)
-
-    @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable[  # type: ignore[override]
-            [Optional[float]], SDPMessage]:
-        return self.receive_sdp_message
 
     @overrides(SCAMPConnection.receive_sdp_message)
     def receive_sdp_message(

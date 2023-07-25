@@ -270,5 +270,5 @@ class UDPConnection(Connection, Listenable[bytes]):
             self.remote_ip_address, self.remote_port)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self) -> Callable[[Optional[float]], bytes]:
+    def get_receive_method(self) -> Callable[[], bytes]:
         return self.receive

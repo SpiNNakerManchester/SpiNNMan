@@ -76,7 +76,7 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
 
     @overrides(Listenable.get_receive_method)
     def get_receive_method(self) -> Callable[  # type: ignore[override]
-            [Optional[float]], AbstractEIEIOMessage]:
+            [], AbstractEIEIOMessage]:
         return self.receive_eieio_message
 
     def __repr__(self) -> str:
