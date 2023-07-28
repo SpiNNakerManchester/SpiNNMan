@@ -380,38 +380,6 @@ class Transceiver(AbstractContextManager):
         return None
 
     @contextmanager
-    def _chip_execute_lock(self, x, y):
-        """
-        Get a lock for executing an executable on a chip.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use except for execute, which is itself deprecated.
-
-        :param int x:
-        :param int y:
-        """
-        # Check if there is a lock for the given chip
-        with self._chip_execute_lock_condition:
-            chip_lock = self._chip_execute_locks[x, y]
-        # Acquire the lock for the chip
-        chip_lock.acquire()
-
-        # Increment the lock counter (used for the flood lock)
-        with self._chip_execute_lock_condition:
-            self._n_chip_execute_locks += 1
-
-        try:
-            yield chip_lock
-        finally:
-            with self._chip_execute_lock_condition:
-                # Release the chip lock
-                chip_lock.release()
-                # Decrement the lock and notify
-                self._n_chip_execute_locks -= 1
-                self._chip_execute_lock_condition.notify_all()
-
-    @contextmanager
     def _flood_execute_lock(self):
         """
         Get a lock for executing a flood fill of an executable.
@@ -1085,12 +1053,6 @@ class Transceiver(AbstractContextManager):
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         response = process.execute(CountState(app_id, state))
         return response.count  # pylint: disable=no-member
-
-    def _get_next_nearest_neighbour_id(self):
-        with self._nearest_neighbour_lock:
-            next_nearest_neighbour_id = (self._nearest_neighbour_id + 1) % 127
-            self._nearest_neighbour_id = next_nearest_neighbour_id
-        return next_nearest_neighbour_id
 
     def execute_flood(
             self, core_subsets, executable, app_id, n_bytes=None, wait=False,

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 # pylint: disable=too-many-arguments
+from contextlib import contextmanager
 import io
 import os
 import struct
@@ -247,6 +248,38 @@ class ExtendedTransceiver(Transceiver):
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
         return next(self.get_iobuf(core_subsets))
+
+    @contextmanager
+    def _chip_execute_lock(self, x, y):
+        """
+        Get a lock for executing an executable on a chip.
+
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use except for execute, which is itself deprecated.
+
+        :param int x:
+        :param int y:
+        """
+        # Check if there is a lock for the given chip
+        with self._chip_execute_lock_condition:
+            chip_lock = self._chip_execute_locks[x, y]
+        # Acquire the lock for the chip
+        chip_lock.acquire()
+
+        # Increment the lock counter (used for the flood lock)
+        with self._chip_execute_lock_condition:
+            self._n_chip_execute_locks += 1
+
+        try:
+            yield chip_lock
+        finally:
+            with self._chip_execute_lock_condition:
+                # Release the chip lock
+                chip_lock.release()
+                # Decrement the lock and notify
+                self._n_chip_execute_locks -= 1
+                self._chip_execute_lock_condition.notify_all()
 
     def execute(
             self, x, y, processors, executable, app_id, n_bytes=None,
@@ -508,6 +541,12 @@ class ExtendedTransceiver(Transceiver):
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
+
+    def _get_next_nearest_neighbour_id(self):
+        with self._nearest_neighbour_lock:
+            next_nearest_neighbour_id = (self._nearest_neighbour_id + 1) % 127
+            self._nearest_neighbour_id = next_nearest_neighbour_id
+        return next_nearest_neighbour_id
 
     def write_memory_flood(
             self, base_address, data, n_bytes=None, offset=0,
