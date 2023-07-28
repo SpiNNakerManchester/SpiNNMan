@@ -16,7 +16,6 @@
 from contextlib import contextmanager
 import io
 import os
-import struct
 import logging
 from threading import Condition, RLock
 import time
@@ -43,26 +42,11 @@ from spinnman.connections.udp_packet_connections import (
 from spinnman.processes import (
     GetHeapProcess, ReadMemoryProcess, SendSingleCommandProcess,
     WriteMemoryProcess)
+from spinnman.transceiver import _EXECUTABLE_ADDRESS, _ONE_BYTE, _ONE_WORD
 from spinnman.utilities.utility_functions import (
     work_out_bmp_from_machine_details)
 
 logger = FormatAdapter(logging.getLogger(__name__))
-
-_SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = (3, 0, 1)
-
-_BMP_NAME = "BC&MP"
-_BMP_MAJOR_VERSIONS = [1, 2]
-
-_CONNECTION_CHECK_RETRIES = 3
-INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
-
-_ONE_BYTE = struct.Struct("B")
-_TWO_BYTES = struct.Struct("<BB")
-_FOUR_BYTES = struct.Struct("<BBBB")
-_ONE_WORD = struct.Struct("<I")
-_ONE_LONG = struct.Struct("<Q")
-_EXECUTABLE_ADDRESS = 0x67800000
 
 
 def create_transceiver_from_hostname(
