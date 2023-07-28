@@ -157,7 +157,6 @@ class ExtendedTransceiver(Transceiver):
         # cope with this
         self._flood_write_lock = Condition()
 
-
         # The nearest neighbour start ID and lock
         self._nearest_neighbour_id = 1
         self._nearest_neighbour_lock = RLock()
