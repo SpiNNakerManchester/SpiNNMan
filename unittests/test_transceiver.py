@@ -74,8 +74,6 @@ class TestTransceiver(unittest.TestCase):
         connections = set()
         connections.add(SCAMPConnection(
             remote_host=board_config.remotehost))
-        with transceiver.Transceiver(ver, connections=connections) as trans:
-            assert trans.get_connections() == connections
 
     def test_create_new_transceiver_from_list_connections(self):
         board_config.set_up_remote_board()
@@ -85,12 +83,6 @@ class TestTransceiver(unittest.TestCase):
         board_config.set_up_local_virtual_board()
         connections.append(BootConnection(
             remote_host=board_config.remotehost))
-        with transceiver.Transceiver(ver, connections=connections) as trans:
-            instantiated_connections = trans.get_connections()
-
-            for connection in connections:
-                assert connection in instantiated_connections
-            # assert trans.get_connections() == connections
 
     def test_retrieving_machine_details(self):
         board_config.set_up_remote_board()
@@ -103,17 +95,17 @@ class TestTransceiver(unittest.TestCase):
         with transceiver.Transceiver(ver, connections=connections) as trans:
             SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
             if board_config.board_version in (2, 3):
-                assert trans.get_machine_dimensions().width == 2
-                assert trans.get_machine_dimensions().height == 2
+                assert trans._get_machine_dimensions().width == 2
+                assert trans._get_machine_dimensions().height == 2
             elif board_config.board_version in (4, 5):
-                assert trans.get_machine_dimensions().width == 8
-                assert trans.get_machine_dimensions().height == 8
+                assert trans._get_machine_dimensions().width == 8
+                assert trans._get_machine_dimensions().height == 8
             else:
-                size = trans.get_machine_dimensions()
+                size = trans._get_machine_dimensions()
                 print(f"Unknown board with size {size.width} x {size.height}")
 
             assert trans.is_connected()
-            print(trans.get_scamp_version())
+            print(trans._get_scamp_version())
             print(trans.get_cpu_infos())
 
     def test_boot_board(self):
@@ -121,36 +113,7 @@ class TestTransceiver(unittest.TestCase):
         with transceiver.create_transceiver_from_hostname(
                 board_config.remotehost, board_config.board_version) as trans:
             # self.assertFalse(trans.is_connected())
-            trans.boot_board()
-
-    def test_set_watch_dog(self):
-        connections = []
-        connections.append(SCAMPConnection(remote_host=None))
-        tx = MockWriteTransceiver(version=5, connections=connections)
-        SpiNNManDataWriter.mock().set_machine(tx.get_machine_details())
-        # All chips
-        tx.set_watch_dog(True)
-        tx.set_watch_dog(False)
-        tx.set_watch_dog(5)
-
-        # The expected write values for the watch dog
-        expected_writes = (
-            SystemVariableDefinition.software_watchdog_count.default, 0, 5)
-
-        # Check the values that were "written" for set_watch_dog,
-        # which should be one per chip
-        written_memory = tx.written_memory
-        write_item = 0
-        for write in range(3):
-            for x, y in tx.get_machine_details().chip_coordinates:
-                assert written_memory[write_item][0] == x
-                assert written_memory[write_item][1] == y
-                assert written_memory[write_item][2] == (
-                    constants.SYSTEM_VARIABLE_BASE_ADDRESS +
-                    SystemVariableDefinition.software_watchdog_count.offset)
-                expected_data = struct.pack("B", expected_writes[write])
-                assert written_memory[write_item][3] == expected_data
-                write_item += 1
+            trans._boot_board()
 
 
 if __name__ == '__main__':

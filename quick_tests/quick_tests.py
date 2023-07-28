@@ -174,11 +174,6 @@ def print_transceiver_tests(transceiver):
         print("Written:", map(hex, write_data))
         print("Read:   ", map(hex, read_data))
 
-    with Section("Flood Memory Write"):
-        transceiver.write_memory_flood(0x70000000, 0x04050607)
-        read_data = transceiver.read_memory(1, 1, 0x70000000, 4)
-        print(hex(struct.unpack("<I", read_data)[0]))
-
     with Section("Execute Flood"):
         transceiver.execute_flood(
             core_subsets, "hello.aplx", app_id, is_filename=True)
@@ -277,26 +272,11 @@ def print_transceiver_tests(transceiver):
             print("{}: {}".format(
                 register.name, diagnostics.registers[register.value]))
 
-    with Section("Send read requests"):
-        transceiver.send_scp_message(ReadMemory(1, 0, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(1, 1, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(1, 1, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
-
     with Section("Get Router Diagnostics"):
         diagnostics = transceiver.get_router_diagnostics(0, 0)
         for register in ROUTER_REGISTER_REGISTERS:
             print("{}: {}".format(
                 register.name, diagnostics.registers[register.value]))
-
-    with Section("Get Router Diagnostic Filters"):
-        for i in range(0, 16):
-            print("Filter", i, ":")
-            current_filter = transceiver.get_router_diagnostic_filter(0, 0, i)
-            print_filter(current_filter)
-            print("")
 
     # 8-byte numbers have to be converted into bytearrays to be written
     inputdata = struct.pack("<Q", 123456789123456789)
@@ -311,20 +291,6 @@ def print_transceiver_tests(transceiver):
         transceiver.write_memory(0, 0, 0x70000000, data=int(123456789))
         data = struct.unpack(
             "<I", transceiver.read_memory(0, 0, 0x70000000, 4))[0]
-        if data != 123456789:
-            raise ValueError("values are not identical")
-
-    with Section("Test writing bytearrays and ints to write_neighbour_memory "
-                 "and extracting them"):
-        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=inputdata)
-        data = struct.unpack(
-            "<Q", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 8))[0]
-        if data != 123456789123456789:
-            raise ValueError("values are not identical")
-
-        transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=123456789)
-        data = struct.unpack(
-            "<I", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 4))[0]
         if data != 123456789:
             raise ValueError("values are not identical")
 
@@ -345,10 +311,6 @@ def print_transceiver_tests(transceiver):
             "<I", transceiver.read_memory(1, 1, 0x70000000, 4))[0]
         if data != 123456789 or data2 != 123456789:
             raise ValueError("values are not identical")
-
-    with Section("Get Heap"):
-        for heap_element in transceiver.get_heap(0, 0):
-            print(heap_element)
 
 
 unittest_setup()
