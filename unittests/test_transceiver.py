@@ -18,6 +18,7 @@ from spinn_utilities.config_holder import set_config
 from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
+from spinnman.extended.extended_transceiver import ExtendedTransceiver
 from spinnman.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
@@ -25,6 +26,7 @@ from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
 from spinnman.connections.udp_packet_connections import (
     BootConnection, SCAMPConnection)
 import spinnman.transceiver as transceiver
+import spinnman.extended.extended_transceiver as extended
 from spinnman.board_test_configuration import BoardTestConfiguration
 
 board_config = BoardTestConfiguration()
@@ -55,6 +57,10 @@ class MockWriteTransceiver(Transceiver):
         pass
 
 
+class MockExtendedTransceiver(MockWriteTransceiver, ExtendedTransceiver):
+    pass
+
+
 class TestTransceiver(unittest.TestCase):
 
     def setUp(self):
@@ -74,7 +80,8 @@ class TestTransceiver(unittest.TestCase):
         connections = set()
         connections.add(SCAMPConnection(
             remote_host=board_config.remotehost))
-        with transceiver.Transceiver(ver, connections=connections) as trans:
+        with extended.ExtendedTransceiver(
+                ver, connections=connections) as trans:
             assert trans.get_connections() == connections
 
     def test_create_new_transceiver_from_list_connections(self):
@@ -126,7 +133,7 @@ class TestTransceiver(unittest.TestCase):
     def test_set_watch_dog(self):
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
-        tx = MockWriteTransceiver(version=5, connections=connections)
+        tx = MockExtendedTransceiver(version=5, connections=connections)
         SpiNNManDataWriter.mock().set_machine(tx.get_machine_details())
         # All chips
         tx.set_watch_dog(True)

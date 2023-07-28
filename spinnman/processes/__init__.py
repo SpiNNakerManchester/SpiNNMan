@@ -17,7 +17,7 @@ from .abstract_multi_connection_process_connection_selector import (
     AbstractMultiConnectionProcessConnectionSelector)
 from .application_copy_run_process import ApplicationCopyRunProcess
 from .application_run_process import ApplicationRunProcess
-from .de_alloc_sdram_process import DeAllocSDRAMProcess
+
 from .fixed_connection_selector import FixedConnectionSelector
 from .get_heap_process import GetHeapProcess
 from .get_cpu_info_process import GetCPUInfoProcess
