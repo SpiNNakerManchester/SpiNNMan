@@ -18,10 +18,12 @@ import io
 import os
 import struct
 import logging
+from threading import Condition, RLock
 import time
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_machine import CoreSubsets
+from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.transceiver import Transceiver
 from spinnman.constants import (
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_FILTER_CONTROLS_OFFSET,
@@ -146,7 +148,35 @@ class ExtendedTransceiver(Transceiver):
         the multiple calls may be made separately over the set of given
         connections.
     """
-    __slots__ = []
+    __slots__ = ["_flood_write_lock", "_nearest_neighbour_id",
+                 "_nearest_neighbour_lock"]
+
+    def __init__(self, version, connections=None):
+        """
+        :param int version: The version of the board being connected to
+        :param list(Connection) connections:
+            An iterable of connections to the board.  If not specified, no
+            communication will be possible until connections are found.
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board, or if no
+            connections to the board can be found (if connections is ``None``)
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        super().__init__(version, connections)
+
+        # A lock against multiple flood fill writes - needed as SCAMP cannot
+        # cope with this
+        self._flood_write_lock = Condition()
+
+
+        # The nearest neighbour start ID and lock
+        self._nearest_neighbour_id = 1
+        self._nearest_neighbour_lock = RLock()
 
     def send_scp_message(self, message, connection=None):
         """
@@ -201,6 +231,39 @@ class ExtendedTransceiver(Transceiver):
             return connection.is_connected()
         return any(c.is_connected() for c in self._scamp_connections)
 
+    def __set_watch_dog_on_chip(self, x, y, watch_dog):
+        """
+        Enable, disable or set the value of the watch dog timer on a
+        specific chip.
+
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
+
+        :param int x: chip X coordinate to write new watchdog parameter to
+        :param int y: chip Y coordinate to write new watchdog parameter to
+        :param watch_dog:
+            Either a boolean indicating whether to enable (True) or
+            disable (False) the watchdog timer, or an int value to set the
+            timer count to
+        :type watch_dog: bool or int
+        """
+        # build what we expect it to be
+        warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
+                          "and untested due to no known use.")
+        value_to_set = watch_dog
+        watchdog = SystemVariableDefinition.software_watchdog_count
+        if isinstance(watch_dog, bool):
+            value_to_set = watchdog.default if watch_dog else 0
+
+        # build data holder
+        data = _ONE_BYTE.pack(value_to_set)
+
+        # write data
+        address = SYSTEM_VARIABLE_BASE_ADDRESS + watchdog.offset
+        self.write_memory(x=x, y=y, base_address=address, data=data)
+
     def set_watch_dog(self, watch_dog):
         """
         Enable, disable or set the value of the watch dog timer.
@@ -219,7 +282,7 @@ class ExtendedTransceiver(Transceiver):
         warn_once(logger, "The set_watch_dog method is deprecated and "
                           "untested due to no known use.")
         for x, y in SpiNNManDataView.get_machine().chip_coordinates:
-            self.set_watch_dog_on_chip(x, y, watch_dog)
+            self.__set_watch_dog_on_chip(x, y, watch_dog)
 
     def get_iobuf_from_core(self, x, y, p):
         """

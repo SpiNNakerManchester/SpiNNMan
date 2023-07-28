@@ -17,7 +17,7 @@ import io
 import os
 import random
 import struct
-from threading import Condition, RLock
+from threading import Condition
 from collections import defaultdict
 from contextlib import contextmanager, suppress
 import logging
@@ -180,13 +180,10 @@ class Transceiver(AbstractContextManager):
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
-        "_flood_write_lock",
         "_height",
         "_iobuf_size",
         "_machine_off",
         "_n_chip_execute_locks",
-        "_nearest_neighbour_id",
-        "_nearest_neighbour_lock",
         "_scamp_connection_selector",
         "_scamp_connections",
         "_udp_scamp_connections",
@@ -244,14 +241,6 @@ class Transceiver(AbstractContextManager):
         self._bmp_connection_selectors = dict()
         self._scamp_connection_selector = \
             self._identify_connections(connections)
-
-        # The nearest neighbour start ID and lock
-        self._nearest_neighbour_id = 1
-        self._nearest_neighbour_lock = RLock()
-
-        # A lock against multiple flood fill writes - needed as SCAMP cannot
-        # cope with this
-        self._flood_write_lock = Condition()
 
         # A lock against single chip executions (entry is (x, y))
         # The condition should be acquired before the locks are
@@ -996,39 +985,6 @@ class Transceiver(AbstractContextManager):
         # read iobuf from machine
         process = ReadIOBufProcess(self._scamp_connection_selector)
         return process.read_iobuf(self._iobuf_size, core_subsets)
-
-    def set_watch_dog_on_chip(self, x, y, watch_dog):
-        """
-        Enable, disable or set the value of the watch dog timer on a
-        specific chip.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param int x: chip X coordinate to write new watchdog parameter to
-        :param int y: chip Y coordinate to write new watchdog parameter to
-        :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
-            disable (False) the watchdog timer, or an int value to set the
-            timer count to
-        :type watch_dog: bool or int
-        """
-        # build what we expect it to be
-        warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
-                          "and untested due to no known use.")
-        value_to_set = watch_dog
-        WATCHDOG = SystemVariableDefinition.software_watchdog_count
-        if isinstance(watch_dog, bool):
-            value_to_set = WATCHDOG.default if watch_dog else 0
-
-        # build data holder
-        data = _ONE_BYTE.pack(value_to_set)
-
-        # write data
-        address = SYSTEM_VARIABLE_BASE_ADDRESS + WATCHDOG.offset
-        self.write_memory(x=x, y=y, base_address=address, data=data)
 
     def get_core_state_count(self, app_id, state):
         """
