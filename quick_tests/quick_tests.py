@@ -29,7 +29,8 @@ from spinn_machine import CoreSubsets, CoreSubset, MulticastRoutingEntry
 from spinn_machine.tags import IPTag, ReverseIPTag
 from spinnman.data import SpiNNManDataView
 from spinnman.config_setup import unittest_setup
-from spinnman.transceiver import create_transceiver_from_hostname
+from spinnman.extended.extended_transceiver import (
+    create_transceiver_from_hostname)
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.enums import Signal
 from spinnman.model import DiagnosticFilter
