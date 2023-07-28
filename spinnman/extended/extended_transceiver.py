@@ -14,6 +14,7 @@
 
 # pylint: disable=too-many-arguments
 import io
+import os
 import struct
 import logging
 import time
@@ -150,7 +151,9 @@ class ExtendedTransceiver(Transceiver):
         """
         Sends an SCP message, without expecting a response.
 
-        :param AbstractSCPRequest message: The message to send
+        :param message: The message to send
+        :type message:
+            spinnman.messages.scp.abstract_messages.AbstractSCPRequest
         :param SCAMPConnection connection:
             The connection to use (omit to pick a random one)
         :raise SpinnmanTimeoutException:
@@ -740,4 +743,3 @@ class ExtendedTransceiver(Transceiver):
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
-
