@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from spinnman.messages.scp.impl import SDRAMDeAlloc
-from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinnman.processes.abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):

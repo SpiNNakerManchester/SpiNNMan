@@ -42,10 +42,9 @@ from spinnman.exceptions import (
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
     SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
-from spinnman.model import DiagnosticFilter, MachineDimensions
+from spinnman.model import MachineDimensions
 from spinnman.model.enums import (
     CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES)
-from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
@@ -53,19 +52,19 @@ from spinnman.messages.spinnaker_boot import (
 from spinnman.messages.scp.enums import PowerCommand
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
-    BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
-    WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
-    CountState, WriteMemory, SetLED, ApplicationRun, SendSignal, AppStop,
+    BMPGetVersion, SetPower, ReadFPGARegister,
+    WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet,
+    CountState, WriteMemory, SendSignal, AppStop,
     IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
-    DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
+    GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
     GetCPUInfoProcess, GetExcludeCPUInfoProcess, GetIncludeCPUInfoProcess,
-    ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
+    ReadIOBufProcess, ApplicationRunProcess,
     LoadFixedRouteRoutingEntryProcess, FixedConnectionSelector,
-    ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
+    ReadFixedRouteRoutingEntryProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess)
@@ -1404,73 +1403,6 @@ class Transceiver(AbstractContextManager):
         addr = self.__get_user_register_address_from_core(p, user)
         self.write_memory(x, y, addr, int(value))
 
-    def write_memory_flood(
-            self, base_address, data, n_bytes=None, offset=0,
-            is_filename=False):
-        """
-        Write to the SDRAM of all chips.
-
-        :param int base_address:
-            The address in SDRAM where the region of memory is to be written
-        :param data:
-            The data that is to be written.  Should be one of the following:
-
-            * An instance of RawIOBase
-            * A byte-string
-            * A single integer
-            * A file name of a file to read (in which case `is_filename`
-              should be set to True)
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int or str
-        :param int n_bytes:
-            The amount of data to be written in bytes.  If not specified:
-
-            * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray or bytes, the length of the bytearray
-              will be used
-            * If `data` is an int, 4 will be used
-            * If `data` is a str, the size of the file will be used
-        :param int offset:
-            The offset where the valid data starts; if `data` is
-            an int, then the offset will be ignored and 0 is used.
-        :param bool is_filename:
-            True if `data` should be interpreted as a file name
-        :raise SpinnmanIOException:
-            * If there is an error communicating with the board
-            * If there is an error reading the executable
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If one of the specified chips is not valid
-            * If `app_id` is an invalid application ID
-            * If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        process = WriteMemoryFloodProcess(self._scamp_connection_selector)
-        # Ensure only one flood fill occurs at any one time
-        with self._flood_write_lock:
-            # Start the flood fill
-            nearest_neighbour_id = self._get_next_nearest_neighbour_id()
-            if isinstance(data, io.RawIOBase):
-                process.write_memory_from_reader(
-                    nearest_neighbour_id, base_address, data, n_bytes)
-            elif isinstance(data, str) and is_filename:
-                if n_bytes is None:
-                    n_bytes = os.stat(data).st_size
-                with open(data, "rb") as reader:
-                    process.write_memory_from_reader(
-                        nearest_neighbour_id, base_address, reader, n_bytes)
-            elif isinstance(data, int):
-                data_to_write = _ONE_WORD.pack(data)
-                process.write_memory_from_bytearray(
-                    nearest_neighbour_id, base_address, data_to_write, 0)
-            else:
-                if n_bytes is None:
-                    n_bytes = len(data)
-                process.write_memory_from_bytearray(
-                    nearest_neighbour_id, base_address, data, offset, n_bytes)
-
     def read_memory(self, x, y, base_address, length, cpu=0):
         """
         Read some areas of memory (usually SDRAM) from the board.
@@ -1682,7 +1614,7 @@ class Transceiver(AbstractContextManager):
         Send a signal to an application.
 
         :param int app_id: The ID of the application to send to
-        :param Signal signal: The signal to send
+        :param ~spinnman.messages.scp.enums.Signal signal: The signal to send
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2080,7 +2012,7 @@ class Transceiver(AbstractContextManager):
         :param int position:
             The position in the list of filters where this filter is to be
             added.
-        :param DiagnosticFilter diagnostic_filter:
+        :param ~spinnman.model.DiagnosticFilter diagnostic_filter:
             The diagnostic filter being set in the placed, between 0 and 15.
 
             .. note::
@@ -2176,23 +2108,6 @@ class Transceiver(AbstractContextManager):
         warn_once(logger, "The bmp_connection property is deprecated and "
                   "likely to be removed.")
         return self._bmp_connection_selectors
-
-    def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
-        """
-        Get the contents of the given heap on a given chip.
-
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
-        :param SystemVariableDefinition heap:
-            The SystemVariableDefinition which is the heap to read
-        :rtype: list(HeapElement)
-        """
-        try:
-            process = GetHeapProcess(self._scamp_connection_selector)
-            return process.get_heap((x, y), heap)
-        except Exception:
-            logger.info(self.__where_is_xy(x, y))
-            raise
 
     def control_sync(self, do_sync):
         """
