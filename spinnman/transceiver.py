@@ -240,7 +240,7 @@ class Transceiver(AbstractContextManager):
         # build connection selectors for the processes.
         self._bmp_connection_selectors = dict()
         self._scamp_connection_selector = \
-            self._identify_connections(connections)
+            self.__identify_connections(connections)
 
         # A lock against single chip executions (entry is (x, y))
         # The condition should be acquired before the locks are
@@ -252,11 +252,11 @@ class Transceiver(AbstractContextManager):
         self._n_chip_execute_locks = 0
 
         # Check that the BMP connections are valid
-        self._check_bmp_connections()
+        self.__check_bmp_connections()
 
         self._machine_off = False
 
-    def __where_is_xy(self, x, y):
+    def _where_is_xy(self, x, y):
         """
         Attempts to get where_is_x_y info from the machine
 
@@ -275,7 +275,7 @@ class Transceiver(AbstractContextManager):
         except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
-    def _identify_connections(self, connections):
+    def __identify_connections(self, connections):
         for conn in connections:
 
             # locate the only boot send conn
@@ -299,7 +299,7 @@ class Transceiver(AbstractContextManager):
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(self._scamp_connections)
 
-    def _check_bmp_connections(self):
+    def __check_bmp_connections(self):
         """
         Check that the BMP connections are actually connected to valid BMPs.
 
@@ -311,7 +311,7 @@ class Transceiver(AbstractContextManager):
 
             # try to send a BMP sver to check if it responds as expected
             try:
-                version_info = self.get_scamp_version(
+                version_info = self._get_scamp_version(
                     conn.chip_x, conn.chip_y,
                     self._bmp_connection_selectors[conn.cabinet, conn.frame])
                 fail_version_name = version_info.name != _BMP_NAME
@@ -369,7 +369,7 @@ class Transceiver(AbstractContextManager):
         return None
 
     @contextmanager
-    def _flood_execute_lock(self):
+    def __flood_execute_lock(self):
         """
         Get a lock for executing a flood fill of an executable.
         """
@@ -459,7 +459,7 @@ class Transceiver(AbstractContextManager):
             return list()
 
         # Get the machine dimensions
-        dims = self.get_machine_dimensions()
+        dims = self._get_machine_dimensions()
 
         # Find all the new connections via the machine Ethernet-connected chips
         version = SpiNNManDataView.get_machine_version()
@@ -504,7 +504,7 @@ class Transceiver(AbstractContextManager):
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._scamp_connections)
 
-    def get_machine_dimensions(self):
+    def _get_machine_dimensions(self):
         """
         Get the maximum chip X-coordinate and maximum chip Y-coordinate of
         the chips in the machine.
@@ -547,10 +547,10 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         # Get the width and height of the machine
-        self.get_machine_dimensions()
+        self._get_machine_dimensions()
 
         # Get the coordinates of the boot chip
-        version_info = self.get_scamp_version()
+        version_info = self._get_scamp_version()
 
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
@@ -566,7 +566,7 @@ class Transceiver(AbstractContextManager):
             logger.info(f"Detected {machine.summary_string()}")
         return machine
 
-    def get_scamp_version(
+    def _get_scamp_version(
             self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
             connection_selector=None, n_retries=N_RETRIES):
@@ -596,7 +596,7 @@ class Transceiver(AbstractContextManager):
         process = GetVersionProcess(connection_selector, n_retries)
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
-    def boot_board(
+    def _boot_board(
             self, number_of_boards=None, width=None, height=None,
             extra_boot_values=None):
         """
@@ -628,7 +628,7 @@ class Transceiver(AbstractContextManager):
         time.sleep(2.0)
 
     @staticmethod
-    def is_scamp_version_compabible(version):
+    def _is_scamp_version_compabible(version):
         """
         Determine if the version of SCAMP is compatible with this transceiver.
 
@@ -696,7 +696,7 @@ class Transceiver(AbstractContextManager):
 
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
-            self.power_on_machine()
+            self._power_on_machine()
 
             # Sleep a bit to let things get going
             time.sleep(2.0)
@@ -711,7 +711,7 @@ class Transceiver(AbstractContextManager):
             raise SpinnmanIOException(
                 "Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
-                not self.is_scamp_version_compabible(
+                not self._is_scamp_version_compabible(
                     version_info.version_number)):
             raise SpinnmanIOException(
                 f"The machine is currently booted with {version_info.name}"
@@ -771,14 +771,14 @@ class Transceiver(AbstractContextManager):
         current_tries_to_go = tries_to_go
         while version_info is None and current_tries_to_go > 0:
             try:
-                version_info = self.get_scamp_version(n_retries=BOOT_RETRIES)
+                version_info = self._get_scamp_version(n_retries=BOOT_RETRIES)
                 if self.__is_default_destination(version_info):
                     version_info = None
                     time.sleep(0.1)
             except SpinnmanGenericProcessException as e:
                 if isinstance(e.exception, SpinnmanTimeoutException):
                     logger.info("Attempting to boot machine")
-                    self.boot_board(
+                    self._boot_board(
                         number_of_boards, width, height, extra_boot_values)
                     current_tries_to_go -= 1
                 elif isinstance(e.exception, SpinnmanIOException):
@@ -788,7 +788,7 @@ class Transceiver(AbstractContextManager):
                     raise
             except SpinnmanTimeoutException:
                 logger.info("Attempting to boot machine")
-                self.boot_board(
+                self._boot_board(
                     number_of_boards, width, height, extra_boot_values)
                 current_tries_to_go -= 1
             except SpinnmanIOException as e:
@@ -798,7 +798,7 @@ class Transceiver(AbstractContextManager):
         # The last thing we tried was booting, so try again to get the version
         if version_info is None:
             with suppress(SpinnmanException):
-                version_info = self.get_scamp_version()
+                version_info = self._get_scamp_version()
                 if self.__is_default_destination(version_info):
                     version_info = None
         if version_info is not None:
@@ -1058,7 +1058,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         # Lock against other executable's
-        with self._flood_execute_lock():
+        with self.__flood_execute_lock():
             # Flood fill the system with the binary
             n_bytes, chksum = self.write_memory(
                 0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes,
@@ -1077,7 +1077,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             process.run(n_bytes, app_id, core_subsets, chksum, wait)
 
-    def power_on_machine(self):
+    def _power_on_machine(self):
         """
         Power on the whole machine.
 
@@ -1351,7 +1351,7 @@ class Transceiver(AbstractContextManager):
             process = ReadMemoryProcess(self._scamp_connection_selector)
             return process.read_memory(x, y, cpu, base_address, length)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def read_word(self, x, y, base_address, cpu=0):
@@ -1385,7 +1385,7 @@ class Transceiver(AbstractContextManager):
             (value, ) = _ONE_WORD.unpack(data)
             return value
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def stop_application(self, app_id):
@@ -1425,7 +1425,7 @@ class Transceiver(AbstractContextManager):
             else:
                 xys.add((cpu_info.x, cpu_info.y))
         for (x, y) in xys:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
 
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets, app_id, cpu_states, timeout=None,
@@ -1547,7 +1547,7 @@ class Transceiver(AbstractContextManager):
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(SendSignal(app_id, signal))
 
-    def locate_spinnaker_connection_for_board_address(self, board_address):
+    def _locate_spinnaker_connection_for_board_address(self, board_address):
         """
         Find a connection that matches the given board IP address.
 
@@ -1625,7 +1625,7 @@ class Transceiver(AbstractContextManager):
         elif board_address is None:
             return self._scamp_connections
 
-        connection = self.locate_spinnaker_connection_for_board_address(
+        connection = self._locate_spinnaker_connection_for_board_address(
             board_address)
         if connection is None:
             return []
@@ -1754,7 +1754,7 @@ class Transceiver(AbstractContextManager):
             process.malloc_sdram(x, y, size, app_id, tag)
             return process.base_address
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def load_multicast_routes(self, x, y, routes, app_id):
@@ -1784,7 +1784,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             process.load_routes(x, y, routes, app_id)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def load_fixed_route(self, x, y, fixed_route, app_id):
@@ -1814,7 +1814,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             process.load_fixed_route(x, y, fixed_route, app_id)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def read_fixed_route(self, x, y, app_id):
@@ -1835,7 +1835,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             return process.read_fixed_route(x, y, app_id)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def get_multicast_routes(self, x, y, app_id=None):
@@ -1867,7 +1867,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def clear_multicast_routes(self, x, y):
@@ -1889,7 +1889,7 @@ class Transceiver(AbstractContextManager):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(RouterClear(x, y))
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def get_router_diagnostics(self, x, y):
@@ -1916,7 +1916,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             return process.get_router_diagnostics(x, y)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
@@ -1951,7 +1951,7 @@ class Transceiver(AbstractContextManager):
             self.__set_router_diagnostic_filter(
                 x, y, position, diagnostic_filter)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def __set_router_diagnostic_filter(
@@ -1999,7 +1999,7 @@ class Transceiver(AbstractContextManager):
             process.execute(WriteMemory(
                 x, y, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def close(self):
@@ -2012,20 +2012,6 @@ class Transceiver(AbstractContextManager):
 
         for connection in self._all_connections:
             connection.close()
-
-    @property
-    def bmp_connection(self):
-        """
-        The BMP connections.
-
-        .. warning::
-            This property is currently deprecated and likely to be removed.
-
-        :rtype: dict(tuple(int,int),MostDirectConnectionSelector)
-        """
-        warn_once(logger, "The bmp_connection property is deprecated and "
-                  "likely to be removed.")
-        return self._bmp_connection_selectors
 
     def control_sync(self, do_sync):
         """

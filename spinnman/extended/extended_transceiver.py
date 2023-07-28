@@ -585,7 +585,7 @@ class ExtendedTransceiver(Transceiver):
             return process.read_link_memory(
                 x, y, cpu, link, base_address, length)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def _get_next_nearest_neighbour_id(self):
@@ -689,7 +689,7 @@ class ExtendedTransceiver(Transceiver):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(SetLED(x, y, cpu, led_states))
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def free_sdram(self, x, y, base_address, app_id):
@@ -710,7 +710,7 @@ class ExtendedTransceiver(Transceiver):
             process = DeAllocSDRAMProcess(self._scamp_connection_selector)
             process.de_alloc_sdram(x, y, app_id, base_address)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def free_sdram_by_app_id(self, x, y, app_id):
@@ -735,7 +735,7 @@ class ExtendedTransceiver(Transceiver):
             process.de_alloc_sdram(x, y, app_id)
             return process.no_blocks_freed
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def get_router_diagnostic_filter(self, x, y, position):
@@ -776,7 +776,7 @@ class ExtendedTransceiver(Transceiver):
                 response.data, response.offset)[0])
             # pylint: disable=no-member
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @property
@@ -826,5 +826,5 @@ class ExtendedTransceiver(Transceiver):
             process = GetHeapProcess(self._scamp_connection_selector)
             return process.get_heap((x, y), heap)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise

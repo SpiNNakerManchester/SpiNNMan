@@ -28,31 +28,31 @@ class Test(unittest.TestCase):
         unittest_setup()
 
     def test_version_same(self):
-        self.assertTrue(Transceiver.is_scamp_version_compabible((
+        self.assertTrue(Transceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2])))
 
     def test_major_version_too_big(self):
-        self.assertFalse(Transceiver.is_scamp_version_compabible((
+        self.assertFalse(Transceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0] + 1, 0, 0)))
 
     def test_major_version_too_small(self):
-        self.assertFalse(Transceiver.is_scamp_version_compabible((
+        self.assertFalse(Transceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0] - 1, 0, 0)))
 
     def test_minor_version_bigger(self):
-        self.assertTrue(Transceiver.is_scamp_version_compabible((
+        self.assertTrue(Transceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1] + 1, _SCAMP_VERSION[2])))
 
     def test_minor_version_smaller(self):
-        self.assertFalse(Transceiver.is_scamp_version_compabible((
+        self.assertFalse(Transceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1] - 1, _SCAMP_VERSION[2])))
 
     def test_patch_version_bigger(self):
-        self.assertTrue(Transceiver.is_scamp_version_compabible((
+        self.assertTrue(Transceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2] + 1)))
 
     def test_patch_version_smaller(self):
-        self.assertFalse(Transceiver.is_scamp_version_compabible((
+        self.assertFalse(Transceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2] - 1)))
 
     def test_compare_versions(self):
