@@ -22,8 +22,9 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_machine import CoreSubsets
 from spinnman.transceiver import Transceiver
-from spinnman.constants import (ROUTER_REGISTER_BASE_ADDRESS,
-    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE)
+from spinnman.constants import (
+    ROUTER_REGISTER_BASE_ADDRESS, ROUTER_FILTER_CONTROLS_OFFSET,
+    ROUTER_DIAGNOSTIC_FILTER_SIZE)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanException
 from spinnman.extended import (
@@ -31,7 +32,6 @@ from spinnman.extended import (
 from spinnman.model import DiagnosticFilter
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.enums import Signal
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     ReadMemory, ApplicationRun)
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
