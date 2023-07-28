@@ -28,7 +28,6 @@ from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_machine import CoreSubsets
-from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
     CPU_MAX_USER, CPU_USER_OFFSET, CPU_USER_START_ADDRESS,
@@ -532,8 +531,8 @@ class Transceiver(AbstractContextManager):
         dims = self.get_machine_dimensions()
 
         # Find all the new connections via the machine Ethernet-connected chips
-        geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
-        for x, y in geometry.get_potential_ethernet_chips(
+        version = SpiNNManDataView.get_machine_version()
+        for x, y in version.get_potential_ethernet_chips(
                 dims.width, dims.height):
             ip_addr_item = SystemVariableDefinition.ethernet_ip_address
             try:
@@ -644,9 +643,7 @@ class Transceiver(AbstractContextManager):
         machine.add_fpga_links()
 
         if self._boot_send_connection:
-            logger.info("Detected a machine on IP address {} which has {}",
-                        machine.boot_chip.ip_address,
-                        machine.cores_and_link_output_string())
+            logger.info(f"Detected {machine.summary_string()}")
         return machine
 
     def is_connected(self, connection=None):

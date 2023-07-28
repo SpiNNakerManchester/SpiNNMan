@@ -14,6 +14,7 @@
 
 import unittest
 import struct
+from spinn_utilities.config_holder import set_config
 from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
@@ -38,7 +39,7 @@ class MockWriteTransceiver(Transceiver):
         self.written_memory = list()
 
     def get_machine_details(self):
-        return virtual_machine(2, 2)
+        return virtual_machine(8, 8)
 
     def _update_machine(self):
         self._machine = self.get_machine_details()
@@ -58,6 +59,7 @@ class TestTransceiver(unittest.TestCase):
 
     def setUp(self):
         unittest_setup()
+        set_config("Machine", "version", 5)
 
     def test_create_new_transceiver_to_board(self):
         board_config.set_up_remote_board()
