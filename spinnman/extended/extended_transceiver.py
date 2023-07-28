@@ -33,6 +33,7 @@ from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     ReadMemory, ApplicationRun)
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
