@@ -57,8 +57,8 @@ class BoardTestConfiguration(object):
         if self.bmp_names == "None":
             self.bmp_names = None
         else:
-            self.bmp_names = [BMPConnectionData(
-                0, 0, self.bmp_names, [0], None)]
+            self.bmp_names = BMPConnectionData(
+                0, 0, self.bmp_names, [0], None)
         self.auto_detect_bmp = \
             self._config.getboolean("Machine", "auto_detect_bmp")
         self.localport = _PORT

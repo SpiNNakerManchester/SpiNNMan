@@ -109,7 +109,7 @@ def create_transceiver_from_hostname(
     :param int version: the type of SpiNNaker board used within the SpiNNaker
         machine being used. If a Spinn-5 board, then the version will be 5,
         Spinn-3 would equal 3 and so on.
-    :param list(BMPConnectionData) bmp_connection_data:
+    :param BMPConnectionData bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
     :param bool auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
@@ -136,17 +136,15 @@ def create_transceiver_from_hostname(
     # final value of the IP address
     if (version >= 4 and auto_detect_bmp is True and
             (bmp_connection_data is None or not bmp_connection_data)):
-        bmp_connection_data = [
-            work_out_bmp_from_machine_details(hostname, number_of_boards)]
+        bmp_connection_data = work_out_bmp_from_machine_details(
+            hostname, number_of_boards)
 
     # handle BMP connections
     if bmp_connection_data is not None:
-        bmp_ip_list = list()
-        for conn_data in bmp_connection_data:
-            bmp_connection = BMPConnection(conn_data)
-            connections.append(bmp_connection)
-            bmp_ip_list.append(bmp_connection.remote_ip_address)
-        logger.info("Transceiver using BMPs: {}", bmp_ip_list)
+        bmp_connection = BMPConnection(bmp_connection_data)
+        connections.append(bmp_connection)
+        logger.info("Transceiver using BMP: {}",
+                    bmp_connection.remote_ip_address)
 
     connections.append(SCAMPConnection(remote_host=hostname))
 
