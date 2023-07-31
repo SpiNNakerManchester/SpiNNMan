@@ -1085,15 +1085,11 @@ class Transceiver(AbstractContextManager):
         self.power_on(self._bmp_connection.boards)
         return True
 
-    def power_on(self, boards=0, cabinet=0, frame=0):
+    def power_on(self, boards=0):
         """
         Power on a set of boards in the machine.
 
         :param int boards: The board or boards to power on
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
         self._power(PowerCommand.POWER_ON, boards)
 
@@ -1111,28 +1107,20 @@ class Transceiver(AbstractContextManager):
         self.power_off(self._bmp_connection.boards)
         return True
 
-    def power_off(self, boards=0, cabinet=0, frame=0):
+    def power_off(self, boards=0):
         """
         Power off a set of boards in the machine.
 
         :param int boards: The board or boards to power off
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
         self._power(PowerCommand.POWER_OFF, boards)
 
-    def _power(self, power_command, boards=0, cabinet=0, frame=0):
+    def _power(self, power_command, boards=0):
         """
         Send a power request to the machine.
 
         :param PowerCommand power_command: The power command to send
         :param boards: The board or boards to send the command to
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
         connection_selector = self._bmp_connection_selector
         timeout = (
@@ -1148,7 +1136,7 @@ class Transceiver(AbstractContextManager):
         if not self._machine_off:
             time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
-    def read_fpga_register(self, fpga_num, register, cabinet, frame, board):
+    def read_fpga_register(self, fpga_num, register, board):
         """
         Read a register on a FPGA of a board. The meaning of the
         register's contents will depend on the FPGA's configuration.
@@ -1157,8 +1145,6 @@ class Transceiver(AbstractContextManager):
         :param int register:
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to request the FPGA register from
         :return: the register data
         :rtype: int
@@ -1169,8 +1155,7 @@ class Transceiver(AbstractContextManager):
             ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register  # pylint: disable=no-member
 
-    def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
-                            board):
+    def write_fpga_register(self, fpga_num, register, value, board):
         """
         Write a register on a FPGA of a board. The meaning of setting the
         register's contents will depend on the FPGA's configuration.
@@ -1180,20 +1165,16 @@ class Transceiver(AbstractContextManager):
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
         :param int value: the value to write into the FPGA register
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to write the FPGA register to
         """
         process = SendSingleCommandProcess(self._bmp_connection_selector)
         process.execute(
             WriteFPGARegister(fpga_num, register, value, board))
 
-    def read_bmp_version(self, board, cabinet, frame):
+    def read_bmp_version(self, board):
         """
         Read the BMP version.
 
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to request the data from
         :return: the sver from the BMP
         """
