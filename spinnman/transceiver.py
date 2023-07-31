@@ -602,6 +602,9 @@ class Transceiver(AbstractContextManager):
 
         :param dict(SystemVariableDefinition,object) extra_boot_values:
             extra values to set during boot
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :raise SpinnmanInvalidParameterException:
             If the board version is not known
         :raise SpinnmanIOException:
@@ -648,7 +651,9 @@ class Transceiver(AbstractContextManager):
             this parameter is deprecated and will be ignored
         :param int n_retries: The number of times to retry booting
         :param dict(SystemVariableDefinition,object) extra_boot_values:
-            Any additional values to set during boot
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :return: The version identifier
         :rtype: VersionInfo
         :raise SpinnmanIOException:
@@ -725,7 +730,9 @@ class Transceiver(AbstractContextManager):
 
         :param int tries_to_go: how many attempts should be supported
         :param dict(SystemVariableDefinition,object) extra_boot_values:
-            Any additional values to set during boot
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :return: version info
         :rtype: VersionInfo
         :raise SpinnmanIOException:
