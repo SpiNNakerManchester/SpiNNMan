@@ -24,7 +24,7 @@ from spinnman.connections.udp_packet_connections.utils import (
 from spinnman.exceptions import SpinnmanTimeoutException
 
 
-def work_out_bmp_from_machine_details(hostname, number_of_boards):
+def work_out_bmp_from_machine_details(hostname):
     """
     Work out the BMP connection IP address given the machine details.
     This is assumed to be the IP address of the machine, with 1 subtracted
@@ -32,7 +32,6 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
     BMP IP address is assumed to be 192.168.0.4
 
     :param str hostname: the SpiNNaker machine main hostname or IP address
-    :param int number_of_boards: the number of boards in the machine
     :return: The BMP connection data
     :rtype: BMPConnectionData
     """
@@ -44,10 +43,7 @@ def work_out_bmp_from_machine_details(hostname, number_of_boards):
     # add board scope for each split
     # if None, the end user didn't enter anything, so assume one board
     # starting at position 0
-    if number_of_boards == 0 or number_of_boards is None:
-        board_range = [0]
-    else:
-        board_range = range(number_of_boards)
+    board_range = [0]
 
     # Assume a single board with no cabinet or frame specified
     return BMPConnectionData(cabinet=0, frame=0, ip_address=bmp_ip_address,
