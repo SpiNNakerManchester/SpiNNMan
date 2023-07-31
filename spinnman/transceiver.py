@@ -1963,7 +1963,7 @@ class Transceiver(AbstractContextManager):
         """
         Close the transceiver and any threads that are running.
         """
-        if self._bmp_connections:
+        if self._bmp_connection:
             if get_config_bool("Machine", "turn_off_machine"):
                 self.power_off_machine()
 
