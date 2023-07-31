@@ -595,28 +595,21 @@ class Transceiver(AbstractContextManager):
         process = GetVersionProcess(connection_selector, n_retries)
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
-    def _boot_board(
-            self, number_of_boards=None, width=None, height=None,
-            extra_boot_values=None):
+    def _boot_board(self, extra_boot_values=None):
         """
         Attempt to boot the board. No check is performed to see if the
         board is already booted.
 
-        :param number_of_boards: this parameter is deprecated
-        :param width: this parameter is deprecated
-        :param height: this parameter is deprecated
         :param dict(SystemVariableDefinition,object) extra_boot_values:
             extra values to set during boot
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :raise SpinnmanInvalidParameterException:
             If the board version is not known
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         """
-        if (width is not None or height is not None or
-                number_of_boards is not None):
-            logger.warning(
-                "The width, height and number_of_boards are no longer"
-                " supported, and might be removed in a future version")
         if not self._boot_send_connection:
             # No can do. Can't boot without a boot connection.
             raise SpinnmanIOException("no boot connection available")
@@ -648,9 +641,7 @@ class Transceiver(AbstractContextManager):
         # version is irrelevant
         return version[1] > _SCAMP_VERSION[1]
 
-    def ensure_board_is_ready(
-            self, number_of_boards=None, width=None, height=None,
-            n_retries=5, extra_boot_values=None):
+    def ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
         """
         Ensure that the board is ready to interact with this version of the
         transceiver. Boots the board if not already booted and verifies that
@@ -658,14 +649,11 @@ class Transceiver(AbstractContextManager):
 
         :param number_of_boards:
             this parameter is deprecated and will be ignored
-        :type number_of_boards: int or None
-        :param width: this parameter is deprecated and will be ignored
-        :type width: int or None
-        :param height: this parameter is deprecated and will be ignored
-        :type height: int or None
         :param int n_retries: The number of times to retry booting
         :param dict(SystemVariableDefinition,object) extra_boot_values:
-            Any additional values to set during boot
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :return: The version identifier
         :rtype: VersionInfo
         :raise SpinnmanIOException:
@@ -673,22 +661,13 @@ class Transceiver(AbstractContextManager):
             * If the version of software on the board is not compatible with
               this transceiver
         """
-
-        # if the machine sizes not been given, calculate from assumption
-        if (width is not None or height is not None or
-                number_of_boards is not None):
-            logger.warning(
-                "The width, height and number_of_boards are no longer"
-                " supported, and might be removed in a future version")
-
         # try to get a SCAMP version once
         logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None
         else:
             version_info = self._try_to_find_scamp_and_boot(
-                INITIAL_FIND_SCAMP_RETRIES_COUNT, number_of_boards,
-                width, height, extra_boot_values)
+                INITIAL_FIND_SCAMP_RETRIES_COUNT, extra_boot_values)
 
         # If we fail to get a SCAMP version this time, try other things
         if version_info is None and self._bmp_connections:
@@ -703,7 +682,7 @@ class Transceiver(AbstractContextManager):
 
             # retry to get a SCAMP version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
-                n_retries, number_of_boards, width, height, extra_boot_values)
+                n_retries, extra_boot_values)
 
         # verify that the version is the expected one for this transceiver
         if version_info is None:
@@ -745,22 +724,15 @@ class Transceiver(AbstractContextManager):
         return (version_info.x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
                 and version_info.y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD)
 
-    def _try_to_find_scamp_and_boot(
-            self, tries_to_go, number_of_boards, width, height,
-            extra_boot_values):
+    def _try_to_find_scamp_and_boot(self, tries_to_go, extra_boot_values):
         """
         Try to detect if SCAMP is running, and if not, boot the machine.
 
         :param int tries_to_go: how many attempts should be supported
-        :param number_of_boards:
-            the number of boards that this machine is built out of;
-            this parameter is deprecated
-        :param width: The width of the machine in chips;
-            this parameter is deprecated
-        :param height: The height of the machine in chips;
-            this parameter is deprecated
         :param dict(SystemVariableDefinition,object) extra_boot_values:
-            Any additional values to set during boot
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :return: version info
         :rtype: VersionInfo
         :raise SpinnmanIOException:
@@ -777,8 +749,7 @@ class Transceiver(AbstractContextManager):
             except SpinnmanGenericProcessException as e:
                 if isinstance(e.exception, SpinnmanTimeoutException):
                     logger.info("Attempting to boot machine")
-                    self._boot_board(
-                        number_of_boards, width, height, extra_boot_values)
+                    self._boot_board(extra_boot_values)
                     current_tries_to_go -= 1
                 elif isinstance(e.exception, SpinnmanIOException):
                     raise SpinnmanIOException(
@@ -787,8 +758,7 @@ class Transceiver(AbstractContextManager):
                     raise
             except SpinnmanTimeoutException:
                 logger.info("Attempting to boot machine")
-                self._boot_board(
-                    number_of_boards, width, height, extra_boot_values)
+                self._boot_board(extra_boot_values)
                 current_tries_to_go -= 1
             except SpinnmanIOException as e:
                 raise SpinnmanIOException(
