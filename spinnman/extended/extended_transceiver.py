@@ -450,8 +450,7 @@ class ExtendedTransceiver(Transceiver):
         """
         warn_once(logger, "The set_led method is deprecated and "
                   "untested due to no known use.")
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+        process = SendSingleCommandProcess(self._bmp_connection_selector)
         process.execute(BMPSetLed(led, action, board))
 
     def read_adc_data(self, board, cabinet, frame):
@@ -471,8 +470,7 @@ class ExtendedTransceiver(Transceiver):
         """
         warn_once(logger, "The read_adc_data method is deprecated and "
                   "untested due to no known use.")
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+        process = SendSingleCommandProcess(self._bmp_connection_selector)
         response = process.execute(ReadADC(board))
         return response.adc_info  # pylint: disable=no-member
 
@@ -792,25 +790,11 @@ class ExtendedTransceiver(Transceiver):
         warn_once(logger, "The number_of_boards_located method is deprecated "
                           "and likely to be removed.")
         boards = 0
-        for bmp_connection in self._bmp_connections:
-            boards += len(bmp_connection.boards)
+        if self._bmp_connection:
+            boards += len(self._bmp_connection.boards)
 
         # if no BMPs are available, then there's still at least one board
         return max(1, boards)
-
-    @property
-    def bmp_connection(self):
-        """
-        The BMP connections.
-
-        .. warning::
-            This property is currently deprecated and likely to be removed.
-
-        :rtype: dict(tuple(int,int),MostDirectConnectionSelector)
-        """
-        warn_once(logger, "The bmp_connection property is deprecated and "
-                  "likely to be removed.")
-        return self._bmp_connection_selectors
 
     def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
         """
