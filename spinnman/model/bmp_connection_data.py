@@ -29,24 +29,6 @@ class BMPConnectionData(object):
         self._port_num = port_num
 
     @property
-    def cabinet(self):
-        """
-        The cabinet number.
-
-        :rtype: int
-        """
-        return 0
-
-    @property
-    def frame(self):
-        """
-        The frame number.
-
-        :rtype: int
-        """
-        return 0
-
-    @property
     def ip_address(self):
         """
         The IP address of the BMP.
