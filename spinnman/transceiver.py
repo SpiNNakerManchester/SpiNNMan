@@ -1105,10 +1105,11 @@ class Transceiver(AbstractContextManager):
         :param int frame:
         :rtype: FixedConnectionSelector
         """
-        key = (cabinet, frame)
+        assert (cabinet==frame==0)
+        key = (0, 0)
         if key not in self._bmp_connection_selectors:
             raise SpinnmanInvalidParameterException(
-                "cabinet and frame", f"{cabinet} and {frame}",
+                "cabinet and frame", f"{0} and {0}",
                 "Unknown combination")
         return self._bmp_connection_selectors[key]
 
