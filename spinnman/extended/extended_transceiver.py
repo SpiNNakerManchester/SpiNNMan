@@ -785,12 +785,11 @@ class ExtendedTransceiver(Transceiver):
         """
         warn_once(logger, "The number_of_boards_located method is deprecated "
                           "and likely to be removed.")
-        boards = 0
-        for bmp_connection in self._bmp_connections:
-            boards += len(bmp_connection.boards)
-
-        # if no BMPs are available, then there's still at least one board
-        return max(1, boards)
+        if self._bmp_connection is not None:
+            return max(1, len(self._bmp_connection.boards))
+        else:
+            # if no BMPs are available, then there's still at least one board
+            return 1
 
     def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
         """
