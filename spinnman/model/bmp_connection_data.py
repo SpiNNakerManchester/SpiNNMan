@@ -56,8 +56,7 @@ class BMPConnectionData(object):
         return self._port_num
 
     def __str__(self):
-        return (f"{self._cabinet}:{self._frame}:{self._ip_address}:"
-                f"{self._boards}:{self._port_num}")
+        return (f"{self._ip_address}:{self._boards}:{self._port_num}")
 
     def __repr__(self):
         return self.__str__()
