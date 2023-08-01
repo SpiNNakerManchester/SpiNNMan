@@ -29,9 +29,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
     A BMP connection which supports queries to the BMP of a SpiNNaker machine.
     """
     __slots__ = [
-        "_boards",
-        "_cabinet",
-        "_frame"]
+        "_boards"]
 
     def __init__(self, connection_data):
         """
@@ -42,27 +40,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
             else connection_data.port_num
         super().__init__(
             remote_host=connection_data.ip_address, remote_port=port)
-        self._cabinet = connection_data.cabinet
-        self._frame = connection_data.frame
         self._boards = connection_data.boards
-
-    @property
-    def cabinet(self):
-        """
-        The cabinet ID of the BMP.
-
-        :rtype: int
-        """
-        return self._cabinet
-
-    @property
-    def frame(self):
-        """
-        The frame ID of the BMP.
-
-        :rtype: int
-        """
-        return self._frame
 
     @property
     def boards(self):

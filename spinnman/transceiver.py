@@ -289,7 +289,7 @@ class Transceiver(AbstractContextManager):
             if isinstance(conn, BMPConnection):
                 # If it is a BMP conn, add it here
                 self._bmp_connections.append(conn)
-                self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
+                self._bmp_connection_selectors[0, 0] =\
                     FixedConnectionSelector(conn)
             # Otherwise, check if it can send and receive SCP (talk to SCAMP)
             elif isinstance(conn, SCAMPConnection):
@@ -312,7 +312,7 @@ class Transceiver(AbstractContextManager):
             try:
                 version_info = self._get_scamp_version(
                     conn.chip_x, conn.chip_y,
-                    self._bmp_connection_selectors[conn.cabinet, conn.frame])
+                    self._bmp_connection_selectors[0, 0])
                 fail_version_name = version_info.name != _BMP_NAME
                 fail_version_num = \
                     version_info.version_number[0] not in _BMP_MAJOR_VERSIONS
@@ -1057,8 +1057,7 @@ class Transceiver(AbstractContextManager):
             logger.warning("No BMP connections, so can't power on")
             return False
         for bmp_connection in self._bmp_connections:
-            self.power_on(bmp_connection.boards, bmp_connection.cabinet,
-                          bmp_connection.frame)
+            self.power_on(bmp_connection.boards)
         return True
 
     def power_on(self, boards=0, cabinet=0, frame=0):
@@ -1085,8 +1084,7 @@ class Transceiver(AbstractContextManager):
             return False
         logger.info("Turning off machine")
         for bmp_connection in self._bmp_connections:
-            self.power_off(bmp_connection.boards, bmp_connection.cabinet,
-                           bmp_connection.frame)
+            self.power_off(bmp_connection.boards)
         return True
 
     def power_off(self, boards=0, cabinet=0, frame=0):

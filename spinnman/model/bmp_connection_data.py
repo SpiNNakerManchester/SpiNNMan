@@ -19,15 +19,11 @@ class BMPConnectionData(object):
     """
     __slots__ = [
         "_boards",
-        "_cabinet",
-        "_frame",
         "_ip_address",
         "_port_num"]
 
-    def __init__(self, cabinet, frame, ip_address, boards, port_num):
+    def __init__(self, ip_address, boards, port_num):
         # pylint: disable=too-many-arguments
-        self._cabinet = cabinet
-        self._frame = frame
         self._ip_address = ip_address
         self._boards = boards
         self._port_num = port_num
