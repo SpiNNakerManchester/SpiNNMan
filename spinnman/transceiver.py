@@ -1139,7 +1139,8 @@ class Transceiver(AbstractContextManager):
         if not self._machine_off:
             time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
-    def read_fpga_register(self, fpga_num, register, cabinet, frame, board):
+    def read_fpga_register(
+            self, fpga_num, register, cabinet=0, frame=0, board=0):
         """
         Read a register on a FPGA of a board. The meaning of the
         register's contents will depend on the FPGA's configuration.
