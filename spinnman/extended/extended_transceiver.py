@@ -427,7 +427,7 @@ class ExtendedTransceiver(Transceiver):
         # Send a signal telling the application to start
         self.send_signal(app_id, Signal.START)
 
-    def set_led(self, led, action, board, cabinet, frame):
+    def set_led(self, led, action, board):
         """
         Set the LED state of a board in the machine.
 
@@ -442,18 +442,16 @@ class ExtendedTransceiver(Transceiver):
         :param LEDAction action:
             State to set the LED to, either on, off or toggle
         :param board: Specifies the board to control the LEDs of. This may
-            also be an iterable of multiple boards (in the same frame). The
+            also be an iterable of multiple boards. The
             command will actually be sent to the first board in the iterable.
         :type board: int or iterable(int)
-        :param int cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         """
         warn_once(logger, "The set_led method is deprecated and "
                   "untested due to no known use.")
         process = SendSingleCommandProcess(self._bmp_selector)
         process.execute(BMPSetLed(led, action, board))
 
-    def read_adc_data(self, board, cabinet, frame):
+    def read_adc_data(self, board):
         """
         Read the BMP ADC data.
 
@@ -462,8 +460,6 @@ class ExtendedTransceiver(Transceiver):
             known use. Same functionality provided by ybug and bmpc.
             Retained in case needed for hardware debugging.
 
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to request the ADC data from
         :return: the FPGA's ADC data object
         :rtype: ADCInfo
