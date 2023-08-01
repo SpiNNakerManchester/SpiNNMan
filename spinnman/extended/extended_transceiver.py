@@ -23,7 +23,7 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_machine import CoreSubsets
 from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 from spinnman.constants import (
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_FILTER_CONTROLS_OFFSET,
     ROUTER_DIAGNOSTIC_FILTER_SIZE)
@@ -42,7 +42,8 @@ from spinnman.connections.udp_packet_connections import (
 from spinnman.processes import (
     GetHeapProcess, ReadMemoryProcess, SendSingleCommandProcess,
     WriteMemoryProcess)
-from spinnman.transceiver import _EXECUTABLE_ADDRESS, _ONE_BYTE, _ONE_WORD
+from spinnman.transceiver.transceiver import (
+    _EXECUTABLE_ADDRESS, _ONE_BYTE, _ONE_WORD)
 from spinnman.utilities.utility_functions import (
     work_out_bmp_from_machine_details)
 

@@ -18,7 +18,7 @@ from spinn_utilities.exceptions import (DataNotYetAvialable)
 from spinnman.config_setup import unittest_setup
 from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 
 
 class MockTranceiver(Transceiver):

@@ -19,7 +19,7 @@ from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.extended.extended_transceiver import ExtendedTransceiver
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)

@@ -15,7 +15,7 @@
 import unittest
 import spinn_utilities
 import spinn_machine
-from spinnman.transceiver import Transceiver, _SCAMP_VERSION
+from spinnman.transceiver.transceiver import Transceiver, _SCAMP_VERSION
 import spinnman
 from spinnman.config_setup import unittest_setup
 

@@ -35,7 +35,7 @@ from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpallocException
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 from .spalloc_state import SpallocState
 from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware

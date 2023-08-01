@@ -16,7 +16,7 @@ import logging
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_machine.data.machine_data_writer import MachineDataWriter
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 from .spinnman_data_view import _SpiNNManDataModel, SpiNNManDataView
 
 logger = FormatAdapter(logging.getLogger(__name__))
