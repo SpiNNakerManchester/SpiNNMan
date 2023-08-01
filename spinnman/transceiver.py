@@ -1181,7 +1181,7 @@ class Transceiver(AbstractContextManager):
         process.execute(
             WriteFPGARegister(fpga_num, register, value, board))
 
-    def read_bmp_version(self, board, cabinet, frame):
+    def read_bmp_version(self, board, cabinet=0, frame=0):
         """
         Read the BMP version.
 
