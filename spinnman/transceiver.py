@@ -1161,8 +1161,8 @@ class Transceiver(AbstractContextManager):
             ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register  # pylint: disable=no-member
 
-    def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
-                            board):
+    def write_fpga_register(self, fpga_num, register, value,
+                            cabinet=0, frame=0, board=0):
         """
         Write a register on a FPGA of a board. The meaning of setting the
         register's contents will depend on the FPGA's configuration.
