@@ -173,7 +173,7 @@ class Transceiver(AbstractContextManager):
     __slots__ = [
         "_all_connections",
         "_bmp_selector",
-        "_bmp_connections",
+        "_bmp_connection",
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
@@ -232,7 +232,7 @@ class Transceiver(AbstractContextManager):
         self._scamp_connections = list()
 
         # The BMP connections
-        self._bmp_connections = list()
+        self._bmp_connection = None
 
         # build connection selectors for the processes.
         self._bmp_selector = None
@@ -249,7 +249,7 @@ class Transceiver(AbstractContextManager):
         self._n_chip_execute_locks = 0
 
         # Check that the BMP connections are valid
-        self.__check_bmp_connections()
+        self.__check_bmp_connection()
 
         self._machine_off = False
 
@@ -286,8 +286,10 @@ class Transceiver(AbstractContextManager):
             # Locate any connections that talk to a BMP
             if isinstance(conn, BMPConnection):
                 # If it is a BMP conn, add it here
-                self._bmp_connections.append(conn)
-                assert (self._bmp_selector is None)
+                if self._bmp_connection is not None:
+                    raise NotImplementedError(
+                        "Only one BMP connection supported")
+                self._bmp_connection = conn
                 self._bmp_selector = FixedConnectionSelector(conn)
             # Otherwise, check if it can send and receive SCP (talk to SCAMP)
             elif isinstance(conn, SCAMPConnection):
@@ -296,7 +298,7 @@ class Transceiver(AbstractContextManager):
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(self._scamp_connections)
 
-    def __check_bmp_connections(self):
+    def __check_bmp_connection(self):
         """
         Check that the BMP connections are actually connected to valid BMPs.
 
@@ -304,7 +306,8 @@ class Transceiver(AbstractContextManager):
         """
         # check that the UDP BMP conn is actually connected to a BMP
         # via the sver command
-        for conn in self._bmp_connections:
+        if self._bmp_connection is not None:
+            conn = self._bmp_connection
 
             # try to send a BMP sver to check if it responds as expected
             try:
@@ -667,7 +670,7 @@ class Transceiver(AbstractContextManager):
                 INITIAL_FIND_SCAMP_RETRIES_COUNT, extra_boot_values)
 
         # If we fail to get a SCAMP version this time, try other things
-        if version_info is None and self._bmp_connections:
+        if version_info is None and self._bmp_connection is not None:
 
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
@@ -1050,11 +1053,10 @@ class Transceiver(AbstractContextManager):
         :rtype bool
         :return success of failure to power on machine
         """
-        if not self._bmp_connections:
+        if self._bmp_connection is None:
             logger.warning("No BMP connections, so can't power on")
             return False
-        for bmp_connection in self._bmp_connections:
-            self.power_on(bmp_connection.boards)
+        self.power_on(self._bmp_connection)
         return True
 
     def power_on(self, boards=0):
@@ -1072,12 +1074,11 @@ class Transceiver(AbstractContextManager):
         :rtype bool
         :return success or failure to power off the machine
         """
-        if not self._bmp_connections:
+        if self._bmp_connection is None:
             logger.warning("No BMP connections, so can't power off")
             return False
         logger.info("Turning off machine")
-        for bmp_connection in self._bmp_connections:
-            self.power_off(bmp_connection.boards)
+        self.power_off(self._bmp_connection)
         return True
 
     def power_off(self, boards=0):
@@ -1936,7 +1937,7 @@ class Transceiver(AbstractContextManager):
         """
         Close the transceiver and any threads that are running.
         """
-        if self._bmp_connections:
+        if self._bmp_connection is not None:
             if get_config_bool("Machine", "turn_off_machine"):
                 self.power_off_machine()
 
