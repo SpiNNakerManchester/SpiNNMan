@@ -174,7 +174,7 @@ class Transceiver(AbstractContextManager):
     """
     __slots__ = [
         "_all_connections",
-        "_bmp_connection_selectors",
+        "_bmp_selector",
         "_bmp_connections",
         "_boot_send_connection",
         "_chip_execute_lock_condition",
@@ -237,7 +237,7 @@ class Transceiver(AbstractContextManager):
         self._bmp_connections = list()
 
         # build connection selectors for the processes.
-        self._bmp_connection_selectors = dict()
+        self._bmp_selector = None
         self._scamp_connection_selector = \
             self.__identify_connections(connections)
 
@@ -289,8 +289,8 @@ class Transceiver(AbstractContextManager):
             if isinstance(conn, BMPConnection):
                 # If it is a BMP conn, add it here
                 self._bmp_connections.append(conn)
-                self._bmp_connection_selectors[0, 0] =\
-                    FixedConnectionSelector(conn)
+                assert (self._bmp_selector is None)
+                self._bmp_selector = FixedConnectionSelector(conn)
             # Otherwise, check if it can send and receive SCP (talk to SCAMP)
             elif isinstance(conn, SCAMPConnection):
                 self._scamp_connections.append(conn)
@@ -311,8 +311,7 @@ class Transceiver(AbstractContextManager):
             # try to send a BMP sver to check if it responds as expected
             try:
                 version_info = self._get_scamp_version(
-                    conn.chip_x, conn.chip_y,
-                    self._bmp_connection_selectors[0, 0])
+                    conn.chip_x, conn.chip_y, self._bmp_selector)
                 fail_version_name = version_info.name != _BMP_NAME
                 fail_version_num = \
                     version_info.version_number[0] not in _BMP_MAJOR_VERSIONS
@@ -1099,20 +1098,6 @@ class Transceiver(AbstractContextManager):
         """
         self._power(PowerCommand.POWER_OFF, boards, cabinet, frame)
 
-    def _bmp_connection(self, cabinet, frame):
-        """
-        :param int cabinet:
-        :param int frame:
-        :rtype: FixedConnectionSelector
-        """
-        assert (cabinet==frame==0)
-        key = (0, 0)
-        if key not in self._bmp_connection_selectors:
-            raise SpinnmanInvalidParameterException(
-                "cabinet and frame", f"{0} and {0}",
-                "Unknown combination")
-        return self._bmp_connection_selectors[key]
-
     def _power(self, power_command, boards=0, cabinet=0, frame=0):
         """
         Send a power request to the machine.
@@ -1124,7 +1109,7 @@ class Transceiver(AbstractContextManager):
         :param int frame: the ID of the frame in the cabinet containing the
             board(s), or 0 if the board is not in a frame
         """
-        connection_selector = self._bmp_connection(cabinet, frame)
+        connection_selector = self._bmp_selector
         timeout = (
             BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
@@ -1154,8 +1139,7 @@ class Transceiver(AbstractContextManager):
         :return: the register data
         :rtype: int
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame), timeout=1.0)
+        process = SendSingleCommandProcess(self._bmp_selector, timeout=1.0)
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register  # pylint: disable=no-member
@@ -1175,8 +1159,7 @@ class Transceiver(AbstractContextManager):
         :param int frame: the frame this is targeting
         :param int board: which board to write the FPGA register to
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+        process = SendSingleCommandProcess(self._bmp_selector)
         process.execute(
             WriteFPGARegister(fpga_num, register, value, board))
 
@@ -1189,8 +1172,7 @@ class Transceiver(AbstractContextManager):
         :param int board: which board to request the data from
         :return: the sver from the BMP
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+        process = SendSingleCommandProcess(self._bmp_selector)
         response = process.execute(BMPGetVersion(board))
         return response.version_info  # pylint: disable=no-member
 
