@@ -84,7 +84,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     def __repr__(self):
         return (
-            f"BMPConnection(cabinet={self._cabinet}, frame={self._frame}, "
+            f"BMPConnection("
             f"boards={self._boards}, local_host={self.local_ip_address}, "
             f"local_port={self.local_port}, "
             f"remote_host={self.remote_ip_address}, "
