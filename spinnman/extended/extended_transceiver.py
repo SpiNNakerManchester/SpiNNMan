@@ -427,7 +427,7 @@ class ExtendedTransceiver(Transceiver):
         # Send a signal telling the application to start
         self.send_signal(app_id, Signal.START)
 
-    def set_led(self, led, action, board, cabinet, frame):
+    def set_led(self, led, action, board):
         """
         Set the LED state of a board in the machine.
 
@@ -442,19 +442,16 @@ class ExtendedTransceiver(Transceiver):
         :param LEDAction action:
             State to set the LED to, either on, off or toggle
         :param board: Specifies the board to control the LEDs of. This may
-            also be an iterable of multiple boards (in the same frame). The
+            also be an iterable of multiple boards. The
             command will actually be sent to the first board in the iterable.
         :type board: int or iterable(int)
-        :param int cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         """
         warn_once(logger, "The set_led method is deprecated and "
                   "untested due to no known use.")
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+        process = SendSingleCommandProcess(self._bmp_selector)
         process.execute(BMPSetLed(led, action, board))
 
-    def read_adc_data(self, board, cabinet, frame):
+    def read_adc_data(self, board):
         """
         Read the BMP ADC data.
 
@@ -463,16 +460,13 @@ class ExtendedTransceiver(Transceiver):
             known use. Same functionality provided by ybug and bmpc.
             Retained in case needed for hardware debugging.
 
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to request the ADC data from
         :return: the FPGA's ADC data object
         :rtype: ADCInfo
         """
         warn_once(logger, "The read_adc_data method is deprecated and "
                   "untested due to no known use.")
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+        process = SendSingleCommandProcess(self._bmp_selector)
         response = process.execute(ReadADC(board))
         return response.adc_info  # pylint: disable=no-member
 
@@ -791,26 +785,11 @@ class ExtendedTransceiver(Transceiver):
         """
         warn_once(logger, "The number_of_boards_located method is deprecated "
                           "and likely to be removed.")
-        boards = 0
-        for bmp_connection in self._bmp_connections:
-            boards += len(bmp_connection.boards)
-
-        # if no BMPs are available, then there's still at least one board
-        return max(1, boards)
-
-    @property
-    def bmp_connection(self):
-        """
-        The BMP connections.
-
-        .. warning::
-            This property is currently deprecated and likely to be removed.
-
-        :rtype: dict(tuple(int,int),MostDirectConnectionSelector)
-        """
-        warn_once(logger, "The bmp_connection property is deprecated and "
-                  "likely to be removed.")
-        return self._bmp_connection_selectors
+        if self._bmp_connection is not None:
+            return max(1, len(self._bmp_connection.boards))
+        else:
+            # if no BMPs are available, then there's still at least one board
+            return 1
 
     def get_heap(self, x, y, heap=SystemVariableDefinition.sdram_heap_address):
         """
