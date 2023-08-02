@@ -14,17 +14,21 @@
 
 import logging
 from spinn_utilities.log import FormatAdapter
+from spinn_machine.version.version_3 import Version3
+from spinn_machine.version.version_5 import Version5
+from spinnman.data import SpiNNManDataView
 from spinnman.utilities.utility_functions import (
     work_out_bmp_from_machine_details)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
-from spinnman.transceiver.base_transceiver import BaseTransceiver
+from spinnman.transceiver.version3Transceiver import Version3Transceiver
+from spinnman.transceiver.version5Transceiver import Version5Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def create_transceiver_from_hostname(
-        hostname, version, bmp_connection_data=None, number_of_boards=None,
+        hostname, bmp_connection_data=None, number_of_boards=None,
         auto_detect_bmp=False):
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
@@ -40,9 +44,6 @@ def create_transceiver_from_hostname(
     :param number_of_boards: a number of boards expected to be supported, or
         ``None``, which defaults to a single board
     :type number_of_boards: int or None
-    :param int version: the type of SpiNNaker board used within the SpiNNaker
-        machine being used. If a Spinn-5 board, then the version will be 5,
-        Spinn-3 would equal 3 and so on.
     :param list(BMPConnectionData) bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
     :param bool auto_detect_bmp:
@@ -68,7 +69,8 @@ def create_transceiver_from_hostname(
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
     # machine, then an assumption can be made that the BMP is at -1 on the
     # final value of the IP address
-    if (version >= 4 and auto_detect_bmp is True and
+    version = SpiNNManDataView.get_machine_version()
+    if (isinstance(version, Version5) and auto_detect_bmp is True and
             (bmp_connection_data is None or not bmp_connection_data)):
         bmp_connection_data = [
             work_out_bmp_from_machine_details(hostname, number_of_boards)]
@@ -87,4 +89,8 @@ def create_transceiver_from_hostname(
     # handle the boot connection
     connections.append(BootConnection(remote_host=hostname))
 
-    return BaseTransceiver(version, connections=connections)
+    if isinstance(version, Version3):
+        return Version3Transceiver(3, connections=connections)
+    if isinstance(version, Version5):
+        return Version5Transceiver(5, connections=connections)
+    raise NotImplementedError(f"No Transceiver for {version=}")

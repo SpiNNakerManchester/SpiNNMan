@@ -82,7 +82,6 @@ def _make_transceiver(host, version, bmp_names):
         config = BoardTestConfiguration()
         config.set_up_remote_board()
         host = config.remotehost
-        version = config.board_version
         bmp_names = config.bmp_names
         auto_detect_bmp = config.auto_detect_bmp
     else:
@@ -95,8 +94,7 @@ def _make_transceiver(host, version, bmp_names):
 
     print(f"talking to SpiNNaker system at {host}")
     return create_transceiver_from_hostname(
-        host, version,
-        bmp_connection_data=bmp_names,
+        host, bmp_connection_data=bmp_names,
         auto_detect_bmp=auto_detect_bmp)
 
 
