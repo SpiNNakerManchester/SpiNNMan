@@ -24,7 +24,6 @@ import logging
 import socket
 import time
 from spinn_utilities.config_holder import get_config_bool
-from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import CoreSubsets
 from spinnman.constants import (
@@ -156,7 +155,7 @@ def create_transceiver_from_hostname(
     return Transceiver(version, connections=connections)
 
 
-class Transceiver(AbstractContextManager):
+class Transceiver(object):
     """
     An encapsulation of various communications with the SpiNNaker board.
 
