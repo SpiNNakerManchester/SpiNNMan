@@ -15,17 +15,17 @@
 import unittest
 import struct
 from spinn_utilities.config_holder import set_config
-from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
-from spinnman.extended.extended_transceiver import ExtendedTransceiver
-from spinnman.transceiver.transceiver import Transceiver
+from spinnman.transceiver import (
+    create_transceiver_from_hostname, MockableTransceiver)
+from spinnman.transceiver.watchdog_setter import WatchdogSetter
+from spinnman.transceiver.version5Transceiver import Version5Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
 from spinnman.connections.udp_packet_connections import (
     BootConnection, SCAMPConnection)
-import spinnman.transceiver as transceiver
 import spinnman.extended.extended_transceiver as extended
 from spinnman.board_test_configuration import BoardTestConfiguration
 
@@ -33,31 +33,7 @@ board_config = BoardTestConfiguration()
 ver = 5  # Guess?
 
 
-class MockWriteTransceiver(Transceiver):
-
-    def __init__(
-            self, version, connections=None):
-        super().__init__(version, connections=connections)
-        self.written_memory = list()
-
-    def get_machine_details(self):
-        return virtual_machine(8, 8)
-
-    def _update_machine(self):
-        self._machine = self.get_machine_details()
-
-    def write_memory(
-            self, x, y, base_address, data, n_bytes=None, offset=0,
-            cpu=0, is_filename=False):
-        print("Doing write to", x, y)
-        self.written_memory.append(
-            (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
-
-    def close(self):
-        pass
-
-
-class MockExtendedTransceiver(MockWriteTransceiver, ExtendedTransceiver):
+class MockExtendedTransceiver(MockableTransceiver, WatchdogSetter):
     pass
 
 
@@ -72,7 +48,7 @@ class TestTransceiver(unittest.TestCase):
         connections = list()
         connections.append(SCAMPConnection(
             remote_host=board_config.remotehost))
-        trans = transceiver.Transceiver(ver, connections=connections)
+        trans = Version5Transceiver(ver, connections=connections)
         trans.close()
 
     def test_create_new_transceiver_one_connection(self):
@@ -92,7 +68,7 @@ class TestTransceiver(unittest.TestCase):
         board_config.set_up_local_virtual_board()
         connections.append(BootConnection(
             remote_host=board_config.remotehost))
-        with transceiver.Transceiver(ver, connections=connections) as trans:
+        with Version5Transceiver(ver, connections=connections) as trans:
             instantiated_connections = trans.get_connections()
 
             for connection in connections:
@@ -107,7 +83,7 @@ class TestTransceiver(unittest.TestCase):
         board_config.set_up_local_virtual_board()
         connections.append(BootConnection(
             remote_host=board_config.remotehost))
-        with transceiver.Transceiver(ver, connections=connections) as trans:
+        with Version5Transceiver(ver, connections=connections) as trans:
             SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
             if board_config.board_version in (2, 3):
                 assert trans._get_machine_dimensions().width == 2
@@ -125,7 +101,7 @@ class TestTransceiver(unittest.TestCase):
 
     def test_boot_board(self):
         board_config.set_up_remote_board()
-        with transceiver.create_transceiver_from_hostname(
+        with create_transceiver_from_hostname(
                 board_config.remotehost, board_config.board_version) as trans:
             # self.assertFalse(trans.is_connected())
             trans._boot_board()
@@ -133,7 +109,7 @@ class TestTransceiver(unittest.TestCase):
     def test_set_watch_dog(self):
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
-        tx = MockExtendedTransceiver(version=5, connections=connections)
+        tx = MockExtendedTransceiver()
         SpiNNManDataWriter.mock().set_machine(tx.get_machine_details())
         # All chips
         tx.set_watch_dog(True)

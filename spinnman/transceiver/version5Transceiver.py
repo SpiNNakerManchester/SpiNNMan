@@ -1,4 +1,4 @@
-# Copyright (c) 2021 The University of Manchester
+# Copyright (c) 2024 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .abstract_transceiver import AbstractTransceiver
-from .mockable_transceiver import MockableTransceiver
-from .transceiver_factory import (create_transceiver_from_hostname)
+from spinnman.transceiver.base_transceiver import BaseTransceiver
 
-__all__ = ["AbstractTransceiver", "create_transceiver_from_hostname",
-           "MockableTransceiver"]
+
+class Version5Transceiver(BaseTransceiver):
+    """
+    Implementation of the Transceiver classes for Version 5 boards
+    """
+    pass

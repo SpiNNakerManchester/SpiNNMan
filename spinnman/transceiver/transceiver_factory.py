@@ -18,7 +18,7 @@ from spinnman.utilities.utility_functions import (
     work_out_bmp_from_machine_details)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
-from spinnman.transceiver.transceiver import Transceiver
+from spinnman.transceiver.base_transceiver import BaseTransceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -87,4 +87,4 @@ def create_transceiver_from_hostname(
     # handle the boot connection
     connections.append(BootConnection(remote_host=hostname))
 
-    return Transceiver(version, connections=connections)
+    return BaseTransceiver(version, connections=connections)

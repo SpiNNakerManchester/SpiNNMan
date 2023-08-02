@@ -67,8 +67,8 @@ from spinnman.processes import (
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess)
-from spinnman.utilities.utility_functions import (
-    get_vcpu_address, work_out_bmp_from_machine_details)
+from spinnman.utilities.utility_functions import get_vcpu_address
+from spinnman.transceiver.abstract_transceiver import AbstractTransceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -81,7 +81,6 @@ _BMP_MAJOR_VERSIONS = [1, 2]
 _CONNECTION_CHECK_RETRIES = 3
 INITIAL_FIND_SCAMP_RETRIES_COUNT = 3
 
-_ONE_BYTE = struct.Struct("B")
 _TWO_BYTES = struct.Struct("<BB")
 _FOUR_BYTES = struct.Struct("<BBBB")
 _ONE_WORD = struct.Struct("<I")
@@ -89,7 +88,7 @@ _ONE_LONG = struct.Struct("<Q")
 _EXECUTABLE_ADDRESS = 0x67800000
 
 
-class Transceiver(AbstractContextManager):
+class BaseTransceiver(AbstractTransceiver):
     """
     An encapsulation of various communications with the SpiNNaker board.
 

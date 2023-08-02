@@ -22,12 +22,9 @@ import time
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_machine import CoreSubsets
-from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
-from spinnman.transceiver.transceiver import Transceiver
 from spinnman.constants import (
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_FILTER_CONTROLS_OFFSET,
     ROUTER_DIAGNOSTIC_FILTER_SIZE)
-from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanException
 from spinnman.extended import (
     BMPSetLed, DeAllocSDRAMProcess, ReadADC, SetLED, WriteMemoryFloodProcess)
@@ -42,8 +39,8 @@ from spinnman.connections.udp_packet_connections import (
 from spinnman.processes import (
     GetHeapProcess, ReadMemoryProcess, SendSingleCommandProcess,
     WriteMemoryProcess)
-from spinnman.transceiver.transceiver import (
-    _EXECUTABLE_ADDRESS, _ONE_BYTE, _ONE_WORD)
+from spinnman.transceiver.version5Transceiver import Version5Transceiver
+from spinnman.transceiver.watchdog_setter import WatchdogSetter
 from spinnman.utilities.utility_functions import (
     work_out_bmp_from_machine_details)
 
@@ -117,7 +114,7 @@ def create_transceiver_from_hostname(
     return ExtendedTransceiver(version, connections=connections)
 
 
-class ExtendedTransceiver(Transceiver):
+class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
     """
     An encapsulation of various communications with the SpiNNaker board.
 
@@ -214,59 +211,6 @@ class ExtendedTransceiver(Transceiver):
         if connection is not None:
             return connection.is_connected()
         return any(c.is_connected() for c in self._scamp_connections)
-
-    def __set_watch_dog_on_chip(self, x, y, watch_dog):
-        """
-        Enable, disable or set the value of the watch dog timer on a
-        specific chip.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param int x: chip X coordinate to write new watchdog parameter to
-        :param int y: chip Y coordinate to write new watchdog parameter to
-        :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
-            disable (False) the watchdog timer, or an int value to set the
-            timer count to
-        :type watch_dog: bool or int
-        """
-        # build what we expect it to be
-        warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
-                          "and untested due to no known use.")
-        value_to_set = watch_dog
-        watchdog = SystemVariableDefinition.software_watchdog_count
-        if isinstance(watch_dog, bool):
-            value_to_set = watchdog.default if watch_dog else 0
-
-        # build data holder
-        data = _ONE_BYTE.pack(value_to_set)
-
-        # write data
-        address = SYSTEM_VARIABLE_BASE_ADDRESS + watchdog.offset
-        self.write_memory(x=x, y=y, base_address=address, data=data)
-
-    def set_watch_dog(self, watch_dog):
-        """
-        Enable, disable or set the value of the watch dog timer.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
-            disable (False) the watch dog timer, or an int value to set the
-            timer count to.
-        :type watch_dog: bool or int
-        """
-        warn_once(logger, "The set_watch_dog method is deprecated and "
-                          "untested due to no known use.")
-        for x, y in SpiNNManDataView.get_machine().chip_coordinates:
-            self.__set_watch_dog_on_chip(x, y, watch_dog)
 
     def get_iobuf_from_core(self, x, y, p):
         """
@@ -383,7 +327,7 @@ class ExtendedTransceiver(Transceiver):
         with self._chip_execute_lock(x, y):
             # Write the executable
             self.write_memory(
-                x, y, _EXECUTABLE_ADDRESS, executable, n_bytes,
+                x, y, self._EXECUTABLE_ADDRESS, executable, n_bytes,
                 is_filename=is_filename)
 
             # Request the start of the executable
@@ -530,7 +474,7 @@ class ExtendedTransceiver(Transceiver):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
         elif isinstance(data, int):
-            data_to_write = _ONE_WORD.pack(data)
+            data_to_write = self._ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
                 x, y, cpu, link, base_address, data_to_write, 0, 4)
         else:
@@ -647,7 +591,7 @@ class ExtendedTransceiver(Transceiver):
                     process.write_memory_from_reader(
                         nearest_neighbour_id, base_address, reader, n_bytes)
             elif isinstance(data, int):
-                data_to_write = _ONE_WORD.pack(data)
+                data_to_write = self._ONE_WORD.pack(data)
                 process.write_memory_from_bytearray(
                     nearest_neighbour_id, base_address, data_to_write, 0)
             else:
@@ -767,7 +711,7 @@ class ExtendedTransceiver(Transceiver):
             process = SendSingleCommandProcess(
                 self._scamp_connection_selector)
             response = process.execute(ReadMemory(x, y, memory_position, 4))
-            return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
+            return DiagnosticFilter.read_from_int(self._ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
             # pylint: disable=no-member
         except Exception:

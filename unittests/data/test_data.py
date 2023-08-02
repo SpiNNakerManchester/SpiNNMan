@@ -18,15 +18,7 @@ from spinn_utilities.exceptions import (DataNotYetAvialable)
 from spinnman.config_setup import unittest_setup
 from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
-from spinnman.transceiver.transceiver import Transceiver
-
-
-class MockTranceiver(Transceiver):
-
-    def __init__(self):
-        """
-        Hide normal init
-        """
+from spinnman.transceiver import MockableTransceiver
 
 
 class TestData(unittest.TestCase):
@@ -53,7 +45,7 @@ class TestData(unittest.TestCase):
         with self.assertRaises(DataNotYetAvialable):
             SpiNNManDataView.get_transceiver()
         self.assertFalse(SpiNNManDataView.has_transceiver())
-        writer.set_transceiver(MockTranceiver())
+        writer.set_transceiver(MockableTransceiver())
         SpiNNManDataView.get_transceiver()
         self.assertTrue(SpiNNManDataView.has_transceiver())
         with self.assertRaises(TypeError):

@@ -16,7 +16,7 @@ import logging
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_machine.data.machine_data_writer import MachineDataWriter
-from spinnman.transceiver.transceiver import Transceiver
+from spinnman.transceiver import AbstractTransceiver
 from .spinnman_data_view import _SpiNNManDataModel, SpiNNManDataView
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -98,11 +98,11 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         """
         Sets the transceiver object.
 
-        :param Transceiver transceiver:
-        :raises TypeError: If the transceiver is not a Transceiver
+        :param AbstractTransceiver transceiver:
+        :raises TypeError: If the transceiver is not a AbstractTransceiver
         """
-        if not isinstance(transceiver, Transceiver):
-            raise TypeError("transceiver should be a Transceiver")
+        if not isinstance(transceiver, AbstractTransceiver):
+            raise TypeError("transceiver should be a AbstractTransceiver")
         if self.__data._transceiver:
             raise NotImplementedError(
                 "Over writing and existing transceiver not supported")
