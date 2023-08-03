@@ -43,6 +43,7 @@ from spinnman.board_test_configuration import BoardTestConfiguration
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 
+unittest_setup()
 board_config = BoardTestConfiguration()
 board_config.set_up_remote_board()
 
@@ -352,7 +353,6 @@ def print_transceiver_tests(transceiver):
             print(heap_element)
 
 
-unittest_setup()
 with create_transceiver_from_hostname(
         board_config.remotehost, board_config.board_version,
         bmp_connection_data=board_config.bmp_names,
