@@ -15,7 +15,7 @@
 import unittest
 from spinn_utilities.config_holder import set_config
 from spinn_utilities.ping import Ping
-from spinnman.model import BMPConnectionData
+# from spinnman.model import BMPConnectionData
 
 _LOCALHOST = "127.0.0.1"
 # Microsoft invalid IP address. For more details see:
