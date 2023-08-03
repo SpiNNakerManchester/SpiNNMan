@@ -65,10 +65,8 @@ class MockExtendedTransceiver(MockWriteTransceiver, ExtendedTransceiver):
 
 class TestTransceiver(unittest.TestCase):
 
-
     def setUp(self):
         unittest_setup()
-        set_config("Machine", "version", 5)
         self.board_config = BoardTestConfiguration()
 
     def test_create_new_transceiver_to_board(self):
@@ -132,6 +130,7 @@ class TestTransceiver(unittest.TestCase):
             trans._boot_board()
 
     def test_set_watch_dog(self):
+        set_config("Machine", "version", 5)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
         tx = MockExtendedTransceiver(version=5, connections=connections)

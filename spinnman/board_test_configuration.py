@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import configparser
-from contextlib import closing
-import os
-import socket
 import unittest
 from spinn_utilities.config_holder import set_config
 from spinn_utilities.ping import Ping
@@ -31,7 +27,6 @@ _PORT = 54321
 class BoardTestConfiguration(object):
 
     def __init__(self):
-        #self.localhost = None
         self.localport = None
         self.remotehost = None
         self.board_version = None
@@ -39,7 +34,6 @@ class BoardTestConfiguration(object):
         self.auto_detect_bmp = None
 
     def set_up_local_virtual_board(self):
-        #self.localhost = _LOCALHOST
         self.localport = _PORT
         self.remotehost = _LOCALHOST
         self.board_version = 5
@@ -61,15 +55,10 @@ class BoardTestConfiguration(object):
         else:
             raise unittest.SkipTest("None of the test boards reachable")
 
-        if self.bmp_names == "None":
-            self.bmp_names = None
-        else:
-            # it always was None but this is what to do if not
-            self.bmp_names = [BMPConnectionData(
-                0, 0, self.bmp_names, [0], None)]
+        # it always was None but this is what to do if not
+        #  self.bmp_names = BMPConnectionData(0, 0, self.bmp_names, [0], None)
 
     def set_up_nonexistent_board(self):
-        self.localhost = None
         self.localport = _PORT
         self.remotehost = _NOHOST
         self.board_version = None

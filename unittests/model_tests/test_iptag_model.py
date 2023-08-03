@@ -18,7 +18,6 @@ from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
 
 
-
 class TestIptag(unittest.TestCase):
 
     def setUp(self):

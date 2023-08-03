@@ -22,7 +22,6 @@ from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 from spinnman.board_test_configuration import BoardTestConfiguration
 
 
-
 class TestUDPConnection(unittest.TestCase):
 
     def setUp(self):
