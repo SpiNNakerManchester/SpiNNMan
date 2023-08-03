@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import unittest
+from spinn_utilities.config_holder import set_config
 from spinn_utilities.exceptions import (DataNotYetAvialable)
 from spinnman.config_setup import unittest_setup
 from spinnman.data import SpiNNManDataView
@@ -42,6 +43,7 @@ class TestData(unittest.TestCase):
 
     def test_mock(self):
         SpiNNManDataWriter.mock()
+        set_config("Machine", "version", 5)
         # check there is a
         #   value not what it is
         SpiNNManDataView.get_machine()

@@ -1,4 +1,4 @@
-# Copyright (c) 2017 The University of Manchester
+# Copyright (c) 2023 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = "1!7.1.0"
-__version_month__ = "TBD"
-__version_year__ = "TBD"
-__version_day__ = "TBD"
-__version_name__ = "Not yet released"
+from .bmp_set_led import BMPSetLed
+from .de_alloc_sdram_process import DeAllocSDRAMProcess
+from .read_adc import ReadADC
+from .set_led import SetLED
+from .write_memory_flood_process import WriteMemoryFloodProcess
+
+__all__ = ["BMPSetLed", "DeAllocSDRAMProcess", "ReadADC", "SetLED",
+           "WriteMemoryFloodProcess"]
