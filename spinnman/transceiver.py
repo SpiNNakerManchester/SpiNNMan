@@ -105,7 +105,7 @@ def create_transceiver_from_hostname(
     :param int version: the type of SpiNNaker board used within the SpiNNaker
         machine being used. If a Spinn-5 board, then the version will be 5,
         Spinn-3 would equal 3 and so on.
-    :param list(BMPConnectionData) bmp_connection_data:
+    :param BMPConnectionData bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
     :param bool auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
@@ -137,12 +137,10 @@ def create_transceiver_from_hostname(
 
     # handle BMP connections
     if bmp_connection_data is not None:
-        bmp_ip_list = list()
-        for conn_data in bmp_connection_data:
-            bmp_connection = BMPConnection(conn_data)
-            connections.append(bmp_connection)
-            bmp_ip_list.append(bmp_connection.remote_ip_address)
-        logger.info("Transceiver using BMPs: {}", bmp_ip_list)
+        bmp_connection = BMPConnection(bmp_connection_data)
+        connections.append(bmp_connection)
+        logger.info("Transceiver using BMP: {}",
+                    bmp_connection.remote_ip_address)
 
     connections.append(SCAMPConnection(remote_host=hostname))
 
@@ -170,8 +168,8 @@ class Transceiver(AbstractContextManager):
     """
     __slots__ = [
         "_all_connections",
-        "_bmp_connection_selectors",
-        "_bmp_connections",
+        "_bmp_selector",
+        "_bmp_connection",
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
@@ -230,10 +228,10 @@ class Transceiver(AbstractContextManager):
         self._scamp_connections = list()
 
         # The BMP connections
-        self._bmp_connections = list()
+        self._bmp_connection = None
 
         # build connection selectors for the processes.
-        self._bmp_connection_selectors = dict()
+        self._bmp_selector = None
         self._scamp_connection_selector = \
             self.__identify_connections(connections)
 
@@ -247,7 +245,7 @@ class Transceiver(AbstractContextManager):
         self._n_chip_execute_locks = 0
 
         # Check that the BMP connections are valid
-        self.__check_bmp_connections()
+        self.__check_bmp_connection()
 
         self._machine_off = False
 
@@ -284,9 +282,11 @@ class Transceiver(AbstractContextManager):
             # Locate any connections that talk to a BMP
             if isinstance(conn, BMPConnection):
                 # If it is a BMP conn, add it here
-                self._bmp_connections.append(conn)
-                self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
-                    FixedConnectionSelector(conn)
+                if self._bmp_connection is not None:
+                    raise NotImplementedError(
+                        "Only one BMP connection supported")
+                self._bmp_connection = conn
+                self._bmp_selector = FixedConnectionSelector(conn)
             # Otherwise, check if it can send and receive SCP (talk to SCAMP)
             elif isinstance(conn, SCAMPConnection):
                 self._scamp_connections.append(conn)
@@ -294,7 +294,7 @@ class Transceiver(AbstractContextManager):
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(self._scamp_connections)
 
-    def __check_bmp_connections(self):
+    def __check_bmp_connection(self):
         """
         Check that the BMP connections are actually connected to valid BMPs.
 
@@ -302,13 +302,13 @@ class Transceiver(AbstractContextManager):
         """
         # check that the UDP BMP conn is actually connected to a BMP
         # via the sver command
-        for conn in self._bmp_connections:
+        if self._bmp_connection is not None:
+            conn = self._bmp_connection
 
             # try to send a BMP sver to check if it responds as expected
             try:
                 version_info = self._get_scamp_version(
-                    conn.chip_x, conn.chip_y,
-                    self._bmp_connection_selectors[conn.cabinet, conn.frame])
+                    conn.chip_x, conn.chip_y, self._bmp_selector)
                 fail_version_name = version_info.name != _BMP_NAME
                 fail_version_num = \
                     version_info.version_number[0] not in _BMP_MAJOR_VERSIONS
@@ -666,7 +666,7 @@ class Transceiver(AbstractContextManager):
                 INITIAL_FIND_SCAMP_RETRIES_COUNT, extra_boot_values)
 
         # If we fail to get a SCAMP version this time, try other things
-        if version_info is None and self._bmp_connections:
+        if version_info is None and self._bmp_connection is not None:
 
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
@@ -1049,25 +1049,19 @@ class Transceiver(AbstractContextManager):
         :rtype bool
         :return success of failure to power on machine
         """
-        if not self._bmp_connections:
+        if self._bmp_connection is None:
             logger.warning("No BMP connections, so can't power on")
             return False
-        for bmp_connection in self._bmp_connections:
-            self.power_on(bmp_connection.boards, bmp_connection.cabinet,
-                          bmp_connection.frame)
+        self.power_on(self._bmp_connection)
         return True
 
-    def power_on(self, boards=0, cabinet=0, frame=0):
+    def power_on(self, boards=0):
         """
         Power on a set of boards in the machine.
 
         :param int boards: The board or boards to power on
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
-        self._power(PowerCommand.POWER_ON, boards, cabinet, frame)
+        self._power(PowerCommand.POWER_ON, boards)
 
     def power_off_machine(self):
         """
@@ -1076,52 +1070,29 @@ class Transceiver(AbstractContextManager):
         :rtype bool
         :return success or failure to power off the machine
         """
-        if not self._bmp_connections:
+        if self._bmp_connection is None:
             logger.warning("No BMP connections, so can't power off")
             return False
         logger.info("Turning off machine")
-        for bmp_connection in self._bmp_connections:
-            self.power_off(bmp_connection.boards, bmp_connection.cabinet,
-                           bmp_connection.frame)
+        self.power_off(self._bmp_connection)
         return True
 
-    def power_off(self, boards=0, cabinet=0, frame=0):
+    def power_off(self, boards=0):
         """
         Power off a set of boards in the machine.
 
         :param int boards: The board or boards to power off
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
-        self._power(PowerCommand.POWER_OFF, boards, cabinet, frame)
+        self._power(PowerCommand.POWER_OFF, boards)
 
-    def _bmp_connection(self, cabinet, frame):
-        """
-        :param int cabinet:
-        :param int frame:
-        :rtype: FixedConnectionSelector
-        """
-        key = (cabinet, frame)
-        if key not in self._bmp_connection_selectors:
-            raise SpinnmanInvalidParameterException(
-                "cabinet and frame", f"{cabinet} and {frame}",
-                "Unknown combination")
-        return self._bmp_connection_selectors[key]
-
-    def _power(self, power_command, boards=0, cabinet=0, frame=0):
+    def _power(self, power_command, boards=0):
         """
         Send a power request to the machine.
 
         :param PowerCommand power_command: The power command to send
         :param boards: The board or boards to send the command to
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
-        connection_selector = self._bmp_connection(cabinet, frame)
+        connection_selector = self._bmp_selector
         timeout = (
             BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
@@ -1135,7 +1106,8 @@ class Transceiver(AbstractContextManager):
         if not self._machine_off:
             time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
-    def read_fpga_register(self, fpga_num, register, cabinet, frame, board):
+    def read_fpga_register(
+            self, fpga_num, register, board=0):
         """
         Read a register on a FPGA of a board. The meaning of the
         register's contents will depend on the FPGA's configuration.
@@ -1144,20 +1116,16 @@ class Transceiver(AbstractContextManager):
         :param int register:
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to request the FPGA register from
         :return: the register data
         :rtype: int
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame), timeout=1.0)
+        process = SendSingleCommandProcess(self._bmp_selector, timeout=1.0)
         response = process.execute(
             ReadFPGARegister(fpga_num, register, board))
         return response.fpga_register  # pylint: disable=no-member
 
-    def write_fpga_register(self, fpga_num, register, value, cabinet, frame,
-                            board):
+    def write_fpga_register(self, fpga_num, register, value, board=0):
         """
         Write a register on a FPGA of a board. The meaning of setting the
         register's contents will depend on the FPGA's configuration.
@@ -1167,26 +1135,20 @@ class Transceiver(AbstractContextManager):
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
         :param int value: the value to write into the FPGA register
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to write the FPGA register to
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+        process = SendSingleCommandProcess(self._bmp_selector)
         process.execute(
             WriteFPGARegister(fpga_num, register, value, board))
 
-    def read_bmp_version(self, board, cabinet, frame):
+    def read_bmp_version(self, board):
         """
         Read the BMP version.
 
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to request the data from
         :return: the sver from the BMP
         """
-        process = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame))
+        process = SendSingleCommandProcess(self._bmp_selector)
         response = process.execute(BMPGetVersion(board))
         return response.version_info  # pylint: disable=no-member
 
@@ -1971,7 +1933,7 @@ class Transceiver(AbstractContextManager):
         """
         Close the transceiver and any threads that are running.
         """
-        if self._bmp_connections:
+        if self._bmp_connection is not None:
             if get_config_bool("Machine", "turn_off_machine"):
                 self.power_off_machine()
 
