@@ -17,7 +17,6 @@ from spinn_machine.tags import IPTag
 from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
 
-board_config = BoardTestConfiguration()
 
 
 class TestIptag(unittest.TestCase):
@@ -26,6 +25,7 @@ class TestIptag(unittest.TestCase):
         unittest_setup()
 
     def test_new_iptag(self):
+        board_config = BoardTestConfiguration()
         board_config.set_up_remote_board()
         ip = "8.8.8.8"
         port = 1337
