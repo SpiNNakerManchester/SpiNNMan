@@ -102,7 +102,7 @@ class TestTransceiver(unittest.TestCase):
     def test_boot_board(self):
         board_config.set_up_remote_board()
         with create_transceiver_from_hostname(
-                board_config.remotehost, board_config.board_version) as trans:
+                board_config.remotehost) as trans:
             # self.assertFalse(trans.is_connected())
             trans._boot_board()
 

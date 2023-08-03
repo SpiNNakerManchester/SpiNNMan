@@ -44,7 +44,7 @@ def create_transceiver_from_hostname(
     :param number_of_boards: a number of boards expected to be supported, or
         ``None``, which defaults to a single board
     :type number_of_boards: int or None
-    :param list(BMPConnectionData) bmp_connection_data:
+    :param BMPConnectionData bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
     :param bool auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
@@ -71,9 +71,9 @@ def create_transceiver_from_hostname(
     # final value of the IP address
     version = SpiNNManDataView.get_machine_version()
     if (isinstance(version, Version5) and auto_detect_bmp is True and
-            (bmp_connection_data is None or not bmp_connection_data)):
-        bmp_connection_data = [
-            work_out_bmp_from_machine_details(hostname, number_of_boards)]
+            (bmp_connection_data is None)):
+        bmp_connection_data = \
+            work_out_bmp_from_machine_details(hostname, number_of_boards)
 
     # handle BMP connections
     if bmp_connection_data is not None:
