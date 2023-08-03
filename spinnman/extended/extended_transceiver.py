@@ -133,9 +133,8 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
     __slots__ = ["_flood_write_lock", "_nearest_neighbour_id",
                  "_nearest_neighbour_lock"]
 
-    def __init__(self, version, connections=None):
+    def __init__(self, connections=None):
         """
-        :param int version: The version of the board being connected to
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
@@ -149,7 +148,7 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        super().__init__(version, connections)
+        super().__init__(connections)
 
         # A lock against multiple flood fill writes - needed as SCAMP cannot
         # cope with this

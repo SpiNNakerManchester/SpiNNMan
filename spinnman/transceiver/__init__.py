@@ -14,7 +14,8 @@
 
 from .abstract_transceiver import AbstractTransceiver
 from .mockable_transceiver import MockableTransceiver
-from .transceiver_factory import (create_transceiver_from_hostname)
+from .transceiver_factory import (
+    create_transceiver_from_connections, create_transceiver_from_hostname)
 
-__all__ = ["AbstractTransceiver", "create_transceiver_from_hostname",
-           "MockableTransceiver"]
+__all__ = ["AbstractTransceiver", "create_transceiver_from_connections",
+           "create_transceiver_from_hostname", "MockableTransceiver"]

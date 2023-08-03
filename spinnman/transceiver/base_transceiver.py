@@ -118,13 +118,10 @@ class BaseTransceiver(AbstractTransceiver):
         "_scamp_connection_selector",
         "_scamp_connections",
         "_udp_scamp_connections",
-        "_version",
         "_width"]
 
-    def __init__(
-            self, version, connections=None):
+    def __init__(self, connections=None):
         """
-        :param int version: The version of the board being connected to
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
@@ -139,7 +136,6 @@ class BaseTransceiver(AbstractTransceiver):
             If a response indicates an error during the exchange
         """
         # Place to keep the current machine
-        self._version = version
         self._width = None
         self._height = None
         self._iobuf_size = None
@@ -548,7 +544,7 @@ class BaseTransceiver(AbstractTransceiver):
             # No can do. Can't boot without a boot connection.
             raise SpinnmanIOException("no boot connection available")
         boot_messages = SpinnakerBootMessages(
-            board_version=self._version, extra_boot_values=extra_boot_values)
+            led_0=self.boot_led_0_value, extra_boot_values=extra_boot_values)
         for boot_message in boot_messages.messages:
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)

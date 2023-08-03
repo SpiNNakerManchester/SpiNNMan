@@ -356,17 +356,12 @@ class SystemVariableBootValues(object):
     __slot__ = [
         "_values"]
 
-    def __init__(self, hardware_version=None, led_0=None):
+    def __init__(self):
         # Create a dict of variable values
         self._values = dict()
         for variable in SystemVariableDefinition:
             self._values[variable] = variable.default
 
-        if hardware_version is not None:
-            self._values[SystemVariableDefinition.hardware_version] =\
-                hardware_version
-        if led_0 is not None:
-            self._values[SystemVariableDefinition.led_0] = led_0
 
     def set_value(self, system_variable_definition, value):
         self._values[system_variable_definition] = value
@@ -380,14 +375,10 @@ class SystemVariableBootValues(object):
         return data
 
 
-spinnaker_boot_values = {
-    1: SystemVariableBootValues(
-        hardware_version=1, led_0=0x00076104),
-    2: SystemVariableBootValues(
-        hardware_version=2, led_0=0x00006103),
-    3: SystemVariableBootValues(
-        hardware_version=3, led_0=0x00000502),
-    4: SystemVariableBootValues(
-        hardware_version=4, led_0=0x00000001),
-    5: SystemVariableBootValues(
-        hardware_version=5, led_0=0x00000001)}
+    """
+    hardware_version=1, led_0=0x00076104),
+    hardware_version=2, led_0=0x00006103),
+    hardware_version=3, led_0=0x00000502),
+    hardware_version=4, led_0=0x00000001),
+    hardware_version=5, led_0=0x00000001)}
+    """

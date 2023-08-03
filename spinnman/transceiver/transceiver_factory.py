@@ -52,7 +52,7 @@ def create_transceiver_from_hostname(
     :param scamp_connections:
         the list of connections used for SCAMP communications
     :return: The created transceiver
-    :rtype: Transceiver
+    :rtype: spinnman.transceiver.AbstractTransceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
     :raise SpinnmanInvalidPacketException:
@@ -89,8 +89,30 @@ def create_transceiver_from_hostname(
     # handle the boot connection
     connections.append(BootConnection(remote_host=hostname))
 
+    return create_transceiver_from_connections(connections)
+
+
+def create_transceiver_from_connections(connections):
+    """
+    Create a Transceiver with these connections
+
+    :param list(Connection) connections:
+        An iterable of connections to the board.  If not specified, no
+        communication will be possible until connections are found.
+    :return: The created transceiver
+    :rtype: spinnman.transceiver.AbstractTransceiver
+    :raise SpinnmanIOException:
+        If there is an error communicating with the board
+    :raise SpinnmanInvalidPacketException:
+        If a packet is received that is not in the valid format
+    :raise SpinnmanInvalidParameterException:
+        If a packet is received that has invalid parameters
+    :raise SpinnmanUnexpectedResponseCodeException:
+        If a response indicates an error during the exchange
+    """
+    version = SpiNNManDataView.get_machine_version()
     if isinstance(version, Version3):
-        return Version3Transceiver(3, connections=connections)
+        return Version3Transceiver(connections=connections)
     if isinstance(version, Version5):
-        return Version5Transceiver(5, connections=connections)
+        return Version5Transceiver(connections=connections)
     raise NotImplementedError(f"No Transceiver for {version=}")

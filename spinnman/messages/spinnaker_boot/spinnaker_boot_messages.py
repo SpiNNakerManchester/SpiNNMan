@@ -16,8 +16,9 @@ import os
 import math
 import time
 import array
+from spinnman.data import SpiNNManDataView
 from .system_variable_boot_values import (
-    SystemVariableBootValues, spinnaker_boot_values, SystemVariableDefinition)
+    SystemVariableBootValues, SystemVariableDefinition)
 from .spinnaker_boot_message import SpinnakerBootMessage
 from .spinnaker_boot_op_code import SpinnakerBootOpCode
 from spinnman.exceptions import (
@@ -41,9 +42,9 @@ class SpinnakerBootMessages(object):
         "_n_bytes_to_read",
         "_no_data_packets"]
 
-    def __init__(self, board_version=None, extra_boot_values=None):
+    def __init__(self, led_0, extra_boot_values=None):
         """
-        :param int board_version: The version of the board to be booted
+        :param int led_0: The balue for the led_0 field
         :param extra_boot_values:
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
@@ -54,16 +55,15 @@ class SpinnakerBootMessages(object):
         :raise SpinnmanIOException:
             If there is an error assembling the packets
         """
-        if (board_version is not None and
-                board_version not in spinnaker_boot_values):
-            raise SpinnmanInvalidParameterException(
-                "board_version", str(board_version), "Unknown board version")
+        version = SpiNNManDataView.get_machine_version()
 
         # Get the boot packet values
-        if board_version is not None:
-            spinnaker_boot_value = spinnaker_boot_values[board_version]
-        else:
-            spinnaker_boot_value = SystemVariableBootValues()
+        spinnaker_boot_value = SystemVariableBootValues()
+
+        spinnaker_boot_value.set_value(
+            SystemVariableDefinition.hardware_version, version.number)
+        spinnaker_boot_value.set_value(
+            SystemVariableDefinition.led_0, led_0)
 
         current_time = int(time.time())
         spinnaker_boot_value.set_value(

@@ -14,7 +14,8 @@
 
 # pylint: disable=too-many-arguments
 
-from spinn_utilities.abstract_base import (AbstractBase, abstractmethod)
+from spinn_utilities.abstract_base import (
+    AbstractBase, abstractmethod, abstractproperty)
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.model.enums import CPUState
 
@@ -874,4 +875,12 @@ class AbstractTransceiver(AbstractContextManager, metaclass=AbstractBase):
             The y-coordinate of the core
         :param int p:
             The processor on the core
+        """
+
+    @abstractproperty
+    def boot_led_0_value(self):
+        """
+        The Values to be set in SpinnakerBootMessages for led_0
+
+        :rtype int:
         """

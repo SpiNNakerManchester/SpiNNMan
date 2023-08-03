@@ -642,7 +642,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             self.connect_to_board(x, y) for (x, y) in self.get_connections()]
         # Also need a boot connection
         proxies.append(self.connect_for_booting())
-        return Version5Transceiver(version=5, connections=proxies)
+        return Version5Transceiver(connections=proxies)
 
     def __repr__(self):
         return f"SpallocJob({self._url})"
