@@ -16,6 +16,7 @@ import unittest
 import struct
 from spinn_utilities.config_holder import set_config
 from spinnman.config_setup import unittest_setup
+from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.transceiver import (
     create_transceiver_from_hostname, MockableTransceiver)
@@ -29,7 +30,6 @@ from spinnman.connections.udp_packet_connections import (
 import spinnman.extended.extended_transceiver as extended
 from spinnman.board_test_configuration import BoardTestConfiguration
 
-board_config = BoardTestConfiguration()
 ver = 5  # Guess?
 
 
@@ -41,72 +41,67 @@ class TestTransceiver(unittest.TestCase):
 
     def setUp(self):
         unittest_setup()
-        set_config("Machine", "version", 5)
+        self.board_config = BoardTestConfiguration()
 
     def test_create_new_transceiver_to_board(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
-            remote_host=board_config.remotehost))
+            remote_host=self.board_config.remotehost))
         trans = Version5Transceiver(ver, connections=connections)
         trans.close()
 
     def test_create_new_transceiver_one_connection(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         connections = set()
         connections.add(SCAMPConnection(
-            remote_host=board_config.remotehost))
+            remote_host=self.board_config.remotehost))
         with extended.ExtendedTransceiver(
                 ver, connections=connections) as trans:
-            assert trans.get_connections() == connections
+            assert trans._all_connections == connections
 
     def test_create_new_transceiver_from_list_connections(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
-            remote_host=board_config.remotehost))
-        board_config.set_up_local_virtual_board()
-        connections.append(BootConnection(
-            remote_host=board_config.remotehost))
+            remote_host=self.board_config.remotehost))
+        connections.append(BootConnection(remote_host="127.0.0.1"))
         with Version5Transceiver(ver, connections=connections) as trans:
-            instantiated_connections = trans.get_connections()
-
+            instantiated_connections = trans._all_connections
             for connection in connections:
                 assert connection in instantiated_connections
             # assert trans.get_connections() == connections
 
     def test_retrieving_machine_details(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
-            remote_host=board_config.remotehost))
-        board_config.set_up_local_virtual_board()
-        connections.append(BootConnection(
-            remote_host=board_config.remotehost))
+            remote_host=self.board_config.remotehost))
+        connections.append(BootConnection(remote_host="127.0.0.1"))
         with Version5Transceiver(ver, connections=connections) as trans:
             SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
-            if board_config.board_version in (2, 3):
+            if self.board_config.board_version in (2, 3):
                 assert trans._get_machine_dimensions().width == 2
                 assert trans._get_machine_dimensions().height == 2
-            elif board_config.board_version in (4, 5):
+            elif self.board_config.board_version in (4, 5):
                 assert trans._get_machine_dimensions().width == 8
                 assert trans._get_machine_dimensions().height == 8
             else:
                 size = trans._get_machine_dimensions()
                 print(f"Unknown board with size {size.width} x {size.height}")
 
-            assert trans.is_connected()
+            assert any(c.is_connected() for c in trans._scamp_connections)
             print(trans._get_scamp_version())
             print(trans.get_cpu_infos())
 
     def test_boot_board(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         with create_transceiver_from_hostname(
-                board_config.remotehost) as trans:
-            # self.assertFalse(trans.is_connected())
+                self.board_config.remotehost) as trans:
             trans._boot_board()
 
     def test_set_watch_dog(self):
+        set_config("Machine", "version", 5)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
         tx = MockExtendedTransceiver()
