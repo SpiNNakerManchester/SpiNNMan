@@ -25,8 +25,7 @@ from spinnman.extended.extended_transceiver import ExtendedTransceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
-from spinnman.connections.udp_packet_connections import (
-    BootConnection, SCAMPConnection)
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.board_test_configuration import BoardTestConfiguration
 
 

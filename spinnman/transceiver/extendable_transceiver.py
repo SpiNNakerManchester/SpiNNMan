@@ -13,12 +13,10 @@
 # limitations under the License.
 
 # pylint: disable=too-many-arguments
-from contextlib import contextmanager, suppress
-
 import logging
 from threading import Condition, RLock
 from spinn_utilities.abstract_base import (
-    AbstractBase, abstractproperty, abstractmethod)
+    AbstractBase, abstractproperty)
 from spinn_utilities.log import FormatAdapter
 from spinnman.transceiver.abstract_transceiver import AbstractTransceiver
 
