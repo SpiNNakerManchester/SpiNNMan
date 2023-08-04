@@ -301,8 +301,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(AbstractTransceiver.send_sdp_message)
     def send_sdp_message(self, message, connection=None):
         if connection is None:
-            self._scamp_connection[random.randint(
-                0, len(self._scamp_connection) - 1)]
+            self._scamp_connections[random.randint(
+                0, len(self._scamp_connections) - 1)]
         else:
             connection_to_use = connection
         connection_to_use.send_sdp_message(message)
