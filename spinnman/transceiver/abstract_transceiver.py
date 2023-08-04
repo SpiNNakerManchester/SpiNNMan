@@ -887,3 +887,15 @@ class AbstractTransceiver(AbstractContextManager, metaclass=AbstractBase):
         :param int p:
             The processor on the core
         """
+
+    @abstractmethod
+    def where_is_xy(self, x, y):
+        """
+        Attempts to get where_is_x_y info from the machine
+
+        If no machine will do its best.
+
+        :param int x:
+        :param int y:
+        :rtype: str
+        """

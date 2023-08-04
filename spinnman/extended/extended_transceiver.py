@@ -17,6 +17,7 @@ from contextlib import contextmanager
 import io
 import os
 import logging
+import random
 import struct
 import time
 from spinn_utilities.abstract_base import AbstractBase
@@ -52,39 +53,16 @@ logger = FormatAdapter(logging.getLogger(__name__))
 @require_subclass(ExtendableTransceiver)
 class ExtendedTransceiver(object, metaclass=AbstractBase):
     """
-    An encapsulation of various communications with the SpiNNaker board.
+    Allows a Transceiver to support extra method not currently needed.
 
-    The methods of this class are designed to be thread-safe (provided they do
-    not access a BMP, as access to those is never thread-safe);
-    thus you can make multiple calls to the same (or different) methods
-    from multiple threads and expect each call to work as if it had been
-    called sequentially, although the order of returns is not guaranteed.
+    All methods here are in danger of being removed if they become too hard
+    to support and many are untested so use at your own risk.
+    It is undetermined if these will work with Spin2 boards.
 
-    .. note::
-        With multiple connections to the board, using multiple threads in this
-        way may result in an increase in the overall speed of operation, since
-        the multiple calls may be made separately over the set of given
-        connections.
+    If any method here is considered important to keep please move it to
+    AbstractTransceiver
     """
     __slots__ = []
-
-    def __init__(self, connections=None):
-        """
-        :param list(Connection) connections:
-            An iterable of connections to the board.  If not specified, no
-            communication will be possible until connections are found.
-        :raise SpinnmanIOException:
-            If there is an error communicating with the board, or if no
-            connections to the board can be found (if connections is ``None``)
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        super().__init__(connections)
-
 
     def send_scp_message(self, message, connection=None):
         """
@@ -110,7 +88,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             If the response is not one of the expected codes
         """
         if connection is None:
-            connection = self._get_random_connection(self._scamp_connections)
+            connection = self._scamp_connectio[random.randint(
+                0, len(self._scamp_connectio) - 1)]
         connection.send_scp_request(message)
 
     def is_connected(self, connection=None):

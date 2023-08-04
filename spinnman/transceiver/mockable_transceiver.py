@@ -28,6 +28,7 @@ class MockableTransceiver(ExtendableTransceiver):
     __slots__ = ["written_memory"]
 
     def __init__(self):
+        super().__init__()
         self.written_memory = list()
 
     @overrides(AbstractTransceiver.send_sdp_message)
@@ -221,6 +222,10 @@ class MockableTransceiver(ExtendableTransceiver):
     def update_provenance_and_exit(self, x, y, p):
         pass
 
+    @overrides(AbstractTransceiver.where_is_xy)
+    def where_is_xy(self, x, y):
+        return f"Mocked {x=} {y=}"
+
     @overrides(ExtendableTransceiver.bmp_connection)
     def bmp_connection(self):
         raise NotImplementedError("Needs to be mocked")
@@ -232,7 +237,3 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(ExtendableTransceiver.scamp_connection_selector)
     def scamp_connection_selector(self):
         raise NotImplementedError("Needs to be mocked")
-
-    @overrides(ExtendableTransceiver.where_is_xy)
-    def where_is_xy(self, x, y):
-        return f"Mocked {x=} {y=}"
