@@ -65,7 +65,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     __slots__ = []
 
     # calls many methods only reachable do to require_subclass
-    # pylint: disable=no-member
+    # pylint: disable=no-member,assigning-non-slot
+    # pylint: disable=access-member-before-definition
 
     def send_scp_message(self, message, connection=None):
         """
