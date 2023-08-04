@@ -72,12 +72,15 @@ class SpallocClient(ACM, AbstractSpallocClient):
     Basic client library for talking to new Spalloc.
     """
     __slots__ = ("__session",
-                 "__machines_url", "__jobs_url", "version")
+                 "__machines_url", "__jobs_url", "version",
+                 "__group", "__collab", "__nmpi_job", "__nmpi_user")
 
     def __init__(
             self, service_url: str,
             username: Optional[str] = None, password: Optional[str] = None,
-            bearer_token: Optional[str] = None):
+            bearer_token: Optional[str] = None,
+            group: Optional[str] = None, collab: Optional[str] = None,
+            nmpi_job: Optional[str] = None, nmpi_user: Optional[str] = None):
         """
         :param str service_url: The reference to the service.
             May have username and password supplied as part of the network
@@ -98,6 +101,10 @@ class SpallocClient(ACM, AbstractSpallocClient):
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
         self.__machines_url = obj["machines-ref"]
         self.__jobs_url = obj["jobs-ref"]
+        self.__group = group
+        self.__collab = collab
+        self.__nmpi_job = nmpi_job
+        self.__nmpi_user = nmpi_user
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
@@ -171,7 +178,15 @@ class SpallocClient(ACM, AbstractSpallocClient):
             create["machine-name"] = machine_name
         else:
             create["tags"] = ["default"]
-        r = self.__session.post(self.__jobs_url, create)
+        if self.__group is not None:
+            create["group"] = self.__group
+        if self.__collab is not None:
+            create["nmpi-collab"] = self.__collab
+        if self.__nmpi_job is not None:
+            create["nmpi-job-id"] = self.__nmpi_job
+            if self.__nmpi_user is not None:
+                create["owner"] = self.__nmpi_user
+        r = self.__session.post(self.__jobs_url, create, timeout=30)
         url = r.headers["Location"]
         return _SpallocJob(self.__session, url)
 

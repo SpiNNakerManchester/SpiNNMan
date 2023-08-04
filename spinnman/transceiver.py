@@ -22,7 +22,7 @@ import os
 import random
 import socket
 import struct
-from threading import Condition, RLock
+from threading import Condition
 import time
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable,
@@ -31,12 +31,10 @@ from typing_extensions import TypeAlias
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
-from spinn_utilities.logger_utils import warn_once
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
 from spinn_machine import (
     CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
-from spinn_machine.spinnaker_triad_geometry import SpiNNakerTriadGeometry
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
@@ -53,34 +51,34 @@ from spinnman.exceptions import (
     SpinnmanUnexpectedResponseCodeException,
     SpiNNManCoresNotInStateException)
 from spinnman.model import (
-    ADCInfo, CPUInfo, CPUInfos, DiagnosticFilter,
-    ChipSummaryInfo, ExecutableTargets,
-    HeapElement, IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
+    CPUInfo, CPUInfos, DiagnosticFilter, ChipSummaryInfo,
+    IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
 from spinnman.model.enums import (
     CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, AbstractSCPResponse)
-from spinnman.messages.scp.enums import Signal, PowerCommand, LEDAction
-from spinnman.messages.scp.impl import (
-    BMPSetLed, BMPGetVersion, SetPower, ReadADC, ReadFPGARegister,
-    WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet, ReadMemory,
-    CountState, WriteMemory, SetLED, SendSignal, AppStop, CheckOKResponse,
-    IPTagSet, IPTagClear, RouterClear, DoSync, GetChipInfo)
-from spinnman.messages.scp.impl.get_chip_info_response import (
-    GetChipInfoResponse)
+from spinnman.messages.scp.enums import Signal, PowerCommand
+from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
+from spinnman.messages.scp.impl import (
+    BMPGetVersion, SetPower, ReadFPGARegister,
+    WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet,
+    CountState, WriteMemory, SendSignal, AppStop, CheckOKResponse,
+    IPTagSet, IPTagClear, RouterClear, DoSync)
+from spinnman.messages.scp.impl.get_chip_info_response import (
+    GetChipInfoResponse)
 from spinnman.connections.abstract_classes import Connection
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection, SDPConnection)
 from spinnman.processes import (
-    DeAllocSDRAMProcess, GetMachineProcess, GetVersionProcess,
+    GetMachineProcess, GetVersionProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
     GetCPUInfoProcess, GetExcludeCPUInfoProcess, GetIncludeCPUInfoProcess,
-    ReadIOBufProcess, ApplicationRunProcess, GetHeapProcess,
+    ReadIOBufProcess, ApplicationRunProcess,
     LoadFixedRouteRoutingEntryProcess, FixedConnectionSelector,
-    ReadFixedRouteRoutingEntryProcess, WriteMemoryFloodProcess,
+    ReadFixedRouteRoutingEntryProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess,
@@ -119,7 +117,7 @@ _EXECUTABLE_ADDRESS = 0x67800000
 
 def create_transceiver_from_hostname(
         hostname: Optional[str], version: int, *,
-        bmp_connection_data: Optional[List[BMPConnectionData]] = None,
+        bmp_connection_data: Optional[BMPConnectionData] = None,
         number_of_boards: Optional[int] = None,
         auto_detect_bmp: bool = False) -> 'Transceiver':
     """
@@ -139,7 +137,7 @@ def create_transceiver_from_hostname(
     :param int version: the type of SpiNNaker board used within the SpiNNaker
         machine being used. If a Spinn-5 board, then the version will be 5,
         Spinn-3 would equal 3 and so on.
-    :param list(BMPConnectionData) bmp_connection_data:
+    :param BMPConnectionData bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
     :param bool auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
@@ -171,17 +169,15 @@ def create_transceiver_from_hostname(
         if number_of_boards is None or number_of_boards < 1:
             raise ValueError(
                 "number_of_boards is required if deriving BMP details")
-        bmp_connection_data = [
-            work_out_bmp_from_machine_details(hostname, number_of_boards)]
+        bmp_connection_data = work_out_bmp_from_machine_details(
+            hostname, number_of_boards)
 
     # handle BMP connections
     if bmp_connection_data is not None:
-        bmp_ip_list: List[Optional[str]] = []
-        for conn_data in bmp_connection_data:
-            bmp_connection = BMPConnection(conn_data)
-            connections.append(bmp_connection)
-            bmp_ip_list.append(bmp_connection.remote_ip_address)
-        logger.info("Transceiver using BMPs: {}", bmp_ip_list)
+        bmp_connection = BMPConnection(bmp_connection_data)
+        connections.append(bmp_connection)
+        logger.info("Transceiver using BMP: {}",
+                    bmp_connection.remote_ip_address)
 
     connections.append(SCAMPConnection(remote_host=hostname))
 
@@ -209,18 +205,15 @@ class Transceiver(AbstractContextManager):
     """
     __slots__ = (
         "_all_connections",
-        "_bmp_connection_selectors",
-        "_bmp_connections",
+        "_bmp_selector",
+        "_bmp_connection",
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
-        "_flood_write_lock",
         "_height",
         "_iobuf_size",
         "_machine_off",
         "_n_chip_execute_locks",
-        "_nearest_neighbour_id",
-        "_nearest_neighbour_lock",
         "_scamp_connection_selector",
         "_scamp_connections",
         "_udp_scamp_connections",
@@ -271,21 +264,13 @@ class Transceiver(AbstractContextManager):
         self._scamp_connections: List[SCAMPConnection] = list()
 
         # The BMP connections
-        self._bmp_connections: List[BMPConnection] = list()
+        self._bmp_connection: Optional[BMPConnection] = None
 
         # build connection selectors for the processes.
-        self._bmp_connection_selectors: Dict[
-            Tuple[int, int], FixedConnectionSelector[BMPConnection]] = dict()
+        self._bmp_selector: Optional[
+            FixedConnectionSelector[BMPConnection]] = None
         self._scamp_connection_selector = \
-            self._identify_connections(connections)
-
-        # The nearest neighbour start ID and lock
-        self._nearest_neighbour_id = 1
-        self._nearest_neighbour_lock = RLock()
-
-        # A lock against multiple flood fill writes - needed as SCAMP cannot
-        # cope with this
-        self._flood_write_lock = Condition()
+            self.__identify_connections(connections)
 
         # A lock against single chip executions (entry is (x, y))
         # The condition should be acquired before the locks are
@@ -298,7 +283,7 @@ class Transceiver(AbstractContextManager):
         self._n_chip_execute_locks = 0
 
         # Check that the BMP connections are valid
-        self._check_bmp_connections()
+        self.__check_bmp_connection()
 
         self._machine_off = False
 
@@ -321,7 +306,7 @@ class Transceiver(AbstractContextManager):
         except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
-    def _identify_connections(
+    def __identify_connections(
             self, connections: Iterable[Connection]
             ) -> MostDirectConnectionSelector:
         for conn in connections:
@@ -337,9 +322,11 @@ class Transceiver(AbstractContextManager):
             # Locate any connections that talk to a BMP
             if isinstance(conn, BMPConnection):
                 # If it is a BMP conn, add it here
-                self._bmp_connections.append(conn)
-                self._bmp_connection_selectors[conn.cabinet, conn.frame] =\
-                    FixedConnectionSelector(conn)
+                if self._bmp_connection is not None:
+                    raise NotImplementedError(
+                        "Only one BMP connection supported")
+                self._bmp_connection = conn
+                self._bmp_selector = FixedConnectionSelector(conn)
             # Otherwise, check if it can send and receive SCP (talk to SCAMP)
             elif isinstance(conn, SCAMPConnection):
                 self._scamp_connections.append(conn)
@@ -347,7 +334,7 @@ class Transceiver(AbstractContextManager):
         # update the transceiver with the conn selectors.
         return MostDirectConnectionSelector(self._scamp_connections)
 
-    def _check_bmp_connections(self) -> None:
+    def __check_bmp_connection(self) -> None:
         """
         Check that the BMP connections are actually connected to valid BMPs.
 
@@ -355,13 +342,13 @@ class Transceiver(AbstractContextManager):
         """
         # check that the UDP BMP conn is actually connected to a BMP
         # via the sver command
-        for conn in self._bmp_connections:
+        if self._bmp_connection is not None:
+            conn = self._bmp_connection
 
             # try to send a BMP sver to check if it responds as expected
             try:
-                version_info = self.get_scamp_version(
-                    conn.chip_x, conn.chip_y,
-                    self._bmp_connection_selectors[conn.cabinet, conn.frame])
+                version_info = self._get_scamp_version(
+                    conn.chip_x, conn.chip_y, self._bmp_selector)
                 fail_version_name = version_info.name != _BMP_NAME
                 fail_version_num = \
                     version_info.version_number[0] not in _BMP_MAJOR_VERSIONS
@@ -420,39 +407,7 @@ class Transceiver(AbstractContextManager):
         return None
 
     @contextmanager
-    def _chip_execute_lock(self, x: int, y: int) -> Iterator[Condition]:
-        """
-        Get a lock for executing an executable on a chip.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use except for execute, which is itself deprecated.
-
-        :param int x:
-        :param int y:
-        """
-        # Check if there is a lock for the given chip
-        with self._chip_execute_lock_condition:
-            chip_lock = self._chip_execute_locks[x, y]
-        # Acquire the lock for the chip
-        chip_lock.acquire()
-
-        # Increment the lock counter (used for the flood lock)
-        with self._chip_execute_lock_condition:
-            self._n_chip_execute_locks += 1
-
-        try:
-            yield chip_lock
-        finally:
-            with self._chip_execute_lock_condition:
-                # Release the chip lock
-                chip_lock.release()
-                # Decrement the lock and notify
-                self._n_chip_execute_locks -= 1
-                self._chip_execute_lock_condition.notify_all()
-
-    @contextmanager
-    def _flood_execute_lock(self) -> Iterator[Condition]:
+    def __flood_execute_lock(self) -> Iterator[Condition]:
         """
         Get a lock for executing a flood fill of an executable.
         """
@@ -477,34 +432,6 @@ class Transceiver(AbstractContextManager):
         if not connections:
             return None
         return connections[random.randint(0, len(connections) - 1)]
-
-    def send_scp_message(
-            self, message: AbstractSCPRequest,
-            connection: Optional[SCAMPConnection] = None):
-        """
-        Sends an SCP message, without expecting a response.
-
-        :param AbstractSCPRequest message: The message to send
-        :param SCAMPConnection connection:
-            The connection to use (omit to pick a random one)
-        :raise SpinnmanTimeoutException:
-            If there is a timeout before a message is received
-        :raise SpinnmanInvalidParameterException:
-            If one of the fields of the received message is invalid
-        :raise SpinnmanInvalidPacketException:
-            * If the message is not a recognised packet type
-            * If a packet is received that is not a valid response
-        :raise SpinnmanUnsupportedOperationException:
-            If no connection can send the type of message given
-        :raise SpinnmanIOException:
-            If there is an error sending the message or receiving the response
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If the response is not one of the expected codes
-        """
-        if connection is None:
-            connection = self._get_random_connection(self._scamp_connections)
-        if connection is not None:
-            connection.send_scp_request(message)
 
     def send_sdp_message(
             self, message: SDPMessage,
@@ -575,11 +502,11 @@ class Transceiver(AbstractContextManager):
             return
 
         # Get the machine dimensions
-        dims = self.get_machine_dimensions()
+        dims = self._get_machine_dimensions()
 
         # Find all the new connections via the machine Ethernet-connected chips
-        geometry = SpiNNakerTriadGeometry.get_spinn5_geometry()
-        for x, y in geometry.get_potential_ethernet_chips(
+        version = SpiNNManDataView.get_machine_version()
+        for x, y in version.get_potential_ethernet_chips(
                 dims.width, dims.height):
             ip_addr_item = SystemVariableDefinition.ethernet_ip_address
             try:
@@ -620,18 +547,7 @@ class Transceiver(AbstractContextManager):
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._scamp_connections)
 
-    def get_connections(self) -> Iterable[Connection]:
-        """
-        Get the currently known connections to the board, made up of those
-        passed in to the transceiver and those that are discovered during
-        calls to discover_connections.  No further discovery is done here.
-
-        :return: An iterable of connections known to the transceiver
-        :rtype: iterable(Connection)
-        """
-        return self._all_connections
-
-    def get_machine_dimensions(self) -> MachineDimensions:
+    def _get_machine_dimensions(self) -> MachineDimensions:
         """
         Get the maximum chip X-coordinate and maximum chip Y-coordinate of
         the chips in the machine.
@@ -675,10 +591,10 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         # Get the width and height of the machine
-        dims = self.get_machine_dimensions()
+        dims = self._get_machine_dimensions()
 
         # Get the coordinates of the boot chip
-        version_info = self.get_scamp_version()
+        version_info = self._get_scamp_version()
 
         # Get the details of all the chips
         get_machine_process = GetMachineProcess(
@@ -691,27 +607,10 @@ class Transceiver(AbstractContextManager):
         machine.add_fpga_links()
 
         if self._boot_send_connection:
-            logger.info("Detected a machine on IP address {} which has {}",
-                        machine.boot_chip.ip_address,
-                        machine.cores_and_link_output_string())
+            logger.info(f"Detected {machine.summary_string()}")
         return machine
 
-    def is_connected(self, connection: Optional[Connection] = None) -> bool:
-        """
-        Determines if the board can be contacted.
-
-        :param Connection connection:
-            The connection which is to be tested.  If `None`,
-            all connections will be tested, and the board will be considered
-            to be connected if any one connection works.
-        :return: True if the board can be contacted, False otherwise
-        :rtype: bool
-        """
-        if connection is not None:
-            return connection.is_connected()
-        return any(c.is_connected() for c in self._scamp_connections)
-
-    def get_scamp_version(
+    def _get_scamp_version(
             self, chip_x: int = AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y: int = AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
             connection_selector: Optional[ConnectionSelector] = None, *,
@@ -740,7 +639,7 @@ class Transceiver(AbstractContextManager):
         process = GetVersionProcess(connection_selector, n_retries)
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
-    def boot_board(self, extra_boot_values: Optional[Dict[
+    def _boot_board(self, extra_boot_values: Optional[Dict[
             SystemVariableDefinition, object]] = None):
         """
         Attempt to boot the board. No check is performed to see if the
@@ -748,6 +647,9 @@ class Transceiver(AbstractContextManager):
 
         :param dict(SystemVariableDefinition,object) extra_boot_values:
             extra values to set during boot
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :raise SpinnmanInvalidParameterException:
             If the board version is not known
         :raise SpinnmanIOException:
@@ -772,7 +674,7 @@ class Transceiver(AbstractContextManager):
         return proc.execute(req)
 
     @staticmethod
-    def is_scamp_version_compabible(version: Tuple[int, int, int]) -> bool:
+    def _is_scamp_version_compabible(version: Tuple[int, int, int]) -> bool:
         """
         Determine if the version of SCAMP is compatible with this transceiver.
 
@@ -803,7 +705,9 @@ class Transceiver(AbstractContextManager):
 
         :param int n_retries: The number of times to retry booting
         :param dict(SystemVariableDefinition,object) extra_boot_values:
-            Any additional values to set during boot
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :return: The version identifier
         :rtype: VersionInfo
         :raise SpinnmanIOException:
@@ -820,10 +724,10 @@ class Transceiver(AbstractContextManager):
                 INITIAL_FIND_SCAMP_RETRIES_COUNT, extra_boot_values)
 
         # If we fail to get a SCAMP version this time, try other things
-        if version_info is None and self._bmp_connections:
+        if version_info is None and self._bmp_connection is not None:
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
-            self.power_on_machine()
+            self._power_on_machine()
 
             # Sleep a bit to let things get going
             time.sleep(2.0)
@@ -837,7 +741,7 @@ class Transceiver(AbstractContextManager):
         if version_info is None:
             raise SpinnmanIOException("Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
-                not self.is_scamp_version_compabible(
+                not self._is_scamp_version_compabible(
                     version_info.version_number)):
             raise SpinnmanIOException(
                 f"The machine is currently booted with {version_info.name}"
@@ -877,9 +781,10 @@ class Transceiver(AbstractContextManager):
 
         :param int tries_to_go: how many attempts should be supported
         :param dict(SystemVariableDefinition,object) extra_boot_values:
-            Any additional values to set during boot
-        :return: version info, or `None` if we couldn't boot anything
-            because of timeouts
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
+        :return: version info
         :rtype: VersionInfo
         :raise SpinnmanIOException:
             If there is a problem communicating with the machine
@@ -888,14 +793,14 @@ class Transceiver(AbstractContextManager):
         current_tries_to_go = tries_to_go
         while version_info is None and current_tries_to_go > 0:
             try:
-                version_info = self.get_scamp_version(n_retries=BOOT_RETRIES)
+                version_info = self._get_scamp_version(n_retries=BOOT_RETRIES)
                 if self.__is_default_destination(version_info):
                     version_info = None
                     time.sleep(0.1)
             except SpinnmanGenericProcessException as e:
                 if isinstance(e.exception, SpinnmanTimeoutException):
                     logger.info("Attempting to boot machine")
-                    self.boot_board(extra_boot_values)
+                    self._boot_board(extra_boot_values)
                     current_tries_to_go -= 1
                 elif isinstance(e.exception, SpinnmanIOException):
                     raise SpinnmanIOException(
@@ -904,7 +809,7 @@ class Transceiver(AbstractContextManager):
                     raise
             except SpinnmanTimeoutException:
                 logger.info("Attempting to boot machine")
-                self.boot_board(extra_boot_values)
+                self._boot_board(extra_boot_values)
                 current_tries_to_go -= 1
             except SpinnmanIOException as e:
                 raise SpinnmanIOException(
@@ -913,7 +818,7 @@ class Transceiver(AbstractContextManager):
         # The last thing we tried was booting, so try again to get the version
         if version_info is None:
             with suppress(SpinnmanException):
-                version_info = self.get_scamp_version()
+                version_info = self._get_scamp_version()
                 if self.__is_default_destination(version_info):
                     version_info = None
         if version_info is not None:
@@ -1113,88 +1018,6 @@ class Transceiver(AbstractContextManager):
         process = ReadIOBufProcess(self._scamp_connection_selector)
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
-    def set_watch_dog_on_chip(
-            self, x: int, y: int, watch_dog: Union[bool, int]):
-        """
-        Enable, disable or set the value of the watch dog timer on a
-        specific chip.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param int x: chip X coordinate to write new watchdog parameter to
-        :param int y: chip Y coordinate to write new watchdog parameter to
-        :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
-            disable (False) the watchdog timer, or an int value to set the
-            timer count to
-        :type watch_dog: bool or int
-        """
-        # build what we expect it to be
-        warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
-                          "and untested due to no known use.")
-        value_to_set = watch_dog
-        WATCHDOG = SystemVariableDefinition.software_watchdog_count
-        if isinstance(watch_dog, bool):
-            value_to_set = cast(int, WATCHDOG.default) if watch_dog else 0
-
-        # build data holder, a single byte
-        data = _ONE_BYTE.pack(value_to_set)
-
-        # write data
-        address = SYSTEM_VARIABLE_BASE_ADDRESS + WATCHDOG.offset
-        self.write_memory(x=x, y=y, base_address=address, data=data)
-
-    def set_watch_dog(self, watch_dog: Union[bool, int]):
-        """
-        Enable, disable or set the value of the watch dog timer.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
-            disable (False) the watch dog timer, or an int value to set the
-            timer count to.
-        :type watch_dog: bool or int
-        """
-        warn_once(logger, "The set_watch_dog method is deprecated and "
-                          "untested due to no known use.")
-        for x, y in SpiNNManDataView.get_machine().chip_coordinates:
-            self.set_watch_dog_on_chip(x, y, watch_dog)
-
-    def get_iobuf_from_core(self, x: int, y: int, p: int) -> IOBuffer:
-        """
-        Get the contents of IOBUF for a given core.
-
-        .. warning::
-            This method is currently deprecated and likely to be removed.
-
-        :param int x: The x-coordinate of the chip containing the processor
-        :param int y: The y-coordinate of the chip containing the processor
-        :param int p: The ID of the processor to get the IOBUF for
-        :return: An IOBUF buffer
-        :rtype: IOBuffer
-        :raise SpinnmanIOException:
-            If there is an error communicating with the board
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If chip_and_cores contains invalid items
-            * If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        warn_once(logger, "The get_iobuf_from_core method is deprecated and "
-                  "likely to be removed.")
-        core_subsets = CoreSubsets()
-        core_subsets.add_processor(x, y, p)
-        return next(iter(self.get_iobuf(core_subsets)))
-
     def get_core_state_count(self, app_id: int, state: CPUState) -> int:
         """
         Get a count of the number of cores which have a given state.
@@ -1216,12 +1039,6 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         return self.__call(CountState(app_id, state)).count
-
-    def _get_next_nearest_neighbour_id(self) -> int:
-        with self._nearest_neighbour_lock:
-            next_nearest_neighbour_id = (self._nearest_neighbour_id + 1) % 127
-            self._nearest_neighbour_id = next_nearest_neighbour_id
-        return next_nearest_neighbour_id
 
     def execute_flood(
             self, core_subsets: CoreSubsets,
@@ -1272,7 +1089,7 @@ class Transceiver(AbstractContextManager):
             # No executable is 4 bytes long
             raise TypeError("executable may not be int")
         # Lock against other executable's
-        with self._flood_execute_lock():
+        with self.__flood_execute_lock():
             # Flood fill the system with the binary
             n_bytes, chksum = self.write_memory(
                 0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes=n_bytes,
@@ -1291,72 +1108,27 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             copy_run.run(n_bytes, app_id, core_subsets, chksum, wait)
 
-    def execute_application(
-            self, executable_targets: ExecutableTargets, app_id: int):
-        """
-        Execute a set of binaries that make up a complete application on
-        specified cores, wait for them to be ready and then start all of the
-        binaries.
-
-        .. note::
-            This will get the binaries into c_main but will not signal the
-            barrier.
-
-        :param ExecutableTargets executable_targets:
-            The binaries to be executed and the cores to execute them on
-        :param int app_id: The app_id to give this application
-        """
-        # Execute each of the binaries and get them in to a "wait" state
-        for binary in executable_targets.binaries:
-            core_subsets = executable_targets.get_cores_for_binary(binary)
-            self.execute_flood(core_subsets, binary, app_id, wait=True)
-
-        # Sleep to allow cores to get going
-        time.sleep(0.5)
-
-        # Check that the binaries have reached a wait state
-        count = self.get_core_state_count(app_id, CPUState.READY)
-        if count < executable_targets.total_processors:
-            cores_ready = self.get_cpu_infos(
-                executable_targets.all_core_subsets, CPUState.READY,
-                include=False)
-            if len(cores_ready) > 0:
-                raise SpinnmanException(
-                    f"Only {count} of {executable_targets.total_processors} "
-                    "cores reached ready state: "
-                    f"{cores_ready.get_status_string()}")
-
-        # Send a signal telling the application to start
-        self.send_signal(app_id, Signal.START)
-
-    def power_on_machine(self) -> bool:
+    def _power_on_machine(self) -> bool:
         """
         Power on the whole machine.
 
         :rtype bool
         :return success of failure to power on machine
         """
-        if not self._bmp_connections:
+        if self._bmp_connection is None:
             logger.warning("No BMP connections, so can't power on")
             return False
-        for bmp_connection in self._bmp_connections:
-            self.power_on(bmp_connection.boards, bmp_connection.cabinet,
-                          bmp_connection.frame)
+        self.power_on()
         return True
 
-    def power_on(self, boards: Union[int, Iterable[int]] = 0,
-                 cabinet: int = 0, frame: int = 0):
+    def power_on(self, boards: Union[int, Iterable[int]] = 0):
         """
         Power on a set of boards in the machine.
 
         :param boards: The board or boards to power on
         :type boards: list(int) or int
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
-        self._power(PowerCommand.POWER_ON, boards, cabinet, frame)
+        self._power(PowerCommand.POWER_ON, boards)
 
     def power_off_machine(self) -> bool:
         """
@@ -1365,77 +1137,49 @@ class Transceiver(AbstractContextManager):
         :rtype bool
         :return success or failure to power off the machine
         """
-        if not self._bmp_connections:
+        if self._bmp_connection is None:
             logger.warning("No BMP connections, so can't power off")
             return False
         logger.info("Turning off machine")
-        for bmp_connection in self._bmp_connections:
-            self.power_off(bmp_connection.boards, bmp_connection.cabinet,
-                           bmp_connection.frame)
+        self.power_off()
         return True
 
-    def power_off(self, boards: Union[int, Iterable[int]] = 0,
-                  cabinet: int = 0, frame: int = 0):
+    def power_off(self, boards: Union[int, Iterable[int]] = 0):
         """
         Power off a set of boards in the machine.
 
-        :param int boards: The board or boards to power off
+        :param boards: The board or boards to power off
         :type boards: list(int) or int
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
-        self._power(PowerCommand.POWER_OFF, boards, cabinet, frame)
+        self._power(PowerCommand.POWER_OFF, boards)
 
-    def _bmp_connection(
-            self, cabinet: int, frame: int) -> FixedConnectionSelector:
-        """
-        :param int cabinet:
-        :param int frame:
-        :rtype: FixedConnectionSelector
-        """
-        sel = self._bmp_connection_selectors.get((cabinet, frame))
-        if not sel:
-            raise SpinnmanInvalidParameterException(
-                "cabinet and frame", f"{cabinet} and {frame}",
-                "Unknown combination")
-        return sel
-
-    def __bmp_call(
-            self, cabinet: int, frame: int, req: AbstractSCPRequest[R],
-            **kwargs) -> R:
+    def __bmp_call(self, req: AbstractSCPRequest[R], **kwargs) -> R:
         """
         Wrapper that makes doing simple BMP calls easier,
         especially with types.
         """
+        if self._bmp_selector is None:
+            raise SpinnmanException(
+                "this transceiver does not support BMP operations")
         proc: SendSingleCommandProcess[R] = SendSingleCommandProcess(
-            self._bmp_connection(cabinet, frame), **kwargs)
+            self._bmp_selector, **kwargs)
         return proc.execute(req)
 
     def _power(
             self, power_command: PowerCommand,
-            boards: Union[int, Iterable[int]] = 0,
-            cabinet: int = 0, frame: int = 0):
+            boards: Union[int, Iterable[int]] = 0):
         """
         Send a power request to the machine.
 
         :param PowerCommand power_command: The power command to send
         :param boards: The board or boards to send the command to
         :type boards: list(int) or int
-        :param int cabinet: the ID of the cabinet containing the frame, or 0
-            if the frame is not in a cabinet
-        :param int frame: the ID of the frame in the cabinet containing the
-            board(s), or 0 if the board is not in a frame
         """
-        if not self._bmp_connection_selectors:
-            warn_once(
-                logger, "No BMP connections so power control unavailable")
         timeout = (
             BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
             else BMP_TIMEOUT)
-        self.__bmp_call(cabinet, frame, SetPower(power_command, boards),
+        self.__bmp_call(SetPower(power_command, boards),
                         timeout=timeout, n_retries=0)
         self._machine_off = power_command == PowerCommand.POWER_OFF
 
@@ -1443,36 +1187,8 @@ class Transceiver(AbstractContextManager):
         if not self._machine_off:
             time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
-    def set_led(
-            self, led: Union[int, Iterable[int]], action: LEDAction,
-            board: int, cabinet: int, frame: int):
-        """
-        Set the LED state of a board in the machine.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param led:
-            Number of the LED or an iterable of LEDs to set the state of (0-7)
-        :type led: int or iterable(int)
-        :param LEDAction action:
-            State to set the LED to, either on, off or toggle
-        :param board: Specifies the board to control the LEDs of. This may
-            also be an iterable of multiple boards (in the same frame). The
-            command will actually be sent to the first board in the iterable.
-        :type board: int or iterable(int)
-        :param int cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
-        """
-        warn_once(logger, "The set_led method is deprecated and "
-                  "untested due to no known use.")
-        self.__bmp_call(cabinet, frame, BMPSetLed(led, action, board))
-
     def read_fpga_register(
-            self, fpga_num: int, register: int, cabinet: int, frame: int,
-            board: int) -> int:
+            self, fpga_num: int, register: int, board: int = 0) -> int:
         """
         Read a register on a FPGA of a board. The meaning of the
         register's contents will depend on the FPGA's configuration.
@@ -1481,20 +1197,17 @@ class Transceiver(AbstractContextManager):
         :param int register:
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to request the FPGA register from
         :return: the register data
         :rtype: int
         """
         response = self.__bmp_call(
-            cabinet, frame, ReadFPGARegister(fpga_num, register, board),
+            ReadFPGARegister(fpga_num, register, board),
             timeout=1.0)
         return response.fpga_register
 
     def write_fpga_register(
-            self, fpga_num: int, register: int, value: int,
-            cabinet: int, frame: int, board: int):
+            self, fpga_num: int, register: int, value: int, board: int = 0):
         """
         Write a register on a FPGA of a board. The meaning of setting the
         register's contents will depend on the FPGA's configuration.
@@ -1504,45 +1217,19 @@ class Transceiver(AbstractContextManager):
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
         :param int value: the value to write into the FPGA register
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to write the FPGA register to
         """
         self.__bmp_call(
-            cabinet, frame,
             WriteFPGARegister(fpga_num, register, value, board))
 
-    def read_adc_data(self, board: int, cabinet: int, frame: int) -> ADCInfo:
-        """
-        Read the BMP ADC data.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
-        :param int board: which board to request the ADC data from
-        :return: the FPGA's ADC data object
-        :rtype: ADCInfo
-        """
-        warn_once(logger, "The read_adc_data method is deprecated and "
-                  "untested due to no known use.")
-        response = self.__bmp_call(cabinet, frame, ReadADC(board))
-        return response.adc_info
-
-    def read_bmp_version(
-            self, board: int, cabinet: int, frame: int) -> VersionInfo:
+    def read_bmp_version(self, board: int) -> VersionInfo:
         """
         Read the BMP version.
 
-        :param int cabinet: cabinet: the cabinet this is targeting
-        :param int frame: the frame this is targeting
         :param int board: which board to request the data from
         :return: the sver from the BMP
         """
-        response = self.__bmp_call(cabinet, frame, BMPGetVersion(board))
+        response = self.__bmp_call(BMPGetVersion(board))
         return response.version_info
 
     def write_memory(
@@ -1646,151 +1333,6 @@ class Transceiver(AbstractContextManager):
         addr = self.__get_user_register_address_from_core(p, user)
         self.write_memory(x, y, addr, int(value))
 
-    def write_neighbour_memory(
-            self, x: int, y: int, link: int, base_address: int,
-            data: Union[BinaryIO, bytes, int], *,
-            n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0):
-        """
-        Write to the memory of a neighbouring chip using a LINK_READ SCP
-        command. If sent to a BMP, this command can be used to communicate
-        with the FPGAs' debug registers.
-
-        .. warning::
-            This method is deprecated and untested due to no known use.
-
-        :param int x:
-            The x-coordinate of the chip whose neighbour is to be written to
-        :param int y:
-            The y-coordinate of the chip whose neighbour is to be written to
-        :param int link:
-            The link index to send the request to (or if BMP, the FPGA number)
-        :param int base_address:
-            The address in SDRAM where the region of memory is to be written
-        :param data: The data to write.  Should be one of the following:
-
-            * An instance of RawIOBase
-            * A bytearray/bytes
-            * A single integer; will be written in little-endian byte order
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int
-        :param int n_bytes:
-            The amount of data to be written in bytes.  If not specified:
-
-            * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray, the length of the bytearray will be
-              used
-            * If `data` is an int, 4 will be used
-        :param int offset:
-            The offset where the valid data starts (if `data` is
-            an int then offset will be ignored and used 0)
-        :param int cpu:
-            The CPU to use, typically 0 (or if a BMP, the slot number)
-        :raise SpinnmanIOException:
-            * If there is an error communicating with the board
-            * If there is an error reading the data
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If `x, y` does not lead to a valid chip
-            * If a packet is received that has invalid parameters
-            * If `base_address` is not a positive integer
-            * If `data` is an RawIOBase but `n_bytes` is not specified
-            * If `data` is an int and `n_bytes` is more than 4
-            * If `n_bytes` is less than 0
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        warn_once(logger, "The write_neighbour_memory method is deprecated "
-                          "and untested due to no known use.")
-        process = WriteMemoryProcess(self._scamp_connection_selector)
-        if isinstance(data, io.RawIOBase):
-            assert n_bytes is not None
-            process.write_link_memory_from_reader(
-                x, y, cpu, link, base_address, cast(BinaryIO, data), n_bytes)
-        elif isinstance(data, int):
-            n_bytes = 4
-            data_to_write = _ONE_WORD.pack(data)
-            process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 4)
-        else:
-            assert isinstance(data, (bytes, bytearray))
-            if n_bytes is None:
-                n_bytes = len(data)
-            process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data, offset, n_bytes)
-
-    def write_memory_flood(
-            self, base_address: int, data: Union[BinaryIO, bytes, int, str], *,
-            n_bytes: Optional[int] = None, offset: int = 0):
-        """
-        Write to the SDRAM of all chips.
-
-        :param int base_address:
-            The address in SDRAM where the region of memory is to be written
-        :param data:
-            The data that is to be written.  Should be one of the following:
-
-            * An instance of RawIOBase
-            * A byte-string
-            * A single integer
-            * A file name of a file to read
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int or str
-        :param int n_bytes:
-            The amount of data to be written in bytes.  If not specified:
-
-            * If `data` is an RawIOBase, an error is raised
-            * If `data` is a bytearray or bytes, the length of the bytearray
-              will be used
-            * If `data` is an int, 4 will be used
-            * If `data` is a str, the size of the file will be used
-        :param int offset:
-            The offset where the valid data starts; if `data` is
-            an int, then the offset will be ignored and 0 is used.
-        :param bool is_filename:
-            True if `data` should be interpreted as a file name
-        :raise SpinnmanIOException:
-            * If there is an error communicating with the board
-            * If there is an error reading the executable
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If one of the specified chips is not valid
-            * If `app_id` is an invalid application ID
-            * If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        process = WriteMemoryFloodProcess(self._scamp_connection_selector)
-        # Ensure only one flood fill occurs at any one time
-        with self._flood_write_lock:
-            # Start the flood fill
-            nearest_neighbour_id = self._get_next_nearest_neighbour_id()
-            if isinstance(data, io.RawIOBase):
-                if n_bytes is None:
-                    raise SpinnmanInvalidParameterException(
-                        "n_bytes", n_bytes,
-                        "must not be None when an IO stream is used")
-                process.write_memory_from_reader(
-                    nearest_neighbour_id, base_address, cast(BinaryIO, data),
-                    n_bytes)
-            elif isinstance(data, str):
-                if n_bytes is None:
-                    n_bytes = os.stat(data).st_size
-                with open(data, "rb") as reader:
-                    process.write_memory_from_reader(
-                        nearest_neighbour_id, base_address, reader, n_bytes)
-            elif isinstance(data, int):
-                data_to_write = _ONE_WORD.pack(data)
-                process.write_memory_from_bytearray(
-                    nearest_neighbour_id, base_address, data_to_write)
-            else:
-                assert isinstance(data, (bytes, bytearray))
-                if n_bytes is None:
-                    n_bytes = len(data)
-                process.write_memory_from_bytearray(
-                    nearest_neighbour_id, base_address, data, offset, n_bytes)
-
     def read_memory(
             self, x: int, y: int, base_address: int, length: int, *,
             cpu: int = 0) -> bytes:
@@ -1857,52 +1399,6 @@ class Transceiver(AbstractContextManager):
             data = process.read_memory(x, y, cpu, base_address, _ONE_WORD.size)
             (value, ) = _ONE_WORD.unpack(data)
             return value
-        except Exception:
-            logger.info(self.__where_is_xy(x, y))
-            raise
-
-    def read_neighbour_memory(
-            self, x: int, y: int, link: int, base_address: int, length: int, *,
-            cpu: int = 0) -> bytes:
-        """
-        Read some areas of memory on a neighbouring chip using a LINK_READ
-        SCP command. If sent to a BMP, this command can be used to
-        communicate with the FPGAs' debug registers.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param int x:
-            The x-coordinate of the chip whose neighbour is to be read from
-        :param int y:
-            The y-coordinate of the chip whose neighbour is to be read from
-        :param int link:
-            The link index to send the request to (or if BMP, the FPGA number)
-        :param int base_address:
-            The address in SDRAM where the region of memory to be read starts
-        :param int length: The length of the data to be read in bytes
-        :param int cpu:
-            The CPU to use, typically 0 (or if a BMP, the slot number)
-        :return: An iterable of chunks of data read in order
-        :rtype: bytes
-        :raise SpinnmanIOException:
-            If there is an error communicating with the board
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If one of `x`, `y`, `cpu`, `base_address` or `length` is invalid
-            * If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        try:
-            warn_once(logger, "The read_neighbour_memory method is deprecated "
-                      "and untested due to no known use.")
-            process = ReadMemoryProcess(self._scamp_connection_selector)
-            return process.read_link_memory(
-                x, y, cpu, link, base_address, length)
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
@@ -2062,7 +1558,7 @@ class Transceiver(AbstractContextManager):
         Send a signal to an application.
 
         :param int app_id: The ID of the application to send to
-        :param Signal signal: The signal to send
+        :param ~spinnman.messages.scp.enums.Signal signal: The signal to send
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -2076,37 +1572,7 @@ class Transceiver(AbstractContextManager):
         """
         self.__call(SendSignal(app_id, signal))
 
-    def set_leds(self, x: int, y: int, cpu: int, led_states):
-        """
-        Set LED states.
-
-        .. warning::
-            The set_leds is deprecated and untested due to no known use.
-
-        :param int x: The x-coordinate of the chip on which to set the LEDs
-        :param int y: The x-coordinate of the chip on which to set the LEDs
-        :param int cpu: The CPU of the chip on which to set the LEDs
-        :param dict(int,int) led_states:
-            A dictionary mapping SetLED index to state with
-            0 being off, 1 on and 2 inverted.
-        :raise SpinnmanIOException:
-            If there is an error communicating with the board
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        try:
-            warn_once(logger, "The set_leds is deprecated and "
-                      "untested due to no known use.")
-            self.__call(SetLED(x, y, cpu, led_states))
-        except Exception:
-            logger.info(self.__where_is_xy(x, y))
-            raise
-
-    def locate_spinnaker_connection_for_board_address(
+    def _locate_spinnaker_connection_for_board_address(
             self, board_address: str) -> Optional[SCAMPConnection]:
         """
         Find a connection that matches the given board IP address.
@@ -2186,7 +1652,7 @@ class Transceiver(AbstractContextManager):
         elif board_address is None:
             return self._scamp_connections
 
-        connection = self.locate_spinnaker_connection_for_board_address(
+        connection = self._locate_spinnaker_connection_for_board_address(
             board_address)
         if connection is None:
             return []
@@ -2314,52 +1780,6 @@ class Transceiver(AbstractContextManager):
             process = MallocSDRAMProcess(self._scamp_connection_selector)
             process.malloc_sdram(x, y, size, app_id, tag)
             return process.base_address
-        except Exception:
-            logger.info(self.__where_is_xy(x, y))
-            raise
-
-    def free_sdram(self, x: int, y: int, base_address: int, app_id: int):
-        """
-        Free allocated SDRAM.
-
-        .. warning::
-            This method is currently deprecated and likely to be removed.
-
-        :param int x: The x-coordinate of the chip onto which to ask for memory
-        :param int y: The y-coordinate of the chip onto which to ask for memory
-        :param int base_address: The base address of the allocated memory
-        :param int app_id: The app ID of the allocated memory
-        """
-        try:
-            warn_once(logger, "The free_sdram method is deprecated and "
-                      "likely to be removed.")
-            process = DeAllocSDRAMProcess(self._scamp_connection_selector)
-            process.de_alloc_sdram(x, y, app_id, base_address)
-        except Exception:
-            logger.info(self.__where_is_xy(x, y))
-            raise
-
-    def free_sdram_by_app_id(self, x: int, y: int, app_id: int):
-        """
-        Free all SDRAM allocated to a given app ID.
-
-        .. warning::
-            This method is currently deprecated and untested as there is no
-            known use. Same functionality provided by ybug and bmpc.
-            Retained in case needed for hardware debugging.
-
-        :param int x: The x-coordinate of the chip onto which to ask for memory
-        :param int y: The y-coordinate of the chip onto which to ask for memory
-        :param int app_id: The app ID of the allocated memory
-        :return: The number of blocks freed
-        :rtype: int
-        """
-        try:
-            warn_once(logger, "The free_sdram_by_app_id method is deprecated "
-                              "and untested due to no known use.")
-            process = DeAllocSDRAMProcess(self._scamp_connection_selector)
-            process.de_alloc_sdram(x, y, app_id)
-            return process.no_blocks_freed
         except Exception:
             logger.info(self.__where_is_xy(x, y))
             raise
@@ -2543,7 +1963,7 @@ class Transceiver(AbstractContextManager):
         :param int position:
             The position in the list of filters where this filter is to be
             added.
-        :param DiagnosticFilter diagnostic_filter:
+        :param ~spinnman.model.DiagnosticFilter diagnostic_filter:
             The diagnostic filter being set in the placed, between 0 and 15.
 
             .. note::
@@ -2590,46 +2010,6 @@ class Transceiver(AbstractContextManager):
         self.__call(WriteMemory(
             x, y, memory_position, _ONE_WORD.pack(data_to_send)))
 
-    def get_router_diagnostic_filter(
-            self, x: int, y: int, position: int) -> DiagnosticFilter:
-        """
-        Gets a router diagnostic filter from a router.
-
-        :param int x:
-            the X address of the router from which this filter is being
-            retrieved
-        :param int y:
-            the Y address of the router from which this filter is being
-            retrieved
-        :param int position:
-            the position in the list of filters to read the information from
-        :return: The diagnostic filter read
-        :rtype: DiagnosticFilter
-        :raise SpinnmanIOException:
-            * If there is an error communicating with the board
-            * If there is an error reading the data
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If x, y does not lead to a valid chip
-            * If a packet is received that has invalid parameters
-            * If position is less than 0 or more than 15
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
-        try:
-            memory_position = (
-                ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
-                position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
-
-            response = self.__call(ReadMemory(x, y, memory_position, 4))
-            return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
-                response.data, response.offset)[0])
-            # pylint: disable=no-member
-        except Exception:
-            logger.info(self.__where_is_xy(x, y))
-            raise
-
     def clear_router_diagnostic_counters(self, x: int, y: int):
         """
         Clear router diagnostic information on a chip.
@@ -2654,70 +2034,16 @@ class Transceiver(AbstractContextManager):
             logger.info(self.__where_is_xy(x, y))
             raise
 
-    @property
-    def number_of_boards_located(self) -> int:
-        """
-        The number of boards currently configured.
-
-        .. warning::
-            This property is currently deprecated and likely to be removed.
-
-        :rtype: int
-        """
-        warn_once(logger, "The number_of_boards_located method is deprecated "
-                          "and likely to be removed.")
-        boards = 0
-        for bmp_connection in self._bmp_connections:
-            boards += len(bmp_connection.boards)
-
-        # if no BMPs are available, then there's still at least one board
-        return max(1, boards)
-
     def close(self) -> None:
         """
         Close the transceiver and any threads that are running.
         """
-        if self._bmp_connections:
+        if self._bmp_connection is not None:
             if get_config_bool("Machine", "turn_off_machine"):
                 self.power_off_machine()
 
         for connection in self._all_connections:
             connection.close()
-
-    @property
-    def bmp_connection(self) -> Dict[Tuple[int, int], FixedConnectionSelector]:
-        """
-        The BMP connections.
-
-        .. warning::
-            This property is currently deprecated and likely to be removed.
-
-        :rtype: dict(tuple(int,int),FixedConnectionSelector)
-        """
-        warn_once(logger, "The bmp_connection property is deprecated and "
-                  "likely to be removed.")
-        return self._bmp_connection_selectors
-
-    def get_heap(
-            self, x: int, y: int,
-            heap: SystemVariableDefinition = (
-                SystemVariableDefinition.sdram_heap_address)
-            ) -> Sequence[HeapElement]:
-        """
-        Get the contents of the given heap on a given chip.
-
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
-        :param SystemVariableDefinition heap:
-            The SystemVariableDefinition which is the heap to read
-        :rtype: list(HeapElement)
-        """
-        try:
-            process = GetHeapProcess(self._scamp_connection_selector)
-            return process.get_heap((x, y), heap)
-        except Exception:
-            logger.info(self.__where_is_xy(x, y))
-            raise
 
     def control_sync(self, do_sync: bool):
         """

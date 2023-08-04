@@ -46,7 +46,7 @@ def work_out_bmp_from_machine_details(
     board_range = range(number_of_boards) if number_of_boards else [0]
 
     # Assume a single board with no cabinet or frame specified
-    return BMPConnectionData(cabinet=0, frame=0, ip_address=bmp_ip_address,
+    return BMPConnectionData(ip_address=bmp_ip_address,
                              boards=board_range, port_num=SCP_SCAMP_PORT)
 
 

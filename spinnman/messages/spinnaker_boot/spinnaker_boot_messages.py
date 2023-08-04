@@ -47,7 +47,10 @@ class SpinnakerBootMessages(object):
                      SystemVariableDefinition, Any]] = None):
         """
         :param int board_version: The version of the board to be booted
-        :param extra_boot_values: Any additional values to be set during boot
+        :param extra_boot_values:
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :type extra_boot_values: dict(SystemVariableDefinition, object)
         :raise SpinnmanInvalidParameterException:
             If the board version is not supported

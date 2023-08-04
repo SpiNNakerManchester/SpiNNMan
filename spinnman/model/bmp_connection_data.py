@@ -20,38 +20,14 @@ class BMPConnectionData(object):
     """
     __slots__ = [
         "_boards",
-        "_cabinet",
-        "_frame",
         "_ip_address",
         "_port_num"]
 
-    def __init__(
-            self, cabinet: int, frame: int, ip_address: str,
-            boards: Sequence[int], port_num: Optional[int]):
-        # pylint: disable=too-many-arguments
-        self._cabinet = cabinet
-        self._frame = frame
+    def __init__(self, ip_address: str, boards: Sequence[int],
+                 port_num: Optional[int]):
         self._ip_address = ip_address
         self._boards = tuple(boards)
         self._port_num = port_num
-
-    @property
-    def cabinet(self) -> int:
-        """
-        The cabinet number.
-
-        :rtype: int
-        """
-        return self._cabinet
-
-    @property
-    def frame(self) -> int:
-        """
-        The frame number.
-
-        :rtype: int
-        """
-        return self._frame
 
     @property
     def ip_address(self) -> str:
@@ -81,8 +57,7 @@ class BMPConnectionData(object):
         return self._port_num
 
     def __str__(self) -> str:
-        return (f"{self._cabinet}:{self._frame}:{self._ip_address}:"
-                f"{self._boards}:{self._port_num}")
+        return f"{self._ip_address}:{self._boards}:{self._port_num}"
 
     def __repr__(self) -> str:
         return self.__str__()

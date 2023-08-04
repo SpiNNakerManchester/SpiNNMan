@@ -23,12 +23,12 @@ from spinn_utilities.config_holder import (
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
-from spinn_machine import (Router, Chip, Link, machine_from_size)
+from spinn_machine import (Router, Chip, Link, Machine)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
-from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
+from spinnman.data import SpiNNManDataView
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition)
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -101,7 +101,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :rtype: ~spinn_machine.Chip
         """
         # Create the down cores set if any
-        n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
+        n_cores = \
+            SpiNNManDataView.get_machine_version().max_cores_per_chip
+        n_cores = min(chip_info.n_cores, n_cores)
         core_states = chip_info.core_states
         down_cores = self._ignore_cores_map.get(
             (chip_info.x, chip_info.y), None)
@@ -244,7 +246,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
-        machine = machine_from_size(width, height)
+        version = SpiNNManDataView.get_machine_version()
+        machine = version.create_machine(width, height)
         self._preprocess_ignore_chips(machine)
         self._process_ignore_links(machine)
         self._preprocess_ignore_cores(machine)

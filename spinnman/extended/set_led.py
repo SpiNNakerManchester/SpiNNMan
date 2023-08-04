@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict
+
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from .check_ok_response import CheckOKResponse
+from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
 
 
 class SetLED(AbstractSCPRequest):
@@ -27,9 +27,9 @@ class SetLED(AbstractSCPRequest):
     This class is currently deprecated and untested as there is no
     known use except for Transceiver.set_led which is itself deprecated.
     """
-    __slots__ = ()
+    __slots__ = []
 
-    def __init__(self, x: int, y: int, cpu: int, led_states: Dict[int, int]):
+    def __init__(self, x, y, cpu, led_states):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255
         :param int y: The y-coordinate of the chip, between 0 and 255
@@ -51,5 +51,5 @@ class SetLED(AbstractSCPRequest):
             argument_1=encoded_led_states)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self) -> CheckOKResponse:
+    def get_scp_response(self):
         return CheckOKResponse("Set SetLED", "CMD_LED")
