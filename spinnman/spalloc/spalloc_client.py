@@ -26,8 +26,8 @@ import sqlite3
 import struct
 import threading
 from typing import (
-    Callable, Collection, Dict, FrozenSet, Iterable, Iterator, List, Optional,
-    Tuple, Union, cast)
+    Callable, Collection, Dict, FrozenSet, Iterable, Iterator, List, Mapping,
+    Optional, Tuple, cast)
 from typing_extensions import TypeAlias
 from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
@@ -35,7 +35,7 @@ from spinn_utilities.abstract_context_manager import (
     AbstractContextManager as ACM)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
-from spinn_utilities.typing.json import JsonObject
+from spinn_utilities.typing.json import JsonObject, JsonValue
 from spinn_utilities.overrides import overrides
 from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
@@ -80,7 +80,7 @@ class SpallocClient(ACM, AbstractSpallocClient):
             username: Optional[str] = None, password: Optional[str] = None,
             bearer_token: Optional[str] = None,
             group: Optional[str] = None, collab: Optional[str] = None,
-            nmpi_job: Optional[str] = None, nmpi_user: Optional[str] = None):
+            nmpi_job: Optional[int] = None, nmpi_user: Optional[str] = None):
         """
         :param str service_url: The reference to the service.
             May have username and password supplied as part of the network
@@ -172,21 +172,23 @@ class SpallocClient(ACM, AbstractSpallocClient):
                 break
             obj = self.__session.get(obj["next"]).json()
 
-    def _create(self, create, machine_name) -> SpallocJob:
+    def _create(self, create: Mapping[str, JsonValue],
+                machine_name: Optional[str]) -> SpallocJob:
         assert self.__session
+        operation = dict(create)
         if machine_name:
-            create["machine-name"] = machine_name
+            operation["machine-name"] = machine_name
         else:
-            create["tags"] = ["default"]
+            operation["tags"] = ["default"]
         if self.__group is not None:
-            create["group"] = self.__group
+            operation["group"] = self.__group
         if self.__collab is not None:
-            create["nmpi-collab"] = self.__collab
+            operation["nmpi-collab"] = self.__collab
         if self.__nmpi_job is not None:
-            create["nmpi-job-id"] = self.__nmpi_job
+            operation["nmpi-job-id"] = self.__nmpi_job
             if self.__nmpi_user is not None:
-                create["owner"] = self.__nmpi_user
-        r = self.__session.post(self.__jobs_url, create, timeout=30)
+                operation["owner"] = self.__nmpi_user
+        r = self.__session.post(self.__jobs_url, operation, timeout=30)
         url = r.headers["Location"]
         return _SpallocJob(self.__session, url)
 
@@ -217,7 +219,7 @@ class SpallocClient(ACM, AbstractSpallocClient):
     def create_job_board(
             self, triad=None, physical=None, ip_address=None,
             machine_name=None, keepalive=45) -> SpallocJob:
-        board: Dict[str, Union[int, str]]
+        board: JsonObject
         if triad:
             x, y, z = triad
             board = {"x": int(x), "y": int(y), "z": int(z)}
