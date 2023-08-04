@@ -17,10 +17,12 @@ from contextlib import contextmanager
 import io
 import os
 import logging
-from threading import Condition, RLock
+import struct
 import time
+from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
+from spinn_utilities.require_subclass import require_subclass
 from spinn_machine import CoreSubsets
 from spinnman.constants import (
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_FILTER_CONTROLS_OFFSET,
@@ -33,88 +35,22 @@ from spinnman.model.enums import CPUState
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.impl import (
     ReadMemory, ApplicationRun)
+from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
+from spinnman.data import SpiNNManDataView
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-from spinnman.connections.udp_packet_connections import (
-    BMPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
     GetHeapProcess, ReadMemoryProcess, SendSingleCommandProcess,
     WriteMemoryProcess)
-from spinnman.transceiver.version5Transceiver import Version5Transceiver
-from spinnman.transceiver.watchdog_setter import WatchdogSetter
-from spinnman.utilities.utility_functions import (
-    work_out_bmp_from_machine_details)
+from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
+
+_ONE_BYTE = struct.Struct("B")
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-def create_transceiver_from_hostname(
-        hostname, version, bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False):
-    """
-    Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
-    given hostname on port 17893 (the default SCAMP port), and a
-    :py:class:`~.BootConnection` on port 54321 (the default boot port),
-    optionally discovering any additional links using the UDPConnection,
-    and then returning the transceiver created with the conjunction of
-    the created UDPConnection and the discovered connections.
-
-    :param hostname: The hostname or IP address of the board or `None` if
-        only the BMP connections are of interest
-    :type hostname: str or None
-    :param number_of_boards: a number of boards expected to be supported, or
-        ``None``, which defaults to a single board
-    :type number_of_boards: int or None
-    :param int version: the type of SpiNNaker board used within the SpiNNaker
-        machine being used. If a Spinn-5 board, then the version will be 5,
-        Spinn-3 would equal 3 and so on.
-    :param list(BMPConnectionData) bmp_connection_data:
-        the details of the BMP connections used to boot multi-board systems
-    :param bool auto_detect_bmp:
-        ``True`` if the BMP of version 4 or 5 boards should be
-        automatically determined from the board IP address
-    :param scamp_connections:
-        the list of connections used for SCAMP communications
-    :return: The created transceiver
-    :rtype: Transceiver
-    :raise SpinnmanIOException:
-        If there is an error communicating with the board
-    :raise SpinnmanInvalidPacketException:
-        If a packet is received that is not in the valid format
-    :raise SpinnmanInvalidParameterException:
-        If a packet is received that has invalid parameters
-    :raise SpinnmanUnexpectedResponseCodeException:
-        If a response indicates an error during the exchange
-    """
-    if hostname is not None:
-        logger.info("Creating transceiver for {}", hostname)
-    connections = list()
-
-    # if no BMP has been supplied, but the board is a spinn4 or a spinn5
-    # machine, then an assumption can be made that the BMP is at -1 on the
-    # final value of the IP address
-    if (version >= 4 and auto_detect_bmp is True and
-            (bmp_connection_data is None or not bmp_connection_data)):
-        bmp_connection_data = [
-            work_out_bmp_from_machine_details(hostname, number_of_boards)]
-
-    # handle BMP connections
-    if bmp_connection_data is not None:
-        bmp_ip_list = list()
-        for conn_data in bmp_connection_data:
-            bmp_connection = BMPConnection(conn_data)
-            connections.append(bmp_connection)
-            bmp_ip_list.append(bmp_connection.remote_ip_address)
-        logger.info("Transceiver using BMPs: {}", bmp_ip_list)
-
-    connections.append(SCAMPConnection(remote_host=hostname))
-
-    # handle the boot connection
-    connections.append(BootConnection(remote_host=hostname))
-
-    return ExtendedTransceiver(version, connections=connections)
-
-
-class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
+@require_subclass(ExtendableTransceiver)
+class ExtendedTransceiver(object, metaclass=AbstractBase):
     """
     An encapsulation of various communications with the SpiNNaker board.
 
@@ -130,8 +66,7 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         the multiple calls may be made separately over the set of given
         connections.
     """
-    __slots__ = ["_flood_write_lock", "_nearest_neighbour_id",
-                 "_nearest_neighbour_lock"]
+    __slots__ = []
 
     def __init__(self, connections=None):
         """
@@ -150,13 +85,6 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         """
         super().__init__(connections)
 
-        # A lock against multiple flood fill writes - needed as SCAMP cannot
-        # cope with this
-        self._flood_write_lock = Condition()
-
-        # The nearest neighbour start ID and lock
-        self._nearest_neighbour_id = 1
-        self._nearest_neighbour_lock = RLock()
 
     def send_scp_message(self, message, connection=None):
         """
@@ -185,31 +113,22 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
             connection = self._get_random_connection(self._scamp_connections)
         connection.send_scp_request(message)
 
-    def get_connections(self):
-        """
-        Get the currently known connections to the board, made up of those
-        passed in to the transceiver and those that are discovered during
-        calls to discover_connections.  No further discovery is done here.
-
-        :return: An iterable of connections known to the transceiver
-        :rtype: list(Connection)
-        """
-        return self._all_connections
-
     def is_connected(self, connection=None):
         """
-        Determines if the board can be contacted.
+        Determines if the board can be contacted via SCAMP
 
         :param Connection connection:
             The connection which is to be tested.  If `None`,
-            all connections will be tested, and the board will be considered
+            all Scamp connections will be tested,
+            and the board will be considered
             to be connected if any one connection works.
         :return: True if the board can be contacted, False otherwise
         :rtype: bool
         """
         if connection is not None:
             return connection.is_connected()
-        return any(c.is_connected() for c in self._scamp_connections)
+        return any(c.is_connected() and isinstance(c, SCAMPConnection)
+                   for c in self._scamp_connections)
 
     def get_iobuf_from_core(self, x, y, p):
         """
@@ -392,7 +311,7 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         """
         warn_once(logger, "The set_led method is deprecated and "
                   "untested due to no known use.")
-        process = SendSingleCommandProcess(self._bmp_selector)
+        process = SendSingleCommandProcess(self.bmp_selector)
         process.execute(BMPSetLed(led, action, board))
 
     def read_adc_data(self, board):
@@ -410,7 +329,7 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         """
         warn_once(logger, "The read_adc_data method is deprecated and "
                   "untested due to no known use.")
-        process = SendSingleCommandProcess(self._bmp_selector)
+        process = SendSingleCommandProcess(self.bmp_selector)
         response = process.execute(ReadADC(board))
         return response.adc_info  # pylint: disable=no-member
 
@@ -468,7 +387,7 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         """
         warn_once(logger, "The write_neighbour_memory method is deprecated "
                           "and untested due to no known use.")
-        process = WriteMemoryProcess(self._scamp_connection_selector)
+        process = WriteMemoryProcess(self.scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
             process.write_link_memory_from_reader(
                 x, y, cpu, link, base_address, data, n_bytes)
@@ -519,11 +438,11 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         try:
             warn_once(logger, "The read_neighbour_memory method is deprecated "
                       "and untested due to no known use.")
-            process = ReadMemoryProcess(self._scamp_connection_selector)
+            process = ReadMemoryProcess(self.scamp_connection_selector)
             return process.read_link_memory(
                 x, y, cpu, link, base_address, length)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     def _get_next_nearest_neighbour_id(self):
@@ -627,7 +546,7 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(SetLED(x, y, cpu, led_states))
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     def free_sdram(self, x, y, base_address, app_id):
@@ -648,7 +567,7 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
             process = DeAllocSDRAMProcess(self._scamp_connection_selector)
             process.de_alloc_sdram(x, y, app_id, base_address)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     def free_sdram_by_app_id(self, x, y, app_id):
@@ -673,7 +592,7 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
             process.de_alloc_sdram(x, y, app_id)
             return process.no_blocks_freed
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     def get_router_diagnostic_filter(self, x, y, position):
@@ -708,13 +627,13 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
                 position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
             process = SendSingleCommandProcess(
-                self._scamp_connection_selector)
+                self.scamp_connection_selector)
             response = process.execute(ReadMemory(x, y, memory_position, 4))
             return DiagnosticFilter.read_from_int(self._ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
             # pylint: disable=no-member
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @property
@@ -729,8 +648,8 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         """
         warn_once(logger, "The number_of_boards_located method is deprecated "
                           "and likely to be removed.")
-        if self._bmp_connection is not None:
-            return max(1, len(self._bmp_connection.boards))
+        if self.bmp_connection is not None:
+            return max(1, len(self.bmp_connection.boards))
         else:
             # if no BMPs are available, then there's still at least one board
             return 1
@@ -746,8 +665,61 @@ class ExtendedTransceiver(Version5Transceiver, WatchdogSetter):
         :rtype: list(HeapElement)
         """
         try:
-            process = GetHeapProcess(self._scamp_connection_selector)
+            process = GetHeapProcess(self.scamp_connection_selector)
             return process.get_heap((x, y), heap)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
+
+    def __set_watch_dog_on_chip(self, x, y, watch_dog):
+        """
+        Enable, disable or set the value of the watch dog timer on a
+        specific chip.
+
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
+
+        :param int x: chip X coordinate to write new watchdog parameter to
+        :param int y: chip Y coordinate to write new watchdog parameter to
+        :param watch_dog:
+            Either a boolean indicating whether to enable (True) or
+            disable (False) the watchdog timer, or an int value to set the
+            timer count to
+        :type watch_dog: bool or int
+        """
+        # build what we expect it to be
+        warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
+                          "and untested due to no known use.")
+        value_to_set = watch_dog
+        watchdog = SystemVariableDefinition.software_watchdog_count
+        if isinstance(watch_dog, bool):
+            value_to_set = watchdog.default if watch_dog else 0
+
+        # build data holder
+        data = _ONE_BYTE.pack(value_to_set)
+
+        # write data
+        address = SYSTEM_VARIABLE_BASE_ADDRESS + watchdog.offset
+        self.write_memory(x=x, y=y, base_address=address, data=data)
+
+    def set_watch_dog(self, watch_dog):
+        """
+        Enable, disable or set the value of the watch dog timer.
+
+        .. warning::
+            This method is currently deprecated and untested as there is no
+            known use. Same functionality provided by ybug and bmpc.
+            Retained in case needed for hardware debugging.
+
+        :param watch_dog:
+            Either a boolean indicating whether to enable (True) or
+            disable (False) the watch dog timer, or an int value to set the
+            timer count to.
+        :type watch_dog: bool or int
+        """
+        warn_once(logger, "The set_watch_dog method is deprecated and "
+                          "untested due to no known use.")
+        for x, y in SpiNNManDataView.get_machine().chip_coordinates:
+            self.__set_watch_dog_on_chip(x, y, watch_dog)

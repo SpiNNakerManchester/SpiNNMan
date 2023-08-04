@@ -21,17 +21,16 @@ from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.transceiver import (
     create_transceiver_from_connections, create_transceiver_from_hostname,
     MockableTransceiver)
-from spinnman.transceiver.watchdog_setter import WatchdogSetter
+from spinnman.extended.extended_transceiver import ExtendedTransceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
 from spinnman.connections.udp_packet_connections import (
     BootConnection, SCAMPConnection)
-import spinnman.extended.extended_transceiver as extended
 from spinnman.board_test_configuration import BoardTestConfiguration
 
 
-class MockExtendedTransceiver(MockableTransceiver, WatchdogSetter):
+class MockExtendedTransceiver(MockableTransceiver, ExtendedTransceiver):
     pass
 
 
@@ -47,6 +46,7 @@ class TestTransceiver(unittest.TestCase):
         connections.append(SCAMPConnection(
             remote_host=self.board_config.remotehost))
         trans = create_transceiver_from_connections(connections=connections)
+        trans.get_connections() == connections
         trans.close()
 
     def test_create_new_transceiver_one_connection(self):
@@ -54,21 +54,9 @@ class TestTransceiver(unittest.TestCase):
         connections = set()
         connections.add(SCAMPConnection(
             remote_host=self.board_config.remotehost))
-        if self.board_config.board_version == 5:
-            with extended.ExtendedTransceiver(connections=connections) as trans:
-                assert trans._all_connections == connections
-
-    def test_create_new_transceiver_from_list_connections(self):
-        self.board_config.set_up_remote_board()
-        connections = list()
-        connections.append(SCAMPConnection(
-            remote_host=self.board_config.remotehost))
-        connections.append(BootConnection(remote_host="127.0.0.1"))
         trans = create_transceiver_from_connections(connections=connections)
-        instantiated_connections = trans._all_connections
-        for connection in connections:
-            assert connection in instantiated_connections
-        #assert trans.get_connections() == connections
+        self.assertSetEqual(connections, trans.get_connections())
+        trans.close()
 
     def test_retrieving_machine_details(self):
         self.board_config.set_up_remote_board()

@@ -17,17 +17,20 @@ from spinnman.data import SpiNNManDataView
 from spinnman.transceiver.base_transceiver import BaseTransceiver
 
 
-class Version3Transceiver(BaseTransceiver):
+class Version5Transceiver(BaseTransceiver):
     """
     Implementation of the Transceiver classes for Version 5 boards
+
+    This class should ONLY be created via by transceiver_factory.py
     """
+    pass
 
     @overrides(BaseTransceiver.__init__)
     def __init__(self, connections=None):
         super().__init__(connections)
-        assert SpiNNManDataView.get_machine_version().number == 3
+        assert SpiNNManDataView.get_machine_version().number == 5
 
     @property
     @overrides(BaseTransceiver.boot_led_0_value)
     def boot_led_0_value(self):
-        return 0x00000502
+        return 0x00000001

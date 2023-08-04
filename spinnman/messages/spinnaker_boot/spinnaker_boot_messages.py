@@ -41,7 +41,7 @@ class SpinnakerBootMessages(object):
         "_n_bytes_to_read",
         "_no_data_packets"]
 
-    def __init__(self, led_0, extra_boot_values=None):
+    def __init__(self, extra_boot_values=None):
         """
         :param extra_boot_values:
             Any additional or overwrite values to set during boot.

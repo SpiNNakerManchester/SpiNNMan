@@ -15,7 +15,7 @@
 # pylint: disable=too-many-arguments
 
 from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod, abstractproperty)
+    AbstractBase, abstractmethod)
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.model.enums import CPUState
 
@@ -85,6 +85,17 @@ class AbstractTransceiver(AbstractContextManager, metaclass=AbstractBase):
             If a packet is received that has invalid parameters
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
+        """
+
+    @abstractmethod
+    def get_connections(self):
+        """
+        Get the currently known connections to the board, made up of those
+        passed in to the transceiver and those that are discovered during
+        calls to discover_connections.  No further discovery is done here.
+
+        :return: An iterable of connections known to the transceiver
+        :rtype: set(Connection)
         """
 
     @abstractmethod

@@ -17,19 +17,21 @@ from spinn_utilities.log import FormatAdapter
 from spinn_machine.version.version_3 import Version3
 from spinn_machine.version.version_5 import Version5
 from spinnman.data import SpiNNManDataView
+from spinnman.extended.version3transceiver import ExtendedVersion3Transceiver
+from spinnman.extended.version5transceiver import ExtendedVersion5Transceiver
 from spinnman.utilities.utility_functions import (
     work_out_bmp_from_machine_details)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
-from spinnman.transceiver.version3Transceiver import Version3Transceiver
-from spinnman.transceiver.version5Transceiver import Version5Transceiver
+from spinnman.transceiver.version3transceiver import Version3Transceiver
+from spinnman.transceiver.version5transceiver import Version5Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def create_transceiver_from_hostname(
         hostname, bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False):
+        auto_detect_bmp=False, extended=False):
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -51,6 +53,8 @@ def create_transceiver_from_hostname(
         automatically determined from the board IP address
     :param scamp_connections:
         the list of connections used for SCAMP communications
+    :param bool extended:
+        If True will return an Extended version of the Transceiver
     :return: The created transceiver
     :rtype: spinnman.transceiver.AbstractTransceiver
     :raise SpinnmanIOException:
@@ -89,16 +93,17 @@ def create_transceiver_from_hostname(
     # handle the boot connection
     connections.append(BootConnection(remote_host=hostname))
 
-    return create_transceiver_from_connections(connections)
+    return create_transceiver_from_connections(connections, extended)
 
 
-def create_transceiver_from_connections(connections):
+def create_transceiver_from_connections(connections, extended=False):
     """
     Create a Transceiver with these connections
 
     :param list(Connection) connections:
         An iterable of connections to the board.  If not specified, no
         communication will be possible until connections are found.
+    :param bool extended:
     :return: The created transceiver
     :rtype: spinnman.transceiver.AbstractTransceiver
     :raise SpinnmanIOException:
@@ -112,7 +117,11 @@ def create_transceiver_from_connections(connections):
     """
     version = SpiNNManDataView.get_machine_version()
     if isinstance(version, Version3):
+        if extended:
+            return ExtendedVersion3Transceiver(connections=connections)
         return Version3Transceiver(connections=connections)
     if isinstance(version, Version5):
+        if extended:
+            return ExtendedVersion5Transceiver(connections=connections)
         return Version5Transceiver(connections=connections)
     raise NotImplementedError(f"No Transceiver for {version=}")

@@ -15,10 +15,7 @@
 # pylint: disable=too-many-arguments
 import io
 import os
-import random
 import struct
-from threading import Condition
-from collections import defaultdict
 from contextlib import contextmanager, suppress
 import logging
 import socket
@@ -27,6 +24,7 @@ from spinn_utilities.abstract_base import (
     AbstractBase, abstractproperty)
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.overrides import overrides
 from spinn_machine import CoreSubsets
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
@@ -70,6 +68,7 @@ from spinnman.processes import (
     MostDirectConnectionSelector, ApplicationCopyRunProcess)
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.transceiver.abstract_transceiver import AbstractTransceiver
+from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -89,33 +88,17 @@ _ONE_LONG = struct.Struct("<Q")
 _EXECUTABLE_ADDRESS = 0x67800000
 
 
-class BaseTransceiver(AbstractTransceiver, metaclass=AbstractBase):
+class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     """
-    An encapsulation of various communications with the SpiNNaker board.
-
-    The methods of this class are designed to be thread-safe (provided they do
-    not access a BMP, as access to those is never thread-safe);
-    thus you can make multiple calls to the same (or different) methods
-    from multiple threads and expect each call to work as if it had been
-    called sequentially, although the order of returns is not guaranteed.
-
-    .. note::
-        With multiple connections to the board, using multiple threads in this
-        way may result in an increase in the overall speed of operation, since
-        the multiple calls may be made separately over the set of given
-        connections.
     """
     __slots__ = [
         "_all_connections",
         "_bmp_selector",
         "_bmp_connection",
         "_boot_send_connection",
-        "_chip_execute_lock_condition",
-        "_chip_execute_locks",
         "_height",
         "_iobuf_size",
         "_machine_off",
-        "_n_chip_execute_locks",
         "_scamp_connection_selector",
         "_scamp_connections",
         "_udp_scamp_connections",
@@ -136,6 +119,8 @@ class BaseTransceiver(AbstractTransceiver, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        super().__init__()
+
         # Place to keep the current machine
         self._width = None
         self._height = None
@@ -170,30 +155,27 @@ class BaseTransceiver(AbstractTransceiver, metaclass=AbstractBase):
         self._scamp_connection_selector = \
             self.__identify_connections(connections)
 
-        # A lock against single chip executions (entry is (x, y))
-        # The condition should be acquired before the locks are
-        # checked or updated
-        # The write lock condition should also be acquired to avoid a flood
-        # fill during an individual chip execute
-        self._chip_execute_locks = defaultdict(Condition)
-        self._chip_execute_lock_condition = Condition()
-        self._n_chip_execute_locks = 0
-
         # Check that the BMP connections are valid
         self.__check_bmp_connection()
 
         self._machine_off = False
 
-    def _where_is_xy(self, x, y):
-        """
-        Attempts to get where_is_x_y info from the machine
+    @property
+    @overrides(ExtendableTransceiver.bmp_selector)
+    def bmp_selector(self):
+        return self._bmp_selector
 
-        If no machine will do its best.
+    @property
+    @overrides(ExtendableTransceiver.scamp_connection_selector)
+    def scamp_connection_selector(self):
+        return self._scamp_connection_selector
 
-        :param int x:
-        :param int y:
-        :rtype: str
-        """
+    @property
+    @overrides(ExtendableTransceiver.bmp_connection)
+    def bmp_connection(self):
+        return self._bmp_connection
+
+    def where_is_xy(self, x, y):
         try:
             if SpiNNManDataView.has_machine():
                 return SpiNNManDataView.get_machine().where_is_xy(x, y)
@@ -297,32 +279,6 @@ class BaseTransceiver(AbstractTransceiver, metaclass=AbstractBase):
             except SpinnmanIOException:
                 break
         return None
-
-    @contextmanager
-    def __flood_execute_lock(self):
-        """
-        Get a lock for executing a flood fill of an executable.
-        """
-        # Get the execute lock all together, so nothing can access it
-        with self._chip_execute_lock_condition:
-            # Wait until nothing is executing
-            self._chip_execute_lock_condition.wait_for(
-                lambda: self._n_chip_execute_locks < 1)
-            yield self._chip_execute_lock_condition
-
-    @staticmethod
-    def _get_random_connection(connections):
-        """
-        Returns the given connection, or else picks one at random.
-
-        :param list(Connection) connections:
-            the list of connections to locate a random one from
-        :return: a connection object
-        :rtype: Connection or None
-        """
-        if not connections:
-            return None
-        return connections[random.randint(0, len(connections) - 1)]
 
     def send_sdp_message(self, message, connection=None):
         """
@@ -433,6 +389,10 @@ class BaseTransceiver(AbstractTransceiver, metaclass=AbstractBase):
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._scamp_connections)
+
+    @overrides(AbstractTransceiver.get_connections)
+    def get_connections(self):
+        return self._all_connections
 
     def _get_machine_dimensions(self):
         """
@@ -552,9 +512,11 @@ class BaseTransceiver(AbstractTransceiver, metaclass=AbstractBase):
         if not self._boot_send_connection:
             # No can do. Can't boot without a boot connection.
             raise SpinnmanIOException("no boot connection available")
+        if extra_boot_values is None:
+            extra_boot_values = dict()
         if SystemVariableDefinition.led_0 not in extra_boot_values:
-            extra_boot_values.set_value(
-                SystemVariableDefinition.led_0, self.boot_led_0_valu)
+            extra_boot_values[SystemVariableDefinition.led_0] = \
+                self.boot_led_0_value
         boot_messages = SpinnakerBootMessages(
             extra_boot_values=extra_boot_values)
         for boot_message in boot_messages.messages:
@@ -969,7 +931,7 @@ class BaseTransceiver(AbstractTransceiver, metaclass=AbstractBase):
             If a response indicates an error during the exchange
         """
         # Lock against other executable's
-        with self.__flood_execute_lock():
+        with self._flood_execute_lock():
             # Flood fill the system with the binary
             n_bytes, chksum = self.write_memory(
                 0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes,

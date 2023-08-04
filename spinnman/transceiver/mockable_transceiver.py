@@ -18,9 +18,10 @@ from spinn_utilities.overrides import overrides
 from spinnman.data import SpiNNManDataView
 from spinnman.model.enums import CPUState
 from spinnman.transceiver.abstract_transceiver import AbstractTransceiver
+from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 
 
-class MockableTransceiver(AbstractTransceiver):
+class MockableTransceiver(ExtendableTransceiver):
     """
     A based for Mock Transceivers
     """
@@ -44,6 +45,10 @@ class MockableTransceiver(AbstractTransceiver):
     @overrides(AbstractTransceiver.get_machine_details)
     def get_machine_details(self):
         return SpiNNManDataView.get_machine()
+
+    @overrides(AbstractTransceiver.get_connections)
+    def get_connections(self):
+        raise NotImplementedError("Needs to be mocked")
 
     @overrides(AbstractTransceiver.ensure_board_is_ready)
     def ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
@@ -215,3 +220,19 @@ class MockableTransceiver(AbstractTransceiver):
     @overrides(AbstractTransceiver.update_provenance_and_exit)
     def update_provenance_and_exit(self, x, y, p):
         pass
+
+    @overrides(ExtendableTransceiver.bmp_connection)
+    def bmp_connection(self):
+        raise NotImplementedError("Needs to be mocked")
+
+    @overrides(ExtendableTransceiver.bmp_selector)
+    def bmp_selector(self):
+        raise NotImplementedError("Needs to be mocked")
+
+    @overrides(ExtendableTransceiver.scamp_connection_selector)
+    def scamp_connection_selector(self):
+        raise NotImplementedError("Needs to be mocked")
+
+    @overrides(ExtendableTransceiver.where_is_xy)
+    def where_is_xy(self, x, y):
+        return f"Mocked {x=} {y=}"
