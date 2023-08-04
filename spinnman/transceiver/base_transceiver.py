@@ -301,8 +301,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(AbstractTransceiver.send_sdp_message)
     def send_sdp_message(self, message, connection=None):
         if connection is None:
-            self._scamp_connectio[random.randint(
-                0, len(self._scamp_connectio) - 1)]
+            self._scamp_connection[random.randint(
+                0, len(self._scamp_connection) - 1)]
         else:
             connection_to_use = connection
         connection_to_use.send_sdp_message(message)
@@ -883,7 +883,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             (value, ) = _ONE_WORD.unpack(data)
             return value
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @overrides(AbstractTransceiver.stop_application)
@@ -909,7 +909,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             else:
                 xys.add((cpu_info.x, cpu_info.y))
         for (x, y) in xys:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
 
     @overrides(AbstractTransceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(
@@ -1109,7 +1109,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             process.malloc_sdram(x, y, size, app_id, tag)
             return process.base_address
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @overrides(AbstractTransceiver.load_multicast_routes)
@@ -1119,7 +1119,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector)
             process.load_routes(x, y, routes, app_id)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @overrides(AbstractTransceiver.load_fixed_route)
@@ -1129,7 +1129,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector)
             process.load_fixed_route(x, y, fixed_route, app_id)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @overrides(AbstractTransceiver.read_fixed_route)
@@ -1139,7 +1139,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector)
             return process.read_fixed_route(x, y, app_id)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @overrides(AbstractTransceiver.get_multicast_routes)
@@ -1151,7 +1151,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @overrides(AbstractTransceiver.clear_multicast_routes)
@@ -1160,7 +1160,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             process.execute(RouterClear(x, y))
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @overrides(AbstractTransceiver.get_router_diagnostics)
@@ -1170,7 +1170,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector)
             return process.get_router_diagnostics(x, y)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     @overrides(AbstractTransceiver.set_router_diagnostic_filter)
@@ -1179,7 +1179,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self.__set_router_diagnostic_filter(
                 x, y, position, diagnostic_filter)
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     def __set_router_diagnostic_filter(
@@ -1227,7 +1227,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             process.execute(WriteMemory(
                 x, y, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
-            logger.info(self._where_is_xy(x, y))
+            logger.info(self.where_is_xy(x, y))
             raise
 
     def close(self):

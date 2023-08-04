@@ -226,14 +226,17 @@ class MockableTransceiver(ExtendableTransceiver):
     def where_is_xy(self, x, y):
         return f"Mocked {x=} {y=}"
 
+    @property
     @overrides(ExtendableTransceiver.bmp_connection)
     def bmp_connection(self):
         raise NotImplementedError("Needs to be mocked")
 
+    @property
     @overrides(ExtendableTransceiver.bmp_selector)
     def bmp_selector(self):
         raise NotImplementedError("Needs to be mocked")
 
+    @property
     @overrides(ExtendableTransceiver.scamp_connection_selector)
     def scamp_connection_selector(self):
         raise NotImplementedError("Needs to be mocked")
