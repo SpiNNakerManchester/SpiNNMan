@@ -23,7 +23,6 @@ class Version5Transceiver(BaseTransceiver):
 
     This class should ONLY be created via by transceiver_factory.py
     """
-    pass
 
     @overrides(BaseTransceiver.__init__)
     def __init__(self, connections=None):
