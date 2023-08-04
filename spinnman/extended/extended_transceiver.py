@@ -64,6 +64,9 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     """
     __slots__ = []
 
+    # calls many methods only reachable do to require_subclass
+    # pylint: disable=no_member
+
     def send_scp_message(self, message, connection=None):
         """
         Sends an SCP message, without expecting a response.
@@ -88,8 +91,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             If the response is not one of the expected codes
         """
         if connection is None:
-            connection = self._scamp_connectio[random.randint(
-                0, len(self._scamp_connectio) - 1)]
+            connection = self.scamp_connections[random.randint(
+                0, len(self.scamp_connections) - 1)]
         connection.send_scp_request(message)
 
     def is_connected(self, connection=None):
@@ -107,7 +110,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         if connection is not None:
             return connection.is_connected()
         return any(c.is_connected() and isinstance(c, SCAMPConnection)
-                   for c in self._scamp_connections)
+                   for c in self.scamp_connections)
 
     def get_iobuf_from_core(self, x, y, p):
         """
