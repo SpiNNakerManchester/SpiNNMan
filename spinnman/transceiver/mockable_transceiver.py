@@ -215,8 +215,3 @@ class MockableTransceiver(AbstractTransceiver):
     @overrides(AbstractTransceiver.update_provenance_and_exit)
     def update_provenance_and_exit(self, x, y, p):
         pass
-
-    @property
-    @overrides(AbstractTransceiver.boot_led_0_value)
-    def boot_led_0_value(self):
-        return 0

@@ -162,6 +162,11 @@ class SystemVariableDefinition(Enum):
     led_0 = _Definition(
         _DataType.INT, offset=0x30, default=0x1,
         doc="The first part of the LED definitions")
+    # hardware_version=1, led_0=0x00076104),
+    # hardware_version=2, led_0=0x00006103),
+    # hardware_version=3, led_0=0x00000502),
+    # hardware_version=4, led_0=0x00000001),
+    # hardware_version=5, led_0=0x00000001)}
     led_1 = _Definition(
         _DataType.INT, offset=0x34,
         doc="The last part of the LED definitions")
@@ -362,7 +367,6 @@ class SystemVariableBootValues(object):
         for variable in SystemVariableDefinition:
             self._values[variable] = variable.default
 
-
     def set_value(self, system_variable_definition, value):
         self._values[system_variable_definition] = value
 
@@ -373,12 +377,3 @@ class SystemVariableBootValues(object):
             data += struct.pack(sys_var.data_type.struct_code,
                                 self._values[sys_var])
         return data
-
-
-    """
-    hardware_version=1, led_0=0x00076104),
-    hardware_version=2, led_0=0x00006103),
-    hardware_version=3, led_0=0x00000502),
-    hardware_version=4, led_0=0x00000001),
-    hardware_version=5, led_0=0x00000001)}
-    """

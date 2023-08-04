@@ -23,8 +23,9 @@ from contextlib import contextmanager, suppress
 import logging
 import socket
 import time
+from spinn_utilities.abstract_base import (
+    AbstractBase, abstractproperty)
 from spinn_utilities.config_holder import get_config_bool
-from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import CoreSubsets
 from spinnman.constants import (
@@ -88,7 +89,7 @@ _ONE_LONG = struct.Struct("<Q")
 _EXECUTABLE_ADDRESS = 0x67800000
 
 
-class BaseTransceiver(AbstractTransceiver):
+class BaseTransceiver(AbstractTransceiver, metaclass=AbstractBase):
     """
     An encapsulation of various communications with the SpiNNaker board.
 
@@ -525,6 +526,14 @@ class BaseTransceiver(AbstractTransceiver):
         process = GetVersionProcess(connection_selector, n_retries)
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
+    @abstractproperty
+    def boot_led_0_value(self):
+        """
+        The Values to be set in SpinnakerBootMessages for led_0
+
+        :rtype int:
+        """
+
     def _boot_board(self, extra_boot_values=None):
         """
         Attempt to boot the board. No check is performed to see if the
@@ -543,8 +552,11 @@ class BaseTransceiver(AbstractTransceiver):
         if not self._boot_send_connection:
             # No can do. Can't boot without a boot connection.
             raise SpinnmanIOException("no boot connection available")
+        if SystemVariableDefinition.led_0 not in extra_boot_values:
+            extra_boot_values.set_value(
+                SystemVariableDefinition.led_0, self.boot_led_0_valu)
         boot_messages = SpinnakerBootMessages(
-            led_0=self.boot_led_0_value, extra_boot_values=extra_boot_values)
+            extra_boot_values=extra_boot_values)
         for boot_message in boot_messages.messages:
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)

@@ -876,11 +876,3 @@ class AbstractTransceiver(AbstractContextManager, metaclass=AbstractBase):
         :param int p:
             The processor on the core
         """
-
-    @abstractproperty
-    def boot_led_0_value(self):
-        """
-        The Values to be set in SpinnakerBootMessages for led_0
-
-        :rtype int:
-        """

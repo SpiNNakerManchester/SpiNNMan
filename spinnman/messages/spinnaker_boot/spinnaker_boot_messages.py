@@ -21,8 +21,7 @@ from .system_variable_boot_values import (
     SystemVariableBootValues, SystemVariableDefinition)
 from .spinnaker_boot_message import SpinnakerBootMessage
 from .spinnaker_boot_op_code import SpinnakerBootOpCode
-from spinnman.exceptions import (
-    SpinnmanInvalidParameterException, SpinnmanIOException)
+from spinnman.exceptions import SpinnmanIOException
 
 _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4
@@ -44,11 +43,11 @@ class SpinnakerBootMessages(object):
 
     def __init__(self, led_0, extra_boot_values=None):
         """
-        :param int led_0: The balue for the led_0 field
         :param extra_boot_values:
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
             based on the board version.
+            for example this may include an Led_0 value.
         :type extra_boot_values: dict(SystemVariableDefinition, object)
         :raise SpinnmanInvalidParameterException:
             If the board version is not supported
@@ -62,8 +61,6 @@ class SpinnakerBootMessages(object):
 
         spinnaker_boot_value.set_value(
             SystemVariableDefinition.hardware_version, version.number)
-        spinnaker_boot_value.set_value(
-            SystemVariableDefinition.led_0, led_0)
 
         current_time = int(time.time())
         spinnaker_boot_value.set_value(
