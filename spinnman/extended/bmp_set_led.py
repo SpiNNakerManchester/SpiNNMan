@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Iterable, Union
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, BMPRequest)
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
+from spinnman.messages.scp.enums.led_action import LEDAction
 
 
 class BMPSetLed(BMPRequest):
@@ -27,9 +29,10 @@ class BMPSetLed(BMPRequest):
     This class is currently deprecated and untested as there is no
     known use except for Transceiver.set_led which is itself deprecated.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, led, action, boards):
+    def __init__(self, led: Union[int, Iterable[int]], action: LEDAction,
+                 boards: Union[int, Iterable[int]]):
         """
         :param led: Number of the LED or an iterable of LEDs to set the
             state of (0-7)
@@ -42,12 +45,9 @@ class BMPSetLed(BMPRequest):
         """
         # set up the led entry for arg1
         if isinstance(led, int):
-            leds = [led]
+            arg1 = action.value << (led * 2)
         else:
-            leds = led
-
-        # LED setting actions
-        arg1 = sum(action.value << (led * 2) for led in leds)
+            arg1 = sum(action.value << (a_led * 2) for a_led in led)
 
         # Bitmask of boards to control
         arg2 = self.get_board_mask(boards)
@@ -59,5 +59,5 @@ class BMPSetLed(BMPRequest):
             argument_1=arg1, argument_2=arg2)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Set the LEDs of a board", "CMD_LED")

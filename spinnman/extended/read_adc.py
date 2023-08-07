@@ -15,13 +15,12 @@
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse, BMPRequest, BMPResponse)
-from spinnman.messages.scp.enums import BMPInfo, SCPCommand, SCPResult
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+    AbstractSCPRequest, BMPRequest, BMPResponse)
+from spinnman.messages.scp.enums import BMPInfo, SCPCommand
 from spinnman.model import ADCInfo
 
 
-class ReadADC(BMPRequest):
+class ReadADC(BMPRequest['_SCPReadADCResponse']):
     """
     SCP Request for the data from the BMP including voltages and
     temperature.
@@ -33,44 +32,38 @@ class ReadADC(BMPRequest):
     .. note::
         The equivalent code in Java is *not* deprecated.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, board):
+    def __init__(self, board: int):
         """
-        :param int board: which board to request the ADC register from
+        :param int board: which board to request the ADC data from
         """
         super().__init__(
             board,
             SCPRequestHeader(command=SCPCommand.CMD_BMP_INFO),
-            argument_1=BMPInfo.ADC)
+            argument_1=BMPInfo.ADC.value)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> '_SCPReadADCResponse':
         return _SCPReadADCResponse()
 
 
-class _SCPReadADCResponse(BMPResponse):
+class _SCPReadADCResponse(BMPResponse[ADCInfo]):
     """
     An SCP response to a request for ADC information.
     """
-    __slots__ = [
-        "_adc_info"]
+    __slots__ = ("_adc_info", )
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self) -> None:
+        super().__init__("Read ADC", SCPCommand.CMD_BMP_INFO)
         self._adc_info = None
 
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "ADC", "CMD_ADC", result.name)
-        self._adc_info = ADCInfo(data, offset)
+    def _parse_payload(self, data: bytes, offset: int) -> ADCInfo:
+        return ADCInfo(data, offset)
 
     @property
     def adc_info(self):
         """
         The ADC information.
         """
-        return self._adc_info
+        return self._value

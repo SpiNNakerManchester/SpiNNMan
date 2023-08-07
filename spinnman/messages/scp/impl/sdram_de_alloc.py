@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
+from typing import Optional, overload
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
@@ -74,7 +74,17 @@ class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
     """
     __slots__ = "_read_n_blocks_freed",
 
-    def __init__(self, x: int, y: int, *, app_id: Optional[int],
+    @overload
+    def __init__(self, x: int, y: int, *, app_id: int,
+                 base_address: None = None):
+        ...
+
+    @overload
+    def __init__(self, x: int, y: int, *, app_id: None = None,
+                 base_address: int):
+        ...
+
+    def __init__(self, x: int, y: int, *, app_id: Optional[int] = None,
                  base_address: Optional[int] = None):
         """
         :param int x:
@@ -88,6 +98,7 @@ class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
         """
         # pylint: disable=unsupported-binary-operation
         if base_address is not None:
+            assert app_id is None
             super().__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

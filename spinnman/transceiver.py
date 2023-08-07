@@ -287,7 +287,7 @@ class Transceiver(AbstractContextManager):
 
         self._machine_off = False
 
-    def __where_is_xy(self, x: int, y: int) -> str:
+    def _where_is_xy(self, x: int, y: int) -> str:
         """
         Attempts to get where_is_x_y info from the machine
 
@@ -664,7 +664,7 @@ class Transceiver(AbstractContextManager):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
-    def __call(self, req: AbstractSCPRequest[R], **kwargs) -> R:
+    def _call(self, req: AbstractSCPRequest[R], **kwargs) -> R:
         """
         Wrapper that makes doing simple SCP calls easier,
         especially with types.
@@ -754,7 +754,7 @@ class Transceiver(AbstractContextManager):
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
         for scamp_connection in self._scamp_connections:
-            self.__call(IPTagSetTTO(
+            self._call(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
 
@@ -1038,7 +1038,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        return self.__call(CountState(app_id, state)).count
+        return self._call(CountState(app_id, state)).count
 
     def execute_flood(
             self, core_subsets: CoreSubsets,
@@ -1153,7 +1153,7 @@ class Transceiver(AbstractContextManager):
         """
         self._power(PowerCommand.POWER_OFF, boards)
 
-    def __bmp_call(self, req: AbstractSCPRequest[R], **kwargs) -> R:
+    def _bmp_call(self, req: AbstractSCPRequest[R], **kwargs) -> R:
         """
         Wrapper that makes doing simple BMP calls easier,
         especially with types.
@@ -1179,8 +1179,8 @@ class Transceiver(AbstractContextManager):
             BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
             else BMP_TIMEOUT)
-        self.__bmp_call(SetPower(power_command, boards),
-                        timeout=timeout, n_retries=0)
+        self._bmp_call(SetPower(power_command, boards),
+                       timeout=timeout, n_retries=0)
         self._machine_off = power_command == PowerCommand.POWER_OFF
 
         # Sleep for 5 seconds if the machine has just been powered on
@@ -1201,7 +1201,7 @@ class Transceiver(AbstractContextManager):
         :return: the register data
         :rtype: int
         """
-        response = self.__bmp_call(
+        response = self._bmp_call(
             ReadFPGARegister(fpga_num, register, board),
             timeout=1.0)
         return response.fpga_register
@@ -1219,7 +1219,7 @@ class Transceiver(AbstractContextManager):
         :param int value: the value to write into the FPGA register
         :param int board: which board to write the FPGA register to
         """
-        self.__bmp_call(
+        self._bmp_call(
             WriteFPGARegister(fpga_num, register, value, board))
 
     def read_bmp_version(self, board: int) -> VersionInfo:
@@ -1229,7 +1229,7 @@ class Transceiver(AbstractContextManager):
         :param int board: which board to request the data from
         :return: the sver from the BMP
         """
-        response = self.__bmp_call(BMPGetVersion(board))
+        response = self._bmp_call(BMPGetVersion(board))
         return response.version_info
 
     def write_memory(
@@ -1365,7 +1365,7 @@ class Transceiver(AbstractContextManager):
             process = ReadMemoryProcess(self._scamp_connection_selector)
             return process.read_memory(x, y, cpu, base_address, length)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def read_word(
@@ -1400,7 +1400,7 @@ class Transceiver(AbstractContextManager):
             (value, ) = _ONE_WORD.unpack(data)
             return value
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def stop_application(self, app_id: int):
@@ -1420,7 +1420,7 @@ class Transceiver(AbstractContextManager):
         """
 
         if not self._machine_off:
-            self.__call(AppStop(app_id))
+            self._call(AppStop(app_id))
         else:
             logger.warning(
                 "You are calling a app stop on a turned off machine. "
@@ -1440,7 +1440,7 @@ class Transceiver(AbstractContextManager):
             else:
                 xys.add((cpu_info[0], cpu_info[1]))
         for (x, y) in xys:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
 
     @staticmethod
     def __state_set(cpu_states: _States) -> FrozenSet[CPUState]:
@@ -1570,7 +1570,7 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        self.__call(SendSignal(app_id, signal))
+        self._call(SendSignal(app_id, signal))
 
     def _locate_spinnaker_connection_for_board_address(
             self, board_address: str) -> Optional[SCAMPConnection]:
@@ -1629,7 +1629,7 @@ class Transceiver(AbstractContextManager):
             ip_string = socket.gethostbyname(host_string)
             ip_address = bytearray(socket.inet_aton(ip_string))
 
-            self.__call(IPTagSet(
+            self._call(IPTagSet(
                 connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
                 ip_tag.tag, strip=ip_tag.strip_sdp, use_sender=use_sender))
 
@@ -1703,7 +1703,7 @@ class Transceiver(AbstractContextManager):
                 "The given board address is not recognised")
 
         for connection in connections:
-            self.__call(ReverseIPTagSet(
+            self._call(ReverseIPTagSet(
                 connection.chip_x, connection.chip_y,
                 reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
                 reverse_ip_tag.destination_p,
@@ -1731,7 +1731,7 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         for conn in self.__get_connection_list(board_address=board_address):
-            self.__call(IPTagClear(conn.chip_x, conn.chip_y, tag))
+            self._call(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
     def get_tags(self, connection: Optional[SCAMPConnection] = None
                  ) -> Iterable[AbstractTag]:
@@ -1781,7 +1781,7 @@ class Transceiver(AbstractContextManager):
             process.malloc_sdram(x, y, size, app_id, tag)
             return process.base_address
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def load_multicast_routes(
@@ -1813,7 +1813,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             process.load_routes(x, y, routes, app_id)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def load_fixed_route(
@@ -1844,7 +1844,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             process.load_fixed_route(x, y, fixed_route, app_id)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def read_fixed_route(self, x: int, y: int, app_id: int) -> FixedRouteEntry:
@@ -1865,7 +1865,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             return process.read_fixed_route(x, y, app_id)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def get_multicast_routes(
@@ -1899,7 +1899,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def clear_multicast_routes(self, x: int, y: int):
@@ -1918,9 +1918,9 @@ class Transceiver(AbstractContextManager):
             If a response indicates an error during the exchange
         """
         try:
-            self.__call(RouterClear(x, y))
+            self._call(RouterClear(x, y))
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def get_router_diagnostics(self, x: int, y: int) -> RouterDiagnostics:
@@ -1947,7 +1947,7 @@ class Transceiver(AbstractContextManager):
                 self._scamp_connection_selector)
             return process.get_router_diagnostics(x, y)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def set_router_diagnostic_filter(
@@ -1984,7 +1984,7 @@ class Transceiver(AbstractContextManager):
             self.__set_router_diagnostic_filter(
                 x, y, position, diagnostic_filter)
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def __set_router_diagnostic_filter(
@@ -2007,7 +2007,7 @@ class Transceiver(AbstractContextManager):
             ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
             position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-        self.__call(WriteMemory(
+        self._call(WriteMemory(
             x, y, memory_position, _ONE_WORD.pack(data_to_send)))
 
     def clear_router_diagnostic_counters(self, x: int, y: int):
@@ -2028,10 +2028,10 @@ class Transceiver(AbstractContextManager):
         """
         try:
             # Clear all
-            self.__call(WriteMemory(
+            self._call(WriteMemory(
                 x, y, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
-            logger.info(self.__where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def close(self) -> None:
@@ -2051,7 +2051,7 @@ class Transceiver(AbstractContextManager):
 
         :param bool do_sync: Whether to synchronise or not
         """
-        self.__call(DoSync(do_sync))
+        self._call(DoSync(do_sync))
 
     def update_provenance_and_exit(self, x: int, y: int, p: int):
         """
