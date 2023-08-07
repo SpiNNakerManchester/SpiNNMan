@@ -16,5 +16,5 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[[tool.mypy]]
-exclude = ["doc", "setup.py"]
+[tool.mypy]
+exclude = ["doc", "setup.py", "unittests", "quick_tests"]
