@@ -15,7 +15,7 @@
 Implementation of the client for the Spalloc web service.
 """
 
-from contextlib import AbstractContextManager, contextmanager
+from contextlib import contextmanager
 from logging import getLogger
 from multiprocessing import Process, Queue
 from time import sleep
@@ -26,6 +26,7 @@ import sqlite3
 import struct
 import threading
 from typing import (
+    ContextManager,
     Callable, Collection, Dict, FrozenSet, Iterable, Iterator, List, Mapping,
     Optional, Tuple, cast)
 from typing_extensions import TypeAlias
@@ -629,7 +630,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.launch_keepalive_task, extend_doc=True)
     def launch_keepalive_task(
-            self, period: float = 30) -> AbstractContextManager[Process]:
+            self, period: float = 30) -> ContextManager[Process]:
         """
         .. note::
             Tricky! *Cannot* be done with a thread, as the main thread is known
