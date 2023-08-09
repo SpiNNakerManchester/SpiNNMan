@@ -788,7 +788,7 @@ class ExtendedTransceiver(Transceiver):
                 ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
                 position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-            response = self._call(ReadMemory(x, y, memory_position, 4))
+            response = self._call(ReadMemory(x, y, 0, memory_position, 4))
             return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
         except Exception:

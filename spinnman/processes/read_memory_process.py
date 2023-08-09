@@ -54,7 +54,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         """
         return self._read_memory(
             base_address, length,
-            functools.partial(ReadMemory, x=x, y=y, cpu=p))
+            functools.partial(ReadMemory, x, y, p))
 
     def read_link_memory(self, x: int, y: int, p: int, link: int,
                          base_address: int, length: int) -> bytes:
@@ -71,7 +71,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         """
         return self._read_memory(
             base_address, length,
-            functools.partial(ReadLink, x=x, y=y, cpu=p, link=link))
+            functools.partial(ReadLink, x, y, p, link))
 
     def _read_memory(
             self, base_address: int, length: int,

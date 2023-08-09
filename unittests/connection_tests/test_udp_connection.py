@@ -45,7 +45,7 @@ class TestUDPConnection(unittest.TestCase):
         self.board_config.set_up_remote_board()
         connection = SCAMPConnection(
             remote_host=self.board_config.remotehost)
-        scp_link = ReadLink(0, 0, 0, 0x70000000, 250)
+        scp_link = ReadLink(0, 0, 0, 0, 0x70000000, 250)
         connection.send_scp_request(scp_link)
         result, _, _, _ = connection.receive_scp_response()
         self.assertEqual(result, SCPResult.RC_OK)
@@ -54,7 +54,7 @@ class TestUDPConnection(unittest.TestCase):
         self.board_config.set_up_remote_board()
         connection = SCAMPConnection(
             remote_host=self.board_config.remotehost)
-        scp_link = ReadMemory(0, 0, 0x70000000, 256)
+        scp_link = ReadMemory(0, 0, 0, 0x70000000, 256)
         connection.send_scp_request(scp_link)
         result, _, _, _ = connection.receive_scp_response()
         self.assertEqual(result, SCPResult.RC_OK)
@@ -64,7 +64,7 @@ class TestUDPConnection(unittest.TestCase):
             self.board_config.set_up_nonexistent_board()
             connection = SCAMPConnection(
                 remote_host=self.board_config.remotehost)
-            scp = ReadMemory(0, 0, 0, 256)
+            scp = ReadMemory(0, 0, 0, 0, 256)
             connection.send_scp_request(scp)
             _, _, _, _ = connection.receive_scp_response(2)
 

@@ -74,7 +74,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
     def _request_iobuf_address(self, iobuf_size: int, x: int, y: int, p: int):
         base_address = get_vcpu_address(p) + CPU_IOBUF_ADDRESS_OFFSET
         self._send_request(
-            ReadMemory(x, y, base_address, 4),
+            ReadMemory(x, y, 0, base_address, 4),
             functools.partial(self._handle_iobuf_address_response,
                               iobuf_size, (x, y, p)))
 
@@ -89,7 +89,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         (xyp, n, base_address, size, offset) = extra_region
         x, y, _ = xyp
         self._send_request(
-            ReadMemory(x, y, base_address, size),
+            ReadMemory(x, y, 0, base_address, size),
             functools.partial(self._handle_extra_iobuf_response,
                               xyp, n, offset))
 
@@ -103,7 +103,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         (xyp, n, next_address, first_read_size) = region
         x, y, _ = xyp
         self._send_request(
-            ReadMemory(x, y, next_address, first_read_size),
+            ReadMemory(x, y, 0, next_address, first_read_size),
             functools.partial(self._handle_first_iobuf_response,
                               xyp, n, next_address, first_read_size))
 

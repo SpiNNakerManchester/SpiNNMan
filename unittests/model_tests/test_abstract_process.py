@@ -27,7 +27,7 @@ import pytest
 class MockProcess(AbstractMultiConnectionProcess):
     def test(self):
         with self._collect_responses(print_exception=True):
-            self._send_request(ReadMemory(0, 0, 0, 4))
+            self._send_request(ReadMemory(0, 0, 0, 0, 4))
 
 
 class MockConnection(SCAMPConnection):

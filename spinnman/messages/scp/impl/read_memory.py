@@ -88,8 +88,7 @@ class ReadMemory(AbstractSCPRequest[Response]):
     """
     __slots__ = ()
 
-    def __init__(self, x: int, y: int, base_address: int, size: int,
-                 cpu: int = 0):
+    def __init__(self, x: int, y: int, cpu: int, base_address: int, size: int):
         """
         :param int x:
             The x-coordinate of the chip to read from, between 0 and 255

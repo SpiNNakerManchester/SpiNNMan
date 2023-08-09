@@ -67,7 +67,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
             callback: Callable[[Response], None]):
         x, y = chip_address
         with self._collect_responses():
-            self._send_request(ReadMemory(x, y, address, size), callback)
+            self._send_request(ReadMemory(x, y, 0, address, size), callback)
 
     def get_heap(self, chip_address: XY,
                  pointer: SystemVariableDefinition = HEAP_ADDRESS

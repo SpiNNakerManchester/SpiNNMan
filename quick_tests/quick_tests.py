@@ -281,12 +281,12 @@ def print_transceiver_tests(transceiver):
                 register.name, diagnostics.registers[register.value]))
 
     with Section("Send read requests"):
-        transceiver.send_scp_message(ReadMemory(1, 0, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(1, 1, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(1, 1, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
-        transceiver.send_scp_message(ReadMemory(0, 1, 0x70000000, 4))
+        transceiver.send_scp_message(ReadMemory(1, 0, 0, 0x70000000, 4))
+        transceiver.send_scp_message(ReadMemory(1, 1, 0, 0x70000000, 4))
+        transceiver.send_scp_message(ReadMemory(1, 1, 0, 0x70000000, 4))
+        transceiver.send_scp_message(ReadMemory(0, 1, 0, 0x70000000, 4))
+        transceiver.send_scp_message(ReadMemory(0, 1, 0, 0x70000000, 4))
+        transceiver.send_scp_message(ReadMemory(0, 1, 0, 0x70000000, 4))
 
     with Section("Get Router Diagnostics"):
         diagnostics = transceiver.get_router_diagnostics(0, 0)
