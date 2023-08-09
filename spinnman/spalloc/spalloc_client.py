@@ -513,8 +513,12 @@ class _SpallocJob(SessionAware, SpallocJob):
             """, [(k1, k2, v) for (k1, k2), v in config.items()])
 
     @overrides(SpallocJob.get_state)
-    def get_state(self):
-        obj = self._get(self._url).json()
+    def get_state(self, wait_for_change=False):
+        timeout = 10
+        if wait_for_change:
+            timeout = None
+        obj = self._get(
+            self._url, wait=wait_for_change, timeout=timeout).json()
         return SpallocState[obj["state"]]
 
     @overrides(SpallocJob.get_root_host)
@@ -603,7 +607,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.wait_until_ready)
     def wait_until_ready(self):
-        state = SpallocState.UNKNOWN
+        state = self.get_state()
         while state != SpallocState.READY:
             state = self.wait_for_state_change(state)
             if state == SpallocState.DESTROYED:

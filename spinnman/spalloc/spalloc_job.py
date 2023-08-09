@@ -35,9 +35,11 @@ class SpallocJob(object, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def get_state(self) -> SpallocState:
+    def get_state(self, wait_for_change=False) -> SpallocState:
         """
         Get the current state of the machine.
+
+        :param bool wait_for_change: Whether to wait for a change in state
 
         :rtype: SpallocState
         """
