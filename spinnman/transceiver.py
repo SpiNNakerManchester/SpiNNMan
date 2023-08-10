@@ -2008,7 +2008,7 @@ class Transceiver(AbstractContextManager):
             position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
         self._call(WriteMemory(
-            x, y, memory_position, _ONE_WORD.pack(data_to_send)))
+            x, y, 0, memory_position, _ONE_WORD.pack(data_to_send)))
 
     def clear_router_diagnostic_counters(self, x: int, y: int):
         """
@@ -2029,7 +2029,7 @@ class Transceiver(AbstractContextManager):
         try:
             # Clear all
             self._call(WriteMemory(
-                x, y, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
+                x, y, 0, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
             logger.info(self._where_is_xy(x, y))
             raise

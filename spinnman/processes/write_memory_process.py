@@ -82,7 +82,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(WriteLink, x=x, y=y, cpu=p, link=link), get_sum)
+            functools.partial(WriteLink, x, y, p, link), get_sum)
 
     def write_memory_from_reader(
             self, x: int, y: int, p: int, base_address: int, reader: BinaryIO,
@@ -106,7 +106,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
-            functools.partial(WriteMemory, x=x, y=y, cpu=p), get_sum)
+            functools.partial(WriteMemory, x, y, p), get_sum)
 
     def write_link_memory_from_reader(
             self, x: int, y: int, p: int, link: int, base_address: int,
@@ -132,7 +132,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
-            functools.partial(WriteLink, x=x, y=y, cpu=p, link=link), get_sum)
+            functools.partial(WriteLink, x, y, p, link), get_sum)
 
     def _write_memory_from_bytearray(
             self, base_address: int, data: bytes, data_offset: int,

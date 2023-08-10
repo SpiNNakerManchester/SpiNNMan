@@ -27,21 +27,21 @@ class WriteMemory(AbstractSCPRequest[CheckOKResponse]):
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, x: int, y: int, base_address: int, data: bytes, *,
-                 cpu: int = 0):
+    def __init__(
+            self, x: int, y: int, cpu: int, base_address: int, data: bytes):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions
         :param int y: The y-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions
+        :param int cpu:
+            The CPU core to use, normally 0 (only needed when writing ITCM or
+            DTCM)
         :param int base_address: The base_address to start writing to
             the base address is not checked to see if its not valid
         :param data: between 1 and 256 bytes of data to write;
             this is not checked due to speed restrictions
         :type data: bytearray or bytes
-        :param int cpu:
-            The CPU core to use, normally 0 (only needed when writing ITCM or
-            DTCM)
         """
         # pylint: disable=too-many-arguments
         size = len(data)
@@ -63,4 +63,4 @@ class WriteMemory(AbstractSCPRequest[CheckOKResponse]):
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self) -> CheckOKResponse:
-        return CheckOKResponse("WriteMemory", "CMD_WRITE")
+        return CheckOKResponse("write to memory", "CMD_WRITE")

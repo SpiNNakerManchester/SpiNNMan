@@ -26,8 +26,8 @@ class WriteLink(AbstractSCPRequest[CheckOKResponse]):
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, x: int, y: int, link: int, base_address: int,
-                 data: bytes, *, cpu: int = 0):
+    def __init__(self, x: int, y: int, cpu: int, link: int, base_address: int,
+                 data: bytes):
         """
         :param int x: The x-coordinate of the chip whose neighbour will be
             written to, between 0 and 255
@@ -57,4 +57,4 @@ class WriteLink(AbstractSCPRequest[CheckOKResponse]):
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self) -> CheckOKResponse:
-        return CheckOKResponse("WriteMemory", "CMD_WRITE")
+        return CheckOKResponse("write neighbour memory", "CMD_LINK_WRITE")

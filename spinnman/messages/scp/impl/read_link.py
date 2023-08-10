@@ -52,4 +52,4 @@ class ReadLink(AbstractSCPRequest[Response]):
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self) -> Response:
-        return Response("ReadLink", "CMD_LINK_READ")
+        return Response("read neighbour memory", "CMD_LINK_READ")

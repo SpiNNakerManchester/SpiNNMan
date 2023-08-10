@@ -115,4 +115,4 @@ class ReadMemory(AbstractSCPRequest[Response]):
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self) -> Response:
-        return Response("Read", "CMD_READ")
+        return Response("read memory", "CMD_READ")
