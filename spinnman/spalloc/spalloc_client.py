@@ -36,7 +36,7 @@ from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpallocException
 from spinnman.transceiver import (
-    AbstractTransceiver, create_transceiver_from_connections)
+    Transceiver, create_transceiver_from_connections)
 from .spalloc_state import SpallocState
 from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware
@@ -636,7 +636,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__keepalive_handle = handle
 
     @overrides(SpallocJob.create_transceiver)
-    def create_transceiver(self) -> AbstractTransceiver:
+    def create_transceiver(self) -> Transceiver:
         if self.get_state() != SpallocState.READY:
             raise SpallocException("job not ready to execute scripts")
         proxies = [

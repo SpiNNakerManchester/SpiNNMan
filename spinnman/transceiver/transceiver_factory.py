@@ -56,7 +56,7 @@ def create_transceiver_from_hostname(
     :param bool extended:
         If True will return an Extended version of the Transceiver
     :return: The created transceiver
-    :rtype: spinnman.transceiver.AbstractTransceiver
+    :rtype: spinnman.transceiver.Transceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
     :raise SpinnmanInvalidPacketException:
@@ -105,7 +105,7 @@ def create_transceiver_from_connections(connections, extended=False):
         communication will be possible until connections are found.
     :param bool extended:
     :return: The created transceiver
-    :rtype: spinnman.transceiver.AbstractTransceiver
+    :rtype: spinnman.transceiver.Transceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
     :raise SpinnmanInvalidPacketException:

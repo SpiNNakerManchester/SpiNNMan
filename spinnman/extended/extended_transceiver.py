@@ -60,7 +60,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     It is undetermined if these will work with Spin2 boards.
 
     If any method here is considered important to keep please move it to
-    AbstractTransceiver
+    Transceiver and its implementations
     """
     __slots__ = []
 

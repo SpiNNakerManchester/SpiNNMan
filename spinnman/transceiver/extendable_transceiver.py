@@ -18,12 +18,12 @@ from threading import Condition, RLock
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractproperty)
 from spinn_utilities.log import FormatAdapter
-from spinnman.transceiver.abstract_transceiver import AbstractTransceiver
+from spinnman.transceiver.abstract_transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class ExtendableTransceiver(AbstractTransceiver, metaclass=AbstractBase):
+class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
     """
     Support Functions to allow a Transceiver to also be an ExtendedTransceiver
 

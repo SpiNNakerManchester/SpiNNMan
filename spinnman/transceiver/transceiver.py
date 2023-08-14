@@ -20,7 +20,7 @@ from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.model.enums import CPUState
 
 
-class AbstractTransceiver(AbstractContextManager, metaclass=AbstractBase):
+class Transceiver(AbstractContextManager, metaclass=AbstractBase):
     """
     An encapsulation of various communications with the SpiNNaker board.
 
