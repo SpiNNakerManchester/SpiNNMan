@@ -43,7 +43,7 @@ class Virtual5Transceiver(Version5Transceiver):
         try:
             return super().read_memory(x, y, base_address, length, cpu)
         except SpinnmanIOException:
-            if (x==y==255 and base_address==4110450434):
+            if (x == y == 255 and base_address == 4110450434):
                 return bytearray(b'\x08\x08')
             raise NotImplementedError(
                 f"Unexpected {x=} {y=} {base_address=}, {length=} {cpu=}")
@@ -54,7 +54,8 @@ class Virtual5Transceiver(Version5Transceiver):
             chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
             connection_selector=None, n_retries=N_RETRIES):
         try:
-            return super()._get_scamp_version(chip_x, chip_y, connection_selector, n_retries)
+            return super()._get_scamp_version(
+                chip_x, chip_y, connection_selector, n_retries)
         except SpinnmanIOException:
             version = VersionInfo(
                 b'@\x00\x07\x08\xff\x00\x00\x00\x00\x00\x80\x00\x02\x00\x00\n'
