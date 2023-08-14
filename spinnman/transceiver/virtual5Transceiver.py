@@ -42,11 +42,12 @@ class Virtual5Transceiver(Version5Transceiver):
     def read_memory(self, x, y, base_address, length, cpu=0):
         try:
             return super().read_memory(x, y, base_address, length, cpu)
-        except SpinnmanIOException:
+        except SpinnmanIOException as exc:
             if (x == y == 255 and base_address == 4110450434):
                 return bytearray(b'\x08\x08')
             raise NotImplementedError(
-                f"Unexpected {x=} {y=} {base_address=}, {length=} {cpu=}")
+                f"Unexpected {x=} {y=} {base_address=}, {length=} {cpu=}") \
+                from exc
 
     @overrides(Version5Transceiver._get_scamp_version)
     def _get_scamp_version(
