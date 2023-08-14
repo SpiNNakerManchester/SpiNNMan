@@ -70,7 +70,7 @@ from spinnman.processes import (
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess)
 from spinnman.utilities.utility_functions import get_vcpu_address
-from spinnman.transceiver.abstract_transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))

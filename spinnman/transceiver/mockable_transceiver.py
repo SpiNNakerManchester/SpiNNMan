@@ -17,7 +17,7 @@
 from spinn_utilities.overrides import overrides
 from spinnman.data import SpiNNManDataView
 from spinnman.model.enums import CPUState
-from spinnman.transceiver.abstract_transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 
 

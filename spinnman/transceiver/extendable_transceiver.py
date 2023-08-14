@@ -18,7 +18,7 @@ from threading import Condition, RLock
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractproperty)
 from spinn_utilities.log import FormatAdapter
-from spinnman.transceiver.abstract_transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

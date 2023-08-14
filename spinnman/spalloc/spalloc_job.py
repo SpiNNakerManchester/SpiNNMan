@@ -17,7 +17,7 @@ from typing import Dict, Tuple
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinnman.constants import SCP_SCAMP_PORT
-from spinnman.transceiver.abstract_transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections import UDPConnection
 from .spalloc_state import SpallocState
 from .spalloc_boot_connection import SpallocBootConnection
