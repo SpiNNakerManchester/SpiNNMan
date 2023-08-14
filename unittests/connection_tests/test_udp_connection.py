@@ -60,10 +60,11 @@ class TestUDPConnection(unittest.TestCase):
         self.assertEqual(result, SCPResult.RC_OK)
 
     def test_send_scp_request_to_nonexistent_host(self):
+        # Microsoft invalid IP address. For more details see:
+        # https://answers.microsoft.com/en-us/windows/forum/windows_vista-networking/invalid-ip-address-169254xx/ce096728-e2b7-4d54-80cc-52a4ed342870
+        _NOHOST = "169.254.254.254"
         with self.assertRaises(SpinnmanTimeoutException):
-            self.board_config.set_up_nonexistent_board()
-            connection = SCAMPConnection(
-                remote_host=self.board_config.remotehost)
+            connection = SCAMPConnection(remote_host=_NOHOST)
             scp = ReadMemory(0, 0, 0, 256)
             connection.send_scp_request(scp)
             _, _, _, _ = connection.receive_scp_response(2)
