@@ -25,6 +25,8 @@ from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
 from spinnman.transceiver.version3transceiver import Version3Transceiver
 from spinnman.transceiver.version5transceiver import Version5Transceiver
+from spinnman.transceiver.virtual5Transceiver import Virtual5Transceiver
+from spinnman.constants import LOCAL_HOST
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -93,16 +95,23 @@ def create_transceiver_from_hostname(
     # handle the boot connection
     connections.append(BootConnection(remote_host=hostname))
 
-    return create_transceiver_from_connections(connections, extended)
+    if hostname == LOCAL_HOST:
+        return create_transceiver_from_connections(
+            connections=connections, virtual=True, extended=extended)
+    else:
+        return create_transceiver_from_connections(
+            connections=connections, virtual=False, extended=extended)
 
 
-def create_transceiver_from_connections(connections, extended=False):
+def create_transceiver_from_connections(
+        connections, virtual=False, extended=False):
     """
     Create a Transceiver with these connections
 
     :param list(Connection) connections:
         An iterable of connections to the board.  If not specified, no
         communication will be possible until connections are found.
+    :param bool virtual: If True will return a virtual Transceiver
     :param bool extended:
     :return: The created transceiver
     :rtype: spinnman.transceiver.Transceiver
@@ -117,10 +126,14 @@ def create_transceiver_from_connections(connections, extended=False):
     """
     version = SpiNNManDataView.get_machine_version()
     if isinstance(version, Version3):
+        if virtual:
+            raise NotImplementedError(f"No Virtual Transceiver for {version=}")
         if extended:
             return ExtendedVersion3Transceiver(connections=connections)
         return Version3Transceiver(connections=connections)
     if isinstance(version, Version5):
+        if virtual:
+            return Virtual5Transceiver(connections=connections)
         if extended:
             return ExtendedVersion5Transceiver(connections=connections)
         return Version5Transceiver(connections=connections)
