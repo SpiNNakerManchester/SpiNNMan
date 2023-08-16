@@ -155,7 +155,7 @@ class Section(object):
 def print_transceiver_tests(transceiver):
 
     with Section("Version Information"):
-        version_info = transceiver.ensure_board_is_ready()
+        version_info = transceiver._ensure_board_is_ready()
         print(version_info)
 
     app_id = SpiNNManDataView().get_new_id()
