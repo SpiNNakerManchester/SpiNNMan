@@ -46,6 +46,9 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :param SDPMessage message: The message to send
         :param SDPConnection connection: An optional connection to use
         """
+        # _ChipProvenanceUpdater._send_chip_update_provenance_and_exit
+        # DataSpeedUpPacketGatherMachineVertex.
+        #      _determine_and_retransmit_missing_seq_nums
 
     @abstractmethod
     def discover_scamp_connections(self):
@@ -65,6 +68,9 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # Used directly after Transceiver init
+        # Not called if add_scamp_connections is called
+        # Not called by SpallocJobController
 
     @abstractmethod
     def add_scamp_connections(self, connections):
@@ -86,6 +92,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # Use on a spalloc created Transceiver
 
     @abstractmethod
     def get_connections(self):
@@ -577,6 +584,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # Known usages are to send Signal START, SYNC0 and SYNC1
 
     @abstractmethod
     def set_ip_tag(self, ip_tag, use_sender=False):
