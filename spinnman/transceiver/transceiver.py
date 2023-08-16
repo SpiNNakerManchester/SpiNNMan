@@ -47,6 +47,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :param SDPConnection connection: An optional connection to use
         """
         # _ChipProvenanceUpdater._send_chip_update_provenance_and_exit
+        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/357
         # DataSpeedUpPacketGatherMachineVertex.
         #      _determine_and_retransmit_missing_seq_nums
 
@@ -144,6 +145,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
             * If the version of software on the board is not compatible with
               this transceiver
         """
+        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/356
 
     @abstractmethod
     def get_cpu_infos(
@@ -329,6 +331,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
 
         :param int boards: The board or boards to power on
         """
+        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/356
 
     @abstractmethod
     def power_off_machine(self):
@@ -338,6 +341,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :rtype bool
         :return success or failure to power off the machine
         """
+        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/356
 
     @abstractmethod
     def power_off(self, boards=0):
@@ -346,6 +350,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
 
         :param int boards: The board or boards to power off
         """
+        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/356
 
     @abstractmethod
     def read_fpga_register(
