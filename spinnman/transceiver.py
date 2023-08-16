@@ -679,7 +679,6 @@ class Transceiver(AbstractContextManager):
             This should only be used for values which are not standard
             based on the board version.
         :return: The version identifier
-        :rtype: VersionInfo
         :raise SpinnmanIOException:
             * If there is a problem booting the board
             * If the version of software on the board is not compatible with
@@ -741,8 +740,6 @@ class Transceiver(AbstractContextManager):
         # Update the connection selector so that it can ask for processor ids
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._scamp_connections)
-
-        return version_info
 
     def __is_default_destination(self, version_info):
         return (version_info.x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
