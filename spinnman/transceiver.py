@@ -1973,6 +1973,24 @@ class Transceiver(AbstractContextManager):
             data=_ONE_WORD.pack(SDP_RUNNING_MESSAGE_CODES
                                 .SDP_UPDATE_PROVENCE_REGION_AND_EXIT.value)))
 
+    def send_chip_update_provenance_and_exit(self, x, y, p):
+        """
+        Sends a singnal to update the provenance and exit
+
+        :param int x:
+        :param int y:
+        :param int p:
+        """
+        cmd = SDP_RUNNING_MESSAGE_CODES.SDP_UPDATE_PROVENCE_REGION_AND_EXIT
+        port = SDP_PORTS.RUNNING_COMMAND_SDP_PORT
+
+        self.send_sdp_message(SDPMessage(
+            SDPHeader(
+                flags=SDPFlag.REPLY_NOT_EXPECTED,
+                destination_port=port.value, destination_cpu=p,
+                destination_chip_x=x, destination_chip_y=y),
+            data=_ONE_WORD.pack(cmd.value)))
+
     def __str__(self):
         addr = self._scamp_connections[0].remote_ip_address
         n = len(self._all_connections)
