@@ -105,6 +105,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :return: An iterable of connections known to the transceiver
         :rtype: set(Connection)
         """
+        # used in unittest only
 
     @abstractmethod
     def get_machine_details(self):
@@ -123,6 +124,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # used by machine_generator
 
     @abstractmethod
     def ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
@@ -176,6 +178,11 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # used by
+        # ASB.__recover_from_error
+        # application_finisher
+        # chip_provenance_updater
+        # emergency_recover_state_from_failure
 
     @abstractmethod
     def get_clock_drift(self, x, y):
@@ -184,6 +191,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :param int x: The x-coordinate of the chip to get drift for
         :param int y: The y-coordinate of the chip to get drift for
         """
+        # used by drift_report
 
     @abstractmethod
     def read_user(self, x, y, p, user):
@@ -208,6 +216,11 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # used by pair_compression and others during _check_for_success
+        # used by memory_map_on_host_chip_report._get_region_table_addr
+        # used by DataSpeedUpPacketGatherMachineVertex
+        #    and ExtraMonitorSupportMachineVertex
+        #    to .update_transaction_id_from_machine
 
     @abstractmethod
     def get_cpu_information_from_core(self, x, y, p):
