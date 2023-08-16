@@ -169,7 +169,8 @@ def create_transceiver_from_hostname(
     # handle the boot connection
     connections.append(BootConnection(remote_host=hostname))
 
-    return Transceiver(version, connections=connections)
+    return Transceiver(version, connections=connections,
+                       power_cycle=power_cycle)
 
 
 class Transceiver(AbstractContextManager):
@@ -1940,7 +1941,7 @@ class Transceiver(AbstractContextManager):
         """
         if self._bmp_connection is not None:
             if get_config_bool("Machine", "turn_off_machine"):
-                self.power_off_machine()
+                self._power_off_machine()
 
         for connection in self._all_connections:
             connection.close()
