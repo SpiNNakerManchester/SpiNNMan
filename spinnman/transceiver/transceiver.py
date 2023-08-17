@@ -50,6 +50,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         # https://github.com/SpiNNakerManchester/SpiNNMan/pull/357
         # DataSpeedUpPacketGatherMachineVertex.
         #      _determine_and_retransmit_missing_seq_nums
+        # https://github.com/SpiNNakerManchester/SpiNNFrontEndCommon/pull/1102
 
     @abstractmethod
     def discover_scamp_connections(self):
