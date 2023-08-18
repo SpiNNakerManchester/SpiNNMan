@@ -836,7 +836,7 @@ class Transceiver(AbstractContextManager):
             requirement from callers and therefor only contract is that the
             result type can be used like: for (x, y, p) in
 
-       :param ~spinn_machine.CoreSubsets core_subsets:
+        :param ~spinn_machine.CoreSubsets core_subsets:
             A set of chips and cores from which to get the
             information. If not specified, the information from all of the
             cores on all of the chips on the board are obtained.
