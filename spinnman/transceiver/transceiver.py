@@ -179,6 +179,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # See https://github.com/SpiNNakerManchester/SpiNNMan/pull/358
         # used by
         # ASB.__recover_from_error
         # application_finisher
@@ -243,6 +244,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # see https://github.com/SpiNNakerManchester/SpiNNMan/pull/358
 
     @abstractmethod
     def get_iobuf(self, core_subsets=None):
