@@ -1000,11 +1000,14 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        a = self.read_user(x, y, p, 0)
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
         process = GetCPUInfoProcess(self._scamp_connection_selector)
         cpu_info = process.get_cpu_info(core_subsets)
-        return cpu_info.get_cpu_info(x, y, p).user[0]
+        b = cpu_info.get_cpu_info(x, y, p).user[0]
+        assert a == b
+        return a
 
     def get_iobuf(self, core_subsets=None):
         """
