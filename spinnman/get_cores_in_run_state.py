@@ -46,22 +46,16 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
     for chip in machine.chips:
         all_cores.append(CoreSubset(chip.x, chip.y, range(1, 17)))
 
-    all_cores = CoreSubsets(core_subsets=all_cores)
-
-    cpu_infos = txrx._get_cpu_infos(all_cores,
-                                    [CPUState.FINISHED, CPUState.RUNNING,
-                                     CPUState.WATCHDOG], True)
-    cores_finished = cpu_infos.infos_for_state(CPUState.FINISHED)
-    cores_running = cpu_infos.infos_for_state(CPUState.RUNNING)
-    cores_watchdog = cpu_infos.infos_for_state(CPUState.WATCHDOG)
-
+    cores_running = txrx.get_cores_in_states(all_cores, CPUState.RUNNING)
     for (x, y, p), _ in cores_running:
         if p not in IGNORED_IDS:
             print(f'run core: {x} {y} {p}')
 
+    cores_finished = txrx.get_cores_in_states(all_cores, CPUState.FINISHED)
     for (x, y, p), _ in cores_finished:
         print(f'finished core: {x} {y} {p}')
 
+    cores_watchdog = txrx.get_cores_in_states(all_cores, CPUState.WATCHDOG)
     for (x, y, p), _ in cores_watchdog:
         print(f'watchdog core: {x} {y} {p}')
 
