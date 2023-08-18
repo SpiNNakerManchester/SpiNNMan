@@ -843,7 +843,16 @@ class Transceiver(AbstractContextManager):
         :param states: The state or states to filter on (if any)
         :type states: None, CPUState or iterable(CPUState)
         :return: An iterable which yields x, y, p for each core in this state
-        rtype: iterable(int, int, int)
+        :rtype: iterable(int, int, int)
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If chip_and_cores contains invalid items
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
         """
         return self._get_cpu_infos(core_subsets, states, True)
 
@@ -856,14 +865,23 @@ class Transceiver(AbstractContextManager):
             requirement from callers and therefor only contract is that the
             result type can be used like: for (x, y, p) in
 
-       :param ~spinn_machine.CoreSubsets core_subsets:
+        :param ~spinn_machine.CoreSubsets core_subsets:
             A set of chips and cores from which to get the
             information. If not specified, the information from all of the
             cores on all of the chips on the board are obtained.
         :param states: The state or states to filter on (if any)
         :type states: None, CPUState or iterable(CPUState)
         :return: An iterable which yields x, y, p for each core in this state
-        rtype: iterable(int, int, int)
+        :rtype: iterable(int, int, int)
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If chip_and_cores contains invalid items
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
         """
         return self._get_cpu_infos(core_subsets, states, False)
 
