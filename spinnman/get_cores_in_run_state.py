@@ -46,6 +46,8 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
     for chip in machine.chips:
         all_cores.append(CoreSubset(chip.x, chip.y, range(1, 17)))
 
+    all_cores = CoreSubsets(core_subsets=all_cores)
+
     cores_running = txrx.get_cores_in_states(all_cores, CPUState.RUNNING)
     for (x, y, p), _ in cores_running:
         if p not in IGNORED_IDS:
