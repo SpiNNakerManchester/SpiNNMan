@@ -774,7 +774,7 @@ class Transceiver(AbstractContextManager):
             logger.info("Found board with version {}", version_info)
         return version_info
 
-    def get_cpu_infos(
+    def _get_cpu_infos(
             self, core_subsets=None, states=None, include=True):
         """
         Get information about the processors on the board.
@@ -826,6 +826,46 @@ class Transceiver(AbstractContextManager):
 
         cpu_info = process.get_cpu_info(core_subsets)
         return cpu_info
+
+    def get_cores_in_states(self, core_subsets, states):
+        """
+        Gets a list of the cores in one of the specified states
+
+        .. note::
+            While this method currently returns a CPUInfos object the only
+            requirement from callers and therefor only contract is that the
+            result type can be used like: for (x, y, p) in
+
+       :param ~spinn_machine.CoreSubsets core_subsets:
+            A set of chips and cores from which to get the
+            information. If not specified, the information from all of the
+            cores on all of the chips on the board are obtained.
+        :param states: The state or states to filter on (if any)
+        :type states: None, CPUState or iterable(CPUState)
+        :return: An iterable which yields x, y, p for each core in this state
+        rtype: iterable(int, int, int)
+        """
+        return self._get_cpu_infos(core_subsets, states, True)
+
+    def get_cores_not_in_states(self, core_subsets, states):
+        """
+        Gets a list of the cores not in one of the specified states
+
+        .. note::
+            While this method currently returns a CPUInfos object the only
+            requirement from callers and therefor only contract is that the
+            result type can be used like: for (x, y, p) in
+
+       :param ~spinn_machine.CoreSubsets core_subsets:
+            A set of chips and cores from which to get the
+            information. If not specified, the information from all of the
+            cores on all of the chips on the board are obtained.
+        :param states: The state or states to filter on (if any)
+        :type states: None, CPUState or iterable(CPUState)
+        :return: An iterable which yields x, y, p for each core in this state
+        rtype: iterable(int, int, int)
+        """
+        return self._get_cpu_infos(core_subsets, states, False)
 
     def get_clock_drift(self, x, y):
         """
@@ -899,7 +939,7 @@ class Transceiver(AbstractContextManager):
         addr = self.__get_user_register_address_from_core(p, user)
         return self.read_word(x, y, addr)
 
-    def get_cpu_information_from_core(self, x, y, p):
+    def _get_cpu_information_from_core(self, x, y, p):
         """
         Get information about a specific processor on the board.
 
@@ -920,7 +960,7 @@ class Transceiver(AbstractContextManager):
         """
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        cpu_infos = self.get_cpu_infos(core_subsets)
+        cpu_infos = self._get_cpu_infos(core_subsets)
         return cpu_infos.get_cpu_info(x, y, p)
 
     def get_region_base_address(self, x, y, p):
@@ -944,8 +984,9 @@ class Transceiver(AbstractContextManager):
         """
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        cpu_infos = self.get_cpu_infos(core_subsets)
-        return cpu_infos.get_cpu_info(x, y, p).user[0]
+        process = GetCPUInfoProcess(self._scamp_connection_selector)
+        cpu_info = process.get_cpu_info(core_subsets)
+        return cpu_info.get_cpu_info(x, y, p).user[0]
 
     def get_iobuf(self, core_subsets=None):
         """
@@ -1439,8 +1480,8 @@ class Transceiver(AbstractContextManager):
                     if error_cores > 0:
                         is_error = True
                 if is_error:
-                    error_core_states = self.get_cpu_infos(
-                        all_core_subsets, error_states, True)
+                    error_core_states = self._get_cpu_infos(all_core_subsets,
+                                                            error_states, True)
                     if len(error_core_states) > 0:
                         self.__log_where_is_info(error_core_states)
                         raise SpiNNManCoresNotInStateException(
@@ -1450,8 +1491,8 @@ class Transceiver(AbstractContextManager):
                 # do a full check if required
                 tries += 1
                 if tries >= counts_between_full_check:
-                    cores_in_state = self.get_cpu_infos(
-                        all_core_subsets, cpu_states, True)
+                    cores_in_state = self._get_cpu_infos(all_core_subsets,
+                                                         cpu_states, True)
                     processors_ready = len(cores_in_state)
                     tries = 0
 
@@ -1472,8 +1513,8 @@ class Transceiver(AbstractContextManager):
 
         # If we haven't reached the final state, do a final full check
         if processors_ready < len(all_core_subsets):
-            cores_not_in_state = self.get_cpu_infos(
-                all_core_subsets, cpu_states, False)
+            cores_not_in_state = self._get_cpu_infos(all_core_subsets,
+                                                     cpu_states, False)
 
             # If we are sure we haven't reached the final state,
             # report a timeout error

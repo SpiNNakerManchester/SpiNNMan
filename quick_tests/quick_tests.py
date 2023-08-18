@@ -191,7 +191,7 @@ def print_transceiver_tests(transceiver):
             time.sleep(0.1)
 
     with Section("CPU Information"):
-        cpu_infos = transceiver.get_cpu_infos(core_subsets)
+        cpu_infos = transceiver._get_cpu_infos(core_subsets)
         cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
         print("{} CPUs".format(len(cpu_infos)))
         for cpu_info in cpu_infos:
@@ -213,7 +213,7 @@ def print_transceiver_tests(transceiver):
     with Section("Stop Application"):
         transceiver.send_signal(app_id, Signal.STOP)
         time.sleep(0.5)
-        cpu_infos = transceiver.get_cpu_infos(core_subsets)
+        cpu_infos = transceiver._get_cpu_infos(core_subsets)
         cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
         print("{} CPUs".format(len(cpu_infos)))
         for cpu_info in cpu_infos:

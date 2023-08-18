@@ -48,9 +48,9 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
 
     all_cores = CoreSubsets(core_subsets=all_cores)
 
-    cpu_infos = txrx.get_cpu_infos(
-        all_cores,
-        [CPUState.FINISHED, CPUState.RUNNING, CPUState.WATCHDOG], True)
+    cpu_infos = txrx._get_cpu_infos(all_cores,
+                                    [CPUState.FINISHED, CPUState.RUNNING,
+                                     CPUState.WATCHDOG], True)
     cores_finished = cpu_infos.infos_for_state(CPUState.FINISHED)
     cores_running = cpu_infos.infos_for_state(CPUState.RUNNING)
     cores_watchdog = cpu_infos.infos_for_state(CPUState.WATCHDOG)

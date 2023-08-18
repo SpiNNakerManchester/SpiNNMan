@@ -60,6 +60,10 @@ class TestCpuInfos(unittest.TestCase):
         self.assertEqual(
             "0:0:02 (06) FINISHED           scamp-3            0", str(info))
 
+        a = set(infos)
+        b = str(a)
+        print(b)
+
 
 if __name__ == '__main__':
     unittest.main()

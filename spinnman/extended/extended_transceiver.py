@@ -415,7 +415,7 @@ class ExtendedTransceiver(Transceiver):
         # Check that the binaries have reached a wait state
         count = self.get_core_state_count(app_id, CPUState.READY)
         if count < executable_targets.total_processors:
-            cores_ready = self.get_cpu_infos(
+            cores_ready = self._get_cpu_infos(
                 executable_targets.all_core_subsets, [CPUState.READY],
                 include=False)
             if len(cores_ready) > 0:
