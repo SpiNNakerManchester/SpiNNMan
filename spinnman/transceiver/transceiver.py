@@ -220,6 +220,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         """
         # used by pair_compression and others during _check_for_success
         # used by memory_map_on_host_chip_report._get_region_table_addr
+        #   https://github.com/SpiNNakerManchester/SpiNNFrontEndCommon/pull/1104
         # used by DataSpeedUpPacketGatherMachineVertex
         #    and ExtraMonitorSupportMachineVertex
         #    to .update_transaction_id_from_machine
@@ -268,6 +269,7 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # Used by IOBufExtractor
 
     @abstractmethod
     def get_core_state_count(self, app_id, state):
@@ -339,6 +341,8 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        # Used by load_app_images, load_sys_images and
+        # run_system_application._load_application
 
     @abstractmethod
     def power_on(self, boards=0):
