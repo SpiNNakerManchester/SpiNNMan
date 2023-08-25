@@ -18,7 +18,7 @@ import logging
 import functools
 from os.path import join
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_int, get_config_str)
+    get_config_bool, get_config_int_or_none, get_config_str)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import (Router, Chip, Link)
@@ -114,7 +114,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
-        max_sdram_size = get_config_int(
+        max_sdram_size = get_config_int_or_none(
             "Machine", "max_sdram_allowed_per_chip")
         if (max_sdram_size is not None and
                 sdram_size > max_sdram_size):
