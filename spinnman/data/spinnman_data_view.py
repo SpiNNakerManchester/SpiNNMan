@@ -218,8 +218,6 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
         return cls.get_transceiver().write_memory(
             x, y, base_address, data,
             n_bytes=n_bytes, offset=offset, cpu=cpu)
@@ -276,8 +274,6 @@ class SpiNNManDataView(MachineDataView):
             If the transceiver is currently unavailable
         """
         if not cls.__data._scamp_connection_selector:
-            if cls.__data._transceiver is None:
-                raise cls._exception("transceiver")
             cls.__data._scamp_connection_selector =\
-                cls.__data._transceiver._scamp_connection_selector
+                cls. get_transceiver()._scamp_connection_selector
         return cls.__data._scamp_connection_selector
