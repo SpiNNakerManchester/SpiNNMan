@@ -61,13 +61,11 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
     @property
     @overrides(AbstractSCPConnection.chip_x)
     def chip_x(self) -> int:
-        assert self._chip_x is not None
         return self._chip_x
 
     @property
     @overrides(AbstractSCPConnection.chip_y)
     def chip_y(self) -> int:
-        assert self._chip_y is not None
         return self._chip_y
 
     def update_chip_coordinates(self, x: int, y: int):

@@ -32,7 +32,7 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
         "_chip_y")
 
     def __init__(
-            self, chip_x: Optional[int] = None, chip_y: Optional[int] = None,
+            self, chip_x: int, chip_y: int,
             local_host: Optional[str] = None,
             local_port: Optional[int] = None,
             remote_host: Optional[str] = None,
