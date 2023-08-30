@@ -261,6 +261,7 @@ class Transceiver(AbstractContextManager):
 
         # A list of all connections that can be used to send and receive SCP
         # messages for SCAMP interaction
+        # Guaranteed to be none empty after self.__identify_connections
         self._scamp_connections: List[SCAMPConnection] = list()
 
         # The BMP connections
@@ -331,7 +332,7 @@ class Transceiver(AbstractContextManager):
             elif isinstance(conn, SCAMPConnection):
                 self._scamp_connections.append(conn)
 
-        # update the transceiver with the conn selectors.
+        # get a selector and ensure self._scamp_connections is not empty
         return MostDirectConnectionSelector(self._scamp_connections)
 
     def __check_bmp_connection(self) -> None:
@@ -420,17 +421,15 @@ class Transceiver(AbstractContextManager):
 
     @staticmethod
     def _get_random_connection(
-            connections: Optional[List[Conn]]) -> Optional[Conn]:
+            connections: Optional[List[Conn]]) -> Conn:
         """
         Returns the given connection, or else picks one at random.
 
         :param list(Connection) connections:
-            the list of connections to locate a random one from
+            the none empty list of connections to locate a random one from
         :return: a connection object
-        :rtype: Connection or None
+        :rtype: Connection
         """
-        if not connections:
-            return None
         return connections[random.randint(0, len(connections) - 1)]
 
     def send_sdp_message(
@@ -445,7 +444,6 @@ class Transceiver(AbstractContextManager):
         if connection is None:
             connection_to_use = self._get_random_connection(
                 self._scamp_connections)
-            assert connection_to_use is not None
             connection_to_use.send_sdp_message(message)
         else:
             connection.send_sdp_message(message)
@@ -496,11 +494,6 @@ class Transceiver(AbstractContextManager):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        # Currently, this only finds other UDP connections given a connection
-        # that supports SCP - this is done via the machine
-        if not self._scamp_connections:
-            return
-
         # Get the machine dimensions
         dims = self._get_machine_dimensions()
 

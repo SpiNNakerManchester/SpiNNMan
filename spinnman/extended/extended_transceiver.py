@@ -201,7 +201,6 @@ class ExtendedTransceiver(Transceiver):
         """
         if connection is None:
             connection = self._get_random_connection(self._scamp_connections)
-            assert connection is not None
         connection.send_scp_request(message)
 
     def get_connections(self) -> Iterable[Connection]:
