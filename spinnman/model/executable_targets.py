@@ -15,7 +15,7 @@
 from collections import defaultdict
 from typing import Collection, Dict, Iterable, Optional, Set, cast
 from spinn_utilities.ordered_set import OrderedSet
-from spinn_machine import CoreSubsets
+from spinn_machine import CoreSubsets, FrozenCoreSubsets
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from .enums import ExecutableType
 
@@ -30,7 +30,7 @@ class ExecutableTargets(object):
         "_total_processors",
         "_binary_type_map"]
 
-    __EMPTY_SUBSET = CoreSubsets()
+    __EMPTY_SUBSET = FrozenCoreSubsets()
 
     def __init__(self) -> None:
         self._targets: Dict[str, CoreSubsets] = dict()
