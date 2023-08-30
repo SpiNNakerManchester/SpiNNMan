@@ -916,9 +916,6 @@ class Transceiver(AbstractContextManager):
         :return: The address for user N register for this processor
         :rtype: int
         """
-        if not (UserRegister.USER_0 <= user <= UserRegister.USER_3):
-            raise ValueError(
-                f"Incorrect user number {user}")
         return (get_vcpu_address(p) + CPU_USER_START_ADDRESS +
                 CPU_USER_OFFSET * user)
 
