@@ -54,7 +54,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(WriteMemory, x=x, y=y, cpu=p), get_sum)
+            functools.partial(WriteMemory, x, y, p), get_sum)
 
     def write_link_memory_from_bytearray(
             self, x: int, y: int, p: int, link: int, base_address: int,
