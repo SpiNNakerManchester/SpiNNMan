@@ -62,11 +62,12 @@ class ReadRouterDiagnosticsProcess(
         :rtype: RouterDiagnostics
         """
         with self._collect_responses():
-            self._send_request(ReadMemory(x, y, 0, 0xe1000000, 4),
+            coords = x, y, 0
+            self._send_request(ReadMemory(coords, 0xe1000000, 4),
                                self.__handle_control_register_response)
-            self._send_request(ReadMemory(x, y, 0, 0xe1000014, 4),
+            self._send_request(ReadMemory(coords, 0xe1000014, 4),
                                self.__handle_error_status_response)
-            self._send_request(ReadMemory(x, y, 0, 0xe1000300, 16 * 4),
+            self._send_request(ReadMemory(coords, 0xe1000300, 16 * 4),
                                self.__handle_register_response)
 
         return RouterDiagnostics(self._control_register, self._error_status,

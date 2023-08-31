@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XYP
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
@@ -26,22 +27,19 @@ class ReadLink(AbstractSCPRequest[Response]):
     """
     __slots__ = ()
 
-    def __init__(self, x: int, y: int, cpu: int, link: int, base_address: int,
-                 size: int):
+    def __init__(self, coords: XYP, link: int, base_address: int, size: int):
         """
-        :param int x:
-            The x-coordinate of the chip to read from, between 0 and 255
-        :param int y:
-            The y-coordinate of the chip to read from, between 0 and 255
-        :param int cpu:
-            The CPU core to use, normally 0
-            (or if a BMP, the board slot number)
+        :param tuple(int,int,int) coords:
+            The coordinates of the core of the chip whose neighbour will be
+            read from; X and Y between 0 and 255,
+            CPU core normally 0 (or if a BMP then the board slot number)
         :param int link: The ID of the link down which to send the query
         :param int base_address:
             The positive base address to start the read from
         :param int size: The number of bytes to read, between 1 and 256
         """
         # pylint: disable=too-many-arguments
+        x, y, cpu = coords
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

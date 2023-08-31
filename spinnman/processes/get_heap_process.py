@@ -15,7 +15,7 @@
 import functools
 import struct
 from typing import Callable, List, Sequence
-from spinn_utilities.typing.coords import XY
+from spinn_utilities.typing.coords import XY, XYP
 from spinnman.processes import AbstractMultiConnectionProcess
 from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.model import HeapElement
@@ -63,30 +63,32 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
                 block_address, self._next_block_address, free))
 
     def __read_address(
-            self, chip_address: XY, address: int, size: int,
+            self, core_coords: XYP, address: int, size: int,
             callback: Callable[[Response], None]):
-        x, y = chip_address
         with self._collect_responses():
-            self._send_request(ReadMemory(x, y, 0, address, size), callback)
+            self._send_request(
+                ReadMemory(core_coords, address, size), callback)
 
-    def get_heap(self, chip_address: XY,
+    def get_heap(self, chip_coords: XY,
                  pointer: SystemVariableDefinition = HEAP_ADDRESS
                  ) -> Sequence[HeapElement]:
         """
-        :param tuple(int,int) chip_address: x, y
+        :param tuple(int,int) chip_coords: x, y
         :param SystemVariableDefinition pointer:
         :rtype: list(HeapElement)
         """
+        x, y = chip_coords
+        core_coords = (x, y, 0)
         self.__read_address(
-            chip_address, SYSTEM_VARIABLE_BASE_ADDRESS + pointer.offset,
+            core_coords, SYSTEM_VARIABLE_BASE_ADDRESS + pointer.offset,
             pointer.data_type.value, self._read_heap_address_response)
 
         self.__read_address(
-            chip_address, self._heap_address, 8, self._read_heap_pointer)
+            core_coords, self._heap_address, 8, self._read_heap_pointer)
 
         while self._next_block_address != 0:
             self.__read_address(
-                chip_address, self._next_block_address, 8,
+                core_coords, self._next_block_address, 8,
                 functools.partial(
                     self._read_next_block, self._next_block_address))
 

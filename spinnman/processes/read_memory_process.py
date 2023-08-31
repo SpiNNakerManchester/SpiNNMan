@@ -14,6 +14,7 @@
 
 import functools
 from typing import Callable
+from spinn_utilities.typing.coords import XYP
 from spinnman.messages.scp.impl import ReadLink, ReadMemory
 from spinnman.messages.scp.impl.read_memory import Response
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
@@ -40,30 +41,26 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         self._view[offset:offset + response.length] = response.data[
             response.offset:response.offset + response.length]
 
-    def read_memory(self, x: int, y: int, p: int, base_address: int,
-                    length: int) -> bytes:
+    def read_memory(
+            self, coords: XYP, base_address: int, length: int) -> bytes:
         """
         Read some memory from a core.
 
-        :param int x:
-        :param int y:
-        :param int p:
+        :param tuple(int,int,int) coords:
         :param int base_address:
         :param int length:
         :rtype: bytearray
         """
         return self._read_memory(
             base_address, length,
-            functools.partial(ReadMemory, x, y, p))
+            functools.partial(ReadMemory, coords))
 
-    def read_link_memory(self, x: int, y: int, p: int, link: int,
+    def read_link_memory(self, coords: XYP, link: int,
                          base_address: int, length: int) -> bytes:
         """
         Read some memory from the neighbour of a core.
 
-        :param int x:
-        :param int y:
-        :param int p:
+        :param tuple(int,int,int) coords:
         :param int link:
         :param int base_address:
         :param int length:
@@ -71,7 +68,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         """
         return self._read_memory(
             base_address, length,
-            functools.partial(ReadLink, x, y, p, link))
+            functools.partial(ReadLink, coords, link))
 
     def _read_memory(
             self, base_address: int, length: int,

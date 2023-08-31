@@ -87,11 +87,12 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
         """
         # Create the read requests
         offset = 0
+        scamp_coords = x, y, 0
         with self._collect_responses():
             for _ in range(_N_READS):
                 self._send_request(
                     ReadMemory(
-                        x, y, 0, base_address + (offset * 16),
+                        scamp_coords, base_address + (offset * 16),
                         UDP_MESSAGE_MAX_SIZE),
                     partial(self.__handle_response, offset))
                 offset += _ENTRIES_PER_READ

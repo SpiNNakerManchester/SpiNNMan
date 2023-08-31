@@ -15,6 +15,8 @@
 import functools
 from typing import BinaryIO, Callable
 import numpy
+from numpy import uint8, uint32
+from spinn_utilities.typing.coords import XYP
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import WriteLink, WriteMemory
 from spinnman.messages.scp.impl import CheckOKResponse
@@ -32,17 +34,13 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     # pylint: disable=too-many-arguments
 
     def write_memory_from_bytearray(
-            self, x: int, y: int, p: int, base_address: int, data: bytes,
+            self, coords: XYP, base_address: int, data: bytes,
             offset: int, n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a SpiNNaker chip from a bytearray.
 
-        :param int x:
-            The x-coordinate of the chip where the memory is to be written to
-        :param int y:
-            The y-coordinate of the chip where the memory is to be written to
-        :param int p:
-            The processor of the chip where the memory is to be written to
+        :param tuple(int,int,int) coords:
+            The X,Y,P coordinates of the core that will write to memory.
         :param int base_address: the address in SDRAM to start writing
         :param data: the data to write
         :type data: bytearray or bytes
@@ -54,21 +52,17 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(WriteMemory, x, y, p), get_sum)
+            functools.partial(WriteMemory, coords), get_sum)
 
     def write_link_memory_from_bytearray(
-            self, x: int, y: int, p: int, link: int, base_address: int,
-            data: bytes, offset: int, n_bytes: int,
-            get_sum: bool = False) -> int:
+            self, coords: XYP, link: int, base_address: int, data: bytes,
+            offset: int, n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a neighbour of a SpiNNaker chip from a bytearray.
 
-        :param int x:
-            The x-coordinate of the chip where the memory is to be written to
-        :param int y:
-            The y-coordinate of the chip where the memory is to be written to
-        :param int p:
-            The processor of the chip where the memory is to be written to
+        :param tuple(int,int,int) coords:
+            The X,Y,P coordinates of the core that will write to its
+            neighbour's memory.
         :param int link:
             Along which link is the neighbour.
         :param int base_address: the address in SDRAM to start writing
@@ -82,20 +76,16 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(WriteLink, x, y, p, link), get_sum)
+            functools.partial(WriteLink, coords, link), get_sum)
 
     def write_memory_from_reader(
-            self, x: int, y: int, p: int, base_address: int, reader: BinaryIO,
+            self, coords: XYP, base_address: int, reader: BinaryIO,
             n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a SpiNNaker chip from a reader.
 
-        :param int x:
-            The x-coordinate of the chip where the memory is to be written to
-        :param int y:
-            The y-coordinate of the chip where the memory is to be written to
-        :param int p:
-            The processor of the chip where the memory is to be written to
+        :param tuple(int,int,int) coords:
+            The X,Y,P coordinates of the core that will write to memory.
         :param int base_address: the address in SDRAM to start writing
         :param reader: the readable object containing the data to write
         :type reader: ~io.RawIOBase or ~io.BufferedIOBase
@@ -106,20 +96,18 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
-            functools.partial(WriteMemory, x, y, p), get_sum)
+            functools.partial(WriteMemory, coords), get_sum)
 
     def write_link_memory_from_reader(
-            self, x: int, y: int, p: int, link: int, base_address: int,
-            reader: BinaryIO, n_bytes: int, get_sum: bool = False) -> int:
+            self, coords: XYP, link: int, base_address: int, reader: BinaryIO,
+            n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a neighbour of a SpiNNaker chip from a reader.
 
-        :param int x:
-            The x-coordinate of the chip where the memory is to be written to
-        :param int y:
-            The y-coordinate of the chip where the memory is to be written to
-        :param int p:
-            The processor of the chip where the memory is to be written to
+        :param tuple(int,int,int) coords:
+            The X,Y,P coordinates of the core that will write to its
+            neighbour's memory. The P coordinate is normally 0; no reason to
+            not use SCAMP for this.
         :param int link:
             Along which link is the neighbour.
         :param int base_address: the address in SDRAM to start writing
@@ -132,7 +120,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
-            functools.partial(WriteLink, x, y, p, link), get_sum)
+            functools.partial(WriteLink, coords, link), get_sum)
 
     def _write_memory_from_bytearray(
             self, base_address: int, data: bytes, data_offset: int,
@@ -154,8 +142,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
                 data_offset += bytes_to_send
         if not get_sum:
             return 0
-        np_data = numpy.array(data, dtype="uint8")
-        np_sum = int(numpy.sum(np_data.view("uint32"), dtype="uint32"))
+        np_data = numpy.array(data, dtype=uint8)
+        np_sum = int(numpy.sum(np_data.view(uint32), dtype=uint32))
         return np_sum & _UNSIGNED_WORD
 
     def _write_memory_from_reader(
@@ -178,8 +166,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
                 offset += bytes_to_send
 
                 if with_sum:
-                    np_data = numpy.frombuffer(data_array, dtype="uint8")
-                    np_sum = int(numpy.sum(np_data.view("uint32")))
+                    np_data = numpy.frombuffer(data_array, dtype=uint8)
+                    np_sum = int(numpy.sum(np_data.view(uint32)))
                     chksum = (chksum + np_sum) & _UNSIGNED_WORD
 
         return chksum

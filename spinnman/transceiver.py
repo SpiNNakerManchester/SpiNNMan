@@ -1286,25 +1286,25 @@ class Transceiver(AbstractContextManager):
         if isinstance(data, io.RawIOBase):
             assert n_bytes is not None
             chksum = process.write_memory_from_reader(
-                x, y, cpu, base_address, cast(BinaryIO, data), n_bytes,
+                (x, y, cpu), base_address, cast(BinaryIO, data), n_bytes,
                 get_sum)
         elif isinstance(data, str):
             if n_bytes is None:
                 n_bytes = os.stat(data).st_size
             with open(data, "rb") as reader:
                 chksum = process.write_memory_from_reader(
-                    x, y, cpu, base_address, reader, n_bytes, get_sum)
+                    (x, y, cpu), base_address, reader, n_bytes, get_sum)
         elif isinstance(data, int):
             n_bytes = 4
             data_to_write = _ONE_WORD.pack(data)
             chksum = process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data_to_write, 0, n_bytes, get_sum)
+                (x, y, cpu), base_address, data_to_write, 0, n_bytes, get_sum)
         else:
             assert isinstance(data, (bytes, bytearray))
             if n_bytes is None:
                 n_bytes = len(data)
             chksum = process.write_memory_from_bytearray(
-                x, y, cpu, base_address, data, offset, n_bytes, get_sum)
+                (x, y, cpu), base_address, data, offset, n_bytes, get_sum)
         return n_bytes, chksum
 
     def write_user(
@@ -1363,7 +1363,7 @@ class Transceiver(AbstractContextManager):
         """
         try:
             process = ReadMemoryProcess(self._scamp_connection_selector)
-            return process.read_memory(x, y, cpu, base_address, length)
+            return process.read_memory((x, y, cpu), base_address, length)
         except Exception:
             logger.info(self._where_is_xy(x, y))
             raise
@@ -1396,7 +1396,8 @@ class Transceiver(AbstractContextManager):
         """
         try:
             process = ReadMemoryProcess(self._scamp_connection_selector)
-            data = process.read_memory(x, y, cpu, base_address, _ONE_WORD.size)
+            data = process.read_memory(
+                (x, y, cpu), base_address, _ONE_WORD.size)
             (value, ) = _ONE_WORD.unpack(data)
             return value
         except Exception:
@@ -2008,7 +2009,7 @@ class Transceiver(AbstractContextManager):
             position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
         self._call(WriteMemory(
-            x, y, 0, memory_position, _ONE_WORD.pack(data_to_send)))
+            (x, y, 0), memory_position, _ONE_WORD.pack(data_to_send)))
 
     def clear_router_diagnostic_counters(self, x: int, y: int):
         """
@@ -2029,7 +2030,7 @@ class Transceiver(AbstractContextManager):
         try:
             # Clear all
             self._call(WriteMemory(
-                x, y, 0, 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
+                (x, y, 0), 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
             logger.info(self._where_is_xy(x, y))
             raise
