@@ -21,8 +21,8 @@ import argparse
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinn_machine import CoreSubsets, CoreSubset
 from spinnman.board_test_configuration import BoardTestConfiguration
+from spinnman.config_setup import unittest_setup
 from spinnman.model.enums import CPUState
-
 SCAMP_ID = 0
 IGNORED_IDS = {SCAMP_ID, 16}  # WHY 16?
 
@@ -104,6 +104,7 @@ def main(args):
     """
     Runs the script.
     """
+    unittest_setup()
     ap = argparse.ArgumentParser(
         description="Check the state of a SpiNNaker machine.")
     ap.add_argument(
