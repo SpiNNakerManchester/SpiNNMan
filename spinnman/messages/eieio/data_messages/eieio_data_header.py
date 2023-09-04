@@ -208,8 +208,8 @@ class EIEIODataHeader(object):
 
         # Convert the flags into types
         # pylint: disable=no-value-for-parameter
-        eieio_type = EIEIOType[message_type]
-        prefix_type = EIEIOPrefix[format_flag]
+        eieio_type = EIEIOType(message_type)
+        prefix_type = EIEIOPrefix(format_flag)
 
         prefix = None
         payload_prefix = None

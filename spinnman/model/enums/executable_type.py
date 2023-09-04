@@ -13,7 +13,7 @@
 # limitations under the License.
 from __future__ import annotations
 from enum import Enum
-from typing import FrozenSet, Sequence, cast
+from typing import FrozenSet, Sequence
 from spinnman.model.enums import CPUState
 
 
@@ -28,52 +28,55 @@ class ExecutableType(Enum):
     supports_auto_pause_and_resume: bool
 
     #: Runs immediately without waiting for barrier and then exits.
-    RUNNING: ExecutableType = cast("ExecutableType", (
+    RUNNING = (
         0,
         [CPUState.RUNNING],
         [CPUState.FINISHED],
         False,
-        "Runs immediately without waiting for barrier and then exits"))
+        "Runs immediately without waiting for barrier and then exits")
     #: Calls ``spin1_start(SYNC_WAIT)`` and then eventually ``spin1_exit()``.
-    SYNC: ExecutableType = cast("ExecutableType", (
+    SYNC = (
         1,
         [CPUState.SYNC0],
         [CPUState.FINISHED],
         False,
-        "Calls spin1_start(SYNC_WAIT) and then eventually spin1_exit()"))
+        "Calls spin1_start(SYNC_WAIT) and then eventually spin1_exit()")
     #: Calls ``simulation_run()`` and ``simulation_exit()`` /
     #: ``simulation_handle_pause_resume()``.
-    USES_SIMULATION_INTERFACE: ExecutableType = cast("ExecutableType", (
+    USES_SIMULATION_INTERFACE = (
         2,
         [CPUState.SYNC0, CPUState.SYNC1, CPUState.PAUSED, CPUState.READY],
         [CPUState.READY],
         True,
         "Calls simulation_run() and simulation_exit() / "
-        "simulation_handle_pause_resume()"))
+        "simulation_handle_pause_resume()")
     #: Situation where there user has supplied no application but for some
     #: reason still wants to run.
-    NO_APPLICATION: ExecutableType = cast("ExecutableType", (
+    NO_APPLICATION = (
         3,
         (),
         (),
         True,
         "Situation where there user has supplied no application but for "
-        "some reason still wants to run"))
+        "some reason still wants to run")
     #: Runs immediately without waiting for barrier and never ends.
-    SYSTEM: ExecutableType = cast("ExecutableType", (
+    SYSTEM = (
         4,
         [CPUState.RUNNING],
         [CPUState.RUNNING],
         True,
-        "Runs immediately without waiting for barrier and never ends"))
+        "Runs immediately without waiting for barrier and never ends")
+
+    def __new__(cls, *args) -> 'ExecutableType':
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        obj. __doc__ = args[-1]
+        return obj
 
     def __init__(self, value: int, start_state: Sequence[CPUState],
                  end_state: Sequence[CPUState],
                  supports_auto_pause_and_resume: bool, doc: str = ""):
-        # pylint: disable=too-many-arguments
-        self._value_ = value
-        self.__doc__ = doc
+        # pylint: disable=too-many-arguments, unused-argument
         self.start_state: FrozenSet[CPUState] = frozenset(start_state)
         self.end_state: FrozenSet[CPUState] = frozenset(end_state)
         self.supports_auto_pause_and_resume = supports_auto_pause_and_resume
-        self.__doc__ = doc

@@ -21,16 +21,24 @@ class EIEIOType(Enum):
     Possible types of EIEIO packets.
     """
     #: Indicates that data is keys which are 16 bits.
-    KEY_16_BIT = cast('EIEIOType', (0, 2, 0))
+    KEY_16_BIT = (0, 2, 0)
     #: Indicates that data is keys and payloads of 16 bits.
-    KEY_PAYLOAD_16_BIT = cast('EIEIOType', (1, 2, 2))
+    KEY_PAYLOAD_16_BIT = (1, 2, 2)
     #: Indicates that data is keys of 32 bits.
-    KEY_32_BIT = cast('EIEIOType', (2, 4, 0))
+    KEY_32_BIT = (2, 4, 0)
     #: Indicates that data is keys and payloads of 32 bits.
-    KEY_PAYLOAD_32_BIT = cast('EIEIOType', (3, 4, 4))
+    KEY_PAYLOAD_32_BIT = (3, 4, 4)
 
-    def __init__(self, value, key_bytes: int, payload_bytes: int):
-        self._value_ = value
+    def __new__(cls, *args) -> 'EIEIOType':
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    def __init__(self, encoded_value: int,
+                 # Optionals just to make mypy SHUT UP!
+                 # https://github.com/python/mypy/issues/10573
+                 key_bytes: int = 0, payload_bytes: int = 0):
+        self._encoded_value = encoded_value
         self._key_bytes = key_bytes
         self._payload_bytes = payload_bytes
 
