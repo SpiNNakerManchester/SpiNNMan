@@ -34,11 +34,11 @@ class _DataType(Enum):
         self._struct_code = struct_code
 
     @property
-    def struct_code(self):
+    def struct_code(self) -> str:
         return self._struct_code
 
     @property
-    def is_byte_array(self):
+    def is_byte_array(self) -> bool:
         # can't use BYTE_ARRAY.value directly here
         return self._value_ == 16
 

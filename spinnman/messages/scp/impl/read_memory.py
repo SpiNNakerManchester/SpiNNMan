@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XYP
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, AbstractSCPResponse)
@@ -88,12 +89,11 @@ class ReadMemory(AbstractSCPRequest[Response]):
     """
     __slots__ = ()
 
-    def __init__(self, x: int, y: int, cpu: int, base_address: int, size: int):
+    def __init__(self, coords: XYP, base_address: int, size: int):
         """
-        :param int x:
-            The x-coordinate of the chip to read from, between 0 and 255
-        :param int y:
-            The y-coordinate of the chip to read from, between 0 and 255
+        :param tuple coords:
+            The X,Y,P coordinates of the chip to read from;
+            X and Y between 0 and 255, P between 0 and 17
         :param int base_address:
             The positive base address to start the read from
         :param int size: The number of bytes to read, between 1 and 256
@@ -102,7 +102,7 @@ class ReadMemory(AbstractSCPRequest[Response]):
             * If the base address is not a positive number
             * If the size is out of range
         """
-        # pylint: disable=too-many-arguments
+        x, y, cpu = coords
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

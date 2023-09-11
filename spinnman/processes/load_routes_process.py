@@ -75,7 +75,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         # Upload the data
         process = WriteMemoryProcess(self._conn_selector)
         process.write_memory_from_bytearray(
-            x, y, 0, _TABLE_ADDRESS, routing_data, 0, len(routing_data))
+            (x, y, 0), _TABLE_ADDRESS, routing_data, 0, len(routing_data))
 
         # Allocate space in the router table
         with self._collect_responses():

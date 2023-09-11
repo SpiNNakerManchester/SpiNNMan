@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XYP
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
@@ -26,21 +27,19 @@ class WriteLink(AbstractSCPRequest[CheckOKResponse]):
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, x: int, y: int, cpu: int, link: int, base_address: int,
-                 data: bytes):
+    def __init__(self, coords: XYP, link: int, base_address: int, data: bytes):
         """
-        :param int x: The x-coordinate of the chip whose neighbour will be
-            written to, between 0 and 255
-        :param int y: The y-coordinate of the chip whose neighbour will be
-            written to, between 0 and 255
+        :param tuple(int,int,int) coords:
+            The coordinates of the core of the chip whose neighbour will be
+            written to; X and Y between 0 and 255,
+            CPU core normally 0 (or if a BMP then the board slot number)
         :param int link: The link number to write to between 0 and 5
             (or if a BMP, the FPGA between 0 and 2)
         :param int base_address: The base_address to start writing to
         :param bytes data: Up to 256 bytes of data to write
-        :param int cpu: The CPU core to use, normally 0
-            (or if a BMP, the board slot number)
         """
         # pylint: disable=too-many-arguments
+        x, y, cpu = coords
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

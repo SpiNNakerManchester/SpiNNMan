@@ -56,7 +56,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
                 x, y = core_subset.x, core_subset.y
                 for p in core_subset.processor_ids:
                     self._send_request(
-                        ReadMemory(x, y, 0, get_vcpu_address(p),
+                        ReadMemory((x, y, 0), get_vcpu_address(p),
                                    CPU_INFO_BYTES),
                         functools.partial(self.__handle_response, x, y, p))
 

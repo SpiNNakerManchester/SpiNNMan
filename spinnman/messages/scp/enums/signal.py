@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import cast
 
 
 class SignalType(Enum):
@@ -29,27 +28,32 @@ class Signal(Enum):
     """
     SCP Signals.
     """
-    INITIALISE: 'Signal' = cast('Signal', (0, SignalType.NEAREST_NEIGHBOUR))
-    POWER_DOWN: 'Signal' = cast('Signal', (1, SignalType.NEAREST_NEIGHBOUR))
-    STOP: 'Signal' = cast('Signal', (2, SignalType.NEAREST_NEIGHBOUR))
-    START: 'Signal' = cast('Signal', (3, SignalType.MULTICAST))
-    SYNC0: 'Signal' = cast('Signal', (4, SignalType.MULTICAST))
-    SYNC1: 'Signal' = cast('Signal', (5, SignalType.MULTICAST))
-    PAUSE: 'Signal' = cast('Signal', (6, SignalType.MULTICAST))
-    CONTINUE: 'Signal' = cast('Signal', (7, SignalType.MULTICAST))
-    EXIT: 'Signal' = cast('Signal', (8, SignalType.MULTICAST))
-    TIMER: 'Signal' = cast('Signal', (9, SignalType.MULTICAST))
-    USER_0: 'Signal' = cast('Signal', (10, SignalType.MULTICAST))
-    USER_1: 'Signal' = cast('Signal', (11, SignalType.MULTICAST))
-    USER_2: 'Signal' = cast('Signal', (12, SignalType.MULTICAST))
-    USER_3: 'Signal' = cast('Signal', (13, SignalType.MULTICAST))
+    INITIALISE = (0, SignalType.NEAREST_NEIGHBOUR)
+    POWER_DOWN = (1, SignalType.NEAREST_NEIGHBOUR)
+    STOP = (2, SignalType.NEAREST_NEIGHBOUR)
+    START = (3, SignalType.MULTICAST)
+    SYNC0 = (4, SignalType.MULTICAST)
+    SYNC1 = (5, SignalType.MULTICAST)
+    PAUSE = (6, SignalType.MULTICAST)
+    CONTINUE = (7, SignalType.MULTICAST)
+    EXIT = (8, SignalType.MULTICAST)
+    TIMER = (9, SignalType.MULTICAST)
+    USER_0 = (10, SignalType.MULTICAST)
+    USER_1 = (11, SignalType.MULTICAST)
+    USER_2 = (12, SignalType.MULTICAST)
+    USER_3 = (13, SignalType.MULTICAST)
 
-    def __init__(self, value, signal_type) -> None:
+    def __new__(cls, *args) -> 'Signal':
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    def __init__(self, value: int, signal_type: SignalType) -> None:
         """
         :param int value: The value used for the signal
         :param SignalType signal_type: The "type" of the signal
         """
-        self._value_ = value
+        assert value >= 0
         self._signal_type = signal_type
 
     @property

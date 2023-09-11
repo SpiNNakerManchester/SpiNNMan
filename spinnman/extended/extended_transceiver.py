@@ -543,18 +543,18 @@ class ExtendedTransceiver(Transceiver):
         if isinstance(data, int):
             data_to_write = _ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 4)
+                (x, y, cpu), link, base_address, data_to_write, 0, 4)
         elif isinstance(data, (bytes, bytearray)):
             if n_bytes is None:
                 n_bytes = len(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data, offset, n_bytes)
+                (x, y, cpu), link, base_address, data, offset, n_bytes)
         else:
             if n_bytes is None:
                 raise ValueError(
                     "n_bytes must be provided when using a reader")
             process.write_link_memory_from_reader(
-                x, y, cpu, link, base_address, data, n_bytes)
+                (x, y, cpu), link, base_address, data, n_bytes)
 
     def read_neighbour_memory(
             self, x: int, y: int, link: int, base_address: int, length: int, *,
@@ -597,7 +597,7 @@ class ExtendedTransceiver(Transceiver):
                       "and untested due to no known use.")
             process = ReadMemoryProcess(self._scamp_connection_selector)
             return process.read_link_memory(
-                x, y, cpu, link, base_address, length)
+                (x, y, cpu), link, base_address, length)
         except Exception:
             logger.info(self._where_is_xy(x, y))
             raise
@@ -787,7 +787,7 @@ class ExtendedTransceiver(Transceiver):
                 ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
                 position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-            response = self._call(ReadMemory(x, y, 0, memory_position, 4))
+            response = self._call(ReadMemory((x, y, 0), memory_position, 4))
             return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
         except Exception:

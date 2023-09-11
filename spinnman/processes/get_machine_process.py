@@ -224,7 +224,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 offset = P2PTable.get_column_offset(column)
                 self._send_request(
                     ReadMemory(
-                        x=boot_x, y=boot_y, cpu=0,
+                        coords=(boot_x, boot_y, 0),
                         base_address=(ROUTER_REGISTER_P2P_ADDRESS + offset),
                         size=p2p_column_bytes),
                     functools.partial(self.__receive_p2p_data, column))
@@ -237,7 +237,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             for (x, y) in p2p_table.iterchips():
                 self._send_request(GetChipInfo(x, y), self._receive_chip_info)
                 self._send_request(
-                    ReadMemory(x, y, 0, P_TO_V_ADDR, P_MAPS_SIZE),
+                    ReadMemory((x, y, 0), P_TO_V_ADDR, P_MAPS_SIZE),
                     functools.partial(self._receive_p_maps, x, y))
 
         # Warn about unexpected missing chips
