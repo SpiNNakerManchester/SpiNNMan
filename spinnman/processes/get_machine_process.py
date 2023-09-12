@@ -19,7 +19,7 @@ import functools
 from os.path import join
 from typing import Dict, List, Optional, Set, Tuple, cast
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_int, get_config_str)
+    get_config_bool, get_config_int_or_none, get_config_str_or_none)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
@@ -121,7 +121,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
-        max_sdram_size = get_config_int(
+        max_sdram_size = get_config_int_or_none(
             "Machine", "max_sdram_allowed_per_chip")
         if (max_sdram_size is not None and
                 sdram_size > max_sdram_size):
@@ -303,7 +303,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreLink.parse_string(
-                get_config_str("Machine", "down_links")):
+                get_config_str_or_none("Machine", "down_links")):
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
@@ -352,7 +352,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         # Convert by ip to global
         for ignore in IgnoreCore.parse_string(
-                get_config_str("Machine", "down_cores")):
+                get_config_str_or_none("Machine", "down_cores")):
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
@@ -376,7 +376,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreChip.parse_string(
-                get_config_str("Machine", "down_chips")):
+                get_config_str_or_none("Machine", "down_chips")):
             # Convert by ip to global
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
