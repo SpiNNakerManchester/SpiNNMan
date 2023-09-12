@@ -19,7 +19,6 @@ from contextlib import contextmanager, suppress
 import io
 import logging
 import os
-import random
 import socket
 import struct
 from threading import Condition
