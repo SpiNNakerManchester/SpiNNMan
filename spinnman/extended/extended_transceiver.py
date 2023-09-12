@@ -200,7 +200,7 @@ class ExtendedTransceiver(Transceiver):
             If the response is not one of the expected codes
         """
         if connection is None:
-            connection = self._get_random_connection(self._scamp_connections)
+            connection = self._scamp_connections[0]
         connection.send_scp_request(message)
 
     def get_connections(self) -> Iterable[Connection]:

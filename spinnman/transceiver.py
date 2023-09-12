@@ -330,7 +330,7 @@ class Transceiver(AbstractContextManager):
                 self._bmp_selector = FixedConnectionSelector(conn)
             # Otherwise, check if it can send and receive SCP (talk to SCAMP)
             elif isinstance(conn, SCAMPConnection):
-                self._scamp_connections.append(conn)
+                self.__add_scamp_connection(conn)
 
         # get a selector and ensure self._scamp_connections is not empty
         return MostDirectConnectionSelector(self._scamp_connections)
@@ -419,19 +419,6 @@ class Transceiver(AbstractContextManager):
                 lambda: self._n_chip_execute_locks < 1)
             yield self._chip_execute_lock_condition
 
-    @staticmethod
-    def _get_random_connection(
-            connections: Optional[List[Conn]]) -> Conn:
-        """
-        Returns the given connection, or else picks one at random.
-
-        :param list(Connection) connections:
-            the none empty list of connections to locate a random one from
-        :return: a connection object
-        :rtype: Connection
-        """
-        return connections[random.randint(0, len(connections) - 1)]
-
     def send_sdp_message(
             self, message: SDPMessage,
             connection: Optional[SDPConnection] = None):
@@ -442,11 +429,22 @@ class Transceiver(AbstractContextManager):
         :param SDPConnection connection: An optional connection to use
         """
         if connection is None:
-            connection_to_use = self._get_random_connection(
-                self._scamp_connections)
+            connection_to_use = self._scamp_connections[0]
             connection_to_use.send_sdp_message(message)
         else:
             connection.send_sdp_message(message)
+
+    def __add_scamp_connection(self, conn: SDPConnection):
+        """
+        Stores the scamp connection making a connection to chip 0, 0 is first.
+
+        :param SDPConnection conn:
+        """
+        # make sure the first is the one to Chip 0, 0 is it is there
+        if conn.chip_x == 0 and conn.chip_y == 0:
+            self._scamp_connections.insert(0, conn)
+        else:
+            self._scamp_connections.append(conn)
 
     def _check_and_add_scamp_connections(
             self, x: int, y: int, ip_address: str):
@@ -471,7 +469,7 @@ class Transceiver(AbstractContextManager):
         if chip_info is not None and chip_info.ethernet_ip_address is not None:
             self._all_connections.add(conn)
             self._udp_scamp_connections[chip_info.ethernet_ip_address] = conn
-            self._scamp_connections.append(conn)
+            self.__add_scamp_connection(conn)
         else:
             logger.warning(
                 "Additional Ethernet connection on {} at chip {}, {} "
