@@ -16,7 +16,6 @@
 import unittest
 from spinnman.config_setup import unittest_setup
 from spinnman.messages.eieio import EIEIOType
-from spinnman.messages.scp.enums import LEDAction
 
 
 class TestEIEIOType(unittest.TestCase):
