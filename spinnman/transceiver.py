@@ -433,7 +433,7 @@ class Transceiver(AbstractContextManager):
         else:
             connection.send_sdp_message(message)
 
-    def __add_scamp_connection(self, conn: SDPConnection):
+    def __add_scamp_connection(self, conn: SCAMPConnection):
         """
         Stores the scamp connection making a connection to chip 0, 0 is first.
 
