@@ -99,7 +99,7 @@ class ApplicationCopyRunProcess(
                         partial(self.__chip_done, chip),
                         partial(self.__chip_err, chip, link))
 
-    def __chip_done(self, chip: Chip):
+    def __chip_done(self, chip: Chip, response: CheckOKResponse):
         """
         Mark the chip as done, and thus eligible to be a source for copying
         from.
