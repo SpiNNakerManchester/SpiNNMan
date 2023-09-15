@@ -1523,7 +1523,7 @@ class Transceiver(AbstractContextManager):
                 tries += 1
                 if tries >= counts_between_full_check:
                     cores_in_state = self.get_cpu_infos(
-                        all_core_subsets, cpu_states, include=True)
+                        all_core_subsets, target_states, include=True)
                     processors_ready = len(cores_in_state)
                     tries = 0
 
@@ -1551,6 +1551,11 @@ class Transceiver(AbstractContextManager):
             # report a timeout error
             if len(cores_not_in_state) != 0:
                 self.__log_where_is_info(cores_not_in_state)
+                states = self.get_cpu_infos(all_core_subsets)
+                for cpu_info in states.values():
+                    if cpu_info.state not in cpu_states:
+                        logger.info("x:{} y:{} p:{} state:{}", cpu_info.x,
+                                    cpu_info.y, cpu_info.p, cpu_info.state)
                 raise SpiNNManCoresNotInStateException(
                     timeout, target_states, cores_not_in_state)
 
