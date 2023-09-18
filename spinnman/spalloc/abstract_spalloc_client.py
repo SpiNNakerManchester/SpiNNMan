@@ -118,3 +118,33 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
+
+    @abstractmethod
+    def create_job_rect_at_board(
+            self, width: int, height: int, triad: Tuple[int, int, int] = None,
+            physical: Tuple[int, int, int] = None, ip_address: str = None,
+            machine_name: str = None, keepalive: int = 45) -> SpallocJob:
+        """
+        Create a job with a rectangle of boards starting at a specific board.
+        At least one of ``triad``, ``physical`` and ``ip_address`` must be not
+        ``None``.
+
+        :param int width:
+            The width of rectangle to request
+        :param int height:
+            The height of rectangle to request
+        :param tuple(int,int,int) triad:
+            The logical coordinate of the board to request
+        :param tuple(int,int,int) physical:
+            The physical coordinate of the board to request
+        :param str ip_address:
+            The IP address of the board to request
+        :param str machine_name:
+            Which machine to run on? If omitted, the service's machine tagged
+            with ``default`` will be used.
+        :param int keepalive:
+            After how many seconds of no activity should a job become eligible
+            for automatic pruning?
+        :return: A handle for monitoring and interacting with the job.
+        :rtype: SpallocJob
+        """
