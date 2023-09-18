@@ -1,4 +1,4 @@
-# Copyright (c) 2017 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = "1!7.1.0"
-__version_month__ = "TBD"
-__version_year__ = "TBD"
-__version_day__ = "TBD"
-__version_name__ = "Not yet released"
+from enum import Enum
+
+
+class SDP_RUNNING_MESSAGE_CODES(Enum):
+    """
+    Codes for sending control messages to spin1_api.
+    """
+    SDP_STOP_ID_CODE = 6
+    SDP_NEW_RUNTIME_ID_CODE = 7
+    SDP_UPDATE_PROVENCE_REGION_AND_EXIT = 8
+    SDP_CLEAR_IOBUF_CODE = 9

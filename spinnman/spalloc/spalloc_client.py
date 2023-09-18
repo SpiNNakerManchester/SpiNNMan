@@ -30,9 +30,12 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
+from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
+from spinnman.exceptions import SpallocException
+from spinnman.transceiver import Transceiver
 from .spalloc_state import SpallocState
 from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware
@@ -45,8 +48,6 @@ from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
 from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_scp_connection import SpallocSCPConnection
-from spinnman.exceptions import SpallocException
-from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(getLogger(__name__))
 _open_req = struct.Struct("<IIIII")
@@ -64,11 +65,13 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     Basic client library for talking to new Spalloc.
     """
     __slots__ = ("__session",
-                 "__machines_url", "__jobs_url", "version")
+                 "__machines_url", "__jobs_url", "version",
+                 "__group", "__collab", "__nmpi_job", "__nmpi_user")
 
     def __init__(
             self, service_url, username=None, password=None,
-            bearer_token=None):
+            bearer_token=None, group=None, collab=None, nmpi_job=None,
+            nmpi_user=None):
         """
         :param str service_url: The reference to the service.
             May have username and password supplied as part of the network
@@ -88,6 +91,10 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
         self.__machines_url = obj["machines-ref"]
         self.__jobs_url = obj["jobs-ref"]
+        self.__group = group
+        self.__collab = collab
+        self.__nmpi_job = nmpi_job
+        self.__nmpi_user = nmpi_user
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
@@ -157,7 +164,15 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             create["machine-name"] = machine_name
         else:
             create["tags"] = ["default"]
-        r = self.__session.post(self.__jobs_url, create)
+        if self.__group is not None:
+            create["group"] = self.__group
+        if self.__collab is not None:
+            create["nmpi-collab"] = self.__collab
+        if self.__nmpi_job is not None:
+            create["nmpi-job-id"] = self.__nmpi_job
+            if self.__nmpi_user is not None:
+                create["owner"] = self.__nmpi_user
+        r = self.__session.post(self.__jobs_url, create, timeout=30)
         url = r.headers["Location"]
         return _SpallocJob(self.__session, url)
 
@@ -184,10 +199,10 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             machine_name=None, keepalive=45):
         if triad:
             x, y, z = triad
-            board = {"x": x, "y": y, "z": z}
+            board = {"x": int(x), "y": int(y), "z": int(z)}
         elif physical:
             c, f, b = physical
-            board = {"cabinet": c, "frame": f, "board": b}
+            board = {"cabinet": int(c), "frame": int(f), "board": int(b)}
         elif ip_address:
             board = {"address": str(ip_address)}
         else:
@@ -203,6 +218,12 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         if self.__session is not None:
             self.__session._purge()
         self.__session = None
+
+
+class _ProxyServiceError(IOError):
+    """
+    An error passed to us from the server over the proxy channel.
+    """
 
 
 def _SpallocKeepalive(url, interval, term_queue, cookies, headers):
@@ -508,7 +529,8 @@ class _SpallocJob(SessionAware, SpallocJob):
     def connect_to_board(self, x, y, port=SCP_SCAMP_PORT):
         self.__init_proxy()
         return _ProxiedSCAMPConnection(
-            self.__proxy_handle, self.__proxy_thread, x, y, port)
+            self.__proxy_handle, self.__proxy_thread,
+            int(x), int(y), int(port))
 
     @overrides(SpallocJob.connect_for_booting)
     def connect_for_booting(self):
@@ -519,12 +541,19 @@ class _SpallocJob(SessionAware, SpallocJob):
     def open_eieio_connection(self, x, y):
         self.__init_proxy()
         return _ProxiedEIEIOConnection(
-            self.__proxy_handle, self.__proxy_thread, x, y, SCP_SCAMP_PORT)
+            self.__proxy_handle, self.__proxy_thread,
+            int(x), int(y), SCP_SCAMP_PORT)
 
-    @overrides(SpallocJob.open_listener_connection)
-    def open_listener_connection(self):
+    @overrides(SpallocJob.open_eieio_listener_connection)
+    def open_eieio_listener_connection(self):
         self.__init_proxy()
         return _ProxiedEIEIOListener(
+            self.__proxy_handle, self.__proxy_thread, self.get_connections())
+
+    @overrides(SpallocJob.open_udp_listener_connection)
+    def open_udp_listener_connection(self):
+        self.__init_proxy()
+        return _ProxiedUDPListener(
             self.__proxy_handle, self.__proxy_thread, self.get_connections())
 
     @overrides(SpallocJob.wait_for_state_change)
@@ -553,7 +582,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             self.__proxy_thread.close()
             self.__proxy_ping.close()
             self.__proxy_handle.close()
-        self._delete(self._url, reason=reason)
+        self._delete(self._url, reason=str(reason))
         logger.info("deleted job at {}", self._url)
 
     @overrides(SpallocJob.keepalive)
@@ -582,7 +611,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         self._keepalive_handle = Closer()
         # pylint: disable=protected-access
         p = Process(target=_SpallocKeepalive, args=(
-            self._keepalive_url, period, self._keepalive_handle._queue,
+            self._keepalive_url, 0 + period, self._keepalive_handle._queue,
             *self._session_credentials), daemon=True)
         p.start()
         self._keepalive_handle._p = p
@@ -643,6 +672,26 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     def _call(self, proto: ProxyProtocol, packer: struct.Struct,
               unpacker: struct.Struct, *args) -> List[int]:
+        """
+        Do a synchronous call.
+
+        :param proto:
+            The protocol message number.
+        :param packer:
+            How to form the protocol message. The first two arguments passed
+            will be the protocol message number and an issued correlation ID
+            (not needed by the caller).
+        :param unpacker:
+            How to extract the expected response.
+        :param args:
+            Additional arguments to pass to the packer.
+        :return:
+            The results from the unpacker *after* the protocol message code and
+            the correlation ID.
+        :raises IOError:
+            If something goes wrong. This could be due to the websocket being
+            closed, or the receipt of an ERROR response.
+        """
         if not self._connected:
             raise IOError("socket closed")
         with self.__call_lock:
@@ -652,7 +701,15 @@ class _ProxiedConnection(metaclass=AbstractBase):
             self.__ws.send_binary(packer.pack(proto, correlation_id, *args))
             if not self._connected:
                 raise IOError("socket closed after send!")
-            return unpacker.unpack(self.__call_queue.get())[2:]
+            reply = self.__call_queue.get()
+            code, _ = _msg.unpack_from(reply, 0)
+            if code == ProxyProtocol.ERROR:
+                # Rest of message is UTF-8 encoded error message string
+                payload = reply[_msg.size:].decode("utf-8")
+                if len(payload):
+                    raise _ProxyServiceError(payload)
+                raise _ProxyServiceError(f"unknown problem with {proto} call")
+            return unpacker.unpack(reply)[2:]
 
     @property
     def _connected(self) -> bool:
@@ -754,6 +811,8 @@ class _ProxiedBidirectionalConnection(
 
     @overrides(SpallocProxiedConnection.send)
     def send(self, data: bytes):
+        if not isinstance(data, (bytes, bytearray)):
+            data = bytes(data)
         self._send(data)
 
     @overrides(SpallocProxiedConnection.receive)
@@ -884,7 +943,9 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
     @overrides(SpallocEIEIOListener.send_to_chip)
     def send_to_chip(
             self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
-        self._send_to(message, x, y, port)
+        if not isinstance(message, (bytes, bytearray)):
+            message = bytes(message)
+        self._send_to(bytes(message), x, y, port)
 
     @property
     @overrides(SpallocEIEIOListener.local_ip_address)
@@ -898,7 +959,36 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
 
     @overrides(SpallocEIEIOListener._get_chip_coords)
     def _get_chip_coords(self, ip_address: str) -> Tuple[int, int]:
-        return self.__conns[ip_address]
+        return self.__conns[str(ip_address)]
 
     def __str__(self):
         return f"EIEIOConnection[proxied](local:{self._addr}:{self._port})"
+
+
+class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
+    __slots__ = ("__conns", )
+
+    def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
+                 conns: Dict[Tuple[int, int], str]):
+        super().__init__(ws, receiver)
+        # Invert the map
+        self.__conns = {ip: xy for (xy, ip) in conns.items()}
+
+    @overrides(UDPConnection.send_to)
+    def send_to(self, data: bytes, address: Tuple[str, int]):
+        ip, port = address
+        x, y = self.__conns[ip]
+        self._send_to(data, x, y, port)
+
+    @property
+    @overrides(UDPConnection.local_ip_address)
+    def local_ip_address(self) -> str:
+        return self._addr
+
+    @property
+    @overrides(UDPConnection.local_port)
+    def local_port(self) -> int:
+        return self._port
+
+    def __str__(self):
+        return f"UDPConnection[proxied](local:{self._addr}:{self._port})"

@@ -1,4 +1,4 @@
-# Copyright (c) 2017 The University of Manchester
+# Copyright (c) 2023 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = "1!7.1.0"
-__version_month__ = "TBD"
-__version_year__ = "TBD"
-__version_day__ = "TBD"
-__version_name__ = "Not yet released"
+version: 2
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+sphinx:
+  configuration: doc/source/conf.py
+  builder: dirhtml
+  fail_on_warning: false
+python:
+  install:
+    - requirements: doc/doc_requirements.txt
+    - method: pip
+      path: .

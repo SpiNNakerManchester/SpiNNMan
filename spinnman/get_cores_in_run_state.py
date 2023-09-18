@@ -21,8 +21,8 @@ import argparse
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinn_machine import CoreSubsets, CoreSubset
 from spinnman.board_test_configuration import BoardTestConfiguration
+from spinnman.config_setup import unittest_setup
 from spinnman.model.enums import CPUState
-
 SCAMP_ID = 0
 IGNORED_IDS = {SCAMP_ID, 16}  # WHY 16?
 
@@ -48,9 +48,12 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
 
     all_cores = CoreSubsets(core_subsets=all_cores)
 
-    cores_finished = txrx.get_cores_in_state(all_cores, CPUState.FINISHED)
-    cores_running = txrx.get_cores_in_state(all_cores, CPUState.RUNNING)
-    cores_watchdog = txrx.get_cores_in_state(all_cores, CPUState.WATCHDOG)
+    cpu_infos = txrx.get_cpu_infos(
+        all_cores,
+        [CPUState.FINISHED, CPUState.RUNNING, CPUState.WATCHDOG], True)
+    cores_finished = cpu_infos.infos_for_state(CPUState.FINISHED)
+    cores_running = cpu_infos.infos_for_state(CPUState.RUNNING)
+    cores_watchdog = cpu_infos.infos_for_state(CPUState.WATCHDOG)
 
     for (x, y, p), _ in cores_running:
         if p not in IGNORED_IDS:
@@ -101,6 +104,7 @@ def main(args):
     """
     Runs the script.
     """
+    unittest_setup()
     ap = argparse.ArgumentParser(
         description="Check the state of a SpiNNaker machine.")
     ap.add_argument(

@@ -18,15 +18,15 @@ import logging
 import functools
 from os.path import join
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_int, get_config_str)
+    get_config_bool, get_config_int_or_none, get_config_str_or_none)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import (Router, Chip, Link, machine_from_size)
+from spinn_machine import (Router, Chip, Link)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
-from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
+from spinnman.data import SpiNNManDataView
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition)
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -94,7 +94,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :rtype: ~spinn_machine.Chip
         """
         # Create the down cores set if any
-        n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
+        n_cores = \
+            SpiNNManDataView.get_machine_version().max_cores_per_chip
+        n_cores = min(chip_info.n_cores, n_cores)
         core_states = chip_info.core_states
         down_cores = self._ignore_cores_map.get(
             (chip_info.x, chip_info.y), None)
@@ -112,7 +114,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
-        max_sdram_size = get_config_int(
+        max_sdram_size = get_config_int_or_none(
             "Machine", "max_sdram_allowed_per_chip")
         if (max_sdram_size is not None and
                 sdram_size > max_sdram_size):
@@ -233,7 +235,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
-        machine = machine_from_size(width, height)
+        version = SpiNNManDataView.get_machine_version()
+        machine = version.create_machine(width, height)
         self._preprocess_ignore_chips(machine)
         self._process_ignore_links(machine)
         self._preprocess_ignore_cores(machine)
@@ -291,7 +294,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreLink.parse_string(
-                get_config_str("Machine", "down_links")):
+                get_config_str_or_none("Machine", "down_links")):
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
@@ -340,7 +343,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         # Convert by ip to global
         for ignore in IgnoreCore.parse_string(
-                get_config_str("Machine", "down_cores")):
+                get_config_str_or_none("Machine", "down_cores")):
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
@@ -364,7 +367,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreChip.parse_string(
-                get_config_str("Machine", "down_chips")):
+                get_config_str_or_none("Machine", "down_chips")):
             # Convert by ip to global
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
