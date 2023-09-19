@@ -15,6 +15,9 @@
 from spinnman.messages.scp.impl import CountState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
+# Timeout for getting core state count; higher due to more waiting needed
+GET_CORE_COUNT_TIMEOUT = 2.0
+
 
 class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
     __slots__ = [
@@ -26,7 +29,7 @@ class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super().__init__(connection_selector)
+        super().__init__(connection_selector, timeout=GET_CORE_COUNT_TIMEOUT)
         self._n_cores = 0
 
     def __handle_response(self, response):
