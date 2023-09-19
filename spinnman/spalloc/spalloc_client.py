@@ -457,8 +457,8 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__proxy_thread = None
         self.__proxy_ping = None
 
-    @overrides(SpallocJob._write_session_credentials_to_db)
-    def _write_session_credentials_to_db(self, cur):
+    @overrides(SpallocJob.get_session_credentials_for_db)
+    def get_session_credentials_for_db(self):
         config = {}
         config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
@@ -471,10 +471,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             # We never write the auth headers themselves; we just extend the
             # session
             del headers["Authorization"]
-        cur.executemany("""
-            INSERT INTO proxy_configuration(kind, name, value)
-            VALUES(?, ?, ?)
-            """, [(k1, k2, v) for (k1, k2), v in config.items()])
+        return config
 
     @overrides(SpallocJob.get_state)
     def get_state(self):
