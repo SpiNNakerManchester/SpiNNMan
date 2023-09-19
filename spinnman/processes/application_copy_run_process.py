@@ -12,16 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from collections import defaultdict
-from functools import partial
 import logging
 from types import TracebackType
-from typing import Dict, Set
+from typing import Callable, Dict, List, Set
 from spinn_utilities.log import FormatAdapter
 from spinn_machine import Chip, CoreSubsets
 from spinnman.data import SpiNNManDataView
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import AppCopyRun, CheckOKResponse
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinnman.exceptions import SpinnmanException
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
@@ -40,9 +41,11 @@ class ApplicationCopyRunProcess(
         The binary must have been loaded to the boot chip before this is
         called!
     """
-    __slots__ = ("__chips_done", "__blacklisted_links")
+    __slots__ = (
+        "__chips_done", "__blacklisted_links", "__advanced", "__round_errors")
+    # pylint: disable=attribute-defined-outside-init
 
-    def __get_next_chips(self) -> Dict[Chip, int]:
+    def __get_next_chips(self, core_subsets: CoreSubsets) -> Dict[Chip, int]:
         """
         Get the chips that are adjacent to the last set of chips, which
         haven't yet been loaded.  Also returned are the links for each chip,
@@ -66,6 +69,16 @@ class ApplicationCopyRunProcess(
                         next_chips[next_chip] = next_link
                         # Only let one thing copy from this chip
                         break
+        if not next_chips and not self.__advanced and (
+                len(core_subsets) != len(self.__chips_done)):
+            missing = []
+            for subset in core_subsets.core_subsets:
+                chip = SpiNNManDataView.get_chip_at(subset.x, subset.y)
+                if chip not in self.__chips_done:
+                    missing.append((subset.x, subset.y))
+            if missing:
+                raise SpinnmanException(
+                    f"Could not fill to all chips: {missing = }")
         return next_chips
 
     def run(self, size: int, app_id: int, core_subsets: CoreSubsets,
@@ -80,14 +93,16 @@ class ApplicationCopyRunProcess(
         :param bool wait:
             Whether to put the binary in "wait" mode or run it straight away
         """
-        # pylint: disable=attribute-defined-outside-init
         boot_chip = SpiNNManDataView.get_machine().boot_chip
         self.__chips_done: Dict[Chip, int] = dict()
         self.__blacklisted_links: Dict[Chip, Set[int]] = defaultdict(set)
         # We use a dict to get reliable iteration order; values unimportant
         self.__chips_done[boot_chip] = 0
+        self.__advanced: bool = False
 
-        while (next_chips := self.__get_next_chips()):
+        while (next_chips := self.__get_next_chips(core_subsets)):
+            self.__advanced = False
+            self.__round_errors: List[SpinnmanException] = []
             # Do all the chips at the current level
             with self._collect_responses():
                 for chip, link in next_chips.items():
@@ -96,29 +111,56 @@ class ApplicationCopyRunProcess(
                     self._send_request(AppCopyRun(
                         chip.x, chip.y, link, size, app_id,
                         subset.processor_ids, chksum, wait),
-                        partial(self.__chip_done, chip),
-                        partial(self.__chip_err, chip, link))
+                        self.__on_chip_done(chip),
+                        self.__on_chip_err(chip, link))
+            if not self.__advanced:
+                logger.warning(
+                    "round of copies could not reach {}", next_chips.keys())
+                for ex in self.__round_errors:
+                    logger.warning("failure:", exc_info=ex)
 
-    def __chip_done(self, chip: Chip):
+    def __on_chip_done(self, chip: Chip) -> Callable[[CheckOKResponse], None]:
         """
-        Mark the chip as done, and thus eligible to be a source for copying
-        from.
+        Generate a response handler to mark the chip as done, and thus eligible
+        to be a source for copying from.
         """
-        self.__chips_done[chip] = 1
+        def handler(_r: CheckOKResponse) -> None:
+            self.__chips_done[chip] = 1
+            self.__advanced = True
 
-    def __chip_err(
-            self, chip: Chip, link: int, request: AppCopyRun,
-            exception: Exception, tb: TracebackType,
-            connection: SCAMPConnection):
+        return handler
+
+    def __on_chip_err(self, chip: Chip, link: int) -> Callable[
+            [AbstractSCPRequest, Exception, TracebackType, SCAMPConnection],
+            None]:
         """
-        This link not working? Blacklist it (for this process, not generally).
-        Pass through to the standard error handler if the chip isn't reachable
-        in a reliable fashion at all (i.e., all links into the chip are
-        exhausted).
+        This link not working? The callback this generates will blacklist it
+        (for this process, not generally), and will pass through to the
+        standard error handler if the chip isn't reachable in a reliable
+        fashion at all (i.e., all links into the chip are exhausted) or the
+        failure is not of an expected class.
+        """
+        def handler(
+                request: AbstractSCPRequest, exception: Exception,
+                tb: TracebackType, connection: SCAMPConnection):
+            if isinstance(exception, SpinnmanException):
+                logger.warning("chip {},{} link {} failed due to {}",
+                               chip.x, chip.y, link, str(exception))
+                self.__round_errors.append(exception)
+                if not self.__blacklist_link(chip, link):
+                    return
+            self._receive_error(request, exception, tb, connection)
+
+        return handler
+
+    def __blacklist_link(self, chip: Chip, link: int) -> bool:
+        """
+        How to blacklist a link.
+
+        :param chip: The target chip
+        :param link: The inbound link to the target chip that failed
+        :return: True if we know a chip is definitely unreachable.
         """
         self.__blacklisted_links[chip].add(link)
-        logger.debug("chip {},{} link {} failed due to {}",
-                     chip.x, chip.y, link, str(exception))
         # pylint: disable=protected-access
-        if len(self.__blacklisted_links[chip]) == len(chip.router._links):
-            self._receive_error(request, exception, tb, connection)
+        return len(self.__blacklisted_links[chip]) == len(chip.router._links)
