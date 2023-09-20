@@ -98,7 +98,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
-    def open_job_from_database(conn: sqlite3.Cursor) -> SpallocJob:
+    def open_job_from_database(service_url, job_url, cookies, headers) -> SpallocJob:
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
@@ -110,35 +110,16 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             credentials may have expired; if so, the job will be unable to
             regenerate them.
 
-        :param ~sqlite3.Cursor conn:
-            The database cursor to retrieve the job details from. Assumes
-            the presence of a ``proxy_configuration`` table with ``kind``,
-            ``name`` and ``value`` columns.
+        :param str service_url:
+        :param str job_url:
+        :param dict(str, str) cookies:
+        :param dict(str, str) headers:
+
         :return:
             The job handle, or ``None`` if the records in the database are
             absent or incomplete.
         :rtype: SpallocJob
         """
-        service_url = None
-        job_url = None
-        cookies = {}
-        headers = {}
-        for row in conn.execute("""
-                SELECT kind, name, value FROM proxy_configuration
-                """):
-            kind, name, value = row
-            if kind == "SPALLOC":
-                if name == "service uri":
-                    service_url = value
-                elif name == "job uri":
-                    job_url = value
-            elif kind == "COOKIE":
-                cookies[name] = value
-            elif kind == "HEADER":
-                headers[name] = value
-        if not service_url or not job_url or not cookies or not headers:
-            # Cannot possibly work without a session or job
-            return None
         session = Session(service_url, session_credentials=(cookies, headers))
         return _SpallocJob(session, job_url)
 
