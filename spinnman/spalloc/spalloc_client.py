@@ -21,7 +21,6 @@ from time import sleep
 from packaging.version import Version
 import queue
 import requests
-import sqlite3
 import struct
 import threading
 from typing import Dict, List, Tuple
@@ -98,7 +97,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
-    def open_job_from_database(service_url, job_url, cookies, headers) -> SpallocJob:
+    def open_job_from_database(
+            service_url, job_url, cookies, headers) -> SpallocJob:
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
