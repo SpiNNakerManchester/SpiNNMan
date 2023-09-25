@@ -123,7 +123,8 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
     def create_job_rect_at_board(
             self, width: int, height: int, triad: Tuple[int, int, int] = None,
             physical: Tuple[int, int, int] = None, ip_address: str = None,
-            machine_name: str = None, keepalive: int = 45) -> SpallocJob:
+            machine_name: str = None, keepalive: int = 45,
+            max_dead_boards: int = 0) -> SpallocJob:
         """
         Create a job with a rectangle of boards starting at a specific board.
         At least one of ``triad``, ``physical`` and ``ip_address`` must be not
@@ -145,6 +146,8 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :param int keepalive:
             After how many seconds of no activity should a job become eligible
             for automatic pruning?
+        :param int max_dead_boards:
+            How many dead boards can be included.
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
