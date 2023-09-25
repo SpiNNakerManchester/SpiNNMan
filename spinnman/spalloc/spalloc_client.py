@@ -228,7 +228,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     @overrides(AbstractSpallocClient.create_job_rect_at_board)
     def create_job_rect_at_board(
             self, width, height, triad=None, physical=None, ip_address=None,
-            machine_name=None, keepalive=45):
+            machine_name=None, keepalive=45, max_dead_boards=0):
         if triad:
             x, y, z = triad
             board = {"x": int(x), "y": int(y), "z": int(z)}
@@ -246,7 +246,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                 "height": int(height)
             },
             "board": board,
-            "keepalive-interval": f"PT{int(keepalive)}S"
+            "keepalive-interval": f"PT{int(keepalive)}S",
+            "max-dead-boards": int(max_dead_boards)
         }, machine_name)
 
     def close(self):
