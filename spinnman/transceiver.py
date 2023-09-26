@@ -1552,7 +1552,8 @@ class Transceiver(AbstractContextManager):
             if len(cores_not_in_state) != 0:
                 self.__log_where_is_info(cores_not_in_state)
                 states = self.get_cpu_infos(all_core_subsets)
-                for cpu_info in states.values():
+                state_values: Iterable[CPUInfo] = states.values()
+                for cpu_info in state_values:
                     if cpu_info.state not in cpu_states:
                         logger.info("x:{} y:{} p:{} state:{}", cpu_info.x,
                                     cpu_info.y, cpu_info.p, cpu_info.state)
