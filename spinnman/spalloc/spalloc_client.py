@@ -477,14 +477,14 @@ class _SpallocJob(SessionAware, SpallocJob):
         config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
         cookies, headers = self._session_credentials
-        for k, v in cookies.items():
-            config["COOKIE", k] = v
-        for k, v in headers.items():
-            config["HEADER", k] = v
         if "Authorization" in headers:
             # We never write the auth headers themselves; we just extend the
             # session
             del headers["Authorization"]
+        for k, v in cookies.items():
+            config["COOKIE", k] = v
+        for k, v in headers.items():
+            config["HEADER", k] = v
         return config
 
     @overrides(SpallocJob.get_state)

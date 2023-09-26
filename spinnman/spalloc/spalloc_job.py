@@ -209,7 +209,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_session_credentials_for_db(self) -> Mapping[str, str]:
+    def get_session_credentials_for_db(self) -> Mapping[Tuple[str, str], str]:
         """
         Get the session credentials for the job to be written into a database
 
