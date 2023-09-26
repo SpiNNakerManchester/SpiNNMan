@@ -1466,9 +1466,10 @@ class Transceiver(AbstractContextManager):
         :param ~spinn_machine.CoreSubsets all_core_subsets:
             the cores to check are in a given sync state
         :param int app_id: the application ID that being used by the simulation
-        :param set(CPUState) cpu_states:
+        :param cpu_states:
             The expected states once the applications are ready; success is
             when each application is in one of these states
+        :type cpu_states: CPUState or iterable(CPUState)
         :param float timeout:
             The amount of time to wait in seconds for the cores to reach one
             of the states
@@ -1552,9 +1553,8 @@ class Transceiver(AbstractContextManager):
             if len(cores_not_in_state) != 0:
                 self.__log_where_is_info(cores_not_in_state)
                 states = self.get_cpu_infos(all_core_subsets)
-                state_values: Iterable[CPUInfo] = states.values()
-                for cpu_info in state_values:
-                    if cpu_info.state not in cpu_states:
+                for cpu_info in states.values():
+                    if cpu_info.state not in target_states:
                         logger.info("x:{} y:{} p:{} state:{}", cpu_info.x,
                                     cpu_info.y, cpu_info.p, cpu_info.state)
                 raise SpiNNManCoresNotInStateException(
