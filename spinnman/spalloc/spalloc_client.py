@@ -22,7 +22,6 @@ from time import sleep
 from packaging.version import Version
 import queue
 import requests
-import sqlite3
 import struct
 import threading
 from typing import (
@@ -109,7 +108,8 @@ class SpallocClient(ACM, AbstractSpallocClient):
         logger.info("established session to {} for {}", service_url, username)
 
     @staticmethod
-    def open_job_from_database(conn: sqlite3.Cursor) -> Optional[SpallocJob]:
+    def open_job_from_database(
+            service_url, job_url, cookies, headers) -> SpallocJob:
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
@@ -121,35 +121,16 @@ class SpallocClient(ACM, AbstractSpallocClient):
             credentials may have expired; if so, the job will be unable to
             regenerate them.
 
-        :param ~sqlite3.Cursor conn:
-            The database cursor to retrieve the job details from. Assumes
-            the presence of a ``proxy_configuration`` table with ``kind``,
-            ``name`` and ``value`` columns.
+        :param str service_url:
+        :param str job_url:
+        :param dict(str, str) cookies:
+        :param dict(str, str) headers:
+
         :return:
             The job handle, or ``None`` if the records in the database are
             absent or incomplete.
         :rtype: SpallocJob
         """
-        service_url = None
-        job_url = None
-        cookies = {}
-        headers = {}
-        for row in conn.execute("""
-                SELECT kind, name, value FROM proxy_configuration
-                """):
-            kind, name, value = row
-            if kind == "SPALLOC":
-                if name == "service uri":
-                    service_url = value
-                elif name == "job uri":
-                    job_url = value
-            elif kind == "COOKIE":
-                cookies[name] = value
-            elif kind == "HEADER":
-                headers[name] = value
-        if not service_url or not job_url or not cookies or not headers:
-            # Cannot possibly work without a session or job
-            return None
         session = Session(service_url, session_credentials=(cookies, headers))
         return _SpallocJob(session, job_url)
 
@@ -490,24 +471,21 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__proxy_thread: Optional[_ProxyReceiver] = None
         self.__proxy_ping: Optional[_ProxyPing] = None
 
-    @overrides(SpallocJob._write_session_credentials_to_db)
-    def _write_session_credentials_to_db(self, cur: sqlite3.Cursor):
+    @overrides(SpallocJob.get_session_credentials_for_db)
+    def get_session_credentials_for_db(self):
         config = {}
         config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
         cookies, headers = self._session_credentials
-        for k, v in cookies.items():
-            config["COOKIE", k] = v
-        for k, v in headers.items():
-            config["HEADER", k] = v
         if "Authorization" in headers:
             # We never write the auth headers themselves; we just extend the
             # session
             del headers["Authorization"]
-        cur.executemany("""
-            INSERT INTO proxy_configuration(kind, name, value)
-            VALUES(?, ?, ?)
-            """, [(k1, k2, v) for (k1, k2), v in config.items()])
+        for k, v in cookies.items():
+            config["COOKIE", k] = v
+        for k, v in headers.items():
+            config["HEADER", k] = v
+        return config
 
     @overrides(SpallocJob.get_state)
     def get_state(self) -> SpallocState:
