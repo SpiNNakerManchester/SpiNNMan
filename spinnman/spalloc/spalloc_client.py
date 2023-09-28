@@ -598,19 +598,22 @@ class _SpallocJob(SessionAware, SpallocJob):
             self.__proxy_handle, self.__proxy_thread, self.get_connections())
 
     @overrides(SpallocJob.wait_for_state_change)
-    def wait_for_state_change(self, old_state):
+    def wait_for_state_change(self, old_state, timeout=None):
         while old_state != SpallocState.DESTROYED:
-            obj = self._get(self._url, wait="true", timeout=None).json()
+            obj = self._get(self._url, wait="true", timeout=timeout).json()
             s = SpallocState[obj["state"]]
             if s != old_state or s == SpallocState.DESTROYED:
                 return s
         return old_state
 
     @overrides(SpallocJob.wait_until_ready)
-    def wait_until_ready(self):
+    def wait_until_ready(self, timeout=None, n_retries=None):
         state = self.get_state()
-        while state != SpallocState.READY:
-            state = self.wait_for_state_change(state)
+        retries = 0
+        while (state != SpallocState.READY and
+               (n_retries is None or retries < n_retries)):
+            retries += 1
+            state = self.wait_for_state_change(state, timeout=timeout)
             if state == SpallocState.DESTROYED:
                 raise SpallocException("job was unexpectedly destroyed")
 
