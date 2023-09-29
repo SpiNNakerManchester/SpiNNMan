@@ -647,8 +647,6 @@ class Transceiver(AbstractContextManager):
         transceiver. Boots the board if not already booted and verifies that
         the version of SCAMP running is compatible with this transceiver.
 
-        :param number_of_boards:
-            this parameter is deprecated and will be ignored
         :param int n_retries: The number of times to retry booting
         :param dict(SystemVariableDefinition,object) extra_boot_values:
             Any additional or overwrite values to set during boot.
