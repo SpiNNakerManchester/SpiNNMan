@@ -1,22 +1,18 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-try:
-    from collections.abc import namedtuple
-except ImportError:
-    from collections import namedtuple
+from collections import namedtuple
 import struct
 from enum import Enum
 
@@ -24,7 +20,8 @@ _SYSTEM_VARIABLES_BOOT_SIZE = 128
 
 
 class _DataType(Enum):
-    """ Enum for data types
+    """
+    Enum for data types.
     """
     BYTE = (1, "<B")
     SHORT = (2, "<H")
@@ -48,6 +45,11 @@ class _DataType(Enum):
     def struct_code(self):
         return self._struct_code
 
+    @property
+    def is_byte_array(self):
+        # can't use BYTE_ARRAY.value directly here
+        return self._value_ == 16
+
 
 class _Definition(namedtuple("_Definition",
                              "offset, data_type, default, array_size, doc")):
@@ -57,12 +59,13 @@ class _Definition(namedtuple("_Definition",
 
     def __new__(cls, data_type, offset, default=0, array_size=None, doc=""):
         # pylint: disable=too-many-arguments
-        return super(_Definition, cls).__new__(
+        return super().__new__(
             cls, offset, data_type, default, array_size, doc)
 
 
 class SystemVariableDefinition(Enum):
-    """ Defines the system variables available
+    """
+    Defines the system variables available.
     """
 
     y = _Definition(
@@ -162,9 +165,9 @@ class SystemVariableDefinition(Enum):
     led_1 = _Definition(
         _DataType.INT, offset=0x34,
         doc="The last part of the LED definitions")
-    padding_1 = _Definition(
+    clock_drift = _Definition(
         _DataType.INT, offset=0x38,
-        doc="A word of padding")
+        doc="The clock drift")
     random_seed = _Definition(
         _DataType.INT, offset=0x3c,
         doc="The random seed")
@@ -313,17 +316,13 @@ class SystemVariableDefinition(Enum):
 
     def __init__(self, offset, data_type, default, array_size, doc):
         """
-
-        :param data_type: The data type of the variable
-        :type data_type: :py:class:`_DataType`
-        :param offset: The offset from the start of the system variable\
+        :param _DataType data_type: The data type of the variable
+        :param int offset: The offset from the start of the system variable
             structure where the variable is found
-        :type offset: int
-        :param default: \
+        :param object default:
             The default value assigned to the variable if not overridden
-        :type default: int
-        :param array_size: The length of the array, or None if not an array
-        :type array_size: int
+        :param array_size: The length of the array, or `None` if not an array
+        :type array_size: int or None
         """
         # pylint: disable=too-many-arguments
         self._data_type = data_type
@@ -350,8 +349,9 @@ class SystemVariableDefinition(Enum):
 
 
 class SystemVariableBootValues(object):
-    """ Default values of the system variables that get passed to SpiNNaker\
-        during boot
+    """
+    Default values of the system variables that get passed to SpiNNaker
+    during boot.
     """
     __slot__ = [
         "_values"]

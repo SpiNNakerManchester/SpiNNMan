@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinn_utilities.overrides import overrides
@@ -26,28 +25,26 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class SDRAMDeAlloc(AbstractSCPRequest):
-    """ An SCP Request to free space in the SDRAM
+    """
+    An SCP Request to free space in the SDRAM.
     """
     __slots__ = [
         "_read_n_blocks_freed"]
 
     def __init__(self, x, y, app_id, base_address=None):
         """
-        :param x: \
+        :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :type x: int
-        :param y: \
+        :param int y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :type y: int
-        :param app_id: The ID of the application, between 0 and 255
-        :type app_id: int
-        :param base_address: The start address in SDRAM to which the block\
-            needs to be deallocated, or none if deallocating via app_id
+        :param int app_id: The ID of the application, between 0 and 255
+        :param base_address: The start address in SDRAM to which the block
+            needs to be deallocated, or `None` if deallocating via app_id
         :type base_address: int or None
         """
-
+        # pylint: disable=unsupported-binary-operation
         if base_address is not None:
-            super(SDRAMDeAlloc, self).__init__(
+            super().__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                     destination_cpu=0, destination_chip_x=x,
@@ -59,7 +56,7 @@ class SDRAMDeAlloc(AbstractSCPRequest):
                 argument_2=base_address)
             self._read_n_blocks_freed = False
         else:
-            super(SDRAMDeAlloc, self).__init__(
+            super().__init__(
                 SDPHeader(
                     flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                     destination_cpu=0, destination_chip_x=x,
@@ -77,7 +74,8 @@ class SDRAMDeAlloc(AbstractSCPRequest):
 
 
 class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
-    """ An SCP response to a request to deallocate SDRAM
+    """
+    An SCP response to a request to deallocate SDRAM.
     """
     __slots__ = [
         "_number_of_blocks_freed",
@@ -86,7 +84,7 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
     def __init__(self, read_n_blocks_freed=False):
         """
         """
-        super(_SCPSDRAMDeAllocResponse, self).__init__()
+        super().__init__()
         self._number_of_blocks_freed = None
         self._read_n_blocks_freed = read_n_blocks_freed
 
@@ -109,8 +107,9 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
 
     @property
     def number_of_blocks_freed(self):
-        """ The number of allocated blocks that have been freed from the\
-            app_id given
+        """
+        The number of allocated blocks that have been freed from the
+        app_id given.
 
         :rtype: int
         """

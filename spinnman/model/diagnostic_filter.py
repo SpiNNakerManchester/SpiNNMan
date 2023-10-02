@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from spinnman.model.enums import (
     DiagnosticFilterDestination, DiagnosticFilterSource,
@@ -52,11 +51,12 @@ def _read_flags_from_word(word, enum_list, offset):
 
 
 class DiagnosticFilter(object):
-    """ A router diagnostic counter filter, which counts packets passing\
-        through the router with certain properties.  The counter will be\
-        incremented so long as the packet matches one of the values in each\
-        field i.e. one of each of the destinations, sources, payload_statuses,\
-        default_routing_statuses, emergency_routing_statuses and packet_types.
+    """
+    A router diagnostic counter filter, which counts packets passing
+    through the router with certain properties.  The counter will be
+    incremented so long as the packet matches one of the values in each
+    field i.e. one of each of the destinations, sources, payload_statuses,
+    default_routing_statuses, emergency_routing_statuses and packet_types.
     """
     __slots__ = [
         "_default_routing_statuses",
@@ -74,40 +74,34 @@ class DiagnosticFilter(object):
                  default_routing_statuses, emergency_routing_statuses,
                  packet_types):
         """
-        :param enable_interrupt_on_counter_event: Indicates whether\
+        :param bool enable_interrupt_on_counter_event: Indicates whether
             an interrupt should be raised when this rule matches
-        :type enable_interrupt_on_counter_event: bool
-        :param match_emergency_routing_status_to_incoming_packet: Indicates\
-            whether the emergency routing statuses should be matched against\
-            packets arriving at this router (if True), or if they should be\
-            matched against packets leaving this router (if False)
-        :type match_emergency_routing_status_to_incoming_packet: bool
-        :param destinations: Increment the counter if one or more of the given\
-            destinations match
-        :type destinations: \
-            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterDestination`)
-        :param sources: Increment the counter if one or more of the given\
-            sources match (or None or empty list to match all)
-        :type sources: \
-            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterSource`)
-        :param payload_statuses: Increment the counter if one or more of the\
-            given payload statuses match  (or None or empty list to match all)
-        :type payload_statuses: \
-            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterPayloadStatus`)
-        :param default_routing_statuses: Increment the counter if one or more\
-            of the given default routing statuses match  (or None or empty\
-            list to match all)
-        :type default_routing_statuses: \
-            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterDefaultRoutingStatus`)
-        :param emergency_routing_statuses: Increment the counter if one or\
-            more of the given emergency routing statuses match (or None or\
-            empty list to match all)
-        :type emergency_routing_statuses: \
-            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterEmergencyRoutingStatus`)
-        :param packet_types: Increment the counter if one or more of the\
-            given packet types match (or None or empty list to match all)
-        :type packet_types: \
-            iterable(:py:class:`spinnman.model.enums.DiagnosticFilterPacketType`)
+        :param bool match_emergency_routing_status_to_incoming_packet:
+            Indicates whether the emergency routing statuses should be matched
+            against packets arriving at this router (if True), or if they
+            should be matched against packets leaving this router (if False)
+        :param list(DiagnosticFilterDestination) destinations:
+            Increment the counter if one or more of the given destinations
+            match
+        :param list(DiagnosticFilterSource) sources:
+            Increment the counter if one or more of the given sources match
+            (or `None` or empty list to match all)
+        :param list(DiagnosticFilterPayloadStatus) payload_statuses:
+            Increment the counter if one or more of the given payload statuses
+            match (or `None` or empty list to match all)
+        :param default_routing_statuses:
+            Increment the counter if one or more of the given default routing
+            statuses match (or `None` or empty list to match all)
+        :type default_routing_statuses:
+            list(DiagnosticFilterDefaultRoutingStatus)
+        :param emergency_routing_statuses:
+            Increment the counter if one or more of the given emergency routing
+            statuses match (or `None` or empty list to match all)
+        :type emergency_routing_statuses:
+            list(DiagnosticFilterEmergencyRoutingStatus)
+        :param list(DiagnosticFilterPacketType) packet_types:
+            Increment the counter if one or more of the given packet types
+            match (or `None` or empty list to match all)
         """
         # pylint: disable=too-many-arguments
         self._enable_interrupt_on_counter_event = \
@@ -155,8 +149,8 @@ class DiagnosticFilter(object):
 
     @property
     def filter_word(self):
-        """ A word of data that can be written to the router to set up\
-            the filter
+        """
+        A word of data that can be written to the router to set up the filter.
         """
         data = 0
         if self._enable_interrupt_on_counter_event:

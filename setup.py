@@ -1,91 +1,33 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2023 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-try:
-    from collections.abc import defaultdict
-except ImportError:
-    from collections import defaultdict
+import distutils.dir_util
+from setuptools import setup
 import os
+import sys
 
-__version__ = None
-exec(open("spinnman/_version.py").read())
-assert __version__
 
-# Build a list of all project modules, as well as supplementary files
-main_package = "spinnman"
-extensions = {".aplx", ".boot", ".cfg", ".json", ".sql", ".template", ".xml",
-              ".xsd"}
-main_package_dir = os.path.join(os.path.dirname(__file__), main_package)
-start = len(main_package_dir)
-packages = []
-package_data = defaultdict(list)
-for dirname, dirnames, filenames in os.walk(main_package_dir):
-    if '__init__.py' in filenames:
-        package = "{}{}".format(
-            main_package, dirname[start:].replace(os.sep, '.'))
-        packages.append(package)
-    for filename in filenames:
-        _, ext = os.path.splitext(filename)
-        if ext in extensions:
-            package = "{}{}".format(
-                main_package, dirname[start:].replace(os.sep, '.'))
-            package_data[package].append(filename)
-
-setup(
-    name="SpiNNMan",
-    version=__version__,
-    description="Interaction with a SpiNNaker Machine",
-    url="https://github.com/SpiNNakerManchester/SpiNNMan",
-    license="GNU GPLv3.0",
-    classifiers=[
-        "Development Status :: 3 - Alpha",
-
-        "Intended Audience :: Developers",
-        "Intended Audience :: Science/Research",
-
-        "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
-
-        "Natural Language :: English",
-
-        "Operating System :: POSIX :: Linux",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: MacOS",
-
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-    ],
-    packages=packages,
-    package_data=package_data,
-    install_requires=[
-        'SpiNNUtilities >= 1!5.0.1, < 1!6.0.0',
-        'SpiNNStorageHandlers >= 1!5.0.1, < 1!6.0.0',
-        'SpiNNMachine >= 1!5.0.1, < 1!6.0.0',
-        'enum34',
-        'future',
-        'futures; python_version == "2.7"',
-        'six'],
-    entry_points={
-        "console_scripts": [
-            "get_cores_in_run_state = spinnman.get_cores_in_run_state:main"]
-    },
-    maintainer="SpiNNakerTeam",
-    maintainer_email="spinnakerusers@googlegroups.com"
-)
+if __name__ == '__main__':
+    # Repeated installs assume files have not changed
+    # https://github.com/pypa/setuptools/issues/3236
+    if len(sys.argv) > 0 and sys.argv[1] == 'egg_info':
+        # on the first call to setpy.py remove files left by previous install
+        this_dir = os.path.dirname(os.path.abspath(__file__))
+        build_dir = os.path.join(this_dir, "build")
+        if os.path.isdir(build_dir):
+            distutils.dir_util.remove_tree(build_dir)
+        egg_dir = os.path.join(this_dir, "SpiNNMan.egg-info")
+        if os.path.isdir(egg_dir):
+            distutils.dir_util.remove_tree(egg_dir)
+    setup()

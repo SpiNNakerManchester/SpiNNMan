@@ -1,45 +1,42 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from spinnman.messages.eieio.command_messages import (
     PaddingRequest, EventStopRequest, StopRequests, StartRequests,
     SpinnakerRequestBuffers, HostSendSequencedData, SpinnakerRequestReadData,
     HostDataRead, EIEIOCommandHeader, EIEIOCommandMessage,
-    DatabaseConfirmation)
+    NotificationProtocolDatabaseLocation)
 from spinnman.constants import EIEIO_COMMAND_IDS
 
 
 def read_eieio_command_message(data, offset):
-    """ Reads the content of an EIEIO command message and returns an object\
-        identifying the command which was contained in the packet, including\
-        any parameter, if required by the command
+    """
+    Reads the content of an EIEIO command message and returns an object
+    identifying the command which was contained in the packet, including
+    any parameter, if required by the command.
 
-    :param data: data received from the network as a bytestring
-    :type data: str
-    :param offset: offset at which the parsing operation should start
-    :type offset: int
-    :return: an object which inherits from EIEIOCommandMessage which contains\
+    :param bytes data: data received from the network as a byte-string
+    :param int offset: offset at which the parsing operation should start
+    :return: an object which inherits from EIEIOCommandMessage which contains
         parsed data received from the network
-    :rtype: \
-        :py:class:`spinnman.messages.eieio.command_messages.EIEIOCommandMessage`
+    :rtype: EIEIOCommandMessage
     """
     command_header = EIEIOCommandHeader.from_bytestring(data, offset)
     command_number = command_header.command
 
-    if command_number == EIEIO_COMMAND_IDS.DATABASE_CONFIRMATION.value:
-        return DatabaseConfirmation.from_bytestring(
+    if command_number == EIEIO_COMMAND_IDS.DATABASE.value:
+        return NotificationProtocolDatabaseLocation.from_bytestring(
             command_header, data, offset + 2)
     # Fill in buffer area with padding
     elif command_number == EIEIO_COMMAND_IDS.EVENT_PADDING.value:

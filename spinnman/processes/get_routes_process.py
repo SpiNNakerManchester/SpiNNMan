@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 import functools
@@ -33,14 +32,21 @@ _ROUTE_ENTRY_PATTERN = struct.Struct("<2xBxIII")
 
 
 class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
-    """ A process for reading the multicast routing table of a SpiNNaker chip.
+    """
+    A process for reading the multicast routing table of a SpiNNaker chip.
     """
     __slots__ = [
         "_app_id",
         "_entries"]
 
     def __init__(self, connection_selector, app_id=None):
-        super(GetMultiCastRoutesProcess, self).__init__(connection_selector)
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        :param int app_id:
+        """
+        super().__init__(connection_selector)
         self._entries = [None] * _N_ENTRIES
         self._app_id = app_id
 
@@ -58,7 +64,7 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         self._entries[route_no + offset] = MulticastRoutingEntry(
             key, mask, processor_ids, link_ids, False)
 
-    def handle_read_response(self, offset, response):
+    def __handle_response(self, offset, response):
         for route_no in range(_ENTRIES_PER_READ):
             entry = _ROUTE_ENTRY_PATTERN.unpack_from(
                 response.data,
@@ -66,14 +72,19 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             self._add_routing_entry(route_no, offset, *entry)
 
     def get_routes(self, x, y, base_address):
-
+        """
+        :param int x:
+        :param int y:
+        :param int base_address:
+        :rtype: list(~spinn_machine.MulticastRoutingEntry)
+        """
         # Create the read requests
         offset = 0
         for _ in range(_N_READS):
             self._send_request(
                 ReadMemory(
                     x, y, base_address + (offset * 16), UDP_MESSAGE_MAX_SIZE),
-                functools.partial(self.handle_read_response, offset))
+                functools.partial(self.__handle_response, offset))
             offset += _ENTRIES_PER_READ
         self._finish()
         self.check_for_error()

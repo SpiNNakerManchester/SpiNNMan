@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -23,7 +22,8 @@ BOOT_MESSAGE_VERSION = 1
 
 
 class SpinnakerBootMessage(object):
-    """ A message used for booting the board
+    """
+    A message used for booting the board.
     """
     __slots__ = [
         "_data",
@@ -36,20 +36,14 @@ class SpinnakerBootMessage(object):
     def __init__(self, opcode, operand_1, operand_2, operand_3, data=None,
                  offset=0):
         """
-        :param opcode: The operation of this packet
-        :type opcode:\
-            :py:class:`spinnman.messages.spinnaker_boot.SpinnakerBootOpCode`
-        :param operand_1: The first operand
-        :type operand_1: int
-        :param operand_2: The second operand
-        :type operand_2: int
-        :param operand_3: The third operand
-        :type operand_3: int
+        :param SpinnakerBootOpCode opcode: The operation of this packet
+        :param int operand_1: The first operand
+        :param int operand_2: The second operand
+        :param int operand_3: The third operand
         :param data: The optional data, up to 256 words
-        :type data: str
-        :param offset: The offset of the valid data
-        :type offset: int
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :type data: bytes or bytearray
+        :param int offset: The offset of the valid data
+        :raise SpinnmanInvalidParameterException:
             If the opcode is not a valid value
         """
         # pylint: disable=too-many-arguments
@@ -67,53 +61,55 @@ class SpinnakerBootMessage(object):
 
     @property
     def opcode(self):
-        """ The operation of this packet
+        """
+        The operation of this packet.
 
-        :return: The operation code
-        :rtype:\
-            :py:class:`spinnman.messages.spinnaker_boot.SpinnakerBootOpCode`
+        :rtype: SpinnakerBootOpCode
         """
         return self._opcode
 
     @property
     def operand_1(self):
-        """ The first operand
+        """
+        The first operand.
 
-        :return: The operand
         :rtype: int
         """
         return self._operand_1
 
     @property
     def operand_2(self):
-        """ The second operand
+        """
+        The second operand.
 
-        :return: The second operand
         :rtype: int
         """
         return self._operand_2
 
     @property
     def operand_3(self):
-        """ The third operand
+        """
+        The third operand.
 
-        :return: The third operand
         :rtype: int
         """
         return self._operand_3
 
     @property
     def data(self):
-        """ The data
+        """
+        The data, or `None` if no data.
 
-        :return: The data or None if no data
-        :rtype: bytearray
+        :rtype: bytes or bytearray
         """
         return self._data
 
     @property
     def bytestring(self):
-        """ The message as a bytestring
+        """
+        The message as a byte-string.
+
+        :rtype: bytes
         """
         data = b""
         if self._data is not None:
@@ -124,6 +120,11 @@ class SpinnakerBootMessage(object):
 
     @staticmethod
     def from_bytestring(data, offset):
+        """
+        :param bytes data:
+        :param int offset:
+        :rtype: SpinnakerBootMessage
+        """
         (opcode_value, operand_1, operand_2, operand_3) = \
             _PATTERN_2xIIII.unpack_from(data, offset)
         the_data = None

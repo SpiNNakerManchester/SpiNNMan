@@ -1,23 +1,23 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from enum import Enum
 
 
 class SignalType(Enum):
-    """ The type of signal, determined by how it is transmitted
+    """
+    The type of signal, determined by how it is transmitted.
     """
     MULTICAST = 0
     POINT_TO_POINT = 1
@@ -25,12 +25,13 @@ class SignalType(Enum):
 
 
 class Signal(Enum):
-    """ SCP Signals
+    """
+    SCP Signals.
     """
     INITIALISE = (0, SignalType.NEAREST_NEIGHBOUR)
     POWER_DOWN = (1, SignalType.NEAREST_NEIGHBOUR)
     STOP = (2, SignalType.NEAREST_NEIGHBOUR)
-    START = (3, SignalType.NEAREST_NEIGHBOUR)
+    START = (3, SignalType.MULTICAST)
     SYNC0 = (4, SignalType.MULTICAST)
     SYNC1 = (5, SignalType.MULTICAST)
     PAUSE = (6, SignalType.MULTICAST)
@@ -50,11 +51,8 @@ class Signal(Enum):
 
     def __init__(self, value, signal_type, doc=""):
         """
-
-        :param value: The value used for the signal
-        :type value: int
-        :param signal_type: The "type" of the signal
-        :type signal_type: :py:class:`.SignalType`
+        :param int value: The value used for the signal
+        :param SignalType signal_type: The "type" of the signal
         """
         self._value_ = value
         self._signal_type = signal_type

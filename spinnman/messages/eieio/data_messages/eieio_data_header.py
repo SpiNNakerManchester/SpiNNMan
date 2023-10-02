@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
@@ -41,26 +40,22 @@ class EIEIODataHeader(object):
     def __init__(self, eieio_type, tag=0, prefix=None,
                  prefix_type=EIEIOPrefix.LOWER_HALF_WORD,
                  payload_base=None, is_time=False, count=0):
-        """ EIEIO header for data packets
+        """
+        EIEIO header for data packets.
 
-        :param eieio_type: the type of message
-        :type eieio_type:\
-            :py:class:`spinnman.spinnman.messages.eieio.EIEIOType`
-        :param tag: the tag of the message (0 by default)
-        :type tag: int
-        :param prefix: the key prefix of the message or None if not prefixed
+        :param EIEIOType eieio_type: the type of message
+        :param int tag: the tag of the message (0 by default)
+        :param prefix: the key prefix of the message or `None` if not prefixed
         :type prefix: int or None
-        :param prefix_type: the position of the prefix (upper or lower)
-        :type prefix_type:\
-            :py:class:`spinnman.messages.eieio.EIEIOPrefix`
-        :param payload_base: \
-            The base payload to be applied, or None if no base payload
+        :param EIEIOPrefix prefix_type:
+            the position of the prefix (upper or lower)
+        :param payload_base:
+            The base payload to be applied, or `None` if no base payload
         :type payload_base: int or None
-        :param is_time: True if the payloads should be taken to be timestamps,\
-            or False otherwise
-        :type is_time: bool
-        :param count: Count of the number of items in the packet
-        :type count: int
+        :param bool is_time:
+            True if the payloads should be taken to be timestamps, or False
+            otherwise
+        :param int count: Count of the number of items in the packet
         """
         # pylint: disable=too-many-arguments
         self._eieio_type = eieio_type
@@ -111,16 +106,13 @@ class EIEIODataHeader(object):
 
     @staticmethod
     def get_header_size(eieio_type, is_prefix=False, is_payload_base=False):
-        """ Get the size of a header with the given parameters
+        """
+        Get the size of a header with the given parameters.
 
-        :param eieio_type: the type of message
-        :type eieio_type:\
-            :py:class:`spinnman.spinnman.messages.eieio.EIEIOType`
-        :param is_prefix: True if there is a prefix, False otherwise
-        :type is_prefix: bool
-        :param is_payload_base: \
+        :param EIEIOType eieio_type: the type of message
+        :param bool is_prefix: True if there is a prefix, False otherwise
+        :param bool is_payload_base:
             True if there is a payload base, False otherwise
-        :type is_payload_base: bool
         :return: The size of the header in bytes
         :rtype: int
         """
@@ -139,12 +131,11 @@ class EIEIODataHeader(object):
 
     @property
     def bytestring(self):
-        """ Get a bytestring of the header
-
-        :return: The header as a bytestring
-        :rtype: str
         """
+        The byte-string of the header.
 
+        :rtype: bytes
+        """
         # Convert the flags to an int
         data = 0
 
@@ -191,17 +182,14 @@ class EIEIODataHeader(object):
 
     @staticmethod
     def from_bytestring(data, offset):
-        """ Read an eieio data header from a bytestring
-
-        :param data: The bytestring to be read
-        :type data: str
-        :param offset: The offset at which the data starts
-        :type offset: int
-        :return: an EIEIO header
-        :rtype:\
-            :py:class:`spinnman.messages.eieio.data_messages.EIEIODataHeader`
         """
+        Read an EIEIO data header from a byte-string.
 
+        :param bytes data: The byte-string to be read
+        :param int offset: The offset at which the data starts
+        :return: an EIEIO header
+        :rtype: EIEIODataHeader
+        """
         (count, header_data) = _PATTERN_BB.unpack_from(data, offset)
 
         # Read the flags in the header
@@ -219,6 +207,7 @@ class EIEIODataHeader(object):
                 "The header indicates that this is a command header")
 
         # Convert the flags into types
+        # pylint: disable=no-value-for-parameter
         eieio_type = EIEIOType(message_type)
         prefix_type = EIEIOPrefix(format_flag)
 

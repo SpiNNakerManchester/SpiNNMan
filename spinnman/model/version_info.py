@@ -1,29 +1,28 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import re
 import struct
 from time import localtime, asctime
-from six import raise_from
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
 
 
 class VersionInfo(object):
-    """ Decodes SC&MP/SARK version information as returned by the SVER command.
+    """
+    Decodes SC&MP/SARK version information as returned by the SVER command.
     """
     __slots__ = [
         "_build_date",
@@ -36,12 +35,12 @@ class VersionInfo(object):
 
     def __init__(self, version_data, offset=0):
         """
-        :param version_data: \
+        :param bytes version_data:
             bytes from an SCP packet containing version information
-        :param offset: the offset in the bytes from an SCP packet containing\
+        :param int offset:
+            the offset in the bytes from an SCP packet containing
             version information
-        :type version_data: bytearray
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :raise SpinnmanInvalidParameterException:
             If the message does not contain valid version information
         """
         (self._p, self._physical_cpu_id, self._y, self._x, _,
@@ -56,9 +55,9 @@ class VersionInfo(object):
                 self._name, self._hardware = version_data.split("/")
                 self._version_string = version_data
             except ValueError as exception:
-                raise_from(SpinnmanInvalidParameterException(
+                raise SpinnmanInvalidParameterException(
                     "version_data", version_data,
-                    "Incorrect format: {}".format(exception)), exception)
+                    f"Incorrect format: {exception}") from exception
         else:
             name_hardware, _, version = version_data.partition("\0")
             self._version_string = version
@@ -71,73 +70,72 @@ class VersionInfo(object):
 
     @property
     def name(self):
-        """ The name of the software.
+        """
+        The name of the software.
 
-        :return: The name
         :rtype: str
         """
         return self._name
 
     @property
     def version_number(self):
-        """ The version number of the software.
+        """
+        The version number of the software.
 
-        :return: The version
         :rtype: tuple(int, int, int)
         """
         return self._version_number
 
     @property
     def hardware(self):
-        """ The hardware being run on.
+        """
+        The hardware being run on.
 
-        :return: The hardware
         :rtype: str
         """
         return self._hardware
 
     @property
     def x(self):
-        """ The x-coordinate of the chip where the information was obtained.
+        """
+        The X-coordinate of the chip where the information was obtained.
 
-        :return: the x-coordinate
         :rtype: int
         """
         return self._x
 
     @property
     def y(self):
-        """ The y-coordinate of the chip where the information was obtained.
+        """
+        The Y-coordinate of the chip where the information was obtained.
 
-        :return: The y-coordinate
         :rtype: int
         """
         return self._y
 
     @property
     def p(self):
-        """ The processor ID of the processor where the information was\
-            obtained.
+        """
+        The processor ID of the processor where the information was obtained.
 
-        :return: the processor ID
         :rtype: int
         """
         return self._p
 
     @property
     def build_date(self):
-        """ The build date of the software.
+        """
+        The build date of the software, in seconds since 1st January 1970.
 
-        :return: The number of seconds since 1st January 1970
         :rtype: int
         """
         return self._build_date
 
     @property
     def version_string(self):
-        """ The version information as text.
+        """
+        The version information as text.
 
-        :return: The version information
         :rtype: str
         """
         return self._version_string

@@ -1,20 +1,18 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
-from past.builtins import xrange
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
 from .eieio_command_message import EIEIOCommandMessage
@@ -26,10 +24,11 @@ _PATTERN_xxBBI = struct.Struct("<xxBBI")
 
 
 class HostDataRead(EIEIOCommandMessage):
-    """ Packet sent by the host computer to the SpiNNaker system in the\
-        context of the buffering output technique to signal that the host has\
-        completed reading data from the output buffer, and that such space can\
-        be considered free to use again
+    """
+    Packet sent by the host computer to the SpiNNaker system in the
+    context of the buffering output technique to signal that the host has
+    completed reading data from the output buffer, and that such space can
+    be considered free to use again.
     """
     __slots__ = [
         "_acks",
@@ -53,12 +52,10 @@ class HostDataRead(EIEIOCommandMessage):
             raise SpinnmanInvalidPacketException(
                 "SpinnakerRequestReadData",
                 "The format for a SpinnakerRequestReadData packet is "
-                "invalid: {0:d} request(s), {1:d} space(s) read "
-                "defined, {2:d} region(s) defined, {3:d} channel(s) "
-                "defined".format(
-                    n_requests, len(space_read), len(region_id), len(channel)))
-        super(HostDataRead, self).__init__(EIEIOCommandHeader(
-            EIEIO_COMMAND_IDS.HOST_DATA_READ))
+                f"invalid: {n_requests} request(s), {len(space_read)} "
+                f"space(s) read defined, {len(region_id)} region(s) defined, "
+                f"{len(channel)} channel(s) defined")
+        super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ))
         self._header = _HostDataReadHeader(n_requests, sequence_no)
         self._acks = _HostDataReadAck(channel, region_id, space_read)
 
@@ -93,7 +90,7 @@ class HostDataRead(EIEIOCommandMessage):
         region_id = list()
         space_read = list()
 
-        for _ in xrange(n_requests):
+        for _ in range(n_requests):
             channel_ack, region_id_ack, space_read_ack = \
                 _PATTERN_xxBBI.unpack_from(data, offset)
             channel.append(channel_ack)
@@ -105,18 +102,19 @@ class HostDataRead(EIEIOCommandMessage):
 
     @property
     def bytestring(self):
-        byte_string = super(HostDataRead, self).bytestring
+        byte_string = super().bytestring
         n_requests = self.n_requests
         byte_string += _PATTERN_BB.pack(n_requests, self.sequence_no)
-        for i in xrange(n_requests):
+        for i in range(n_requests):
             byte_string += _PATTERN_xxBBI.pack(
                 self.channel(i), self.region_id(i), self.space_read(i))
         return byte_string
 
 
 class _HostDataReadHeader(object):
-    """ The HostDataRead contains itself on header with the number of requests\
-        and a sequence number
+    """
+    The HostDataRead contains itself on header with the number of requests
+    and a sequence number.
     """
     __slots__ = [
         "_n_requests",
@@ -136,7 +134,8 @@ class _HostDataReadHeader(object):
 
 
 class _HostDataReadAck(object):
-    """ Contains a set of acks which refer to each of the channels read
+    """
+    Contains a set of ACKs which refer to each of the channels read.
     """
     __slots__ = [
         "_channel",

@@ -1,37 +1,49 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from spinnman.messages.scp.impl import SDRAMAlloc
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess):
-    """ A process for allocating a block of SDRAM on a SpiNNaker chip.
+    """
+    A process for allocating a block of SDRAM on a SpiNNaker chip.
     """
     __slots__ = [
         "_base_address"]
 
     def __init__(self, connection_selector):
-        super(MallocSDRAMProcess, self).__init__(connection_selector)
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        """
+        super().__init__(connection_selector)
         self._base_address = None
 
     def _handle_sdram_alloc_response(self, response):
         self._base_address = response.base_address
 
     def malloc_sdram(self, x, y, size, app_id, tag):
-        """ Allocate space in the SDRAM space.
+        """
+        Allocate space in the SDRAM space.
+
+        :param int x:
+        :param int y:
+        :param int size:
+        :param int app_id:
+        :param int tag:
         """
         # pylint: disable=too-many-arguments
         self._send_request(SDRAMAlloc(x, y, app_id, size, tag),
@@ -41,4 +53,9 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess):
 
     @property
     def base_address(self):
+        """
+        The address of the allocated memory block.
+
+        :rtype: int
+        """
         return self._base_address

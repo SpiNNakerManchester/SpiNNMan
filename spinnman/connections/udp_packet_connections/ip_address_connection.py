@@ -1,46 +1,39 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-from .udp_connection import UDPConnection
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+from contextlib import suppress
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
+from .udp_connection import UDPConnection
 
 _BOOTROM_SPINN_PORT = 54321  # Matches SPINN_PORT in spinnaker_bootROM
 
 
 class IPAddressesConnection(UDPConnection):
-    """ A connection that detects any UDP packet that is transmitted by\
-        SpiNNaker boards prior to boot
+    """
+    A connection that detects any UDP packet that is transmitted by
+    SpiNNaker boards prior to boot.
     """
     __slots__ = []
 
     def __init__(self, local_host=None,
                  local_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
-        super(IPAddressesConnection, self).__init__(
-            local_host=local_host, local_port=local_port)
-
-    def supports_sends_message(self, message):  # @UnusedVariable
-        # pylint: disable=unused-argument
-        return False
+        super().__init__(local_host=local_host, local_port=local_port)
 
     def receive_ip_address(self, timeout=None):
-        try:
+        with suppress(Exception):
             (_, (ip_address, port)) = self.receive_with_address(timeout)
             if port == _BOOTROM_SPINN_PORT:
                 return ip_address
-        except Exception:
-            pass
         return None
 
     def __repr__(self):

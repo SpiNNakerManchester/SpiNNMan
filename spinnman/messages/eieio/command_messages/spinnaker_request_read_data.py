@@ -1,20 +1,18 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
-from past.builtins import xrange
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
 from .eieio_command_message import EIEIOCommandMessage
@@ -29,9 +27,10 @@ _PATTERN_BBBBII = struct.Struct("<BBBBII")
 
 
 class SpinnakerRequestReadData(EIEIOCommandMessage):
-    """ Message used in the context of the buffering output mechanism which is\
-        sent from the SpiNNaker system to the host computer to signal that\
-        some data is available to be read
+    """
+    Message used in the context of the buffering output mechanism which is
+    sent from the SpiNNaker system to the host computer to signal that
+    some data is available to be read.
     """
     __slots__ = [
         "_header",
@@ -65,7 +64,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
                     n_requests, len(start_address), len(space_to_be_read),
                     len(region_id), len(channel)))
 
-        super(SpinnakerRequestReadData, self).__init__(EIEIOCommandHeader(
+        super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA))
         self._header = _SpinnakerRequestReadDataHeader(
             x, y, p, n_requests, sequence_no)
@@ -120,7 +119,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         start_address = list()
         space_to_be_read = list()
 
-        for i in xrange(n_requests):
+        for i in range(n_requests):
             if i == 0:
                 request_channel, request_region_id, request_start_address, \
                     request_space_to_be_read = _PATTERN_BBII.unpack_from(
@@ -141,12 +140,12 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
 
     @property
     def bytestring(self):
-        byte_string = super(SpinnakerRequestReadData, self).bytestring
+        byte_string = super().bytestring
         byte_string += _PATTERN_BB.pack(self.x, self.y)
         n_requests = self.n_requests
         processor_and_request = (self.p << 3) | n_requests
 
-        for i in xrange(n_requests):
+        for i in range(n_requests):
             if i == 0:
                 byte_string += _PATTERN_BBBBII.pack(
                     processor_and_request, self.sequence_no,
@@ -160,8 +159,9 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
 
 
 class _SpinnakerRequestReadDataHeader(object):
-    """ Contains the position of the core in the machine (x, y, p), the number\
-        of requests and a sequence number
+    """
+    Contains the position of the core in the machine (x, y, p), the number
+    of requests and a sequence number.
     """
     __slots__ = [
         "_n_requests",
@@ -198,7 +198,8 @@ class _SpinnakerRequestReadDataHeader(object):
 
 
 class _SpinnakerRequestReadDataRequest(object):
-    """ Contains a set of requests which refer to the channels used
+    """
+    Contains a set of requests which refer to the channels used.
     """
     __slots__ = [
         "_channel",

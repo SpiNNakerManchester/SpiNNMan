@@ -1,24 +1,24 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from .app_stop import AppStop
+from .app_copy_run import AppCopyRun
 from .application_run import ApplicationRun
 from .bmp_get_version import BMPGetVersion
-from .bmp_set_led import BMPSetLed
 from .check_ok_response import CheckOKResponse
 from .count_state import CountState
+from .do_sync import DoSync
 from .fill_request import FillRequest
 from .flood_fill_data import FloodFillData
 from .flood_fill_end import FloodFillEnd
@@ -30,7 +30,6 @@ from .iptag_get import IPTagGet
 from .iptag_get_info import IPTagGetInfo
 from .iptag_set import IPTagSet
 from .iptag_set_tto import IPTagSetTTO
-from .read_adc import ReadADC
 from .read_fpga_register import ReadFPGARegister
 from .read_link import ReadLink
 from .read_memory import ReadMemory
@@ -41,7 +40,6 @@ from .router_init import RouterInit
 from .sdram_alloc import SDRAMAlloc
 from .sdram_de_alloc import SDRAMDeAlloc
 from .send_signal import SendSignal
-from .set_led import SetLED
 from .set_power import SetPower
 from .write_fpga_register import WriteFPGARegister
 from .write_link import WriteLink
@@ -49,15 +47,14 @@ from .write_memory import WriteMemory
 from .fixed_route_init import FixedRouteInit
 from .fixed_route_read import FixedRouteRead
 
-__all__ = ["AppStop", "ApplicationRun",
-           "BMPSetLed", "BMPGetVersion",
-           "CheckOKResponse", "GetChipInfo", "CountState",
+__all__ = ["AppStop", "ApplicationRun", "AppCopyRun",
+           "BMPGetVersion", "CheckOKResponse", "GetChipInfo", "CountState",
+           "DoSync",
            "FloodFillData", "FillRequest",
            "FloodFillEnd", "FloodFillStart",
            "IPTagClear", "IPTagGet", "IPTagGetInfo",
-           "IPTagSet", "IPTagSetTTO", "SetLED",
-           "SetPower", "ReadADC",
-           "ReadFPGARegister", "ReadLink",
+           "IPTagSet", "IPTagSetTTO",
+           "SetPower", "ReadFPGARegister", "ReadLink",
            "ReadMemory", "ReverseIPTagSet",
            "RouterAlloc", "RouterClear",
            "RouterInit", "SDRAMAlloc",

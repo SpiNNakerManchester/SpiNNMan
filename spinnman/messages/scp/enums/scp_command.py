@@ -1,23 +1,23 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from enum import Enum
 
 
 class SCPCommand(Enum):
-    """ The SCP Commands
+    """
+    The SCP Commands.
     """
     CMD_VER = (0, "Get SCAMP Version")
     CMD_RUN = 1
@@ -30,7 +30,7 @@ class SCPCommand(Enum):
     CMD_LINK_WRITE = (18, "Write neighbouring chip's memory.")
     CMD_AR = 19
     CMD_NNP = (20, "Send a Nearest-Neighbour packet")
-    CMD_P2PC = 21
+    CMD_APP_COPY_RUN = (21, "Copy a binary from an adjacent chip and start it")
     CMD_SIG = (22, "Send a Signal")
     CMD_FFD = (23, "Send Flood-Fill Data")
     CMD_AS = 24
@@ -41,6 +41,7 @@ class SCPCommand(Enum):
     CMD_RTR = (29, "Initialise the router")
     CMD_DPRI = (30, "Dropped Packet Reinjection setup")
     CMD_INFO = (31, "Get Chip Summary Information")
+    CMD_SYNC = (32, "Control sending of synchronization messages")
     CMD_BMP_INFO = (48, "Get BMP info structures")
     CMD_FLASH_COPY = 49
     CMD_FLASH_ERASE = 50

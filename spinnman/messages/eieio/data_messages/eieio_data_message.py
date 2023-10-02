@@ -1,20 +1,19 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-import math
 import struct
+from spinn_utilities.overrides import overrides
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterException)
 from spinnman.messages.eieio import (
@@ -31,7 +30,8 @@ _TWO_WORDS = struct.Struct("<II")
 
 
 class EIEIODataMessage(AbstractEIEIOMessage):
-    """ An EIEIO Data message
+    """
+    An EIEIO Data message.
     """
     __slots__ = [
         "_data",
@@ -42,15 +42,10 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     def __init__(self, eieio_header, data=None, offset=0):
         """
-        :param eieio_header: The header of the message
-        :type eieio_header:\
-            :py:class:`spinnman.messages.eieio.data_messages.EIEIODataHeader`
-        :param data: Optional data contained within the packet
-        :type data: str
-        :param offset: Optional offset where the valid data starts
-        :type offset: int
+        :param EIEIODataHeader eieio_header: The header of the message
+        :param bytes data: Optional data contained within the packet
+        :param int offset: Optional offset where the valid data starts
         """
-
         # The header
         self._header = eieio_header
 
@@ -67,16 +62,18 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             eieio_type, count=0, data=None, offset=0, key_prefix=None,
             payload_prefix=None, timestamp=None,
             prefix_type=EIEIOPrefix.LOWER_HALF_WORD):
-        """ Create a data message
+        """
+        Create a data message.
 
-        :param eieio_type: The EIEIOType of the message
-        :param count: The number of items in the message
-        :param data: The data in the message
-        :param offset: The offset in the data where the actual data starts
-        :param key_prefix: The prefix of the keys
-        :param payload_prefix: The prefix of the payload
-        :param timestamp: The timestamp of the packet
-        :param prefix_type: The type of the key prefix if 16-bits
+        :param EIEIOType eieio_type: The type of the message
+        :param int count: The number of items in the message
+        :param bytes data: The data in the message
+        :param int offset:
+            The offset in the data where the actual data starts
+        :param int key_prefix: The prefix of the keys
+        :param int payload_prefix: The prefix of the payload
+        :param int timestamp: The timestamp of the packet
+        :param EIEIOPrefix prefix_type: The type of the key prefix if 16-bits
         """
         # pylint: disable=too-many-arguments
         payload_base = payload_prefix
@@ -90,24 +87,26 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             data=data, offset=offset)
 
     @property
+    @overrides(AbstractEIEIOMessage.eieio_header)
     def eieio_header(self):
+        """
+        :rtype: EIEIODataHeader
+        """
         return self._header
 
     @staticmethod
     def min_packet_length(
             eieio_type, is_prefix=False, is_payload_base=False,
             is_timestamp=False):
-        """ The minimum length of a message with the given header, in bytes
+        """
+        The minimum length of a message with the given header, in bytes.
 
-        :param eieio_type: the type of message
-        :type eieio_type:\
-            :py:class:`spinnman.spinnman.messages.eieio.EIEIOType`
-        :param is_prefix: True if there is a prefix, False otherwise
-        :type is_prefix: bool
-        :param is_payload_base: \
+        :param EIEIOType eieio_type: the type of message
+        :param bool is_prefix: True if there is a prefix, False otherwise
+        :param bool is_payload_base:
             True if there is a payload base, False otherwise
-        :type is_payload_base: bool
-        :param is_timestamp: True if there is a timestamp, False otherwise
+        :param bool is_timestamp:
+            True if there is a timestamp, False otherwise
         :return: The minimum size of the packet in bytes
         :rtype: int
         """
@@ -116,49 +115,55 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         return header_size + eieio_type.payload_bytes
 
     def get_min_packet_length(self):
-        """ Get the minimum length of a message instance in bytes
+        """
+        Get the minimum length of a message instance in bytes.
 
         :rtype: int
         """
-        return EIEIODataMessage.min_packet_length(
+        return self.min_packet_length(
             eieio_type=self._header.eieio_type,
             is_prefix=self._header.prefix is not None,
             is_payload_base=self._header.payload_base is not None)
 
     @property
     def max_n_elements(self):
-        """ The maximum number of elements that can fit in the packet
+        """
+        The maximum number of elements that can fit in the packet.
 
         :rtype: int
         """
         ty = self._header.eieio_type
-        return int(math.floor(
-            (UDP_MESSAGE_MAX_SIZE - self._header.size) /
-            (ty.key_bytes + ty.payload_bytes)))
+        return (UDP_MESSAGE_MAX_SIZE - self._header.size) // (
+            ty.key_bytes + ty.payload_bytes)
 
     @property
     def n_elements(self):
-        """ The number of elements in the packet
+        """
+        The number of elements in the packet.
+
+        :rtype: int
         """
         return self._header.count
 
     @property
     def size(self):
-        """ The size of the packet with the current contents
+        """
+        The size of the packet with the current contents.
+
+        :rtype: int
         """
         ty = self._header.eieio_type
         return (self._header.size +
                 (ty.key_bytes + ty.payload_bytes) * self._header.count)
 
     def add_key_and_payload(self, key, payload):
-        """ Adds a key and payload to the packet
+        """
+        Adds a key and payload to the packet.
 
-        :param key: The key to add
-        :type key: int
-        :param payload: The payload to add
-        :type payload: int
-        :raise SpinnmanInvalidParameterException:\
-            If the key or payload is too big for the format, or the format\
+        :param int key: The key to add
+        :param int payload: The payload to add
+        :raise SpinnmanInvalidParameterException:
+            If the key or payload is too big for the format, or the format
             doesn't expect a payload
         """
         if key > self._header.eieio_type.max_value:
@@ -172,17 +177,16 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                 "Larger than the maximum allowed of {}".format(
                     self._header.eieio_type.max_value))
 
-        EIEIODataMessage.add_element(
-            self, KeyPayloadDataElement(
-                key, payload, self._header.is_time))
+        self.add_element(KeyPayloadDataElement(
+            key, payload, self._header.is_time))
 
     def add_key(self, key):
-        """ Add a key to the packet
+        """
+        Add a key to the packet.
 
-        :param key: The key to add
-        :type key: int
-        :raise SpinnmanInvalidParameterException:\
-            If the key is too big for the format, or the format expects a\
+        :param int key: The key to add
+        :raise SpinnmanInvalidParameterException:
+            If the key is too big for the format, or the format expects a
             payload
         """
         if key > self._header.eieio_type.max_value:
@@ -190,18 +194,17 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                 "key", key,
                 "Larger than the maximum allowed of {}".format(
                     self._header.eieio_type.max_value))
-        EIEIODataMessage.add_element(self, KeyDataElement(key))
+        self.add_element(KeyDataElement(key))
 
     def add_element(self, element):
-        """ Add an element to the message.  The correct type of element must\
-            be added, depending on the header values
+        """
+        Add an element to the message.  The correct type of element must
+        be added, depending on the header values.
 
-        :param element: The element to be added
-        :type element:\
-            :py:class:`spinnman.messages.eieio.data_messages.AbstractDataElement`
-        :raise SpinnmanInvalidParameterException: \
+        :param AbstractDataElement element: The element to be added
+        :raise SpinnmanInvalidParameterException:
             If the element is not compatible with the header
-        :raise SpinnmanInvalidPacketException: \
+        :raise SpinnmanInvalidPacketException:
             If the message was created to read data
         """
         if self._data is not None:
@@ -213,10 +216,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def is_next_element(self):
-        """ Determine if there is another element to be read
+        """
+        Whether there is another element to be read.
 
-        :return: True if the message was created with data, and there are more\
-            elements to be read
         :rtype: bool
         """
         return (self._data is not None and
@@ -224,11 +226,11 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def next_element(self):
-        """ The next element to be read, or None if no more elements.  The\
-            exact type of element returned depends on the packet type
+        """
+        The next element to be read, or `None` if no more elements.
+        The exact type of element returned depends on the packet type.
 
-        :rtype:\
-            :py:class:`spinnman.messages.eieio.data_messages.AbstractDataElement`
+        :rtype: AbstractDataElement
         """
         if not self.is_next_element:
             return None
@@ -265,15 +267,14 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         return KeyPayloadDataElement(key, payload, self._header.is_time)
 
     @property
+    @overrides(AbstractEIEIOMessage.bytestring)
     def bytestring(self):
         return self._header.bytestring + self._elements
 
     def __str__(self):
         if self._data is not None:
-            return "EIEIODataMessage:{}:{}".format(
-                self._header, self._header.count)
-        return "EIEIODataMessage:{}:{}".format(
-            self._header, self._elements)
+            return f"EIEIODataMessage:{self._header}:{self._header.count}"
+        return f"EIEIODataMessage:{self._header}:{self._elements}"
 
     def __repr__(self):
         return self.__str__()

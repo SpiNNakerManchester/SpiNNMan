@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinnman import constants
@@ -27,7 +26,8 @@ _PATTERN = struct.Struct(
 
 
 class ADCInfo(object):
-    """ Container for the ADC data thats been retrieved from an FPGA.
+    """
+    Container for the ADC data that's been retrieved from an FPGA.
     """
     __slots__ = [
         "_fan_0",
@@ -45,9 +45,9 @@ class ADCInfo(object):
 
     def __init__(self, adc_data, offset):
         """
-        :param adc_data: bytes from an SCP packet containing ADC information
-        :type adc_data: str
-        :raise spinnman.exceptions.SpinnmanInvalidParameterException: \
+        :param bytes adc_data:
+            bytes from an SCP packet containing ADC information
+        :raise SpinnmanInvalidParameterException:
             If the message does not contain valid ADC information
         """
         data = _PATTERN.unpack_from(adc_data, offset)
@@ -79,7 +79,8 @@ class ADCInfo(object):
 
     @property
     def voltage_1_2c(self):
-        """ Actual voltage of the 1.2V c supply rail
+        """
+        Actual voltage of the 1.2V c supply rail.
 
         :rtype: float
         """
@@ -87,7 +88,8 @@ class ADCInfo(object):
 
     @property
     def voltage_1_2b(self):
-        """ Actual voltage of the 1.2V b supply rail
+        """
+        Actual voltage of the 1.2V b supply rail.
 
         :rtype: float
         """
@@ -95,7 +97,8 @@ class ADCInfo(object):
 
     @property
     def voltage_1_2a(self):
-        """ Actual voltage of the 1.2V a supply rail
+        """
+        Actual voltage of the 1.2V a supply rail.
 
         :rtype: float
         """
@@ -103,7 +106,8 @@ class ADCInfo(object):
 
     @property
     def voltage_1_8(self):
-        """ Actual voltage of the 1.8V supply rail
+        """
+        Actual voltage of the 1.8V supply rail.
 
         :rtype: float
         """
@@ -111,7 +115,8 @@ class ADCInfo(object):
 
     @property
     def voltage_3_3(self):
-        """ Actual voltage of the 3.3V supply rail
+        """
+        Actual voltage of the 3.3V supply rail.
 
         :rtype: float
         """
@@ -119,7 +124,8 @@ class ADCInfo(object):
 
     @property
     def voltage_supply(self):
-        """ Actual voltage of the main power supply (nominally 12V).
+        """
+        Actual voltage of the main power supply (nominally 12V).
 
         :rtype: float
         """
@@ -127,7 +133,8 @@ class ADCInfo(object):
 
     @property
     def temp_top(self):
-        """ temperature top
+        """
+        Temperature top.
 
         :rtype: float
         """
@@ -135,7 +142,8 @@ class ADCInfo(object):
 
     @property
     def temp_btm(self):
-        """ temperature bottom
+        """
+        Temperature bottom.
 
         :rtype: float
         """
@@ -143,7 +151,8 @@ class ADCInfo(object):
 
     @property
     def temp_ext_0(self):
-        """ temperature external 0
+        """
+        Temperature external 0.
 
         :rtype: float or None
         """
@@ -151,7 +160,8 @@ class ADCInfo(object):
 
     @property
     def temp_ext_1(self):
-        """ temperature external 1
+        """
+        Temperature external 1.
 
         :rtype: float or None
         """
@@ -159,7 +169,8 @@ class ADCInfo(object):
 
     @property
     def fan_0(self):
-        """ fan 0
+        """
+        Fan 0.
 
         :rtype: float or None
         """
@@ -167,7 +178,8 @@ class ADCInfo(object):
 
     @property
     def fan_1(self):
-        """ fan 1
+        """
+        Fan 1.
 
         :rtype: float or None
         """

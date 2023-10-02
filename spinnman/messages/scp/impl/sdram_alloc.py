@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinn_utilities.overrides import overrides
@@ -25,46 +24,54 @@ from spinnman.exceptions import (
 
 _ONE_WORD = struct.Struct("<I")
 
+FLAG_RETRY_TAG = 4
+
 
 class SDRAMAlloc(AbstractSCPRequest):
-    """ An SCP Request to allocate space in the SDRAM space
+    """
+    An SCP Request to allocate space in the SDRAM space.
     """
     __slots__ = [
         "_size"]
 
-    def __init__(self, x, y, app_id, size, tag=None):
+    def __init__(self, x, y, app_id, size, tag=None, retry_tag=True):
         """
-        :param x: \
+        :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :type x: int
-        :param y: \
+        :param int y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :type y: int
-        :param app_id: The ID of the application, between 0 and 255
-        :type app_id: int
-        :param size: The size in bytes of memory to be allocated
-        :type size: int
-        :param tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can be\
-            looked up by a SpiNNaker application to discover the address of\
+        :param int app_id: The ID of the application, between 0 and 255
+        :param int size: The size in bytes of memory to be allocated
+        :param int tag:
+            The tag for the SDRAM, a 8-bit (chip-wide) tag that can be
+            looked up by a SpiNNaker application to discover the address of
             the allocated block. If `0` then no tag is applied.
-        :type tag: int
+        :param bool retry_tag:
+            If a tag is used, add a safety check to retry the tag.  This can
+            avoid issues with re-allocating memory on a retry message.
         """
         # pylint: disable=too-many-arguments
+        extra_flag = 0
+        if retry_tag and tag is not None:
+            extra_flag = FLAG_RETRY_TAG
+
         if tag is None:
             tag = 0
-        elif not(0 <= tag < 256):
+        elif not (0 <= tag < 256):
             raise SpinnmanInvalidParameterException(
                 "tag",
                 "The tag param needs to be between 0 and 255, or None (in "
                 "which case 0 will be used by default)", str(tag))
 
-        super(SDRAMAlloc, self).__init__(
+        # pylint: disable=unsupported-binary-operation
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
                 destination_chip_y=y),
             SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
             argument_1=(
+                (extra_flag << 16) |
                 (app_id << 8) |
                 AllocFree.ALLOC_SDRAM.value),  # @UndefinedVariable
             argument_2=size, argument_3=tag)
@@ -76,14 +83,15 @@ class SDRAMAlloc(AbstractSCPRequest):
 
 
 class _SCPSDRAMAllocResponse(AbstractSCPResponse):
-    """ An SCP response to a request to allocate space in SDRAM
+    """
+    An SCP response to a request to allocate space in SDRAM.
     """
     __slots__ = [
         "_base_address",
         "_size"]
 
     def __init__(self, size):
-        super(_SCPSDRAMAllocResponse, self).__init__()
+        super().__init__()
         self._size = size
         self._base_address = None
 
@@ -100,11 +108,12 @@ class _SCPSDRAMAllocResponse(AbstractSCPResponse):
         if self._base_address == 0:
             raise SpinnmanInvalidParameterException(
                 "SDRAM Allocation response base address", self._base_address,
-                "Could not allocate {} bytes of SDRAM".format(self._size))
+                f"Could not allocate {self._size} bytes of SDRAM")
 
     @property
     def base_address(self):
-        """ The base address allocated, or 0 if none
+        """
+        The base address allocated, or 0 if none.
 
         :rtype: int
         """
