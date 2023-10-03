@@ -329,3 +329,24 @@ class CPUInfo(object):
         return "{}:{}:{:02n} ({:02n}) {:18} {:16s} {:3n}".format(
             self.x, self.y, self.p, self.physical_cpu_id, self._state.name,
             self._application_name, self._application_id)
+
+    def get_status_string(self):
+        """
+        Get a string indicating the status of the given core.
+
+        :rtype: str
+        """
+        if self.state == CPUState.RUN_TIME_EXCEPTION:
+            return (
+                f"{self._x}:{self._y}:{self._p} " 
+                f"(ph: {self._physical_cpu_id}) "
+                f"in state {self._state.name}:{self._run_time_error.name}\n"
+                f"    r0={self._registers[0]}, r1={self._registers[1]}, "
+                f"r2={self._registers[2]}, r3={self._registers[3]}\n"
+                f"    r4={self._registers[4]}, r5={self._registers[5]}, "
+                f"r6={self._registers[6]}, r7={self._registers[7]}\n"
+                f"    PSR={self._processor_state_register}, "
+                f"SP={self._stack_pointer}, LR={self._link_register}\n")
+        else:
+            return (
+                f"{self._x}:{self._y}:{self._p} in state {self._state.name}\n")
