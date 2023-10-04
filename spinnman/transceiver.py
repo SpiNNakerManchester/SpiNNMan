@@ -921,6 +921,26 @@ class Transceiver(AbstractContextManager):
         cpu_infos = self.get_cpu_infos(core_subsets)
         return cpu_infos.get_cpu_info(x, y, p)
 
+    def get_region_base_address(self, x, y, p):
+        """
+        Gets the base address of the Region Table
+        :param int x: The x-coordinate of the chip containing the processor
+        :param int y: The y-coordinate of the chip containing the processor
+        :param int p: The ID of the processor to get the address
+        :return: The adddress of the Region table for the selected core
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If x, y, p is not a valid processor
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        return self.read_user(x, y, p, 0)
+
     def get_iobuf(self, core_subsets=None):
         """
         Get the contents of the IOBUF buffer for a number of processors.
