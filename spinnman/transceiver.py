@@ -42,7 +42,7 @@ from spinnman.constants import (
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
     ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES)
+    BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
@@ -113,12 +113,30 @@ _ONE_WORD = struct.Struct("<I")
 _ONE_LONG = struct.Struct("<Q")
 _EXECUTABLE_ADDRESS = 0x67800000
 
+_POWER_CYCLE_WARNING = (
+    "When power-cycling a board, it is recommended that you wait for 30 "
+    "seconds before attempting a reboot. Therefore, the tools will now "
+    "wait for 30 seconds. If you wish to avoid this wait, please set "
+    "reset_machine_on_startup = False in the [Machine] section of the "
+    "relevant configuration (cfg) file.")
+
+_POWER_CYCLE_FAILURE_WARNING = (
+    "The end user requested the power-cycling of the board. But the "
+    "tools did not have the required BMP connection to facilitate a "
+    "power-cycling, and therefore will not do so. please set the "
+    "bmp_names accordingly in the [Machine] section of the relevant "
+    "configuration (cfg) file. Or use a machine assess process which "
+    "provides the BMP data (such as a spalloc system) or finally set "
+    "reset_machine_on_startup = False in the [Machine] section of the "
+    "relevant configuration (cfg) file to avoid this warning in future.")
+
 
 def create_transceiver_from_hostname(
         hostname: Optional[str], version: int, *,
         bmp_connection_data: Optional[BMPConnectionData] = None,
         number_of_boards: Optional[int] = None,
-        auto_detect_bmp: bool = False) -> 'Transceiver':
+        auto_detect_bmp: bool = False,
+        power_cycle: bool =False) -> 'Transceiver':
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -143,6 +161,7 @@ def create_transceiver_from_hostname(
         automatically determined from the board IP address
     :param scamp_connections:
         the list of connections used for SCAMP communications
+    :param bool power_cycle: If True will power cycle the machine:
     :return: The created transceiver
     :rtype: Transceiver
     :raise SpinnmanIOException:
@@ -183,7 +202,8 @@ def create_transceiver_from_hostname(
     # handle the boot connection
     connections.append(BootConnection(remote_host=hostname))
 
-    return Transceiver(version, connections=connections)
+    return Transceiver(version, connections=connections,
+                       power_cycle=power_cycle)
 
 
 class Transceiver(AbstractContextManager):
@@ -220,12 +240,14 @@ class Transceiver(AbstractContextManager):
         "_width")
 
     def __init__(self, version: int,
-                 connections: Optional[List[Connection]] = None):
+                 connections: Optional[List[Connection]] = None,
+                 power_cycle: bool =False):
         """
         :param int version: The version of the board being connected to
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
+        :param bool power_cycle: If True will power cycle the machine:
         :raise SpinnmanIOException:
             If there is an error communicating with the board, or if no
             connections to the board can be found (if connections is ``None``)
@@ -286,6 +308,11 @@ class Transceiver(AbstractContextManager):
         self.__check_bmp_connection()
 
         self._machine_off = False
+
+        if power_cycle:
+            self._power_off_machine()
+        self._ensure_board_is_ready()
+
 
     def _where_is_xy(self, x: int, y: int) -> str:
         """
@@ -685,7 +712,7 @@ class Transceiver(AbstractContextManager):
         # version is irrelevant
         return version[1] > _SCAMP_VERSION[1]
 
-    def ensure_board_is_ready(
+    def _ensure_board_is_ready(
             self, n_retries: int = 5, extra_boot_values: Optional[Dict[
             SystemVariableDefinition, object]] = None) -> VersionInfo:
         """
@@ -699,7 +726,6 @@ class Transceiver(AbstractContextManager):
             This should only be used for values which are not standard
             based on the board version.
         :return: The version identifier
-        :rtype: VersionInfo
         :raise SpinnmanIOException:
             * If there is a problem booting the board
             * If the version of software on the board is not compatible with
@@ -756,8 +782,6 @@ class Transceiver(AbstractContextManager):
         # Update the connection selector so that it can ask for processor ids
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._scamp_connections)
-
-        return version_info
 
     def __is_default_destination(self, version_info: VersionInfo) -> bool:
         return (version_info.x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
@@ -1099,46 +1123,22 @@ class Transceiver(AbstractContextManager):
         """
         Power on the whole machine.
 
-        :rtype bool
         :return success of failure to power on machine
         """
-        if self._bmp_connection is None:
-            logger.warning("No BMP connections, so can't power on")
-            return False
-        self.power_on()
-        return True
-
-    def power_on(self, boards: Union[int, Iterable[int]] = 0):
-        """
-        Power on a set of boards in the machine.
-
-        :param boards: The board or boards to power on
-        :type boards: list(int) or int
-        """
-        self._power(PowerCommand.POWER_ON, boards)
+        self._power(PowerCommand.POWER_ON)
+        # Sleep for 5 seconds as the machine has just been powered on
+        time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
     def power_off_machine(self) -> bool:
         """
         Power off the whole machine.
 
-        :rtype bool
         :return success or failure to power off the machine
         """
-        if self._bmp_connection is None:
-            logger.warning("No BMP connections, so can't power off")
-            return False
-        logger.info("Turning off machine")
-        self.power_off()
-        return True
-
-    def power_off(self, boards: Union[int, Iterable[int]] = 0):
-        """
-        Power off a set of boards in the machine.
-
-        :param boards: The board or boards to power off
-        :type boards: list(int) or int
-        """
-        self._power(PowerCommand.POWER_OFF, boards)
+        self._power(PowerCommand.POWER_OFF)
+        logger.warning(_POWER_CYCLE_WARNING)
+        time.sleep(POWER_CYCLE_WAIT_TIME_IN_SECONDS)
+        logger.warning("Power cycle wait complete")
 
     def _bmp_call(self, req: AbstractSCPRequest[R], **kwargs) -> R:
         """
@@ -1152,27 +1152,19 @@ class Transceiver(AbstractContextManager):
             self._bmp_selector, **kwargs)
         return proc.execute(req)
 
-    def _power(
-            self, power_command: PowerCommand,
-            boards: Union[int, Iterable[int]] = 0):
+    def _power(self, power_command: PowerCommand):
         """
         Send a power request to the machine.
 
         :param PowerCommand power_command: The power command to send
-        :param boards: The board or boards to send the command to
-        :type boards: list(int) or int
         """
         timeout = (
             BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
             else BMP_TIMEOUT)
-        self._bmp_call(SetPower(power_command, boards),
+        self._bmp_call(SetPower(power_command, self._bmp_connection.boards),
                        timeout=timeout, n_retries=0)
         self._machine_off = power_command == PowerCommand.POWER_OFF
-
-        # Sleep for 5 seconds if the machine has just been powered on
-        if not self._machine_off:
-            time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
     def read_fpga_register(
             self, fpga_num: int, register: int, board: int = 0) -> int:
@@ -2034,7 +2026,7 @@ class Transceiver(AbstractContextManager):
         """
         if self._bmp_connection is not None:
             if get_config_bool("Machine", "turn_off_machine"):
-                self.power_off_machine()
+                self._power_off_machine()
 
         for connection in self._all_connections:
             connection.close()
