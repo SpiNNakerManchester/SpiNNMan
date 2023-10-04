@@ -58,6 +58,9 @@ class MockWriteTransceiver(Transceiver):
     def close(self):
         pass
 
+    def _ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
+        pass
+
 
 class MockExtendedTransceiver(MockWriteTransceiver, ExtendedTransceiver):
     pass
