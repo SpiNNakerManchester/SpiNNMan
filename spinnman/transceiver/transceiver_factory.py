@@ -32,8 +32,8 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def create_transceiver_from_hostname(
-        hostname, bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False, extended=False):
+        hostname, *, bmp_connection_data=None, number_of_boards=None,
+        auto_detect_bmp=False, power_cycle=False, extended=False):
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -53,6 +53,7 @@ def create_transceiver_from_hostname(
     :param bool auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
         automatically determined from the board IP address
+    :param bool power_cycle: If True will power cycle the machine
     :param scamp_connections:
         the list of connections used for SCAMP communications
     :param bool extended:
@@ -100,11 +101,12 @@ def create_transceiver_from_hostname(
             connections=connections, virtual=True, extended=extended)
     else:
         return create_transceiver_from_connections(
-            connections=connections, virtual=False, extended=extended)
+            connections=connections, virtual=False, power_cycle=power_cycle,
+            extended=extended)
 
 
 def create_transceiver_from_connections(
-        connections, virtual=False, extended=False):
+        connections, virtual=False, power_cycle=False, extended=False):
     """
     Create a Transceiver with these connections
 
@@ -112,6 +114,7 @@ def create_transceiver_from_connections(
         An iterable of connections to the board.  If not specified, no
         communication will be possible until connections are found.
     :param bool virtual: If True will return a virtual Transceiver
+    :param bool power_cycle: If True will power cycle the machine
     :param bool extended:
     :return: The created transceiver
     :rtype: spinnman.transceiver.Transceiver
@@ -129,12 +132,17 @@ def create_transceiver_from_connections(
         if virtual:
             raise NotImplementedError(f"No Virtual Transceiver for {version=}")
         if extended:
-            return ExtendedVersion3Transceiver(connections=connections)
-        return Version3Transceiver(connections=connections)
+            return ExtendedVersion3Transceiver(
+                connections=connections, power_cycle=power_cycle)
+        return Version3Transceiver(
+            connections=connections, power_cycle=power_cycle)
     if isinstance(version, Version5):
         if virtual:
-            return Virtual5Transceiver(connections=connections)
+            return Virtual5Transceiver(
+                connections=connections, power_cycle=power_cycle)
         if extended:
-            return ExtendedVersion5Transceiver(connections=connections)
-        return Version5Transceiver(connections=connections)
+            return ExtendedVersion5Transceiver(
+                connections=connections, power_cycle=power_cycle)
+        return Version5Transceiver(
+            connections=connections, power_cycle=power_cycle)
     raise NotImplementedError(f"No Transceiver for {version=}")

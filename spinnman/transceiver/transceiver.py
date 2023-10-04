@@ -128,29 +128,6 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         # used by machine_generator
 
     @abstractmethod
-    def ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
-        """
-        Ensure that the board is ready to interact with this version of the
-        transceiver. Boots the board if not already booted and verifies that
-        the version of SCAMP running is compatible with this transceiver.
-
-        :param number_of_boards:
-            this parameter is deprecated and will be ignored
-        :param int n_retries: The number of times to retry booting
-        :param dict(SystemVariableDefinition,object) extra_boot_values:
-            Any additional or overwrite values to set during boot.
-            This should only be used for values which are not standard
-            based on the board version.
-        :return: The version identifier
-        :rtype: VersionInfo
-        :raise SpinnmanIOException:
-            * If there is a problem booting the board
-            * If the version of software on the board is not compatible with
-              this transceiver
-        """
-        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/356
-
-    @abstractmethod
     def get_cpu_infos(
             self, core_subsets=None, states=None, include=True):
         """
@@ -343,34 +320,6 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         """
         # Used by load_app_images, load_sys_images and
         # run_system_application._load_application
-
-    @abstractmethod
-    def power_on(self, boards=0):
-        """
-        Power on a set of boards in the machine.
-
-        :param int boards: The board or boards to power on
-        """
-        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/356
-
-    @abstractmethod
-    def power_off_machine(self):
-        """
-        Power off the whole machine.
-
-        :rtype bool
-        :return success or failure to power off the machine
-        """
-        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/356
-
-    @abstractmethod
-    def power_off(self, boards=0):
-        """
-        Power off a set of boards in the machine.
-
-        :param int boards: The board or boards to power off
-        """
-        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/356
 
     @abstractmethod
     def read_fpga_register(

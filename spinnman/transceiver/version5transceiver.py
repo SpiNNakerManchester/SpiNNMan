@@ -25,8 +25,8 @@ class Version5Transceiver(BaseTransceiver):
     """
 
     @overrides(BaseTransceiver.__init__)
-    def __init__(self, connections=None):
-        super().__init__(connections)
+    def __init__(self, connections=None, power_cycle=False):
+        super().__init__(connections, power_cycle)
         assert SpiNNManDataView.get_machine_version().number == 5
 
     @property

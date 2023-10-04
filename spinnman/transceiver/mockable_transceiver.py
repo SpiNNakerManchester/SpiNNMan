@@ -51,10 +51,6 @@ class MockableTransceiver(ExtendableTransceiver):
     def get_connections(self):
         raise NotImplementedError("Needs to be mocked")
 
-    @overrides(Transceiver.ensure_board_is_ready)
-    def ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
-        raise NotImplementedError("Needs to be mocked")
-
     @overrides(Transceiver.get_cpu_infos)
     def get_cpu_infos(
             self, core_subsets=None, states=None, include=True):
@@ -85,23 +81,6 @@ class MockableTransceiver(ExtendableTransceiver):
             self, core_subsets, executable, app_id, n_bytes=None, wait=False,
             is_filename=False):
         pass
-
-    @overrides(Transceiver.power_on)
-    def power_on(self, boards=0):
-        """
-        Power on a set of boards in the machine.
-
-        :param int boards: The board or boards to power on
-        """
-        return True
-
-    @overrides(Transceiver.power_off_machine)
-    def power_off_machine(self):
-        return True
-
-    @overrides(Transceiver.power_off)
-    def power_off(self, boards=0):
-        return True
 
     @overrides(Transceiver.read_fpga_register)
     def read_fpga_register(

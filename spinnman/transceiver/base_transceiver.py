@@ -36,7 +36,7 @@ from spinnman.constants import (
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
     ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES)
+    BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
@@ -90,6 +90,22 @@ _ONE_WORD = struct.Struct("<I")
 _ONE_LONG = struct.Struct("<Q")
 _EXECUTABLE_ADDRESS = 0x67800000
 
+_POWER_CYCLE_WARNING = (
+    "When power-cycling a board, it is recommended that you wait for 30 "
+    "seconds before attempting a reboot. Therefore, the tools will now "
+    "wait for 30 seconds. If you wish to avoid this wait, please set "
+    "reset_machine_on_startup = False in the [Machine] section of the "
+    "relevant configuration (cfg) file.")
+
+_POWER_CYCLE_FAILURE_WARNING = (
+    "The end user requested the power-cycling of the board. But the "
+    "tools did not have the required BMP connection to facilitate a "
+    "power-cycling, and therefore will not do so. please set the "
+    "bmp_names accordingly in the [Machine] section of the relevant "
+    "configuration (cfg) file. Or use a machine assess process which "
+    "provides the BMP data (such as a spalloc system) or finally set "
+    "reset_machine_on_startup = False in the [Machine] section of the "
+    "relevant configuration (cfg) file to avoid this warning in future.")
 
 class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     """
@@ -112,7 +128,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         "_udp_scamp_connections",
         "_width"]
 
-    def __init__(self, connections=None):
+    def __init__(self, connections=None, power_cycle=False):
         """
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
@@ -176,6 +192,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         self.__check_bmp_connection()
 
         self._machine_off = False
+        if power_cycle:
+            self._power_off_machine()
+        self._ensure_board_is_ready()
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)
@@ -512,8 +531,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         # version is irrelevant
         return version[1] > _SCAMP_VERSION[1]
 
-    @overrides(Transceiver.ensure_board_is_ready)
-    def ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
+    def _ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
         """
         Ensure that the board is ready to interact with this version of the
         transceiver. Boots the board if not already booted and verifies that
@@ -789,28 +807,21 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         :rtype bool
         :return success of failure to power on machine
         """
-        if self._bmp_connection is None:
-            logger.warning("No BMP connections, so can't power on")
-            return False
-        self.power_on(self._bmp_connection)
-        return True
+        self._power(PowerCommand.POWER_ON)
+        # Sleep for 5 seconds as the machine has just been powered on
+        time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
-    @overrides(Transceiver.power_on)
-    def power_on(self, boards=0):
-        self._power(PowerCommand.POWER_ON, boards)
+    def _power_off_machine(self):
+        """
+        Power off the whole machine.
 
-    @overrides(Transceiver.power_off_machine)
-    def power_off_machine(self):
-        if self._bmp_connection is None:
-            logger.warning("No BMP connections, so can't power off")
-            return False
-        logger.info("Turning off machine")
-        self.power_off(self._bmp_connection)
-        return True
-
-    @overrides(Transceiver.power_off)
-    def power_off(self, boards=0):
-        self._power(PowerCommand.POWER_OFF, boards)
+        :rtype bool
+        :return success or failure to power off the machine
+        """
+        self._power(PowerCommand.POWER_OFF)
+        logger.warning(_POWER_CYCLE_WARNING)
+        time.sleep(POWER_CYCLE_WAIT_TIME_IN_SECONDS)
+        logger.warning("Power cycle wait complete")
 
     def _power(self, power_command, boards=0):
         """
@@ -819,19 +830,14 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         :param PowerCommand power_command: The power command to send
         :param boards: The board or boards to send the command to
         """
-        connection_selector = self._bmp_selector
         timeout = (
             BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
             else BMP_TIMEOUT)
         process = SendSingleCommandProcess(
-            connection_selector, timeout=timeout, n_retries=0)
+            self._bmp_selector, timeout=timeout, n_retries=0)
         process.execute(SetPower(power_command, boards))
         self._machine_off = power_command == PowerCommand.POWER_OFF
-
-        # Sleep for 5 seconds if the machine has just been powered on
-        if not self._machine_off:
-            time.sleep(BMP_POST_POWER_ON_SLEEP_TIME)
 
     @overrides(Transceiver.read_fpga_register)
     def read_fpga_register(
@@ -1253,7 +1259,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         if self._bmp_connection is not None:
             if get_config_bool("Machine", "turn_off_machine"):
-                self.power_off_machine()
+                self._power_off_machine()
 
         for connection in self._all_connections:
             connection.close()
