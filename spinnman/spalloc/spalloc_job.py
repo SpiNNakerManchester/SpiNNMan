@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from sqlite3 import Cursor
 from typing import Dict, Tuple
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
@@ -205,17 +204,13 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
 
     @abstractmethod
-    def _write_session_credentials_to_db(self, cur: Cursor):
+    def get_session_credentials_for_db(self):
         """
-        Write the session credentials for the job to the database accessed by
-        the given cursor.
+        Get the session credentials for the job to be written into a database
 
         .. note::
             May assume that there is a ``proxy_configuration`` table with
             ``kind``, ``name`` and ``value`` columns.
-
-        :param ~sqlite3.Cursor cur:
-            The open cursor to the database.
         """
 
     def __enter__(self):
