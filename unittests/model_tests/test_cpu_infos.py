@@ -43,9 +43,12 @@ class TestCpuInfos(unittest.TestCase):
         infos.add_info(info)
         info = CPUInfo(1, 0, 1, self.make_info_data(7, CPUState.FINISHED))
         infos.add_info(info)
+        info = CPUInfo(1, 1, 2, self.make_info_data(4, CPUState.RUN_TIME_EXCEPTION))
+        infos.add_info(info)
 
+        self.assertSetEqual(set(infos), {(1, 0, 1), (0, 0, 1), (0, 0, 2), (1, 1, 2)})
         self.assertEqual(
-            "['0, 0, 1 (ph: 5)', '0, 0, 2 (ph: 6)', '1, 0, 1 (ph: 7)']",
+            "['0, 0, 1 (ph: 5)', '0, 0, 2 (ph: 6)', '1, 0, 1 (ph: 7)', '1, 1, 2 (ph: 4)']",
             str(infos))
 
         finished = infos.infos_for_state(CPUState.FINISHED)
@@ -59,6 +62,15 @@ class TestCpuInfos(unittest.TestCase):
         info = infos.get_cpu_info(0, 0, 2)
         self.assertEqual(
             "0:0:02 (06) FINISHED           scamp-3            0", str(info))
+
+        self.assertEqual(infos.get_status_string(),
+                         "0:0:1 in state RUNNING\n"
+                         "0:0:2 in state FINISHED\n"
+                         "1:0:1 in state FINISHED\n"
+                         "1:1:2 (ph: 4) in state RUN_TIME_EXCEPTION:NONE\n"
+                         "    r0=134676544, r1=255, r2=8388608, r3=173\n"
+                         "    r4=0, r5=0, r6=0, r7=0\n"
+                         "    PSR=0, SP=0, LR=0\n")
 
 
 if __name__ == '__main__':
