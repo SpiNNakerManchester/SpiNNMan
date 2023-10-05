@@ -1,3 +1,4 @@
+[![PyPi version](https://img.shields.io/pypi/v/SpiNNMan.svg?style=flat)](https://pypi.org/project/SpiNNMan/)
 [![Build Status](https://github.com/SpiNNakerManchester/SpiNNMan/workflows/Python%20Actions/badge.svg?branch=master)](https://github.com/SpiNNakerManchester/SpiNNMan/actions?query=workflow%3A%22Python+Actions%22+branch%3Amaster)
 [![Documentation Status](https://readthedocs.org/projects/spinnman/badge/?version=latest)](https://spinnman.readthedocs.io/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/SpiNNakerManchester/SpiNNMan/badge.svg?branch=master)](https://coveralls.io/github/SpiNNakerManchester/SpiNNMan?branch=master)
@@ -41,19 +42,25 @@ the git repository:
 To install as a development version which all users will then be able to use,
 run the following where the code has been extracted:
 
-    sudo python setup.py develop
+    sudo pip install -e .
 
 To install as a development version for only yourself, run:
 
-    python setup.py develop --user
+    pip install -e . --user
 
-To install as a development version in a virtualenv, with the virutalenv
+To install as a development version in a `virtualenv`, with the `virutalenv`
 enabled, run:
 
-    python setup.py develop
+    pip install -e .
+
+Test Installation
+=================
+To be able to run the unitests add [Test] to the pip installs above
+
+    pip install -e .[Test]
 
 Documentation
 =============
 [SpiNNMan Python documentation](http://spinnman.readthedocs.io)
 
-[Combined PyNN8 python documentation](http://spinnaker8manchester.readthedocs.io)
+[Combined python documentation](http://spinnakermanchester.readthedocs.io)

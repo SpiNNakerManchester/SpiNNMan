@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 """
 To run this you need an hello.aplx
@@ -30,7 +29,8 @@ from spinn_machine import CoreSubsets, CoreSubset, MulticastRoutingEntry
 from spinn_machine.tags import IPTag, ReverseIPTag
 from spinnman.data import SpiNNManDataView
 from spinnman.config_setup import unittest_setup
-from spinnman.transceiver import create_transceiver_from_hostname
+from spinnman.extended.extended_transceiver import (
+    create_transceiver_from_hostname)
 from spinnman.model.enums import CPUState
 from spinnman.messages.scp.enums import Signal
 from spinnman.model import DiagnosticFilter
@@ -38,11 +38,12 @@ from spinnman.messages.scp.impl import ReadMemory
 from spinnman.model.enums import (
     DiagnosticFilterDestination, DiagnosticFilterPacketType)
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
-from board_test_configuration import BoardTestConfiguration
+from spinnman.board_test_configuration import BoardTestConfiguration
 
 logging.basicConfig(level=logging.INFO)
 logging.getLogger("spinnman.transceiver").setLevel(logging.DEBUG)
 
+unittest_setup()
 board_config = BoardTestConfiguration()
 board_config.set_up_remote_board()
 
@@ -130,12 +131,12 @@ def print_reinjection_status(status):
     print("Reinjected packets:", status.n_reinjected_packets)
     print("Router timeout: {}  emergency timeout {}".format(
         status.router_timeout, status.router_emergency_timeout))
-    print("Re-injecting multicast: {}  point_to_point: {}  nearest_neighbour:"
-          " {}  fixed_route: {}").format(
-              status.is_reinjecting_multicast,
-              status.is_reinjecting_point_to_point,
-              status.is_reinjecting_nearest_neighbour,
-              status.is_reinjecting_fixed_route)
+    print(("Re-injecting multicast: {}  point_to_point: {}  nearest_neighbour:"
+           " {}  fixed_route: {}").format(
+               status.is_reinjecting_multicast,
+               status.is_reinjecting_point_to_point,
+               status.is_reinjecting_nearest_neighbour,
+               status.is_reinjecting_fixed_route))
 
 
 class Section(object):
@@ -154,7 +155,7 @@ class Section(object):
 def print_transceiver_tests(transceiver):
 
     with Section("Version Information"):
-        version_info = transceiver.ensure_board_is_ready()
+        version_info = transceiver._get_scamp_version()
         print(version_info)
 
     app_id = SpiNNManDataView().get_new_id()
@@ -190,7 +191,7 @@ def print_transceiver_tests(transceiver):
             time.sleep(0.1)
 
     with Section("CPU Information"):
-        cpu_infos = transceiver.get_cpu_information(core_subsets)
+        cpu_infos = transceiver.get_cpu_infos(core_subsets)
         cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
         print("{} CPUs".format(len(cpu_infos)))
         for cpu_info in cpu_infos:
@@ -212,7 +213,7 @@ def print_transceiver_tests(transceiver):
     with Section("Stop Application"):
         transceiver.send_signal(app_id, Signal.STOP)
         time.sleep(0.5)
-        cpu_infos = transceiver.get_cpu_information(core_subsets)
+        cpu_infos = transceiver.get_cpu_infos(core_subsets)
         cpu_infos = sorted(cpu_infos, key=lambda x: (x.x, x.y, x.p))
         print("{} CPUs".format(len(cpu_infos)))
         for cpu_info in cpu_infos:
@@ -308,12 +309,12 @@ def print_transceiver_tests(transceiver):
         data = struct.unpack(
             "<Q", transceiver.read_memory(0, 0, 0x70000000, 8))[0]
         if data != 123456789123456789:
-            raise Exception("values are not identical")
+            raise ValueError("values are not identical")
         transceiver.write_memory(0, 0, 0x70000000, data=int(123456789))
         data = struct.unpack(
             "<I", transceiver.read_memory(0, 0, 0x70000000, 4))[0]
         if data != 123456789:
-            raise Exception("values are not identical")
+            raise ValueError("values are not identical")
 
     with Section("Test writing bytearrays and ints to write_neighbour_memory "
                  "and extracting them"):
@@ -321,13 +322,13 @@ def print_transceiver_tests(transceiver):
         data = struct.unpack(
             "<Q", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 8))[0]
         if data != 123456789123456789:
-            raise Exception("values are not identical")
+            raise ValueError("values are not identical")
 
         transceiver.write_neighbour_memory(0, 0, 0, 0x70000000, data=123456789)
         data = struct.unpack(
             "<I", transceiver.read_neighbour_memory(0, 0, 0, 0x70000000, 4))[0]
         if data != 123456789:
-            raise Exception("values are not identical")
+            raise ValueError("values are not identical")
 
     with Section("Test writing bytearrays and ints to write_memory_flood and "
                  "extracting them"):
@@ -337,7 +338,7 @@ def print_transceiver_tests(transceiver):
         data2 = struct.unpack(
             "<Q", transceiver.read_memory(1, 1, 0x70000000, 8))[0]
         if data != 123456789123456789 or data2 != 123456789123456789:
-            raise Exception("values are not identical")
+            raise ValueError("values are not identical")
 
         transceiver.write_memory_flood(0x70000000, data=123456789)
         data = struct.unpack(
@@ -345,13 +346,13 @@ def print_transceiver_tests(transceiver):
         data2 = struct.unpack(
             "<I", transceiver.read_memory(1, 1, 0x70000000, 4))[0]
         if data != 123456789 or data2 != 123456789:
-            raise Exception("values are not identical")
+            raise ValueError("values are not identical")
 
     with Section("Get Heap"):
         for heap_element in transceiver.get_heap(0, 0):
             print(heap_element)
 
-unittest_setup()
+
 with create_transceiver_from_hostname(
         board_config.remotehost, board_config.board_version,
         bmp_connection_data=board_config.bmp_names,

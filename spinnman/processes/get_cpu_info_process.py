@@ -1,29 +1,31 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import functools
-from spinnman.model import CPUInfo
+import struct
+from spinnman.model import CPUInfo, CPUInfos
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl import ReadMemory
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
+_INFO_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
+
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess):
     __slots__ = [
-        "_cpu_info"]
+        "_cpu_infos"]
 
     def __init__(self, connection_selector):
         """
@@ -32,10 +34,14 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector)
-        self._cpu_info = list()
+        self._cpu_infos = CPUInfos()
+
+    def _filter_and_add_repsonse(self, x, y, p, cpu_data):
+        self._cpu_infos.add_info(CPUInfo(x, y, p, cpu_data))
 
     def __handle_response(self, x, y, p, response):
-        self._cpu_info.append(CPUInfo(x, y, p, response.data, response.offset))
+        cpu_data = _INFO_PATTERN.unpack_from(response.data, response.offset)
+        self._filter_and_add_repsonse(x, y, p, cpu_data)
 
     def get_cpu_info(self, core_subsets):
         """
@@ -53,4 +59,4 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess):
         self._finish()
         self.check_for_error()
 
-        return self._cpu_info
+        return self._cpu_infos

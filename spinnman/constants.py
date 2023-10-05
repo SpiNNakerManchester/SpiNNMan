@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from enum import Enum
 
@@ -59,16 +58,13 @@ CPU_INFO_OFFSET = 0xe5007000
 CPU_INFO_BYTES = 128
 
 #: The address at which user0 register starts
-CPU_USER_0_START_ADDRESS = 112
+CPU_USER_START_ADDRESS = 112
 
-#: The address at which user1 register starts
-CPU_USER_1_START_ADDRESS = 116
+# The number of bytes the user start address moves each time
+CPU_USER_OFFSET = 4
 
-#: The address at which user2 register starts
-CPU_USER_2_START_ADDRESS = 120
-
-#: The address at which user3 register starts
-CPU_USER_3_START_ADDRESS = 124
+# The largest user number
+CPU_MAX_USER = 3
 
 #: The address at which the iobuf address starts
 CPU_IOBUF_ADDRESS_OFFSET = 88
@@ -108,10 +104,11 @@ BMP_POST_POWER_ON_SLEEP_TIME = 5.0
 
 
 class EIEIO_COMMAND_IDS(Enum):
-    """ A listing of what SpiNNaker specific EIEIO commands there are.
     """
-    #: Database handshake with external program
-    DATABASE_CONFIRMATION = 1
+    A listing of what SpiNNaker specific EIEIO commands there are.
+    """
+    #: Database handshake with external program; not routed via SpiNNaker
+    DATABASE = 1
     #: Fill in buffer area with padding
     EVENT_PADDING = 2
     #: End of all buffers, stop execution
@@ -139,9 +136,9 @@ class EIEIO_COMMAND_IDS(Enum):
 
 
 class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
-    """ The values used by the SCP IP tag time outs. These control how long to\
-        wait for any message request which requires a response, before raising\
-        an error.
+    """
+    The values used by the SCP IP tag time outs. These control how long to wait
+    for any message request which requires a response, before raising an error.
 
     The value is calculated via the following formula:
 
@@ -159,7 +156,8 @@ class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
 
 
 class ROUTER_REGISTER_REGISTERS(Enum):
-    """ The indices to the router registers.
+    """
+    The indices to the router registers.
     """
     LOC_MC = 0
     EXT_MC = 1
@@ -180,8 +178,9 @@ class ROUTER_REGISTER_REGISTERS(Enum):
 
 
 class READ_TYPES(Enum):
-    """ The types of read available from SARK. These values are used to tell\
-        SARK how to read the data in a time efficient manner.
+    """
+    The types of read available from SARK. These values are used to tell
+    SARK how to read the data in a time efficient manner.
     """
     BYTE = 0
     HALF_WORD = 1

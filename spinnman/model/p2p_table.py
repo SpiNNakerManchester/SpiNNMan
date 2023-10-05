@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2016 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinnman.model.enums import P2PTableRoute
@@ -20,7 +19,8 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class P2PTable(object):
-    """ Represents a P2P routing table read from the machine.
+    """
+    Represents a P2P routing table read from the machine.
     """
     __slots__ = [
         "_height",
@@ -51,7 +51,8 @@ class P2PTable(object):
 
     @staticmethod
     def get_n_column_bytes(height):
-        """ Get the number of bytes to be read for each column of the table.
+        """
+        Get the number of bytes to be read for each column of the table.
 
         :param int height: The height of the machine
         """
@@ -59,8 +60,9 @@ class P2PTable(object):
 
     @staticmethod
     def get_column_offset(column):
-        """ Get the offset of the next column in the table from the P2P base\
-            address.
+        """
+        Get the offset of the next column in the table from the P2P base
+        address.
 
         :param int column: The column to be read
         """
@@ -68,7 +70,8 @@ class P2PTable(object):
 
     @property
     def width(self):
-        """ The width of the machine that this table represents.
+        """
+        The width of the machine that this table represents.
 
         :rtype: int
         """
@@ -76,21 +79,24 @@ class P2PTable(object):
 
     @property
     def height(self):
-        """ The height of the machine that this table represents.
+        """
+        The height of the machine that this table represents.
 
         :rtype: int
         """
         return self._height
 
     def iterchips(self):
-        """ Get an iterator of tuples of (x, y) coordinates in the table
+        """
+        Get an iterator of tuples of (x, y) coordinates in the table.
 
         :rtype: iterable(tuple(int,int))
         """
         return iter(self._routes.keys())
 
     def is_route(self, x, y):
-        """ Determines if there is a route in the P2P table to the given chip.
+        """
+        Determines if there is a route in the P2P table to the given chip.
 
         :param int x: The x-coordinate of the chip to look up
         :param int y: The y-coordinate of the chip to look up
@@ -101,7 +107,8 @@ class P2PTable(object):
             self._routes[(x, y)] != P2PTableRoute.NONE)
 
     def get_route(self, x, y):
-        """ Get the route to follow from this chip to the given chip.
+        """
+        Get the route to follow from this chip to the given chip.
 
         :param int x: The x-coordinate of the chip to find the route to
         :param int y: The y-coordinate of the chip to find the route to

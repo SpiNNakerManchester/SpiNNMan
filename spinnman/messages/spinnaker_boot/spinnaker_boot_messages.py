@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import os
 import math
@@ -34,7 +33,8 @@ _BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES // 4) - 1) << 8
 
 
 class SpinnakerBootMessages(object):
-    """ Represents a set of boot messages to be sent to boot the board
+    """
+    A set of boot messages to be sent to boot the board.
     """
     __slots__ = [
         "_boot_data",
@@ -42,10 +42,12 @@ class SpinnakerBootMessages(object):
         "_no_data_packets"]
 
     def __init__(self, board_version=None, extra_boot_values=None):
-        """ Builds the boot messages needed to boot the SpiNNaker machine
-
+        """
         :param int board_version: The version of the board to be booted
-        :param extra_boot_values: Any additional values to be set during boot
+        :param extra_boot_values:
+            Any additional or overwrite values to set during boot.
+            This should only be used for values which are not standard
+            based on the board version.
         :type extra_boot_values: dict(SystemVariableDefinition, object)
         :raise SpinnmanInvalidParameterException:
             If the board version is not supported
@@ -112,16 +114,17 @@ class SpinnakerBootMessages(object):
         file_size = os.stat(file_name).st_size
         if file_size > _BOOT_IMAGE_MAX_BYTES:
             raise SpinnmanIOException(
-                "The boot file is too big at {} bytes (only files up to 32KB "
-                "are acceptable".format(file_size))
+                f"The boot file is too big at {file_size} bytes "
+                "(only files up to 32KB are acceptable")
         elif file_size % 4 != 0:
             raise SpinnmanIOException(
-                "The boot file size of {} bytes must be divisible by 4".format(
-                    file_size))
+                f"The boot file size of {file_size} bytes "
+                "must be divisible by 4")
         return file_name, file_size
 
     def _get_packet_data(self, block_id):
-        """ Read a packet of data
+        """
+        Read a packet of data.
 
         :param int block_id:
         :rtype: bytes
@@ -132,11 +135,11 @@ class SpinnakerBootMessages(object):
 
     @property
     def messages(self):
-        """ An iterable of message to be sent.
+        """
+        An iterable of message to be sent.
 
         :rtype: iterable(SpinnakerBootMessage)
         """
-
         # Construct and yield the start packet
         yield SpinnakerBootMessage(
             opcode=SpinnakerBootOpCode.FLOOD_FILL_START,

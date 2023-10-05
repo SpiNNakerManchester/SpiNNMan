@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinn_utilities.overrides import overrides
@@ -21,11 +20,12 @@ from .utils import update_sdp_header_for_udp_send
 from spinnman.connections.abstract_classes import Listenable
 
 _TWO_SKIP = struct.Struct("<2x")
-_REPR_TEMPLATE = "SDPConnection(chip_x={}, chip_y={}, local_host={},"\
-    " local_port={}, remote_host={}, remote_port={})"
 
 
 class SDPConnection(UDPConnection, Listenable):
+    """
+    A connection that talks SpiNNaker Datagram Protocol.
+    """
     __slots__ = [
         "_chip_x",
         "_chip_y"]
@@ -55,8 +55,9 @@ class SDPConnection(UDPConnection, Listenable):
         self._chip_y = chip_y
 
     def receive_sdp_message(self, timeout=None):
-        """ Receives an SDP message from this connection.  Blocks until the\
-            message has been received, or a timeout occurs.
+        """
+        Receives an SDP message from this connection.  Blocks until the
+        message has been received, or a timeout occurs.
 
         :param int timeout:
             The time in seconds to wait for the message to arrive; if not
@@ -76,7 +77,8 @@ class SDPConnection(UDPConnection, Listenable):
         return SDPMessage.from_bytestring(data, 2)
 
     def send_sdp_message(self, sdp_message):
-        """ Sends an SDP message down this connection
+        """
+        Sends an SDP message down this connection.
 
         :param SDPMessage sdp_message: The SDP message to be sent
         :raise SpinnmanIOException:
@@ -95,6 +97,8 @@ class SDPConnection(UDPConnection, Listenable):
         return self.receive_sdp_message
 
     def __repr__(self):
-        return _REPR_TEMPLATE.format(
-            self._chip_x, self._chip_y, self.local_ip_address,
-            self.local_port, self.remote_ip_address, self.remote_port)
+        return (
+            f"SDPConnection(chip_x={self._chip_x}, chip_y={self._chip_y}, "
+            f"local_host={self.local_ip_address}, local_port={self.local_port}"
+            f", remote_host={self.remote_ip_address}, "
+            f"remote_port={self.remote_port})")

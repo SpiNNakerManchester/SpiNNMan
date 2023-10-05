@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2017 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
@@ -24,12 +23,13 @@ def _on_same_board(chip_1, chip_2):
 
 
 def _get_next_chips(chips_done):
-    """ Get the chips that are adjacent to the last set of chips, which
-        haven't yet been loaded.  Also returned are the links for each chip,
-        which gives the link which should be read from to get the data.
+    """
+    Get the chips that are adjacent to the last set of chips, which
+    haven't yet been loaded.  Also returned are the links for each chip,
+    which gives the link which should be read from to get the data.
 
     :param set((int,int)) chips_done:
-    The coordinates of chips that have already been done
+        The coordinates of chips that have already been done
     :return: A dict of chip coordinates to link to use, Chip
     :rtype: dict((int,int), (int, Chip))
     """
@@ -48,21 +48,24 @@ def _get_next_chips(chips_done):
 
 
 class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
-    """ Process to start a binary on a subset of cores on a subset of chips
-        of a machine, performed by, on each chip, copying the data from
-        an adjacent chip and then starting the binary.  This goes to each
-        chip in turn, and so detects failures early on, as well as ensuring
-        that the copy and execution is done in the case of success i.e. this
-        ensures that if all commands are successful, the full binary has been
-        copied and started.
+    """
+    Process to start a binary on a subset of cores on a subset of chips
+    of a machine, performed by, on each chip, copying the data from
+    an adjacent chip and then starting the binary.  This goes to each
+    chip in turn, and so detects failures early on, as well as ensuring
+    that the copy and execution is done in the case of success i.e. this
+    ensures that if all commands are successful, the full binary has been
+    copied and started.
 
-        NOTE: The binary must have been loaded to the boot chip before this is
+    .. note::
+        The binary must have been loaded to the boot chip before this is
         called!
     """
     __slots__ = []
 
     def run(self, size, app_id, core_subsets, chksum, wait):
-        """ Run the process.
+        """
+        Run the process.
 
         :param int size: The size of the binary to copy
         :param int app_id: The application id to assign to the running binary

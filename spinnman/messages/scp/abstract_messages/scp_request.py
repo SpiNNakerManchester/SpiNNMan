@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
@@ -20,7 +19,8 @@ _THREE_WORDS = struct.Struct("<III")
 
 
 class AbstractSCPRequest(object, metaclass=AbstractBase):
-    """ Represents an Abstract SCP Request
+    """
+    Represents an Abstract SCP Request.
     """
     __slots__ = [
         "_argument_1",
@@ -36,17 +36,16 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
     def __init__(self, sdp_header, scp_request_header, argument_1=None,
                  argument_2=None, argument_3=None, data=None):
         """
-
         :param SDPHeader sdp_header: The SDP header of the request
         :param SCPRequestHeader scp_request_header:
             The SCP header of the request
         :param int argument_1:
-            The first argument, or None if no first argument
+            The first argument, or `None` if no first argument
         :param int argument_2:
-            The second argument, or None if no second argument
+            The second argument, or `None` if no second argument
         :param int argument_3:
-            The third argument, or None if no third argument
-        :param data: The optional data, or None if no data
+            The third argument, or `None` if no third argument
+        :param data: The optional data, or `None` if no data
         :type data: bytearray or bytes or None
         """
         # pylint: disable=too-many-arguments
@@ -59,7 +58,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def sdp_header(self):
-        """ The SDP header of the message
+        """
+        The SDP header of the message.
 
         :rtype: SDPHeader
         """
@@ -67,7 +67,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def scp_request_header(self):
-        """ The SCP request header of the message
+        """
+        The SCP request header of the message.
 
         :rtype: SCPRequestHeader
         """
@@ -75,7 +76,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def argument_1(self):
-        """ The first argument, or None if no first argument
+        """
+        The first argument, or `None` if no first argument.
 
         :rtype: int
         """
@@ -83,7 +85,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def argument_2(self):
-        """ The second argument, or None if no second argument
+        """
+        The second argument, or `None` if no second argument.
 
         :rtype: int
         """
@@ -91,7 +94,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def argument_3(self):
-        """ The third argument, or None if no third argument
+        """
+        The third argument, or `None` if no third argument.
 
         :rtype: int
         """
@@ -99,7 +103,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def data(self):
-        """ The data, or None if no data
+        """
+        The data, or `None` if no data.
 
         :rtype: bytearray
         """
@@ -107,7 +112,8 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @property
     def bytestring(self):
-        """ The request as a bytestring
+        """
+        The request as a byte-string.
 
         :rtype: bytes
         """
@@ -130,9 +136,10 @@ class AbstractSCPRequest(object, metaclass=AbstractBase):
 
     @abstractmethod
     def get_scp_response(self):
-        """ Get an SCP response message to be used to process any response\
-            received
+        """
+        Get an SCP response message to be used to process any response
+        received.
 
-        :return: An SCP response, or None if no response is required
+        :return: An SCP response, or `None` if no response is required
         :rtype: AbstractSCPResponse
         """

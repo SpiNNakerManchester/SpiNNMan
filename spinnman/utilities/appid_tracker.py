@@ -1,24 +1,24 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2017 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 _MIN_APP_ID = 17
 _MAX_APP_ID = 254
 
 
 class AppIdTracker(object):
-    """ A tracker of application IDs to make it easier to allocate new IDs.
+    """
+    A tracker of application IDs to make it easier to allocate new IDs.
     """
     __slots__ = [
         "_free_ids",
@@ -44,14 +44,16 @@ class AppIdTracker(object):
         self._max_app_id = max_app_id
 
     def get_new_id(self):
-        """ Get a new unallocated ID
+        """
+        Get a new unallocated ID
 
         :rtype: int
         """
         return self._free_ids.pop()
 
     def allocate_id(self, allocated_id):
-        """ Allocate a given ID.
+        """
+        Allocate a given ID.
 
         :param int allocated_id: The ID to allocate
         :raises KeyError: If the ID is not present
@@ -59,12 +61,14 @@ class AppIdTracker(object):
         self._free_ids.remove(allocated_id)
 
     def free_id(self, id_to_free):
-        """ Free a given ID.
+        """
+        Free a given ID.
 
         :param int id_to_free: The ID to free
         :raises KeyError: If the ID is out of range
         """
         if id_to_free < self._min_app_id or id_to_free > self._max_app_id:
-            raise KeyError("ID {} out of allowed range of {} to {}".format(
-                id_to_free, self._min_app_id, self._max_app_id))
+            raise KeyError(
+                f"ID {id_to_free} out of allowed range of {self._min_app_id} "
+                f"to {self._max_app_id}")
         self._free_ids.add(id_to_free)

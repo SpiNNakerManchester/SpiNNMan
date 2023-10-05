@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 
@@ -19,10 +18,11 @@ _TWO_SHORTS = struct.Struct("<2H")
 
 
 class SCPRequestHeader(object):
-    """ Represents the header of an SCP Request
-        Each optional parameter in the constructor can be set to a value other\
-        than None once, after which it is immutable.  It is an error to set a\
-        parameter that is not currently None.
+    """
+    Represents the header of an SCP Request
+    Each optional parameter in the constructor can be set to a value other
+    than `None` once, after which it is immutable.  It is an error to set a
+    parameter that is not currently `None`.
     """
     __slots__ = [
         "_command",
@@ -30,10 +30,9 @@ class SCPRequestHeader(object):
 
     def __init__(self, command, sequence=0):
         """
-
         :param SCPCommand command: The SCP command
         :param int sequence:
-            The number of the SCP packet in order of all packets\
+            The number of the SCP packet in order of all packets
             sent or received, between 0 and 65535
         :raise SpinnmanInvalidParameterException:
             If one of the parameters is incorrect
@@ -43,7 +42,8 @@ class SCPRequestHeader(object):
 
     @property
     def command(self):
-        """ The command of the SCP packet
+        """
+        The command of the SCP packet.
 
         :rtype: SCPCommand
         """
@@ -51,7 +51,8 @@ class SCPRequestHeader(object):
 
     @property
     def sequence(self):
-        """ The sequence number of the SCP packet, between 0 and 65535
+        """
+        The sequence number of the SCP packet, between 0 and 65535.
 
         :rtype: int
         """
@@ -59,7 +60,8 @@ class SCPRequestHeader(object):
 
     @sequence.setter
     def sequence(self, sequence):
-        """ Set the sequence number of the SCP packet
+        """
+        Set the sequence number of the SCP packet.
 
         :param int sequence: The sequence number to set, between 0 and 65535
         :raise SpinnmanInvalidParameterException:
@@ -69,7 +71,8 @@ class SCPRequestHeader(object):
 
     @property
     def bytestring(self):
-        """ The header as a bytestring
+        """
+        The header as a byte-string.
 
         :rtype: bytes
         """

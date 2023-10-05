@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from collections import defaultdict
 from contextlib import suppress
@@ -19,16 +18,15 @@ import logging
 import functools
 from os.path import join
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_int, get_config_str)
+    get_config_bool, get_config_int_or_none, get_config_str_or_none)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import (
-    Router, Chip, SDRAM, Link, machine_from_size)
+from spinn_machine import (Router, Chip, Link)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
-from spinn_machine import Machine
 from spinn_machine.machine_factory import machine_repair
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
+from spinnman.data import SpiNNManDataView
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition)
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -49,7 +47,8 @@ P_MAPS_SIZE = P_TO_V.array_size + V_TO_P.array_size
 
 
 class GetMachineProcess(AbstractMultiConnectionProcess):
-    """ A process for getting the machine details over a set of connections.
+    """
+    A process for getting the machine details over a set of connections.
     """
     __slots__ = [
         "_chip_info",
@@ -92,7 +91,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._progress = None
 
     def _make_chip(self, chip_info, machine):
-        """ Creates a chip from a ChipSummaryInfo structure.
+        """
+        Creates a chip from a ChipSummaryInfo structure.
 
         :param ChipSummaryInfo chip_info:
             The ChipSummaryInfo structure to create the chip from
@@ -100,7 +100,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :rtype: ~spinn_machine.Chip
         """
         # Create the down cores set if any
-        n_cores = min(chip_info.n_cores, Machine.max_cores_per_chip())
+        n_cores = \
+            SpiNNManDataView.get_machine_version().max_cores_per_chip
+        n_cores = min(chip_info.n_cores, n_cores)
         core_states = chip_info.core_states
         down_cores = self._ignore_cores_map.get(
             (chip_info.x, chip_info.y), None)
@@ -118,17 +120,16 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip's SDRAM object
         sdram_size = chip_info.largest_free_sdram_block
-        max_sdram_size = get_config_int(
+        max_sdram_size = get_config_int_or_none(
             "Machine", "max_sdram_allowed_per_chip")
         if (max_sdram_size is not None and
                 sdram_size > max_sdram_size):
             sdram_size = max_sdram_size
-        sdram = SDRAM(size=sdram_size)
 
         # Create the chip
         return Chip(
             x=chip_info.x, y=chip_info.y, n_processors=n_cores,
-            router=router, sdram=sdram,
+            router=router, sdram=sdram_size,
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y,
@@ -176,7 +177,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self._progress.update()
 
     def _receive_p_maps(self, x, y, scp_read_response):
-        """ Receive the physical-to-virtual and virtual-to-physical maps
+        """
+        Receive the physical-to-virtual and virtual-to-physical maps.
+
         :param _SCPReadMemoryResponse scp_read_response:
         """
         data = scp_read_response.data
@@ -244,7 +247,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 logger.warning(
                     "Chip {}, {} was expected but didn't reply", x, y)
 
-        machine = machine_from_size(width, height)
+        version = SpiNNManDataView.get_machine_version()
+        machine = version.create_machine(width, height)
         self._preprocess_ignore_chips(machine)
         self._process_ignore_links(machine)
         self._preprocess_ignore_cores(machine)
@@ -287,11 +291,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _process_ignore_links(self, machine):
         """
-        Processes the collection of ignore links to remove then from chipinfo
+        Processes the collection of ignore links to remove then from chipinfo.
 
-        Converts any local x, y, IP address to global xy
+        Converts any local (x, y, IP address) to global (x, y)
 
-        Discards any ignores which are known to have no\
+        Discards any ignores which are known to have no
         affect based on the already read chip_info
 
         Also removes any inverse links
@@ -299,10 +303,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Logs all actions except for ignores with unused IP addresses
 
         :param ~spinn_machine.Machine machine:
-            An empty machine to handle wraparounds
+            An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreLink.parse_string(
-                get_config_str("Machine", "down_links")):
+                get_config_str_or_none("Machine", "down_links")):
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
@@ -336,22 +340,22 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _preprocess_ignore_cores(self, machine):
         """
-        Converts the collection of ignore cores into a map of ignore by xy
+        Converts the collection of ignore cores into a map of ignore by x,y.
 
-        Converts any local x, y ipaddress to global xy
+        Converts any local (x, y, IP address) to global (x, y)
 
-        Discards (with log messages) any ignores which are known to have no\
+        Discards (with log messages) any ignores which are known to have no
         affect based on the already read chip_info
 
-        Converts any physical  cores to virtual ones.\
+        Converts any physical  cores to virtual ones.
         Core numbers <= 0 are assumed to be 0 - physical_id
 
         :param ~spinn_machine.Machine machine:
-            An empty machine to handle wraparounds
+            An empty machine to handle wrap-arounds
         """
         # Convert by ip to global
         for ignore in IgnoreCore.parse_string(
-                get_config_str("Machine", "down_cores")):
+                get_config_str_or_none("Machine", "down_cores")):
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:
@@ -362,20 +366,20 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _preprocess_ignore_chips(self, machine):
         """
-        Processes the collection of ignore chips and discards their chipinfo
+        Processes the collection of ignore chips and discards their chipinfo.
 
-        Converts any local x, y ipaddress to global xy
+        Converts any local (x, y IP address) to global (x, y)
 
-        Discards any ignores which are known to have no\
+        Discards any ignores which are known to have no
         affect based on the already read chip_info
 
-        Logs all actions except for ignores with unused ip addresses
+        Logs all actions except for ignores with unused IP addresses
 
         :param ~spinn_machine.Machine machine:
-            An empty machine to handle wraparounds
+            An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreChip.parse_string(
-                get_config_str("Machine", "down_chips")):
+                get_config_str_or_none("Machine", "down_chips")):
             # Convert by ip to global
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
@@ -452,30 +456,30 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if p > 0:
             self._report_ignore("On chip {} ignoring core {}", xy, p)
             return p
-        else:
-            virtual_map = self._physical_to_virtual_map[xy]
-            if 0-p >= len(virtual_map) or virtual_map[0-p] == 0xFF:
-                self._report_ignore(
-                    "On chip {} physical core {} was not used "
-                    "so ignore is being discarded.".format(xy, -p))
-                return None
-            virtual_p = virtual_map[0-p]
-            if virtual_p == 0:
-                self._report_ignore(
-                    "On chip {} physical core {} was used as the monitor "
-                    "so will NOT be ignored".format(xy, -p))
-                return None
+        virtual_map = self._physical_to_virtual_map[xy]
+        physical = 0 - p
+        if physical >= len(virtual_map) or virtual_map[physical] == 0xFF:
             self._report_ignore(
-                "On chip {} ignoring core {} as it maps to physical "
-                "core {}", xy, virtual_p, 0-p)
-            return virtual_p
+                "On chip {} physical core {} was not used "
+                "so ignore is being discarded.", xy, physical)
+            return None
+        virtual_p = virtual_map[physical]
+        if virtual_p == 0:
+            self._report_ignore(
+                "On chip {} physical core {} was used as the monitor "
+                "so will NOT be ignored", xy, physical)
+            return None
+        self._report_ignore(
+            "On chip {} ignoring core {} as it maps to physical "
+            "core {}", xy, virtual_p, physical)
+        return virtual_p
 
     def _report_ignore(self, message, *args):
         """
-        Writes the ignore message by either creating or appending the report
+        Writes the ignore message by either creating or appending the report.
 
-        The implementation choice to reopen the file every time is not the\
-        fastest but is the cleanest and safest for code that in default\
+        The implementation choice to reopen the file every time is not the
+        fastest but is the cleanest and safest for code that in default
         conditions is never run.
 
         :param str message:

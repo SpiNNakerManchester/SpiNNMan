@@ -1,30 +1,30 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import traceback
 
 
 class SpinnmanException(Exception):
-    """ Superclass of exceptions that occur when dealing with communication\
-        with SpiNNaker
+    """
+    Superclass of exceptions that occur when dealing with communication
+    with SpiNNaker.
     """
 
 
 class SpinnmanInvalidPacketException(SpinnmanException):
-    """ An exception that indicates that a packet was not in the expected\
-        format
+    """
+    An exception that indicates that a packet was not in the expected format.
     """
 
     def __init__(self, packet_type, problem):
@@ -32,27 +32,34 @@ class SpinnmanInvalidPacketException(SpinnmanException):
         :param str packet_type: The type of packet expected
         :param str problem: The problem with the packet
         """
-        super().__init__("Invalid packet of type {} received: {}".format(
-            packet_type, problem))
+        super().__init__(
+            f"Invalid packet of type {packet_type} received: {problem}")
         self._packet_type = packet_type
         self._problem = problem
 
     @property
     def packet_type(self):
-        """ The packet type
+        """
+        The packet type.
+
+        :rtype: str
         """
         return self._packet_type
 
     @property
     def problem(self):
-        """ The problem with the packet
+        """
+        The problem with the packet.
+
+        :rtype: str
         """
         return self._problem
 
 
 class SpinnmanInvalidParameterException(SpinnmanException):
-    """ An exception that indicates that the value of one of the parameters\
-        passed was invalid
+    """
+    An exception that indicates that the value of one of the parameters
+    passed was invalid.
     """
 
     def __init__(self, parameter, value, problem):
@@ -62,34 +69,42 @@ class SpinnmanInvalidParameterException(SpinnmanException):
         :param str problem: The problem with the parameter
         """
         super().__init__(
-            "Setting parameter {} to value {} is invalid: {}".format(
-                parameter, value, problem))
+            f"Setting parameter {parameter} to value {value} is invalid: "
+            f"{problem}")
         self._parameter = parameter
         self._value = value
         self._problem = problem
 
     @property
     def parameter(self):
-        """ The parameter with an invalid value
+        """
+        The parameter with an invalid value.
+
+        :rtype: str
         """
         return self._parameter
 
     @property
     def value(self):
-        """ The value that is invalid
+        """
+        The value that is invalid.
         """
         return self._value
 
     @property
     def problem(self):
-        """ The problem with the parameter value
+        """
+        The problem with the parameter value.
+
+        :rtype: str
         """
         return self._problem
 
 
 class SpinnmanInvalidParameterTypeException(SpinnmanException):
-    """ An exception that indicates that the type of one of the parameters\
-        passed was invalid
+    """
+    An exception that indicates that the type of one of the parameters
+    passed was invalid.
     """
 
     def __init__(self, parameter, param_type, problem):
@@ -98,45 +113,57 @@ class SpinnmanInvalidParameterTypeException(SpinnmanException):
         :param str param_type: The type of the parameter that is invalid
         :param str problem: The problem with the parameter
         """
-        super().__init__("Parameter {} of type {} is invalid: {}".format(
-            parameter, param_type, problem))
+        super().__init__(
+            f"Parameter {parameter} of type {param_type} is invalid: "
+            f"{problem}")
         self._parameter = parameter
         self._type = param_type
         self._problem = problem
 
     @property
     def parameter(self):
-        """ The parameter with an invalid value
+        """
+        The parameter with an invalid value.
+
+        :rtype: str
         """
         return self._parameter
 
     @property
     def type(self):
-        """ The value that is invalid
+        """
+        The value that is invalid.
         """
         return self._type
 
     @property
     def problem(self):
-        """ The problem with the parameter value
+        """
+        The problem with the parameter value.
+
+        :rtype: str
         """
         return self._problem
 
 
 class SpinnmanIOException(SpinnmanException):
-    """ An exception that something went wrong with the underlying IO
+    """
+    An exception that something went wrong with the underlying IO.
     """
 
     def __init__(self, problem):
         """
         :param str problem: The problem with the IO
         """
-        super().__init__("IO Error: {}".format(problem))
+        super().__init__(f"IO Error: {problem}")
         self._problem = problem
 
     @property
     def problem(self):
-        """ The problem with IO
+        """
+        The problem with IO.
+
+        :rtype: str
         """
         return self._problem
 
@@ -152,8 +179,9 @@ class SpinnmanEOFException(SpinnmanIOException):
 
 
 class SpinnmanTimeoutException(SpinnmanException):
-    """ An exception that indicates that a timeout occurred before an operation
-        could finish
+    """
+    An exception that indicates that a timeout occurred before an operation
+    could finish.
     """
 
     def __init__(self, operation, timeout, msg=None):
@@ -162,8 +190,7 @@ class SpinnmanTimeoutException(SpinnmanException):
         :param float timeout: The timeout value in seconds
         """
         if msg is None:
-            msg = "Operation {} timed out after {} seconds".format(
-                operation, timeout)
+            msg = f"Operation {operation} timed out after {timeout} seconds"
         super().__init__(msg)
 
         self._operation = operation
@@ -171,20 +198,27 @@ class SpinnmanTimeoutException(SpinnmanException):
 
     @property
     def operation(self):
-        """ The operation that was performed
+        """
+        The operation that was performed.
+
+        :rtype: str
         """
         return self._operation
 
     @property
     def timeout(self):
-        """ The timeout value in seconds
+        """
+        The timeout value in seconds.
+
+        :rtype: float
         """
         return self._timeout
 
 
 class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
-    """ Indicate that a response code returned from the board was unexpected\
-        for the current operation
+    """
+    Indicate that a response code returned from the board was unexpected
+    for the current operation.
     """
 
     def __init__(self, operation, command, response):
@@ -194,34 +228,42 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         :param str response: The response received in error
         """
         super().__init__(
-            "Unexpected response {} while performing operation {} using"
-            " command {}".format(response, operation, command))
+            f"Unexpected response {response} while performing "
+            f"operation {operation} using command {command}")
         self._operation = operation
         self._command = command
         self._response = response
 
     @property
     def operation(self):
-        """ The operation being performed
+        """
+        The operation being performed.
+
+        :rtype: str
         """
         return self._operation
 
     @property
     def command(self):
-        """ The command being executed
+        """
+        The command being executed.
         """
         return self._command
 
     @property
     def response(self):
-        """ The unexpected response
+        """
+        The unexpected response.
+
+        :rtype: str
         """
         return self._response
 
 
 class SpinnmanGroupedProcessException(SpinnmanException):
-    """ Encapsulates exceptions from processes which communicate with a\
-        collection of cores/chips
+    """
+    Encapsulates exceptions from processes which communicate with a
+    collection of cores/chips.
     """
     def __init__(self, error_requests, exceptions, tracebacks, connections):
         problem = "Exceptions found were:\n"
@@ -246,8 +288,9 @@ class SpinnmanGroupedProcessException(SpinnmanException):
 
 
 class SpinnmanGenericProcessException(SpinnmanException):
-    """ Encapsulates exceptions from processes which communicate with some\
-        core/chip
+    """
+    Encapsulates exceptions from processes which communicate with some
+    core/chip.
     """
     def __init__(self, exception, tb, x, y, p, phys_p, tb2=None):
         """
@@ -279,19 +322,21 @@ class SpinnmanGenericProcessException(SpinnmanException):
 
 
 class SpinnmanUnsupportedOperationException(SpinnmanException):
-    """ An exception that indicates that the given operation is not supported
+    """
+    An exception that indicates that the given operation is not supported.
     """
 
     def __init__(self, operation):
         """
         :param str operation: The operation being requested
         """
-        super().__init__("Operation {} is not supported".format(operation))
+        super().__init__(f"Operation {operation} is not supported")
         self._operation = operation
 
     @property
     def operation(self):
-        """ The unsupported operation requested
+        """
+        The unsupported operation requested.
 
         :rtype: str
         """
@@ -299,8 +344,9 @@ class SpinnmanUnsupportedOperationException(SpinnmanException):
 
 
 class SpinnmanEIEIOPacketParsingException(SpinnmanException):
-    """ Unable to complete the parsing of the EIEIO packet received.\
-    The routine used is invalid or the content of the packet is invalid
+    """
+    Unable to complete the parsing of the EIEIO packet received.
+    The routine used is invalid or the content of the packet is invalid.
     """
 
     def __init__(self, parsing_format, packet):
@@ -309,8 +355,9 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
         :param bytes packet:
         """
         super().__init__(
-            "The packet received is being parsed as an EIEIO {0:s} packet, "
-            "but the content of the packet is invalid".format(parsing_format))
+            "The packet received is being parsed as an EIEIO "
+            f"{parsing_format} packet, "
+            "but the content of the packet is invalid")
         self._packet = packet
 
     @property
@@ -322,7 +369,8 @@ class SpinnmanEIEIOPacketParsingException(SpinnmanException):
 
 
 class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
-    """ Cores failed to reach a given state within a timeout.
+    """
+    Cores failed to reach a given state within a timeout.
     """
 
     def __init__(self, timeout, expected_states, failed_core_states):
@@ -333,11 +381,11 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         """
         n_cores = len(failed_core_states)
         if n_cores > 10:
-            msg = "waiting for {} cores to reach one of {}".format(
-                n_cores, expected_states)
+            msg = (f"waiting for {n_cores} cores to reach "
+                   f"one of {expected_states}")
         else:
-            msg = "waiting for cores {} to reach one of {}".format(
-                failed_core_states, expected_states)
+            msg = (f"waiting for cores {failed_core_states} to reach "
+                   f"one of {expected_states}")
         super().__init__(msg, timeout, msg)
         self._failed_core_states = failed_core_states
 
@@ -346,3 +394,9 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         :rtype: CPUInfos
         """
         return self._failed_core_states
+
+
+class SpallocException(SpinnmanException):
+    """
+    Raised when there is a problem with the Spalloc session or job.
+    """

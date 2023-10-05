@@ -1,33 +1,35 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import unittest
 import struct
+from spinn_utilities.config_holder import set_config
 from spinn_machine import virtual_machine
 from spinnman.config_setup import unittest_setup
+from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
+from spinnman.extended.extended_transceiver import ExtendedTransceiver
 from spinnman.transceiver import Transceiver
 from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
     SystemVariableDefinition)
 from spinnman.connections.udp_packet_connections import (
-    BootConnection, EIEIOConnection, SCAMPConnection)
+    BootConnection, SCAMPConnection)
 import spinnman.transceiver as transceiver
-from board_test_configuration import BoardTestConfiguration
+import spinnman.extended.extended_transceiver as extended
+from spinnman.board_test_configuration import BoardTestConfiguration
 
-board_config = BoardTestConfiguration()
 ver = 5  # Guess?
 
 
@@ -39,7 +41,9 @@ class MockWriteTransceiver(Transceiver):
         self.written_memory = list()
 
     def get_machine_details(self):
-        return virtual_machine(2, 2)
+        version = SpiNNManDataView.get_machine_version()
+        width, height = version.board_shape
+        return virtual_machine(width, height)
 
     def _update_machine(self):
         self._machine = self.get_machine_details()
@@ -54,102 +58,85 @@ class MockWriteTransceiver(Transceiver):
     def close(self):
         pass
 
+    def _ensure_board_is_ready(self, n_retries=5, extra_boot_values=None):
+        pass
+
+
+class MockExtendedTransceiver(MockWriteTransceiver, ExtendedTransceiver):
+    pass
+
 
 class TestTransceiver(unittest.TestCase):
 
     def setUp(self):
         unittest_setup()
+        self.board_config = BoardTestConfiguration()
 
     def test_create_new_transceiver_to_board(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
-            remote_host=board_config.remotehost))
+            remote_host=self.board_config.remotehost))
         trans = transceiver.Transceiver(ver, connections=connections)
         trans.close()
 
     def test_create_new_transceiver_one_connection(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         connections = set()
         connections.add(SCAMPConnection(
-            remote_host=board_config.remotehost))
-        with transceiver.Transceiver(ver, connections=connections) as trans:
-            assert trans.get_connections() == connections
+            remote_host=self.board_config.remotehost))
+        with extended.ExtendedTransceiver(
+                ver, connections=connections) as trans:
+            assert trans._all_connections == connections
 
     def test_create_new_transceiver_from_list_connections(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
-            remote_host=board_config.remotehost))
-        board_config.set_up_local_virtual_board()
-        connections.append(BootConnection(
-            remote_host=board_config.remotehost))
+            remote_host=self.board_config.remotehost))
+        connections.append(BootConnection(remote_host="127.0.0.1"))
         with transceiver.Transceiver(ver, connections=connections) as trans:
-            instantiated_connections = trans.get_connections()
+            instantiated_connections = trans._all_connections
 
             for connection in connections:
                 assert connection in instantiated_connections
             # assert trans.get_connections() == connections
 
     def test_retrieving_machine_details(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
-            remote_host=board_config.remotehost))
-        board_config.set_up_local_virtual_board()
-        connections.append(BootConnection(
-            remote_host=board_config.remotehost))
+            remote_host=self.board_config.remotehost))
+        connections.append(BootConnection(remote_host="127.0.0.1"))
         with transceiver.Transceiver(ver, connections=connections) as trans:
             SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
-            if board_config.board_version in (2, 3):
-                assert trans.get_machine_dimensions().width == 2
-                assert trans.get_machine_dimensions().height == 2
-            elif board_config.board_version in (4, 5):
-                assert trans.get_machine_dimensions().width == 8
-                assert trans.get_machine_dimensions().height == 8
+            if self.board_config.board_version in (2, 3):
+                assert trans._get_machine_dimensions().width == 2
+                assert trans._get_machine_dimensions().height == 2
+            elif self.board_config.board_version in (4, 5):
+                assert trans._get_machine_dimensions().width == 8
+                assert trans._get_machine_dimensions().height == 8
             else:
-                size = trans.get_machine_dimensions()
+                size = trans._get_machine_dimensions()
                 print(f"Unknown board with size {size.width} x {size.height}")
 
-            assert trans.is_connected()
-            print(trans.get_scamp_version())
-            print(trans.get_cpu_information())
+            assert any(c.is_connected() for c in trans._scamp_connections)
+            print(trans._get_scamp_version())
+            print(trans.get_cpu_infos())
 
     def test_boot_board(self):
-        board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board()
         with transceiver.create_transceiver_from_hostname(
-                board_config.remotehost, board_config.board_version) as trans:
-            # self.assertFalse(trans.is_connected())
-            trans.boot_board()
-
-    def test_listener_creation(self):
-        # Tests the creation of listening sockets
-
-        # Create board connections
-        connections = []
-        connections.append(SCAMPConnection(remote_host=None))
-        orig_connection = EIEIOConnection()
-        connections.append(orig_connection)
-
-        # Create transceiver
-        with Transceiver(version=5, connections=connections) as trnx:
-            # Register a UDP listeners
-            connection_1 = trnx.register_eieio_listener(callback=None)
-            connection_2 = trnx.register_eieio_listener(callback=None)
-            connection_3 = trnx.register_eieio_listener(
-                callback=None, local_port=orig_connection.local_port)
-            connection_4 = trnx.register_eieio_listener(
-                callback=None, local_port=orig_connection.local_port + 1)
-
-            assert connection_1 == orig_connection
-            assert connection_2 == orig_connection
-            assert connection_3 == orig_connection
-            assert connection_4 != orig_connection
+                self.board_config.remotehost,
+                self.board_config.board_version) as trans:
+            # self.assertFalse(trans.is_connected(        unittest_setup()))
+            trans._boot_board()
 
     def test_set_watch_dog(self):
+        set_config("Machine", "version", 5)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
-        tx = MockWriteTransceiver(version=5, connections=connections)
+        tx = MockExtendedTransceiver(version=5, connections=connections)
         SpiNNManDataWriter.mock().set_machine(tx.get_machine_details())
         # All chips
         tx.set_watch_dog(True)

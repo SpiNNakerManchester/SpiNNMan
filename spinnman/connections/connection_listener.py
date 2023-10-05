@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import logging
 from threading import Thread
@@ -26,8 +25,9 @@ _TIMEOUT = 1
 
 
 class ConnectionListener(Thread, AbstractContextManager):
-    """ Thread that listens to a connection and calls callbacks with new\
-        messages when they arrive.
+    """
+    Thread that listens to a connection and calls callbacks with new
+    messages when they arrive.
     """
     __slots__ = [
         "__callback_pool",
@@ -46,7 +46,7 @@ class ConnectionListener(Thread, AbstractContextManager):
             connection is to be terminated.
         """
         super().__init__(
-            name="Connection listener for connection {}".format(connection))
+            name=f"Connection listener for connection {connection}")
         self.daemon = True
         self.__connection = connection
         self.__timeout = timeout
@@ -56,7 +56,7 @@ class ConnectionListener(Thread, AbstractContextManager):
 
     def __run_step(self, handler):
         """
-        :param callable handler:
+        :param ~collections.abc.Callable handler:
         """
         if self.__connection.is_ready_to_receive(timeout=self.__timeout):
             message = handler()
@@ -74,7 +74,8 @@ class ConnectionListener(Thread, AbstractContextManager):
             logger.exception("problem in listener call")
 
     def run(self):
-        """ Implements the listening thread.
+        """
+        Implements the listening thread.
         """
         with self.__callback_pool:
             handler = self.__connection.get_receive_method()
@@ -89,18 +90,23 @@ class ConnectionListener(Thread, AbstractContextManager):
                                        exc_info=True)
 
     def add_callback(self, callback):
-        """ Add a callback to be called when a message is received
+        """
+        Add a callback to be called when a message is received.
 
-        :param callable callback:
+        :param ~collections.abc.Callable callback:
             A callable which takes a single parameter, which is the message
             received; the result of the callback will be ignored.
         """
         self.__callbacks.add(callback)
 
     def close(self):
-        """ Closes the listener.  Note that this does not close the provider\
-            of the messages; this instead marks the listener as closed.  The\
-            listener will not truly stop until the get message call returns.
+        """
+        Closes the listener.
+
+        .. note::
+            This does not close the provider of the messages; this instead
+            marks the listener as closed.  The listener will not truly stop
+            until the get message call returns.
         """
         self.__done = True
         self.join()

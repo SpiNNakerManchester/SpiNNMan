@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from .udp_connection import UDPConnection
@@ -26,13 +25,15 @@ _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
 
 
 class EIEIOConnection(UDPConnection, Listenable):
-    """ A UDP connection for sending and receiving raw EIEIO messages.
+    """
+    A UDP connection for sending and receiving raw EIEIO messages.
     """
     __slots__ = []
 
     def receive_eieio_message(self, timeout=None):
-        """ Receives an EIEIO message from this connection.  Blocks until\
-            a message has been received, or a timeout occurs.
+        """
+        Receives an EIEIO message from this connection.  Blocks until
+        a message has been received, or a timeout occurs.
 
         :param int timeout:
             The time in seconds to wait for the message to arrive; if not
@@ -55,7 +56,8 @@ class EIEIOConnection(UDPConnection, Listenable):
         return read_eieio_data_message(data, 0)
 
     def send_eieio_message(self, eieio_message):
-        """ Sends an EIEIO message down this connection
+        """
+        Sends an EIEIO message down this connection.
 
         :param AbstractEIEIOMessage eieio_message:
             The EIEIO message to be sent

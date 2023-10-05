@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import logging
 from spinn_utilities.log import FormatAdapter
@@ -26,15 +25,16 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 class SetPower(BMPRequest):
-    """ An SCP request for the BMP to power on or power off a rack of boards
+    """
+    An SCP request for the BMP to power on or power off a rack of boards.
     """
     __slots__ = []
 
     def __init__(self, power_command, boards, delay=0.0, board_to_send_to=0):
         """
         .. note::
-            There is currently a bug in the BMP that means some boards don't\
-            respond to power commands not sent to BMP 0. Thus changing the\
+            There is currently a bug in the BMP that means some boards don't
+            respond to power commands not sent to BMP 0. Thus changing the
             board_to_send_to parameter is not recommended!
 
         :param PowerCommand power_command: The power command being sent

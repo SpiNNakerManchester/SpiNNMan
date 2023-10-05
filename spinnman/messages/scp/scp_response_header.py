@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinnman.messages.scp.enums import SCPResult
@@ -20,7 +19,8 @@ _TWO_SHORTS = struct.Struct("<2H")
 
 
 class SCPResponseHeader(object):
-    """ Represents the header of an SCP Response
+    """
+    Represents the header of an SCP Response.
     """
     __slots__ = [
         "_result",
@@ -36,27 +36,28 @@ class SCPResponseHeader(object):
 
     @property
     def result(self):
-        """ The result of the SCP response
+        """
+        The result of the SCP response.
 
-        :return: The result
         :rtype: SCPResult
         """
         return self._result
 
     @property
     def sequence(self):
-        """ The sequence number of the SCP response
+        """
+        The sequence number of the SCP response, between 0 and 65535.
 
-        :return: The sequence number of the packet, between 0 and 65535
         :rtype: int
         """
         return self._sequence
 
     @staticmethod
     def from_bytestring(data, offset):
-        """ Read a header from a bytestring
+        """
+        Read a header from a byte-string.
 
-        :param bytes data: The bytestring to read from
+        :param bytes data: The byte-string to read from
         :param int offset:
         """
         result, sequence = _TWO_SHORTS.unpack_from(data, offset)

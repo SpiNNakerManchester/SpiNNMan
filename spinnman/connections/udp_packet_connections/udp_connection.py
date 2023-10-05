@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import logging
 import socket
@@ -35,6 +34,18 @@ _REPR_TEMPLATE = "UDPConnection(local={}:{}, remote={}:{})"
 
 
 class UDPConnection(Connection, Listenable):
+    """
+    A connection that routes messages via UDP to some remote host.
+
+    Subclasses of this should be aware that UDP messages may be dropped,
+    reordered, or duplicated, and that there's no way to tell whether the
+    other end of the connection truly exists except by listening for
+    occasional messages from them. There is also an upper size limit on
+    messages, formally of 64kB, but usually of about 1500 bytes (the typical
+    maximum size of an Ethernet packet);
+    SDP messages have lower maximum lengths.
+    """
+
     __slots__ = [
         "_can_send",
         "_local_ip_address",
@@ -98,10 +109,13 @@ class UDPConnection(Connection, Listenable):
     @property
     def __is_closed(self):
         """
-        Is the socket closed? Note that just because a socket is not closed
-        doesn't mean that you're going to be able to successfully write to it
-        or read from it; some failures are only detected on use. But closed
-        sockets definitely behave in certain ways!
+        Is the socket closed?
+
+        .. note::
+            Just because a socket is not closed doesn't mean that you're going
+            to be able to successfully write to it or read from it; some
+            failures are only detected on use. But closed sockets definitely
+            behave in certain ways!
 
         :rtype: bool
         """
@@ -129,46 +143,49 @@ class UDPConnection(Connection, Listenable):
 
     @property
     def local_ip_address(self):
-        """ The local IP address to which the connection is bound.
+        """
+        The local IP address to which the connection is bound,
+        as a dotted string, e.g., `0.0.0.0`.
 
-        :return: The local IP address as a dotted string, e.g., 0.0.0.0
         :rtype: str
         """
         return self._local_ip_address
 
     @property
     def local_port(self):
-        """ The local port to which the connection is bound.
+        """
+        The number of the local port to which the connection is bound.
 
-        :return: The local port number
         :rtype: int
         """
         return self._local_port
 
     @property
     def remote_ip_address(self):
-        """ The remote IP address to which the connection is connected.
+        """
+        The remote IP address to which the connection is connected,
+        or `None` if not connected remotely.
 
-        :return: The remote IP address as a dotted string, or None if not
-            connected remotely
         :rtype: str
         """
         return self._remote_ip_address
 
     @property
     def remote_port(self):
-        """ The remote port to which the connection is connected.
+        """
+        The remote port number to which the connection is connected,
+        or `None` if not connected remotely.
 
-        :return: The remote port, or None if not connected remotely
         :rtype: int
         """
         return self._remote_port
 
     def receive(self, timeout=None):
-        """ Receive data from the connection
+        """
+        Receive data from the connection.
 
-        :param float timeout: The timeout in seconds, or None to wait forever
-        :return: The data received as a bytestring
+        :param float timeout: The timeout in seconds, or `None` to wait forever
+        :return: The data received as a byte-string
         :rtype: bytes
         :raise SpinnmanTimeoutException:
             If a timeout occurs before any data is received
@@ -179,10 +196,11 @@ class UDPConnection(Connection, Listenable):
         return receive_message(self._socket, timeout, 300)
 
     def receive_with_address(self, timeout=None):
-        """ Receive data from the connection along with the address where the\
-            data was received from
+        """
+        Receive data from the connection along with the address where the
+        data was received from.
 
-        :param float timeout: The timeout, or None to wait forever
+        :param float timeout: The timeout, or `None` to wait forever
         :return: A tuple of the data received and a tuple of the
             (address, port) received from
         :rtype: tuple(bytes, tuple(str, int))
@@ -195,7 +213,8 @@ class UDPConnection(Connection, Listenable):
         return receive_message_and_address(self._socket, timeout, 300)
 
     def send(self, data):
-        """ Send data down this connection
+        """
+        Send data down this connection.
 
         :param data: The data to be sent
         :type data: bytes or bytearray
@@ -212,9 +231,10 @@ class UDPConnection(Connection, Listenable):
                 raise SpinnmanEOFException()
 
     def send_to(self, data, address):
-        """ Send data down this connection
+        """
+        Send data down this connection.
 
-        :param data: The data to be sent as a bytestring
+        :param data: The data to be sent as a byte-string
         :type data: bytes or bytearray
         :param tuple(str,int) address:
             A tuple of (address, port) to send the data to

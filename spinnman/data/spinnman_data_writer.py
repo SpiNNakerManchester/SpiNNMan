@@ -1,17 +1,16 @@
-# Copyright (c) 2021-2022 The University of Manchester
+# Copyright (c) 2021 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import logging
 from spinn_utilities.log import FormatAdapter
@@ -29,20 +28,18 @@ REPORTS_DIRNAME = "reports"
 
 class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     """
-    See UtilsDataWriter
+    See :py:class:`~spinn_utilities.data.UtilsDataWriter`
 
     This class is designed to only be used directly within the SpiNNMan
-    repository unittests as all methods are available to subclasses
+    repository unit tests as all methods are available to subclasses
     """
     __data = _SpiNNManDataModel()
     __slots__ = []
 
     def _spinnman_mock(self):
         """
-        Like _mock but does not call super class _mock
-        This method should only be called by setup (via _setup)
-
-        This method should only be called by mock via _mock
+        Like :py:meth:`_mock` but does not call superclass `_mock`.
+        This method should only be called by `mock` via `_mock`
         """
         self.__data._clear()
 
@@ -53,9 +50,9 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def _spinnman_setup(self):
         """
-        Like _setup but does not call super class _setup
+        Like :py:meth:`_setup` but does not call superclass `_setup`.
 
-        This method should only be called by setup (via _setup)
+        This method should only be called by `setup` (via `_setup`)
         """
         self.__data._clear()
 
@@ -67,7 +64,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     def _local_hard_reset(self):
         """
         Puts spinnman data back into the state expected at graph changed and
-            sim.reset
+        `sim.reset`.
 
         Unlike hard_reset this method does not call super classes
 
@@ -83,10 +80,10 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def _local_soft_reset(self):
         """
-        Puts all data back into the state expected at sim.reset but not
-        graph changed
+        Puts all data back into the state expected at `sim.reset` but not
+        graph changed.
 
-        Unlike soft_reset this method does not call super classes
+        Unlike soft_reset this method does not call superclasses
 
         This method should only be called by soft_reset (via _soft_reset)
         """
@@ -99,7 +96,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def set_transceiver(self, transceiver):
         """
-        Sets the transceiver object
+        Sets the transceiver object.
 
         :param Transceiver transceiver:
         :raises TypeError: If the transceiver is not a Transceiver

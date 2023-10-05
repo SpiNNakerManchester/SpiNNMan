@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2015 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import struct
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
@@ -41,16 +40,17 @@ class EIEIODataHeader(object):
     def __init__(self, eieio_type, tag=0, prefix=None,
                  prefix_type=EIEIOPrefix.LOWER_HALF_WORD,
                  payload_base=None, is_time=False, count=0):
-        """ EIEIO header for data packets
+        """
+        EIEIO header for data packets.
 
         :param EIEIOType eieio_type: the type of message
         :param int tag: the tag of the message (0 by default)
-        :param prefix: the key prefix of the message or None if not prefixed
+        :param prefix: the key prefix of the message or `None` if not prefixed
         :type prefix: int or None
         :param EIEIOPrefix prefix_type:
             the position of the prefix (upper or lower)
         :param payload_base:
-            The base payload to be applied, or None if no base payload
+            The base payload to be applied, or `None` if no base payload
         :type payload_base: int or None
         :param bool is_time:
             True if the payloads should be taken to be timestamps, or False
@@ -106,7 +106,8 @@ class EIEIODataHeader(object):
 
     @staticmethod
     def get_header_size(eieio_type, is_prefix=False, is_payload_base=False):
-        """ Get the size of a header with the given parameters
+        """
+        Get the size of a header with the given parameters.
 
         :param EIEIOType eieio_type: the type of message
         :param bool is_prefix: True if there is a prefix, False otherwise
@@ -130,12 +131,11 @@ class EIEIODataHeader(object):
 
     @property
     def bytestring(self):
-        """ Get a bytestring of the header
+        """
+        The byte-string of the header.
 
-        :return: The header as a bytestring
         :rtype: bytes
         """
-
         # Convert the flags to an int
         data = 0
 
@@ -182,14 +182,14 @@ class EIEIODataHeader(object):
 
     @staticmethod
     def from_bytestring(data, offset):
-        """ Read an eieio data header from a bytestring
+        """
+        Read an EIEIO data header from a byte-string.
 
-        :param bytes data: The bytestring to be read
+        :param bytes data: The byte-string to be read
         :param int offset: The offset at which the data starts
         :return: an EIEIO header
         :rtype: EIEIODataHeader
         """
-
         (count, header_data) = _PATTERN_BB.unpack_from(data, offset)
 
         # Read the flags in the header

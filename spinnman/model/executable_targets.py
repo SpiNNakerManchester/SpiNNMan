@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2016 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from collections import defaultdict
 from spinn_utilities.ordered_set import OrderedSet
@@ -20,7 +19,8 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 
 
 class ExecutableTargets(object):
-    """ Encapsulate the binaries and cores on which to execute them.
+    """
+    Encapsulate the binaries and cores on which to execute them.
     """
     __slots__ = [
         "_all_core_subsets",
@@ -35,13 +35,13 @@ class ExecutableTargets(object):
         self._binary_type_map = defaultdict(OrderedSet)
 
     def add_subsets(self, binary, subsets, executable_type=None):
-        """ Add core subsets to a binary
+        """
+        Add core subsets to a binary.
 
         :param str binary: the path to the binary needed to be executed
         :param ~spinn_machine.CoreSubsets subsets:
             the subset of cores that the binary needs to be loaded on
-        :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
-                executable_type:
+        :param ~spinnman.model.enum.ExecutableType executable_type:
             The type of this executable.
             ``None`` means don't record it.
         """
@@ -57,7 +57,8 @@ class ExecutableTargets(object):
 
     def add_processor(
             self, binary, chip_x, chip_y, chip_p, executable_type=None):
-        """ Add a processor to the executable targets
+        """
+        Add a processor to the executable targets
 
         :param str binary: the binary path for executable
         :param int chip_x:
@@ -65,8 +66,7 @@ class ExecutableTargets(object):
         :param int chip_y:
             the coordinate on the machine in terms of y for the chip
         :param int chip_p: the processor ID to place this executable on
-        :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
-                executable_type:
+        :param ~spinnman.model.enum.ExecutableType executable_type:
             the executable type for locating n cores of
         """
         if self.known(binary, chip_x, chip_y, chip_p):
@@ -80,11 +80,10 @@ class ExecutableTargets(object):
         self._total_processors += 1
 
     def get_n_cores_for_executable_type(self, executable_type):
-        """ get the number of cores that the executable type is using
+        """
+        Get the number of cores that the executable type is using.
 
-        :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
-                executable_type:
-            the executable type for locating n cores of
+        :param ~spinnman.model.enum.ExecutableType executable_type:
         :return: the number of cores using this executable type
         :rtype: int
         """
@@ -93,10 +92,10 @@ class ExecutableTargets(object):
             for aplx in self._binary_type_map[executable_type])
 
     def get_binaries_of_executable_type(self, executable_type):
-        """ get the binaries of a given a executable type
+        """
+        Get the binaries of a given a executable type.
 
-        :param ~spinn_front_end_common.utilities.utility_objs.ExecutableType \
-                executable_type:
+        :param ~spinnman.model.enum.ExecutableType executable_type:
             the executable type enum value
         :return: iterable of binaries with that executable type
         :rtype: iterable(str)
@@ -104,16 +103,18 @@ class ExecutableTargets(object):
         return self._binary_type_map[executable_type]
 
     def executable_types_in_binary_set(self):
-        """ get the executable types in the set of binaries
+        """
+        Get the executable types in the set of binaries.
 
         :return: iterable of the executable types in this binary set.
         :rtype:
-            iterable(~spinn_front_end_common.utilities.utility_objs.ExecutableType)
+            iterable(~spinnman.model.enum.ExecutableType)
         """
         return self._binary_type_map.keys()
 
     def get_cores_for_binary(self, binary):
-        """ Get the cores that a binary is to run on
+        """
+        Get the cores that a binary is to run on.
 
         :param str binary: The binary to find the cores for
         """
@@ -121,7 +122,8 @@ class ExecutableTargets(object):
 
     @property
     def binaries(self):
-        """ The binaries of the executables
+        """
+        The binaries of the executables.
 
         :rtype: iterable(str)
         """
@@ -129,7 +131,8 @@ class ExecutableTargets(object):
 
     @property
     def total_processors(self):
-        """ The total number of cores to be loaded
+        """
+        The total number of cores to be loaded.
 
         :rtype: int
         """
@@ -137,7 +140,8 @@ class ExecutableTargets(object):
 
     @property
     def all_core_subsets(self):
-        """ All the core subsets for all the binaries
+        """
+        All the core subsets for all the binaries.
 
         :rtype: ~spinn_machine.CoreSubsets
         """
@@ -158,6 +162,6 @@ class ExecutableTargets(object):
             if self._targets[binary].is_core(chip_x, chip_y, chip_p):
                 return True
 
-        parameter = "x:{} y:{} p:{}".format(chip_x, chip_y, chip_p)
-        problem = "Already associated with a different binary"
-        raise SpinnmanInvalidParameterException(parameter, binary, problem)
+        raise SpinnmanInvalidParameterException(
+            f"x:{chip_x} y:{chip_y} p:{chip_p}", binary,
+            "Already associated with a different binary")

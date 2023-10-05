@@ -1,17 +1,16 @@
-# Copyright (c) 2017-2019 The University of Manchester
+# Copyright (c) 2014 The University of Manchester
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
@@ -30,7 +29,8 @@ _IPTAG_FORMAT = struct.Struct("<4s6s3HIH3B")
 
 
 class IPTagGet(AbstractSCPRequest):
-    """ An SCP Request to get an IP tag
+    """
+    An SCP Request to get an IP tag.
     """
     __slots__ = []
 
@@ -56,7 +56,8 @@ class IPTagGet(AbstractSCPRequest):
 
 
 class _SCPIPTagGetResponse(AbstractSCPResponse):
-    """ An SCP response to a request for an IP tags
+    """
+    An SCP response to a request for an IP tags.
     """
     __slots__ = [
         "_count",
@@ -104,7 +105,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def ip_address(self):
-        """ The IP address of the tag, as a bytearray of 4 bytes
+        """
+        The IP address of the tag, as a bytearray of 4 bytes.
 
         :rtype: bytearray
         """
@@ -112,7 +114,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def mac_address(self):
-        """ The MAC address of the tag, as a bytearray of 6 bytes
+        """
+        The MAC address of the tag, as a bytearray of 6 bytes.
 
         :rtype: bytearray
         """
@@ -120,7 +123,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def port(self):
-        """ The port of the tag
+        """
+        The port of the tag.
 
         :rtype: int
         """
@@ -128,7 +132,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def timeout(self):
-        """ The timeout of the tag
+        """
+        The timeout of the tag.
 
         :rtype: int
         """
@@ -136,7 +141,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def flags(self):
-        """ The flags of the tag
+        """
+        The flags of the tag.
 
         :rtype: int
         """
@@ -144,7 +150,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def in_use(self):
-        """ True if the tag is marked as being in use
+        """
+        Whether the tag is marked as being in use.
 
         :rtype: bool
         """
@@ -152,7 +159,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def is_temporary(self):
-        """ True if the tag is temporary
+        """
+        Whether the tag is temporary.
 
         :rtype: bool
         """
@@ -160,8 +168,12 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def is_arp(self):
-        """ True if the tag is in the ARP state (where the MAC address is\
-            being looked up - transient state so unlikely)
+        """
+        Whether the tag is in the ARP state (where the MAC address is
+        being looked up).
+
+        .. note::
+            This is a transient state; it is unlikely to be observed.
 
         :rtype: bool
         """
@@ -169,7 +181,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def is_reverse(self):
-        """ True if the tag is a reverse tag
+        """
+        Whether the tag is a reverse tag.
 
         :rtype: bool
         """
@@ -177,7 +190,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def strip_sdp(self):
-        """ True if the tag is to strip the SDP header
+        """
+        Whether the tag is to strip the SDP header.
 
         :rtype: bool
         """
@@ -185,7 +199,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def count(self):
-        """ The count of the number of packets that have been sent with the tag
+        """
+        The count of the number of packets that have been sent with the tag.
 
         :rtype: int
         """
@@ -193,7 +208,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def rx_port(self):
-        """ The receive port of the tag
+        """
+        The receive port of the tag.
 
         :rtype: int
         """
@@ -201,7 +217,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def spin_chip_x(self):
-        """ The x-coordinate of the chip on which the tag is defined
+        """
+        The X-coordinate of the chip on which the tag is defined.
 
         :rtype: int
         """
@@ -209,7 +226,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def spin_chip_y(self):
-        """ The y-coordinate of the chip on which the tag is defined
+        """
+        The Y-coordinate of the chip on which the tag is defined.
 
         :rtype: int
         """
@@ -217,7 +235,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def spin_port(self):
-        """ The spin-port of the IP tag
+        """
+        The spin-port of the IP tag.
 
         :rtype: int
         """
@@ -225,7 +244,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
 
     @property
     def spin_cpu(self):
-        """ The CPU ID of the IP tag
+        """
+        The CPU ID of the IP tag.
 
         :rtype: int
         """
