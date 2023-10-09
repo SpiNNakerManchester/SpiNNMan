@@ -927,7 +927,7 @@ class Transceiver(AbstractContextManager):
     def get_region_base_address(self, x, y, p):
         """
         Gets the base address of the Region Table
-        
+
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
         :param int p: The ID of the processor to get the address
