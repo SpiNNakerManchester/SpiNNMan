@@ -1449,6 +1449,8 @@ class Transceiver(AbstractContextManager):
                 if tries >= counts_between_full_check:
                     cores_in_state = self.get_cpu_infos(
                         all_core_subsets, cpu_states, True)
+                    # convert to a list of xyp values
+                    cores_in_state_xyps = list(cores_in_state)
                     processors_ready = len(cores_in_state)
                     tries = 0
 
@@ -1458,7 +1460,7 @@ class Transceiver(AbstractContextManager):
                         for core_subset in all_core_subsets.core_subsets:
                             for p in core_subset.processor_ids:
                                 if ((core_subset.x, core_subset.y, p) not in
-                                        cores_in_state.keys()):
+                                        cores_in_state_xyps):
                                     logger.warning(
                                         "waiting on {}:{}:{}",
                                         core_subset.x, core_subset.y, p)
