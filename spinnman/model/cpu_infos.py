@@ -42,6 +42,7 @@ class CPUInfos(object):
         :param list(~spinnman.model.enums.CPUState) states:
             Only add if the Info has this state
         """
+        # pylint: disable=protected-access
         for info in other._cpu_infos:
             if info.state in states:
                 self.add_info(other)
