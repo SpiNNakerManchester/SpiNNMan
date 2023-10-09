@@ -33,6 +33,21 @@ class CPUInfos(object):
         """
         self._cpu_infos[cpu_info.x, cpu_info.y, cpu_info.p] = cpu_info
 
+    def add_infos(self, other, states):
+        """
+        Adds all the infos in the other CPUInfos if the have one of the
+        required states
+
+        mainly a support method for Transceiver.add_cpu_information_from_core
+
+        :param CPUInfos other: Another Infos object to merge in
+        :param list(~spinnman.model.enums.CPUState) states:
+            Only add if the Info has this state
+        """
+        for info in other._cpu_infos:
+            if info.state in states:
+                self.add_info(other)
+
     def add_processor(self, x, y, processor_id, cpu_info):
         """
         Add a info on a given core.

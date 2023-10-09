@@ -897,15 +897,18 @@ class Transceiver(AbstractContextManager):
         addr = self.__get_user_register_address_from_core(p, user)
         return self.read_word(x, y, addr)
 
-    def get_cpu_information_from_core(self, x, y, p):
+    def add_cpu_information_from_core(self, cpu_infos, x, y, p, states):
         """
-        Get information about a specific processor on the board.
+        Adds information about a specific processor on the board to the info
 
+        :param CPUInfo cpu_infos: Info to add data for this core to
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
         :param int p: The ID of the processor to get the information about
+        :param states:
+        If provided will only add the info if in one of the states
+        :type states: list(CPUState)
         :return: The CPU information for the selected core
-        :rtype: CPUInfo
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -918,8 +921,8 @@ class Transceiver(AbstractContextManager):
         """
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        cpu_infos = self.get_cpu_infos(core_subsets)
-        return cpu_infos.get_cpu_info(x, y, p)
+        new_infos = self.get_cpu_infos(core_subsets)
+        cpu_infos.add_infos(new_infos)
 
     def get_region_base_address(self, x, y, p):
         """
