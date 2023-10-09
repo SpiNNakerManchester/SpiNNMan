@@ -46,46 +46,8 @@ class CPUInfos(object):
             if info.state in states:
                 self.add_info(other)
 
-    @property
-    def cpu_infos(self):
-        """
-        The one per core core info.
-
-        :return: iterable of x,y,p core info
-        :rtype: iterable(~spinnman.model.CPUInfo)
-        """
-        return iter(self._cpu_infos.items())
-
     def __iter__(self):
         return iter(self._cpu_infos)
-
-    def iteritems(self):
-        """
-        Get an iterable of (x, y, p), cpu_info.
-        :rtype: (iterable(tuple(int, int, int),  ~spinnman.model.CPUInfo)
-        """
-        return iter(self._cpu_infos.items())
-
-    def items(self):
-        return self._cpu_infos.items()
-
-    def values(self):
-        return self._cpu_infos.values()
-
-    def itervalues(self):
-        """
-        Get an iterable of cpu_info.
-        """
-        return iter(self._cpu_infos.items())
-
-    def keys(self):
-        return self._cpu_infos.keys()
-
-    def iterkeys(self):
-        """
-        Get an iterable of (x, y, p).
-        """
-        return iter(self._cpu_infos.keys())
 
     def __len__(self):
         """
