@@ -922,7 +922,7 @@ class Transceiver(AbstractContextManager):
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
         new_infos = self.get_cpu_infos(core_subsets)
-        cpu_infos.add_infos(new_infos)
+        cpu_infos.add_infos(new_infos, states)
 
     def get_region_base_address(self, x, y, p):
         """
