@@ -906,7 +906,7 @@ class Transceiver(AbstractContextManager):
         :param int y: The y-coordinate of the chip containing the processor
         :param int p: The ID of the processor to get the information about
         :param states:
-        If provided will only add the info if in one of the states
+            If provided will only add the info if in one of the states
         :type states: list(CPUState)
         :return: The CPU information for the selected core
         :raise SpinnmanIOException:
