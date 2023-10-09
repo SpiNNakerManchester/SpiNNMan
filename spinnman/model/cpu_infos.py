@@ -48,19 +48,6 @@ class CPUInfos(object):
             if info.state in states:
                 self.add_info(other)
 
-    def add_processor(self, x, y, processor_id, cpu_info):
-        """
-        Add a info on a given core.
-
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
-        :param int processor_id: A processor ID
-        :param CPUInfo cpu_info:
-            The CPU information for the core.
-            Not checked so could be None at test own risk
-        """
-        self._cpu_infos[x, y, processor_id] = cpu_info
-
     @property
     def cpu_infos(self):
         """
@@ -143,7 +130,7 @@ class CPUInfos(object):
         :param CPUInfos cpu_infos: A CPUInfos objects
         :rtype: str
         """
-        break_down = "\n"
+        break_down = ""
         for core_info in self._cpu_infos.values():
             break_down += core_info.get_status_string()
         return break_down

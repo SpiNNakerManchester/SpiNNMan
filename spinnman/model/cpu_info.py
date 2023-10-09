@@ -350,3 +350,25 @@ class CPUInfo(object):
         else:
             return (
                 f"{self._x}:{self._y}:{self._p} in state {self._state.name}\n")
+
+    @staticmethod
+    def mock_info(x, y, p, physical_cpu_id, state):
+        """
+        Makes a CPU_info object for Testing purposes
+
+        :param int x:
+        :param int y:
+        :param int p:
+        :param int physical_cpu_id:
+        :param  CPUState CPIstate:
+        """
+        registers = b'@\x00\x07\x08\xff\x00\x00\x00\x00\x00\x80\x00\xad\x00' \
+                    b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \
+                    b'\x00\x00\x00\x00\x00'
+        time = 1687857627
+        application_name = b'scamp-3\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        iobuff_address = 197634
+        cpu_data = (
+            registers, 0, 0, 0, 0, physical_cpu_id, state.value, 0, 0, 0, 0,
+            0, 0, 0, 0, time, application_name, iobuff_address, 0, 0, 0, 0, 0)
+        return CPUInfo(x, y, p, cpu_data)
