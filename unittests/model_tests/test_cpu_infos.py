@@ -61,5 +61,6 @@ class TestCpuInfos(unittest.TestCase):
                          "    PSR=0, SP=0, LR=0\n")
 
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -338,7 +338,7 @@ class CPUInfo(object):
         """
         if self.state == CPUState.RUN_TIME_EXCEPTION:
             return (
-                f"{self._x}:{self._y}:{self._p} " 
+                f"{self._x}:{self._y}:{self._p} "
                 f"(ph: {self._physical_cpu_id}) "
                 f"in state {self._state.name}:{self._run_time_error.name}\n"
                 f"    r0={self._registers[0]}, r1={self._registers[1]}, "
