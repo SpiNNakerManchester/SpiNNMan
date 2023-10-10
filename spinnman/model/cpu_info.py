@@ -57,7 +57,7 @@ class CPUInfo(object):
         "_monitor_mailbox_command",
         "__monitor_mailbox",
         "_physical_cpu_id",
-        "__psr",
+        "__processor_state_register",
         "_registers",
         "_run_time_error",
         "_software_error_count",
@@ -80,16 +80,16 @@ class CPUInfo(object):
         # pylint: disable=too-many-arguments
         self._x, self._y, self._p = x, y, p
 
-        (registers,                                                 # 32s 0
-         self.__psr, self.__sp, self.__lr,                          # 3I  32
-         run_time_error, self._physical_cpu_id,                     # 2B  44
-         state, self._application_id,                               # 2B  46
-         self.__app_mailbox, self.__monitor_mailbox,                # 2I  48
-         app_mailbox_cmd, mon_mailbox_cmd,                          # 2B  56
-         self._software_error_count,                                # H   58
+        (registers,  # 32s 0
+         self.__processor_state_register, self.__sp, self.__lr,  # 3I  32
+         run_time_error, self._physical_cpu_id,  # 2B  44
+         state, self._application_id,  # 2B  46
+         self.__app_mailbox, self.__monitor_mailbox,  # 2I  48
+         app_mailbox_cmd, mon_mailbox_cmd,  # 2B  56
+         self._software_error_count,  # H   58
          self.__filename_address, self.__line_number, self.__time,  # 3I  60
-         app_name,                                                  # 16s 72
-         self._iobuf_address, self._software_version,               # 2I  88
+         app_name,  # 16s 72
+         self._iobuf_address, self._software_version,  # 2I  88
          # skipped                                                  # 16x 96
          user0, user1, user2, user3                                 # 4I  112
          ) = cpu_data
@@ -277,7 +277,7 @@ class CPUInfo(object):
         :return: The PSR value
         :rtype: int
         """
-        return self.__psr
+        return self.__processor_state_register
 
     @property
     def stack_pointer(self) -> int:
@@ -359,7 +359,7 @@ class CPUInfo(object):
                 f"r2={self._registers[2]}, r3={self._registers[3]}\n"
                 f"    r4={self._registers[4]}, r5={self._registers[5]}, "
                 f"r6={self._registers[6]}, r7={self._registers[7]}\n"
-                f"    PSR={self._processor_state_register}, "
+                f"    PSR={self.__processor_state_register}, "
                 f"SP={self._stack_pointer}, LR={self._link_register}\n")
         else:
             return (
