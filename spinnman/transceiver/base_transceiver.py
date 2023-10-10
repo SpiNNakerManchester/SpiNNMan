@@ -107,6 +107,7 @@ _POWER_CYCLE_FAILURE_WARNING = (
     "reset_machine_on_startup = False in the [Machine] section of the "
     "relevant configuration (cfg) file to avoid this warning in future.")
 
+
 class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     """
     A base for all the code shared by all Version of the Transciever.
