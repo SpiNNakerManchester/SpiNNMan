@@ -50,8 +50,7 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def create_transceiver_from_hostname(
-        hostname, version, bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False):
+        hostname, version, bmp_connection_data=None, auto_detect_bmp=False):
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -63,9 +62,6 @@ def create_transceiver_from_hostname(
     :param hostname: The hostname or IP address of the board or `None` if
         only the BMP connections are of interest
     :type hostname: str or None
-    :param number_of_boards: a number of boards expected to be supported, or
-        ``None``, which defaults to a single board
-    :type number_of_boards: int or None
     :param int version: the type of SpiNNaker board used within the SpiNNaker
         machine being used. If a Spinn-5 board, then the version will be 5,
         Spinn-3 would equal 3 and so on.
@@ -97,7 +93,7 @@ def create_transceiver_from_hostname(
     if (version >= 4 and auto_detect_bmp is True and
             (bmp_connection_data is None or not bmp_connection_data)):
         bmp_connection_data = [
-            work_out_bmp_from_machine_details(hostname, number_of_boards)]
+            work_out_bmp_from_machine_details(hostname)]
 
     # handle BMP connections
     if bmp_connection_data is not None:
