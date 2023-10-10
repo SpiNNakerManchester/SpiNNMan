@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinnman.model.enums import CPUState
-
 
 class CPUInfos(object):
     """
@@ -33,59 +31,24 @@ class CPUInfos(object):
         """
         self._cpu_infos[cpu_info.x, cpu_info.y, cpu_info.p] = cpu_info
 
-    def add_processor(self, x, y, processor_id, cpu_info):
+    def add_infos(self, other, states):
         """
-        Add a info on a given core.
+        Adds all the infos in the other CPUInfos if the have one of the
+        required states
 
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
-        :param int processor_id: A processor ID
-        :param CPUInfo cpu_info:
-            The CPU information for the core.
-            Not checked so could be None at test own risk
-        """
-        self._cpu_infos[x, y, processor_id] = cpu_info
+        mainly a support method for Transceiver.add_cpu_information_from_core
 
-    @property
-    def cpu_infos(self):
+        :param CPUInfos other: Another Infos object to merge in
+        :param list(~spinnman.model.enums.CPUState) states:
+            Only add if the Info has this state
         """
-        The one per core core info.
-
-        :return: iterable of x,y,p core info
-        :rtype: iterable(~spinnman.model.CPUInfo)
-        """
-        return iter(self._cpu_infos.items())
+        # pylint: disable=protected-access
+        for info in other._cpu_infos:
+            if info.state in states:
+                self.add_info(other)
 
     def __iter__(self):
         return iter(self._cpu_infos)
-
-    def iteritems(self):
-        """
-        Get an iterable of (x, y, p), cpu_info.
-        :rtype: (iterable(tuple(int, int, int),  ~spinnman.model.CPUInfo)
-        """
-        return iter(self._cpu_infos.items())
-
-    def items(self):
-        return self._cpu_infos.items()
-
-    def values(self):
-        return self._cpu_infos.values()
-
-    def itervalues(self):
-        """
-        Get an iterable of cpu_info.
-        """
-        return iter(self._cpu_infos.items())
-
-    def keys(self):
-        return self._cpu_infos.keys()
-
-    def iterkeys(self):
-        """
-        Get an iterable of (x, y, p).
-        """
-        return iter(self._cpu_infos.keys())
 
     def __len__(self):
         """
@@ -128,24 +91,9 @@ class CPUInfos(object):
         :param CPUInfos cpu_infos: A CPUInfos objects
         :rtype: str
         """
-        break_down = "\n"
-        for (x, y, p), core_info in self.cpu_infos:
-            if core_info.state == CPUState.RUN_TIME_EXCEPTION:
-                break_down += "    {}:{}:{} (ph: {}) in state {}:{}\n".format(
-                    x, y, p, core_info.physical_cpu_id, core_info.state.name,
-                    core_info.run_time_error.name)
-                break_down += "        r0={}, r1={}, r2={}, r3={}\n".format(
-                    core_info.registers[0], core_info.registers[1],
-                    core_info.registers[2], core_info.registers[3])
-                break_down += "        r4={}, r5={}, r6={}, r7={}\n".format(
-                    core_info.registers[4], core_info.registers[5],
-                    core_info.registers[6], core_info.registers[7])
-                break_down += "        PSR={}, SP={}, LR={}\n".format(
-                    core_info.processor_state_register,
-                    core_info.stack_pointer, core_info.link_register)
-            else:
-                break_down += "    {}:{}:{} in state {}\n".format(
-                    x, y, p, core_info.state.name)
+        break_down = ""
+        for core_info in self._cpu_infos.values():
+            break_down += core_info.get_status_string()
         return break_down
 
     def __str__(self):
