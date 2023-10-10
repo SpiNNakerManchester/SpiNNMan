@@ -40,7 +40,7 @@ class TestTransceiver(unittest.TestCase):
         self.board_config = BoardTestConfiguration()
 
     def test_create_new_transceiver_to_board(self):
-        self.board_config.set_up_remote_board(version=5)
+        self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
             remote_host=self.board_config.remotehost))
@@ -49,7 +49,7 @@ class TestTransceiver(unittest.TestCase):
         trans.close()
 
     def test_create_new_transceiver_one_connection(self):
-        self.board_config.set_up_remote_board(version=5)
+        self.board_config.set_up_remote_board()
         connections = set()
         connections.add(SCAMPConnection(
             remote_host=self.board_config.remotehost))
@@ -58,7 +58,7 @@ class TestTransceiver(unittest.TestCase):
         trans.close()
 
     def test_retrieving_machine_details(self):
-        self.board_config.set_up_remote_board(version=5)
+        self.board_config.set_up_remote_board()
         trans = create_transceiver_from_hostname(self.board_config.remotehost)
         SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
         version = SpiNNManDataView.get_machine_version()
@@ -72,7 +72,7 @@ class TestTransceiver(unittest.TestCase):
         print(trans.get_cpu_infos())
 
     def test_boot_board(self):
-        self.board_config.set_up_remote_board(version=5)
+        self.board_config.set_up_remote_board()
         with create_transceiver_from_hostname(
                 self.board_config.remotehost) as trans:
             trans._boot_board()
