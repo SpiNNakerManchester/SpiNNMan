@@ -14,13 +14,11 @@
 
 # pylint: disable=too-many-arguments
 
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod)
-from spinn_utilities.abstract_context_manager import AbstractContextManager
+from spinn_utilities.abstract_base import abstractmethod
 from spinnman.model.enums import CPUState
 
 
-class Transceiver(AbstractContextManager, metaclass=AbstractBase):
+class Transceiver(object):
     """
     An encapsulation of various communications with the SpiNNaker board.
 
