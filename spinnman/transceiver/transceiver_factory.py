@@ -32,8 +32,8 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def create_transceiver_from_hostname(
-        hostname, *, bmp_connection_data=None, number_of_boards=None,
-        auto_detect_bmp=False, power_cycle=False, extended=False):
+        hostname, *, bmp_connection_data=None, auto_detect_bmp=False,
+        power_cycle=False, extended=False):
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -45,8 +45,6 @@ def create_transceiver_from_hostname(
     :param hostname: The hostname or IP address of the board or `None` if
         only the BMP connections are of interest
     :type hostname: str or None
-    :param number_of_boards: a number of boards expected to be supported, or
-        ``None``, which defaults to a single board
     :type number_of_boards: int or None
     :param BMPConnectionData bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
@@ -80,7 +78,7 @@ def create_transceiver_from_hostname(
     if (isinstance(version, Version5) and auto_detect_bmp is True and
             (bmp_connection_data is None)):
         bmp_connection_data = \
-            work_out_bmp_from_machine_details(hostname, number_of_boards)
+            work_out_bmp_from_machine_details(hostname)
 
     # handle BMP connections
     if bmp_connection_data is not None:
