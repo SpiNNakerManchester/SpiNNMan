@@ -64,8 +64,12 @@ class MockableTransceiver(ExtendableTransceiver):
     def read_user(self, x, y, p, user):
         raise NotImplementedError("Needs to be mocked")
 
-    @overrides(Transceiver.get_cpu_information_from_core)
-    def get_cpu_information_from_core(self, x, y, p):
+    @overrides(Transceiver.add_cpu_information_from_core)
+    def add_cpu_information_from_core(self, cpu_infos, x, y, p, states):
+        raise NotImplementedError("Needs to be mocked")
+
+    @overrides(Transceiver.get_region_base_address)
+    def get_region_base_address(self, x, y, p):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_iobuf)

@@ -738,12 +738,33 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         addr = self.__get_user_register_address_from_core(p, user)
         return self.read_word(x, y, addr)
 
-    @overrides(Transceiver.get_cpu_information_from_core)
-    def get_cpu_information_from_core(self, x, y, p):
+    @overrides(Transceiver.add_cpu_information_from_core)
+    def add_cpu_information_from_core(self, cpu_infos, x, y, p, states):
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
-        cpu_infos = self.get_cpu_infos(core_subsets)
-        return cpu_infos.get_cpu_info(x, y, p)
+        new_infos = self.get_cpu_infos(core_subsets)
+        cpu_infos.add_infos(new_infos, states)
+
+    def get_region_base_address(self, x, y, p):
+        """
+        Gets the base address of the Region Table
+
+        :param int x: The x-coordinate of the chip containing the processor
+        :param int y: The y-coordinate of the chip containing the processor
+        :param int p: The ID of the processor to get the address
+        :return: The adddress of the Region table for the selected core
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If x, y, p is not a valid processor
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        return self.read_user(x, y, p, 0)
 
     @overrides(Transceiver.get_iobuf)
     def get_iobuf(self, core_subsets=None):
@@ -980,6 +1001,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 if tries >= counts_between_full_check:
                     cores_in_state = self.get_cpu_infos(
                         all_core_subsets, cpu_states, True)
+                    # convert to a list of xyp values
+                    cores_in_state_xyps = list(cores_in_state)
                     processors_ready = len(cores_in_state)
                     tries = 0
 
@@ -989,7 +1012,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                         for core_subset in all_core_subsets.core_subsets:
                             for p in core_subset.processor_ids:
                                 if ((core_subset.x, core_subset.y, p) not in
-                                        cores_in_state.keys()):
+                                        cores_in_state_xyps):
                                     logger.warning(
                                         "waiting on {}:{}:{}",
                                         core_subset.x, core_subset.y, p)

@@ -203,15 +203,18 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         #    to .update_transaction_id_from_machine
 
     @abstractmethod
-    def get_cpu_information_from_core(self, x, y, p):
+    def add_cpu_information_from_core(self, cpu_infos, x, y, p, states):
         """
-        Get information about a specific processor on the board.
+        Adds information about a specific processor on the board to the info
 
+        :param CPUInfo cpu_infos: Info to add data for this core to
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
         :param int p: The ID of the processor to get the information about
+        :param states:
+            If provided will only add the info if in one of the states
+        :type states: list(CPUState)
         :return: The CPU information for the selected core
-        :rtype: CPUInfo
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -222,7 +225,28 @@ class Transceiver(AbstractContextManager, metaclass=AbstractBase):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        # see https://github.com/SpiNNakerManchester/SpiNNMan/pull/358
+        # used by emergency_recover_state_from_failure
+
+    @abstractmethod
+    def get_region_base_address(self, x, y, p):
+        """
+        Gets the base address of the Region Table
+
+        :param int x: The x-coordinate of the chip containing the processor
+        :param int y: The y-coordinate of the chip containing the processor
+        :param int p: The ID of the processor to get the address
+        :return: The adddress of the Region table for the selected core
+        :rtype: int
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            * If x, y, p is not a valid processor
+            * If a packet is received that has invalid parameters
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
 
     @abstractmethod
     def get_iobuf(self, core_subsets=None):
