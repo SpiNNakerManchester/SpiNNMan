@@ -73,9 +73,8 @@ class TestTransceiver(unittest.TestCase):
 
     def test_boot_board(self):
         self.board_config.set_up_remote_board()
-        with create_transceiver_from_hostname(
-                self.board_config.remotehost) as trans:
-            trans._boot_board()
+        trans = create_transceiver_from_hostname(self.board_config.remotehost)
+        trans._boot_board()
 
     def test_set_watch_dog(self):
         set_config("Machine", "version", 5)
