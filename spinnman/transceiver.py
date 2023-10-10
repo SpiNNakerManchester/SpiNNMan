@@ -28,7 +28,6 @@ from typing import (
     Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, cast)
 from typing_extensions import TypeAlias
 from spinn_utilities.config_holder import get_config_bool
-from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
@@ -206,7 +205,7 @@ def create_transceiver_from_hostname(
                        power_cycle=power_cycle)
 
 
-class Transceiver(AbstractContextManager):
+class Transceiver(object):
     """
     An encapsulation of various communications with the SpiNNaker board.
 
