@@ -57,7 +57,6 @@ R = TypeVar("R", bound=AbstractSCPResponse)
 def create_transceiver_from_hostname(
         hostname: Optional[str], version: int, *,
         bmp_connection_data: Optional[List[BMPConnectionData]] = None,
-        number_of_boards: Optional[int] = None,
         auto_detect_bmp: bool = False) -> 'ExtendedTransceiver':
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
@@ -70,9 +69,6 @@ def create_transceiver_from_hostname(
     :param hostname: The hostname or IP address of the board or `None` if
         only the BMP connections are of interest
     :type hostname: str or None
-    :param number_of_boards: a number of boards expected to be supported, or
-        ``None``, which defaults to a single board
-    :type number_of_boards: int or None
     :param int version: the type of SpiNNaker board used within the SpiNNaker
         machine being used. If a Spinn-5 board, then the version will be 5,
         Spinn-3 would equal 3 and so on.
@@ -108,7 +104,7 @@ def create_transceiver_from_hostname(
         assert number_of_boards is not None, \
             "number_of_boards must be supplied to work out BMP connections"
         bmp_connection_data = [
-            work_out_bmp_from_machine_details(hostname, number_of_boards)]
+            work_out_bmp_from_machine_details(hostname)]
 
     # handle BMP connections
     if bmp_connection_data is not None:

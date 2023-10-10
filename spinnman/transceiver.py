@@ -133,7 +133,6 @@ _POWER_CYCLE_FAILURE_WARNING = (
 def create_transceiver_from_hostname(
         hostname: Optional[str], version: int, *,
         bmp_connection_data: Optional[BMPConnectionData] = None,
-        number_of_boards: Optional[int] = None,
         auto_detect_bmp: bool = False,
         power_cycle: bool =False) -> 'Transceiver':
     """
@@ -147,9 +146,6 @@ def create_transceiver_from_hostname(
     :param hostname: The hostname or IP address of the board or `None` if
         only the BMP connections are of interest
     :type hostname: str or None
-    :param number_of_boards: a number of boards expected to be supported, or
-        ``None``, which defaults to a single board
-    :type number_of_boards: int or None
     :param int version: the type of SpiNNaker board used within the SpiNNaker
         machine being used. If a Spinn-5 board, then the version will be 5,
         Spinn-3 would equal 3 and so on.
@@ -183,11 +179,8 @@ def create_transceiver_from_hostname(
             (bmp_connection_data is None or not bmp_connection_data)):
         if hostname is None:
             raise ValueError("hostname is required if deriving BMP details")
-        if number_of_boards is None or number_of_boards < 1:
-            raise ValueError(
-                "number_of_boards is required if deriving BMP details")
         bmp_connection_data = work_out_bmp_from_machine_details(
-            hostname, number_of_boards)
+            hostname)
 
     # handle BMP connections
     if bmp_connection_data is not None:
