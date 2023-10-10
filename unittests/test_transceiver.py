@@ -87,9 +87,8 @@ class TestTransceiver(unittest.TestCase):
         self.board_config.set_up_remote_board()
         connections = {
             SCAMPConnection(remote_host=self.board_config.remotehost)}
-        with extended.ExtendedTransceiver(
-                ver, connections=connections) as trans:
-            assert trans._all_connections == connections
+        trans = extended.ExtendedTransceiver(ver, connections=connections)
+        assert trans._all_connections == connections
 
     def test_create_new_transceiver_from_list_connections(self):
         self.board_config.set_up_remote_board()
@@ -97,12 +96,11 @@ class TestTransceiver(unittest.TestCase):
         connections.append(SCAMPConnection(
             remote_host=self.board_config.remotehost))
         connections.append(BootConnection(remote_host="127.0.0.1"))
-        with transceiver.Transceiver(ver, connections=connections) as trans:
-            instantiated_connections = trans._all_connections
+        trans = transceiver.Transceiver(ver, connections=connections)
+        instantiated_connections = trans._all_connections
 
-            for connection in connections:
-                assert connection in instantiated_connections
-            # assert trans.get_connections() == connections
+        for connection in connections:
+            assert connection in instantiated_connections
 
     def test_retrieving_machine_details(self):
         self.board_config.set_up_remote_board()
@@ -110,29 +108,28 @@ class TestTransceiver(unittest.TestCase):
         connections.append(SCAMPConnection(
             remote_host=self.board_config.remotehost))
         connections.append(BootConnection(remote_host="127.0.0.1"))
-        with transceiver.Transceiver(ver, connections=connections) as trans:
-            SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
-            if self.board_config.board_version in (2, 3):
-                assert trans._get_machine_dimensions().width == 2
-                assert trans._get_machine_dimensions().height == 2
-            elif self.board_config.board_version in (4, 5):
-                assert trans._get_machine_dimensions().width == 8
-                assert trans._get_machine_dimensions().height == 8
-            else:
-                size = trans._get_machine_dimensions()
-                print(f"Unknown board with size {size.width} x {size.height}")
+        trans = transceiver.Transceiver(ver, connections=connections)
+        SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
+        if self.board_config.board_version in (2, 3):
+            assert trans._get_machine_dimensions().width == 2
+            assert trans._get_machine_dimensions().height == 2
+        elif self.board_config.board_version in (4, 5):
+            assert trans._get_machine_dimensions().width == 8
+            assert trans._get_machine_dimensions().height == 8
+        else:
+            size = trans._get_machine_dimensions()
+            print(f"Unknown board with size {size.width} x {size.height}")
 
-            assert any(c.is_connected() for c in trans._scamp_connections)
-            print(trans._get_scamp_version())
-            print(trans.get_cpu_infos())
+        assert any(c.is_connected() for c in trans._scamp_connections)
+        print(trans._get_scamp_version())
+        print(trans.get_cpu_infos())
 
     def test_boot_board(self):
         self.board_config.set_up_remote_board()
-        with transceiver.create_transceiver_from_hostname(
+        trans = transceiver.create_transceiver_from_hostname(
                 self.board_config.remotehost,
-                self.board_config.board_version) as trans:
-            # self.assertFalse(trans.is_connected(        unittest_setup()))
-            trans._boot_board()
+                self.board_config.board_version)
+        trans._boot_board()
 
     def test_set_watch_dog(self):
         set_config("Machine", "version", 5)
