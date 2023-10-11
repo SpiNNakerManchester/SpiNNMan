@@ -25,6 +25,7 @@ class SCPCommand(Enum):
     CMD_WRITE = (3, "Write SDRAM")
     CMD_APLX = 4
     CMD_FILL = 5
+    CMD_COUNT = (15, "Count the number of cores in a given state")
     CMD_REMAP = 16
     CMD_LINK_READ = (17, "Read neighbouring chip's memory.")
     CMD_LINK_WRITE = (18, "Write neighbouring chip's memory.")

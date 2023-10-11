@@ -52,7 +52,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPGetVersion, SetPower, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet,
-    CountState, WriteMemory, SendSignal, AppStop,
+    WriteMemory, SendSignal, AppStop,
     IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
@@ -65,14 +65,15 @@ from spinnman.processes import (
     ReadFixedRouteRoutingEntryProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
-    MostDirectConnectionSelector, ApplicationCopyRunProcess)
+    MostDirectConnectionSelector, ApplicationCopyRunProcess,
+    GetNCoresInStateProcess)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = (3, 0, 1)
+_SCAMP_VERSION = (4, 0, 0)
 
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
@@ -994,13 +995,14 @@ class Transceiver(object):
         process = ReadIOBufProcess(self._scamp_connection_selector)
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
-    def get_core_state_count(self, app_id, state):
+    def get_core_state_count(self, app_id, state, xys=None):
         """
         Get a count of the number of cores which have a given state.
 
         :param int app_id:
             The ID of the application from which to get the count.
         :param CPUState state: The state count to get
+        :param list(int,int) xys: The chips to query, or None for all
         :return: A count of the cores with the given status
         :rtype: int
         :raise SpinnmanIOException:
@@ -1014,9 +1016,14 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        response = process.execute(CountState(app_id, state))
-        return response.count  # pylint: disable=no-member
+        process = GetNCoresInStateProcess(self._scamp_connection_selector)
+        chip_xys = xys
+        if xys is None:
+            machine = SpiNNManDataView.get_machine()
+            chip_xys = [(ch.x, ch.y)
+                        for ch in machine.ethernet_connected_chips]
+
+        return process.get_n_cores_in_state(chip_xys, app_id, state)
 
     def execute_flood(
             self, core_subsets, executable, app_id, n_bytes=None, wait=False,

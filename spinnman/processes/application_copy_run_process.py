@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import defaultdict
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+
+APP_COPY_RUN_TIMEOUT = 6.0
 
 
 def _on_same_board(chip_1, chip_2):
@@ -22,29 +25,54 @@ def _on_same_board(chip_1, chip_2):
             chip_1.nearest_ethernet_y == chip_2.nearest_ethernet_y)
 
 
-def _get_next_chips(chips_done):
+def _get_next_chips(chips_done, parent_chips, machine):
     """
     Get the chips that are adjacent to the last set of chips, which
     haven't yet been loaded.  Also returned are the links for each chip,
     which gives the link which should be read from to get the data.
 
-    :param set((int,int)) chips_done:
-        The coordinates of chips that have already been done
-    :return: A dict of chip coordinates to link to use, Chip
-    :rtype: dict((int,int), (int, Chip))
+    :param dict((int,int),list(int,int)) chips_done:
+        The coordinates of chips that have already been done by Ethernet
+    :param dict((int, int),~spinn_machine.Chip) parent_chips:
+        A dictionary of chip coordinates to chips that use that chip as a
+        parent
+    :return: A list of next chips to use
+    :rtype: list(chip)
     """
-    next_chips = dict()
-    for x, y in chips_done:
-        chip = SpiNNManDataView.get_chip_at(x, y)
-        for link in chip.router.links:
-            chip_coords = (link.destination_x, link.destination_y)
-            if chip_coords not in chips_done and chip_coords not in next_chips:
-                next_chip = SpiNNManDataView.get_chip_at(*chip_coords)
-                opp_link = (link.source_link_id + 3) % 6
-                next_chips[chip_coords] = (opp_link, next_chip)
-                # Only let one thing copy from this chip
-                break
+    next_chips = list()
+    for eth_chip in chips_done:
+        off_board_copy_done = False
+        for c_x, c_y in chips_done[eth_chip]:
+            chip_xy = machine.get_chip_at(c_x, c_y)
+            for chip in parent_chips[c_x, c_y]:
+                on_same_board = _on_same_board(chip, chip_xy)
+                eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
+                if (eth not in chips_done or
+                        (chip.x, chip.y) not in chips_done[eth]):
+                    if on_same_board or not off_board_copy_done:
+                        next_chips.append(chip)
+                        if not on_same_board:
+                            off_board_copy_done = True
+                        # Only do one copy from each chip at a time
+                        break
+
     return next_chips
+
+
+def _compute_parent_chips(machine):
+    """
+    Compute a dictionary of chip coordinates to list of chips who use that chip
+    as a parent in the tree.
+
+    :param ~spinn_machine.Machine machine: The machine to compute the map for
+    :rtype: dict((int, int), ~spinn_machine.Chip)
+    """
+    chip_links = defaultdict(list)
+    for chip in machine.chips:
+        if chip.parent_link is not None:
+            link = chip.router.get_link(chip.parent_link)
+            chip_links[link.destination_x, link.destination_y].append(chip)
+    return chip_links
 
 
 class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
@@ -63,6 +91,10 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = []
 
+    def __init__(self, next_connection_selector, timeout=APP_COPY_RUN_TIMEOUT):
+        AbstractMultiConnectionProcess.__init__(
+            self, next_connection_selector, timeout=timeout)
+
     def run(self, size, app_id, core_subsets, chksum, wait):
         """
         Run the process.
@@ -74,18 +106,22 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         :param bool wait:
             Whether to put the binary in "wait" mode or run it straight away
         """
-        boot_chip = SpiNNManDataView.get_machine().boot_chip
-        chips_done = set([(boot_chip.x, boot_chip.y)])
-        next_chips = _get_next_chips(chips_done)
+        machine = SpiNNManDataView.get_machine()
+        boot_chip = machine.boot_chip
+        chips_done = defaultdict(list)
+        chips_done[boot_chip.x, boot_chip.y].append((boot_chip.x, boot_chip.y))
+        parent_chips = _compute_parent_chips(machine)
+        next_chips = _get_next_chips(chips_done, parent_chips, machine)
 
         while next_chips:
             # Do all the chips at the current level
-            for link, chip in next_chips.values():
+            for chip in next_chips:
                 subset = core_subsets.get_core_subset_for_chip(chip.x, chip.y)
                 self._send_request(AppCopyRun(
-                    chip.x, chip.y, link, size, app_id, subset.processor_ids,
-                    chksum, wait))
-                chips_done.add((chip.x, chip.y))
+                    chip.x, chip.y, chip.parent_link, size, app_id,
+                    subset.processor_ids, chksum, wait))
+                eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
+                chips_done[eth].append((chip.x, chip.y))
             self._finish()
             self.check_for_error()
-            next_chips = _get_next_chips(chips_done)
+            next_chips = _get_next_chips(chips_done, parent_chips, machine)
