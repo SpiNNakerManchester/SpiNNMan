@@ -14,6 +14,8 @@
 
 from enum import Enum
 
+LOCAL_HOST = "127.0.0.1"
+
 #: the amount of time to wait in seconds between powering off and powering
 # on a SpiNNaker board.
 POWER_CYCLE_WAIT_TIME_IN_SECONDS = 30

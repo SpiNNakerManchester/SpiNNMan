@@ -99,10 +99,10 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         Sets the transceiver object.
 
         :param Transceiver transceiver:
-        :raises TypeError: If the transceiver is not a Transceiver
+        :raises TypeError: If the transceiver is not a Transceiver subclass
         """
         if not isinstance(transceiver, Transceiver):
-            raise TypeError("transceiver should be a Transceiver")
+            raise TypeError("transceiver should be a Transceiver subclass")
         if self.__data._transceiver:
             raise NotImplementedError(
                 "Over writing and existing transceiver not supported")
