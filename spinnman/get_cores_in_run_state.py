@@ -18,6 +18,7 @@ This is a script used to check the state of a SpiNNaker machine.
 
 import sys
 import argparse
+from spinn_utilities.config_holder import set_config
 from spinnman.transceiver import create_transceiver_from_hostname
 from spinn_machine import CoreSubsets, CoreSubset
 from spinnman.board_test_configuration import BoardTestConfiguration
@@ -82,8 +83,7 @@ def _make_transceiver(host, version, bmp_names):
         config = BoardTestConfiguration()
         config.set_up_remote_board()
         host = config.remotehost
-        version = config.board_version
-        bmp_names = config.bmp_names
+        bmp_names = None
         auto_detect_bmp = config.auto_detect_bmp
     else:
         if version is None:
@@ -92,11 +92,11 @@ def _make_transceiver(host, version, bmp_names):
             else:
                 version = 5
         auto_detect_bmp = False
+        set_config("Machine", "version", version)
 
     print(f"talking to SpiNNaker system at {host}")
     return create_transceiver_from_hostname(
-        host, version,
-        bmp_connection_data=bmp_names,
+        host, bmp_connection_data=bmp_names,
         auto_detect_bmp=auto_detect_bmp)
 
 

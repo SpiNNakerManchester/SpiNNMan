@@ -25,7 +25,7 @@ class TestIptag(unittest.TestCase):
 
     def test_new_iptag(self):
         board_config = BoardTestConfiguration()
-        board_config.set_up_remote_board()
+        board_config.set_up_remote_board(version=5)
         ip = "8.8.8.8"
         port = 1337
         tag = 255

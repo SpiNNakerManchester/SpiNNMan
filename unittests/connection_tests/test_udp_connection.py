@@ -15,6 +15,7 @@
 import unittest
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.config_setup import unittest_setup
+from spinnman.constants import LOCAL_HOST
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.scp.impl import GetVersion, ReadLink, ReadMemory
 from spinnman.messages.scp.enums import SCPResult
@@ -29,12 +30,15 @@ class TestUDPConnection(unittest.TestCase):
         self.board_config = BoardTestConfiguration()
 
     def test_scp_version_request_and_response_board(self):
-        self.board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board(version=5)
         connection = SCAMPConnection(
             remote_host=self.board_config.remotehost)
         scp_req = GetVersion(0, 0, 0)
         scp_response = GetVersionResponse()
         connection.send_scp_request(scp_req)
+        if self.board_config.remotehost == LOCAL_HOST:
+            raise unittest.SkipTest(
+                "Can not test the rest without a ral board")
         _, _, data, offset = connection.receive_scp_response()
         scp_response.read_bytestring(data, offset)
         print(scp_response.version_info)
@@ -42,28 +46,35 @@ class TestUDPConnection(unittest.TestCase):
             scp_response._scp_response_header._result, SCPResult.RC_OK)
 
     def test_scp_read_link_request_and_response_board(self):
-        self.board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board(version=5)
         connection = SCAMPConnection(
             remote_host=self.board_config.remotehost)
         scp_link = ReadLink((0, 0, 0), 0, 0x70000000, 250)
         connection.send_scp_request(scp_link)
+        if self.board_config.remotehost == LOCAL_HOST:
+            raise unittest.SkipTest(
+                "Can not test the rest without a ral board")
         result, _, _, _ = connection.receive_scp_response()
         self.assertEqual(result, SCPResult.RC_OK)
 
     def test_scp_read_memory_request_and_response_board(self):
-        self.board_config.set_up_remote_board()
+        self.board_config.set_up_remote_board(version=5)
         connection = SCAMPConnection(
             remote_host=self.board_config.remotehost)
         scp_link = ReadMemory((0, 0, 0), 0x70000000, 256)
         connection.send_scp_request(scp_link)
+        if self.board_config.remotehost == LOCAL_HOST:
+            raise unittest.SkipTest(
+                "Can not test the rest without a ral board")
         result, _, _, _ = connection.receive_scp_response()
         self.assertEqual(result, SCPResult.RC_OK)
 
     def test_send_scp_request_to_nonexistent_host(self):
+        # Microsoft invalid IP address. For more details see:
+        # https://answers.microsoft.com/en-us/windows/forum/windows_vista-networking/invalid-ip-address-169254xx/ce096728-e2b7-4d54-80cc-52a4ed342870
+        _NOHOST = "169.254.254.254"
         with self.assertRaises(SpinnmanTimeoutException):
-            self.board_config.set_up_nonexistent_board()
-            connection = SCAMPConnection(
-                remote_host=self.board_config.remotehost)
+            connection = SCAMPConnection(remote_host=_NOHOST)
             scp = ReadMemory((0, 0, 0), 0, 256)
             connection.send_scp_request(scp)
             _, _, _, _ = connection.receive_scp_response(2)

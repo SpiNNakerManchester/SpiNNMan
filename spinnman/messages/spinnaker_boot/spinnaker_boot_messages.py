@@ -17,12 +17,12 @@ import math
 import time
 from typing import Any, Dict, Iterable, Optional, Tuple
 import array
+from spinnman.data import SpiNNManDataView
 from .system_variable_boot_values import (
-    SystemVariableBootValues, spinnaker_boot_values, SystemVariableDefinition)
+    SystemVariableBootValues, SystemVariableDefinition)
 from .spinnaker_boot_message import SpinnakerBootMessage
 from .spinnaker_boot_op_code import SpinnakerBootOpCode
-from spinnman.exceptions import (
-    SpinnmanInvalidParameterException, SpinnmanIOException)
+from spinnman.exceptions import SpinnmanIOException
 
 _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4
@@ -42,31 +42,27 @@ class SpinnakerBootMessages(object):
         "_n_bytes_to_read",
         "_no_data_packets")
 
-    def __init__(self, board_version: Optional[int] = None,
-                 extra_boot_values: Optional[Dict[
-                     SystemVariableDefinition, Any]] = None):
+    def __init__(self, extra_boot_values: Optional[Dict[
+        SystemVariableDefinition, Any]] = None):
         """
-        :param int board_version: The version of the board to be booted
         :param extra_boot_values:
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
             based on the board version.
+            for example this may include an Led_0 value.
         :type extra_boot_values: dict(SystemVariableDefinition, object)
         :raise SpinnmanInvalidParameterException:
             If the board version is not supported
         :raise SpinnmanIOException:
             If there is an error assembling the packets
         """
-        if (board_version is not None and
-                board_version not in spinnaker_boot_values):
-            raise SpinnmanInvalidParameterException(
-                "board_version", str(board_version), "Unknown board version")
+        version = SpiNNManDataView.get_machine_version()
 
         # Get the boot packet values
-        if board_version is not None:
-            spinnaker_boot_value = spinnaker_boot_values[board_version]
-        else:
-            spinnaker_boot_value = SystemVariableBootValues()
+        spinnaker_boot_value = SystemVariableBootValues()
+
+        spinnaker_boot_value.set_value(
+            SystemVariableDefinition.hardware_version, version.number)
 
         current_time = int(time.time())
         spinnaker_boot_value.set_value(
