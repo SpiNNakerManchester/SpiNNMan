@@ -13,19 +13,25 @@
 # limitations under the License.
 
 from collections import defaultdict
+from typing import Callable, Dict, Iterable, List, Set, Tuple
+from spinn_machine import Chip, CoreSubsets, Machine
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
+from spinnman.processes import ConnectionSelector
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 APP_COPY_RUN_TIMEOUT = 6.0
 
 
-def _on_same_board(chip_1, chip_2):
+def _on_same_board(chip_1: Chip, chip_2: Chip):
     return (chip_1.nearest_ethernet_x == chip_2.nearest_ethernet_x and
             chip_1.nearest_ethernet_y == chip_2.nearest_ethernet_y)
 
 
-def _get_next_chips(chips_done, parent_chips, machine):
+def _get_next_chips(
+        chips_done: Dict[Tuple[int, int], Iterable[Tuple[int, int]]],
+        parent_chips: Dict[Tuple[int, int], Chip],
+        machine: Machine) -> Iterable[Chip]:
     """
     Get the chips that are adjacent to the last set of chips, which
     haven't yet been loaded.  Also returned are the links for each chip,
@@ -39,7 +45,7 @@ def _get_next_chips(chips_done, parent_chips, machine):
     :return: A list of next chips to use
     :rtype: list(chip)
     """
-    next_chips = list()
+    next_chips: Iterable[Chip] = list()
     for eth_chip in chips_done:
         off_board_copy_done = False
         for c_x, c_y in chips_done[eth_chip]:
@@ -59,7 +65,8 @@ def _get_next_chips(chips_done, parent_chips, machine):
     return next_chips
 
 
-def _compute_parent_chips(machine):
+def _compute_parent_chips(
+        machine: Machine) -> Dict[Tuple[int, int], Iterable[Chip]]:
     """
     Compute a dictionary of chip coordinates to list of chips who use that chip
     as a parent in the tree.
@@ -67,7 +74,7 @@ def _compute_parent_chips(machine):
     :param ~spinn_machine.Machine machine: The machine to compute the map for
     :rtype: dict((int, int), ~spinn_machine.Chip)
     """
-    chip_links = defaultdict(list)
+    chip_links: Dict[Tuple[int, int], Iterable[Chip]] = defaultdict(list)
     for chip in machine.chips:
         if chip.parent_link is not None:
             link = chip.router.get_link(chip.parent_link)
@@ -91,11 +98,13 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = []
 
-    def __init__(self, next_connection_selector, timeout=APP_COPY_RUN_TIMEOUT):
+    def __init__(self, next_connection_selector: ConnectionSelector,
+                 timeout: float = APP_COPY_RUN_TIMEOUT):
         AbstractMultiConnectionProcess.__init__(
             self, next_connection_selector, timeout=timeout)
 
-    def run(self, size, app_id, core_subsets, chksum, wait):
+    def run(self, size: int, app_id: int, core_subsets: CoreSubsets,
+            chksum: int, wait: bool):
         """
         Run the process.
 
@@ -108,7 +117,8 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         """
         machine = SpiNNManDataView.get_machine()
         boot_chip = machine.boot_chip
-        chips_done = defaultdict(list)
+        chips_done: Dict[Tuple[int, int], Iterable[Tuple[int, int]]] = \
+            defaultdict(list)
         chips_done[boot_chip.x, boot_chip.y].append((boot_chip.x, boot_chip.y))
         parent_chips = _compute_parent_chips(machine)
         next_chips = _get_next_chips(chips_done, parent_chips, machine)
