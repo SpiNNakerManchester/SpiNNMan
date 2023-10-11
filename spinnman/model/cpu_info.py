@@ -360,7 +360,7 @@ class CPUInfo(object):
                 f"    r4={self.__registers[4]}, r5={self.__registers[5]}, "
                 f"r6={self.__registers[6]}, r7={self.__registers[7]}\n"
                 f"    PSR={self.__processor_state_register}, "
-                f"SP={self._stack_pointer}, LR={self._link_register}\n")
+                f"SP={self.__stack_pointer}, LR={self.__link_register}\n")
         else:
             return (
                 f"{self.__x}:{self.__y}:{self.__p} "
