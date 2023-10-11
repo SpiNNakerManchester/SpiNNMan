@@ -271,13 +271,14 @@ class Transceiver(object):
         # Used by IOBufExtractor
 
     @abstractmethod
-    def get_core_state_count(self, app_id, state):
+    def get_core_state_count(self, app_id, state, xys=None):
         """
         Get a count of the number of cores which have a given state.
 
         :param int app_id:
             The ID of the application from which to get the count.
         :param CPUState state: The state count to get
+        :param list(int,int) xys: The chips to query, or None for all
         :return: A count of the cores with the given status
         :rtype: int
         :raise SpinnmanIOException:

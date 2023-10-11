@@ -77,7 +77,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_core_state_count)
-    def get_core_state_count(self, app_id, state):
+    def get_core_state_count(self, app_id, state, xys=None):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.execute_flood)

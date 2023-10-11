@@ -55,7 +55,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPGetVersion, SetPower, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet,
-    CountState, WriteMemory, SendSignal, AppStop,
+    WriteMemory, SendSignal, AppStop,
     IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
@@ -68,15 +68,16 @@ from spinnman.processes import (
     ReadFixedRouteRoutingEntryProcess,
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
-    MostDirectConnectionSelector, ApplicationCopyRunProcess)
-from spinnman.utilities.utility_functions import get_vcpu_address
+    MostDirectConnectionSelector, ApplicationCopyRunProcess,
+    GetNCoresInStateProcess)
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
+from spinnman.utilities.utility_functions import get_vcpu_address
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = (3, 0, 1)
+_SCAMP_VERSION = (4, 0, 0)
 
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
@@ -746,25 +747,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         new_infos = self.get_cpu_infos(core_subsets)
         cpu_infos.add_infos(new_infos, states)
 
+    @overrides(Transceiver.get_region_base_address)
     def get_region_base_address(self, x, y, p):
-        """
-        Gets the base address of the Region Table
-
-        :param int x: The x-coordinate of the chip containing the processor
-        :param int y: The y-coordinate of the chip containing the processor
-        :param int p: The ID of the processor to get the address
-        :return: The adddress of the Region table for the selected core
-        :rtype: int
-        :raise SpinnmanIOException:
-            If there is an error communicating with the board
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            * If x, y, p is not a valid processor
-            * If a packet is received that has invalid parameters
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
         return self.read_user(x, y, p, 0)
 
     @overrides(Transceiver.get_iobuf)
@@ -781,10 +765,15 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
     @overrides(Transceiver.get_core_state_count)
-    def get_core_state_count(self, app_id, state):
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        response = process.execute(CountState(app_id, state))
-        return response.count  # pylint: disable=no-member
+    def get_core_state_count(self, app_id, state, xys=None):
+        process = GetNCoresInStateProcess(self._scamp_connection_selector)
+        chip_xys = xys
+        if xys is None:
+            machine = SpiNNManDataView.get_machine()
+            chip_xys = [(ch.x, ch.y)
+                        for ch in machine.ethernet_connected_chips]
+
+        return process.get_n_cores_in_state(chip_xys, app_id, state)
 
     @contextmanager
     def _flood_execute_lock(self):

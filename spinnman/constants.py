@@ -213,6 +213,9 @@ address_length_dtype = {
 #: This is the default timeout when using SCP
 SCP_TIMEOUT = 1.0
 
+#: This is the default timeout when using SCP count (can take a bit longer)
+SCP_TIMEOUT_COUNT = 5.0
+
 #: This is the default number of retries when using SCP
 N_RETRIES = 10
 
