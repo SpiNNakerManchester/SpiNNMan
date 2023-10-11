@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import (
+    BinaryIO, Collection, Dict, FrozenSet, Iterable,
+    Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, cast)
 from spinn_utilities.overrides import overrides
+from spinnman.connections.abstract_classes import Connection
 from spinnman.data import SpiNNManDataView
 from spinnman.transceiver.base_transceiver import BaseTransceiver
 
@@ -25,7 +29,8 @@ class Version5Transceiver(BaseTransceiver):
     """
 
     @overrides(BaseTransceiver.__init__)
-    def __init__(self, connections=None, power_cycle=False):
+    def __init__(self, connections: Optional[List[Connection]] = None,
+                 power_cycle: bool = False):
         super().__init__(connections, power_cycle)
         assert SpiNNManDataView.get_machine_version().number == 5
 

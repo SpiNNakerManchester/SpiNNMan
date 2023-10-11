@@ -14,6 +14,9 @@
 
 # pylint: disable=too-many-arguments
 
+from typing import (
+    BinaryIO, Collection, Dict, FrozenSet, Iterable,
+    Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, cast)
 from spinn_utilities.abstract_base import abstractmethod
 from spinnman.model.enums import CPUState
 
@@ -34,7 +37,7 @@ class Transceiver(object):
         the multiple calls may be made separately over the set of given
         connections.
     """
-    __slots__ = []
+    __slots__ = ()
 
     @abstractmethod
     def send_sdp_message(self, message, connection=None):

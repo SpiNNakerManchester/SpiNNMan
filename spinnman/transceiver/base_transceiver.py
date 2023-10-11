@@ -23,12 +23,16 @@ import logging
 import socket
 from threading import Condition
 import time
+from typing import (
+    BinaryIO, Collection, Dict, FrozenSet, Iterable,
+    Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, cast)
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractproperty)
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_machine import CoreSubsets
+from spinnman.connections.abstract_classes import Connection
 from spinnman.constants import (
     BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
     CPU_MAX_USER, CPU_USER_OFFSET, CPU_USER_START_ADDRESS,
@@ -130,7 +134,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         "_udp_scamp_connections",
         "_width"]
 
-    def __init__(self, connections=None, power_cycle=False):
+    def __init__(self, connections: Optional[List[Connection]] = None,
+                 power_cycle: bool = False):
         """
         :param list(Connection) connections:
             An iterable of connections to the board.  If not specified, no
@@ -148,9 +153,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         super().__init__()
 
         # Place to keep the current machine
-        self._width = None
-        self._height = None
-        self._iobuf_size = None
+        self._width: Optional[int] = None
+        self._height: Optional[int] = None
+        self._iobuf_size: Optional[int] = None
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -158,35 +163,36 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             connections = list()
 
         # A set of all connection - used for closing
-        self._all_connections = set()
-        self._all_connections.update(connections)
+        self._all_connections = set(connections)
 
         # A boot send connection - there can only be one in the current system,
         # or otherwise bad things can happen!
-        self._boot_send_connection = None
+        self._boot_send_connection: Optional[BootConnection] = None
 
         # A dict of IP address -> SCAMP connection
         # These are those that can be used for setting up IP Tags
-        self._udp_scamp_connections = dict()
+        self._scamp_connections: List[SCAMPConnection] = list()
 
         # A list of all connections that can be used to send and receive SCP
         # messages for SCAMP interaction
-        self._scamp_connections = list()
+        self._scamp_connections: List[SCAMPConnection] = list()
 
         # The BMP connections
-        self._bmp_connection = None
+        self._bmp_connection: Optional[BMPConnection] = None
 
         # A lock against single chip executions (entry is (x, y))
         # The condition should be acquired before the locks are
         # checked or updated
         # The write lock condition should also be acquired to avoid a flood
         # fill during an individual chip execute
-        self._chip_execute_locks = defaultdict(Condition)
+        self._chip_execute_locks: Dict[
+            Tuple[int, int], Condition] = defaultdict(Condition)
         self._chip_execute_lock_condition = Condition()
         self._n_chip_execute_locks = 0
 
         # build connection selectors for the processes.
-        self._bmp_selector = None
+        self._bmp_selector: Optional[
+            FixedConnectionSelector[BMPConnection]] = None
         self._scamp_connection_selector = \
             self.__identify_connections(connections)
 
@@ -200,12 +206,12 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)
-    def bmp_selector(self):
+    def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
         return self._bmp_selector
 
     @property
     @overrides(ExtendableTransceiver.scamp_connection_selector)
-    def scamp_connection_selector(self):
+    def scamp_connection_selector(self) -> MostDirectConnectionSelector:
         return self._scamp_connection_selector
 
     @property

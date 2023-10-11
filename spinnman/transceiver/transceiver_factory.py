@@ -13,12 +13,15 @@
 # limitations under the License.
 
 import logging
+from typing import (List, Optional)
 from spinn_utilities.log import FormatAdapter
 from spinn_machine.version.version_3 import Version3
 from spinn_machine.version.version_5 import Version5
+from spinnman.connections.abstract_classes import Connection
 from spinnman.data import SpiNNManDataView
 from spinnman.extended.version3transceiver import ExtendedVersion3Transceiver
 from spinnman.extended.version5transceiver import ExtendedVersion5Transceiver
+from spinnman.model.bmp_connection_data import BMPConnectionData
 from spinnman.utilities.utility_functions import (
     work_out_bmp_from_machine_details)
 from spinnman.connections.udp_packet_connections import (
@@ -32,8 +35,10 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def create_transceiver_from_hostname(
-        hostname, *, bmp_connection_data=None, auto_detect_bmp=False,
-        power_cycle=False, extended=False):
+        hostname: Optional[str], *,
+        bmp_connection_data: Optional[BMPConnectionData] = None,
+        auto_detect_bmp: bool = False, power_cycle: bool = False,
+        extended: bool = False):
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -69,7 +74,7 @@ def create_transceiver_from_hostname(
     """
     if hostname is not None:
         logger.info("Creating transceiver for {}", hostname)
-    connections = list()
+    connections: List[Connection] = list()
 
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
     # machine, then an assumption can be made that the BMP is at -1 on the
@@ -77,6 +82,8 @@ def create_transceiver_from_hostname(
     version = SpiNNManDataView.get_machine_version()
     if (isinstance(version, Version5) and auto_detect_bmp is True and
             (bmp_connection_data is None)):
+        if hostname is None:
+            raise ValueError("hostname is required if deriving BMP details")
         bmp_connection_data = \
             work_out_bmp_from_machine_details(hostname)
 

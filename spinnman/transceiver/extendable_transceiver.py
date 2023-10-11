@@ -54,7 +54,7 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
         """
 
     @abstractproperty
-    def bmp_selector(self):
+    def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
         """
         Returns the bmp selector
 
