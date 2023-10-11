@@ -212,6 +212,9 @@ address_length_dtype: Dict[Tuple[int, int], READ_TYPES] = {
 #: This is the default timeout when using SCP
 SCP_TIMEOUT: float = 1.0
 
+#: This is the default timeout when using SCP count (can take a bit longer)
+SCP_TIMEOUT_COUNT = 5.0
+
 #: This is the default number of retries when using SCP
 N_RETRIES: int = 10
 

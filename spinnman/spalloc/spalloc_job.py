@@ -34,9 +34,11 @@ class SpallocJob(object, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def get_state(self) -> SpallocState:
+    def get_state(self, wait_for_change=False) -> SpallocState:
         """
         Get the current state of the machine.
+
+        :param bool wait_for_change: Whether to wait for a change in state
 
         :rtype: SpallocState
         """
@@ -138,12 +140,16 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def wait_for_state_change(self, old_state: SpallocState) -> SpallocState:
+    def wait_for_state_change(self, old_state: SpallocState,
+                              timeout: int = None) -> SpallocState:
         """
         Wait until the allocation is not in the given old state.
 
         :param SpallocState old_state:
             The state that we are looking to change out of.
+        :param timeout:
+            The time to wait, or None to wait forever
+        :type timeout: int or None
         :return: The state that the allocation is now in.
 
             .. note::
@@ -153,10 +159,15 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def wait_until_ready(self):
+    def wait_until_ready(self, timeout: int = None, n_retries: int = None):
         """
         Wait until the allocation is in the ``READY`` state.
 
+        :param timeout: The timeout or None to wait forever
+        :type timeout: int or None
+        :param n_retries:
+            The number of times to retry, or None to retry forever
+        :type n_retries: int or None
         :raises Exception: If the allocation is destroyed
         """
         raise NotImplementedError()

@@ -29,8 +29,8 @@ class SCPCommand(Enum):
     CMD_WRITE = 3
     CMD_APLX = 4
     CMD_FILL = 5
-
     # ======== SCAMP ========
+    CMD_COUNT = 15
     CMD_REMAP = 16
     #: Read neighbouring chip's memory.
     CMD_LINK_READ = 17

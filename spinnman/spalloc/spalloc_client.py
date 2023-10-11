@@ -20,6 +20,7 @@ from logging import getLogger
 from multiprocessing import Process, Queue
 from time import sleep
 from packaging.version import Version
+from urllib.parse import urlparse, urlunparse, ParseResult
 import queue
 import requests
 import struct
@@ -31,8 +32,7 @@ from typing import (
 from typing_extensions import TypeAlias
 from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinn_utilities.abstract_context_manager import (
-    AbstractContextManager as ACM)
+from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
@@ -67,7 +67,18 @@ _msg = struct.Struct("<II")
 _msg_to = struct.Struct("<IIIII")
 
 
-class SpallocClient(ACM, AbstractSpallocClient):
+def fix_url(url):
+    parts = urlparse(url)
+    if parts.scheme != 'https':
+        parts = ParseResult("https", parts.netloc, parts.path,
+                            parts.params, parts. query, parts.fragment)
+    if not parts.path.endswith("/"):
+        parts = ParseResult(parts.scheme, parts.netloc, parts.path + "/",
+                            parts.params, parts.query, parts.fragment)
+    return urlunparse(parts)
+
+
+class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     """
     Basic client library for talking to new Spalloc.
     """
@@ -99,8 +110,8 @@ class SpallocClient(ACM, AbstractSpallocClient):
         v = cast(JsonObject, obj["version"])
         self.version = Version(
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
-        self.__machines_url = obj["machines-ref"]
-        self.__jobs_url = obj["jobs-ref"]
+        self.__machines_url = fix_url(obj["machines-ref"])
+        self.__jobs_url = fix_url(obj["jobs-ref"])
         self.__group = group
         self.__collab = collab
         self.__nmpi_job = nmpi_job
@@ -149,7 +160,7 @@ class SpallocClient(ACM, AbstractSpallocClient):
             deleted=("true" if deleted else "false")).json()
         while obj["jobs"]:
             for u in obj["jobs"]:
-                yield _SpallocJob(self.__session, u)
+                yield _SpallocJob(self.__session, fix_url(u))
             if "next" not in obj:
                 break
             obj = self.__session.get(obj["next"]).json()
@@ -172,7 +183,7 @@ class SpallocClient(ACM, AbstractSpallocClient):
                 operation["owner"] = self.__nmpi_user
         r = self.__session.post(self.__jobs_url, operation, timeout=30)
         url = r.headers["Location"]
-        return _SpallocJob(self.__session, url)
+        return _SpallocJob(self.__session, fix_url(url))
 
     @overrides(AbstractSpallocClient.create_job)
     def create_job(
@@ -217,6 +228,32 @@ class SpallocClient(ACM, AbstractSpallocClient):
             "board": board,
             "keepalive-interval": f"PT{int(keepalive)}S"
         }, machine_name)
+
+    @overrides(AbstractSpallocClient.create_job_rect_at_board)
+    def create_job_rect_at_board(
+            self, width, height, triad=None, physical=None, ip_address=None,
+            machine_name=None, keepalive=45, max_dead_boards=0):
+        if triad:
+            x, y, z = triad
+            board = {"x": int(x), "y": int(y), "z": int(z)}
+        elif physical:
+            c, f, b = physical
+            board = {"cabinet": int(c), "frame": int(f), "board": int(b)}
+        elif ip_address:
+            board = {"address": str(ip_address)}
+        else:
+            raise KeyError("at least one of triad, physical and ip_address "
+                           "must be given")
+        return self._create({
+            "dimensions": {
+                "width": int(width),
+                "height": int(height)
+            },
+            "board": board,
+            "keepalive-interval": f"PT{int(keepalive)}S",
+            "max-dead-boards": int(max_dead_boards)
+        }, machine_name)
+
 
     def close(self) -> None:
         # pylint: disable=protected-access
@@ -488,8 +525,12 @@ class _SpallocJob(SessionAware, SpallocJob):
         return config
 
     @overrides(SpallocJob.get_state)
-    def get_state(self) -> SpallocState:
-        obj = self._get(self._url).json()
+    def get_state(self, wait_for_change: bool = False) -> SpallocState:
+        timeout = 10
+        if wait_for_change:
+            timeout = None
+        obj = self._get(
+            self._url, wait=wait_for_change, timeout=timeout).json()
         return SpallocState[obj["state"]]
 
     @overrides(SpallocJob.get_root_host)
@@ -572,19 +613,23 @@ class _SpallocJob(SessionAware, SpallocJob):
             self.__proxy_handle, proxy, self.get_connections())
 
     @overrides(SpallocJob.wait_for_state_change)
-    def wait_for_state_change(self, old_state: SpallocState) -> SpallocState:
+    def wait_for_state_change(self, old_state: SpallocState,
+                              timeout: Optional[int]=None) -> SpallocState:
         while old_state != SpallocState.DESTROYED:
-            obj = self._get(self._url, wait="true", timeout=None).json()
+            obj = self._get(self._url, wait="true", timeout=timeout).json()
             s = SpallocState[obj["state"]]
             if s != old_state or s == SpallocState.DESTROYED:
                 return s
         return old_state
 
     @overrides(SpallocJob.wait_until_ready)
-    def wait_until_ready(self) -> None:
-        state = SpallocState.UNKNOWN
-        while state != SpallocState.READY:
-            state = self.wait_for_state_change(state)
+    def wait_until_ready(self, timeout: Optional[int] = None, n_retries=None):
+        state = self.get_state()
+        retries = 0
+        while (state != SpallocState.READY and
+               (n_retries is None or retries < n_retries)):
+            retries += 1
+            state = self.wait_for_state_change(state, timeout=timeout)
             if state == SpallocState.DESTROYED:
                 raise SpallocException("job was unexpectedly destroyed")
 

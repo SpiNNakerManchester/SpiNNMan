@@ -39,7 +39,7 @@ ECB: TypeAlias = Callable[
 MAX_SEQUENCE = 65536
 RETRY_CODES = frozenset([
     SCPResult.RC_TIMEOUT, SCPResult.RC_P2P_TIMEOUT, SCPResult.RC_LEN,
-    SCPResult.RC_P2P_NOREPLY])
+    SCPResult.RC_P2P_NOREPLY, SCPResult.RC_P2P_BUSY])
 
 # Keep a global track of the sequence numbers used
 _next_sequence = 0
@@ -313,9 +313,12 @@ class SCPRequestPipeLine(Generic[R]):
     def _resend(self, seq: int, request_sent, reason: str):
         if self._retries[seq] <= 0:
             # Report timeouts as timeout exception
-            if all(rr == "timeout" for rr in self._retry_reason[seq]):
+
+            self._retry_reason[seq].append(reason)
+            if all(reason == "timeout" for reason in self._retry_reason[seq]):
                 raise SpinnmanTimeoutException(
-                    request_sent, self._packet_timeout)
+                    request_sent,
+                    self._packet_timeout)
 
             # Report any other exception
             raise SpinnmanIOException(

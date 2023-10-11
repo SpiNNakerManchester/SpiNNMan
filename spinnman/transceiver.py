@@ -80,7 +80,7 @@ from spinnman.processes import (
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess,
-    ConnectionSelector)
+    ConnectionSelector, GetNCoresInStateProcess)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
 from spinnman.model.bmp_connection_data import BMPConnectionData
@@ -97,7 +97,7 @@ _States: TypeAlias = Union[CPUState, Iterable[CPUState]]
 logger = FormatAdapter(logging.getLogger(__name__))
 
 _SCAMP_NAME = "SC&MP"
-_SCAMP_VERSION = (3, 0, 1)
+_SCAMP_VERSION = (4, 0, 0)
 
 _BMP_NAME = "BC&MP"
 _BMP_MAJOR_VERSIONS = [1, 2]
@@ -1047,13 +1047,16 @@ class Transceiver(object):
         process = ReadIOBufProcess(self._scamp_connection_selector)
         return process.read_iobuf(self._iobuf_size, core_subsets)
 
-    def get_core_state_count(self, app_id: int, state: CPUState) -> int:
+    def get_core_state_count(
+            self, app_id: int, state: CPUState,
+            xys: Optional[Iterable[Tuple[int, int]]]=None) -> int:
         """
         Get a count of the number of cores which have a given state.
 
         :param int app_id:
             The ID of the application from which to get the count.
         :param CPUState state: The state count to get
+        :param list(int,int) xys: The chips to query, or None for all
         :return: A count of the cores with the given status
         :rtype: int
         :raise SpinnmanIOException:
@@ -1067,7 +1070,14 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        return self._call(CountState(app_id, state)).count
+
+        if xys is None:
+            machine = SpiNNManDataView.get_machine()
+            chip_xys = [(ch.x, ch.y)
+                        for ch in machine.ethernet_connected_chips]
+        else:
+            chip_xys = xys
+        return self._call(CountState(chip_xys, app_id, state)).count
 
     def execute_flood(
             self, core_subsets: CoreSubsets,

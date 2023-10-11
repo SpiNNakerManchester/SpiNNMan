@@ -132,7 +132,7 @@ class SystemVariableDefinition(Enum):
         _DataType.BYTE, offset=0x29,
         doc="Nearest-Neighbour retry parameter")
     link_peek_timeout_microseconds = _Definition(
-        _DataType.BYTE, offset=0x2a, default=100,
+        _DataType.BYTE, offset=0x2a, default=200,
         doc="The link peek/poke timeout in microseconds")
     led_half_period_10_ms = _Definition(
         _DataType.BYTE, offset=0x2b, default=1,
