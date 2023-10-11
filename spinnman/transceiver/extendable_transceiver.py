@@ -14,10 +14,13 @@
 
 # pylint: disable=too-many-arguments
 import logging
+from typing import Optional
 from threading import Condition, RLock
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractproperty)
 from spinn_utilities.log import FormatAdapter
+from spinnman.connections.udp_packet_connections import BMPConnection
+from spinnman.processes import FixedConnectionSelector
 from spinnman.transceiver.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
