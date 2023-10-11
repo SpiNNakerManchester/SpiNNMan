@@ -80,7 +80,7 @@ from spinnman.processes import (
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess,
-    ConnectionSelector, GetNCoresInStateProcess)
+    ConnectionSelector)
 from spinnman.utilities.utility_functions import (
     get_vcpu_address, work_out_bmp_from_machine_details)
 from spinnman.model.bmp_connection_data import BMPConnectionData
@@ -134,7 +134,7 @@ def create_transceiver_from_hostname(
         hostname: Optional[str], version: int, *,
         bmp_connection_data: Optional[BMPConnectionData] = None,
         auto_detect_bmp: bool = False,
-        power_cycle: bool =False) -> 'Transceiver':
+        power_cycle: bool = False) -> 'Transceiver':
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -233,7 +233,7 @@ class Transceiver(object):
 
     def __init__(self, version: int,
                  connections: Optional[List[Connection]] = None,
-                 power_cycle: bool =False):
+                 power_cycle: bool = False):
         """
         :param int version: The version of the board being connected to
         :param list(Connection) connections:
@@ -304,7 +304,6 @@ class Transceiver(object):
         if power_cycle:
             self._power_off_machine()
         self._ensure_board_is_ready()
-
 
     def _where_is_xy(self, x: int, y: int) -> str:
         """
@@ -1049,7 +1048,7 @@ class Transceiver(object):
 
     def get_core_state_count(
             self, app_id: int, state: CPUState,
-            xys: Optional[Iterable[Tuple[int, int]]]=None) -> int:
+            xys: Optional[Iterable[Tuple[int, int]]] = None) -> int:
         """
         Get a count of the number of cores which have a given state.
 
@@ -2105,7 +2104,7 @@ class Transceiver(object):
                 flags=SDPFlag.REPLY_NOT_EXPECTED,
                 destination_port=port.value, destination_cpu=p,
                 destination_chip_x=x, destination_chip_y=y),
-             data=_ONE_WORD.pack(cmd.value)))
+                data=_ONE_WORD.pack(cmd.value)))
 
     def __str__(self) -> str:
         addr = self._scamp_connections[0].remote_ip_address

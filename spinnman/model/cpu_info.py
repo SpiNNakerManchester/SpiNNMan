@@ -82,7 +82,8 @@ class CPUInfo(object):
 
         (registers,  # 32s 0
          self.__processor_state_register, self.__stack_pointer,
-         self.__link_register,  run_time_error, self.__physical_cpu_id,  # 2B  44
+         self.__link_register,  run_time_error,
+         self.__physical_cpu_id,  # 2B  44
          state, self.__application_id,  # 2B  46
          self.__app_mailbox, self.__monitor_mailbox,  # 2I  48
          app_mailbox_cmd, mon_mailbox_cmd,  # 2B  56

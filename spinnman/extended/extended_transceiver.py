@@ -101,8 +101,6 @@ def create_transceiver_from_hostname(
             (bmp_connection_data is None or not bmp_connection_data)):
         assert hostname is not None, \
             "hostname must be supplied to work out BMP connections"
-        assert number_of_boards is not None, \
-            "number_of_boards must be supplied to work out BMP connections"
         bmp_connection_data = [
             work_out_bmp_from_machine_details(hostname)]
 

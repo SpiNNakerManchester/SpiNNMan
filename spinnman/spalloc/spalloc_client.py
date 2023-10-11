@@ -254,7 +254,6 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             "max-dead-boards": int(max_dead_boards)
         }, machine_name)
 
-
     def close(self) -> None:
         # pylint: disable=protected-access
         if self.__session is not None:
@@ -614,7 +613,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state: SpallocState,
-                              timeout: Optional[int]=None) -> SpallocState:
+                              timeout: Optional[int] = None) -> SpallocState:
         while old_state != SpallocState.DESTROYED:
             obj = self._get(self._url, wait="true", timeout=timeout).json()
             s = SpallocState[obj["state"]]
