@@ -57,7 +57,13 @@ from spinnman.model import (
     IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
 from spinnman.model.enums import (
     CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest, AbstractSCPResponse)
 from spinnman.messages.scp.enums import Signal, PowerCommand
+from spinnman.messages.scp.impl import (
+    BMPGetVersion, SetPower, ReadFPGARegister, WriteFPGARegister, IPTagSetTTO,
+    ReverseIPTagSet, CountState, WriteMemory, SendSignal, AppStop,
+    CheckOKResponse, IPTagSet, IPTagClear, RouterClear, DoSync)
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.scp.impl.get_chip_info_response import (
     GetChipInfoResponse)
@@ -231,8 +237,16 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def bmp_connection(self) -> BMPConnection:
         return self._bmp_connection
 
-    @overrides(Transceiver.where_is_xy)
-    def where_is_xy(self, x: int, y:int):
+    def _where_is_xy(self, x: int, y:int):
+        """
+        Attempts to get where_is_x_y info from the machine
+
+        If no machine will do its best.
+
+        :param int x:
+        :param int y:
+        :rtype: str
+        """
         try:
             if SpiNNManDataView.has_machine():
                 return SpiNNManDataView.get_machine().where_is_xy(x, y)
@@ -531,6 +545,15 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
+    def _call(self, req: AbstractSCPRequest[AbstractSCPResponse], **kwargs) -> AbstractSCPResponse:
+        """
+        Wrapper that makes doing simple SCP calls easier,
+        especially with types.
+        """
+        proc: SendSingleCommandProcess[AbstractSCPResponse] = SendSingleCommandProcess(
+            self._scamp_connection_selector, **kwargs)
+        return proc.execute(req)
+
     @staticmethod
     def _is_scamp_version_compabible(version: Tuple[int, int, int]) -> bool:
         """
@@ -571,7 +594,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             * If the version of software on the board is not compatible with
               this transceiver
         """
-        # try to get a SCAMP version once
         logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None
@@ -581,7 +603,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         # If we fail to get a SCAMP version this time, try other things
         if version_info is None and self._bmp_connection is not None:
-
             # start by powering up each BMP connection
             logger.info("Attempting to power on machine")
             self._power_on_machine()
@@ -596,8 +617,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         # verify that the version is the expected one for this transceiver
         if version_info is None:
-            raise SpinnmanIOException(
-                "Failed to communicate with the machine")
+            raise SpinnmanIOException("Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
                 not self._is_scamp_version_compabible(
                     version_info.version_number)):
@@ -612,21 +632,18 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         # Change the default SCP timeout on the machine, keeping the old one to
         # revert at close
         for scamp_connection in self._scamp_connections:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(IPTagSetTTO(
+            self._call(IPTagSetTTO(
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
 
             chip_info = self._check_connection(scamp_connection)
-            if chip_info is not None:
+            if chip_info is not None and chip_info.ethernet_ip_address:
                 self._udp_scamp_connections[chip_info.ethernet_ip_address] = \
                     scamp_connection
 
         # Update the connection selector so that it can ask for processor ids
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._scamp_connections)
-
-        return version_info
 
     def __is_default_destination(self, version_info: VersionInfo) -> bool:
         return (version_info.x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
@@ -945,7 +962,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             process = ReadMemoryProcess(self._scamp_connection_selector)
             return process.read_memory((x, y, cpu), base_address, length)
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.read_word)
@@ -957,14 +974,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             (value, ) = _ONE_WORD.unpack(data)
             return value
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.stop_application)
     def stop_application(self, app_id: int):
         if not self._machine_off:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(AppStop(app_id))
+            self._call(AppStop(app_id))
         else:
             logger.warning(
                 "You are calling a app stop on a turned off machine. "
@@ -984,7 +1000,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             else:
                 xys.add((cpu_info.x, cpu_info.y))
         for (x, y) in xys:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
 
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(
@@ -1069,8 +1085,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.send_signal)
     def send_signal(self, app_id: int, signal: Signal):
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(SendSignal(app_id, signal))
+        self._call(SendSignal(app_id, signal))
 
     def _locate_spinnaker_connection_for_board_address(
             self, board_address: str) -> Optional[SCAMPConnection]:
@@ -1108,8 +1123,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             ip_string = socket.gethostbyname(host_string)
             ip_address = bytearray(socket.inet_aton(ip_string))
 
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(IPTagSet(
+            self._call(IPTagSet(
                 connection.chip_x, connection.chip_y, ip_address, ip_tag.port,
                 ip_tag.tag, strip=ip_tag.strip_sdp, use_sender=use_sender))
 
@@ -1163,8 +1177,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 "The given board address is not recognised")
 
         for connection in connections:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(ReverseIPTagSet(
+            self._call(ReverseIPTagSet(
                 connection.chip_x, connection.chip_y,
                 reverse_ip_tag.destination_x, reverse_ip_tag.destination_y,
                 reverse_ip_tag.destination_p,
@@ -1174,8 +1187,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.clear_ip_tag)
     def clear_ip_tag(self, tag: int, board_address: Optional[str] = None):
         for conn in self.__get_connection_list(board_address=board_address):
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(IPTagClear(conn.chip_x, conn.chip_y, tag))
+            self._call(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
     @overrides(Transceiver.get_tags)
     def get_tags(self, connection: Optional[SCAMPConnection] = None
@@ -1194,7 +1206,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             process.malloc_sdram(x, y, size, app_id, tag)
             return process.base_address
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.load_multicast_routes)
@@ -1206,7 +1218,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector)
             process.load_routes(x, y, routes, app_id)
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.load_fixed_route)
@@ -1217,7 +1229,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector)
             process.load_fixed_route(x, y, fixed_route, app_id)
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.read_fixed_route)
@@ -1227,7 +1239,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector)
             return process.read_fixed_route(x, y, app_id)
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.get_multicast_routes)
@@ -1241,16 +1253,15 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.clear_multicast_routes)
     def clear_multicast_routes(self, x: int, y: int):
         try:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
-            process.execute(RouterClear(x, y))
+            self._call(RouterClear(x, y))
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.get_router_diagnostics)
@@ -1260,7 +1271,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 self._scamp_connection_selector)
             return process.get_router_diagnostics(x, y)
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.set_router_diagnostic_filter)
@@ -1271,7 +1282,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self.__set_router_diagnostic_filter(
                 x, y, position, diagnostic_filter)
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     def __set_router_diagnostic_filter(
@@ -1294,19 +1305,17 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
             position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(WriteMemory(
+        self._call(WriteMemory(
             (x, y, 0), memory_position, _ONE_WORD.pack(data_to_send)))
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
     def clear_router_diagnostic_counters(self, x: int, y: int):
         try:
-            process = SendSingleCommandProcess(self._scamp_connection_selector)
             # Clear all
-            process.execute(WriteMemory(
+            self._call(WriteMemory(
                 (x, y, 0), 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @overrides(Transceiver.close)
