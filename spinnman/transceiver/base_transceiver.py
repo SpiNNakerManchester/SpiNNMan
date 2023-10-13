@@ -383,11 +383,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.discover_scamp_connections)
     def discover_scamp_connections(self) -> None:
-        # Currently, this only finds other UDP connections given a connection
-        # that supports SCP - this is done via the machine
-        if not self._scamp_connections:
-            return list()
-
         # Get the machine dimensions
         dims = self._get_machine_dimensions()
 
@@ -450,7 +445,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.get_machine_details)
     def get_machine_details(self) -> Machine:
         # Get the width and height of the machine
-        self._get_machine_dimensions()
+        dims = self._get_machine_dimensions()
 
         # Get the coordinates of the boot chip
         version_info = self._get_scamp_version()
@@ -459,7 +454,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector)
         machine = get_machine_process.get_machine_details(
-            version_info.x, version_info.y, self._width, self._height)
+            version_info.x, version_info.y, dims._width, dims._height)
 
         # Work out and add the SpiNNaker links and FPGA links
         machine.add_spinnaker_links()
