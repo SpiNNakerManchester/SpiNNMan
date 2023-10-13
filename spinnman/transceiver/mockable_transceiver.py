@@ -82,7 +82,7 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.execute_flood)
     def execute_flood(
-            self, core_subsets, executable, app_id, n_bytes=None, wait=False,
+            self, core_subsets, executable, app_id, *, n_bytes=None, wait=False,
             is_filename=False):
         pass
 
@@ -106,7 +106,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.write_memory)
-    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
+    def write_memory(self, x, y, base_address, data, *, n_bytes=None, offset=0,
                      cpu=0, is_filename=False, get_sum=False):
         print("Doing write to", x, y)
         self.written_memory.append(
@@ -130,7 +130,7 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(
-            self, all_core_subsets, app_id, cpu_states, timeout=None,
+            self, all_core_subsets, app_id, cpu_states, *, timeout=None,
             time_between_polls=0.1,
             error_states=frozenset({
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),

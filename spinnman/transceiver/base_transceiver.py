@@ -171,7 +171,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         # A dict of IP address -> SCAMP connection
         # These are those that can be used for setting up IP Tags
-        self._scamp_connections: List[SCAMPConnection] = list()
+        self._udp_scamp_connections: Dict[str, SCAMPConnection] = dict()
 
         # A list of all connections that can be used to send and receive SCP
         # messages for SCAMP interaction
@@ -795,7 +795,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.execute_flood)
     def execute_flood(
-            self, core_subsets, executable, app_id, n_bytes=None, wait=False,
+            self, core_subsets, executable, app_id, *, n_bytes=None, wait=False,
             is_filename=False):
         # Lock against other executable's
         with self._flood_execute_lock():
@@ -877,7 +877,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         return response.version_info  # pylint: disable=no-member
 
     @overrides(Transceiver.write_memory)
-    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
+    def write_memory(self, x, y, base_address, data, *, n_bytes=None, offset=0,
                      cpu=0, is_filename=False, get_sum=False):
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
@@ -953,7 +953,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(
-            self, all_core_subsets, app_id, cpu_states, timeout=None,
+            self, all_core_subsets, app_id, cpu_states, *, timeout=None,
             time_between_polls=0.1,
             error_states=frozenset({
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),

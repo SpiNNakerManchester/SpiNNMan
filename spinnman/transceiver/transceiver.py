@@ -18,7 +18,20 @@ from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable,
     Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, cast)
 from spinn_utilities.abstract_base import abstractmethod
-from spinnman.model.enums import CPUState
+from spinn_utilities.progress_bar import ProgressBar
+from spinn_utilities.typing.coords import XY
+from spinn_machine import (
+    CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
+from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
+from spinnman.connections.udp_packet_connections import (
+    BMPConnection, BootConnection, SCAMPConnection, SDPConnection)
+from spinnman.messages.scp.enums import Signal, PowerCommand
+from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
+from spinnman.model import (
+    CPUInfo, CPUInfos, DiagnosticFilter, ChipSummaryInfo,
+    IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
+from spinnman.model.enums import (
+    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
 
 
 class Transceiver(object):
@@ -40,21 +53,19 @@ class Transceiver(object):
     __slots__ = ()
 
     @abstractmethod
-    def send_sdp_message(self, message, connection=None):
+    def send_sdp_message(self, message: SDPMessage,
+                         connection: Optional[SDPConnection] = None):
         """
         Sends an SDP message using one of the connections.
 
         :param SDPMessage message: The message to send
         :param SDPConnection connection: An optional connection to use
         """
-        # _ChipProvenanceUpdater._send_chip_update_provenance_and_exit
-        # https://github.com/SpiNNakerManchester/SpiNNMan/pull/357
-        # DataSpeedUpPacketGatherMachineVertex.
-        #      _determine_and_retransmit_missing_seq_nums
-        # https://github.com/SpiNNakerManchester/SpiNNFrontEndCommon/pull/1102
+        # https://github.com/SpiNNakerManchester/SpiNNMan/issues/369
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def discover_scamp_connections(self):
+    def discover_scamp_connections(self) -> None:
         """
         Find connections to the board and store these for future use.
 
@@ -74,9 +85,10 @@ class Transceiver(object):
         # Used directly after Transceiver init
         # Not called if add_scamp_connections is called
         # Not called by SpallocJobController
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def add_scamp_connections(self, connections):
+    def add_scamp_connections(self, connections: Dict[XY, str]):
         """
         Check connections to the board and store these for future use.
 
@@ -96,6 +108,7 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         # Use on a spalloc created Transceiver
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
     def get_connections(self):
@@ -108,9 +121,10 @@ class Transceiver(object):
         :rtype: set(Connection)
         """
         # used in unittest only
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_machine_details(self):
+    def get_machine_details(self) -> Machine:
         """
         Get the details of the machine made up of chips on a board and how
         they are connected to each other.
@@ -127,10 +141,13 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         # used by machine_generator
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
     def get_cpu_infos(
-            self, core_subsets=None, states=None, include=True):
+            self, core_subsets: Optional[CoreSubsets] = None,
+            states: Union[CPUState, Iterable[CPUState], None] = None,
+            include: bool = True) -> CPUInfos:
         """
         Get information about the processors on the board.
 
@@ -139,11 +156,11 @@ class Transceiver(object):
             information. If not specified, the information from all of the
             cores on all of the chips on the board are obtained.
         :param states: The state or states to filter on (if any)
-        :type states: None, CPUState or collection(CPUState)
+        :type states: None, CPUState or iterable(CPUState)
         :param bool include:
-            If True includes only infos in the requested state(s).
-            If False includes only infos NOT in the requested state(s).
-            Ignored if states is None.
+            If `True` includes only infos in the requested state(s).
+            If `False` includes only infos *not* in the requested state(s).
+            Ignored if states is `None`.
         :return: The CPU information for the selected cores and States, or
             all cores/states  if core_subsets/states is not specified
         :rtype: ~spinnman.model.CPUInfos
@@ -157,24 +174,26 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        # See https://github.com/SpiNNakerManchester/SpiNNMan/pull/358
         # used by
-        # ASB.__recover_from_error
         # application_finisher
         # chip_provenance_updater
         # emergency_recover_state_from_failure
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_clock_drift(self, x, y):
+    def get_clock_drift(self, x: int, y: int) -> float:
         """
-        Get the clock drift
+        Get the clock drift.
+
         :param int x: The x-coordinate of the chip to get drift for
         :param int y: The y-coordinate of the chip to get drift for
         """
         # used by drift_report
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def read_user(self, x, y, p, user):
+
+    def read_user(self, x: int, y: int, p: int, user: UserRegister):
         """
         Get the contents of the this user register for the given processor.
 
@@ -202,13 +221,16 @@ class Transceiver(object):
         # used by DataSpeedUpPacketGatherMachineVertex
         #    and ExtraMonitorSupportMachineVertex
         #    to .update_transaction_id_from_machine
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def add_cpu_information_from_core(self, cpu_infos, x, y, p, states):
+    def add_cpu_information_from_core(
+            self, cpu_infos: CPUInfos, x: int, y: int, p: int,
+            states: Iterable[CPUState]):
         """
         Adds information about a specific processor on the board to the info
 
-        :param CPUInfo cpu_infos: Info to add data for this core to
+        :param CPUInfos cpu_infos: Info to add data for this core to
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
         :param int p: The ID of the processor to get the information about
@@ -227,9 +249,10 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         # used by emergency_recover_state_from_failure
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_region_base_address(self, x, y, p):
+    def get_region_base_address(self, x: int, y: int, p: int):
         """
         Gets the base address of the Region Table
 
@@ -248,9 +271,11 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_iobuf(self, core_subsets=None):
+    def get_iobuf(self, core_subsets: Optional[CoreSubsets] = None
+                  ) -> Iterable[IOBuffer]:
         """
         Get the contents of the IOBUF buffer for a number of processors.
 
@@ -272,9 +297,12 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         # Used by IOBufExtractor
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_core_state_count(self, app_id, state, xys=None):
+    def get_core_state_count(
+            self, app_id: int, state: CPUState,
+            xys: Optional[Iterable[Tuple[int, int]]] = None) -> int:
         """
         Get a count of the number of cores which have a given state.
 
@@ -295,11 +323,14 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
     def execute_flood(
-            self, core_subsets, executable, app_id, n_bytes=None, wait=False,
-            is_filename=False):
+            self, core_subsets: CoreSubsets,
+            executable: Union[BinaryIO, bytes, str], app_id: int, *,
+            n_bytes: Optional[int] = None, wait: bool = False,
+            is_filename: bool=False):
         """
         Start an executable running on multiple places on the board.  This
         will be optimised based on the selected cores, but it may still
@@ -309,11 +340,9 @@ class Transceiver(object):
             Which cores on which chips to start the executable
         :param executable:
             The data that is to be executed. Should be one of the following:
-
             * An instance of RawIOBase
             * A bytearray
-            * A filename of an executable (in which case `is_filename` must be
-              set to True)
+            * A filename of an executable
         :type executable:
             ~io.RawIOBase or bytes or bytearray or str
         :param int app_id:
@@ -324,11 +353,9 @@ class Transceiver(object):
             * If `executable` is an RawIOBase, an error is raised
             * If `executable` is a bytearray, the length of the bytearray will
               be used
-            * If `executable` is an int, 4 will be used
             * If `executable` is a str, the length of the file will be used
         :param bool wait:
             True if the processors should enter a "wait" state on loading
-        :param bool is_filename: True if the data is a filename
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
@@ -346,10 +373,11 @@ class Transceiver(object):
         """
         # Used by load_app_images, load_sys_images and
         # run_system_application._load_application
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
     def read_fpga_register(
-            self, fpga_num, register, board=0):
+            self, fpga_num: int, register: int, board: int = 0) -> int:
         """
         Read a register on a FPGA of a board. The meaning of the
         register's contents will depend on the FPGA's configuration.
@@ -362,9 +390,11 @@ class Transceiver(object):
         :return: the register data
         :rtype: int
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def write_fpga_register(self, fpga_num, register, value, board=0):
+    def write_fpga_register(
+            self, fpga_num: int, register: int, value: int, board: int = 0):
         """
         Write a register on a FPGA of a board. The meaning of setting the
         register's contents will depend on the FPGA's configuration.
@@ -376,19 +406,25 @@ class Transceiver(object):
         :param int value: the value to write into the FPGA register
         :param int board: which board to write the FPGA register to
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def read_bmp_version(self, board):
+    def read_bmp_version(self, board: int) -> VersionInfo:
         """
         Read the BMP version.
 
         :param int board: which board to request the data from
         :return: the sver from the BMP
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def write_memory(self, x, y, base_address, data, n_bytes=None, offset=0,
-                     cpu=0, is_filename=False, get_sum=False):
+    def write_memory(
+            self, x: int, y: int, base_address: int,
+            data: Union[BinaryIO, bytes, int, str], *,
+            n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
+            is_filename: bool = False,
+            get_sum: bool = False) -> Tuple[int, int]:
         """
         Write to the SDRAM on the board.
 
@@ -403,8 +439,7 @@ class Transceiver(object):
             * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
-            * A filename of a data file (in which case `is_filename` must be
-              set to True)
+            * A string - the filename of a data file
         :type data:
             ~io.RawIOBase or bytes or bytearray or int or str
         :param int n_bytes:
@@ -417,7 +452,6 @@ class Transceiver(object):
             * If `data` is a str, the length of the file will be used
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
-        :param bool is_filename: True if `data` is a filename
         :param bool get_sum: whether to return a checksum or 0
         :return: The number of bytes written, the checksum (0 if get_sum=False)
         :rtype: int, int
@@ -436,11 +470,13 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def write_user(self, x, y, p, user, value):
+    def write_user(
+            self, x: int, y: int, p: int, user: UserRegister, value: int):
         """
-        Write to the this user register for the given processor.
+        Write to the user *N* "register" for the given processor.
 
         .. note::
             Conventionally, user_0 usually holds the address of the table of
@@ -449,7 +485,7 @@ class Transceiver(object):
         :param int x: X coordinate of the chip
         :param int y: Y coordinate of the chip
         :param int p: Virtual processor identifier on the chip
-        :param int user: The user number of write data for
+        :param int user: The user "register" number of write data for
         :param int value: The value to write
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -460,9 +496,12 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def read_memory(self, x, y, base_address, length, cpu=0):
+    def read_memory(
+            self, x: int, y: int, base_address: int, length: int,
+            cpu: int = 0) -> bytes:
         """
         Read some areas of memory (usually SDRAM) from the board.
 
@@ -488,9 +527,11 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def read_word(self, x, y, base_address, cpu=0):
+    def read_word(
+            self, x: int, y: int, base_address: int, cpu: int = 0) -> int:
         """
         Read a word (usually of SDRAM) from the board.
 
@@ -515,9 +556,10 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def stop_application(self, app_id):
+    def stop_application(self, app_id: int):
         """
         Sends a stop request for an app_id.
 
@@ -532,14 +574,18 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
     def wait_for_cores_to_be_in_state(
-            self, all_core_subsets, app_id, cpu_states, timeout=None,
-            time_between_polls=0.1,
-            error_states=frozenset({
-                CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),
-            counts_between_full_check=100, progress_bar=None):
+            self, all_core_subsets: CoreSubsets, app_id: int,
+            cpu_states: Union[CPUState, Iterable[CPUState]], *,
+            timeout: Optional[float] = None,
+            time_between_polls: float = 0.1,
+            error_states: FrozenSet[CPUState] = frozenset((
+                CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
+            counts_between_full_check: int = 100,
+            progress_bar: Optional[ProgressBar] = None):
         """
         Waits for the specified cores running the given application to be
         in some target state or states. Handles failures.
@@ -547,9 +593,10 @@ class Transceiver(object):
         :param ~spinn_machine.CoreSubsets all_core_subsets:
             the cores to check are in a given sync state
         :param int app_id: the application ID that being used by the simulation
-        :param set(CPUState) cpu_states:
+        :param cpu_states:
             The expected states once the applications are ready; success is
             when each application is in one of these states
+        :type cpu_states: CPUState or iterable(CPUState)
         :param float timeout:
             The amount of time to wait in seconds for the cores to reach one
             of the states
@@ -565,9 +612,10 @@ class Transceiver(object):
         :raise SpinnmanTimeoutException:
             If a timeout is specified and exceeded.
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def send_signal(self, app_id, signal):
+    def send_signal(self, app_id: int, signal: Signal):
         """
         Send a signal to an application.
 
@@ -585,9 +633,10 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         # Known usages are to send Signal START, SYNC0 and SYNC1
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def set_ip_tag(self, ip_tag, use_sender=False):
+    def set_ip_tag(self, ip_tag: IPTag, use_sender: bool = False):
         """
         Set up an IP tag.
 
@@ -610,9 +659,10 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def set_reverse_ip_tag(self, reverse_ip_tag):
+    def set_reverse_ip_tag(self, reverse_ip_tag: ReverseIPTag):
         """
         Set up a reverse IP tag.
 
@@ -634,9 +684,10 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_ip_tag(self, tag, board_address=None):
+    def clear_ip_tag(self, tag: int, board_address: Optional[str] = None):
         """
         Clear the setting of an IP tag.
 
@@ -656,9 +707,11 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_tags(self, connection=None):
+    def get_tags(self, connection: Optional[SCAMPConnection] = None
+                 ) -> Iterable[AbstractTag]:
         """
         Get the current set of tags that have been set on the board.
 
@@ -678,9 +731,11 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def malloc_sdram(self, x, y, size, app_id, tag=None):
+    def malloc_sdram(
+            self, x: int, y: int, size: int, app_id: int, tag=0) -> int:
         """
         Allocates a chunk of SDRAM on a chip on the machine.
 
@@ -695,9 +750,12 @@ class Transceiver(object):
         :return: the base address of the allocated memory
         :rtype: int
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def load_multicast_routes(self, x, y, routes, app_id):
+    def load_multicast_routes(
+            self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
+            app_id: int):
         """
         Load a set of multicast routes on to a chip.
 
@@ -719,9 +777,11 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def load_fixed_route(self, x, y, fixed_route, app_id):
+    def load_fixed_route(
+            self, x: int, y: int, fixed_route: FixedRouteEntry, app_id: int):
         """
         Loads a fixed route routing table entry onto a chip's router.
 
@@ -743,9 +803,10 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def read_fixed_route(self, x, y, app_id):
+    def read_fixed_route(self, x: int, y: int, app_id: int) -> FixedRouteEntry:
         """
         Reads a fixed route routing table entry from a chip's router.
 
@@ -758,9 +819,12 @@ class Transceiver(object):
             routes.  If not specified, defaults to 0.
         :return: the route as a fixed route entry
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_multicast_routes(self, x, y, app_id=None):
+    def get_multicast_routes(
+            self, x: int, y: int,
+            app_id: Optional[int] = None) -> List[MulticastRoutingEntry]:
         """
         Get the current multicast routes set up on a chip.
 
@@ -782,9 +846,10 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_multicast_routes(self, x, y):
+    def clear_multicast_routes(self, x: int, y: int):
         """
         Remove all the multicast routes on a chip.
 
@@ -799,9 +864,10 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_router_diagnostics(self, x, y):
+    def get_router_diagnostics(self, x: int, y: int) -> RouterDiagnostics:
         """
         Get router diagnostic information from a chip.
 
@@ -820,9 +886,12 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
+    def set_router_diagnostic_filter(
+            self, x: int, y: int, position: int,
+            diagnostic_filter: DiagnosticFilter):
         """
         Sets a router diagnostic filter in a router.
 
@@ -850,9 +919,11 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_router_diagnostic_counters(self, x, y):
+
+    def clear_router_diagnostic_counters(self, x: int, y: int):
         """
         Clear router diagnostic information on a chip.
 
@@ -868,23 +939,26 @@ class Transceiver(object):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def close(self):
+    def close(self) -> None:
         """
         Close the transceiver and any threads that are running.
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def control_sync(self, do_sync):
+    def control_sync(self, do_sync: bool):
         """
         Control the synchronisation of the chips.
 
         :param bool do_sync: Whether to synchronise or not
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def update_provenance_and_exit(self, x, y, p):
+    def update_provenance_and_exit(self, x: int, y: int, p: int):
         """
         Sends a command to update prevenance and exit
 
@@ -895,6 +969,7 @@ class Transceiver(object):
         :param int p:
             The processor on the core
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
     def where_is_xy(self, x, y):
@@ -907,3 +982,4 @@ class Transceiver(object):
         :param int y:
         :rtype: str
         """
+        raise NotImplementedError("abstractmethod")
