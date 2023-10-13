@@ -1,4 +1,4 @@
-# Copyright (c) 2014 The University of Manchester
+# Copyright (c) 2023 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,22 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from .extended_transceiver import ExtendedTransceiver
+from spinnman.transceiver.version3transceiver import Version3Transceiver
 
-/.project
-/.pydevproject
-/.idea
-/.settings
-/doc/build
-*.pyc
-/boot.py
-*.aplx
-/testdata.dat
-build/
-dist/
-SpiNNMan.egg-info
-*build/
--hello.aplx
-.coverage
-.cache/
-.pytest_cache/
-/scripts/
+
+class ExtendedVersion3Transceiver(Version3Transceiver, ExtendedTransceiver):
+    pass

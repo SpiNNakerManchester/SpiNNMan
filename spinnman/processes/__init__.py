@@ -24,6 +24,7 @@ from .get_cpu_info_process import GetCPUInfoProcess
 from .get_exclude_cpu_info_process import GetExcludeCPUInfoProcess
 from .get_include_cpu_info_process import GetIncludeCPUInfoProcess
 from .get_machine_process import GetMachineProcess
+from .get_n_cores_in_state_process import GetNCoresInStateProcess
 from .get_routes_process import GetMultiCastRoutesProcess
 from .get_tags_process import GetTagsProcess
 from .get_version_process import GetVersionProcess
@@ -49,7 +50,8 @@ __all__ = ["AbstractMultiConnectionProcessConnectionSelector",
            "GetCPUInfoProcess",
            "GetExcludeCPUInfoProcess", "GetIncludeCPUInfoProcess",
            "GetHeapProcess",
-           "GetMachineProcess", "GetMultiCastRoutesProcess", "GetTagsProcess",
+           "GetMachineProcess", "GetMultiCastRoutesProcess",
+           "GetNCoresInStateProcess", "GetTagsProcess",
            "GetVersionProcess", "LoadFixedRouteRoutingEntryProcess",
            "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
            "ReadFixedRouteRoutingEntryProcess", "ReadIOBufProcess",
