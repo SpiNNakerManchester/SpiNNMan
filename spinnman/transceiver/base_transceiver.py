@@ -59,6 +59,8 @@ from spinnman.model.enums import (
     CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
 from spinnman.messages.scp.enums import Signal, PowerCommand
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
+from spinnman.messages.scp.impl.get_chip_info_response import (
+    GetChipInfoResponse)
 from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
@@ -308,23 +310,25 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                                  conn.remote_ip_address)
                 raise
 
+    @staticmethod
     def _check_connection(
-            self, connection_selector: SCAMPConnection,
-            chip_x: int, chip_y: int) -> Optional[ChipSummaryInfo]:
+            connection: SCAMPConnection) -> Optional[ChipSummaryInfo]:
         """
         Check that the given connection to the given chip works.
 
-        :param connection_selector: the connection selector to use
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
+            the connection selector to use
         :param int chip_x: the chip x coordinate to try to talk to
         :param int chip_y: the chip y coordinate to try to talk to
         :return: True if a valid response is received, False otherwise
         :rtype: ChipInfo or None
         """
+        chip_x, chip_y = connection.chip_x, connection.chip_y
+        connection_selector = FixedConnectionSelector(connection)
         for _ in range(_CONNECTION_CHECK_RETRIES):
             try:
-                sender = SendSingleCommandProcess(connection_selector)
+                sender: SendSingleCommandProcess[GetChipInfoResponse] = \
+                    SendSingleCommandProcess(connection_selector)
                 chip_info = sender.execute(  # pylint: disable=no-member
                     GetChipInfo(chip_x, chip_y)).chip_info
                 if not chip_info.is_ethernet_available:
@@ -367,7 +371,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         conn = SCAMPConnection(remote_host=ip_address, chip_x=x, chip_y=y)
 
         # check if it works
-        chip_info = self._check_connection(FixedConnectionSelector(conn), x, y)
+        chip_info = self._check_connection(conn)
         if chip_info is not None:
             self._all_connections.add(conn)
             self._udp_scamp_connections[chip_info.ethernet_ip_address] = conn
@@ -618,9 +622,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 scamp_connection.chip_x, scamp_connection.chip_y,
                 IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
 
-            chip_info = self._check_connection(
-                FixedConnectionSelector(scamp_connection),
-                scamp_connection.chip_x, scamp_connection.chip_y)
+            chip_info = self._check_connection(scamp_connection)
             if chip_info is not None:
                 self._udp_scamp_connections[chip_info.ethernet_ip_address] = \
                     scamp_connection
