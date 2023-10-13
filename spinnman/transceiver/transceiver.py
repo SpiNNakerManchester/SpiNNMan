@@ -16,7 +16,7 @@
 
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable,
-    Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, cast)
+    List, Optional, Tuple, Union)
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
@@ -24,14 +24,14 @@ from spinn_machine import (
     CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 from spinnman.connections.udp_packet_connections import (
-    BMPConnection, BootConnection, SCAMPConnection, SDPConnection)
-from spinnman.messages.scp.enums import Signal, PowerCommand
-from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
+    SCAMPConnection, SDPConnection)
+from spinnman.messages.scp.enums import Signal
+from spinnman.messages.sdp import SDPMessage
 from spinnman.model import (
-    CPUInfo, CPUInfos, DiagnosticFilter, ChipSummaryInfo,
-    IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
+    CPUInfos, DiagnosticFilter, IOBuffer, RouterDiagnostics,
+    VersionInfo)
 from spinnman.model.enums import (
-    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
+    CPUState, UserRegister)
 
 
 class Transceiver(object):
@@ -972,7 +972,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def where_is_xy(self, x, y):
+    def where_is_xy(self, x: int, y:int):
         """
         Attempts to get where_is_x_y info from the machine
 

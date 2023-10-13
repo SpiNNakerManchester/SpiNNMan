@@ -14,9 +14,26 @@
 
 # pylint: disable=too-many-arguments
 
+from typing import (
+    BinaryIO, Collection, Dict, FrozenSet, Iterable,
+    List, Optional, Tuple, Union)
 from spinn_utilities.overrides import overrides
+from spinn_utilities.progress_bar import ProgressBar
+from spinn_utilities.typing.coords import XY
+from spinn_machine import (
+    CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
+from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 from spinnman.data import SpiNNManDataView
-from spinnman.model.enums import CPUState
+from spinnman.connections.udp_packet_connections import BMPConnection
+from spinnman.connections.udp_packet_connections import (
+    SCAMPConnection, SDPConnection)
+from spinnman.processes import ConnectionSelector, FixedConnectionSelector
+from spinnman.messages.scp.enums import Signal
+from spinnman.messages.sdp import SDPMessage
+from spinnman.model import (
+    CPUInfos, DiagnosticFilter, IOBuffer, RouterDiagnostics,
+    VersionInfo)
+from spinnman.model.enums import CPUState, UserRegister
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 
@@ -29,22 +46,25 @@ class MockableTransceiver(ExtendableTransceiver):
 
     def __init__(self):
         super().__init__()
-        self.written_memory = list()
+        self.written_memory: Iterable[
+            Tuple[int, int, int, Union[BinaryIO, bytes, int, str],
+                  Optional[int], int, bool]] = list()
 
     @overrides(Transceiver.send_sdp_message)
-    def send_sdp_message(self, message, connection=None):
+    def send_sdp_message(self, message: SDPMessage,
+                         connection: Optional[SDPConnection] = None):
         pass
 
     @overrides(Transceiver.discover_scamp_connections)
-    def discover_scamp_connections(self):
+    def discover_scamp_connections(self) -> None:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.add_scamp_connections)
-    def add_scamp_connections(self, connections):
+    def add_scamp_connections(self, connections: Dict[XY, str]):
         pass
 
     @overrides(Transceiver.get_machine_details)
-    def get_machine_details(self):
+    def get_machine_details(self) -> Machine:
         return SpiNNManDataView.get_machine()
 
     @overrides(Transceiver.get_connections)
@@ -53,7 +73,9 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.get_cpu_infos)
     def get_cpu_infos(
-            self, core_subsets=None, states=None, include=True):
+            self, core_subsets: Optional[CoreSubsets] = None,
+            states: Union[CPUState, Iterable[CPUState], None] = None,
+            include: bool = True) -> CPUInfos:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_clock_drift)
@@ -61,42 +83,50 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.read_user)
-    def read_user(self, x, y, p, user):
+    def read_user(self, x: int, y: int, p: int, user: UserRegister):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.add_cpu_information_from_core)
-    def add_cpu_information_from_core(self, cpu_infos, x, y, p, states):
+    def add_cpu_information_from_core(
+            self, cpu_infos: CPUInfos, x: int, y: int, p: int,
+            states: Iterable[CPUState]):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_region_base_address)
-    def get_region_base_address(self, x, y, p):
+    def get_region_base_address(self, x: int, y: int, p: int):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_iobuf)
-    def get_iobuf(self, core_subsets=None):
+    def get_iobuf(self, core_subsets: Optional[CoreSubsets] = None
+                  ) -> Iterable[IOBuffer]:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_core_state_count)
-    def get_core_state_count(self, app_id, state, xys=None):
+    def get_core_state_count(
+            self, app_id: int, state: CPUState,
+            xys: Optional[Iterable[Tuple[int, int]]] = None) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.execute_flood)
     def execute_flood(
-            self, core_subsets, executable, app_id, *, n_bytes=None, wait=False,
-            is_filename=False):
+            self, core_subsets: CoreSubsets,
+            executable: Union[BinaryIO, bytes, str], app_id: int, *,
+            n_bytes: Optional[int] = None, wait: bool = False,
+            is_filename: bool=False):
         pass
 
     @overrides(Transceiver.read_fpga_register)
     def read_fpga_register(
-            self, fpga_num, register, board=0):
+            self, fpga_num: int, register: int, board: int = 0) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.write_fpga_register)
-    def write_fpga_register(self, fpga_num, register, value, board=0):
+    def write_fpga_register(
+            self, fpga_num: int, register: int, value: int, board: int = 0):
         pass
 
     @overrides(Transceiver.read_bmp_version)
-    def read_bmp_version(self, board):
+    def read_bmp_version(self, board: int) -> VersionInfo:
         """
         Read the BMP version.
 
@@ -106,120 +136,140 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.write_memory)
-    def write_memory(self, x, y, base_address, data, *, n_bytes=None, offset=0,
-                     cpu=0, is_filename=False, get_sum=False):
+    def write_memory(
+            self, x: int, y: int, base_address: int,
+            data: Union[BinaryIO, bytes, int, str], *,
+            n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
+            is_filename: bool = False,
+            get_sum: bool = False) -> Tuple[int, int]:
         print("Doing write to", x, y)
         self.written_memory.append(
             (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
 
     @overrides(Transceiver.write_user)
-    def write_user(self, x, y, p, user, value):
+    def write_user(
+            self, x: int, y: int, p: int, user: UserRegister, value: int):
         pass
 
     @overrides(Transceiver.read_memory)
-    def read_memory(self, x, y, base_address, length, cpu=0):
+    def read_memory(
+            self, x: int, y: int, base_address: int, length: int,
+            cpu: int = 0) -> bytes:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.read_word)
-    def read_word(self, x, y, base_address, cpu=0):
+    def read_word(
+            self, x: int, y: int, base_address: int, cpu: int = 0) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.stop_application)
-    def stop_application(self, app_id):
-        pass
+    def stop_application(self, app_id: int):
+       pass
 
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(
-            self, all_core_subsets, app_id, cpu_states, *, timeout=None,
-            time_between_polls=0.1,
-            error_states=frozenset({
-                CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG}),
-            counts_between_full_check=100, progress_bar=None):
+            self, all_core_subsets: CoreSubsets, app_id: int,
+            cpu_states: Union[CPUState, Iterable[CPUState]], *,
+            timeout: Optional[float] = None,
+            time_between_polls: float = 0.1,
+            error_states: FrozenSet[CPUState] = frozenset((
+                CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
+            counts_between_full_check: int = 100,
+            progress_bar: Optional[ProgressBar] = None):
         pass
 
     @overrides(Transceiver.send_signal)
-    def send_signal(self, app_id, signal):
+    def send_signal(self, app_id: int, signal: Signal):
         pass
 
     @overrides(Transceiver.set_ip_tag)
-    def set_ip_tag(self, ip_tag, use_sender=False):
+    def set_ip_tag(self, ip_tag: IPTag, use_sender: bool = False):
         pass
 
     @overrides(Transceiver.set_reverse_ip_tag)
-    def set_reverse_ip_tag(self, reverse_ip_tag):
+    def set_reverse_ip_tag(self, reverse_ip_tag: ReverseIPTag):
         pass
 
     @overrides(Transceiver.clear_ip_tag)
-    def clear_ip_tag(self, tag, board_address=None):
+    def clear_ip_tag(self, tag: int, board_address: Optional[str] = None):
         pass
 
     @overrides(Transceiver.get_tags)
-    def get_tags(self, connection=None):
+    def get_tags(self, connection: Optional[SCAMPConnection] = None
+                 ) -> Iterable[AbstractTag]:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.malloc_sdram)
-    def malloc_sdram(self, x, y, size, app_id, tag=None):
+    def malloc_sdram(
+            self, x: int, y: int, size: int, app_id: int, tag=0) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.load_multicast_routes)
-    def load_multicast_routes(self, x, y, routes, app_id):
+    def load_multicast_routes(
+            self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
+            app_id: int):
         pass
 
     @overrides(Transceiver.load_fixed_route)
-    def load_fixed_route(self, x, y, fixed_route, app_id):
+    def load_fixed_route(
+            self, x: int, y: int, fixed_route: FixedRouteEntry, app_id: int):
         pass
 
     @overrides(Transceiver.read_fixed_route)
-    def read_fixed_route(self, x, y, app_id):
+    def read_fixed_route(self, x: int, y: int, app_id: int) -> FixedRouteEntry:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_multicast_routes)
-    def get_multicast_routes(self, x, y, app_id=None):
+    def get_multicast_routes(
+            self, x: int, y: int,
+            app_id: Optional[int] = None) -> List[MulticastRoutingEntry]:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.clear_multicast_routes)
-    def clear_multicast_routes(self, x, y):
+    def clear_multicast_routes(self, x: int, y: int):
         pass
 
     @overrides(Transceiver.get_router_diagnostics)
-    def get_router_diagnostics(self, x, y):
+    def get_router_diagnostics(self, x: int, y: int) -> RouterDiagnostics:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.set_router_diagnostic_filter)
-    def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
+    def set_router_diagnostic_filter(
+            self, x: int, y: int, position: int,
+            diagnostic_filter: DiagnosticFilter):
         pass
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
-    def clear_router_diagnostic_counters(self, x, y):
+    def clear_router_diagnostic_counters(self, x: int, y: int):
         pass
 
     @overrides(Transceiver.close)
-    def close(self):
+    def close(self) -> None:
         pass
 
     @overrides(Transceiver.control_sync)
-    def control_sync(self, do_sync):
+    def control_sync(self, do_sync: bool):
         pass
 
     @overrides(Transceiver.update_provenance_and_exit)
-    def update_provenance_and_exit(self, x, y, p):
+    def update_provenance_and_exit(self, x: int, y: int, p: int):
         pass
 
     @overrides(Transceiver.where_is_xy)
-    def where_is_xy(self, x, y):
+    def where_is_xy(self, x: int, y:int):
         return f"Mocked {x=} {y=}"
 
     @property
     @overrides(ExtendableTransceiver.bmp_connection)
-    def bmp_connection(self):
+    def bmp_connection(self) -> BMPConnection:
         raise NotImplementedError("Needs to be mocked")
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)
-    def bmp_selector(self):
+    def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
         raise NotImplementedError("Needs to be mocked")
 
     @property
     @overrides(ExtendableTransceiver.scamp_connection_selector)
-    def scamp_connection_selector(self):
+    def scamp_connection_selector(self) -> ConnectionSelector:
         raise NotImplementedError("Needs to be mocked")
