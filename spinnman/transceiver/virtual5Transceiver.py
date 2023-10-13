@@ -13,12 +13,32 @@
 # limitations under
 # return 0the License.
 
+from typing import (
+    BinaryIO, Collection, Dict, FrozenSet, Iterable,
+    List, Optional, Tuple, Union)
+from spinn_utilities.abstract_base import abstractmethod
+from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.overrides import overrides
-from spinn_machine import virtual_machine
+from spinn_utilities.typing.coords import XY
+from spinn_machine import (
+    CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry,
+    virtual_machine)
+from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
+from spinnman.connections.udp_packet_connections import (
+    SCAMPConnection, SDPConnection)
 from spinnman.constants import N_RETRIES
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.model import VersionInfo
+from spinnman.messages.scp.enums import Signal
+from spinnman.messages.sdp import SDPMessage
+from spinnman.messages.spinnaker_boot import (
+    SystemVariableDefinition, SpinnakerBootMessages)
+from spinnman.model import (
+    CPUInfos, DiagnosticFilter, IOBuffer, RouterDiagnostics,
+    VersionInfo)
+from spinnman.model.enums import (
+    CPUState, UserRegister)
+from spinnman.processes import ConnectionSelector
 from .version5transceiver import Version5Transceiver
 
 
@@ -32,14 +52,17 @@ class Virtual5Transceiver(Version5Transceiver):
     """
 
     @overrides(Version5Transceiver._boot_board)
-    def _boot_board(self, extra_boot_values=None):
+    def _boot_board(self, extra_boot_values: Optional[Dict[
+            SystemVariableDefinition, object]] = None):
         try:
             super()._boot_board(extra_boot_values)
         except SpinnmanIOException:
             pass
 
     @overrides(Version5Transceiver.read_memory)
-    def read_memory(self, x, y, base_address, length, cpu=0):
+    def read_memory(
+            self, x: int, y: int, base_address: int, length: int,
+            cpu: int = 0) -> bytes:
         try:
             return super().read_memory(x, y, base_address, length, cpu)
         except SpinnmanIOException as exc:
@@ -51,9 +74,10 @@ class Virtual5Transceiver(Version5Transceiver):
 
     @overrides(Version5Transceiver._get_scamp_version)
     def _get_scamp_version(
-            self, chip_x=AbstractSCPRequest.DEFAULT_DEST_X_COORD,
-            chip_y=AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-            connection_selector=None, n_retries=N_RETRIES):
+            self, chip_x: int = AbstractSCPRequest.DEFAULT_DEST_X_COORD,
+            chip_y: int = AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
+            connection_selector: Optional[ConnectionSelector] = None,
+            n_retries: int = N_RETRIES) -> VersionInfo:
         try:
             return super()._get_scamp_version(
                 chip_x, chip_y, connection_selector, n_retries)
@@ -65,14 +89,17 @@ class Virtual5Transceiver(Version5Transceiver):
             return version
 
     @overrides(Version5Transceiver.get_machine_details)
-    def get_machine_details(self):
+    def get_machine_details(self) -> Machine:
         try:
             return super().get_machine_details()
         except SpinnmanIOException:
             return virtual_machine(8, 8)
 
     @overrides(Version5Transceiver.get_cpu_infos)
-    def get_cpu_infos(self, core_subsets=None, states=None, include=True):
+    def get_cpu_infos(
+            self, core_subsets: Optional[CoreSubsets] = None,
+            states: Union[CPUState, Iterable[CPUState], None] = None,
+            include: bool = True) -> CPUInfos:
         try:
             return super().get_cpu_infos(core_subsets, states, include)
         except SpinnmanIOException:

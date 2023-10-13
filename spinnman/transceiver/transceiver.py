@@ -922,7 +922,6 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-
     def clear_router_diagnostic_counters(self, x: int, y: int):
         """
         Clear router diagnostic information on a chip.

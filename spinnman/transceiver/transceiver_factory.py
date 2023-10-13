@@ -111,7 +111,8 @@ def create_transceiver_from_hostname(
 
 
 def create_transceiver_from_connections(
-        connections, virtual=False, power_cycle=False, extended=False):
+        connections: List[Connection], virtual: bool = False,
+        power_cycle: bool = False, extended: bool = False):
     """
     Create a Transceiver with these connections
 

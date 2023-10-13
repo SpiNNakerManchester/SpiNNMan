@@ -36,5 +36,5 @@ class Version5Transceiver(BaseTransceiver):
 
     @property
     @overrides(BaseTransceiver.boot_led_0_value)
-    def boot_led_0_value(self):
+    def boot_led_0_value(self) -> int:
         return 0x00000001
