@@ -16,7 +16,6 @@ import logging
 from threading import Thread
 from typing import Callable, Generic, List, TypeVar
 from concurrent.futures import ThreadPoolExecutor, Future
-from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import SpinnmanEOFException
 from spinnman.connections.abstract_classes import Listenable
@@ -28,7 +27,7 @@ _POOL_SIZE = 4
 _TIMEOUT = 1
 
 
-class ConnectionListener(Thread, AbstractContextManager, Generic[T]):
+class ConnectionListener(Thread, Generic[T]):
     """
     Thread that listens to a connection and calls callbacks with new
     messages when they arrive.
