@@ -34,6 +34,7 @@ from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
 from spinnman.model import P2PTable
 from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinn_utilities.progress_bar import ProgressBar
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -60,7 +61,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Holds a mapping from (x,y) to a mapping of physical to virtual core
         "_virtual_to_physical_map",
         # Holds a mapping from (x,y) to a mapping of virtual to physical core
-        "_physical_to_virtual_map"]
+        "_physical_to_virtual_map",
+        # Progress bar to fill in as details are received
+        "_progress"]
 
     def __init__(self, connection_selector):
         """
@@ -83,6 +86,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Maps between virtual and physical cores
         self._virtual_to_physical_map = dict()
         self._physical_to_virtual_map = dict()
+
+        # Keep track of progress
+        self._progress = None
 
     def _make_chip(self, chip_info, machine):
         """
@@ -167,6 +173,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
+        if self._progress is not None:
+            self._progress.update()
 
     def _receive_p_maps(self, x, y, scp_read_response):
         """
@@ -218,12 +226,16 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         p2p_table = P2PTable(width, height, self._p2p_column_data)
 
         # Get the chip information for each chip
+        self._progress = ProgressBar(
+            p2p_table.n_routes,
+            f"Reading details from {p2p_table.n_routes} chips")
         for (x, y) in p2p_table.iterchips():
             self._send_request(GetChipInfo(x, y), self._receive_chip_info)
             self._send_request(
                 ReadMemory(x, y, P_TO_V_ADDR, P_MAPS_SIZE),
                 functools.partial(self._receive_p_maps, x, y))
         self._finish()
+        self._progress.end()
         with suppress(Exception):
             # Ignore errors, as any error here just means that a chip
             # is down that wasn't marked as down

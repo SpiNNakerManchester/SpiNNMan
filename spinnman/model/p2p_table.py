@@ -117,3 +117,11 @@ class P2PTable(object):
         if (x, y) in self._routes:
             return self._routes[x, y]
         return P2PTableRoute.NONE
+
+    @property
+    def n_routes(self):
+        """ The number of routes in the table
+
+        :rtype: int
+        """
+        return len(self._routes)
