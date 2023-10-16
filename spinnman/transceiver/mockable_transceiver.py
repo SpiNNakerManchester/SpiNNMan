@@ -111,8 +111,7 @@ class MockableTransceiver(ExtendableTransceiver):
     def execute_flood(
             self, core_subsets: CoreSubsets,
             executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False,
-            is_filename: bool=False):
+            n_bytes: Optional[int] = None, wait: bool = False):
         pass
 
     @overrides(Transceiver.read_fpga_register)
@@ -140,11 +139,10 @@ class MockableTransceiver(ExtendableTransceiver):
             self, x: int, y: int, base_address: int,
             data: Union[BinaryIO, bytes, int, str], *,
             n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
-            is_filename: bool = False,
             get_sum: bool = False) -> Tuple[int, int]:
         print("Doing write to", x, y)
         self.written_memory.append(
-            (x, y, base_address, data, n_bytes, offset, cpu, is_filename))
+            (x, y, base_address, data, n_bytes, offset, cpu))
 
     @overrides(Transceiver.write_user)
     def write_user(

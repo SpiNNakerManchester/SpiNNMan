@@ -329,8 +329,7 @@ class Transceiver(object):
     def execute_flood(
             self, core_subsets: CoreSubsets,
             executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False,
-            is_filename: bool=False):
+            n_bytes: Optional[int] = None, wait: bool = False):
         """
         Start an executable running on multiple places on the board.  This
         will be optimised based on the selected cores, but it may still
@@ -423,7 +422,6 @@ class Transceiver(object):
             self, x: int, y: int, base_address: int,
             data: Union[BinaryIO, bytes, int, str], *,
             n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
-            is_filename: bool = False,
             get_sum: bool = False) -> Tuple[int, int]:
         """
         Write to the SDRAM on the board.

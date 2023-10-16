@@ -718,27 +718,24 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             process = GetCPUInfoProcess(self._scamp_connection_selector)
         else:
             if isinstance(states, CPUState):
-                new_states = set()
-                new_states.add(states)
-                states = new_states
+                state_set = frozenset((states, ))
+            else:
+                state_set = frozenset(states)
             if include:
                 process = GetIncludeCPUInfoProcess(
-                    self._scamp_connection_selector, states)
+                    self._scamp_connection_selector, state_set)
             else:
                 process = GetExcludeCPUInfoProcess(
-                    self._scamp_connection_selector, states)
+                    self._scamp_connection_selector, state_set)
 
-        cpu_info = process.get_cpu_info(core_subsets)
-        return cpu_info
 
     @overrides(Transceiver.get_clock_drift)
     def get_clock_drift(self, x: int, y: int) -> float:
         DRIFT_FP = 1 << 17
 
-        drift = self._get_sv_data(x, y, SystemVariableDefinition.clock_drift)
-        drift = struct.unpack("<i", struct.pack("<I", drift))[0]
-        drift = drift / DRIFT_FP
-        return drift
+        drift_b = self._get_sv_data(x, y, SystemVariableDefinition.clock_drift)
+        drift = struct.unpack("<i", struct.pack("<I", drift_b))[0]
+        return drift / DRIFT_FP
 
     def _get_sv_data(
             self, x: int, y: int,
@@ -750,8 +747,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
         if data_item.data_type.is_byte_array:
+            size = cast(int, data_item.array_size)
             # Do not need to decode the bytes of a byte array
-            return self.read_memory(x, y, addr, data_item.array_size)
+            return self.read_memory(x, y, addr, size)
         return struct.unpack_from(
             data_item.data_type.struct_code,
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
@@ -759,15 +757,15 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @staticmethod
     def __get_user_register_address_from_core(p: int, user: UserRegister):
         """
-        Get the address of user 0 for a given processor on the board.
+        Get the address of user *N* for a given processor on the board.
 
         .. note::
             Conventionally, user_0 usually holds the address of the table of
             memory regions.
 
-        :param int p: The ID of the processor to get the user 0 address from
-        :param int user: The user number to get the address for
-        :return: The address for user 0 register for this processor
+        :param int p: The ID of the processor to get the user N address from
+        :param int user: The user "register" number to get the address for
+        :return: The address for user N register for this processor
         :rtype: int
         """
         if user < 0 or user > CPU_MAX_USER:
@@ -799,10 +797,18 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                   ) -> Iterable[IOBuffer]:
         # making the assumption that all chips have the same iobuf size.
         if self._iobuf_size is None:
-            self._iobuf_size = self._get_sv_data(
+            self._iobuf_size = cast(int, self._get_sv_data(
                 AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                 AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-                SystemVariableDefinition.iobuf_size)
+                SystemVariableDefinition.iobuf_size))
+        # Get all the cores if the subsets are not given
+        # todo is core_subsets ever None
+        if core_subsets is None:
+            core_subsets = CoreSubsets()
+            for chip in SpiNNManDataView.get_machine().chips:
+                for processor in chip.processors:
+                    core_subsets.add_processor(
+                        chip.x, chip.y, processor.processor_id)
 
         # read iobuf from machine
         process = ReadIOBufProcess(self._scamp_connection_selector)
@@ -818,11 +824,12 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             machine = SpiNNManDataView.get_machine()
             chip_xys = [(ch.x, ch.y)
                         for ch in machine.ethernet_connected_chips]
-
+        else:
+            chip_xys = xys
         return process.get_n_cores_in_state(chip_xys, app_id, state)
 
     @contextmanager
-    def _flood_execute_lock(self) -> Iterator[Condition]:
+    def __flood_execute_lock(self) -> Iterator[Condition]:
         """
         Get a lock for executing a flood fill of an executable.
         """
@@ -837,26 +844,29 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def execute_flood(
             self, core_subsets: CoreSubsets,
             executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False,
-            is_filename: bool=False):
+            n_bytes: Optional[int] = None, wait: bool = False,):
+        if isinstance(executable, int):
+            # No executable is 4 bytes long
+            raise TypeError("executable may not be int")
         # Lock against other executable's
-        with self._flood_execute_lock():
+        with self.__flood_execute_lock():
             # Flood fill the system with the binary
             n_bytes, chksum = self.write_memory(
-                0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes = n_bytes,
-                is_filename=is_filename, get_sum=True)
+                0, 0, _EXECUTABLE_ADDRESS, executable, n_bytes=n_bytes,
+                get_sum=True)
+
             # Execute the binary on the cores on 0, 0 if required
             if core_subsets.is_chip(0, 0):
                 boot_subset = CoreSubsets()
                 boot_subset.add_core_subset(
                     core_subsets.get_core_subset_for_chip(0, 0))
-                process = ApplicationRunProcess(
+                runner = ApplicationRunProcess(
                     self._scamp_connection_selector)
-                process.run(app_id, boot_subset, wait)
+                runner.run(app_id, boot_subset, wait)
 
-            process = ApplicationCopyRunProcess(
+            copy_run = ApplicationCopyRunProcess(
                 self._scamp_connection_selector)
-            process.run(n_bytes, app_id, core_subsets, chksum, wait)
+            copy_run.run(n_bytes, app_id, core_subsets, chksum, wait)
 
     def _power_on_machine(self) -> None:
         """
@@ -881,6 +891,19 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         time.sleep(POWER_CYCLE_WAIT_TIME_IN_SECONDS)
         logger.warning("Power cycle wait complete")
 
+    def _bmp_call(self, req: AbstractSCPRequest[AbstractSCPResponse],
+                  **kwargs) -> AbstractSCPResponse:
+        """
+        Wrapper that makes doing simple BMP calls easier,
+        especially with types.
+        """
+        if self._bmp_selector is None:
+            raise SpinnmanException(
+                "this transceiver does not support BMP operations")
+        proc: SendSingleCommandProcess[AbstractSCPResponse] =\
+            SendSingleCommandProcess(self._bmp_selector, **kwargs)
+        return proc.execute(req)
+
     def _power(self, power_command: PowerCommand):
         """
         Send a power request to the machine.
@@ -898,30 +921,27 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.read_fpga_register)
     def read_fpga_register(
             self, fpga_num: int, register: int, board: int = 0) -> int:
-        process = SendSingleCommandProcess(self._bmp_selector, timeout=1.0)
-        response = process.execute(
-            ReadFPGARegister(fpga_num, register, board))
-        return response.fpga_register  # pylint: disable=no-member
+        response = self._bmp_call(
+            ReadFPGARegister(fpga_num, register, board),
+            timeout=1.0)
+        return response.fpga_register
 
     @overrides(Transceiver.write_fpga_register)
     def write_fpga_register(
             self, fpga_num: int, register: int, value: int, board: int = 0):
-        process = SendSingleCommandProcess(self._bmp_selector)
-        process.execute(
+        self._bmp_call(
             WriteFPGARegister(fpga_num, register, value, board))
 
     @overrides(Transceiver.read_bmp_version)
     def read_bmp_version(self, board: int) -> VersionInfo:
-        process = SendSingleCommandProcess(self._bmp_selector)
-        response = process.execute(BMPGetVersion(board))
-        return response.version_info  # pylint: disable=no-member
+        response = self._bmp_call(BMPGetVersion(board))
+        return response.version_info
 
     @overrides(Transceiver.write_memory)
     def write_memory(
             self, x: int, y: int, base_address: int,
             data: Union[BinaryIO, bytes, int, str], *,
             n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
-            is_filename: bool = False,
             get_sum: bool = False) -> Tuple[int, int]:
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
@@ -970,7 +990,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self, x: int, y: int, base_address: int, cpu: int = 0) -> int:
         try:
             process = ReadMemoryProcess(self._scamp_connection_selector)
-            data = process.read_memory((x, y, cpu), base_address, _ONE_WORD.size)
+            data = process.read_memory(
+                (x, y, cpu), base_address, _ONE_WORD.size)
             (value, ) = _ONE_WORD.unpack(data)
             return value
         except Exception:
@@ -995,10 +1016,11 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         xys = set()
         for cpu_info in cpu_infos:
-            if isinstance(cpu_info, tuple):
-                xys.add((cpu_info[0], cpu_info[1]))
-            else:
+            # todo: Is it ever not a CPUInfo
+            if isinstance(cpu_info, CPUInfo):
                 xys.add((cpu_info.x, cpu_info.y))
+            else:
+                xys.add((cpu_info[0], cpu_info[1]))
         for (x, y) in xys:
             logger.info(self._where_is_xy(x, y))
 
@@ -1017,12 +1039,16 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         max_processors_ready = 0
         timeout_time = None if timeout is None else time.time() + timeout
         tries = 0
+        if isinstance(cpu_states, CPUState):
+            target_states = frozenset((cpu_states,))
+        else:
+            target_states = frozenset(cpu_states)
         while (processors_ready < len(all_core_subsets) and
                (timeout_time is None or time.time() < timeout_time)):
 
             # Get the number of processors in the ready states
             processors_ready = 0
-            for cpu_state in cpu_states:
+            for cpu_state in target_states:
                 processors_ready += self.get_core_state_count(
                     app_id, cpu_state)
             if progress_bar:
@@ -1043,17 +1069,17 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                     if len(error_core_states) > 0:
                         self.__log_where_is_info(error_core_states)
                         raise SpiNNManCoresNotInStateException(
-                            timeout, cpu_states, error_core_states)
+                            timeout, target_states, error_core_states)
 
                 # If we haven't seen an error, increase the tries, and
                 # do a full check if required
                 tries += 1
                 if tries >= counts_between_full_check:
                     cores_in_state = self.get_cpu_infos(
-                        all_core_subsets, cpu_states, True)
+                        all_core_subsets, target_states, include=True)
                     # convert to a list of xyp values
                     cores_in_state_xyps = list(cores_in_state)
-                    processors_ready = len(cores_in_state)
+                    processors_ready = len(cores_in_state_xyps)
                     tries = 0
 
                     # iterate over the cores waiting to finish and see
@@ -1074,14 +1100,19 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         # If we haven't reached the final state, do a final full check
         if processors_ready < len(all_core_subsets):
             cores_not_in_state = self.get_cpu_infos(
-                all_core_subsets, cpu_states, False)
+                all_core_subsets, cpu_states, include=False)
 
             # If we are sure we haven't reached the final state,
             # report a timeout error
             if len(cores_not_in_state) != 0:
                 self.__log_where_is_info(cores_not_in_state)
+                states = self.get_cpu_infos(all_core_subsets)
+                for cpu_info in states.values():
+                    if cpu_info.state not in target_states:
+                        logger.info("x:{} y:{} p:{} state:{}", cpu_info.x,
+                                    cpu_info.y, cpu_info.p, cpu_info.state)
                 raise SpiNNManCoresNotInStateException(
-                    timeout, cpu_states, cores_not_in_state)
+                    timeout, target_states, cores_not_in_state)
 
     @overrides(Transceiver.send_signal)
     def send_signal(self, app_id: int, signal: Signal):
@@ -1247,8 +1278,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self, x: int, y: int,
             app_id: Optional[int] = None) -> List[MulticastRoutingEntry]:
         try:
-            base_address = self._get_sv_data(
-                x, y, SystemVariableDefinition.router_table_copy_address)
+            base_address = cast(int, self._get_sv_data(
+                x, y, SystemVariableDefinition.router_table_copy_address))
             process = GetMultiCastRoutesProcess(
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)
@@ -1329,8 +1360,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.control_sync)
     def control_sync(self, do_sync: bool):
-        process = SendSingleCommandProcess(self._scamp_connection_selector)
-        process.execute(DoSync(do_sync))
+        self._call(DoSync(do_sync))
 
     @overrides(Transceiver.update_provenance_and_exit)
     def update_provenance_and_exit(self, x: int, y: int, p: int):
@@ -1359,7 +1389,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 flags=SDPFlag.REPLY_NOT_EXPECTED,
                 destination_port=port.value, destination_cpu=p,
                 destination_chip_x=x, destination_chip_y=y),
-            data=_ONE_WORD.pack(cmd.value)))
+                data=_ONE_WORD.pack(cmd.value)))
 
     def __str__(self) -> str:
         addr = self._scamp_connections[0].remote_ip_address
