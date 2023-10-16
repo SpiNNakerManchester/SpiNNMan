@@ -43,7 +43,7 @@ class SpinnakerBootMessages(object):
         "_no_data_packets")
 
     def __init__(self, extra_boot_values: Optional[Dict[
-        SystemVariableDefinition, Any]] = None):
+            SystemVariableDefinition, Any]] = None):
         """
         :param extra_boot_values:
             Any additional or overwrite values to set during boot.

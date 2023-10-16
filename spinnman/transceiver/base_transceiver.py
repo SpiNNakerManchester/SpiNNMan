@@ -57,13 +57,8 @@ from spinnman.model import (
     IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
 from spinnman.model.enums import (
     CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
-from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse)
-from spinnman.messages.scp.enums import Signal, PowerCommand
-from spinnman.messages.scp.impl import (
-    BMPGetVersion, SetPower, ReadFPGARegister, WriteFPGARegister, IPTagSetTTO,
-    ReverseIPTagSet, CountState, WriteMemory, SendSignal, AppStop,
-    CheckOKResponse, IPTagSet, IPTagClear, RouterClear, DoSync)
+from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
+from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.scp.impl.get_chip_info_response import (
     GetChipInfoResponse)
@@ -237,7 +232,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def bmp_connection(self) -> BMPConnection:
         return self._bmp_connection
 
-    def _where_is_xy(self, x: int, y:int):
+    def _where_is_xy(self, x: int, y: int):
         """
         Attempts to get where_is_x_y info from the machine
 
@@ -545,13 +540,14 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
-    def _call(self, req: AbstractSCPRequest[AbstractSCPResponse], **kwargs) -> AbstractSCPResponse:
+    def _call(self, req: AbstractSCPRequest[AbstractSCPResponse],
+              **kwargs) -> AbstractSCPResponse:
         """
         Wrapper that makes doing simple SCP calls easier,
         especially with types.
         """
-        proc: SendSingleCommandProcess[AbstractSCPResponse] = SendSingleCommandProcess(
-            self._scamp_connection_selector, **kwargs)
+        proc: SendSingleCommandProcess[AbstractSCPResponse] = \
+            SendSingleCommandProcess(self._scamp_connection_selector, **kwargs)
         return proc.execute(req)
 
     @staticmethod
@@ -727,7 +723,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             else:
                 process = GetExcludeCPUInfoProcess(
                     self._scamp_connection_selector, state_set)
-
 
     @overrides(Transceiver.get_clock_drift)
     def get_clock_drift(self, x: int, y: int) -> float:
@@ -1389,7 +1384,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 flags=SDPFlag.REPLY_NOT_EXPECTED,
                 destination_port=port.value, destination_cpu=p,
                 destination_chip_x=x, destination_chip_y=y),
-                data=_ONE_WORD.pack(cmd.value)))
+            data=_ONE_WORD.pack(cmd.value)))
 
     def __str__(self) -> str:
         addr = self._scamp_connections[0].remote_ip_address

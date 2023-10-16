@@ -162,7 +162,7 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.stop_application)
     def stop_application(self, app_id: int):
-       pass
+        pass
 
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(

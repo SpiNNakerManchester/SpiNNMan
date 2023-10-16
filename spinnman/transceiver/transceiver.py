@@ -192,7 +192,6 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-
     def read_user(self, x: int, y: int, p: int, user: UserRegister):
         """
         Get the contents of the this user register for the given processor.

@@ -13,31 +13,15 @@
 # limitations under
 # return 0the License.
 
-from typing import (
-    BinaryIO, Collection, Dict, FrozenSet, Iterable,
-    List, Optional, Tuple, Union)
-from spinn_utilities.abstract_base import abstractmethod
-from spinn_utilities.progress_bar import ProgressBar
+from typing import Dict, Iterable, Optional, Union
 from spinn_utilities.overrides import overrides
-from spinn_utilities.typing.coords import XY
-from spinn_machine import (
-    CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry,
-    virtual_machine)
-from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
-from spinnman.connections.udp_packet_connections import (
-    SCAMPConnection, SDPConnection)
+from spinn_machine import CoreSubsets, Machine, virtual_machine
 from spinnman.constants import N_RETRIES
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import Signal
-from spinnman.messages.sdp import SDPMessage
-from spinnman.messages.spinnaker_boot import (
-    SystemVariableDefinition, SpinnakerBootMessages)
-from spinnman.model import (
-    CPUInfos, DiagnosticFilter, IOBuffer, RouterDiagnostics,
-    VersionInfo)
-from spinnman.model.enums import (
-    CPUState, UserRegister)
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
+from spinnman.model import CPUInfos, VersionInfo
+from spinnman.model.enums import CPUState
 from spinnman.processes import ConnectionSelector
 from .version5transceiver import Version5Transceiver
 

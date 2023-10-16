@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import (
-    BinaryIO, Collection, Dict, FrozenSet, Iterable,
-    Iterator, List, Optional, Sequence, Tuple, TypeVar, Union, cast)
+from typing import List, Optional
 from spinn_utilities.overrides import overrides
 from spinnman.connections.abstract_classes import Connection
 from spinnman.data import SpiNNManDataView
