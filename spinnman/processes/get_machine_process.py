@@ -42,6 +42,7 @@ from spinnman.model.enums import CPUState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import \
     ConnectionSelector
+from spinn_utilities.progress_bar import ProgressBar
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -69,7 +70,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Holds a mapping from (x,y) to a mapping of physical to virtual core
         "_virtual_to_physical_map",
         # Holds a mapping from (x,y) to a mapping of virtual to physical core
-        "_physical_to_virtual_map")
+        "_physical_to_virtual_map",
+        # Progress bar to fill in as details are received
+        "_progress")
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
@@ -100,6 +103,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :return: The created chip
         :rtype: ~spinn_machine.Chip
         """
+        # Keep track of progress
+        self._progress = None
         # Create the down cores set if any
         n_cores = \
             SpiNNManDataView.get_machine_version().max_cores_per_chip
@@ -177,6 +182,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
+        if self._progress is not None:
+            self._progress.update()
 
     def _receive_p_maps(
             self, x: int, y: int, scp_read_response: Response):
@@ -231,6 +238,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         p2p_table = P2PTable(width, height, self._p2p_column_data)
 
         # Get the chip information for each chip
+        self._progress = ProgressBar(
+            p2p_table.n_routes,
+            f"Reading details from {p2p_table.n_routes} chips")
         with suppress(Exception), self._collect_responses():
             # Ignore errors, as any error here just means that a chip
             # is down that wasn't marked as down
@@ -239,6 +249,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 self._send_request(
                     ReadMemory((x, y, 0), P_TO_V_ADDR, P_MAPS_SIZE),
                     functools.partial(self._receive_p_maps, x, y))
+        self._progress.end()
 
         # Warn about unexpected missing chips
         for (x, y) in p2p_table.iterchips():
