@@ -724,6 +724,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 process = GetExcludeCPUInfoProcess(
                     self._scamp_connection_selector, state_set)
 
+        cpu_info = process.get_cpu_info(core_subsets)
+        return cpu_info
+
     @overrides(Transceiver.get_clock_drift)
     def get_clock_drift(self, x: int, y: int) -> float:
         DRIFT_FP = 1 << 17
