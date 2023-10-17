@@ -62,7 +62,8 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             Router.convert_spinnaker_route_to_routing_ids(route)
 
         self._entries[route_no + offset] = MulticastRoutingEntry(
-            key, mask, processor_ids, link_ids, False)
+            key, mask, processor_ids=processor_ids, link_ids=link_ids,
+            defaultable=False)
 
     def __handle_response(self, offset, response):
         for route_no in range(_ENTRIES_PER_READ):
