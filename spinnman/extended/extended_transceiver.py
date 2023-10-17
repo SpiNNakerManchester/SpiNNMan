@@ -374,16 +374,16 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         process = WriteMemoryProcess(self.scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
             process.write_link_memory_from_reader(
-                x, y, cpu, link, base_address, data, n_bytes)
+                (x, y, cpu), link, base_address, data, n_bytes)
         elif isinstance(data, int):
             data_to_write = self._ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 4)
+                (x, y, cpu), link, base_address, data_to_write, 0, 4)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data, offset, n_bytes)
+                (x, y, cpu), link, base_address, data, offset, n_bytes)
 
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
         """
@@ -424,7 +424,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
                       "and untested due to no known use.")
             process = ReadMemoryProcess(self.scamp_connection_selector)
             return process.read_link_memory(
-                x, y, cpu, link, base_address, length)
+                (x, y, cpu), link, base_address, length)
         except Exception:
             logger.info(self.where_is_xy(x, y))
             raise
@@ -533,7 +533,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             logger.info(self.where_is_xy(x, y))
             raise
 
-    def free_sdram(self, x, y, base_address, app_id):
+    def free_sdram(self, x, y, base_address):
         """
         Free allocated SDRAM.
 
@@ -543,13 +543,12 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         :param int x: The x-coordinate of the chip onto which to ask for memory
         :param int y: The y-coordinate of the chip onto which to ask for memory
         :param int base_address: The base address of the allocated memory
-        :param int app_id: The app ID of the allocated memory
         """
         try:
             warn_once(logger, "The free_sdram method is deprecated and "
                       "likely to be removed.")
             process = DeAllocSDRAMProcess(self._scamp_connection_selector)
-            process.de_alloc_sdram(x, y, app_id, base_address)
+            process.de_alloc_sdram(x, y, base_address)
         except Exception:
             logger.info(self.where_is_xy(x, y))
             raise
@@ -612,7 +611,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
 
             process = SendSingleCommandProcess(
                 self.scamp_connection_selector)
-            response = process.execute(ReadMemory(x, y, memory_position, 4))
+            response = process.execute(
+                ReadMemory((x, y, 0), memory_position, 4))
             return DiagnosticFilter.read_from_int(self._ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
             # pylint: disable=no-member
