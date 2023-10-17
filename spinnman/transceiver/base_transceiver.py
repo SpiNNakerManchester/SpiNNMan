@@ -463,7 +463,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         get_machine_process = GetMachineProcess(
             self._scamp_connection_selector)
         machine = get_machine_process.get_machine_details(
-            version_info.x, version_info.y, dims._width, dims._height)
+            version_info.x, version_info.y, dims.width, dims.height)
 
         # Work out and add the SpiNNaker links and FPGA links
         machine.add_spinnaker_links()
