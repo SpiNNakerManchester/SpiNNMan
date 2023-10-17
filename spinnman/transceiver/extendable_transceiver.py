@@ -55,6 +55,7 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
         Returns the BMP connection if there is one
         :rtype: BMPConnection or None
         """
+        raise NotImplementedError("This method is abstract")
 
     @abstractproperty
     def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
@@ -63,6 +64,7 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
 
         :rtype: AbstractMultiConnectionProcessConnectionSelector
         """
+        raise NotImplementedError("This method is abstract")
 
     @abstractproperty
     def scamp_connection_selector(self) -> ConnectionSelector:
@@ -71,3 +73,4 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
 
         :rtype: AbstractMultiConnectionProcessConnectionSelector
         """
+        raise NotImplementedError("This method is abstract")
