@@ -60,6 +60,22 @@ class TestCpuInfos(unittest.TestCase):
                          "    r4=0, r5=0, r6=0, r7=0\n"
                          "    PSR=0, SP=0, LR=0\n")
 
+    def test_add_info(self):
+        infos1 = CPUInfos()
+        infos1.add_info(CPUInfo.mock_info(0, 0, 1, 5, CPUState.RUNNING))
+        infos1.add_info(CPUInfo.mock_info(0, 0, 2, 6, CPUState.FINISHED))
+        self.assertSetEqual(set(infos1), {(0, 0, 1), (0, 0, 2)})
+
+        infos2 = CPUInfos()
+        infos2.add_info(CPUInfo.mock_info(1, 0, 1, 7, CPUState.FINISHED))
+        infos2.add_info(CPUInfo.mock_info(
+            1, 1, 2, 4, CPUState.RUN_TIME_EXCEPTION))
+        infos2.add_info(CPUInfo.mock_info(1, 0, 2, 8, CPUState.FINISHED))
+        self.assertSetEqual(set(infos2), {(1, 0, 1), (1, 1, 2), (1, 0, 2)})
+
+        infos1.add_infos(infos2, [CPUState.FINISHED])
+        self.assertSetEqual(set(infos1),
+                            {(0, 0, 1), (0, 0, 2), (1, 0, 1), (1, 0, 2)})
 
 if __name__ == '__main__':
     unittest.main()

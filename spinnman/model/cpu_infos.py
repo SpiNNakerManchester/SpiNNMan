@@ -43,9 +43,10 @@ class CPUInfos(object):
             Only add if the Info has this state
         """
         # pylint: disable=protected-access
-        for info in other._cpu_infos:
+        assert isinstance(other, CPUInfos)
+        for info in other._cpu_infos.values():
             if info.state in states:
-                self.add_info(other)
+                self.add_info(info)
 
     def __iter__(self):
         return iter(self._cpu_infos)
