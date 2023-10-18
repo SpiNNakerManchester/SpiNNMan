@@ -1241,22 +1241,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         process.execute(WriteMemory(
             x, y, memory_position, _ONE_WORD.pack(data_to_send)))
 
+    @overrides(Transceiver.clear_router_diagnostic_counters)
     def clear_router_diagnostic_counters(self, x, y):
-        """
-        Clear router diagnostic information on a chip.
-
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
-        :raise SpinnmanIOException:
-            If there is an error communicating with the board
-        :raise SpinnmanInvalidPacketException:
-            If a packet is received that is not in the valid format
-        :raise SpinnmanInvalidParameterException:
-            If a packet is received that has invalid parameters or a counter
-            ID is out of range
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If a response indicates an error during the exchange
-        """
         try:
             process = SendSingleCommandProcess(self._scamp_connection_selector)
             # Clear all
@@ -1266,10 +1252,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             logger.info(self.where_is_xy(x, y))
             raise
 
+    @overrides(Transceiver.close)
     def close(self):
-        """
-        Close the transceiver and any threads that are running.
-        """
         if self._bmp_connection is not None:
             if get_config_bool("Machine", "turn_off_machine"):
                 self._power_off_machine()
@@ -1277,26 +1261,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         for connection in self._all_connections:
             connection.close()
 
+    @overrides(Transceiver.control_sync)
     def control_sync(self, do_sync):
-        """
-        Control the synchronisation of the chips.
-
-        :param bool do_sync: Whether to synchronise or not
-        """
         process = SendSingleCommandProcess(self._scamp_connection_selector)
         process.execute(DoSync(do_sync))
 
+    @overrides(Transceiver.update_provenance_and_exit)
     def update_provenance_and_exit(self, x, y, p):
-        """
-        Sends a command to update prevenance and exit
-
-        :param int x:
-            The x-coordinate of the core
-        :param int y:
-            The y-coordinate of the core
-        :param int p:
-            The processor on the core
-        """
         # Send these signals to make sure the application isn't stuck
         self.send_sdp_message(SDPMessage(
             sdp_header=SDPHeader(
@@ -1306,14 +1277,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             data=_ONE_WORD.pack(SDP_RUNNING_MESSAGE_CODES
                                 .SDP_UPDATE_PROVENCE_REGION_AND_EXIT.value)))
 
+    @overrides(Transceiver.send_chip_update_provenance_and_exit)
     def send_chip_update_provenance_and_exit(self, x, y, p):
-        """
-        Sends a singnal to update the provenance and exit
-
-        :param int x:
-        :param int y:
-        :param int p:
-        """
         cmd = SDP_RUNNING_MESSAGE_CODES.SDP_UPDATE_PROVENCE_REGION_AND_EXIT
         port = SDP_PORTS.RUNNING_COMMAND_SDP_PORT
 
