@@ -97,12 +97,6 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.read_bmp_version)
     def read_bmp_version(self, board):
-        """
-        Read the BMP version.
-
-        :param int board: which board to request the data from
-        :return: the sver from the BMP
-        """
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.write_memory)
@@ -203,6 +197,10 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.update_provenance_and_exit)
     def update_provenance_and_exit(self, x, y, p):
+        pass
+
+    @overrides(Transceiver.send_chip_update_provenance_and_exit)
+    def send_chip_update_provenance_and_exit(self, x, y, p):
         pass
 
     @overrides(Transceiver.where_is_xy)
