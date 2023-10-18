@@ -169,8 +169,8 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
     @property
     def is_arp(self):
         """
-        Whether the tag is in the ARP state (where the MAC address is
-        being looked up).
+        Whether the tag is in the Address Resolution Protocol state
+        (where the MAC address is being looked up).
 
         .. note::
             This is a transient state; it is unlikely to be observed.

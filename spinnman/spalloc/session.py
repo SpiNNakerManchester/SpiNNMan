@@ -29,26 +29,28 @@ _debug_pretty_print = False
 
 
 def _may_renew(method):
-    def pp_req(req: requests.PreparedRequest):
+    def pp_req(request: requests.PreparedRequest):
         """
-        :param ~requests.PreparedRequest req:
+        :param ~requests.PreparedRequest request:
         """
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '>>>>>>>>>>>START>>>>>>>>>>>',
-            req.method + ' ' + req.url,
-            '\r\n'.join('{}: {}'.format(*kv) for kv in req.headers.items()),
-            req.body if req.body else ""))
+            request.method + ' ' + request.url,
+            '\r\n'.join('{}: {}'.format(*kv)
+                        for kv in request.headers.items()),
+            request.body if request.body else ""))
 
-    def pp_resp(resp: requests.Response):
+    def pp_resp(response: requests.Response):
         """
-        :param ~requests.Response resp:
+        :param ~requests.Response response:
         """
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '<<<<<<<<<<<START<<<<<<<<<<<',
-            str(resp.status_code) + " " + resp.reason,
-            '\r\n'.join('{}: {}'.format(*kv) for kv in resp.headers.items()),
+            str(response.status_code) + " " + response.reason,
+            '\r\n'.join('{}: {}'.format(*kv)
+                        for kv in response.headers.items()),
             # Assume we only get textual responses
-            str(resp.content, "UTF-8") if resp.content else ""))
+            str(response.content, "UTF-8") if response.content else ""))
 
     @wraps(method)
     def call(self, *args, **kwargs):
@@ -139,20 +141,20 @@ class Session:
         return self.__handle_error_or_return(r)
 
     @_may_renew
-    def post(self, url: str, jsonobj: dict, timeout: int = 10,
+    def post(self, url: str, json_dict: dict, timeout: int = 10,
              **kwargs) -> requests.Response:
         """
         Do an HTTP ``POST`` in the session.
 
         :param str url:
         :param int timeout:
-        :param dict jsonobj:
+        :param dict json_dict:
         :rtype: ~requests.Response
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
         cookies, headers = self._credentials
-        r = requests.post(url, params=params, json=jsonobj,
+        r = requests.post(url, params=params, json=json_dict,
                           cookies=cookies, headers=headers,
                           allow_redirects=False, timeout=timeout)
         logger.debug("POST {} returned {}", url, r.status_code)
@@ -340,8 +342,8 @@ class SessionAware:
     def _get(self, url: str, **kwargs) -> requests.Response:
         return self.__session.get(url, **kwargs)
 
-    def _post(self, url: str, jsonobj: dict, **kwargs) -> requests.Response:
-        return self.__session.post(url, jsonobj, **kwargs)
+    def _post(self, url: str, json_dict: dict, **kwargs) -> requests.Response:
+        return self.__session.post(url, json_dict, **kwargs)
 
     def _put(self, url: str, data: str, **kwargs) -> requests.Response:
         return self.__session.put(url, data, **kwargs)

@@ -23,6 +23,7 @@ from .check_ok_response import CheckOKResponse
 _ONE_WORD = struct.Struct("<I")
 
 
+# pylint: disable=wrong-spelling-in-docstring
 class WriteFPGARegister(BMPRequest):
     """
     A request for writing a word to a FPGA (SPI) register.
@@ -36,17 +37,17 @@ class WriteFPGARegister(BMPRequest):
     """
     __slots__ = []
 
-    def __init__(self, fpga_num, addr, value, board):
+    def __init__(self, fpga_num, address, value, board):
         """
         :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
-        :param int addr: Register address to read or write to (will be rounded
-            down to the nearest 32-bit word boundary).
+        :param int address: Register address to read or write to
+            (will be rounded down to the nearest 32-bit word boundary).
         :param int value: A 32-bit int value to write to the register
         """
         super().__init__(
             board,
             SCPRequestHeader(command=SCPCommand.CMD_LINK_WRITE),
-            argument_1=addr & (~0x3), argument_2=4, argument_3=fpga_num,
+            argument_1=address & (~0x3), argument_2=4, argument_3=fpga_num,
             data=_ONE_WORD.pack(value))
 
     @overrides(AbstractSCPRequest.get_scp_response)

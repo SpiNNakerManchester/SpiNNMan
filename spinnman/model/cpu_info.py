@@ -258,9 +258,9 @@ class CPUInfo(object):
     @property
     def processor_state_register(self):
         """
-        The value in the processor state register (PSR).
+        The value in the processor state register.
 
-        :return: The PSR value
+        :return: The processor state register value
         :rtype: int
         """
         return self._processor_state_register
@@ -268,9 +268,9 @@ class CPUInfo(object):
     @property
     def stack_pointer(self):
         """
-        The current stack pointer value (SP).
+        The current stack pointer value.
 
-        :return: The SP value
+        :return: The stack pointer value
         :rtype: int
         """
         return self._stack_pointer
@@ -278,9 +278,9 @@ class CPUInfo(object):
     @property
     def link_register(self):
         """
-        The current link register value (LR).
+        The current link register value.
 
-        :return: The LR value
+        :return: The link register value
         :rtype: int
         """
         return self._link_register

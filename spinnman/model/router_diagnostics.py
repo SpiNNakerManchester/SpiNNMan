@@ -51,6 +51,7 @@ class RouterDiagnostics(object):
 
         self._register_values = register_values
 
+    # pylint: disable=wrong-spelling-in-docstring
     @property
     def mon(self):
         """

@@ -111,7 +111,7 @@ _POWER_CYCLE_FAILURE_WARNING = (
 
 class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     """
-    A base for all the code shared by all Version of the Transciever.
+    A base for all the code shared by all Version of the Transceiver.
 
     """
     __slots__ = [
