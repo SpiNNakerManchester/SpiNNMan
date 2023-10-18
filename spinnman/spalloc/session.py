@@ -139,20 +139,20 @@ class Session:
         return self.__handle_error_or_return(r)
 
     @_may_renew
-    def post(self, url: str, jsonobj: dict, timeout: int = 10,
+    def post(self, url: str, json_dict: dict, timeout: int = 10,
              **kwargs) -> requests.Response:
         """
         Do an HTTP ``POST`` in the session.
 
         :param str url:
         :param int timeout:
-        :param dict jsonobj:
+        :param dict json_dict:
         :rtype: ~requests.Response
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
         cookies, headers = self._credentials
-        r = requests.post(url, params=params, json=jsonobj,
+        r = requests.post(url, params=params, json=json_dict,
                           cookies=cookies, headers=headers,
                           allow_redirects=False, timeout=timeout)
         logger.debug("POST {} returned {}", url, r.status_code)
@@ -340,8 +340,8 @@ class SessionAware:
     def _get(self, url: str, **kwargs) -> requests.Response:
         return self.__session.get(url, **kwargs)
 
-    def _post(self, url: str, jsonobj: dict, **kwargs) -> requests.Response:
-        return self.__session.post(url, jsonobj, **kwargs)
+    def _post(self, url: str, json_dict: dict, **kwargs) -> requests.Response:
+        return self.__session.post(url, json_dict, **kwargs)
 
     def _put(self, url: str, data: str, **kwargs) -> requests.Response:
         return self.__session.put(url, data, **kwargs)
