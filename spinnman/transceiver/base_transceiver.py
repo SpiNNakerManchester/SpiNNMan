@@ -234,13 +234,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(ExtendableTransceiver.where_is_xy)
     def where_is_xy(self, x: int, y: int):
-         try:
+        try:
             if SpiNNManDataView.has_machine():
                 return SpiNNManDataView.get_machine().where_is_xy(x, y)
             return (f"No Machine. "
                     f"Root IP:{self._scamp_connections[0].remote_ip_address}"
                     f"x:{x} y:{y}")
-         except Exception as ex:  # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
     def __identify_connections(

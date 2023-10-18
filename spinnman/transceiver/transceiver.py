@@ -979,7 +979,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def where_is_xy(self, x:int, y:int):
+    def where_is_xy(self, x: int, y: int):
         """
         Attempts to get where_is_x_y info from the machine
 

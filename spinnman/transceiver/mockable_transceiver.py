@@ -252,7 +252,7 @@ class MockableTransceiver(ExtendableTransceiver):
         pass
 
     @overrides(Transceiver.where_is_xy)
-    def where_is_xy(self, x:int, y:int):
+    def where_is_xy(self, x: int, y: int):
         return f"Mocked {x=} {y=}"
 
     @property

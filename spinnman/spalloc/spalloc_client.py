@@ -27,7 +27,7 @@ import struct
 import threading
 from typing import (
     ContextManager,
-    Callable, Collection, Dict, FrozenSet, Iterable, Iterator, List, Mapping,
+    Callable, Dict, FrozenSet, Iterable, Iterator, List, Mapping,
     Optional, Tuple, cast)
 from typing_extensions import TypeAlias
 from websocket import WebSocket  # type: ignore
@@ -736,7 +736,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
     def _open_connection(self) -> int:
         raise NotImplementedError
 
-    def _call(self, proto: ProxyProtocol, packer: struct.Struct,
+    def _call(self, protocol: ProxyProtocol, packer: struct.Struct,
               unpacker: struct.Struct, *args) -> List[int]:
         """
         Do a synchronous call.

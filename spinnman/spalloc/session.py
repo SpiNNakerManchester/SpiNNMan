@@ -15,10 +15,10 @@ from functools import wraps
 from logging import getLogger
 import re
 import requests
-from typing import Dict, Tuple, cast, Optional, Union
+from typing import Dict, Tuple, cast, Optional
 import websocket  # type: ignore
 from spinn_utilities.log import FormatAdapter
-from spinn_utilities.typing.json import JsonArray, JsonObject
+from spinn_utilities.typing.json import JsonObject
 from .utils import clean_url
 from spinnman.exceptions import SpallocException
 
@@ -36,7 +36,7 @@ def _may_renew(method):
         """
         print('{} {}\n{}\r\n{}\r\n\r\n{}'.format(
             '>>>>>>>>>>>START>>>>>>>>>>>',
-            request.method + ' ' + request.url,
+            request.method, request.url,
             '\r\n'.join('{}: {}'.format(*kv)
                         for kv in request.headers.items()),
             request.body if request.body else ""))
@@ -144,7 +144,7 @@ class Session:
         return self.__handle_error_or_return(r)
 
     @_may_renew
-    def post(self, url: str, jsonobj: dict, timeout: int = 10,
+    def post(self, url: str, json_dict: dict, timeout: int = 10,
              **kwargs) -> requests.Response:
         """
         Do an HTTP ``POST`` in the session.
