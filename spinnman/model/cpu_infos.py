@@ -49,9 +49,9 @@ class CPUInfos(object):
         """
         # pylint: disable=protected-access
         assert isinstance(other, CPUInfos)
-        for info in other._cpu_infos:
+        for info in other._cpu_infos.values():
             if info.state in states:
-                self.add_info(other)
+                self.add_info(info)
 
     def __iter__(self) -> Iterator[XYP]:
         return iter(self._cpu_infos)
