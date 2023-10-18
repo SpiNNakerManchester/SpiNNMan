@@ -232,23 +232,15 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def bmp_connection(self) -> BMPConnection:
         return self._bmp_connection
 
-    def _where_is_xy(self, x: int, y: int):
-        """
-        Attempts to get where_is_x_y info from the machine
-
-        If no machine will do its best.
-
-        :param int x:
-        :param int y:
-        :rtype: str
-        """
-        try:
+    @overrides(ExtendableTransceiver.bmp_connection)
+    def where_is_xy(self, x:int, y:int):
+         try:
             if SpiNNManDataView.has_machine():
                 return SpiNNManDataView.get_machine().where_is_xy(x, y)
             return (f"No Machine. "
                     f"Root IP:{self._scamp_connections[0].remote_ip_address}"
                     f"x:{x} y:{y}")
-        except Exception as ex:  # pylint: disable=broad-except
+         except Exception as ex:  # pylint: disable=broad-except
             return str(ex)
 
     def __identify_connections(
@@ -1371,14 +1363,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             data=_ONE_WORD.pack(SDP_RUNNING_MESSAGE_CODES
                                 .SDP_UPDATE_PROVENCE_REGION_AND_EXIT.value)))
 
-    def send_chip_update_provenance_and_exit(self, x, y, p):
-        """
-        Sends a singnal to update the provenance and exit
-
-        :param int x:
-        :param int y:
-        :param int p:
-        """
+    @overrides(Transceiver.send_chip_update_provenance_and_exit)
+    def send_chip_update_provenance_and_exit(self, x: int, y: int, p: int):
         cmd = SDP_RUNNING_MESSAGE_CODES.SDP_UPDATE_PROVENCE_REGION_AND_EXIT
         port = SDP_PORTS.RUNNING_COMMAND_SDP_PORT
 
