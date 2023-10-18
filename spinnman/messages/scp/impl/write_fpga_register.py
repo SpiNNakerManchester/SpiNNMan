@@ -40,8 +40,8 @@ class WriteFPGARegister(BMPRequest):
     def __init__(self, fpga_num, address, value, board):
         """
         :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
-        :param int address: Register address to read or write to (will be rounded
-            down to the nearest 32-bit word boundary).
+        :param int address: Register address to read or write to
+            (will be rounded down to the nearest 32-bit word boundary).
         :param int value: A 32-bit int value to write to the register
         """
         super().__init__(
