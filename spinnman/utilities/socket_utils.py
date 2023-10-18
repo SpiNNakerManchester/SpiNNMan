@@ -51,6 +51,7 @@ def get_tcp_socket():
             f"Error setting up socket: {e}") from e
 
 
+# pylint: disable=wrong-spelling-in-docstring
 def set_receive_buffer_size(sock, size):
     """
     Wrapper round setsockopt() system call.

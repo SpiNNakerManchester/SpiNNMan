@@ -21,12 +21,15 @@ Spalloc
 bmpc
 ybug
 txrx
+url
+xy
 xys
 
 # Our special words
 keepalive
 
 # Python packages
+spinnman
 websocket
 
 # Python types
@@ -45,8 +48,10 @@ DiagnosticFilterSource
 ExecutableType
 HeapElement
 IOBuffer
+PreparedRequest
 RawIOBase
 SCAMPConnection
+SpallocMachine
 SpinnakerBootMessage
 SystemVariableDefinition
 WebSocket
