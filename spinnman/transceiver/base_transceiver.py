@@ -127,7 +127,7 @@ _POWER_CYCLE_FAILURE_WARNING = (
 
 class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     """
-    A base for all the code shared by all Version of the Transciever.
+    A base for all the code shared by all Version of the Transceiver.
 
     """
     __slots__ = (
@@ -232,8 +232,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def bmp_connection(self) -> BMPConnection:
         return self._bmp_connection
 
-    @overrides(ExtendableTransceiver.bmp_connection)
-    def where_is_xy(self, x:int, y:int):
+    @overrides(ExtendableTransceiver.where_is_xy)
+    def where_is_xy(self, x: int, y: int):
          try:
             if SpiNNManDataView.has_machine():
                 return SpiNNManDataView.get_machine().where_is_xy(x, y)

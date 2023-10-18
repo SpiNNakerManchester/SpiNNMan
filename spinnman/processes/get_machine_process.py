@@ -299,7 +299,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _process_ignore_links(self, machine: Machine):
         """
-        Processes the collection of ignore links to remove then from chipinfo.
+        Processes the collection of ignore links to remove then from chip info.
 
         Converts any local (x, y, IP address) to global (x, y)
 
@@ -374,7 +374,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _preprocess_ignore_chips(self, machine: Machine):
         """
-        Processes the collection of ignore chips and discards their chipinfo.
+        Processes the collection of ignore chips and discards their chip info.
 
         Converts any local (x, y IP address) to global (x, y)
 

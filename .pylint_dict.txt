@@ -13,15 +13,26 @@
 # limitations under the License.
 
 # Our abbreviations/names
+bmp
+cpu
+iobuf
+scp
 Spalloc
 bmpc
 ybug
 txrx
+url
+xy
+xys
 
 # Our special words
 keepalive
+# Our special words ("wrap-arounds" gets split up)
+arounds
+
 
 # Python packages
+spinnman
 websocket
 
 # Python types
@@ -29,11 +40,24 @@ BMPConnectionData
 BufferedIOBase
 CoreSubset
 CPUInfo
+CPUInfos
 CPUState
+DiagnosticFilter
+DiagnosticFilterDestination
+DiagnosticFilterDefaultRoutingStatus
+DiagnosticFilterEmergencyRoutingStatus
+DiagnosticFilterPacketType
+DiagnosticFilterPayloadStatus
+DiagnosticFilterSource
+ExecutableType
 HeapElement
 IOBuffer
+PreparedRequest
 RawIOBase
 SCAMPConnection
+SCPResult
+SpallocJob
+SpallocMachine
 SpinnakerBootMessage
 SystemVariableDefinition
 WebSocket
