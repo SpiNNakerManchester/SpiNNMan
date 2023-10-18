@@ -13,10 +13,15 @@
 # limitations under the License.
 
 # Our abbreviations/names
+bmp
+cpu
+iobuf
+scp
 Spalloc
 bmpc
 ybug
 txrx
+xys
 
 # Our special words
 keepalive
@@ -29,7 +34,15 @@ BMPConnectionData
 BufferedIOBase
 CoreSubset
 CPUInfo
+CPUInfos
 CPUState
+DiagnosticFilter
+DiagnosticFilterDestination
+DiagnosticFilterDefaultRoutingStatus
+DiagnosticFilterEmergencyRoutingStatus
+DiagnosticFilterPacketType
+DiagnosticFilterSource
+ExecutableType
 HeapElement
 IOBuffer
 RawIOBase
