@@ -232,8 +232,16 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def bmp_connection(self) -> BMPConnection:
         return self._bmp_connection
 
-    @overrides(ExtendableTransceiver.where_is_xy)
-    def where_is_xy(self, x: int, y: int):
+    def _where_is_xy(self, x: int, y: int):
+        """
+        Attempts to get where_is_x_y info from the machine
+
+        If no machine will do its best.
+
+        :param int x:
+        :param int y:
+        :rtype: str
+        """
         try:
             if SpiNNManDataView.has_machine():
                 return SpiNNManDataView.get_machine().where_is_xy(x, y)

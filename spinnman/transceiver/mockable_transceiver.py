@@ -251,10 +251,6 @@ class MockableTransceiver(ExtendableTransceiver):
     def send_chip_update_provenance_and_exit(self, x: int, y: int, p: int):
         pass
 
-    @overrides(Transceiver.where_is_xy)
-    def where_is_xy(self, x: int, y: int):
-        return f"Mocked {x=} {y=}"
-
     @property
     @overrides(ExtendableTransceiver.bmp_connection)
     def bmp_connection(self) -> BMPConnection:
