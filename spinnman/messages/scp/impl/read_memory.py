@@ -89,9 +89,9 @@ class ReadMemory(AbstractSCPRequest[Response]):
     """
     __slots__ = ()
 
-    def __init__(self, coords: XYP, base_address: int, size: int):
+    def __init__(self, coordinates: XYP, base_address: int, size: int):
         """
-        :param tuple coords:
+        :param tuple coordinates:
             The X,Y,P coordinates of the chip to read from;
             X and Y between 0 and 255, P between 0 and 17
         :param int base_address:
@@ -102,7 +102,7 @@ class ReadMemory(AbstractSCPRequest[Response]):
             * If the base address is not a positive number
             * If the size is out of range
         """
-        x, y, cpu = coords
+        x, y, cpu = coordinates
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

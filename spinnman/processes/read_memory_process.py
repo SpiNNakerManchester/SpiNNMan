@@ -42,25 +42,25 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
             response.offset:response.offset + response.length]
 
     def read_memory(
-            self, coords: XYP, base_address: int, length: int) -> bytes:
+            self, coordinates: XYP, base_address: int, length: int) -> bytes:
         """
         Read some memory from a core.
 
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
         :param int base_address:
         :param int length:
         :rtype: bytearray
         """
         return self._read_memory(
             base_address, length,
-            functools.partial(ReadMemory, coords))
+            functools.partial(ReadMemory, coordinates))
 
-    def read_link_memory(self, coords: XYP, link: int,
+    def read_link_memory(self, coordinates: XYP, link: int,
                          base_address: int, length: int) -> bytes:
         """
         Read some memory from the neighbour of a core.
 
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
         :param int link:
         :param int base_address:
         :param int length:
@@ -68,7 +68,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         """
         return self._read_memory(
             base_address, length,
-            functools.partial(ReadLink, coords, link))
+            functools.partial(ReadLink, coordinates, link))
 
     def _read_memory(
             self, base_address: int, length: int,

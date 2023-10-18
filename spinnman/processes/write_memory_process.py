@@ -34,12 +34,12 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     # pylint: disable=too-many-arguments
 
     def write_memory_from_bytearray(
-            self, coords: XYP, base_address: int, data: bytes,
+            self, coordinates: XYP, base_address: int, data: bytes,
             offset: int, n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a SpiNNaker chip from a bytearray.
 
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
             The X,Y,P coordinates of the core that will write to memory.
         :param int base_address: the address in SDRAM to start writing
         :param data: the data to write
@@ -52,15 +52,15 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(WriteMemory, coords), get_sum)
+            functools.partial(WriteMemory, coordinates), get_sum)
 
     def write_link_memory_from_bytearray(
-            self, coords: XYP, link: int, base_address: int, data: bytes,
+            self, coordinates: XYP, link: int, base_address: int, data: bytes,
             offset: int, n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a neighbour of a SpiNNaker chip from a bytearray.
 
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
             The X,Y,P coordinates of the core that will write to its
             neighbour's memory.
         :param int link:
@@ -76,15 +76,15 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(WriteLink, coords, link), get_sum)
+            functools.partial(WriteLink, coordinates, link), get_sum)
 
     def write_memory_from_reader(
-            self, coords: XYP, base_address: int, reader: BinaryIO,
+            self, coordinates: XYP, base_address: int, reader: BinaryIO,
             n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a SpiNNaker chip from a reader.
 
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
             The X,Y,P coordinates of the core that will write to memory.
         :param int base_address: the address in SDRAM to start writing
         :param reader: the readable object containing the data to write
@@ -96,15 +96,15 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
-            functools.partial(WriteMemory, coords), get_sum)
+            functools.partial(WriteMemory, coordinates), get_sum)
 
     def write_link_memory_from_reader(
-            self, coords: XYP, link: int, base_address: int, reader: BinaryIO,
-            n_bytes: int, get_sum: bool = False) -> int:
+            self, coordinates: XYP, link: int, base_address: int,
+            reader: BinaryIO, n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a neighbour of a SpiNNaker chip from a reader.
 
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
             The X,Y,P coordinates of the core that will write to its
             neighbour's memory. The P coordinate is normally 0; no reason to
             not use SCAMP for this.
@@ -120,7 +120,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
-            functools.partial(WriteLink, coords, link), get_sum)
+            functools.partial(WriteLink, coordinates, link), get_sum)
 
     def _write_memory_from_bytearray(
             self, base_address: int, data: bytes, data_offset: int,

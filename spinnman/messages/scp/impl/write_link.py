@@ -27,9 +27,10 @@ class WriteLink(AbstractSCPRequest[CheckOKResponse]):
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, coords: XYP, link: int, base_address: int, data: bytes):
+    def __init__(
+            self, coordinates: XYP, link: int, base_address: int, data: bytes):
         """
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
             The coordinates of the core of the chip whose neighbour will be
             written to; X and Y between 0 and 255,
             CPU core normally 0 (or if a BMP then the board slot number)
@@ -39,7 +40,7 @@ class WriteLink(AbstractSCPRequest[CheckOKResponse]):
         :param bytes data: Up to 256 bytes of data to write
         """
         # pylint: disable=too-many-arguments
-        x, y, cpu = coords
+        x, y, cpu = coordinates
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

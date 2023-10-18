@@ -232,7 +232,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 offset = P2PTable.get_column_offset(column)
                 self._send_request(
                     ReadMemory(
-                        coords=(boot_x, boot_y, 0),
+                        coordinates=(boot_x, boot_y, 0),
                         base_address=(ROUTER_REGISTER_P2P_ADDRESS + offset),
                         size=p2p_column_bytes),
                     functools.partial(self.__receive_p2p_data, column))

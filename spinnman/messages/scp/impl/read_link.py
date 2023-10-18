@@ -27,9 +27,10 @@ class ReadLink(AbstractSCPRequest[Response]):
     """
     __slots__ = ()
 
-    def __init__(self, coords: XYP, link: int, base_address: int, size: int):
+    def __init__(
+            self, coordinates: XYP, link: int, base_address: int, size: int):
         """
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
             The coordinates of the core of the chip whose neighbour will be
             read from; X and Y between 0 and 255,
             CPU core normally 0 (or if a BMP then the board slot number)
@@ -39,7 +40,7 @@ class ReadLink(AbstractSCPRequest[Response]):
         :param int size: The number of bytes to read, between 1 and 256
         """
         # pylint: disable=too-many-arguments
-        x, y, cpu = coords
+        x, y, cpu = coordinates
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

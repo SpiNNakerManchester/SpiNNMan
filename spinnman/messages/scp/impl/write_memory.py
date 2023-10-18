@@ -28,9 +28,9 @@ class WriteMemory(AbstractSCPRequest[CheckOKResponse]):
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, coords: XYP, base_address: int, data: bytes):
+    def __init__(self, coordinates: XYP, base_address: int, data: bytes):
         """
-        :param tuple(int,int,int) coords:
+        :param tuple(int,int,int) coordinates:
             The coordinates of the chip, X and Y between 0 and 255, and P
             between 0 and 17 (normally 0 when writing to SDRAM; may be other
             values when writing to ITCM or DTCM);
@@ -42,7 +42,7 @@ class WriteMemory(AbstractSCPRequest[CheckOKResponse]):
         :type data: bytearray or bytes
         """
         size = len(data)
-        x, y, cpu = coords
+        x, y, cpu = coordinates
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
