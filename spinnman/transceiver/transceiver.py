@@ -258,7 +258,7 @@ class Transceiver(object):
         :param int x: The x-coordinate of the chip containing the processor
         :param int y: The y-coordinate of the chip containing the processor
         :param int p: The ID of the processor to get the address
-        :return: The adddress of the Region table for the selected core
+        :return: The address of the Region table for the selected core
         :rtype: int
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -412,7 +412,7 @@ class Transceiver(object):
         Read the BMP version.
 
         :param int board: which board to request the data from
-        :return: the sver from the BMP
+        :return: the version_info from the BMP
         """
         raise NotImplementedError("abstractmethod")
 
@@ -956,7 +956,7 @@ class Transceiver(object):
     @abstractmethod
     def update_provenance_and_exit(self, x: int, y: int, p: int):
         """
-        Sends a command to update prevenance and exit
+        Sends a command to update provenance and exit
 
         :param int x:
             The x-coordinate of the core
@@ -964,5 +964,29 @@ class Transceiver(object):
             The y-coordinate of the core
         :param int p:
             The processor on the core
+        """
+        raise NotImplementedError("abstractmethod")
+
+    @abstractmethod
+    def send_chip_update_provenance_and_exit(self, x: int, y: int, p: int):
+        """
+        Sends a signal to update the provenance and exit
+
+        :param int x:
+        :param int y:
+        :param int p:
+        """
+        raise NotImplementedError("abstractmethod")
+
+    @abstractmethod
+    def where_is_xy(self, x:int, y:int):
+        """
+        Attempts to get where_is_x_y info from the machine
+
+        If no machine will do its best.
+
+        :param int x:
+        :param int y:
+        :rtype: str
         """
         raise NotImplementedError("abstractmethod")
