@@ -46,7 +46,8 @@ def _may_renew(method):
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '<<<<<<<<<<<START<<<<<<<<<<<',
             str(response.status_code) + " " + response.reason,
-            '\r\n'.join('{}: {}'.format(*kv) for kv in response.headers.items()),
+            '\r\n'.join('{}: {}'.format(*kv)
+                        for kv in response.headers.items()),
             # Assume we only get textual responses
             str(response.content, "UTF-8") if response.content else ""))
 
