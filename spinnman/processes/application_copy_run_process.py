@@ -51,6 +51,8 @@ def _get_next_chips(
         for c_x, c_y in chips_done[eth_chip]:
             chip_xy = machine.get_chip_at(c_x, c_y)
             for chip in parent_chips[c_x, c_y]:
+                a: Chip = chip
+                b: Chip = chip_xy
                 on_same_board = _on_same_board(chip, chip_xy)
                 eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
                 if (eth not in chips_done or
