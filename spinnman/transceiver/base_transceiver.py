@@ -1209,6 +1209,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             logger.info(self.where_is_xy(x, y))
             raise
 
+    @overrides(Transceiver.get_scamp_connection_selector)
+    def get_scamp_connection_selector(self) -> MostDirectConnectionSelector:
+        return self._scamp_connection_selector
+
     @overrides(Transceiver.set_router_diagnostic_filter)
     def set_router_diagnostic_filter(self, x, y, position, diagnostic_filter):
         try:

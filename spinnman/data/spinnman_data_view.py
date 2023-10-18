@@ -260,7 +260,7 @@ class SpiNNManDataView(MachineDataView):
         """
         Gets the SCAMP connection selector from the transceiver.
 
-        Syntactic sugar for `get_transceiver().scamp_connection_selector()`
+        Syntactic sugar for `get_transceiver().get_scamp_connection_selector()`
 
         :rtype: MostDirectConnectionSelector
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
@@ -270,5 +270,5 @@ class SpiNNManDataView(MachineDataView):
             if cls.__data._transceiver is None:
                 raise cls._exception("transceiver")
             cls.__data._scamp_connection_selector =\
-                cls.__data._transceiver._scamp_connection_selector
+                cls.__data._transceiver.get_scamp_connection_selector()
         return cls.__data._scamp_connection_selector

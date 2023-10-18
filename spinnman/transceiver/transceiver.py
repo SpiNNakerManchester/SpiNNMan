@@ -16,6 +16,7 @@
 
 from spinn_utilities.abstract_base import abstractmethod
 from spinnman.model.enums import CPUState
+from spinnman.processes import MostDirectConnectionSelector
 
 
 class Transceiver(object):
@@ -816,6 +817,14 @@ class Transceiver(object):
             If a packet is received that has invalid parameters
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
+        """
+
+    @abstractmethod
+    def get_scamp_connection_selector(self) -> MostDirectConnectionSelector:
+        """
+        Returns the most direct scamp connections
+
+        :rtype: MostDirectConnectionSelecto
         """
 
     @abstractmethod
