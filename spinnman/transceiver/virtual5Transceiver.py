@@ -24,7 +24,7 @@ from .version5transceiver import Version5Transceiver
 
 class Virtual5Transceiver(Version5Transceiver):
     """
-    Overwirtes the standard Version 5 Transceiver
+    Overwrites the standard Version 5 Transceiver
     to intercept the sending of messages.
 
     This is just enough different to pass know tests.

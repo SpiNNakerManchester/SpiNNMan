@@ -291,7 +291,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _process_ignore_links(self, machine):
         """
-        Processes the collection of ignore links to remove then from chipinfo.
+        Processes the collection of ignore links to remove then from chip info.
 
         Converts any local (x, y, IP address) to global (x, y)
 
@@ -303,7 +303,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Logs all actions except for ignores with unused IP addresses
 
         :param ~spinn_machine.Machine machine:
-            An empty machine to handle wrap-arounds
+            An empty machine to handle wrap-around
         """
         for ignore in IgnoreLink.parse_string(
                 get_config_str_or_none("Machine", "down_links")):
@@ -351,7 +351,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Core numbers <= 0 are assumed to be 0 - physical_id
 
         :param ~spinn_machine.Machine machine:
-            An empty machine to handle wrap-arounds
+            An empty machine to handle wrap-around
         """
         # Convert by ip to global
         for ignore in IgnoreCore.parse_string(
