@@ -93,6 +93,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Maps between virtual and physical cores
         self._virtual_to_physical_map: Dict[XY, bytes] = dict()
         self._physical_to_virtual_map: Dict[XY, bytes] = dict()
+        self._progress: ProgressBar = None
 
     def _make_chip(self, chip_info: ChipSummaryInfo, machine: Machine) -> Chip:
         """
