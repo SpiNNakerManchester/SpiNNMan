@@ -39,16 +39,16 @@ def _may_renew(method):
             '\r\n'.join('{}: {}'.format(*kv) for kv in req.headers.items()),
             req.body if req.body else ""))
 
-    def pp_resp(resp: requests.Response):
+    def pp_resp(response: requests.Response):
         """
-        :param ~requests.Response resp:
+        :param ~requests.Response response:
         """
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '<<<<<<<<<<<START<<<<<<<<<<<',
-            str(resp.status_code) + " " + resp.reason,
-            '\r\n'.join('{}: {}'.format(*kv) for kv in resp.headers.items()),
+            str(response.status_code) + " " + response.reason,
+            '\r\n'.join('{}: {}'.format(*kv) for kv in response.headers.items()),
             # Assume we only get textual responses
-            str(resp.content, "UTF-8") if resp.content else ""))
+            str(response.content, "UTF-8") if response.content else ""))
 
     @wraps(method)
     def call(self, *args, **kwargs):

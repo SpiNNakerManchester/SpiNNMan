@@ -30,7 +30,7 @@ class AppCopyRun(AbstractSCPRequest):
     """
     __slots__ = ["__link"]
 
-    def __init__(self, x, y, link, size, app_id, processors, chksum,
+    def __init__(self, x, y, link, size, app_id, processors, checksum,
                  wait=False):
         """
         :param int x:
@@ -41,7 +41,7 @@ class AppCopyRun(AbstractSCPRequest):
         :param int size: The number of bytes to read, must be divisible by 4
         :param int app_id: The app to associate the copied binary with
         :param list(int) processors: The processors to start on the chip
-        :param int chksum: The checksum of the data to copy
+        :param int checksum: The checksum of the data to copy
         :param bool wait: Whether to start in wait mode or not
         """
         # pylint: disable=too-many-arguments
@@ -59,7 +59,7 @@ class AppCopyRun(AbstractSCPRequest):
             processor_mask |= _WAIT_FLAG
         self.__link = link
 
-        arg1 = ((chksum & 0x1FFFFFFF) << 3) | link
+        arg1 = ((checksum & 0x1FFFFFFF) << 3) | link
 
         super().__init__(
             SDPHeader(
