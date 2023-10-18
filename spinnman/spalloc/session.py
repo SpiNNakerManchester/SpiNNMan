@@ -29,15 +29,16 @@ _debug_pretty_print = False
 
 
 def _may_renew(method):
-    def pp_req(req: requests.PreparedRequest):
+    def pp_req(request: requests.PreparedRequest):
         """
-        :param ~requests.PreparedRequest req:
+        :param ~requests.PreparedRequest request:
         """
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '>>>>>>>>>>>START>>>>>>>>>>>',
-            req.method + ' ' + req.url,
-            '\r\n'.join('{}: {}'.format(*kv) for kv in req.headers.items()),
-            req.body if req.body else ""))
+            request.method + ' ' + request.url,
+            '\r\n'.join('{}: {}'.format(*kv)
+                        for kv in request.headers.items()),
+            request.body if request.body else ""))
 
     def pp_resp(response: requests.Response):
         """

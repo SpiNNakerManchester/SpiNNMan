@@ -270,7 +270,7 @@ class CPUInfo(object):
         """
         The current stack pointer value.
 
-        :return: The stack pointervalue
+        :return: The stack pointer value
         :rtype: int
         """
         return self._stack_pointer

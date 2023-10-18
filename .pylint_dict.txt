@@ -27,6 +27,9 @@ xys
 
 # Our special words
 keepalive
+# Our special words ("wrap-arounds" gets split up)
+arounds
+
 
 # Python packages
 spinnman
@@ -44,6 +47,7 @@ DiagnosticFilterDestination
 DiagnosticFilterDefaultRoutingStatus
 DiagnosticFilterEmergencyRoutingStatus
 DiagnosticFilterPacketType
+DiagnosticFilterPayloadStatus
 DiagnosticFilterSource
 ExecutableType
 HeapElement
@@ -51,6 +55,8 @@ IOBuffer
 PreparedRequest
 RawIOBase
 SCAMPConnection
+SCPResult
+SpallocJob
 SpallocMachine
 SpinnakerBootMessage
 SystemVariableDefinition
