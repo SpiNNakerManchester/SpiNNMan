@@ -715,7 +715,8 @@ class _SpallocJob(SessionAware, SpallocJob):
 
 class _ProxiedConnection(metaclass=AbstractBase):
     """
-    Core mux/demux emulating a connection that is proxied over a websocket.
+    Core multiplexer/demultiplexer emulating a connection that is proxied
+    over a websocket.
 
     None of the methods are public because subclasses may expose a profile of
     them to conform to a particular type of connection.
@@ -736,11 +737,11 @@ class _ProxiedConnection(metaclass=AbstractBase):
         raise NotImplementedError
 
     def _call(self, proto: ProxyProtocol, packer: struct.Struct,
-              unpacker: struct.Struct, *args) -> Collection[int]:
+              unpacker: struct.Struct, *args) -> List[int]:
         """
         Do a synchronous call.
 
-        :param proto:
+        :param protocol:
             The protocol message number.
         :param packer:
             How to form the protocol message. The first two arguments passed
@@ -767,7 +768,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
             # All calls via websocket use correlation_id
             correlation_id = self.__receiver.expect_return(
                 self.__call_queue.put)
-            self.__ws.send_binary(packer.pack(proto, correlation_id, *args))
+            self.__ws.send_binary(packer.pack(protocol, correlation_id, *args))
             if not self._connected:
                 raise IOError("socket closed after send!")
             reply = self.__call_queue.get()
@@ -777,7 +778,8 @@ class _ProxiedConnection(metaclass=AbstractBase):
                 payload = reply[_msg.size:].decode("utf-8")
                 if len(payload):
                     raise _ProxyServiceError(payload)
-                raise _ProxyServiceError(f"unknown problem with {proto} call")
+                raise _ProxyServiceError(
+                    f"unknown problem with {protocol} call")
             return unpacker.unpack(reply)[2:]
 
     @property

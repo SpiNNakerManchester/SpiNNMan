@@ -104,14 +104,14 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
             self, next_connection_selector, timeout=timeout)
 
     def run(self, size: int, app_id: int, core_subsets: CoreSubsets,
-            chksum: int, wait: bool):
+            checksum: int, wait: bool):
         """
         Run the process.
 
         :param int size: The size of the binary to copy
         :param int app_id: The application id to assign to the running binary
         :param CoreSubsets core_subsets: The cores to load the binary on to
-        :param int chksum: The checksum of the data to test against
+        :param int checksum: The checksum of the data to test against
         :param bool wait:
             Whether to put the binary in "wait" mode or run it straight away
         """
@@ -129,7 +129,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
                 subset = core_subsets.get_core_subset_for_chip(chip.x, chip.y)
                 self._send_request(AppCopyRun(
                     chip.x, chip.y, chip.parent_link, size, app_id,
-                    subset.processor_ids, chksum, wait))
+                    subset.processor_ids, checksum, wait))
                 eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
                 chips_done[eth].append((chip.x, chip.y))
             self._finish()
