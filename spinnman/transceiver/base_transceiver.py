@@ -1024,6 +1024,14 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         for (x, y) in xys:
             logger.info(self._where_is_xy(x, y))
 
+    @staticmethod
+    def __state_set(cpu_states: Union[CPUState, Iterable[CPUState]])\
+            -> FrozenSet[CPUState]:
+        if isinstance(cpu_states, CPUState):
+            return frozenset((cpu_states,))
+        else:
+            return frozenset(cpu_states)
+
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets: CoreSubsets, app_id: int,
@@ -1034,15 +1042,11 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check: int = 100,
             progress_bar: Optional[ProgressBar] = None):
-        # check that the right number of processors are in the states
         processors_ready = 0
         max_processors_ready = 0
         timeout_time = None if timeout is None else time.time() + timeout
         tries = 0
-        if isinstance(cpu_states, CPUState):
-            target_states = frozenset((cpu_states,))
-        else:
-            target_states = frozenset(cpu_states)
+        target_states = self.__state_set(cpu_states)
         while (processors_ready < len(all_core_subsets) and
                (timeout_time is None or time.time() < timeout_time)):
 
