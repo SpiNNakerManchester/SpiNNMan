@@ -25,7 +25,7 @@ from threading import Condition
 import time
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable, Iterator, List, Optional,
-    Sequence, Tuple, Union, cast)
+    Sequence, Tuple, TypeVar, Union, cast)
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod)
 from spinn_utilities.config_holder import get_config_bool
@@ -66,7 +66,8 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
 from spinnman.messages.scp.enums import PowerCommand
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest as _AbstractSCPRequest)
 from spinnman.messages.scp.impl import (
     BMPGetVersion, SetPower, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet,
@@ -89,6 +90,11 @@ from spinnman.processes import (
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 from spinnman.utilities.utility_functions import get_vcpu_address
+
+#: Type of a response.
+# This allows subclasses to be used
+AbstractSCPResponse = TypeVar(
+    "AbstractSCPResponse", bound=_AbstractSCPResponse)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
