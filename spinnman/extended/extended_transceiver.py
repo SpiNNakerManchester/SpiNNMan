@@ -253,8 +253,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         # Execute each of the binaries and get them in to a "wait" state
         for binary in executable_targets.binaries:
             core_subsets = executable_targets.get_cores_for_binary(binary)
-            self.execute_flood(
-                core_subsets, binary, app_id, wait=True, is_filename=True)
+            self.execute_flood(core_subsets, binary, app_id, wait=True)
 
         # Sleep to allow cores to get going
         time.sleep(0.5)
