@@ -174,9 +174,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
                 self._n_chip_execute_locks -= 1
                 self._chip_execute_lock_condition.notify_all()
 
-    def execute(
-            self, x, y, processors, executable, app_id, n_bytes=None,
-            wait=False, is_filename=False):
+    def execute(self, x, y, processors, executable, app_id, n_bytes=None,
+                wait=False):
         """
         Start an executable running on a single chip.
 
@@ -210,7 +209,6 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             * If executable is a str, the length of the file will be used
         :param bool wait:
             True if the binary should enter a "wait" state on loading
-        :param bool is_filename: True if executable is a filename
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
@@ -229,8 +227,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         with self._chip_execute_lock(x, y):
             # Write the executable
             self.write_memory(
-                x, y, self._EXECUTABLE_ADDRESS, executable, n_bytes,
-                is_filename=is_filename)
+                x, y, self._EXECUTABLE_ADDRESS, executable, n_bytes=n_bytes)
 
             # Request the start of the executable
             process = SendSingleCommandProcess(self._scamp_connection_selector)
