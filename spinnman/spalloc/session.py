@@ -34,12 +34,12 @@ def _may_renew(method):
         """
         :param ~requests.PreparedRequest request:
         """
-        print('{} {}\n{}\r\n{}\r\n\r\n{}'.format(
-            '>>>>>>>>>>>START>>>>>>>>>>>',
-            str(request.method), str(request.url),
-            '\r\n'.join('{}: {}'.format(*kv)
-                        for kv in request.headers.items()),
-            request.body if request.body else ""))
+        print(f">>>>>>>>>>>START>>>>>>>>>>>\n")
+        print(f"{request.method} {request.url}")
+        print('\r\n'.join('{}: {}'.format(*kv)
+                          for kv in request.headers.items()))
+        if request.body:
+            print(request.body)
 
     def pp_resp(response: requests.Response):
         """

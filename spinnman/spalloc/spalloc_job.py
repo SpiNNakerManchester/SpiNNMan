@@ -159,8 +159,8 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def wait_until_ready(
-            self, timeout: Optional[int] = None, n_retries: int = None):
+    def wait_until_ready(self, timeout: Optional[int] = None,
+                         n_retries: Optional[int] = None):
         """
         Wait until the allocation is in the ``READY`` state.
 

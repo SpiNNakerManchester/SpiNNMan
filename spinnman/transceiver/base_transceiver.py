@@ -355,8 +355,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def send_sdp_message(self, message: SDPMessage,
                          connection: Optional[SDPConnection] = None):
         if connection is None:
-            connection_to_use = self._scamp_connections[random.randint(
-                0, len(self._scamp_connections) - 1)]
+            connection_to_use: SDPConnection = self._scamp_connections[
+                random.randint(0, len(self._scamp_connections) - 1)]
         else:
             connection_to_use = connection
         connection_to_use.send_sdp_message(message)

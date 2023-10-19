@@ -623,7 +623,8 @@ class _SpallocJob(SessionAware, SpallocJob):
         return old_state
 
     @overrides(SpallocJob.wait_until_ready)
-    def wait_until_ready(self, timeout: Optional[int] = None, n_retries=None):
+    def wait_until_ready(self, timeout: Optional[int] = None,
+                         n_retries: Optional[int] = None):
         state = self.get_state()
         retries = 0
         while (state != SpallocState.READY and
