@@ -450,7 +450,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
                     2))
         assert self._height is not None
-        return MachineDimensions(width, height)
+        return MachineDimensions(self._width, self._height)
 
     @overrides(Transceiver.get_machine_details)
     def get_machine_details(self) -> Machine:
