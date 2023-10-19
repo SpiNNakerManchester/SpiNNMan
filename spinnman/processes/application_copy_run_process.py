@@ -30,7 +30,7 @@ def _on_same_board(chip_1: Chip, chip_2: Chip):
 
 def _get_next_chips(
         chips_done: Dict[Tuple[int, int], Iterable[Tuple[int, int]]],
-        parent_chips: Dict[Tuple[int, int], Chip],
+        parent_chips: Dict[Tuple[int, int], Iterable[Chip]],
         machine: Machine) -> Iterable[Chip]:
     """
     Get the chips that are adjacent to the last set of chips, which
@@ -49,7 +49,7 @@ def _get_next_chips(
     for eth_chip in chips_done:
         off_board_copy_done = False
         for c_x, c_y in chips_done[eth_chip]:
-            chip_xy = machine.get_chip_at(c_x, c_y)
+            chip_xy = machine[c_x, c_y]
             for chip in parent_chips[c_x, c_y]:
                 temp1: Chip = chip
                 temp2: Chip = chip_xy
