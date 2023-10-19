@@ -43,11 +43,11 @@ class MockableTransceiver(ExtendableTransceiver):
     """
     A based for Mock Transceivers
     """
-    __slots__ = ["written_memory"]
+    __slots__ = ["_written_memory"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.written_memory: List[
+        self._written_memory: List[
             Tuple[int, int, int, Union[BinaryIO, bytes, int, str],
                   Optional[int], int, bool]] = []
 
@@ -136,10 +136,10 @@ class MockableTransceiver(ExtendableTransceiver):
             n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
             get_sum: bool = False) -> Tuple[int, int]:
         print("Doing write to", x, y)
-        self.written_memory.append(
+        self._written_memory.append(
             (x, y, base_address, data, n_bytes, offset, cpu))
         # Hope the return is never used as it will be wrong
-        return [-1, -1]
+        return (-1, -1)
 
     @overrides(Transceiver.write_user)
     def write_user(
@@ -257,11 +257,6 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.send_chip_update_provenance_and_exit)
     def send_chip_update_provenance_and_exit(self, x: int, y: int, p: int):
         pass
-
-    @property
-    @overrides(ExtendableTransceiver.bmp_connection)
-    def bmp_connection(self) -> BMPConnection:
-        raise NotImplementedError("Needs to be mocked")
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)

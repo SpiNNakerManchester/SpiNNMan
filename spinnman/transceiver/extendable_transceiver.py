@@ -51,15 +51,6 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
 
     @property
     @abstractmethod
-    def bmp_connection(self) -> BMPConnection:
-        """
-        Returns the BMP connection if there is one
-        :rtype: BMPConnection or None
-        """
-        raise NotImplementedError("This method is abstract")
-
-    @property
-    @abstractmethod
     def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
         """
         Returns the bmp selector

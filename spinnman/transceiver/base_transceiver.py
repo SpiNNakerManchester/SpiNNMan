@@ -227,11 +227,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def scamp_connection_selector(self) -> MostDirectConnectionSelector:
         return self._scamp_connection_selector
 
-    @property
-    @overrides(ExtendableTransceiver.bmp_connection)
-    def bmp_connection(self) -> BMPConnection:
-        return self._bmp_connection
-
     def _where_is_xy(self, x: int, y: int):
         """
         Attempts to get where_is_x_y info from the machine
