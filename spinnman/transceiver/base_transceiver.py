@@ -443,13 +443,14 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         if self._width is None or self._height is None:
             height_item = SystemVariableDefinition.y_size
-            self._height, self._width = _TWO_BYTES.unpack_from(
+            height, width = _TWO_BYTES.unpack_from(
                 self.read_memory(
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
                     2))
-        return MachineDimensions(self._width, self._height)
+            self._height, self._width = height, width
+        return MachineDimensions(height, width)
 
     @overrides(Transceiver.get_machine_details)
     def get_machine_details(self) -> Machine:
@@ -510,6 +511,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         :rtype int:
         """
+        raise NotImplementedError
 
     def _boot_board(self, extra_boot_values: Optional[Dict[
             SystemVariableDefinition, object]] = None):
@@ -574,7 +576,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     def _ensure_board_is_ready(
             self, n_retries: int = 5, extra_boot_values: Optional[Dict[
-            SystemVariableDefinition, object]] = None) -> VersionInfo:
+            SystemVariableDefinition, object]] = None):
         """
         Ensure that the board is ready to interact with this version of the
         transceiver. Boots the board if not already booted and verifies that
@@ -585,7 +587,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
             based on the board version.
-        :return: The version identifier
         :raise SpinnmanIOException:
             * If there is a problem booting the board
             * If the version of software on the board is not compatible with
