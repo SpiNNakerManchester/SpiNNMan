@@ -34,7 +34,7 @@ def _may_renew(method):
         """
         :param ~requests.PreparedRequest request:
         """
-        print(f">>>>>>>>>>>START>>>>>>>>>>>\n")
+        print(">>>>>>>>>>>START>>>>>>>>>>>\n")
         print(f"{request.method} {request.url}")
         print('\r\n'.join('{}: {}'.format(*kv)
                           for kv in request.headers.items()))
