@@ -27,7 +27,7 @@ from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable, Iterator, List, Optional,
     Sequence, Tuple, Union, cast)
 from spinn_utilities.abstract_base import (
-    AbstractBase, abstractproperty)
+    AbstractBase, abstractmethod)
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
@@ -502,7 +502,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         process = GetVersionProcess(connection_selector, n_retries)
         return process.get_version(x=chip_x, y=chip_y, p=0)
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def boot_led_0_value(self) -> int:
         """
         The Values to be set in SpinnakerBootMessages for led_0

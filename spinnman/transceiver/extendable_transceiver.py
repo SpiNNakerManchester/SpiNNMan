@@ -17,7 +17,7 @@ import logging
 from typing import Optional
 from threading import Condition, RLock
 from spinn_utilities.abstract_base import (
-    AbstractBase, abstractproperty)
+    AbstractBase, abstractmethod)
 from spinn_utilities.log import FormatAdapter
 from spinnman.connections.udp_packet_connections import BMPConnection
 from spinnman.processes import ConnectionSelector, FixedConnectionSelector
@@ -49,7 +49,8 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
         self._nearest_neighbour_id = 1
         self._nearest_neighbour_lock = RLock()
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def bmp_connection(self) -> BMPConnection:
         """
         Returns the BMP connection if there is one
@@ -57,7 +58,8 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
         """
         raise NotImplementedError("This method is abstract")
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
         """
         Returns the bmp selector
@@ -66,7 +68,8 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
         """
         raise NotImplementedError("This method is abstract")
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def scamp_connection_selector(self) -> ConnectionSelector:
         """
         Returns the scamp selector
