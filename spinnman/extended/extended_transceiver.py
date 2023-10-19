@@ -62,7 +62,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     If any method here is considered important to keep please move it to
     Transceiver and its implementations
     """
-    __slots__ = []
+    __slots__ = ()
 
     # calls many methods only reachable do to require_subclass
     # pylint: disable=no-member,assigning-non-slot

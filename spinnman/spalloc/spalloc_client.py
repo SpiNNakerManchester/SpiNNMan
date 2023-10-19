@@ -26,7 +26,7 @@ import requests
 import struct
 import threading
 from typing import (
-    ContextManager,
+    Any, ContextManager,
     Callable, Dict, FrozenSet, Iterable, Iterator, List, Mapping,
     Optional, Tuple, cast)
 from typing_extensions import TypeAlias
@@ -738,7 +738,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         raise NotImplementedError
 
     def _call(self, protocol: ProxyProtocol, packer: struct.Struct,
-              unpacker: struct.Struct, *args) -> Tuple[any]:
+              unpacker: struct.Struct, *args) -> Tuple[Any, ...]:
         """
         Do a synchronous call.
 
