@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import cast, Dict, Iterable, List, Mapping, Tuple
+from typing import cast, Iterable, List, Mapping, Tuple
 from spinn_machine import Chip, CoreSubsets, Link, Machine
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
