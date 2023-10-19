@@ -777,7 +777,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.add_cpu_information_from_core)
     def add_cpu_information_from_core(
             self, cpu_infos: CPUInfos, x: int, y: int, p: int,
-            states: Iterable[CPUState]):
+            states: Iterator[CPUState]):
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
         new_infos = self.get_cpu_infos(core_subsets)

@@ -892,6 +892,7 @@ class Transceiver(object):
 
         :rtype: MostDirectConnectionSelecto
         """
+        raise NotImplementedError("abstractmethod")
 
     @abstractmethod
     def set_router_diagnostic_filter(

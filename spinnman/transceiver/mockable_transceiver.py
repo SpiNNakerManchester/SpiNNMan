@@ -43,11 +43,11 @@ class MockableTransceiver(ExtendableTransceiver):
     """
     A based for Mock Transceivers
     """
-    __slots__ = ["_written_memory"]
+    __slots__ = ["written_memory"]
 
     def __init__(self) -> None:
         super().__init__()
-        self._written_memory: List[
+        self.written_memory: List[
             Tuple[int, int, int, Union[BinaryIO, bytes, int, str],
                   Optional[int], int, bool]] = []
 
@@ -136,7 +136,7 @@ class MockableTransceiver(ExtendableTransceiver):
             n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
             get_sum: bool = False) -> Tuple[int, int]:
         print("Doing write to", x, y)
-        self._written_memory.append(
+        self.written_memory.append(
             (x, y, base_address, data, n_bytes, offset, cpu))
         # Hope the return is never used as it will be wrong
         return (-1, -1)
