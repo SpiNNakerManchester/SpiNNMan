@@ -66,8 +66,7 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
     SystemVariableDefinition, SpinnakerBootMessages)
 from spinnman.messages.scp.enums import PowerCommand
-from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest as _AbstractSCPRequest)
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import (
     BMPGetVersion, SetPower, ReadFPGARegister,
     WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet,
@@ -93,8 +92,8 @@ from spinnman.utilities.utility_functions import get_vcpu_address
 
 #: Type of a response.
 # This allows subclasses to be used
-AbstractSCPResponse = TypeVar(
-    "AbstractSCPResponse", bound=_AbstractSCPResponse)
+_AbstractSCPResponse = TypeVar(
+    "_AbstractSCPResponse", bound=AbstractSCPResponse)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -444,13 +443,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         if self._width is None or self._height is None:
             height_item = SystemVariableDefinition.y_size
-            height, width = _TWO_BYTES.unpack_from(
+            self._height, self._width = _TWO_BYTES.unpack_from(
                 self.read_memory(
                     AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
                     2))
-            self._height, self._width = height, width
+        assert self._height is not None
         return MachineDimensions(width, height)
 
     @overrides(Transceiver.get_machine_details)
@@ -544,13 +543,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
-    def _call(self, req: AbstractSCPRequest[AbstractSCPResponse],
-              **kwargs) -> AbstractSCPResponse:
+    def _call(self, req: AbstractSCPRequest[_AbstractSCPResponse],
+              **kwargs) -> _AbstractSCPResponse:
         """
         Wrapper that makes doing simple SCP calls easier,
         especially with types.
         """
-        proc: SendSingleCommandProcess[AbstractSCPResponse] = \
+        proc: SendSingleCommandProcess[_AbstractSCPResponse] = \
             SendSingleCommandProcess(self._scamp_connection_selector, **kwargs)
         return proc.execute(req)
 
@@ -892,8 +891,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         time.sleep(POWER_CYCLE_WAIT_TIME_IN_SECONDS)
         logger.warning("Power cycle wait complete")
 
-    def _bmp_call(self, req: AbstractSCPRequest[AbstractSCPResponse],
-                  **kwargs) -> AbstractSCPResponse:
+    def _bmp_call(self, req: AbstractSCPRequest[_AbstractSCPResponse],
+                  **kwargs) -> _AbstractSCPResponse:
         """
         Wrapper that makes doing simple BMP calls easier,
         especially with types.
@@ -901,7 +900,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         if self._bmp_selector is None:
             raise SpinnmanException(
                 "this transceiver does not support BMP operations")
-        proc: SendSingleCommandProcess[AbstractSCPResponse] =\
+        proc: SendSingleCommandProcess[_AbstractSCPResponse] =\
             SendSingleCommandProcess(self._bmp_selector, **kwargs)
         return proc.execute(req)
 
