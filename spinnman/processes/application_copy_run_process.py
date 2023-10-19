@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import cast, Dict, Iterable, List, Tuple
-from spinn_machine import Chip, CoreSubsets, Machine
+from typing import cast, Dict, Iterable, List, Mapping, Tuple
+from spinn_machine import Chip, CoreSubsets, Link, Machine
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
 from spinnman.processes import ConnectionSelector
@@ -29,8 +29,8 @@ def _on_same_board(chip_1: Chip, chip_2: Chip):
 
 
 def _get_next_chips(
-        chips_done: Dict[Tuple[int, int], Iterable[Tuple[int, int]]],
-        parent_chips: Dict[Tuple[int, int], Iterable[Chip]],
+        chips_done: Mapping[Tuple[int, int], List[Tuple[int, int]]],
+        parent_chips: Mapping[Tuple[int, int], List[Chip]],
         machine: Machine) -> Iterable[Chip]:
     """
     Get the chips that are adjacent to the last set of chips, which
@@ -66,7 +66,7 @@ def _get_next_chips(
 
 
 def _compute_parent_chips(
-        machine: Machine) -> Dict[Tuple[int, int], Iterable[Chip]]:
+        machine: Machine) -> Mapping[Tuple[int, int], List[Chip]]:
     """
     Compute a dictionary of chip coordinates to list of chips who use that chip
     as a parent in the tree.
@@ -74,10 +74,10 @@ def _compute_parent_chips(
     :param ~spinn_machine.Machine machine: The machine to compute the map for
     :rtype: dict((int, int), ~spinn_machine.Chip)
     """
-    chip_links: Dict[Tuple[int, int], List[Chip]] = defaultdict(list)
+    chip_links: Mapping[Tuple[int, int], List[Chip]] = defaultdict(list)
     for chip in machine.chips:
         if chip.parent_link is not None:
-            link = chip.router.get_link(chip.parent_link)
+            link = cast(Link, chip.router.get_link(chip.parent_link))
             chip_links[link.destination_x, link.destination_y].append(chip)
     return chip_links
 
@@ -117,7 +117,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         """
         machine = SpiNNManDataView.get_machine()
         boot_chip = machine.boot_chip
-        chips_done: Dict[Tuple[int, int], List[Tuple[int, int]]] = \
+        chips_done: Mapping[Tuple[int, int], List[Tuple[int, int]]] = \
             defaultdict(list)
         chips_done[boot_chip.x, boot_chip.y].append((boot_chip.x, boot_chip.y))
         parent_chips = _compute_parent_chips(machine)
