@@ -450,7 +450,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
                     2))
             self._height, self._width = height, width
-        return MachineDimensions(height, width)
+        return MachineDimensions(width, height)
 
     @overrides(Transceiver.get_machine_details)
     def get_machine_details(self) -> Machine:
