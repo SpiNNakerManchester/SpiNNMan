@@ -36,6 +36,7 @@ from spinnman.model import (
 from spinnman.model.enums import CPUState, UserRegister
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
+from spinnman.processes import MostDirectConnectionSelector
 
 
 class MockableTransceiver(ExtendableTransceiver):
@@ -225,6 +226,10 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.get_router_diagnostics)
     def get_router_diagnostics(self, x: int, y: int) -> RouterDiagnostics:
+        raise NotImplementedError("Needs to be mocked")
+
+    @overrides(Transceiver.get_scamp_connection_selector)
+    def get_scamp_connection_selector(self) -> MostDirectConnectionSelector:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.set_router_diagnostic_filter)

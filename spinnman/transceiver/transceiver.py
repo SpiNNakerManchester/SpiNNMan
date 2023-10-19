@@ -30,8 +30,8 @@ from spinnman.messages.sdp import SDPMessage
 from spinnman.model import (
     CPUInfos, DiagnosticFilter, IOBuffer, RouterDiagnostics,
     VersionInfo)
-from spinnman.model.enums import (
-    CPUState, UserRegister)
+from spinnman.model.enums import CPUState, UserRegister
+from spinnman.processes import MostDirectConnectionSelector
 
 
 class Transceiver(object):
@@ -884,6 +884,14 @@ class Transceiver(object):
             If a response indicates an error during the exchange
         """
         raise NotImplementedError("abstractmethod")
+
+    @abstractmethod
+    def get_scamp_connection_selector(self) -> MostDirectConnectionSelector:
+        """
+        Returns the most direct scamp connections
+
+        :rtype: MostDirectConnectionSelecto
+        """
 
     @abstractmethod
     def set_router_diagnostic_filter(
