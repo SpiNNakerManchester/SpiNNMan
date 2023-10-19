@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import Dict, Iterable, Tuple
+from typing import cast, Dict, Iterable, List, Tuple
 from spinn_machine import Chip, CoreSubsets, Machine
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
@@ -45,16 +45,12 @@ def _get_next_chips(
     :return: A list of next chips to use
     :rtype: list(chip)
     """
-    next_chips: Iterable[Chip] = list()
+    next_chips: List[Chip] = list()
     for eth_chip in chips_done:
         off_board_copy_done = False
         for c_x, c_y in chips_done[eth_chip]:
             chip_xy = machine[c_x, c_y]
             for chip in parent_chips[c_x, c_y]:
-                temp1: Chip = chip
-                temp2: Chip = chip_xy
-                if temp1 == temp2:
-                    print("flake8")
                 on_same_board = _on_same_board(chip, chip_xy)
                 eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
                 if (eth not in chips_done or
@@ -78,7 +74,7 @@ def _compute_parent_chips(
     :param ~spinn_machine.Machine machine: The machine to compute the map for
     :rtype: dict((int, int), ~spinn_machine.Chip)
     """
-    chip_links: Dict[Tuple[int, int], Iterable[Chip]] = defaultdict(list)
+    chip_links: Dict[Tuple[int, int], List[Chip]] = defaultdict(list)
     for chip in machine.chips:
         if chip.parent_link is not None:
             link = chip.router.get_link(chip.parent_link)
@@ -100,7 +96,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         The binary must have been loaded to the boot chip before this is
         called!
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self, next_connection_selector: ConnectionSelector,
                  timeout: float = APP_COPY_RUN_TIMEOUT):
@@ -121,7 +117,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         """
         machine = SpiNNManDataView.get_machine()
         boot_chip = machine.boot_chip
-        chips_done: Dict[Tuple[int, int], Iterable[Tuple[int, int]]] = \
+        chips_done: Dict[Tuple[int, int], List[Tuple[int, int]]] = \
             defaultdict(list)
         chips_done[boot_chip.x, boot_chip.y].append((boot_chip.x, boot_chip.y))
         parent_chips = _compute_parent_chips(machine)
@@ -132,7 +128,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
             for chip in next_chips:
                 subset = core_subsets.get_core_subset_for_chip(chip.x, chip.y)
                 self._send_request(AppCopyRun(
-                    chip.x, chip.y, chip.parent_link, size, app_id,
+                    chip.x, chip.y, cast(int, chip.parent_link), size, app_id,
                     subset.processor_ids, checksum, wait))
                 eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
                 chips_done[eth].append((chip.x, chip.y))
