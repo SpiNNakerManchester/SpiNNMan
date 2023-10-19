@@ -92,7 +92,7 @@ def create_transceiver_from_hostname(
         bmp_connection = BMPConnection(bmp_connection_data)
         connections.append(bmp_connection)
         logger.info("Transceiver using BMP: {}",
-            bmp_connection.remote_ip_address)
+                    bmp_connection.remote_ip_address)
 
     connections.append(SCAMPConnection(remote_host=hostname))
 
