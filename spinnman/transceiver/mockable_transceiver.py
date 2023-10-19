@@ -49,7 +49,7 @@ class MockableTransceiver(ExtendableTransceiver):
         super().__init__()
         self.written_memory: List[
             Tuple[int, int, int, Union[BinaryIO, bytes, int, str],
-                  Optional[int], int, bool]] = []
+                  Optional[int], int, int]] = []
 
     @overrides(Transceiver.send_sdp_message)
     def send_sdp_message(self, message: SDPMessage,
