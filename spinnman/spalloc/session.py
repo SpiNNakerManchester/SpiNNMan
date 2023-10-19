@@ -36,7 +36,7 @@ def _may_renew(method):
         """
         print('{} {}\n{}\r\n{}\r\n\r\n{}'.format(
             '>>>>>>>>>>>START>>>>>>>>>>>',
-            request.method, request.url,
+            str(request.method), str(request.url),
             '\r\n'.join('{}: {}'.format(*kv)
                         for kv in request.headers.items()),
             request.body if request.body else ""))

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, Iterator
+from typing import Dict, Iterable, Iterator
 from spinn_utilities.typing.coords import XYP
 from .cpu_info import CPUInfo
 
@@ -36,7 +36,7 @@ class CPUInfos(object):
         """
         self._cpu_infos[cpu_info.x, cpu_info.y, cpu_info.p] = cpu_info
 
-    def add_infos(self, other, states: Iterator[CPUState]):
+    def add_infos(self, other, states: Iterable[CPUState]):
         """
         Adds all the infos in the other CPUInfos if the have one of the
         required states

@@ -141,7 +141,7 @@ class SpallocJob(object, metaclass=AbstractBase):
 
     @abstractmethod
     def wait_for_state_change(self, old_state: SpallocState,
-                              timeout: int = None) -> SpallocState:
+                              timeout: Optional[int] = None) -> SpallocState:
         """
         Wait until the allocation is not in the given old state.
 
@@ -159,7 +159,8 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def wait_until_ready(self, timeout: int = None, n_retries: int = None):
+    def wait_until_ready(
+            self, timeout: Optional[int] = None, n_retries: int = None):
         """
         Wait until the allocation is in the ``READY`` state.
 

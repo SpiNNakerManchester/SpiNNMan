@@ -89,12 +89,10 @@ def create_transceiver_from_hostname(
 
     # handle BMP connections
     if bmp_connection_data is not None:
-        bmp_ip_list = list()
-        for conn_data in bmp_connection_data:
-            bmp_connection = BMPConnection(conn_data)
-            connections.append(bmp_connection)
-            bmp_ip_list.append(bmp_connection.remote_ip_address)
-        logger.info("Transceiver using BMPs: {}", bmp_ip_list)
+        bmp_connection = BMPConnection(bmp_connection_data)
+        connections.append(bmp_connection)
+        logger.info("Transceiver using BMP: {}",
+            bmp_connection.remote_ip_address)
 
     connections.append(SCAMPConnection(remote_host=hostname))
 

@@ -128,9 +128,11 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job_rect_at_board(
-            self, width: int, height: int, triad: Tuple[int, int, int] = None,
-            physical: Tuple[int, int, int] = None, ip_address: str = None,
-            machine_name: str = None, keepalive: int = 45,
+            self, width: int, height: int,
+            triad: Optional[Tuple[int, int, int]] = None,
+            physical: Optional[Tuple[int, int, int]] = None,
+            ip_address: Optional[str] = None,
+            machine_name: Optional[str] = None, keepalive: int = 45,
             max_dead_boards: int = 0) -> SpallocJob:
         """
         Create a job with a rectangle of boards starting at a specific board.

@@ -381,7 +381,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         # check if it works
         chip_info = self._check_connection(conn)
-        if chip_info is not None:
+        if chip_info is not None and chip_info.ethernet_ip_address is not None:
             self._all_connections.add(conn)
             self._udp_scamp_connections[chip_info.ethernet_ip_address] = conn
             self._scamp_connections.append(conn)
@@ -449,7 +449,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                     AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                     SYSTEM_VARIABLE_BASE_ADDRESS + height_item.offset,
                     2))
-        assert self._height is not None
+        assert self._width is not None and self._height is not None
         return MachineDimensions(self._width, self._height)
 
     @overrides(Transceiver.get_machine_details)
@@ -782,7 +782,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.add_cpu_information_from_core)
     def add_cpu_information_from_core(
             self, cpu_infos: CPUInfos, x: int, y: int, p: int,
-            states: Iterator[CPUState]):
+            states: Iterable[CPUState]):
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
         new_infos = self.get_cpu_infos(core_subsets)
@@ -790,7 +790,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.get_region_base_address)
     def get_region_base_address(self, x: int, y: int, p: int):
-        return self.read_user(x, y, p, 0)
+        return self.read_user(x, y, p, UserRegister.USER_0)
 
     @overrides(Transceiver.get_iobuf)
     def get_iobuf(self, core_subsets: Optional[CoreSubsets] = None
@@ -910,6 +910,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         :param PowerCommand power_command: The power command to send
         """
+        if self._bmp_connection is None:
+            raise NotImplementedError("can not power change without BMP")
         timeout = (
             BMP_POWER_ON_TIMEOUT
             if power_command == PowerCommand.POWER_ON
@@ -1110,11 +1112,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             # report a timeout error
             if len(cores_not_in_state) != 0:
                 self.__log_where_is_info(cores_not_in_state)
-                states = self.get_cpu_infos(all_core_subsets)
-                for cpu_info in states.values():
-                    if cpu_info.state not in target_states:
-                        logger.info("x:{} y:{} p:{} state:{}", cpu_info.x,
-                                    cpu_info.y, cpu_info.p, cpu_info.state)
                 raise SpiNNManCoresNotInStateException(
                     timeout, target_states, cores_not_in_state)
 

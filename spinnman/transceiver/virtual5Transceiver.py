@@ -87,4 +87,5 @@ class Virtual5Transceiver(Version5Transceiver):
         try:
             return super().get_cpu_infos(core_subsets, states, include)
         except SpinnmanIOException:
-            return None
+            # return an empty
+            return CPUInfos()

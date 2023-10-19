@@ -526,7 +526,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.get_state)
     def get_state(self, wait_for_change: bool = False) -> SpallocState:
-        timeout = 10
+        timeout: Optional[int] = 10
         if wait_for_change:
             timeout = None
         obj = self._get(
@@ -737,7 +737,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         raise NotImplementedError
 
     def _call(self, protocol: ProxyProtocol, packer: struct.Struct,
-              unpacker: struct.Struct, *args) -> List[int]:
+              unpacker: struct.Struct, *args) -> Tuple[any]:
         """
         Do a synchronous call.
 
