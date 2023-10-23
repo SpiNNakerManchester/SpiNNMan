@@ -41,8 +41,8 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         self._view[offset:offset + response.length] = response.data[
             response.offset:response.offset + response.length]
 
-    def read_memory(
-            self, coordinates: XYP, base_address: int, length: int) -> bytes:
+    def read_memory(self, coordinates: XYP, base_address: int,
+                    length: int) -> bytearray:
         """
         Read some memory from a core.
 
@@ -56,7 +56,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
             functools.partial(ReadMemory, coordinates))
 
     def read_link_memory(self, coordinates: XYP, link: int,
-                         base_address: int, length: int) -> bytes:
+                         base_address: int, length: int) -> bytearray:
         """
         Read some memory from the neighbour of a core.
 
@@ -73,7 +73,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
     def _read_memory(
             self, base_address: int, length: int,
             packet_class: Callable[
-                [int, int], AbstractSCPRequest[Response]]) -> bytes:
+                [int, int], AbstractSCPRequest[Response]]) -> bytearray:
         data = bytearray(length)
         self._view = memoryview(data)
         n_bytes = length
@@ -88,4 +88,4 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
                 n_bytes -= bytes_to_get
                 offset += bytes_to_get
 
-        return bytes(data)
+        return data

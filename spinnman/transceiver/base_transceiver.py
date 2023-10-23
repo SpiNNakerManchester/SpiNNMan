@@ -979,7 +979,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.read_memory)
     def read_memory(
             self, x: int, y: int, base_address: int, length: int,
-            cpu: int = 0) -> bytes:
+            cpu: int = 0) -> bytearray:
         try:
             process = ReadMemoryProcess(self._scamp_connection_selector)
             return process.read_memory((x, y, cpu), base_address, length)
