@@ -498,7 +498,7 @@ class Transceiver(object):
     @abstractmethod
     def read_memory(
             self, x: int, y: int, base_address: int, length: int,
-            cpu: int = 0) -> bytes:
+            cpu: int = 0) -> bytearray:
         """
         Read some areas of memory (usually SDRAM) from the board.
 

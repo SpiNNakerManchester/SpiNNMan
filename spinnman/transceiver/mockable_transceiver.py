@@ -149,7 +149,7 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.read_memory)
     def read_memory(
             self, x: int, y: int, base_address: int, length: int,
-            cpu: int = 0) -> bytes:
+            cpu: int = 0) -> bytearray:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.read_word)
