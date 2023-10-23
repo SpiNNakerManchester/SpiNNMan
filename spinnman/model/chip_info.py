@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Iterable, List, Optional
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 
 
@@ -32,7 +33,7 @@ class ChipInfo(object):
         "_virtual_core_ids",
         "_virtual_to_physical_core_map"]
 
-    def __init__(self, system_data, offset):
+    def __init__(self, system_data: bytes, offset: int):
         """
         :param bytes system_data:
             A byte-string retrieved from SDRAM on the board
@@ -44,22 +45,22 @@ class ChipInfo(object):
         self._system_data = system_data
         self._offset = offset
 
-        links_available = self._read_value("links_available")
-        self._links_available = list()
-        for i in range(0, 6):
+        links_available = self._read_int("links_available")
+        self._links_available: List[int] = list()
+        for i in range(6):
             if ((links_available >> i) & 0x1) != 0:
                 self._links_available.append(i)
 
-        self._led_flash_period_ms = self._read_value(
+        self._led_flash_period_ms = self._read_int(
             "led_half_period_10_ms") * 10
-        self._leds = [self._read_value("led_0"), self._read_value("led_1")]
-        self._status_map = bytearray(self._read_value("status_map"))
-        self._physical_to_virtual_core_map = bytearray(
-            self._read_value("physical_to_virtual_core_map"))
-        self._virtual_to_physical_core_map = bytearray(
-            self._read_value("virtual_to_physical_core_map"))
+        self._leds = [self._read_int("led_0"), self._read_int("led_1")]
+        self._status_map = self._read_bytes("status_map")
+        self._physical_to_virtual_core_map = self._read_bytes(
+            "physical_to_virtual_core_map")
+        self._virtual_to_physical_core_map = self._read_bytes(
+            "virtual_to_physical_core_map")
 
-        self._virtual_core_ids = list()
+        self._virtual_core_ids: List[int] = list()
         for physical_core_id in range(
                 0, len(self._physical_to_virtual_core_map)):
             virtual_core_id = self._physical_to_virtual_core_map[
@@ -68,88 +69,92 @@ class ChipInfo(object):
                 self._virtual_core_ids.append(virtual_core_id)
         self._virtual_core_ids.sort()
 
-        ip = bytearray(self._read_value("ethernet_ip_address"))
-        self._ip_address = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
+        ip = self._read_bytes("ethernet_ip_address")
+        self._ip_address: Optional[str] = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
         if self._ip_address == "0.0.0.0":
             self._ip_address = None
 
-    def _read_value(self, item):
+    def _read_int(self, item: str) -> int:
         item_def = SystemVariableDefinition[item]
         code = item_def.data_type.struct_code
-        if item_def.array_size is not None:
-            code = f"{item_def.array_size}{code}"
-        values = struct.unpack_from(
+        assert item_def.array_size is None
+        value, = struct.unpack_from(
             code, self._system_data, self._offset + item_def.offset)
-        return values[0]
+        return value
 
-    def __getattr__(self, item):
-        return self._read_value(item)
+    def _read_bytes(self, item: str) -> bytes:
+        item_def = SystemVariableDefinition[item]
+        assert item_def.array_size is not None
+        code = f"{item_def.array_size}{item_def.data_type.struct_code}"
+        value, = struct.unpack_from(
+            code, self._system_data, self._offset + item_def.offset)
+        return value
 
     @property
-    def x(self):
+    def x(self) -> int:
         """
         The X-coordinate of the chip.
 
         :rtype: int
         """
-        return self._read_value("x")
+        return self._read_int("x")
 
     @property
-    def y(self):
+    def y(self) -> int:
         """
         The Y-coordinate of the chip.
 
         :rtype: int
         """
-        return self._read_value("y")
+        return self._read_int("y")
 
     @property
-    def x_size(self):
+    def x_size(self) -> int:
         """
         The number of chips in the X-dimension.
 
         :rtype: int
         """
-        return self._read_value("x_size")
+        return self._read_int("x_size")
 
     @property
-    def y_size(self):
+    def y_size(self) -> int:
         """
         The number of chips in the Y-dimension.
 
         :rtype: int
         """
-        return self._read_value("y_size")
+        return self._read_int("y_size")
 
     @property
-    def nearest_ethernet_x(self):
+    def nearest_ethernet_x(self) -> int:
         """
         The X-coordinate of the nearest chip with Ethernet.
 
         :rtype: int
         """
-        return self._read_value("nearest_ethernet_x")
+        return self._read_int("nearest_ethernet_x")
 
     @property
-    def nearest_ethernet_y(self):
+    def nearest_ethernet_y(self) -> int:
         """
         The Y-coordinate of the nearest chip with Ethernet.
 
         :rtype: int
         """
-        return self._read_value("nearest_ethernet_y")
+        return self._read_int("nearest_ethernet_y")
 
     @property
-    def is_ethernet_available(self):
+    def is_ethernet_available(self) -> bool:
         """
         Whether the Ethernet is running on this chip.
 
         :rtype: bool
         """
-        return self._read_value("is_ethernet_available") == 1
+        return self._read_int("is_ethernet_available") == 1
 
     @property
-    def links_available(self):
+    def links_available(self) -> Iterable[int]:
         """
         The links that are available on the chip.
 
@@ -158,16 +163,16 @@ class ChipInfo(object):
         return self._links_available
 
     @property
-    def cpu_clock_mhz(self):
+    def cpu_clock_mhz(self) -> int:
         """
         The speed of the CPU clock in MHz.
 
         :rtype: int
         """
-        return self._read_value("cpu_clock_mhz")
+        return self._read_int("cpu_clock_mhz")
 
     @property
-    def physical_to_virtual_core_map(self):
+    def physical_to_virtual_core_map(self) -> bytes:
         """
         The physical core ID to virtual core ID map; entries with a value
         of 0xFF are non-operational cores.
@@ -177,7 +182,7 @@ class ChipInfo(object):
         return self._physical_to_virtual_core_map
 
     @property
-    def virtual_to_physical_core_map(self):
+    def virtual_to_physical_core_map(self) -> bytes:
         """
         The virtual core ID to physical core ID map; entries with a value
         of 0xFF are non-operational cores.
@@ -187,7 +192,7 @@ class ChipInfo(object):
         return self._virtual_to_physical_core_map
 
     @property
-    def virtual_core_ids(self):
+    def virtual_core_ids(self) -> Iterable[int]:
         """
         A list of available cores by virtual core ID (including the monitor).
 
@@ -196,43 +201,43 @@ class ChipInfo(object):
         return self._virtual_core_ids
 
     @property
-    def sdram_base_address(self):
+    def sdram_base_address(self) -> int:
         """
         The base address of the user region of SDRAM on the chip.
 
         :rtype: int
         """
-        return self._read_value("sdram_base_address")
+        return self._read_int("sdram_base_address")
 
     @property
-    def system_sdram_base_address(self):
+    def system_sdram_base_address(self) -> int:
         """
         The base address of the System SDRAM region on the chip.
 
         :rtype: int
         """
-        return self._read_value("system_sdram_base_address")
+        return self._read_int("system_sdram_base_address")
 
     @property
-    def cpu_information_base_address(self):
+    def cpu_information_base_address(self) -> int:
         """
         The base address of the CPU information structure.
 
         :rtype: int
         """
-        return self._read_value("cpu_information_base_address")
+        return self._read_int("cpu_information_base_address")
 
     @property
-    def first_free_router_entry(self):
+    def first_free_router_entry(self) -> int:
         """
         The ID of the first free routing entry on the chip.
 
         :rtype: int
         """
-        return self._read_value("first_free_router_entry")
+        return self._read_int("first_free_router_entry")
 
     @property
-    def ip_address(self):
+    def ip_address(self) -> Optional[str]:
         """
         The IP address of the chip, or `None` if no Ethernet.
 
@@ -241,36 +246,36 @@ class ChipInfo(object):
         return self._ip_address
 
     @property
-    def iobuf_size(self):
+    def iobuf_size(self) -> int:
         """
         The size of the IOBUF buffers in bytes.
 
         :rtype: int
         """
-        return self._read_value("iobuf_size")
+        return self._read_int("iobuf_size")
 
-    def router_table_copy_address(self):
+    def router_table_copy_address(self) -> int:
         """
         The address of the copy of the router table.
 
         :rtype: int
         """
-        return self._read_value("router_table_copy_address")
+        return self._read_int("router_table_copy_address")
 
     @property
-    def system_ram_heap_address(self):
+    def system_ram_heap_address(self) -> int:
         """
         The address of the base of the heap in system RAM.
 
         :rtype: int
         """
-        return self._read_value("system_ram_heap_address")
+        return self._read_int("system_ram_heap_address")
 
     @property
-    def sdram_heap_address(self):
+    def sdram_heap_address(self) -> int:
         """
         The address of the base of the heap in SDRAM.
 
         :rtype: int
         """
-        return self._read_value("sdram_heap_address")
+        return self._read_int("sdram_heap_address")

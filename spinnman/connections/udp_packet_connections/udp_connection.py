@@ -16,6 +16,7 @@ import logging
 import socket
 import select
 from contextlib import suppress
+from typing import Callable, Optional, Tuple
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.ping import Ping
@@ -31,9 +32,10 @@ logger = FormatAdapter(logging.getLogger(__name__))
 _RECEIVE_BUFFER_SIZE = 1048576
 _PING_COUNT = 5
 _REPR_TEMPLATE = "UDPConnection(local={}:{}, remote={}:{})"
+_MSG_MAX = 300
 
 
-class UDPConnection(Connection, Listenable):
+class UDPConnection(Connection, Listenable[bytes]):
     """
     A connection that routes messages via UDP to some remote host.
 
@@ -46,16 +48,19 @@ class UDPConnection(Connection, Listenable):
     SDP messages have lower maximum lengths.
     """
 
-    __slots__ = [
+    __slots__ = (
         "_can_send",
         "_local_ip_address",
         "_local_port",
         "_remote_ip_address",
         "_remote_port",
-        "_socket"]
+        "_socket")
 
-    def __init__(self, local_host=None, local_port=None, remote_host=None,
-                 remote_port=None):
+    def __init__(
+            self, local_host: Optional[str] = None,
+            local_port: Optional[int] = None,
+            remote_host: Optional[str] = None,
+            remote_port: Optional[int] = None):
         """
         :param str local_host: The local host name or IP address to bind to.
             If not specified defaults to bind to all interfaces, unless
@@ -73,7 +78,6 @@ class UDPConnection(Connection, Listenable):
         :raise SpinnmanIOException:
             If there is an error setting up the communication channel
         """
-
         self._socket = get_udp_socket()
         set_receive_buffer_size(self._socket, _RECEIVE_BUFFER_SIZE)
 
@@ -85,8 +89,8 @@ class UDPConnection(Connection, Listenable):
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
         self._can_send = False
-        self._remote_ip_address = None
-        self._remote_port = None
+        self._remote_ip_address: Optional[str] = None
+        self._remote_port: Optional[int] = None
 
         # Get the host to connect to remotely
         if remote_host is not None and remote_port is not None:
@@ -96,7 +100,7 @@ class UDPConnection(Connection, Listenable):
             self._can_send = True
 
         # If things are closed here, it's a catastrophic problem
-        if self._socket._closed:
+        if self.__is_closed:
             raise SpinnmanEOFException()
 
         # Get the details of where the socket is connected
@@ -107,7 +111,7 @@ class UDPConnection(Connection, Listenable):
         self._socket.settimeout(1.0)
 
     @property
-    def __is_closed(self):
+    def __is_closed(self) -> bool:
         """
         Is the socket closed?
 
@@ -120,10 +124,11 @@ class UDPConnection(Connection, Listenable):
         :rtype: bool
         """
         # Reach into Python'#s guts
-        return self._socket._closed  # pylint: disable=protected-access
+        # pylint: disable=protected-access
+        return self._socket._closed  # type: ignore[attr-defined]
 
     @overrides(Connection.is_connected)
-    def is_connected(self):
+    def is_connected(self) -> bool:
         # Closed sockets are never connected!
         if self.__is_closed:
             return False
@@ -142,7 +147,7 @@ class UDPConnection(Connection, Listenable):
         return False
 
     @property
-    def local_ip_address(self):
+    def local_ip_address(self) -> str:
         """
         The local IP address to which the connection is bound,
         as a dotted string, e.g., `0.0.0.0`.
@@ -152,7 +157,7 @@ class UDPConnection(Connection, Listenable):
         return self._local_ip_address
 
     @property
-    def local_port(self):
+    def local_port(self) -> int:
         """
         The number of the local port to which the connection is bound.
 
@@ -161,7 +166,7 @@ class UDPConnection(Connection, Listenable):
         return self._local_port
 
     @property
-    def remote_ip_address(self):
+    def remote_ip_address(self) -> Optional[str]:
         """
         The remote IP address to which the connection is connected,
         or `None` if not connected remotely.
@@ -171,7 +176,7 @@ class UDPConnection(Connection, Listenable):
         return self._remote_ip_address
 
     @property
-    def remote_port(self):
+    def remote_port(self) -> Optional[int]:
         """
         The remote port number to which the connection is connected,
         or `None` if not connected remotely.
@@ -180,7 +185,7 @@ class UDPConnection(Connection, Listenable):
         """
         return self._remote_port
 
-    def receive(self, timeout=None):
+    def receive(self, timeout: Optional[float] = None) -> bytes:
         """
         Receive data from the connection.
 
@@ -193,7 +198,7 @@ class UDPConnection(Connection, Listenable):
         """
         if self.__is_closed:
             raise SpinnmanEOFException()
-        return receive_message(self._socket, timeout, 300)
+        return receive_message(self._socket, timeout, _MSG_MAX)
 
     def receive_with_address(self, timeout=None):
         """
@@ -210,9 +215,9 @@ class UDPConnection(Connection, Listenable):
         """
         if self.__is_closed:
             raise SpinnmanEOFException()
-        return receive_message_and_address(self._socket, timeout, 300)
+        return receive_message_and_address(self._socket, timeout, _MSG_MAX)
 
-    def send(self, data):
+    def send(self, data: bytes):
         """
         Send data down this connection.
 
@@ -230,7 +235,7 @@ class UDPConnection(Connection, Listenable):
             if self.__is_closed:
                 raise SpinnmanEOFException()
 
-    def send_to(self, data, address):
+    def send_to(self, data: bytes, address: Tuple[str, int]):
         """
         Send data down this connection.
 
@@ -247,23 +252,23 @@ class UDPConnection(Connection, Listenable):
                 raise SpinnmanEOFException()
 
     @overrides(Connection.close)
-    def close(self):
+    def close(self) -> None:
         if self.__is_closed:
             return
         with suppress(Exception):
             self._socket.shutdown(socket.SHUT_WR)
         self._socket.close()
 
-    def is_ready_to_receive(self, timeout=0):
+    def is_ready_to_receive(self, timeout: float = 0):
         if self.__is_closed:
             return True
         return len(select.select([self._socket], [], [], timeout)[0]) == 1
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return _REPR_TEMPLATE.format(
             self.local_ip_address, self.local_port,
             self.remote_ip_address, self.remote_port)
 
     @overrides(Listenable.get_receive_method)
-    def get_receive_method(self):
+    def get_receive_method(self) -> Callable[[], bytes]:
         return self.receive

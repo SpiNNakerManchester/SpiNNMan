@@ -11,8 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import annotations
 from enum import Enum
+from typing import FrozenSet, Sequence
 from spinnman.model.enums import CPUState
 
 
@@ -21,6 +22,10 @@ class ExecutableType(Enum):
     The different types of executable from the perspective of how they
     are started and controlled.
     """
+    value: int
+    start_state: FrozenSet[CPUState]
+    end_state: FrozenSet[CPUState]
+    supports_auto_pause_and_resume: bool
 
     #: Runs immediately without waiting for barrier and then exits.
     RUNNING = (
@@ -49,8 +54,8 @@ class ExecutableType(Enum):
     #: reason still wants to run.
     NO_APPLICATION = (
         3,
-        [],
-        [],
+        (),
+        (),
         True,
         "Situation where there user has supplied no application but for "
         "some reason still wants to run")
@@ -62,23 +67,16 @@ class ExecutableType(Enum):
         True,
         "Runs immediately without waiting for barrier and never ends")
 
-    def __new__(cls, value, start_state, end_state,
-                supports_auto_pause_and_resume, doc=""):
-        # pylint: disable=protected-access, too-many-arguments
+    def __new__(cls, *args) -> 'ExecutableType':
         obj = object.__new__(cls)
-        obj._value_ = value
-        obj.start_state = start_state
-        obj.end_state = end_state
-        obj.supports_auto_pause_and_resume = supports_auto_pause_and_resume
-        obj.__doc__ = doc
+        obj._value_ = args[0]
+        obj. __doc__ = args[-1]
         return obj
 
-    def __init__(self, value, start_state, end_state,
-                 supports_auto_pause_and_resume, doc=""):
-        # pylint: disable=too-many-arguments
-        self._value_ = value
-        self.__doc__ = doc
-        self.start_state = start_state
-        self.end_state = end_state
+    def __init__(self, value: int, start_state: Sequence[CPUState],
+                 end_state: Sequence[CPUState],
+                 supports_auto_pause_and_resume: bool, doc: str = ""):
+        # pylint: disable=too-many-arguments, unused-argument
+        self.start_state: FrozenSet[CPUState] = frozenset(start_state)
+        self.end_state: FrozenSet[CPUState] = frozenset(end_state)
         self.supports_auto_pause_and_resume = supports_auto_pause_and_resume
-        self.__doc__ = doc

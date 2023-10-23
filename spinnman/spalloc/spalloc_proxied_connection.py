@@ -14,7 +14,7 @@
 """
 API of the client for the Spalloc web service.
 """
-
+from typing import Optional
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.connections.abstract_classes import Listenable
 
@@ -32,14 +32,15 @@ class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):
 
         :param data: The message to send.
         """
+        raise NotImplementedError
 
     @abstractmethod
-    def receive(self, timeout=None) -> bytes:
+    def receive(self, timeout: Optional[float] = None) -> bytes:
         """
         Receive a message on an open socket. Will block until a message is
         received.
 
-        :param timeout:
+        :param float timeout:
             How long to wait for a message to be received before timing out.
             If `None`, will wait indefinitely (or until the connection is
             closed).
@@ -48,3 +49,4 @@ class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):
         :raises SpinnmanTimeoutException:
             If a timeout happens
         """
+        raise NotImplementedError

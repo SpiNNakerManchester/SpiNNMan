@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
@@ -25,13 +26,41 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 _ONE_WORD = struct.Struct("<I")
 
 
-class RouterAlloc(AbstractSCPRequest):
+class RouterAllocResponse(AbstractSCPResponse):
+    """
+    An SCP response to a request to allocate router entries.
+    """
+    __slots__ = "_base_address",
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._base_address: Optional[int] = None
+
+    @overrides(AbstractSCPResponse.read_data_bytestring)
+    def read_data_bytestring(self, data: bytes, offset: int):
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "Router Allocation", "CMD_ALLOC", result.name)
+        self._base_address = _ONE_WORD.unpack_from(data, offset)[0]
+
+    @property
+    def base_address(self) -> int:
+        """
+        The base address allocated, or 0 if none.
+
+        :rtype: int
+        """
+        return self._base_address or 0
+
+
+class RouterAlloc(AbstractSCPRequest[RouterAllocResponse]):
     """
     An SCP Request to allocate space for routing entries.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, x, y, app_id, n_entries):
+    def __init__(self, x: int, y: int, app_id: int, n_entries: int):
         """
         :param int x:
             The x-coordinate of the chip to allocate on, between 0 and 255
@@ -53,36 +82,5 @@ class RouterAlloc(AbstractSCPRequest):
             argument_2=n_entries)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
-        return _SCPRouterAllocResponse()
-
-
-class _SCPRouterAllocResponse(AbstractSCPResponse):
-    """
-    An SCP response to a request to allocate router entries.
-    """
-    __slots__ = [
-        "_base_address"]
-
-    def __init__(self):
-        """
-        """
-        super().__init__()
-        self._base_address = None
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "Router Allocation", "CMD_ALLOC", result.name)
-        self._base_address = _ONE_WORD.unpack_from(data, offset)[0]
-
-    @property
-    def base_address(self):
-        """
-        The base address allocated, or 0 if none.
-
-        :rtype: int
-        """
-        return self._base_address
+    def get_scp_response(self) -> RouterAllocResponse:
+        return RouterAllocResponse()

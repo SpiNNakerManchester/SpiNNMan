@@ -17,16 +17,17 @@ from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
+from spinnman.model.enums import CPUState
 from .count_state_response import CountStateResponse
 
 
-class CountState(AbstractSCPRequest):
+class CountState(AbstractSCPRequest[CountStateResponse]):
     """
     An SCP Request to get a count of the cores in a particular state.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, x, y, app_id, state):
+    def __init__(self, x: int, y: int, app_id: int, state: CPUState):
         """
         :param int app_id: The ID of the application, between 0 and 255
         :param CPUState state: The state to count
@@ -42,5 +43,5 @@ class CountState(AbstractSCPRequest):
             argument_2=state.value)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CountStateResponse:
         return CountStateResponse()

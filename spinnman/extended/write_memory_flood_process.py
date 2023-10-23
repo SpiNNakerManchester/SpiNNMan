@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import math
+from typing import BinaryIO, Optional
 from spinnman.messages.scp.impl import (
     FloodFillEnd, FloodFillStart, FloodFillData)
-from spinnman.processes.abstract_multi_connection_process import (
-    AbstractMultiConnectionProcess)
+from spinnman.processes import (
+    AbstractMultiConnectionProcess, ConnectionSelector)
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 
@@ -24,28 +25,27 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
     """
     A process for writing memory on multiple SpiNNaker chips at once.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, next_connection_selector):
+    def __init__(self, next_connection_selector: ConnectionSelector):
         AbstractMultiConnectionProcess.__init__(
             self, next_connection_selector, n_channels=3,
             intermediate_channel_waits=2)
 
-    def _start_flood_fill(self, n_bytes, nearest_neighbour_id):
+    def _start_flood_fill(self, n_bytes: int, nearest_neighbour_id: int):
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /
                                  UDP_MESSAGE_MAX_SIZE))
-        self._send_request(
-            FloodFillStart(nearest_neighbour_id, n_blocks))
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(
+                FloodFillStart(nearest_neighbour_id, n_blocks))
 
-    def _end_flood_fill(self, nearest_neighbour_id):
-        self._send_request(FloodFillEnd(nearest_neighbour_id))
-        self._finish()
-        self.check_for_error()
+    def _end_flood_fill(self, nearest_neighbour_id: int):
+        with self._collect_responses():
+            self._send_request(FloodFillEnd(nearest_neighbour_id))
 
-    def write_memory_from_bytearray(self, nearest_neighbour_id, base_address,
-                                    data, offset, n_bytes=None):
+    def write_memory_from_bytearray(
+            self, nearest_neighbour_id: int, base_address: int,
+            data: bytes, offset: int, n_bytes: Optional[int] = None):
         """
         :param int nearest_neighbour_id:
         :param int base_address:
@@ -59,27 +59,27 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             n_bytes = len(data)
         self._start_flood_fill(n_bytes, nearest_neighbour_id)
 
-        data_offset = offset
-        offset = base_address
-        block_no = 0
-        while n_bytes > 0:
-            bytes_to_send = min((int(n_bytes), UDP_MESSAGE_MAX_SIZE))
+        with self._collect_responses():
+            data_offset = offset
+            offset = base_address
+            block_no = 0
+            while n_bytes > 0:
+                bytes_to_send = min((int(n_bytes), UDP_MESSAGE_MAX_SIZE))
 
-            self._send_request(FloodFillData(
-                nearest_neighbour_id, block_no, offset,
-                data, data_offset, bytes_to_send))
+                self._send_request(FloodFillData(
+                    nearest_neighbour_id, block_no, offset,
+                    data, data_offset, bytes_to_send))
 
-            block_no += 1
-            n_bytes -= bytes_to_send
-            offset += bytes_to_send
-            data_offset += bytes_to_send
-        self._finish()
-        self.check_for_error()
+                block_no += 1
+                n_bytes -= bytes_to_send
+                offset += bytes_to_send
+                data_offset += bytes_to_send
 
         self._end_flood_fill(nearest_neighbour_id)
 
-    def write_memory_from_reader(self, nearest_neighbour_id, base_address,
-                                 reader, n_bytes):
+    def write_memory_from_reader(
+            self, nearest_neighbour_id: int, base_address: int,
+            reader: BinaryIO, n_bytes: int):
         """
         :param int nearest_neighbour_id:
         :param int base_address:
@@ -89,20 +89,19 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
         """
         self._start_flood_fill(n_bytes, nearest_neighbour_id)
 
-        offset = base_address
-        block_no = 0
-        while n_bytes > 0:
-            bytes_to_send = min((int(n_bytes), UDP_MESSAGE_MAX_SIZE))
-            data_array = reader.read(bytes_to_send)
+        with self._collect_responses():
+            offset = base_address
+            block_no = 0
+            while n_bytes > 0:
+                bytes_to_send = min((int(n_bytes), UDP_MESSAGE_MAX_SIZE))
+                data_array = reader.read(bytes_to_send)
 
-            self._send_request(FloodFillData(
-                nearest_neighbour_id, block_no, offset,
-                data_array, 0, len(data_array)))
+                self._send_request(FloodFillData(
+                    nearest_neighbour_id, block_no, offset,
+                    data_array, 0, len(data_array)))
 
-            block_no += 1
-            n_bytes -= bytes_to_send
-            offset += bytes_to_send
-        self._finish()
-        self.check_for_error()
+                block_no += 1
+                n_bytes -= bytes_to_send
+                offset += bytes_to_send
 
         self._end_flood_fill(nearest_neighbour_id)

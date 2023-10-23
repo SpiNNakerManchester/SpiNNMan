@@ -19,44 +19,58 @@ class SCPCommand(Enum):
     """
     The SCP Commands.
     """
-    CMD_VER = (0, "Get SCAMP Version")
+    # ======== SARK ========
+    #: Get software version.
+    CMD_VER = 0
     CMD_RUN = 1
-    CMD_READ = (2, "Read SDRAM")
-    CMD_WRITE = (3, "Write SDRAM")
+    #: Read SDRAM.
+    CMD_READ = 2
+    #: Write SDRAM.
+    CMD_WRITE = 3
     CMD_APLX = 4
     CMD_FILL = 5
-    CMD_COUNT = (15, "Count the number of cores in a given state")
+    # ======== SCAMP ========
+    CMD_COUNT = 15
     CMD_REMAP = 16
-    CMD_LINK_READ = (17, "Read neighbouring chip's memory.")
-    CMD_LINK_WRITE = (18, "Write neighbouring chip's memory.")
+    #: Read neighbouring chip's memory.
+    CMD_LINK_READ = 17
+    #: Write neighbouring chip's memory.
+    CMD_LINK_WRITE = 18
     CMD_AR = 19
-    CMD_NNP = (20, "Send a Nearest-Neighbour packet")
-    CMD_APP_COPY_RUN = (21, "Copy a binary from an adjacent chip and start it")
-    CMD_SIG = (22, "Send a Signal")
-    CMD_FFD = (23, "Send Flood-Fill Data")
+    #: Send a Nearest-Neighbour packet.
+    CMD_NNP = 20
+    #: Copy a binary from an adjacent chip and start it
+    CMD_APP_COPY_RUN = 21
+    #: Send a Signal.
+    CMD_SIG = 22
+    #: Send Flood-Fill Data.
+    CMD_FFD = 23
     CMD_AS = 24
-    CMD_LED = (25, "Control the LEDs")
-    CMD_IPTAG = (26, "Set an IPTAG")
+    #: Control the LEDs.
+    CMD_LED = 25
+    #: Set an IPTAG.
+    CMD_IPTAG = 26
     CMD_SROM = 27
-    CMD_ALLOC = (28, "Allocate or Free SDRAM or Routing entries")
-    CMD_RTR = (29, "Initialise the router")
-    CMD_DPRI = (30, "Dropped Packet Reinjection setup")
-    CMD_INFO = (31, "Get Chip Summary Information")
-    CMD_SYNC = (32, "Control sending of synchronization messages")
-    CMD_BMP_INFO = (48, "Get BMP info structures")
+    #: Allocate or Free SDRAM or Routing entries.
+    CMD_ALLOC = 28
+    #: Initialise the router.
+    CMD_RTR = 29
+    #: Dropped Packet Reinjection setup.
+    CMD_DPRI = 30
+    #: Get Chip Summary Information.
+    CMD_INFO = 31
+    #: Control sending of synchronization messages.
+    CMD_SYNC = 32
+
+    # ======== BMP ========
+    #: Get BMP info structures
+    CMD_BMP_INFO = 48
     CMD_FLASH_COPY = 49
     CMD_FLASH_ERASE = 50
     CMD_FLASH_WRITE = 51
     CMD_RESET = 55
-    CMD_BMP_POWER = (57, "Turns on or off the machine via BMP")
+    #: Turns on or off the machine via BMP.
+    CMD_BMP_POWER = 57
+
+    # ======== OUTBOUND (OBSOLETE) ========
     CMD_TUBE = 64
-
-    def __new__(cls, value, doc=""):
-        # pylint: disable=protected-access, unused-argument
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
-
-    def __init__(self, value, doc=""):
-        self._value_ = value
-        self.__doc__ = doc

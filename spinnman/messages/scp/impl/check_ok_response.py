@@ -22,11 +22,11 @@ class CheckOKResponse(AbstractSCPResponse):
     """
     An SCP response to a request which returns nothing other than OK.
     """
-    __slots__ = [
+    __slots__ = (
         "_command",
-        "_operation"]
+        "_operation")
 
-    def __init__(self, operation, command):
+    def __init__(self, operation: str, command):
         """
         :param str operation: The operation being performed
         :param command: The command that was sent
@@ -37,7 +37,7 @@ class CheckOKResponse(AbstractSCPResponse):
         self._command = command
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int) -> None:
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

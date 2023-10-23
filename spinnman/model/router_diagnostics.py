@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Sequence
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
 from spinnman.model.enums.router_error import RouterError
@@ -28,7 +28,9 @@ class RouterDiagnostics(object):
         "_wait_1",
         "_wait_2"]
 
-    def __init__(self, control_register, error_status, register_values):
+    def __init__(
+            self, control_register: int, error_status: int,
+            register_values: Sequence[int]):
         """
         :param int control_register: The value of the control register
         :param int error_status: The value of the error_status
@@ -53,7 +55,7 @@ class RouterDiagnostics(object):
 
     # pylint: disable=wrong-spelling-in-docstring
     @property
-    def mon(self):
+    def mon(self) -> int:
         """
         The "mon" part of the control register.
 
@@ -62,7 +64,7 @@ class RouterDiagnostics(object):
         return self._mon
 
     @property
-    def wait_1(self):
+    def wait_1(self) -> int:
         """
         The "wait_1" part of the control register.
 
@@ -71,7 +73,7 @@ class RouterDiagnostics(object):
         return self._wait_1
 
     @property
-    def wait_2(self):
+    def wait_2(self) -> int:
         """
         The "wait_2" part of the control register.
 
@@ -80,7 +82,7 @@ class RouterDiagnostics(object):
         return self._wait_2
 
     @property
-    def error_status(self):
+    def error_status(self) -> int:
         """
         The error status.
 
@@ -89,7 +91,7 @@ class RouterDiagnostics(object):
         return self._error_status
 
     @property
-    def error_count(self):
+    def error_count(self) -> int:
         """
         The count of errors.
 
@@ -98,7 +100,7 @@ class RouterDiagnostics(object):
         return self._error_status & 0xFF
 
     @property
-    def errors_set(self):
+    def errors_set(self) -> Sequence[RouterError]:
         """
         A list of errors that have been detected.
 
@@ -108,7 +110,7 @@ class RouterDiagnostics(object):
             error for error in RouterError if error.value & self._error_status]
 
     @property
-    def n_local_multicast_packets(self):
+    def n_local_multicast_packets(self) -> int:
         """
         The number of multicast packets received from local cores.
 
@@ -117,7 +119,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.LOC_MC.value]
 
     @property
-    def n_external_multicast_packets(self):
+    def n_external_multicast_packets(self) -> int:
         """
         The number of multicast packets received from external links.
 
@@ -126,7 +128,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.EXT_MC.value]
 
     @property
-    def n_dropped_multicast_packets(self):
+    def n_dropped_multicast_packets(self) -> int:
         """
         The number of multicast packets received that were dropped.
 
@@ -135,7 +137,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.DUMP_MC.value]
 
     @property
-    def n_local_peer_to_peer_packets(self):
+    def n_local_peer_to_peer_packets(self) -> int:
         """
         The number of peer-to-peer packets received from local cores.
 
@@ -144,7 +146,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.LOC_PP.value]
 
     @property
-    def n_external_peer_to_peer_packets(self):
+    def n_external_peer_to_peer_packets(self) -> int:
         """
         The number of peer-to-peer packets received from external links.
 
@@ -153,7 +155,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.EXT_PP.value]
 
     @property
-    def n_dropped_peer_to_peer_packets(self):
+    def n_dropped_peer_to_peer_packets(self) -> int:
         """
         The number of peer-to-peer packets received that were dropped.
 
@@ -162,7 +164,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.DUMP_PP.value]
 
     @property
-    def n_local_nearest_neighbour_packets(self):
+    def n_local_nearest_neighbour_packets(self) -> int:
         """
         The number of nearest-neighbour packets received from local cores.
 
@@ -171,7 +173,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.LOC_NN.value]
 
     @property
-    def n_external_nearest_neighbour_packets(self):
+    def n_external_nearest_neighbour_packets(self) -> int:
         """
         The number of nearest-neighbour packets received from external links.
 
@@ -180,7 +182,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.EXT_NN.value]
 
     @property
-    def n_dropped_nearest_neighbour_packets(self):
+    def n_dropped_nearest_neighbour_packets(self) -> int:
         """
         The number of nearest-neighbour packets received that were dropped.
 
@@ -189,7 +191,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.DUMP_NN.value]
 
     @property
-    def n_local_fixed_route_packets(self):
+    def n_local_fixed_route_packets(self) -> int:
         """
         The number of fixed-route packets received from local cores.
 
@@ -198,7 +200,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.LOC_FR.value]
 
     @property
-    def n_external_fixed_route_packets(self):
+    def n_external_fixed_route_packets(self) -> int:
         """
         The number of fixed-route packets received from external links.
 
@@ -207,7 +209,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.EXT_FR.value]
 
     @property
-    def n_dropped_fixed_route_packets(self):
+    def n_dropped_fixed_route_packets(self) -> int:
         """
         The number of fixed-route packets received that were dropped.
 
@@ -216,7 +218,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.DUMP_FR.value]
 
     @property
-    def user_0(self):
+    def user_0(self) -> int:
         """
         The number of packets counted by the user 0 router diagnostic filter.
 
@@ -225,7 +227,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.USER_0.value]
 
     @property
-    def user_1(self):
+    def user_1(self) -> int:
         """
         The number of packets counted by the user 1 router diagnostic filter.
 
@@ -234,7 +236,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.USER_1.value]
 
     @property
-    def user_2(self):
+    def user_2(self) -> int:
         """
         The number of packets counted by the user 2 router diagnostic filter.
 
@@ -243,7 +245,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.USER_2.value]
 
     @property
-    def user_3(self):
+    def user_3(self) -> int:
         """
         The number of packets counted by the user 3 router diagnostic filter.
 
@@ -252,7 +254,7 @@ class RouterDiagnostics(object):
         return self._register_values[ROUTER_REGISTER_REGISTERS.USER_3.value]
 
     @property
-    def user_registers(self):
+    def user_registers(self) -> Sequence[int]:
         """
         The values in the user control registers.
 
@@ -264,7 +266,7 @@ class RouterDiagnostics(object):
             ROUTER_REGISTER_REGISTERS.USER_3.value + 1]
 
     @property
-    def registers(self):
+    def registers(self) -> Sequence[int]:
         """
         The values in all of the registers.  Can be used to directly access
         the registers if they have been programmed to give different values.

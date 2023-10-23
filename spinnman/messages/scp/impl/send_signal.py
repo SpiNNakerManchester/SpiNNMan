@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import cast
 from spinn_utilities.overrides import overrides
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.enums import SCPCommand, Signal
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
 
@@ -24,19 +24,19 @@ _ALL_CORE_MASK = 0xFFFF
 _APP_MASK = 0xFF
 
 
-def _get_data(app_id, signal):
+def _get_data(app_id: int, signal: Signal) -> int:
     data = (_APP_MASK << 8) | app_id
-    data += signal.value << 16
+    data += cast(int, signal.value) << 16
     return data
 
 
-class SendSignal(AbstractSCPRequest):
+class SendSignal(AbstractSCPRequest[CheckOKResponse]):
     """
     An SCP Request to send a signal to cores.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, app_id, signal):
+    def __init__(self, app_id: int, signal: Signal):
         """
         :param int app_id: The ID of the application, between 0 and 255
         :param Signal signal: The signal to send
@@ -59,5 +59,5 @@ class SendSignal(AbstractSCPRequest):
             argument_3=_ALL_CORE_MASK)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Send Signal", "CMD_SIG")

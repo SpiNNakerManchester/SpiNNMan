@@ -13,96 +13,97 @@
 # limitations under the License.
 
 from enum import Enum
+from typing import Dict, Tuple
 
 LOCAL_HOST = "127.0.0.1"
 
 #: the amount of time to wait in seconds between powering off and powering
 # on a SpiNNaker board.
-POWER_CYCLE_WAIT_TIME_IN_SECONDS = 30
+POWER_CYCLE_WAIT_TIME_IN_SECONDS: int = 30
 
 #: The default port of the connection
-SCP_SCAMP_PORT = 17893
+SCP_SCAMP_PORT: int = 17893
 
 #: The default port of the connection
-UDP_BOOT_CONNECTION_DEFAULT_PORT = 54321
+UDP_BOOT_CONNECTION_DEFAULT_PORT: int = 54321
 
 #: The base address of the system variable structure in System ram
-SYSTEM_VARIABLE_BASE_ADDRESS = 0xf5007f00
+SYSTEM_VARIABLE_BASE_ADDRESS: int = 0xf5007f00
 
 #: The base address of a routers diagnostic filter controls
-ROUTER_REGISTER_BASE_ADDRESS = 0xe1000000
+ROUTER_REGISTER_BASE_ADDRESS: int = 0xe1000000
 
 #: The base address of a routers p2p routing table
-ROUTER_REGISTER_P2P_ADDRESS = ROUTER_REGISTER_BASE_ADDRESS + 0x10000
+ROUTER_REGISTER_P2P_ADDRESS: int = ROUTER_REGISTER_BASE_ADDRESS + 0x10000
 
 #: Offset for the router filter controls first register (one word each)
-ROUTER_FILTER_CONTROLS_OFFSET = 0x200
+ROUTER_FILTER_CONTROLS_OFFSET: int = 0x200
 
 #: Point where default filters finish and user set-able ones are available
-ROUTER_DEFAULT_FILTERS_MAX_POSITION = 11
+ROUTER_DEFAULT_FILTERS_MAX_POSITION: int = 11
 
 #: Size of a router diagnostic filter control register in bytes
-ROUTER_DIAGNOSTIC_FILTER_SIZE = 4
+ROUTER_DIAGNOSTIC_FILTER_SIZE: int = 4
 
 #: Number of router diagnostic filters
-NO_ROUTER_DIAGNOSTIC_FILTERS = 16
+NO_ROUTER_DIAGNOSTIC_FILTERS: int = 16
 
 #: The size of the system variable structure in bytes
-SYSTEM_VARIABLE_BYTES = 256
+SYSTEM_VARIABLE_BYTES: int = 256
 
 #: The max size a UDP packet can be, excluding headers
-UDP_MESSAGE_MAX_SIZE = 256
+UDP_MESSAGE_MAX_SIZE: int = 256
 
 #: The address of the start of the VCPU structure (copied from sark.h)
-CPU_INFO_OFFSET = 0xe5007000
+CPU_INFO_OFFSET: int = 0xe5007000
 
 #: How many bytes the CPU info data takes up
-CPU_INFO_BYTES = 128
+CPU_INFO_BYTES: int = 128
 
 #: The address at which user0 register starts
-CPU_USER_START_ADDRESS = 112
+CPU_USER_START_ADDRESS: int = 112
 
-# The number of bytes the user start address moves each time
-CPU_USER_OFFSET = 4
+#: The number of bytes the user start address moves each time
+CPU_USER_OFFSET: int = 4
 
-# The largest user number
-CPU_MAX_USER = 3
+#: The largest user "register" number.
+CPU_MAX_USER: int = 3
 
 #: The address at which the iobuf address starts
-CPU_IOBUF_ADDRESS_OFFSET = 88
+CPU_IOBUF_ADDRESS_OFFSET: int = 88
 
 #: Max user requested tag value
-MAX_TAG_ID = 7
+MAX_TAG_ID: int = 7
 
 #: The range of values the BMP's 12-bit ADCs can measure.
-BMP_ADC_MAX = 1 << 12
+BMP_ADC_MAX: int = 1 << 12
 
 #: Multiplier to convert from ADC value to volts for lines less than 2.5 V.
-BMP_V_SCALE_2_5 = 2.5 / BMP_ADC_MAX
+BMP_V_SCALE_2_5: float = 2.5 / BMP_ADC_MAX
 
 #: Multiplier to convert from ADC value to volts for 3.3 V lines.
-BMP_V_SCALE_3_3 = 3.75 / BMP_ADC_MAX
+BMP_V_SCALE_3_3: float = 3.75 / BMP_ADC_MAX
 
 #: Multiplier to convert from ADC value to volts for 12 V lines.
-BMP_V_SCALE_12 = 15.0 / BMP_ADC_MAX
+BMP_V_SCALE_12: float = 15.0 / BMP_ADC_MAX
 
 #: Multiplier to convert from temperature probe values to degrees Celsius.
-BMP_TEMP_SCALE = 1.0 / 256.0
+BMP_TEMP_SCALE: float = 1.0 / 256.0
 
 #: Temperature value returned when a probe is not connected.
-BMP_MISSING_TEMP = -0x8000
+BMP_MISSING_TEMP: int = -0x8000
 
 #: Fan speed value returned when a fan is absent.
-BMP_MISSING_FAN = -1
+BMP_MISSING_FAN: int = -1
 
 #: Timeout for BMP power-on commands to reply.
-BMP_POWER_ON_TIMEOUT = 10.0
+BMP_POWER_ON_TIMEOUT: float = 10.0
 
 #: Timeout for other BMP commands to reply
-BMP_TIMEOUT = 0.5
+BMP_TIMEOUT: float = 0.5
 
 #: Time to sleep after powering on boards
-BMP_POST_POWER_ON_SLEEP_TIME = 5.0
+BMP_POST_POWER_ON_SLEEP_TIME: float = 5.0
 
 
 class EIEIO_COMMAND_IDS(Enum):
@@ -192,7 +193,7 @@ class READ_TYPES(Enum):
 #: This is a mapping between read address in the mapping between word byte
 #: position, the number of bytes you wish to read, and the type of time
 #: efficient way to read said amount of bytes via SARK
-address_length_dtype = {
+address_length_dtype: Dict[Tuple[int, int], READ_TYPES] = {
     (0, 0): READ_TYPES.WORD,
     (0, 1): READ_TYPES.BYTE,
     (0, 2): READ_TYPES.HALF_WORD,
@@ -211,15 +212,15 @@ address_length_dtype = {
     (3, 3): READ_TYPES.BYTE}
 
 #: This is the default timeout when using SCP
-SCP_TIMEOUT = 1.0
+SCP_TIMEOUT: float = 1.0
 
 #: This is the default timeout when using SCP count (can take a bit longer)
 SCP_TIMEOUT_COUNT = 5.0
 
 #: This is the default number of retries when using SCP
-N_RETRIES = 10
+N_RETRIES: int = 10
 
 #: This is the number of retries during boot - this is different because
 #: otherwise boot takes too long (retrying on a non-booted machine will never
 #: work)
-BOOT_RETRIES = 3
+BOOT_RETRIES: int = 3

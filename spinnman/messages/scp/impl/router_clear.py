@@ -20,13 +20,13 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
 
 
-class RouterClear(AbstractSCPRequest):
+class RouterClear(AbstractSCPRequest[CheckOKResponse]):
     """
     A request to clear the router on a chip.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255
         :param int y: The y-coordinate of the chip, between 0 and 255
@@ -42,5 +42,5 @@ class RouterClear(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_RTR))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("RouterClear", "CMD_RTR")

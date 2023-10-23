@@ -19,10 +19,10 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
     """
     An EIEIO command message.
     """
-    __slots__ = [
+    __slots__ = (
         "_data",
         "_eieio_command_header",
-        "_offset"]
+        "_offset")
 
     def __init__(self, eieio_command_header, data=None, offset=0):
         """

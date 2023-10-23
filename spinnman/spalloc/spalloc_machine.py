@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Set, Tuple
-from spinn_utilities.abstract_base import AbstractBase, abstractproperty
+from typing import FrozenSet, Tuple
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
 class SpallocMachine(object, metaclass=AbstractBase):
@@ -24,43 +24,56 @@ class SpallocMachine(object, metaclass=AbstractBase):
     """
     __slots__ = ()
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self) -> str:
         """
         The name of the machine.
         """
+        raise NotImplementedError
 
-    @abstractproperty
-    def tags(self) -> Set[str]:
+    @property
+    @abstractmethod
+    def tags(self) -> FrozenSet[str]:
         """
         The tags of the machine.
         """
+        raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def width(self) -> int:
         """
         The width of the machine, in boards.
         """
+        raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def height(self) -> int:
         """
         The height of the machine, in boards.
         """
+        raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def dead_boards(self) -> list:
         """
         The dead or out-of-service boards of the machine.
         """
+        raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def dead_links(self) -> list:
         """
         The dead or out-of-service links of the machine.
         """
+        raise NotImplementedError
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def area(self) -> Tuple[int, int]:
         """
         Area of machine, in boards.
@@ -68,6 +81,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
         :return: width, height
         :rtype: tuple(int,int)
         """
+        raise NotImplementedError
 
 # TODO: Add in where-is operations
 # Not yet done because not needed immediately for toolchain

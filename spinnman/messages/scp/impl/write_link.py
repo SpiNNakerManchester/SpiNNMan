@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XYP
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
@@ -20,27 +21,26 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .check_ok_response import CheckOKResponse
 
 
-class WriteLink(AbstractSCPRequest):
+class WriteLink(AbstractSCPRequest[CheckOKResponse]):
     """
     A request to write memory on a neighbouring chip.
     """
-    __slots__ = [
-        "_data_to_write"]
+    __slots__ = "_data_to_write",
 
-    def __init__(self, x, y, link, base_address, data, cpu=0):
+    def __init__(
+            self, coordinates: XYP, link: int, base_address: int, data: bytes):
         """
-        :param int x: The x-coordinate of the chip whose neighbour will be
-            written to, between 0 and 255
-        :param int y: The y-coordinate of the chip whose neighbour will be
-            written to, between 0 and 255
-        :param int cpu: The CPU core to use, normally 0
-            (or if a BMP, the board slot number)
+        :param tuple(int,int,int) coordinates:
+            The coordinates of the core of the chip whose neighbour will be
+            written to; X and Y between 0 and 255,
+            CPU core normally 0 (or if a BMP then the board slot number)
         :param int link: The link number to write to between 0 and 5
             (or if a BMP, the FPGA between 0 and 2)
         :param int base_address: The base_address to start writing to
         :param bytes data: Up to 256 bytes of data to write
         """
         # pylint: disable=too-many-arguments
+        x, y, cpu = coordinates
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
@@ -52,9 +52,9 @@ class WriteLink(AbstractSCPRequest):
         self._data_to_write = data
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         return super().bytestring + bytes(self._data_to_write)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
-        return CheckOKResponse("WriteMemory", "CMD_WRITE")
+    def get_scp_response(self) -> CheckOKResponse:
+        return CheckOKResponse("write neighbour memory", "CMD_LINK_WRITE")

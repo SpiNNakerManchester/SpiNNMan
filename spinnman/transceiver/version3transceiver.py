@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List, Optional
 from spinn_utilities.overrides import overrides
+from spinnman.connections.abstract_classes import Connection
 from spinnman.data import SpiNNManDataView
 from spinnman.transceiver.base_transceiver import BaseTransceiver
 
@@ -25,11 +27,12 @@ class Version3Transceiver(BaseTransceiver):
     """
 
     @overrides(BaseTransceiver.__init__)
-    def __init__(self, connections=None, power_cycle=False):
+    def __init__(self, connections: Optional[List[Connection]] = None,
+                 power_cycle: bool = False):
         super().__init__(connections, power_cycle=power_cycle)
         assert SpiNNManDataView.get_machine_version().number == 3
 
     @property
     @overrides(BaseTransceiver.boot_led_0_value)
-    def boot_led_0_value(self):
+    def boot_led_0_value(self) -> int:
         return 0x00000502

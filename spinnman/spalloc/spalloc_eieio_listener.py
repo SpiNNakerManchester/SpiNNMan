@@ -16,13 +16,11 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Tuple
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod, abstractproperty)
+from typing import Optional, Tuple
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
-from spinnman.connections.abstract_classes import Listenable
-from spinnman.connections.udp_packet_connections import (
-    update_sdp_header_for_udp_send, EIEIOConnection)
+from spinn_utilities.typing.coords import XY
+from spinnman.connections.udp_packet_connections import EIEIOConnection
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.eieio import (
@@ -31,6 +29,7 @@ from spinnman.messages.eieio import (
 from spinnman.messages.sdp import SDPMessage, SDPFlag, SDPHeader
 from spinnman.messages.scp.impl import IPTagSet
 from .spalloc_proxied_connection import SpallocProxiedConnection
+# mypy: disable-error-code=empty-body
 
 _ONE_SHORT = struct.Struct("<H")
 _TWO_SHORTS = struct.Struct("<2H")
@@ -49,16 +48,13 @@ class SpallocEIEIOListener(
     __slots__ = ()
 
     @overrides(EIEIOConnection.receive_eieio_message)
-    def receive_eieio_message(self, timeout=None):
+    def receive_eieio_message(
+            self, timeout: Optional[float] = None) -> AbstractEIEIOMessage:
         data = self.receive(timeout)
         header = _ONE_SHORT.unpack_from(data)[0]
         if header & 0xC000 == 0x4000:
             return read_eieio_command_message(data, 0)
         return read_eieio_data_message(data, 0)
-
-    @overrides(Listenable.get_receive_method)
-    def get_receive_method(self):
-        return self.receive_eieio_message
 
     @overrides(SpallocProxiedConnection.send)
     def send(self, data):
@@ -68,7 +64,7 @@ class SpallocEIEIOListener(
         """
 
     @abstractmethod
-    def _get_chip_coords(self, ip_address: str) -> Tuple[int, int]:
+    def _get_chip_coords(self, ip_address: str) -> XY:
         """
         Get the coordinates of a chip given its IP address.
 
@@ -77,6 +73,7 @@ class SpallocEIEIOListener(
         :return: Ethernet-enabled chip coordinates: X, Y
         :rtype: tuple(int, int)
         """
+        raise NotImplementedError
 
     @abstractmethod
     def send_to_chip(
@@ -95,6 +92,7 @@ class SpallocEIEIOListener(
             The UDP port on the Ethernet-enabled chip to send the message to.
             Defaults to the SCP port.
         """
+        raise NotImplementedError
 
     def send_to(self, data: bytes, address: Tuple[str, int]):
         """
@@ -111,23 +109,27 @@ class SpallocEIEIOListener(
         x, y = self._get_chip_coords(ip)
         self.send_to_chip(data, x, y, port)
 
-    @abstractproperty
-    def local_ip_address(self) -> str:
+    @property
+    @abstractmethod
+    def local_ip_address(self) -> str:  # type: ignore[override]
         """
         The IP address on the server to which the connection is bound.
 
         :return: The IP address as a dotted string, e.g., 0.0.0.0
         :rtype: str
         """
+        raise NotImplementedError
 
-    @abstractproperty
-    def local_port(self) -> int:
+    @property
+    @abstractmethod
+    def local_port(self) -> int:  # type: ignore[override]
         """
         The port on the server to which the connection is bound.
 
         :return: The local port number
         :rtype: int
         """
+        raise NotImplementedError
 
     def send_eieio_message_to_core(
             self, eieio_message: AbstractEIEIOMessage, x: int, y: int, p: int,
@@ -175,7 +177,7 @@ class SpallocEIEIOListener(
         request = IPTagSet(
             x, y, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
         request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
-        update_sdp_header_for_udp_send(request.sdp_header, x, y)
+        request.sdp_header.update_for_send(x, y)
         data = _TWO_SKIP + request.bytestring
         for _try in range(_NUM_UPDATE_TAG_TRIES):
             try:

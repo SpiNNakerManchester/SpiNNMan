@@ -14,10 +14,13 @@
 
 # pylint: disable=too-many-arguments
 import logging
+from typing import Optional
 from threading import Condition, RLock
 from spinn_utilities.abstract_base import (
-    AbstractBase, abstractproperty)
+    AbstractBase, abstractmethod)
 from spinn_utilities.log import FormatAdapter
+from spinnman.connections.udp_packet_connections import BMPConnection
+from spinnman.processes import ConnectionSelector, FixedConnectionSelector
 from spinnman.transceiver.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -46,25 +49,22 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
         self._nearest_neighbour_id = 1
         self._nearest_neighbour_lock = RLock()
 
-    @abstractproperty
-    def bmp_connection(self):
-        """
-        Returns the BMP connection if there is one
-        :rtype: BMPConnection or None
-        """
-
-    @abstractproperty
-    def bmp_selector(self):
+    @property
+    @abstractmethod
+    def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
         """
         Returns the bmp selector
 
         :rtype: AbstractMultiConnectionProcessConnectionSelector
         """
+        raise NotImplementedError("This method is abstract")
 
-    @abstractproperty
-    def scamp_connection_selector(self):
+    @property
+    @abstractmethod
+    def scamp_connection_selector(self) -> ConnectionSelector:
         """
         Returns the scamp selector
 
         :rtype: AbstractMultiConnectionProcessConnectionSelector
         """
+        raise NotImplementedError("This method is abstract")

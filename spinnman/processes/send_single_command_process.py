@@ -11,34 +11,48 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Generic, Optional, TypeVar
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import SCP_TIMEOUT
+from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
+#: Type of responses.
+#: :meta private:
+R = TypeVar("R", bound=AbstractSCPResponse)
 
 
-class SendSingleCommandProcess(AbstractMultiConnectionProcess):
-    __slots__ = [
-        "_response"]
+class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
+    """
+    A process that sends a single command and waits for a simple response.
+    """
+    __slots__ = ("_response", )
 
-    def __init__(self, connection_selector, n_retries=3, timeout=SCP_TIMEOUT):
+    def __init__(self, connection_selector: ConnectionSelector,
+                 n_retries: int = 3, timeout: float = SCP_TIMEOUT):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
+        :param int n_retries:
+            The number of retries of a message to use. Passed to
+            :py:class:`SCPRequestPipeLine`
+        :param float timeout:
+            The timeout, in seconds. Passed to
+            :py:class:`SCPRequestPipeLine`
         """
         super().__init__(
             connection_selector, n_retries=n_retries, timeout=timeout)
-        self._response = None
+        self._response: Optional[R] = None
 
-    def __handle_response(self, response):
+    def __handle_response(self, response: R):
         self._response = response
 
-    def execute(self, request):
+    def execute(self, request: AbstractSCPRequest[R]) -> R:
         """
         :param AbstractSCPRequest request:
         :rtype: AbstractSCPResponse
         """
-        self._send_request(request, self.__handle_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(request, self.__handle_response)
+        assert self._response is not None
         return self._response

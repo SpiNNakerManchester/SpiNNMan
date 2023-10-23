@@ -21,7 +21,7 @@ class IOBuffer(object):
         "_iobuf",
         "_x", "_y", "_p"]
 
-    def __init__(self, x, y, p, iobuf):
+    def __init__(self, x: int, y: int, p: int, iobuf: str):
         """
         :param int x: The x-coordinate of a chip
         :param int y: The y-coordinate of a chip
@@ -34,7 +34,7 @@ class IOBuffer(object):
         self._iobuf = iobuf
 
     @property
-    def x(self):
+    def x(self) -> int:
         """
         The X-coordinate of the chip containing the core.
 
@@ -43,7 +43,7 @@ class IOBuffer(object):
         return self._x
 
     @property
-    def y(self):
+    def y(self) -> int:
         """
         The Y-coordinate of the chip containing the core.
 
@@ -52,7 +52,7 @@ class IOBuffer(object):
         return self._y
 
     @property
-    def p(self):
+    def p(self) -> int:
         """
         The ID of the core on the chip.
 
@@ -61,7 +61,7 @@ class IOBuffer(object):
         return self._p
 
     @property
-    def iobuf(self):
+    def iobuf(self) -> str:
         """
         The contents of the buffer.
 
@@ -69,7 +69,7 @@ class IOBuffer(object):
         """
         return self._iobuf
 
-    def __str__(self):
+    def __str__(self) -> str:
         value = ""
         for line in self._iobuf.split("\n"):
             value += f"{self._x}:{self._y}:{self._p:2n}: {line}\n"

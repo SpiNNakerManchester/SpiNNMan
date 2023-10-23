@@ -16,8 +16,8 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Dict, Iterable, Tuple
-from spinn_utilities.abstract_base import (AbstractBase, abstractmethod)
+from typing import Dict, Iterable, Tuple, Optional
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from .spalloc_machine import SpallocMachine
 from .spalloc_job import SpallocJob
 
@@ -43,6 +43,7 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
             Mapping from machine names to handles for working with a machine.
         :rtype: dict(str,SpallocMachine)
         """
+        raise NotImplementedError
 
     @abstractmethod
     def list_jobs(self, deleted: bool = False) -> Iterable[SpallocJob]:
@@ -53,10 +54,11 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: The jobs known to the server.
         :rtype: ~typing.Iterable(SpallocJob)
         """
+        raise NotImplementedError
 
     @abstractmethod
     def create_job(
-            self, num_boards: int = 1, machine_name: str = None,
+            self, num_boards: int = 1, machine_name: Optional[str] = None,
             keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a specified number of boards.
@@ -72,10 +74,11 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
+        raise NotImplementedError
 
     @abstractmethod
     def create_job_rect(
-            self, width: int, height: int, machine_name: str = None,
+            self, width: int, height: int, machine_name: Optional[str] = None,
             keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a rectangle of boards.
@@ -93,12 +96,15 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
+        raise NotImplementedError
 
     @abstractmethod
     def create_job_board(
-            self, triad: Tuple[int, int, int] = None,
-            physical: Tuple[int, int, int] = None, ip_address: str = None,
-            machine_name: str = None, keepalive: int = 45) -> SpallocJob:
+            self, triad: Optional[Tuple[int, int, int]] = None,
+            physical: Optional[Tuple[int, int, int]] = None,
+            ip_address: Optional[str] = None,
+            machine_name: Optional[str] = None,
+            keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a specific board. At least one of ``triad``,
         ``physical`` and ``ip_address`` must be not ``None``.
@@ -118,12 +124,15 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
+        raise NotImplementedError
 
     @abstractmethod
     def create_job_rect_at_board(
-            self, width: int, height: int, triad: Tuple[int, int, int] = None,
-            physical: Tuple[int, int, int] = None, ip_address: str = None,
-            machine_name: str = None, keepalive: int = 45,
+            self, width: int, height: int,
+            triad: Optional[Tuple[int, int, int]] = None,
+            physical: Optional[Tuple[int, int, int]] = None,
+            ip_address: Optional[str] = None,
+            machine_name: Optional[str] = None, keepalive: int = 45,
             max_dead_boards: int = 0) -> SpallocJob:
         """
         Create a job with a rectangle of boards starting at a specific board.
@@ -151,3 +160,4 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :return: A handle for monitoring and interacting with the job.
         :rtype: SpallocJob
         """
+        raise NotImplementedError

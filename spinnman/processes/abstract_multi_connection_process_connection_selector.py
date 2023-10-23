@@ -12,19 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Generic, TypeVar
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod)
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.connections.udp_packet_connections import (
+    BMPConnection, SCAMPConnection)
+
+#: Type of connections selected between.
+#: :meta private:
+Conn = TypeVar("Conn", SCAMPConnection, BMPConnection)
 
 
-class AbstractMultiConnectionProcessConnectionSelector(
-        object, metaclass=AbstractBase):
+class ConnectionSelector(Generic[Conn], metaclass=AbstractBase):
     """
     A connection selector for multi-connection processes.
     """
-    __slots__ = []
+    __slots__ = ()
 
     @abstractmethod
-    def get_next_connection(self, message):
+    def get_next_connection(
+            self, message: AbstractSCPRequest) -> Conn:
         """
         Get the index of the  next connection for the process from a list
         of connections.
@@ -32,3 +40,4 @@ class AbstractMultiConnectionProcessConnectionSelector(
         :param AbstractSCPRequest message: The SCP message to be sent
         :rtype: SCAMPConnection
         """
+        raise NotImplementedError

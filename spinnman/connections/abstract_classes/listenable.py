@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Callable, Generic, TypeVar
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+#: :meta private:
+T = TypeVar("T")
 
 
 # Should inherit from Connection, but doesn't for MRO reasons
-class Listenable(object, metaclass=AbstractBase):
+class Listenable(Generic[T], metaclass=AbstractBase):
     """
     An interface for connections that can listen for incoming messages.
 
@@ -27,13 +29,14 @@ class Listenable(object, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def get_receive_method(self):
+    def get_receive_method(self) -> Callable[[], T]:
         """
         Get the method that receives for this connection.
         """
+        raise NotImplementedError
 
     @abstractmethod
-    def is_ready_to_receive(self, timeout=0):
+    def is_ready_to_receive(self, timeout: float = 0) -> bool:
         """
         Determines if there is an SCP packet to be read without blocking.
 
@@ -42,3 +45,4 @@ class Listenable(object, metaclass=AbstractBase):
         :return: True if there is an SCP packet to be read
         :rtype: bool
         """
+        raise NotImplementedError

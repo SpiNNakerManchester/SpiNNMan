@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Optional
 from spinnman import constants
 
 _PATTERN = struct.Struct(
@@ -43,7 +44,7 @@ class ADCInfo(object):
         "_voltage_3_3",
         "_voltage_supply"]
 
-    def __init__(self, adc_data, offset):
+    def __init__(self, adc_data: bytes, offset: int):
         """
         :param bytes adc_data:
             bytes from an SCP packet containing ADC information
@@ -61,24 +62,26 @@ class ADCInfo(object):
         self._temp_top = float(data[8]) * constants.BMP_TEMP_SCALE
         self._temp_btm = float(data[9]) * constants.BMP_TEMP_SCALE
         if data[12] != constants.BMP_MISSING_TEMP:
-            self._temp_ext_0 = (float(data[12]) * constants.BMP_TEMP_SCALE)
+            self._temp_ext_0: Optional[float] = (
+                float(data[12]) * constants.BMP_TEMP_SCALE)
         else:
             self._temp_ext_0 = None
         if data[13] != constants.BMP_MISSING_TEMP:
-            self._temp_ext_1 = (float(data[13]) * constants.BMP_TEMP_SCALE)
+            self._temp_ext_1: Optional[float] = (
+                float(data[13]) * constants.BMP_TEMP_SCALE)
         else:
             self._temp_ext_1 = None
         if data[16] != constants.BMP_MISSING_FAN:
-            self._fan_0 = float(data[16])
+            self._fan_0: Optional[float] = float(data[16])
         else:
             self._fan_0 = None
         if data[17] != constants.BMP_MISSING_FAN:
-            self._fan_1 = float(data[17])
+            self._fan_1: Optional[float] = float(data[17])
         else:
             self._fan_1 = None
 
     @property
-    def voltage_1_2c(self):
+    def voltage_1_2c(self) -> float:
         """
         Actual voltage of the 1.2V c supply rail.
 
@@ -87,7 +90,7 @@ class ADCInfo(object):
         return self._voltage_1_2c
 
     @property
-    def voltage_1_2b(self):
+    def voltage_1_2b(self) -> float:
         """
         Actual voltage of the 1.2V b supply rail.
 
@@ -96,7 +99,7 @@ class ADCInfo(object):
         return self._voltage_1_2b
 
     @property
-    def voltage_1_2a(self):
+    def voltage_1_2a(self) -> float:
         """
         Actual voltage of the 1.2V a supply rail.
 
@@ -105,7 +108,7 @@ class ADCInfo(object):
         return self._voltage_1_2a
 
     @property
-    def voltage_1_8(self):
+    def voltage_1_8(self) -> float:
         """
         Actual voltage of the 1.8V supply rail.
 
@@ -114,7 +117,7 @@ class ADCInfo(object):
         return self._voltage_1_8
 
     @property
-    def voltage_3_3(self):
+    def voltage_3_3(self) -> float:
         """
         Actual voltage of the 3.3V supply rail.
 
@@ -123,7 +126,7 @@ class ADCInfo(object):
         return self._voltage_3_3
 
     @property
-    def voltage_supply(self):
+    def voltage_supply(self) -> float:
         """
         Actual voltage of the main power supply (nominally 12V).
 
@@ -132,7 +135,7 @@ class ADCInfo(object):
         return self._voltage_supply
 
     @property
-    def temp_top(self):
+    def temp_top(self) -> float:
         """
         Temperature top.
 
@@ -141,7 +144,7 @@ class ADCInfo(object):
         return self._temp_top
 
     @property
-    def temp_btm(self):
+    def temp_btm(self) -> float:
         """
         Temperature bottom.
 
@@ -150,7 +153,7 @@ class ADCInfo(object):
         return self._temp_btm
 
     @property
-    def temp_ext_0(self):
+    def temp_ext_0(self) -> Optional[float]:
         """
         Temperature external 0.
 
@@ -159,7 +162,7 @@ class ADCInfo(object):
         return self._temp_ext_0
 
     @property
-    def temp_ext_1(self):
+    def temp_ext_1(self) -> Optional[float]:
         """
         Temperature external 1.
 
@@ -168,7 +171,7 @@ class ADCInfo(object):
         return self._temp_ext_1
 
     @property
-    def fan_0(self):
+    def fan_0(self) -> Optional[float]:
         """
         Fan 0.
 
@@ -177,7 +180,7 @@ class ADCInfo(object):
         return self._fan_0
 
     @property
-    def fan_1(self):
+    def fan_1(self) -> Optional[float]:
         """
         Fan 1.
 

@@ -23,7 +23,7 @@ class StopRequests(EIEIOCommandMessage):
     signal to the SpiNNaker system that to stop sending
     "SpinnakerRequestBuffers" packet.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self):
         super().__init__(EIEIOCommandHeader(

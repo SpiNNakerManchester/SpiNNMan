@@ -38,14 +38,14 @@ class TestSCPMessageAssembly(unittest.TestCase):
         self.assertEqual(scp.data, None)
 
     def test_create_new_link_scp_pkt(self):
-        scp = ReadLink(0, 0, 0, 0, 256)
+        scp = ReadLink((0, 0, 0), 0, 0, 256)
         self.assertEqual(scp.argument_1, 0)
         self.assertEqual(scp.argument_2, 256)
         self.assertEqual(scp.argument_3, 0)
         self.assertEqual(scp.data, None)
 
     def test_create_new_memory_scp_pkt(self):
-        scp = ReadMemory(0, 0, 0, 256)
+        scp = ReadMemory((0, 0, 0), 0, 256)
         self.assertEqual(scp.argument_1, 0)
         self.assertEqual(scp.argument_2, 256)
         self.assertEqual(scp.argument_3, 2)

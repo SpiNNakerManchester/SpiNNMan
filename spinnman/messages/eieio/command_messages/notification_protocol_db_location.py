@@ -26,8 +26,7 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
     This message is not sent to SpiNNaker boards but rather to an auxiliary
     tool (e.g., data visualiser).
     """
-    __slots__ = [
-        "_database_path"]
+    __slots__ = "_database_path",
 
     def __init__(self, database_path=None):
         """

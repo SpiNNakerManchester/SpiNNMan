@@ -11,9 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod, abstractproperty)
+from typing import Optional, Tuple
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .connection import Connection
 
 
@@ -25,7 +26,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def is_ready_to_receive(self, timeout=0):
+    def is_ready_to_receive(self, timeout: float = 0):
         """
         Determines if there is an SCP packet to be read without blocking.
 
@@ -34,16 +35,18 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         :return: True if there is an SCP packet to be read
         :rtype: bool
         """
+        raise NotImplementedError
 
     @abstractmethod
-    def receive_scp_response(self, timeout=1.0):
+    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> Tuple[
+            SCPResult, int, bytes, int]:
         """
         Receives an SCP response from this connection.  Blocks
         until a message has been received, or a timeout occurs.
 
         :param int timeout:
-            The time in seconds to wait for the message to arrive; if not
-            specified, will wait forever, or until the connection is closed
+            The time in seconds to wait for the message to arrive; if `None`,
+            will wait forever, or until the connection is closed
         :return: The SCP result, the sequence number, the data of the response
             and the offset at which the data starts (i.e., where the SDP
             header starts).
@@ -53,16 +56,18 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         :raise SpinnmanTimeoutException:
             If there is a timeout before a message is received
         """
+        raise NotImplementedError
 
     @abstractmethod
-    def get_scp_data(self, scp_request):
+    def get_scp_data(self, scp_request: AbstractSCPRequest) -> bytes:
         """
         Returns the data of an SCP request as it would be sent down this
         connection.
         """
+        raise NotImplementedError
 
     @abstractmethod
-    def send_scp_request(self, scp_request):
+    def send_scp_request(self, scp_request: AbstractSCPRequest):
         """
         Sends an SCP request down this connection.
 
@@ -82,21 +87,26 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         :raise SpinnmanIOException:
             If there is an error sending the message
         """
+        raise NotImplementedError
 
-    @abstractproperty
-    def chip_x(self):
+    @property
+    @abstractmethod
+    def chip_x(self) -> int:
         """
         The X-coordinate of the chip at which messages sent down this
         connection will arrive at first.
 
         :rtype: int
         """
+        raise NotImplementedError
 
-    @abstractproperty
-    def chip_y(self):
+    @property
+    @abstractmethod
+    def chip_y(self) -> int:
         """
         The Y-coordinate of the chip at which messages sent down this
         connection will arrive at first.
 
         :rtype: int
         """
+        raise NotImplementedError

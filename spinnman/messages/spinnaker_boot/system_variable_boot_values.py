@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import namedtuple
 import struct
+from typing import NamedTuple, Union, Optional
 from enum import Enum
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
@@ -29,38 +29,29 @@ class _DataType(Enum):
     LONG = (8, "<Q")
     BYTE_ARRAY = (16, "s")
 
-    def __new__(cls, value, struct_code, doc=""):
-        # pylint: disable=protected-access, unused-argument
-        obj = object.__new__(cls)
-        obj._value_ = value
-        obj._struct_code = struct_code
-        return obj
-
-    def __init__(self, value, struct_code, doc=""):
+    def __init__(self, value, struct_code):
         self._value_ = value
         self._struct_code = struct_code
-        self.__doc__ = doc
 
     @property
-    def struct_code(self):
+    def struct_code(self) -> str:
         return self._struct_code
 
     @property
-    def is_byte_array(self):
+    def is_byte_array(self) -> bool:
         # can't use BYTE_ARRAY.value directly here
         return self._value_ == 16
 
 
-class _Definition(namedtuple("_Definition",
-                             "offset, data_type, default, array_size, doc")):
+class _Definition(NamedTuple):
     """
-    helper class that contains a definition for a variable.
+    A definition for a particular variable.
     """
-
-    def __new__(cls, data_type, offset, default=0, array_size=None, doc=""):
-        # pylint: disable=too-many-arguments
-        return super().__new__(
-            cls, offset, data_type, default, array_size, doc)
+    data_type: _DataType
+    offset: int
+    default: Union[int, bytes] = 0
+    array_size: Optional[int] = None
+    doc: str = ""
 
 
 class SystemVariableDefinition(Enum):
@@ -247,15 +238,15 @@ class SystemVariableDefinition(Enum):
         doc="The fourth user variable")
     status_map = _Definition(
         _DataType.BYTE_ARRAY, offset=0x80, array_size=20,
-        default=bytes(bytearray(20)),
+        default=bytes(20),
         doc="The status map set during SCAMP boot")
     physical_to_virtual_core_map = _Definition(
         _DataType.BYTE_ARRAY, offset=0x94, array_size=20,
-        default=bytes(bytearray(20)),
+        default=bytes(20),
         doc="The physical core ID to virtual core ID map")
     virtual_to_physical_core_map = _Definition(
         _DataType.BYTE_ARRAY, offset=0xa8, array_size=20,
-        default=bytes(bytearray(20)),
+        default=bytes(20),
         doc="The virtual core ID to physical core ID map")
     n_working_cores = _Definition(
         _DataType.BYTE, offset=0xbc,
@@ -307,7 +298,7 @@ class SystemVariableDefinition(Enum):
         doc="The monitor incoming mailbox flags")
     ethernet_ip_address = _Definition(
         _DataType.BYTE_ARRAY, offset=0xf0, array_size=4,
-        default=bytes(bytearray(4)),
+        default=bytes(4),
         doc="The IP address of the chip")
     fixed_route_copy = _Definition(
         _DataType.INT, offset=0xf4,
@@ -319,7 +310,9 @@ class SystemVariableDefinition(Enum):
         _DataType.INT, offset=0xfc,
         doc="A word of padding")
 
-    def __init__(self, offset, data_type, default, array_size, doc):
+    def __init__(
+            self, data_type: _DataType, offset: int,
+            default: Union[int, bytes], array_size: Optional[int], doc: str):
         """
         :param _DataType data_type: The data type of the variable
         :param int offset: The offset from the start of the system variable
@@ -330,26 +323,26 @@ class SystemVariableDefinition(Enum):
         :type array_size: int or None
         """
         # pylint: disable=too-many-arguments
-        self._data_type = data_type
-        self._offset = offset
-        self._default = default
-        self._array_size = array_size
+        self._data_type: _DataType = data_type
+        self._offset: int = offset
+        self._default: Union[int, bytes] = default
+        self._array_size: Optional[int] = array_size
         self.__doc__ = doc
 
     @property
-    def data_type(self):
+    def data_type(self) -> _DataType:
         return self._data_type
 
     @property
-    def array_size(self):
+    def array_size(self) -> Optional[int]:
         return self._array_size
 
     @property
-    def offset(self):
+    def offset(self) -> int:
         return self._offset
 
     @property
-    def default(self):
+    def default(self) -> Union[int, bytes]:
         return self._default
 
 
@@ -358,8 +351,7 @@ class SystemVariableBootValues(object):
     Default values of the system variables that get passed to SpiNNaker
     during boot.
     """
-    __slot__ = [
-        "_values"]
+    __slot__ = "_values",
 
     def __init__(self):
         # Create a dict of variable values

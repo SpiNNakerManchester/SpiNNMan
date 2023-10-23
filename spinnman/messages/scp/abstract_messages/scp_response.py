@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Optional
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.scp import SCPResponseHeader
@@ -29,15 +29,15 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
     """
     Represents an abstract SCP Response.
     """
-    __slots__ = [
+    __slots__ = (
         "_scp_response_header",
-        "_sdp_header"]
+        "_sdp_header")
 
-    def __init__(self):
-        self._sdp_header = None
-        self._scp_response_header = None
+    def __init__(self) -> None:
+        self._sdp_header: Optional[SDPHeader] = None
+        self._scp_response_header: Optional[SCPResponseHeader] = None
 
-    def read_bytestring(self, data, offset):
+    def read_bytestring(self, data: bytes, offset: int):
         """
         Reads a packet from a byte-string of data.
 
@@ -51,28 +51,31 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         self.read_data_bytestring(data, _SCP_DATA_OFFSET + offset)
 
     @abstractmethod
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         """
         Reads the remainder of the data following the header.
 
         :param bytes data: The byte-string to read from
         :param int offset: The offset into the data after the headers
         """
+        raise NotImplementedError
 
     @property
-    def sdp_header(self):
+    def sdp_header(self) -> SDPHeader:
         """
         The SDP header from the response.
 
         :rtype: SDPHeader
         """
+        assert self._sdp_header is not None, "no response read"
         return self._sdp_header
 
     @property
-    def scp_response_header(self):
+    def scp_response_header(self) -> SCPResponseHeader:
         """
         The SCP header from the response.
 
         :rtype: SCPResponseHeader
         """
+        assert self._scp_response_header is not None, "no response read"
         return self._scp_response_header

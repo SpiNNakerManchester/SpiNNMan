@@ -20,13 +20,13 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from .get_version_response import GetVersionResponse
 
 
-class GetVersion(AbstractSCPRequest):
+class GetVersion(AbstractSCPRequest[GetVersionResponse]):
     """
     An SCP request to read the version of software running on a core.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, x, y, p):
+    def __init__(self, x: int, y: int, p: int):
         """
         :param int x:
             The x-coordinate of the chip to read from, between 0 and 255
@@ -46,5 +46,5 @@ class GetVersion(AbstractSCPRequest):
             SCPRequestHeader(command=SCPCommand.CMD_VER))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> GetVersionResponse:
         return GetVersionResponse()

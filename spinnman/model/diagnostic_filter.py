@@ -11,11 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import annotations
+from enum import Enum
+from typing import List, Type, TypeVar
 from spinnman.model.enums import (
     DiagnosticFilterDestination, DiagnosticFilterSource,
     DiagnosticFilterPayloadStatus, DiagnosticFilterDefaultRoutingStatus,
     DiagnosticFilterEmergencyRoutingStatus, DiagnosticFilterPacketType)
+#: :meta private:
+E = TypeVar("E", bound=Enum)
 
 # Bit offsets of the various fields in the filter word
 _PACKET_TYPE_OFFSET = 0
@@ -29,9 +33,11 @@ _ENABLE_INTERRUPT_OFFSET = 30
 
 
 # Uses an enum to set flags in the filter word from a given offset
-def _set_flags_in_word(word, enum_list, enum_type, offset):
+def _set_flags_in_word(
+        word: int, enum_list: List[E], enum_type: Type[E],
+        offset: int) -> int:
     if enum_list is None:
-        enum_values = list()
+        enum_values: List[E] = list()
     else:
         enum_values = list(enum_list)
     if not enum_values:
@@ -42,8 +48,9 @@ def _set_flags_in_word(word, enum_list, enum_type, offset):
 
 
 # Uses an enum to read flags in the filter word from a given offset
-def _read_flags_from_word(word, enum_list, offset):
-    flags = list()
+def _read_flags_from_word(
+        word: int, enum_list: Type[E], offset: int) -> List[E]:
+    flags: List[E] = list()
     for enum_value in enum_list:
         if word & 1 << (enum_value.value + offset) != 0:
             flags.append(enum_value)
@@ -68,11 +75,16 @@ class DiagnosticFilter(object):
         "_payload_statuses",
         "_sources"]
 
-    def __init__(self, enable_interrupt_on_counter_event,
-                 match_emergency_routing_status_to_incoming_packet,
-                 destinations, sources, payload_statuses,
-                 default_routing_statuses, emergency_routing_statuses,
-                 packet_types):
+    def __init__(self, enable_interrupt_on_counter_event: bool,
+                 match_emergency_routing_status_to_incoming_packet: bool,
+                 destinations: List[DiagnosticFilterDestination],
+                 sources: List[DiagnosticFilterSource],
+                 payload_statuses: List[DiagnosticFilterPayloadStatus],
+                 default_routing_statuses: List[
+                     DiagnosticFilterDefaultRoutingStatus],
+                 emergency_routing_statuses: List[
+                     DiagnosticFilterEmergencyRoutingStatus],
+                 packet_types: List[DiagnosticFilterPacketType]):
         """
         :param bool enable_interrupt_on_counter_event: Indicates whether
             an interrupt should be raised when this rule matches
@@ -116,39 +128,41 @@ class DiagnosticFilter(object):
         self._packet_types = packet_types
 
     @property
-    def enable_interrupt_on_counter_event(self):
+    def enable_interrupt_on_counter_event(self) -> bool:
         return self._enable_interrupt_on_counter_event
 
     @property
-    def match_emergency_routing_status_to_incoming_packet(self):
+    def match_emergency_routing_status_to_incoming_packet(self) -> bool:
         return self._match_emergency_routing_status_to_incoming_packet
 
     @property
-    def destinations(self):
+    def destinations(self) -> List[DiagnosticFilterDestination]:
         return self._destinations
 
     @property
-    def sources(self):
+    def sources(self) -> List[DiagnosticFilterSource]:
         return self._sources
 
     @property
-    def payload_statuses(self):
+    def payload_statuses(self) -> List[DiagnosticFilterPayloadStatus]:
         return self._payload_statuses
 
     @property
-    def default_routing_statuses(self):
+    def default_routing_statuses(self) -> List[
+            DiagnosticFilterDefaultRoutingStatus]:
         return self._default_routing_statuses
 
     @property
-    def emergency_routing_statuses(self):
+    def emergency_routing_statuses(self) -> List[
+            DiagnosticFilterEmergencyRoutingStatus]:
         return self._emergency_routing_statuses
 
     @property
-    def packet_types(self):
+    def packet_types(self) -> List[DiagnosticFilterPacketType]:
         return self._packet_types
 
     @property
-    def filter_word(self):
+    def filter_word(self) -> int:
         """
         A word of data that can be written to the router to set up the filter.
         """
@@ -179,7 +193,7 @@ class DiagnosticFilter(object):
         return data
 
     @staticmethod
-    def read_from_int(int_value):
+    def read_from_int(int_value: int) -> DiagnosticFilter:
         enable_interrupt_on_counter_event = (
             (int_value >> _ENABLE_INTERRUPT_OFFSET) & 0x1) == 1
         match_emergency_routing_status_to_incoming_packet = (

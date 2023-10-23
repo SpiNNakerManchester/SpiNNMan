@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Dict, List, Tuple
 from spinnman.model.enums import P2PTableRoute
 
 _ONE_WORD = struct.Struct("<I")
@@ -27,13 +28,14 @@ class P2PTable(object):
         "_routes",
         "_width"]
 
-    def __init__(self, width, height, column_data):
+    def __init__(self, width: int, height: int,
+                 column_data: List[Tuple[bytes, int]]):
         """
         :param int width:
         :param int height:
-        :param bytes column_data:
+        :param list(tuple(bytes,int)) column_data:
         """
-        self._routes = dict()
+        self._routes: Dict[Tuple[int, int], P2PTableRoute] = dict()
         self._width = width
         self._height = height
         for x in range(len(column_data)):
@@ -50,7 +52,7 @@ class P2PTable(object):
                     y += 1
 
     @staticmethod
-    def get_n_column_bytes(height):
+    def get_n_column_bytes(height: int) -> int:
         """
         Get the number of bytes to be read for each column of the table.
 
@@ -59,7 +61,7 @@ class P2PTable(object):
         return ((height + 7) // 8) * 4
 
     @staticmethod
-    def get_column_offset(column):
+    def get_column_offset(column: int) -> int:
         """
         Get the offset of the next column in the table from the P2P base
         address.
@@ -69,7 +71,7 @@ class P2PTable(object):
         return (((256 * column) // 8) * 4)
 
     @property
-    def width(self):
+    def width(self) -> int:
         """
         The width of the machine that this table represents.
 
@@ -78,7 +80,7 @@ class P2PTable(object):
         return self._width
 
     @property
-    def height(self):
+    def height(self) -> int:
         """
         The height of the machine that this table represents.
 
@@ -106,7 +108,7 @@ class P2PTable(object):
             (x, y) in self._routes and
             self._routes[(x, y)] != P2PTableRoute.NONE)
 
-    def get_route(self, x, y):
+    def get_route(self, x: int, y: int) -> P2PTableRoute:
         """
         Get the route to follow from this chip to the given chip.
 
@@ -114,9 +116,7 @@ class P2PTable(object):
         :param int y: The y-coordinate of the chip to find the route to
         :rtype: P2PTableRoute
         """
-        if (x, y) in self._routes:
-            return self._routes[x, y]
-        return P2PTableRoute.NONE
+        return self._routes.get((x, y), P2PTableRoute.NONE)
 
     @property
     def n_routes(self):

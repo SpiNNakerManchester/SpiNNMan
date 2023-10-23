@@ -23,7 +23,7 @@ from spinnman.transceiver import MockableTransceiver
 
 class TestData(unittest.TestCase):
 
-    def setUp(cls):
+    def setUp(self):
         unittest_setup()
 
     def test_setup(self):

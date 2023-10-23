@@ -13,10 +13,13 @@
 # limitations under the License.
 
 import struct
-import functools
-from spinnman.messages.scp.impl import ReadMemory
+from functools import partial
+from typing import List, Optional
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinn_machine import MulticastRoutingEntry, Router
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 # There are 1024 entries in a routing table
@@ -31,26 +34,28 @@ _N_READS = 64
 _ROUTE_ENTRY_PATTERN = struct.Struct("<2xBxIII")
 
 
-class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
+class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
     """
     A process for reading the multicast routing table of a SpiNNaker chip.
     """
-    __slots__ = [
+    __slots__ = (
         "_app_id",
-        "_entries"]
+        "_entries")
 
-    def __init__(self, connection_selector, app_id=None):
+    def __init__(self, connection_selector: ConnectionSelector,
+                 app_id: Optional[int] = None):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         :param int app_id:
         """
         super().__init__(connection_selector)
-        self._entries = [None] * _N_ENTRIES
+        self._entries: List[Optional[MulticastRoutingEntry]] = \
+            [None] * _N_ENTRIES
         self._app_id = app_id
 
-    def _add_routing_entry(self, route_no, offset, app_id, route, key, mask):
+    def _add_routing_entry(
+            self, route_no: int, offset: int, app_id: int, route: int,
+            key: int, mask: int):
         # pylint: disable=too-many-arguments
         if route >= 0xFF000000:
             return
@@ -65,14 +70,15 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             key, mask, processor_ids=processor_ids, link_ids=link_ids,
             defaultable=False)
 
-    def __handle_response(self, offset, response):
+    def __handle_response(self, offset: int, response: Response):
         for route_no in range(_ENTRIES_PER_READ):
             entry = _ROUTE_ENTRY_PATTERN.unpack_from(
                 response.data,
                 response.offset + route_no * _ROUTE_ENTRY_PATTERN.size)
             self._add_routing_entry(route_no, offset, *entry)
 
-    def get_routes(self, x, y, base_address):
+    def get_routes(self, x: int, y: int,
+                   base_address: int) -> List[MulticastRoutingEntry]:
         """
         :param int x:
         :param int y:
@@ -81,13 +87,14 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         """
         # Create the read requests
         offset = 0
-        for _ in range(_N_READS):
-            self._send_request(
-                ReadMemory(
-                    x, y, base_address + (offset * 16), UDP_MESSAGE_MAX_SIZE),
-                functools.partial(self.__handle_response, offset))
-            offset += _ENTRIES_PER_READ
-        self._finish()
-        self.check_for_error()
+        scamp_coords = x, y, 0
+        with self._collect_responses():
+            for _ in range(_N_READS):
+                self._send_request(
+                    ReadMemory(
+                        scamp_coords, base_address + (offset * 16),
+                        UDP_MESSAGE_MAX_SIZE),
+                    partial(self.__handle_response, offset))
+                offset += _ENTRIES_PER_READ
 
         return [entry for entry in self._entries if entry is not None]

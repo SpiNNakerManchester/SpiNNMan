@@ -14,7 +14,7 @@
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 from .application_copy_run_process import ApplicationCopyRunProcess
 from .application_run_process import ApplicationRunProcess
 
@@ -42,7 +42,11 @@ from .round_robin_connection_selector import RoundRobinConnectionSelector
 from .send_single_command_process import SendSingleCommandProcess
 from .write_memory_process import WriteMemoryProcess
 
+# Old name
+AbstractMultiConnectionProcessConnectionSelector = ConnectionSelector
+
 __all__ = ["AbstractMultiConnectionProcessConnectionSelector",
+           "ConnectionSelector",
            "FixedConnectionSelector", "MostDirectConnectionSelector",
            "RoundRobinConnectionSelector",
            "AbstractMultiConnectionProcess",

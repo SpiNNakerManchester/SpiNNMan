@@ -12,16 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os.path
 import time
-import logging
+from typing import List
 from spinn_utilities.log import FormatAdapter
+from spinn_machine import Machine, Chip
+from spinnman.connections.abstract_classes import Connection
 
 logger = FormatAdapter(logging.getLogger(__name__))
 _REPORT_NAME = "machine_structure.rpt"
 
 
-def generate_machine_report(report_directory, machine, connections):
+def generate_machine_report(
+        report_directory: str, machine: Machine,
+        connections: List[Connection]):
     """
     Generate report on the physical structure of the target SpiNNaker machine.
 
@@ -46,7 +51,7 @@ def generate_machine_report(report_directory, machine, connections):
         raise
 
 
-def _write_header(f, timestamp, machine, connections):
+def _write_header(f, timestamp: str, machine: Machine, connections):
     """
     :param str timestamp:
     :param ~spinn_machine.Machine machine:
@@ -61,7 +66,7 @@ def _write_header(f, timestamp, machine, connections):
     f.write("\t\t==========================\n")
 
 
-def _write_chip_router_report(f, chip):
+def _write_chip_router_report(f, chip: Chip):
     """
     :param ~spinn_machine.Chip chip:
     """

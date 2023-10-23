@@ -11,31 +11,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import annotations
 import logging
 from threading import Thread
-from concurrent.futures import ThreadPoolExecutor
+from typing import Callable, Generic, List, TypeVar
+from concurrent.futures import ThreadPoolExecutor, Future
 from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import SpinnmanEOFException
+from spinnman.connections.abstract_classes import Listenable
 
+#: :meta private:
+T = TypeVar("T")
 logger = FormatAdapter(logging.getLogger(__name__))
 _POOL_SIZE = 4
 _TIMEOUT = 1
 
 
-class ConnectionListener(Thread):
+class ConnectionListener(Thread, Generic[T]):
     """
     Thread that listens to a connection and calls callbacks with new
     messages when they arrive.
     """
-    __slots__ = [
+    __slots__ = (
         "__callback_pool",
         "__callbacks",
         "__connection",
         "__done",
-        "__timeout"]
+        "__timeout")
 
-    def __init__(self, connection, n_processes=_POOL_SIZE, timeout=_TIMEOUT):
+    def __init__(self, connection: Listenable[T],
+                 n_processes: int = _POOL_SIZE, timeout: float = _TIMEOUT):
         """
         :param Listenable connection: A connection to listen to
         :param int n_processes:
@@ -51,19 +56,20 @@ class ConnectionListener(Thread):
         self.__timeout = timeout
         self.__callback_pool = ThreadPoolExecutor(max_workers=n_processes)
         self.__done = False
-        self.__callbacks = set()
+        self.__callbacks: List[Callable[[T], None]] = []
 
-    def __run_step(self, handler):
+    def __run_step(self, handler: Callable[[], T]):
         """
         :param ~collections.abc.Callable handler:
         """
         if self.__connection.is_ready_to_receive(timeout=self.__timeout):
             message = handler()
             for callback in self.__callbacks:
-                future = self.__callback_pool.submit(callback, message)
+                future = self.__callback_pool.submit(
+                    callback, message)
                 future.add_done_callback(self.__done_callback)
 
-    def __done_callback(self, future):
+    def __done_callback(self, future: Future[None]):
         """
         :param ~concurrent.futures.Future future:
         """
@@ -72,7 +78,7 @@ class ConnectionListener(Thread):
         except Exception:  # pylint: disable=broad-except
             logger.exception("problem in listener call")
 
-    def run(self):
+    def run(self) -> None:
         """
         Implements the listening thread.
         """
@@ -88,7 +94,7 @@ class ConnectionListener(Thread):
                         logger.warning("problem when dispatching message",
                                        exc_info=True)
 
-    def add_callback(self, callback):
+    def add_callback(self, callback: Callable[[T], None]):
         """
         Add a callback to be called when a message is received.
 
@@ -96,9 +102,9 @@ class ConnectionListener(Thread):
             A callable which takes a single parameter, which is the message
             received; the result of the callback will be ignored.
         """
-        self.__callbacks.add(callback)
+        self.__callbacks.append(callback)
 
-    def close(self):
+    def close(self) -> None:
         """
         Closes the listener.
 

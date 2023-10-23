@@ -62,7 +62,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     If any method here is considered important to keep please move it to
     Transceiver and its implementations
     """
-    __slots__ = []
+    __slots__ = ()
 
     # calls many methods only reachable do to require_subclass
     # pylint: disable=no-member,assigning-non-slot
@@ -174,9 +174,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
                 self._n_chip_execute_locks -= 1
                 self._chip_execute_lock_condition.notify_all()
 
-    def execute(
-            self, x, y, processors, executable, app_id, n_bytes=None,
-            wait=False, is_filename=False):
+    def execute(self, x, y, processors, executable, app_id, n_bytes=None,
+                wait=False):
         """
         Start an executable running on a single chip.
 
@@ -210,7 +209,6 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             * If executable is a str, the length of the file will be used
         :param bool wait:
             True if the binary should enter a "wait" state on loading
-        :param bool is_filename: True if executable is a filename
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the executable
@@ -229,8 +227,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         with self._chip_execute_lock(x, y):
             # Write the executable
             self.write_memory(
-                x, y, self._EXECUTABLE_ADDRESS, executable, n_bytes,
-                is_filename=is_filename)
+                x, y, self._EXECUTABLE_ADDRESS, executable, n_bytes=n_bytes)
 
             # Request the start of the executable
             process = SendSingleCommandProcess(self._scamp_connection_selector)
@@ -253,8 +250,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         # Execute each of the binaries and get them in to a "wait" state
         for binary in executable_targets.binaries:
             core_subsets = executable_targets.get_cores_for_binary(binary)
-            self.execute_flood(
-                core_subsets, binary, app_id, wait=True, is_filename=True)
+            self.execute_flood(core_subsets, binary, app_id, wait=True)
 
         # Sleep to allow cores to get going
         time.sleep(0.5)
@@ -374,16 +370,16 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         process = WriteMemoryProcess(self.scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
             process.write_link_memory_from_reader(
-                x, y, cpu, link, base_address, data, n_bytes)
+                (x, y, cpu), link, base_address, data, n_bytes)
         elif isinstance(data, int):
             data_to_write = self._ONE_WORD.pack(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data_to_write, 0, 4)
+                (x, y, cpu), link, base_address, data_to_write, 0, 4)
         else:
             if n_bytes is None:
                 n_bytes = len(data)
             process.write_link_memory_from_bytearray(
-                x, y, cpu, link, base_address, data, offset, n_bytes)
+                (x, y, cpu), link, base_address, data, offset, n_bytes)
 
     def read_neighbour_memory(self, x, y, link, base_address, length, cpu=0):
         """
@@ -424,7 +420,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
                       "and untested due to no known use.")
             process = ReadMemoryProcess(self.scamp_connection_selector)
             return process.read_link_memory(
-                x, y, cpu, link, base_address, length)
+                (x, y, cpu), link, base_address, length)
         except Exception:
             logger.info(self.where_is_xy(x, y))
             raise
@@ -533,7 +529,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             logger.info(self.where_is_xy(x, y))
             raise
 
-    def free_sdram(self, x, y, base_address, app_id):
+    def free_sdram(self, x, y, base_address):
         """
         Free allocated SDRAM.
 
@@ -543,13 +539,12 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         :param int x: The x-coordinate of the chip onto which to ask for memory
         :param int y: The y-coordinate of the chip onto which to ask for memory
         :param int base_address: The base address of the allocated memory
-        :param int app_id: The app ID of the allocated memory
         """
         try:
             warn_once(logger, "The free_sdram method is deprecated and "
                       "likely to be removed.")
             process = DeAllocSDRAMProcess(self._scamp_connection_selector)
-            process.de_alloc_sdram(x, y, app_id, base_address)
+            process.de_alloc_sdram(x, y, base_address)
         except Exception:
             logger.info(self.where_is_xy(x, y))
             raise
@@ -612,7 +607,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
 
             process = SendSingleCommandProcess(
                 self.scamp_connection_selector)
-            response = process.execute(ReadMemory(x, y, memory_position, 4))
+            response = process.execute(
+                ReadMemory((x, y, 0), memory_position, 4))
             return DiagnosticFilter.read_from_int(self._ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
             # pylint: disable=no-member

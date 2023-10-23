@@ -13,50 +13,51 @@
 # limitations under the License.
 
 import functools
-import struct
-from spinnman.model import CPUInfo, CPUInfos
+from typing import cast
+from spinn_machine import CoreSubsets
+from spinnman.model import CPUInfos
+from spinnman.model.cpu_info import CPUInfo, _vcpu_t, _VCPU_PATTERN
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.utilities.utility_functions import get_vcpu_address
-from spinnman.messages.scp.impl import ReadMemory
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 
-_INFO_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
 
+class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
+    __slots__ = ("__cpu_infos", )
 
-class GetCPUInfoProcess(AbstractMultiConnectionProcess):
-    __slots__ = [
-        "_cpu_infos"]
-
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
-        self._cpu_infos = CPUInfos()
+        self.__cpu_infos = CPUInfos()
 
-    def _filter_and_add_repsonse(self, x, y, p, cpu_data):
-        self._cpu_infos.add_info(CPUInfo(x, y, p, cpu_data))
+    def _is_desired(self, cpu_info: CPUInfo) -> bool:
+        # pylint: disable=unused-argument
+        return True
 
-    def __handle_response(self, x, y, p, response):
-        cpu_data = _INFO_PATTERN.unpack_from(response.data, response.offset)
-        self._filter_and_add_repsonse(x, y, p, cpu_data)
+    def __handle_response(self, x: int, y: int, p: int, response: Response):
+        cpu_data = cast(_vcpu_t, _VCPU_PATTERN.unpack_from(
+            response.data, response.offset))
+        cpu_info = CPUInfo(x, y, p, cpu_data)
+        if self._is_desired(cpu_info):
+            self.__cpu_infos.add_info(cpu_info)
 
-    def get_cpu_info(self, core_subsets):
+    def get_cpu_info(self, core_subsets: CoreSubsets) -> CPUInfos:
         """
         :param ~spinn_machine.CoreSubsets core_subsets:
-        :rtype: list(CPUInfo)
+        :rtype: CPUInfos
         """
-        for core_subset in core_subsets:
-            x = core_subset.x
-            y = core_subset.y
+        with self._collect_responses():
+            for core_subset in core_subsets:
+                x, y = core_subset.x, core_subset.y
+                for p in core_subset.processor_ids:
+                    self._send_request(
+                        ReadMemory((x, y, 0), get_vcpu_address(p),
+                                   CPU_INFO_BYTES),
+                        functools.partial(self.__handle_response, x, y, p))
 
-            for p in core_subset.processor_ids:
-                self._send_request(
-                    ReadMemory(x, y, get_vcpu_address(p), CPU_INFO_BYTES),
-                    functools.partial(self.__handle_response, x, y, p))
-        self._finish()
-        self.check_for_error()
-
-        return self._cpu_infos
+        return self.__cpu_infos

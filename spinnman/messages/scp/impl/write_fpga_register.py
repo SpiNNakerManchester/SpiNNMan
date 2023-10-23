@@ -15,16 +15,15 @@
 import struct
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, BMPRequest)
+    AbstractSCPRequest, BMPRequest, BMPOKResponse)
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.enums import SCPCommand
-from .check_ok_response import CheckOKResponse
 
 _ONE_WORD = struct.Struct("<I")
 
 
 # pylint: disable=wrong-spelling-in-docstring
-class WriteFPGARegister(BMPRequest):
+class WriteFPGARegister(BMPRequest[BMPOKResponse]):
     """
     A request for writing a word to a FPGA (SPI) register.
 
@@ -35,9 +34,9 @@ class WriteFPGARegister(BMPRequest):
     .. _README: https://github.com/SpiNNakerManchester/spio/\
                 blob/master/designs/spinnaker_fpgas/README.md#spi-interface
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, fpga_num, address, value, board):
+    def __init__(self, fpga_num: int, address: int, value: int, board: int):
         """
         :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
         :param int address: Register address to read or write to
@@ -51,5 +50,6 @@ class WriteFPGARegister(BMPRequest):
             data=_ONE_WORD.pack(value))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
-        return CheckOKResponse("Send FPGA register write", "CMD_LINK_WRITE")
+    def get_scp_response(self) -> BMPOKResponse:
+        return BMPOKResponse(
+            "Send FPGA register write", SCPCommand.CMD_LINK_WRITE)

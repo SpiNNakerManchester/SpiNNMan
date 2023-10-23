@@ -15,6 +15,7 @@
 import os
 import math
 import time
+from typing import Any, Dict, Iterable, Optional, Tuple
 import array
 from spinnman.data import SpiNNManDataView
 from .system_variable_boot_values import (
@@ -36,12 +37,13 @@ class SpinnakerBootMessages(object):
     """
     A set of boot messages to be sent to boot the board.
     """
-    __slots__ = [
+    __slots__ = (
         "_boot_data",
         "_n_bytes_to_read",
-        "_no_data_packets"]
+        "_no_data_packets")
 
-    def __init__(self, extra_boot_values=None):
+    def __init__(self, extra_boot_values: Optional[Dict[
+            SystemVariableDefinition, Any]] = None):
         """
         :param extra_boot_values:
             Any additional or overwrite values to set during boot.
@@ -102,7 +104,7 @@ class SpinnakerBootMessages(object):
         self._n_bytes_to_read = n_words_to_read * 4
 
     @staticmethod
-    def _get_boot_image_file():
+    def _get_boot_image_file() -> Tuple[str, int]:
         """
         :rtype: tuple(str,int)
         """
@@ -119,7 +121,7 @@ class SpinnakerBootMessages(object):
                 "must be divisible by 4")
         return file_name, file_size
 
-    def _get_packet_data(self, block_id):
+    def _get_packet_data(self, block_id: int) -> bytes:
         """
         Read a packet of data.
 
@@ -131,7 +133,7 @@ class SpinnakerBootMessages(object):
         return self._boot_data[offset:offset + n_bytes]
 
     @property
-    def messages(self):
+    def messages(self) -> Iterable[SpinnakerBootMessage]:
         """
         An iterable of message to be sent.
 

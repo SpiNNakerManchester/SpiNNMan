@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Optional
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -23,17 +23,18 @@ _NNP_FORWARD_RETRY = (0x3f << 24) | (0x1E << 16)
 _NNP_FLOOD_FILL_START = 6
 
 
-class FloodFillData(AbstractSCPRequest):
+class FloodFillData(AbstractSCPRequest[CheckOKResponse]):
     """
     A request to start a flood fill of data.
     """
-    __slots__ = [
+    __slots__ = (
         "_data_to_write",
         "_offset",
-        "_size"]
+        "_size")
 
-    def __init__(self, nearest_neighbour_id, block_no, base_address, data,
-                 offset=0, length=None):
+    def __init__(
+            self, nearest_neighbour_id: int, block_no: int, base_address: int,
+            data: bytes, offset: int = 0, length: Optional[int] = None):
         """
         :param int nearest_neighbour_id:
             The ID of the packet, between 0 and 127
@@ -45,11 +46,12 @@ class FloodFillData(AbstractSCPRequest):
             divisible by 4
         """
         # pylint: disable=too-many-arguments
-        self._size = length
         self._offset = offset
         self._data_to_write = data
         if length is None:
             self._size = len(data)
+        else:
+            self._size = length
 
         argument_1 = _NNP_FORWARD_RETRY | nearest_neighbour_id
         argument_2 = (block_no << 16) | (((self._size // 4) - 1) << 8)
@@ -65,11 +67,11 @@ class FloodFillData(AbstractSCPRequest):
             argument_3=base_address, data=None)
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         datastring = super().bytestring
         data = self._data_to_write[self._offset:self._offset + self._size]
         return datastring + bytes(data)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Flood Fill", "CMD_NNP:NNP_FFS")

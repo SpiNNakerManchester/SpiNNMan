@@ -22,13 +22,14 @@ from .check_ok_response import CheckOKResponse
 _IPTAG_SET = 1
 
 
-class IPTagSet(AbstractSCPRequest):
+class IPTagSet(AbstractSCPRequest[CheckOKResponse]):
     """
     An SCP Request to set an IP Tag.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, x, y, host, port, tag, strip, use_sender=False):
+    def __init__(self, x: int, y: int, host, port: int, tag: int, *,
+                 strip: bool = False, use_sender: bool = False):
         """
         :param int x: The x-coordinate of a chip, between 0 and 255
         :param int y: The y-coordinate of a chip, between 0 and 255
@@ -56,5 +57,5 @@ class IPTagSet(AbstractSCPRequest):
                         (host[1] << 8) | host[0]))
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Set IP Tag", "CMD_IPTAG")

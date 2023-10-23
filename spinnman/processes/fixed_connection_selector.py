@@ -11,27 +11,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Any, Generic, TypeVar
 from spinn_utilities.overrides import overrides
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
+from spinnman.connections.udp_packet_connections import (
+    SCAMPConnection, BMPConnection)
+
+#: Type of connections selected between.
+#: :meta private:
+Conn = TypeVar("Conn", SCAMPConnection, BMPConnection)
 
 
-class FixedConnectionSelector(
-        AbstractMultiConnectionProcessConnectionSelector):
+class FixedConnectionSelector(ConnectionSelector[Conn], Generic[Conn]):
     """
     A connection selector that only uses a single connection.
     """
     __slots__ = ("__connection", )
 
-    def __init__(self, connection):
+    def __init__(self, connection: Conn):
         """
         :param SCAMPConnection connection:
             The connection to be used
         """
-        self.__connection = connection
+        self.__connection: Conn = connection
 
-    @overrides(
-        AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
-    def get_next_connection(self, message):
+    @overrides(ConnectionSelector.get_next_connection)
+    def get_next_connection(self, message: Any) -> Conn:
         return self.__connection

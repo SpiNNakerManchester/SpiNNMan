@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import List
 from spinn_utilities.overrides import overrides
 from spinn_machine import FixedRouteEntry
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
@@ -25,14 +26,47 @@ from spinnman.messages.sdp import SDPHeader, SDPFlag
 _ONE_WORD = struct.Struct("<I")
 
 
-class FixedRouteRead(AbstractSCPRequest):
+class _FixedRouteResponse(AbstractSCPResponse):
+    """
+    response for the fixed route read
+    """
+    __slots__ = [
+        # the fixed route router entry
+        "_route"]
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._route = 0
+
+    @overrides(AbstractSCPResponse.read_data_bytestring)
+    def read_data_bytestring(self, data: bytes, offset: int):
+        result = self.scp_response_header.result
+        if result != SCPResult.RC_OK:
+            raise SpinnmanUnexpectedResponseCodeException(
+                "Read Fixed Route entry", "CMD_RTR", result.name)
+
+        self._route = _ONE_WORD.unpack_from(data, offset)[0]
+
+    @property
+    def route(self) -> FixedRouteEntry:
+        processor_ids: List[int] = list()
+        for processor_id in range(26):
+            if self._route & (1 << (6 + processor_id)) != 0:
+                processor_ids.append(processor_id)
+        link_ids: List[int] = list()
+        for link_id in range(6):
+            if self._route & (1 << link_id) != 0:
+                link_ids.append(link_id)
+        return FixedRouteEntry(processor_ids, link_ids)
+
+
+class FixedRouteRead(AbstractSCPRequest[_FixedRouteResponse]):
     """
     Gets a fixed route entry.
     """
+    __slots__ = ()
 
-    __slots__ = []
-
-    def __init__(self, x, y, app_id):
+    def __init__(self, x: int, y: int, app_id: int):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
@@ -54,39 +88,5 @@ class FixedRouteRead(AbstractSCPRequest):
             argument_1=(app_id << 8) | 3, argument_2=1 << 31)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> _FixedRouteResponse:
         return _FixedRouteResponse()
-
-
-class _FixedRouteResponse(AbstractSCPResponse):
-    """
-    response for the fixed route read
-    """
-    __slots__ = [
-        # the fixed route router entry
-        "_route"]
-
-    def __init__(self):
-        super().__init__()
-        self._route = None
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "Read Fixed Route entry", "CMD_RTR", result.name)
-
-        self._route = _ONE_WORD.unpack_from(data, offset)[0]
-
-    @property
-    def route(self):
-        processor_ids = list()
-        for processor_id in range(0, 26):
-            if self._route & (1 << (6 + processor_id)) != 0:
-                processor_ids.append(processor_id)
-        link_ids = list()
-        for link_id in range(0, 6):
-            if self._route & (1 << link_id) != 0:
-                link_ids.append(link_id)
-        return FixedRouteEntry(processor_ids, link_ids)

@@ -23,8 +23,7 @@ class EIEIOCommandHeader(object):
     """
     EIEIO header for command packets.
     """
-    __slots__ = [
-        "_command"]
+    __slots__ = "_command",
 
     def __init__(self, command):
         if isinstance(command, Enum):
