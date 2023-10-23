@@ -46,7 +46,7 @@ class Virtual5Transceiver(Version5Transceiver):
     @overrides(Version5Transceiver.read_memory)
     def read_memory(
             self, x: int, y: int, base_address: int, length: int,
-            cpu: int = 0) -> bytes:
+            cpu: int = 0) -> bytearray:
         try:
             return super().read_memory(x, y, base_address, length, cpu)
         except SpinnmanIOException as exc:
