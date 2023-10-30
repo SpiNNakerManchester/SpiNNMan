@@ -34,7 +34,9 @@ class CountStateResponse(AbstractSCPResponse):
     @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
+        # We can accept a no-reply response here; that could just mean
+        # that the count wasn't complete (but might be enough anyway)
+        if result != SCPResult.RC_OK and result != SCPResult.RC_P2P_NOREPLY:
             raise SpinnmanUnexpectedResponseCodeException(
                 "CountState", "CMD_COUNT", result.name)
         self._count = _ONE_WORD.unpack_from(data, offset)[0]
