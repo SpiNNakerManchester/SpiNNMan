@@ -24,6 +24,8 @@ from spinn_machine import CoreSubsets, CoreSubset
 from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
 from spinnman.model.enums import CPUState
+from spinnman.transceiver import Transceiver
+
 SCAMP_ID = 0
 IGNORED_IDS = {SCAMP_ID, 16}  # WHY 16?
 
@@ -67,7 +69,7 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
         print(f'watchdog core: {x} {y} {p}')
 
 
-def _make_transceiver(host, version, bmp_names):
+def _make_transceiver(host, version, bmp_names) -> Transceiver:
     """
     :param host:
         Host to use or `None` to use test configuration for all parameters

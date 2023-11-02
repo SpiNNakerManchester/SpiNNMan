@@ -26,6 +26,7 @@ from spinnman.utilities.utility_functions import (
     work_out_bmp_from_machine_details)
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
+from spinnman.transceiver import Transceiver
 from spinnman.transceiver.version3transceiver import Version3Transceiver
 from spinnman.transceiver.version5transceiver import Version5Transceiver
 from spinnman.transceiver.virtual5Transceiver import Virtual5Transceiver
@@ -38,7 +39,7 @@ def create_transceiver_from_hostname(
         hostname: Optional[str], *,
         bmp_connection_data: Optional[BMPConnectionData] = None,
         auto_detect_bmp: bool = False, power_cycle: bool = False,
-        extended: bool = False):
+        extended: bool = False) -> Transceiver:
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -110,7 +111,7 @@ def create_transceiver_from_hostname(
 
 def create_transceiver_from_connections(
         connections: List[Connection], virtual: bool = False,
-        power_cycle: bool = False, extended: bool = False):
+        power_cycle: bool = False, extended: bool = False) -> Transceiver:
     """
     Create a Transceiver with these connections
 
