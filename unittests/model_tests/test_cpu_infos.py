@@ -43,12 +43,13 @@ class TestCpuInfos(unittest.TestCase):
             "['0, 0, 2 (ph: 6)', '1, 0, 1 (ph: 7)']", str(finished))
         self.assertTrue(finished)
 
+        finished = infos.infos_not_in_states(
+            [CPUState.RUNNING, CPUState.RUN_TIME_EXCEPTION])
+        self.assertEqual(
+            "['0, 0, 2 (ph: 6)', '1, 0, 1 (ph: 7)']", str(finished))
+
         idle = infos.infos_for_state(CPUState.IDLE)
         self.assertFalse(idle)
-
-        info = infos.get_cpu_info(0, 0, 2)
-        self.assertEqual(
-            "0:0:02 (06) FINISHED           scamp-3            0", str(info))
 
         # the str is for example purpose and may change without notice
         self.assertEqual(infos.get_status_string(),

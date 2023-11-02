@@ -90,6 +90,20 @@ class CPUInfos(object):
                 for_state.add_info(info)
         return for_state
 
+    def infos_not_in_states(self, states: Iterable[CPUState]) -> 'CPUInfos':
+        """
+        Creates a new CpuInfos object with Just the Infos that match the state.
+
+        :param iterable(~spinnman.model.enums.CPUState) states:
+        :return: New Infos object with the filtered infos if any
+        :rtype: CPUInfos
+        """
+        for_state = CPUInfos()
+        for info in self._cpu_infos.values():
+            if info.state not in states:
+                for_state.add_info(info)
+        return for_state
+
     def get_status_string(self) -> str:
         """
         Get a string indicating the status of the given cores.
