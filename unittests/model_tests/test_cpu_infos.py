@@ -51,7 +51,6 @@ class TestCpuInfos(unittest.TestCase):
         idle = infos.infos_for_state(CPUState.IDLE)
         self.assertFalse(idle)
 
-
         # the str is for example purpose and may change without notice
         self.assertEqual(infos.get_status_string(),
                          "0:0:1 in state RUNNING\n"
