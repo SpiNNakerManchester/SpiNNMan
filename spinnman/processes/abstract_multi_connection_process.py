@@ -17,7 +17,7 @@ import logging
 import sys
 from types import TracebackType
 from typing import (
-    Callable, Dict, Generator, Generic, List, Optional, TypeVar, cast)
+    Callable, Dict, Generator, Generic, List, Optional, TypeVar, cast, Set)
 from typing_extensions import Self, TypeAlias
 from spinn_utilities.log import FormatAdapter
 from spinnman.connections import SCPRequestPipeLine
@@ -62,7 +62,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
     def __init__(self, next_connection_selector: ConnectionSelector,
                  n_retries: int = N_RETRIES, timeout: float = SCP_TIMEOUT,
                  n_channels: int = 8, intermediate_channel_waits: int = 7,
-                 non_fail_retry_codes: Optional[set(SCPResult)] = None):
+                 non_fail_retry_codes: Optional[Set[SCPResult]] = None):
         """
         :param ConnectionSelector next_connection_selector:
             How to choose the connection.
@@ -77,7 +77,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
         :param int intermediate_channel_waits:
             The maximum number of outstanding message/reply pairs to have on a
             particular connection. Passed to :py:class:`SCPRequestPipeLine`
-        :param Optional[set(SCPResult)] non_fail_retry_codes:
+        :param Optional[Set[SCPResult]] non_fail_retry_codes:
             Optional set of responses that result in retry but after retrying
             don't then result in failure even if returned on the last call.
         """
