@@ -14,6 +14,7 @@
 
 from spinnman.messages.scp.impl import CountState
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 # Timeout for getting core state count; higher due to more waiting needed
 GET_CORE_COUNT_TIMEOUT = 2.0
@@ -29,7 +30,8 @@ class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
-        super().__init__(connection_selector, timeout=GET_CORE_COUNT_TIMEOUT)
+        super().__init__(connection_selector, timeout=GET_CORE_COUNT_TIMEOUT,
+                         non_fail_retry_codes={SCPResult.RC_P2P_NOREPLY})
         self._n_cores = 0
 
     def __handle_response(self, response):

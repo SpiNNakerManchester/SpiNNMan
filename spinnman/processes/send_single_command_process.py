@@ -18,6 +18,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
+from spinnman.messages.scp.enums.scp_result import SCPResult
 #: Type of responses.
 #: :meta private:
 R = TypeVar("R", bound=AbstractSCPResponse)
@@ -30,7 +31,8 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
     __slots__ = ("_response", )
 
     def __init__(self, connection_selector: ConnectionSelector,
-                 n_retries: int = 3, timeout: float = SCP_TIMEOUT):
+                 n_retries: int = 3, timeout: float = SCP_TIMEOUT,
+                 non_fail_retry_codes: Optional[set(SCPResult)] = None):
         """
         :param ConnectionSelector connection_selector:
         :param int n_retries:
@@ -39,9 +41,13 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
         :param float timeout:
             The timeout, in seconds. Passed to
             :py:class:`SCPRequestPipeLine`
+        :param Optional[set(SCPResult)] non_fail_retry_codes:
+            Optional set of responses that result in retry but after retrying
+            don't then result in failure even if returned on the last call.
         """
         super().__init__(
-            connection_selector, n_retries=n_retries, timeout=timeout)
+            connection_selector, n_retries=n_retries, timeout=timeout,
+            non_fail_retry_codes=non_fail_retry_codes)
         self._response: Optional[R] = None
 
     def __handle_response(self, response: R):
