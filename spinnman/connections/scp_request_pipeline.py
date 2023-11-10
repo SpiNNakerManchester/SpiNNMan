@@ -69,6 +69,7 @@ class SCPRequestPipeLine(Generic[R]):
         "_n_retries",
         "_n_retry_code_resent",
         "_n_timeouts",
+        "_non_fail_retry_codes",
         "_packet_timeout",
         "_retry_reason",
         "_request_data",
@@ -78,7 +79,8 @@ class SCPRequestPipeLine(Generic[R]):
 
     def __init__(self, connection: SCAMPConnection, n_channels=1,
                  intermediate_channel_waits=0,
-                 n_retries=N_RETRIES, packet_timeout=SCP_TIMEOUT):
+                 n_retries=N_RETRIES, packet_timeout=SCP_TIMEOUT,
+                 non_fail_retry_codes=None):
         """
         :param SCAMPConnection connection:
             The connection over which the communication is to take place
@@ -91,6 +93,9 @@ class SCPRequestPipeLine(Generic[R]):
             reason before an error is triggered
         :param float packet_timeout: The number of elapsed seconds after
             sending a packet before it is considered a timeout.
+        :param non_fail_retry_codes: Codes that could retry but won't fail, or
+            None if there are no such codes
+        :type non_fail_retry_codes: set(SCPResult) or None
         """
         self._connection = connection
         self._n_channels = n_channels
@@ -129,6 +134,9 @@ class SCPRequestPipeLine(Generic[R]):
         # The number of packets that have been resent
         self._n_resent = 0
         self._n_retry_code_resent = 0
+        self._non_fail_retry_codes = non_fail_retry_codes
+        if self._non_fail_retry_codes is None:
+            self._non_fail_retry_codes = set()
 
         # self._token_bucket = TokenBucket(43750, 4375000)
         # self._token_bucket = TokenBucket(3408, 700000)
@@ -268,29 +276,31 @@ class SCPRequestPipeLine(Generic[R]):
                     time.sleep(0.1)
                     self._resend(seq, request_sent, str(result))
                     self._n_retry_code_resent += 1
+                    return
                 except Exception as e:  # pylint: disable=broad-except
-                    self._error_callbacks[seq](
-                        request_sent, e,
-                        cast(TracebackType, sys.exc_info()[2]),
-                        self._connection)
-                    self._remove_record(seq)
-            else:
+                    if result not in self._non_fail_retry_codes:
+                        self._error_callbacks[seq](
+                            request_sent, e,
+                            cast(TracebackType, sys.exc_info()[2]),
+                            self._connection)
+                        self._remove_record(seq)
+                        return
 
-                # No retry is possible - try constructing the result
-                try:
-                    response = request_sent.get_scp_response()
-                    response.read_bytestring(raw_data, offset)
-                    cb = self._callbacks[seq]
-                    if cb is not None:
-                        cb(response)
-                except Exception as e:  # pylint: disable=broad-except
-                    self._error_callbacks[seq](
-                        request_sent, e,
-                        cast(TracebackType, sys.exc_info()[2]),
-                        self._connection)
+            # No retry is possible and not failed - try constructing the result
+            try:
+                response = request_sent.get_scp_response()
+                response.read_bytestring(raw_data, offset)
+                cb = self._callbacks[seq]
+                if cb is not None:
+                    cb(response)
+            except Exception as e:  # pylint: disable=broad-except
+                self._error_callbacks[seq](
+                    request_sent, e,
+                    cast(TracebackType, sys.exc_info()[2]),
+                    self._connection)
 
-                # Remove the sequence from the outstanding responses
-                self._remove_record(seq)
+            # Remove the sequence from the outstanding responses
+            self._remove_record(seq)
 
     def _handle_receive_timeout(self) -> None:
         self._n_timeouts += 1
