@@ -17,7 +17,7 @@ import logging
 import sys
 from types import TracebackType
 from typing import (
-    Callable, Dict, Generator, Generic, List, Optional, TypeVar, cast)
+    Callable, Dict, Generator, Generic, List, Optional, TypeVar, cast, Set)
 from typing_extensions import Self, TypeAlias
 from spinn_utilities.log import FormatAdapter
 from spinnman.connections import SCPRequestPipeLine
@@ -29,6 +29,7 @@ from .abstract_multi_connection_process_connection_selector import (
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, AbstractSCPResponse)
+from spinnman.messages.scp.enums.scp_result import SCPResult
 #: Type of responses.
 #: :meta private:
 R = TypeVar("R", bound=AbstractSCPResponse)
@@ -53,13 +54,15 @@ class AbstractMultiConnectionProcess(Generic[R]):
         "_intermediate_channel_waits",
         "_n_channels",
         "_n_retries",
+        "_non_fail_retry_codes",
         "_conn_selector",
         "_scp_request_pipelines",
         "_timeout")
 
     def __init__(self, next_connection_selector: ConnectionSelector,
                  n_retries: int = N_RETRIES, timeout: float = SCP_TIMEOUT,
-                 n_channels: int = 8, intermediate_channel_waits: int = 7):
+                 n_channels: int = 8, intermediate_channel_waits: int = 7,
+                 non_fail_retry_codes: Optional[Set[SCPResult]] = None):
         """
         :param ConnectionSelector next_connection_selector:
             How to choose the connection.
@@ -74,6 +77,9 @@ class AbstractMultiConnectionProcess(Generic[R]):
         :param int intermediate_channel_waits:
             The maximum number of outstanding message/reply pairs to have on a
             particular connection. Passed to :py:class:`SCPRequestPipeLine`
+        :param Optional[Set[SCPResult]] non_fail_retry_codes:
+            Optional set of responses that result in retry but after retrying
+            don't then result in failure even if returned on the last call.
         """
         self._exceptions: List[Exception] = []
         self._tracebacks: List[TracebackType] = []
@@ -86,6 +92,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
         self._n_channels = n_channels
         self._intermediate_channel_waits = intermediate_channel_waits
         self._conn_selector = next_connection_selector
+        self._non_fail_retry_codes = non_fail_retry_codes
 
     def _send_request(self, request: AbstractSCPRequest[R],
                       callback: Optional[Callable[[R], None]] = None,
@@ -98,7 +105,8 @@ class AbstractMultiConnectionProcess(Generic[R]):
                 connection, n_retries=self._n_retries,
                 packet_timeout=self._timeout,
                 n_channels=self._n_channels,
-                intermediate_channel_waits=self._intermediate_channel_waits)
+                intermediate_channel_waits=self._intermediate_channel_waits,
+                non_fail_retry_codes=self._non_fail_retry_codes)
         self._scp_request_pipelines[connection].send_request(
             request, callback, error_callback)
 
