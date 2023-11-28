@@ -182,6 +182,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             operation["nmpi-job-id"] = self.__nmpi_job
             if self.__nmpi_user is not None:
                 operation["owner"] = self.__nmpi_user
+        logger.info("Posting {} to {}", operation, self.__jobs_url)
         r = self.__session.post(self.__jobs_url, operation, timeout=30)
         url = r.headers["Location"]
         return _SpallocJob(self.__session, fix_url(url))
