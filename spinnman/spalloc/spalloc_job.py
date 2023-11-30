@@ -141,15 +141,15 @@ class SpallocJob(object, metaclass=AbstractBase):
 
     @abstractmethod
     def wait_for_state_change(self, old_state: SpallocState,
-                              timeout: Optional[int] = None) -> SpallocState:
+                              n_retries: Optional[int] = None) -> SpallocState:
         """
         Wait until the allocation is not in the given old state.
 
         :param SpallocState old_state:
             The state that we are looking to change out of.
-        :param timeout:
-            The time to wait, or None to wait forever
-        :type timeout: int or None
+        :param n_retries:
+            The number of times to retry or None to try forever
+        :type n_retries: int or None
         :return: The state that the allocation is now in.
 
             .. note::
@@ -159,13 +159,10 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def wait_until_ready(self, timeout: Optional[int] = None,
-                         n_retries: Optional[int] = None):
+    def wait_until_ready(self, n_retries: Optional[int] = None):
         """
         Wait until the allocation is in the ``READY`` state.
 
-        :param timeout: The timeout or None to wait forever
-        :type timeout: int or None
         :param n_retries:
             The number of times to retry, or None to retry forever
         :type n_retries: int or None

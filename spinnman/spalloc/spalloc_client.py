@@ -615,23 +615,24 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state: SpallocState,
-                              timeout: Optional[int] = None) -> SpallocState:
-        while old_state != SpallocState.DESTROYED:
-            obj = self._get(self._url, wait="true", timeout=timeout).json()
+                              n_retries: Optional[int] = None) -> SpallocState:
+        retries = 0
+        while (old_state != SpallocState.DESTROYED and 
+               (n_retries is None or retries < n_retries)):
+            retries += 1
+            obj = self._get(self._url, wait="true", timeout=None).json()
             s = SpallocState[obj["state"]]
             if s != old_state or s == SpallocState.DESTROYED:
                 return s
         return old_state
 
     @overrides(SpallocJob.wait_until_ready)
-    def wait_until_ready(self, timeout: Optional[int] = None,
-                         n_retries: Optional[int] = None):
+    def wait_until_ready(self, n_retries: Optional[int] = None):
         state = self.get_state()
-        retries = 0
-        while (state != SpallocState.READY and
-               (n_retries is None or retries < n_retries)):
-            retries += 1
-            state = self.wait_for_state_change(state, timeout=timeout)
+        while state != SpallocState.READY:
+            state = self.wait_for_state_change(state, n_retries=n_retries)
+            if state == SpallocState.READY or n_retries is not None:
+                return
             if state == SpallocState.DESTROYED:
                 raise SpallocException("job was unexpectedly destroyed")
 
