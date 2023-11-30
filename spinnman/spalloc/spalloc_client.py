@@ -617,7 +617,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     def wait_for_state_change(self, old_state: SpallocState,
                               n_retries: Optional[int] = None) -> SpallocState:
         retries = 0
-        while (old_state != SpallocState.DESTROYED and 
+        while (old_state != SpallocState.DESTROYED and
                (n_retries is None or retries < n_retries)):
             retries += 1
             obj = self._get(self._url, wait="true", timeout=None).json()
