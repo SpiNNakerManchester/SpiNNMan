@@ -15,12 +15,13 @@ from functools import wraps
 from logging import getLogger
 import re
 import requests
+from json.decoder import JSONDecodeError
 from typing import Dict, Tuple, cast, Optional
 import websocket  # type: ignore
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.json import JsonObject
-from .utils import clean_url
 from spinnman.exceptions import SpallocException
+from .utils import clean_url
 
 logger = FormatAdapter(getLogger(__name__))
 #: The name of the session cookie issued by Spring Security
@@ -250,7 +251,18 @@ class Session:
                               data=form, timeout=10)
             logger.debug("POST {} returned {}",
                          self.__login_submit_url, r.status_code)
-            self._session_id = r.cookies[_SESSION_COOKIE]
+            try:
+                self._session_id = r.cookies[_SESSION_COOKIE]
+            except KeyError as e:
+                try:
+                    json_error = r.json()
+                    if 'message' in json_error:
+                        error = json_error['message']
+                    else:
+                        error = str(json_error)
+                except JSONDecodeError:
+                    error = r.raw
+                raise SpallocException(f"Unable to login: {error}") from e
             # We don't need to follow that redirect
 
         # Step three: get the basic service data and new CSRF token
