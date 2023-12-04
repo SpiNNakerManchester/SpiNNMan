@@ -571,7 +571,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         except KeyError:
             return None
 
-    def __init_proxy(self) -> _ProxyReceiver:
+    def __init_proxy(self) -> Tuple[_ProxyReceiver, WebSocket]:
         if self.__proxy_handle is None or not self.__proxy_handle.connected:
             if self.__proxy_url is None:
                 raise ValueError("no proxy available")
@@ -579,39 +579,37 @@ class _SpallocJob(SessionAware, SpallocJob):
                 self.__proxy_url, origin=get_hostname(self._url))
             self.__proxy_thread = _ProxyReceiver(self.__proxy_handle)
             self.__proxy_ping = _ProxyPing(self.__proxy_handle)
+        assert self.__proxy_handle is not None
         assert self.__proxy_thread is not None
-        return self.__proxy_thread
+        return self.__proxy_thread, self.__proxy_handle
 
     @overrides(SpallocJob.connect_to_board)
     def connect_to_board(
             self, x: int, y: int,
             port: int = SCP_SCAMP_PORT) -> SpallocSCPConnection:
-        proxy = self.__init_proxy()
-        return _ProxiedSCAMPConnection(
-            self.__proxy_handle, proxy, int(x), int(y), int(port))
+        proxy, ws = self.__init_proxy()
+        return _ProxiedSCAMPConnection(ws, proxy, int(x), int(y), int(port))
 
     @overrides(SpallocJob.connect_for_booting)
     def connect_for_booting(self) -> SpallocBootConnection:
-        proxy = self.__init_proxy()
-        return _ProxiedBootConnection(self.__proxy_handle, proxy)
+        proxy, ws = self.__init_proxy()
+        return _ProxiedBootConnection(ws, proxy)
 
     @overrides(SpallocJob.open_eieio_connection)
     def open_eieio_connection(self, x: int, y: int) -> SpallocEIEIOConnection:
-        proxy = self.__init_proxy()
+        proxy, ws = self.__init_proxy()
         return _ProxiedEIEIOConnection(
-            self.__proxy_handle, proxy, int(x), int(y), SCP_SCAMP_PORT)
+            ws, proxy, int(x), int(y), SCP_SCAMP_PORT)
 
     @overrides(SpallocJob.open_eieio_listener_connection)
     def open_eieio_listener_connection(self) -> SpallocEIEIOListener:
-        proxy = self.__init_proxy()
-        return _ProxiedEIEIOListener(
-            self.__proxy_handle, proxy, self.get_connections())
+        proxy, ws = self.__init_proxy()
+        return _ProxiedEIEIOListener(ws, proxy, self.get_connections())
 
     @overrides(SpallocJob.open_udp_listener_connection)
     def open_udp_listener_connection(self) -> UDPConnection:
-        proxy = self.__init_proxy()
-        return _ProxiedUDPListener(
-            self.__proxy_handle, proxy, self.get_connections())
+        proxy, ws = self.__init_proxy()
+        return _ProxiedUDPListener(ws, proxy, self.get_connections())
 
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state: SpallocState,
