@@ -263,7 +263,6 @@ class Session:
                 except JSONDecodeError:
                     error = r.raw
                 raise SpallocException(f"Unable to login: {error}") from e
-            # We don't need to follow that redirect
 
         # Step three: get the basic service data and new CSRF token
         obj: JsonObject = self.get(self.__srv_base).json()
