@@ -212,8 +212,11 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
 
     @overrides(AbstractSpallocClient.create_job_board)
     def create_job_board(
-            self, triad=None, physical=None, ip_address=None,
-            machine_name=None, keepalive=45) -> SpallocJob:
+            self, triad: Optional[Tuple[int, int, int]] = None,
+            physical: Optional[Tuple[int, int, int]] = None,
+            ip_address: Optional[str] = None,
+            machine_name: Optional[str] = None,
+            keepalive: int = 45) -> SpallocJob:
         board: JsonObject
         if triad:
             x, y, z = triad
@@ -233,8 +236,12 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
 
     @overrides(AbstractSpallocClient.create_job_rect_at_board)
     def create_job_rect_at_board(
-            self, width, height, triad=None, physical=None, ip_address=None,
-            machine_name=None, keepalive=45, max_dead_boards=0):
+            self, width: int, height: int,
+            triad: Optional[Tuple[int, int, int]] = None,
+            physical: Optional[Tuple[int, int, int]] = None,
+            ip_address: Optional[str] = None,
+            machine_name: Optional[str] = None, keepalive: int = 45,
+            max_dead_boards: int = 0) -> SpallocJob:
         if triad:
             x, y, z = triad
             board = {"x": int(x), "y": int(y), "z": int(z)}
@@ -510,7 +517,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__proxy_ping: Optional[_ProxyPing] = None
 
     @overrides(SpallocJob.get_session_credentials_for_db)
-    def get_session_credentials_for_db(self):
+    def get_session_credentials_for_db(self) -> Mapping[Tuple[str, str], str]:
         config = {}
         config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
@@ -634,7 +641,7 @@ class _SpallocJob(SessionAware, SpallocJob):
                 raise SpallocException("job was unexpectedly destroyed")
 
     @overrides(SpallocJob.destroy)
-    def destroy(self, reason: str = "finished") -> None:
+    def destroy(self, reason: str = "finished"):
         if self.__keepalive_handle:
             self.__keepalive_handle.close()
             self.__keepalive_handle = None
@@ -871,7 +878,7 @@ class _ProxiedBidirectionalConnection(
         super().__init__(ws, receiver)
 
     @overrides(_ProxiedConnection._open_connection)
-    def _open_connection(self):
+    def _open_connection(self) -> int:
         handle, = self._call(
             ProxyProtocol.OPEN, _open_req, _open_close_res,
             *self.__connect_args)
@@ -882,7 +889,7 @@ class _ProxiedBidirectionalConnection(
         return self._connected
 
     @overrides(Connection.close)
-    def close(self):
+    def close(self) -> None:
         self._close()
 
     @overrides(SpallocProxiedConnection.send)
@@ -941,7 +948,7 @@ class _ProxiedUnboundConnection(
         self._close()
 
     @overrides(SpallocProxiedConnection.send)
-    def send(self, data: bytes) -> None:
+    def send(self, data: bytes):
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
