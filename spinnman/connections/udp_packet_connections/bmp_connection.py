@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Sequence, Tuple
+from typing import Optional, Sequence, Tuple
 from spinn_utilities.overrides import overrides
 from .udp_connection import UDPConnection
 from spinnman.constants import SCP_SCAMP_PORT
@@ -74,7 +74,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         return _TWO_SKIP.pack() + scp_request.bytestring
 
     @overrides(AbstractSCPConnection.receive_scp_response)
-    def receive_scp_response(self, timeout=1.0) -> Tuple[
+    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> Tuple[
             SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)

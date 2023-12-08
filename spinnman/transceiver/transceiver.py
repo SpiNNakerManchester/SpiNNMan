@@ -16,13 +16,14 @@
 
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable,
-    List, Optional, Tuple, Union)
+    List, Optional, Set, Tuple, Union)
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
 from spinn_machine import (
     CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
+from spinnman.connections.abstract_classes import Connection
 from spinnman.connections.udp_packet_connections import (
     SCAMPConnection, SDPConnection)
 from spinnman.messages.scp.enums import Signal
@@ -111,7 +112,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_connections(self):
+    def get_connections(self) -> Set[Connection]:
         """
         Get the currently known connections to the board, made up of those
         passed in to the transceiver and those that are discovered during
@@ -732,7 +733,7 @@ class Transceiver(object):
 
     @abstractmethod
     def malloc_sdram(
-            self, x: int, y: int, size: int, app_id: int, tag=0) -> int:
+            self, x: int, y: int, size: int, app_id: int, tag: int = 0) -> int:
         """
         Allocates a chunk of SDRAM on a chip on the machine.
 
