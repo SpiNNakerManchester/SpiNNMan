@@ -28,7 +28,7 @@ import threading
 from typing import (
     Any, ContextManager,
     Callable, Dict, FrozenSet, Iterable, Iterator, List, Mapping,
-    Optional, Tuple, cast)
+    Optional, Tuple, Union, cast)
 from typing_extensions import TypeAlias
 from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
@@ -242,6 +242,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             ip_address: Optional[str] = None,
             machine_name: Optional[str] = None, keepalive: int = 45,
             max_dead_boards: int = 0) -> SpallocJob:
+        board: JsonObject
         if triad:
             x, y, z = triad
             board = {"x": int(x), "y": int(y), "z": int(z)}
