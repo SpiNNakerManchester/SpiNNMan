@@ -27,10 +27,10 @@ class HostSendSequencedData(EIEIOCommandMessage):
     buffering input mechanism to identify packet which needs to be stored
     in memory for future use.
     """
-    __slots__ = [
+    __slots__ = (
         "_eieio_data_message",
         "_region_id",
-        "_sequence_no"]
+        "_sequence_no")
 
     def __init__(self, region_id, sequence_no, eieio_data_message):
         super().__init__(EIEIOCommandHeader(

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional, Sequence
 
 
 class BMPConnectionData(object):
@@ -22,14 +23,14 @@ class BMPConnectionData(object):
         "_ip_address",
         "_port_num"]
 
-    def __init__(self, ip_address, boards, port_num):
-        # pylint: disable=too-many-arguments
+    def __init__(self, ip_address: str, boards: Sequence[int],
+                 port_num: Optional[int]):
         self._ip_address = ip_address
-        self._boards = boards
+        self._boards = tuple(boards)
         self._port_num = port_num
 
     @property
-    def ip_address(self):
+    def ip_address(self) -> str:
         """
         The IP address of the BMP.
 
@@ -38,7 +39,7 @@ class BMPConnectionData(object):
         return self._ip_address
 
     @property
-    def boards(self):
+    def boards(self) -> Sequence[int]:
         """
         The boards to be addressed.
 
@@ -47,7 +48,7 @@ class BMPConnectionData(object):
         return self._boards
 
     @property
-    def port_num(self):
+    def port_num(self) -> Optional[int]:
         """
         The port number associated with this BMP connection.
 
@@ -55,8 +56,8 @@ class BMPConnectionData(object):
         """
         return self._port_num
 
-    def __str__(self):
-        return (f"{self._ip_address}:{self._boards}:{self._port_num}")
+    def __str__(self) -> str:
+        return f"{self._ip_address}:{self._boards}:{self._port_num}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()

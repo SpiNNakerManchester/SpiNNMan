@@ -25,8 +25,7 @@ class TokenBucket(object):
 
     Not thread safe.
     """
-
-    __slots__ = ['_capacity', '_tokens', '_fill_rate', '_timestamp']
+    __slots__ = ('_capacity', '_tokens', '_fill_rate', '_timestamp')
 
     def __init__(self, tokens, fill_rate):
         """

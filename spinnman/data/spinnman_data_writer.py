@@ -34,9 +34,9 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
     repository unit tests as all methods are available to subclasses
     """
     __data = _SpiNNManDataModel()
-    __slots__ = []
+    __slots__ = ()
 
-    def _spinnman_mock(self):
+    def _spinnman_mock(self) -> None:
         """
         Like :py:meth:`_mock` but does not call superclass `_mock`.
         This method should only be called by `mock` via `_mock`
@@ -44,11 +44,11 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         self.__data._clear()
 
     @overrides(MachineDataWriter._mock)
-    def _mock(self):
+    def _mock(self) -> None:
         MachineDataWriter._mock(self)
         self._spinnman_mock()
 
-    def _spinnman_setup(self):
+    def _spinnman_setup(self) -> None:
         """
         Like :py:meth:`_setup` but does not call superclass `_setup`.
 
@@ -57,11 +57,11 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         self.__data._clear()
 
     @overrides(MachineDataWriter._setup)
-    def _setup(self):
+    def _setup(self) -> None:
         MachineDataWriter._setup(self)
         self._spinnman_setup()
 
-    def _local_hard_reset(self):
+    def _local_hard_reset(self) -> None:
         """
         Puts spinnman data back into the state expected at graph changed and
         `sim.reset`.
@@ -74,11 +74,11 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         self.__data._hard_reset()
 
     @overrides(MachineDataWriter._hard_reset)
-    def _hard_reset(self):
+    def _hard_reset(self) -> None:
         MachineDataWriter._hard_reset(self)
         self._local_hard_reset()
 
-    def _local_soft_reset(self):
+    def _local_soft_reset(self) -> None:
         """
         Puts all data back into the state expected at `sim.reset` but not
         graph changed.
@@ -90,19 +90,19 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         self.__data._soft_reset()
 
     @overrides(MachineDataWriter._soft_reset)
-    def _soft_reset(self):
+    def _soft_reset(self) -> None:
         MachineDataWriter._soft_reset(self)
         self._local_soft_reset()
 
-    def set_transceiver(self, transceiver):
+    def set_transceiver(self, transceiver: Transceiver):
         """
         Sets the transceiver object.
 
         :param Transceiver transceiver:
-        :raises TypeError: If the transceiver is not a Transceiver
+        :raises TypeError: If the transceiver is not a Transceiver subclass
         """
         if not isinstance(transceiver, Transceiver):
-            raise TypeError("transceiver should be a Transceiver")
+            raise TypeError("transceiver should be a Transceiver subclass")
         if self.__data._transceiver:
             raise NotImplementedError(
                 "Over writing and existing transceiver not supported")

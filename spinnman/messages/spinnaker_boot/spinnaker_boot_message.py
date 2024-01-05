@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import Optional
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from .spinnaker_boot_op_code import SpinnakerBootOpCode
 
@@ -25,16 +26,17 @@ class SpinnakerBootMessage(object):
     """
     A message used for booting the board.
     """
-    __slots__ = [
+    __slots__ = (
         "_data",
         "_offset",
         "_opcode",
         "_operand_1",
         "_operand_2",
-        "_operand_3"]
+        "_operand_3")
 
-    def __init__(self, opcode, operand_1, operand_2, operand_3, data=None,
-                 offset=0):
+    def __init__(self, opcode: SpinnakerBootOpCode,
+                 operand_1: int, operand_2: int, operand_3: int,
+                 data: Optional[bytes] = None, offset: int = 0):
         """
         :param SpinnakerBootOpCode opcode: The operation of this packet
         :param int operand_1: The first operand
@@ -60,7 +62,7 @@ class SpinnakerBootMessage(object):
         self._offset = offset
 
     @property
-    def opcode(self):
+    def opcode(self) -> SpinnakerBootOpCode:
         """
         The operation of this packet.
 
@@ -69,7 +71,7 @@ class SpinnakerBootMessage(object):
         return self._opcode
 
     @property
-    def operand_1(self):
+    def operand_1(self) -> int:
         """
         The first operand.
 
@@ -78,7 +80,7 @@ class SpinnakerBootMessage(object):
         return self._operand_1
 
     @property
-    def operand_2(self):
+    def operand_2(self) -> int:
         """
         The second operand.
 
@@ -87,7 +89,7 @@ class SpinnakerBootMessage(object):
         return self._operand_2
 
     @property
-    def operand_3(self):
+    def operand_3(self) -> int:
         """
         The third operand.
 
@@ -96,7 +98,7 @@ class SpinnakerBootMessage(object):
         return self._operand_3
 
     @property
-    def data(self):
+    def data(self) -> Optional[bytes]:
         """
         The data, or `None` if no data.
 
@@ -105,7 +107,7 @@ class SpinnakerBootMessage(object):
         return self._data
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         """
         The message as a byte-string.
 
@@ -119,7 +121,7 @@ class SpinnakerBootMessage(object):
             self._operand_1, self._operand_2, self._operand_3) + data
 
     @staticmethod
-    def from_bytestring(data, offset):
+    def from_bytestring(data: bytes, offset: int) -> 'SpinnakerBootMessage':
         """
         :param bytes data:
         :param int offset:

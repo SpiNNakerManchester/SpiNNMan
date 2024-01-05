@@ -25,23 +25,24 @@ class CountStateResponse(AbstractSCPResponse):
     """
     An SCP response to a request for the number of cores in a given state.
     """
-    __slots__ = [
-        "_count"]
+    __slots__ = "_count",
 
     def __init__(self):
         super().__init__()
         self._count = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
+        # We can accept a no-reply response here; that could just mean
+        # that the count wasn't complete (but might be enough anyway)
+        if result != SCPResult.RC_OK and result != SCPResult.RC_P2P_NOREPLY:
             raise SpinnmanUnexpectedResponseCodeException(
-                "CountState", "CMD_SIGNAL", result.name)
+                "CountState", "CMD_COUNT", result.name)
         self._count = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
-    def count(self):
+    def count(self) -> int:
         """
         The count of the number of cores with the requested state.
 

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import time
+from typing import Optional
 from .udp_connection import UDPConnection
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
@@ -24,12 +25,12 @@ class BootConnection(UDPConnection):
     """
     A connection to the SpiNNaker board that uses UDP to for booting.
     """
-    __slots__ = []
+    __slots__ = ()
     _REPR_TEMPLATE = (
         "BootConnection(local_host={}, local_port={}, remote_host={}, "
         "remote_port={})")
 
-    def __init__(self, remote_host=None):
+    def __init__(self, remote_host: Optional[str] = None):
         """
         :param str remote_host:
             The remote host name or IP address to send packets to.  If not
@@ -41,7 +42,7 @@ class BootConnection(UDPConnection):
         super().__init__(remote_host=remote_host,
                          remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
-    def send_boot_message(self, boot_message):
+    def send_boot_message(self, boot_message: SpinnakerBootMessage):
         """
         Sends a SpiNNaker boot message using this connection.
 
@@ -54,12 +55,13 @@ class BootConnection(UDPConnection):
         # Sleep between messages to avoid flooding the machine
         time.sleep(_ANTI_FLOOD_DELAY)
 
-    def receive_boot_message(self, timeout=None):
+    def receive_boot_message(
+            self, timeout: Optional[float] = None) -> SpinnakerBootMessage:
         """
         Receives a boot message from this connection.  Blocks until a
         message has been received, or a timeout occurs.
 
-        :param int timeout:
+        :param float timeout:
             The time in seconds to wait for the message to arrive; if not
             specified, will wait forever, or until the connection is closed.
         :return: a boot message

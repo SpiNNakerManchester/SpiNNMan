@@ -26,8 +26,7 @@ class HostDataReadAck(EIEIOCommandMessage):
     context of the buffering output technique to signal that the host has
     received a request to read data.
     """
-    __slots__ = [
-        "_sequence_no"]
+    __slots__ = "_sequence_no",
 
     def __init__(self, sequence_no):
         super().__init__(

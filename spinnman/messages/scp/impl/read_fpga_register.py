@@ -15,21 +15,20 @@
 import struct
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse, BMPRequest, BMPResponse)
-from spinnman.messages.scp.enums import SCPCommand, SCPResult
+    AbstractSCPRequest, BMPRequest, BMPResponse)
+from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.scp import SCPRequestHeader
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 _ONE_WORD = struct.Struct("<I")
 
 
-class ReadFPGARegister(BMPRequest):
+class ReadFPGARegister(BMPRequest['_SCPReadFPGARegisterResponse']):
     """
     Requests the data from a FPGA's register.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, fpga_num, register, board):
+    def __init__(self, fpga_num: int, register: int, board: int):
         """
         Sets up a read FPGA register request.
 
@@ -49,35 +48,23 @@ class ReadFPGARegister(BMPRequest):
             argument_1=arg1, argument_2=4, argument_3=fpga_num)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
-        return _SCPReadFPGARegisterResponse()
+    def get_scp_response(self) -> '_SCPReadFPGARegisterResponse':
+        return _SCPReadFPGARegisterResponse(
+            "Read FPGA register", SCPCommand.CMD_LINK_READ)
 
 
-class _SCPReadFPGARegisterResponse(BMPResponse):
+class _SCPReadFPGARegisterResponse(BMPResponse[int]):
     """
     An SCP response to a request for the version of software running.
     """
-    __slots__ = [
-        "_fpga_register"]
-
-    def __init__(self):
-        super().__init__()
-        self._fpga_register = None
-
-    @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
-        result = self.scp_response_header.result
-        if result != SCPResult.RC_OK:
-            raise SpinnmanUnexpectedResponseCodeException(
-                "Read FPGA register", "CMD_LINK_READ", result.name)
-
-        self._fpga_register = _ONE_WORD.unpack_from(data, offset)[0]
+    def _parse_payload(self, data: bytes, offset: int) -> int:
+        return _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
-    def fpga_register(self):
+    def fpga_register(self) -> int:
         """
         The register information received.
 
         :rtype: int
         """
-        return self._fpga_register
+        return self._value

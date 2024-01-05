@@ -21,7 +21,7 @@ class PaddingRequest(EIEIOCommandMessage):
     """
     Packet used to pad space in the buffering area, if needed.
     """
-    __slots__ = []
+    __slots__ = ()
 
     def __init__(self):
         super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.EVENT_PADDING))

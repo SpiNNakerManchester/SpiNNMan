@@ -23,42 +23,60 @@ class TestCpuInfos(unittest.TestCase):
     def setUp(self):
         unittest_setup()
 
-    def make_info_data(self, physical_cpu_id, state):
-        registers = b'@\x00\x07\x08\xff\x00\x00\x00\x00\x00\x80\x00\xad\x00' \
-                    b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \
-                    b'\x00\x00\x00\x00\x00'
-        time = 1687857627
-        application_name = b'scamp-3\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-        iobuff_address = 197634
-        return (registers, 0, 0, 0, 0, physical_cpu_id, state.value, 0, 0, 0,
-                0, 0, 0, 0, 0, time, application_name, iobuff_address, 0, 0,
-                0, 0, 0)
-
     def test_cpu_infos(self):
         infos = CPUInfos()
 
-        info = CPUInfo(0, 0, 1, self.make_info_data(5, CPUState.RUNNING))
-        infos.add_info(info)
-        info = CPUInfo(0, 0, 2, self.make_info_data(6, CPUState.FINISHED))
-        infos.add_info(info)
-        info = CPUInfo(1, 0, 1, self.make_info_data(7, CPUState.FINISHED))
-        infos.add_info(info)
+        infos.add_info(CPUInfo.mock_info(0, 0, 1, 5, CPUState.RUNNING))
+        infos.add_info(CPUInfo.mock_info(0, 0, 2, 6, CPUState.FINISHED))
+        infos.add_info(CPUInfo.mock_info(1, 0, 1, 7, CPUState.FINISHED))
+        infos.add_info(CPUInfo.mock_info(
+            1, 1, 2, 4, CPUState.RUN_TIME_EXCEPTION))
 
+        self.assertSetEqual(set(infos),
+                            {(1, 0, 1), (0, 0, 1), (0, 0, 2), (1, 1, 2)})
         self.assertEqual(
-            "['0, 0, 1 (ph: 5)', '0, 0, 2 (ph: 6)', '1, 0, 1 (ph: 7)']",
-            str(infos))
+            "['0, 0, 1 (ph: 5)', '0, 0, 2 (ph: 6)', '1, 0, 1 (ph: 7)',"
+            " '1, 1, 2 (ph: 4)']", str(infos))
 
         finished = infos.infos_for_state(CPUState.FINISHED)
         self.assertEqual(
             "['0, 0, 2 (ph: 6)', '1, 0, 1 (ph: 7)']", str(finished))
         self.assertTrue(finished)
 
+        finished = infos.infos_not_in_states(
+            [CPUState.RUNNING, CPUState.RUN_TIME_EXCEPTION])
+        self.assertEqual(
+            "['0, 0, 2 (ph: 6)', '1, 0, 1 (ph: 7)']", str(finished))
+
         idle = infos.infos_for_state(CPUState.IDLE)
         self.assertFalse(idle)
 
-        info = infos.get_cpu_info(0, 0, 2)
-        self.assertEqual(
-            "0:0:02 (06) FINISHED           scamp-3            0", str(info))
+        # the str is for example purpose and may change without notice
+        self.assertEqual(infos.get_status_string(),
+                         "0:0:1 in state RUNNING\n"
+                         "0:0:2 in state FINISHED\n"
+                         "1:0:1 in state FINISHED\n"
+                         "1:1:2 (ph: 4) in state RUN_TIME_EXCEPTION:NONE\n"
+                         "    r0=134676544, r1=255, r2=8388608, r3=173\n"
+                         "    r4=0, r5=0, r6=0, r7=0\n"
+                         "    PSR=0, SP=0, LR=0\n")
+
+    def test_add_info(self):
+        infos1 = CPUInfos()
+        infos1.add_info(CPUInfo.mock_info(0, 0, 1, 5, CPUState.RUNNING))
+        infos1.add_info(CPUInfo.mock_info(0, 0, 2, 6, CPUState.FINISHED))
+        self.assertSetEqual(set(infos1), {(0, 0, 1), (0, 0, 2)})
+
+        infos2 = CPUInfos()
+        infos2.add_info(CPUInfo.mock_info(1, 0, 1, 7, CPUState.FINISHED))
+        infos2.add_info(CPUInfo.mock_info(
+            1, 1, 2, 4, CPUState.RUN_TIME_EXCEPTION))
+        infos2.add_info(CPUInfo.mock_info(1, 0, 2, 8, CPUState.FINISHED))
+        self.assertSetEqual(set(infos2), {(1, 0, 1), (1, 1, 2), (1, 0, 2)})
+
+        infos1.add_infos(infos2, [CPUState.FINISHED])
+        self.assertSetEqual(set(infos1),
+                            {(0, 0, 1), (0, 0, 2), (1, 0, 1), (1, 0, 2)})
 
 
 if __name__ == '__main__':

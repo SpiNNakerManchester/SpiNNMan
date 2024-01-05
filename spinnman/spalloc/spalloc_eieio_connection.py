@@ -16,13 +16,11 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Tuple
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractproperty)
+from typing import Optional
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
-from spinnman.connections.abstract_classes import Listenable
-from spinnman.connections.udp_packet_connections import (
-    update_sdp_header_for_udp_send, EIEIOConnection)
+from spinn_utilities.typing.coords import XY
+from spinnman.connections.udp_packet_connections import EIEIOConnection
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.eieio import (
     AbstractEIEIOMessage,
@@ -64,24 +62,23 @@ class SpallocEIEIOConnection(
         self.send(_TWO_SKIP + sdp_message.bytestring)
 
     @overrides(EIEIOConnection.receive_eieio_message)
-    def receive_eieio_message(self, timeout=None):
+    def receive_eieio_message(
+            self, timeout: Optional[float] = None) -> AbstractEIEIOMessage:
         data = self.receive(timeout)
         header = _ONE_SHORT.unpack_from(data)[0]
         if header & 0xC000 == 0x4000:
             return read_eieio_command_message(data, 0)
         return read_eieio_data_message(data, 0)
 
-    @overrides(Listenable.get_receive_method)
-    def get_receive_method(self):
-        return self.receive_eieio_message
-
-    @abstractproperty
-    def _coords(self) -> Tuple[int, int]:
+    @property
+    @abstractmethod
+    def _coords(self) -> XY:
         """
         The X, Y coordinates of the chip this connection is connected to.
 
         :rtype: tuple(int,int)
         """
+        raise NotImplementedError
 
     def update_tag(self, tag: int, do_receive: bool = True):
         """
@@ -100,7 +97,7 @@ class SpallocEIEIOConnection(
         request = IPTagSet(
             x, y, [0, 0, 0, 0], 0, tag, strip=True, use_sender=True)
         request.sdp_header.flags = SDPFlag.REPLY_EXPECTED_NO_P2P
-        update_sdp_header_for_udp_send(request.sdp_header, x, y)
+        request.sdp_header.update_for_send(x, y)
         data = _TWO_SKIP + request.bytestring
         for _try in range(_NUM_UPDATE_TAG_TRIES):
             try:

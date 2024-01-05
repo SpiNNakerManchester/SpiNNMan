@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import List, Optional
 from spinnman.model.enums import CPUState
 from spinn_machine.machine import Machine
 
@@ -41,7 +42,7 @@ class ChipSummaryInfo(object):
         "_working_links",
         "_x", "_y"]
 
-    def __init__(self, chip_summary_data, offset, x, y):
+    def __init__(self, chip_summary_data: bytes, offset: int, x: int, y: int):
         """
         :param bytes chip_summary_data: The data from the SCP response
         :param int offset: The offset into the data where the data starts
@@ -68,9 +69,8 @@ class ChipSummaryInfo(object):
         self._x = x
         self._y = y
 
-        self._nearest_ethernet_x = None
-        self._nearest_ethernet_y = None
-        self._ethernet_ip_address = None
+        self._nearest_ethernet_x, self._nearest_ethernet_y = 0, 0
+        self._ethernet_ip_address: Optional[str] = None
 
         (self._nearest_ethernet_y, self._nearest_ethernet_x) = \
             _TWO_BYTES.unpack_from(chip_summary_data, data_offset)
@@ -83,7 +83,7 @@ class ChipSummaryInfo(object):
         data_offset += 4
 
         # In case the data hasn't been added in the version of SCAMP being used
-        self._parent_link = None
+        self._parent_link: Optional[int] = None
         if len(chip_summary_data) > data_offset:
             (self._parent_link, ) = _ONE_SHORT.unpack_from(
                 chip_summary_data, data_offset)
@@ -94,7 +94,7 @@ class ChipSummaryInfo(object):
             data_offset += 2
 
     @property
-    def x(self):
+    def x(self) -> int:
         """
         The X-coordinate of the chip that this data is from.
 
@@ -103,7 +103,7 @@ class ChipSummaryInfo(object):
         return self._x
 
     @property
-    def y(self):
+    def y(self) -> int:
         """
         The Y-coordinate of the chip that this data is from.
 
@@ -112,7 +112,7 @@ class ChipSummaryInfo(object):
         return self._y
 
     @property
-    def n_cores(self):
+    def n_cores(self) -> int:
         """
         The number of cores working on the chip (including monitors).
 
@@ -121,7 +121,7 @@ class ChipSummaryInfo(object):
         return self._n_cores
 
     @property
-    def core_states(self):
+    def core_states(self) -> List[CPUState]:
         """
         The state of the cores on the chip (list of one per core).
 
@@ -130,7 +130,7 @@ class ChipSummaryInfo(object):
         return self._core_states
 
     @property
-    def working_links(self):
+    def working_links(self) -> List[int]:
         """
         The IDs of the working links outgoing from this chip.
 
@@ -139,7 +139,7 @@ class ChipSummaryInfo(object):
         return self._working_links
 
     @property
-    def is_ethernet_available(self):
+    def is_ethernet_available(self) -> bool:
         """
         Whether the Ethernet connection is available on this chip.
 
@@ -148,7 +148,7 @@ class ChipSummaryInfo(object):
         return self._is_ethernet_available
 
     @property
-    def n_free_multicast_routing_entries(self):
+    def n_free_multicast_routing_entries(self) -> int:
         """
         The number of multicast routing entries free on this chip.
 
@@ -157,7 +157,7 @@ class ChipSummaryInfo(object):
         return self._n_free_multicast_routing_entries
 
     @property
-    def largest_free_sdram_block(self):
+    def largest_free_sdram_block(self) -> int:
         """
         The size of the largest block of free SDRAM in bytes.
 
@@ -166,7 +166,7 @@ class ChipSummaryInfo(object):
         return self._largest_free_sdram_block
 
     @property
-    def largest_free_sram_block(self):
+    def largest_free_sram_block(self) -> int:
         """
         The size of the largest block of free SRAM in bytes.
 
@@ -175,7 +175,7 @@ class ChipSummaryInfo(object):
         return self._largest_free_sram_block
 
     @property
-    def nearest_ethernet_x(self):
+    def nearest_ethernet_x(self) -> int:
         """
         The X-coordinate of the nearest Ethernet chip.
 
@@ -184,7 +184,7 @@ class ChipSummaryInfo(object):
         return self._nearest_ethernet_x
 
     @property
-    def nearest_ethernet_y(self):
+    def nearest_ethernet_y(self) -> int:
         """
         The Y-coordinate of the nearest Ethernet chip.
 
@@ -193,7 +193,7 @@ class ChipSummaryInfo(object):
         return self._nearest_ethernet_y
 
     @property
-    def ethernet_ip_address(self):
+    def ethernet_ip_address(self) -> Optional[str]:
         """
         The IP address of the Ethernet if up, or `None` if not.
 
@@ -201,14 +201,14 @@ class ChipSummaryInfo(object):
         """
         return self._ethernet_ip_address
 
-    def clear_ethernet_ip_address(self):
+    def clear_ethernet_ip_address(self) -> None:
         """
         Forces the Ethernet IP address to `None`, in case of an errant chip.
         """
         self._ethernet_ip_address = None
 
     @property
-    def parent_link(self):
+    def parent_link(self) -> Optional[int]:
         """
         The link to the parent of the chip in the tree of chips from root.
 
@@ -216,5 +216,5 @@ class ChipSummaryInfo(object):
         """
         return self._parent_link
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"x:{self.x} y:{self.y} n_cores:{self.n_cores}"

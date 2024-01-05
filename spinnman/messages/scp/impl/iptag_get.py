@@ -28,34 +28,7 @@ _IPTAG_GET = 2
 _IPTAG_FORMAT = struct.Struct("<4s6s3HIH3B")
 
 
-class IPTagGet(AbstractSCPRequest):
-    """
-    An SCP Request to get an IP tag.
-    """
-    __slots__ = []
-
-    def __init__(self, x, y, tag):
-        """
-        :param int x: The x-coordinate of a chip, between 0 and 255
-        :param int y: The y-coordinate of a chip, between 0 and 255
-        :param int tag: The tag to get details of, between 0 and 7
-        :param int tag: The tag, between 0 and 7
-        """
-        super().__init__(
-            SDPHeader(
-                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=0, destination_chip_x=x,
-                destination_chip_y=y),
-            SCPRequestHeader(command=SCPCommand.CMD_IPTAG),
-            argument_1=(_IPTAG_GET << 16) | tag,
-            argument_2=1)
-
-    @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
-        return _SCPIPTagGetResponse()
-
-
-class _SCPIPTagGetResponse(AbstractSCPResponse):
+class IPTagGetResponse(AbstractSCPResponse):
     """
     An SCP response to a request for an IP tags.
     """
@@ -72,24 +45,22 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         "_spin_port",
         "_timeout"]
 
-    def __init__(self):
-        """
-        """
+    def __init__(self) -> None:
         super().__init__()
-        self._ip_address = None
-        self._mac_address = None
-        self._port = None
-        self._timeout = None
-        self._flags = None
-        self._count = None
-        self._rx_port = None
-        self._spin_chip_y = None
-        self._spin_chip_x = None
-        self._spin_cpu = None
-        self._spin_port = None
+        self._ip_address = b'\0\0\0\0'
+        self._mac_address = b'\0\0\0\0\0\0'
+        self._port = 0
+        self._timeout = 0
+        self._flags = 0
+        self._count = 0
+        self._rx_port = 0
+        self._spin_chip_y = 0
+        self._spin_chip_x = 0
+        self._spin_cpu = 0
+        self._spin_port = 0
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -104,7 +75,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         self._spin_cpu = processor_and_port & 0x1F
 
     @property
-    def ip_address(self):
+    def ip_address(self) -> bytes:
         """
         The IP address of the tag, as a bytearray of 4 bytes.
 
@@ -113,7 +84,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._ip_address
 
     @property
-    def mac_address(self):
+    def mac_address(self) -> bytes:
         """
         The MAC address of the tag, as a bytearray of 6 bytes.
 
@@ -122,7 +93,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._mac_address
 
     @property
-    def port(self):
+    def port(self) -> int:
         """
         The port of the tag.
 
@@ -131,7 +102,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._port
 
     @property
-    def timeout(self):
+    def timeout(self) -> int:
         """
         The timeout of the tag.
 
@@ -140,7 +111,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._timeout
 
     @property
-    def flags(self):
+    def flags(self) -> int:
         """
         The flags of the tag.
 
@@ -149,7 +120,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._flags
 
     @property
-    def in_use(self):
+    def in_use(self) -> bool:
         """
         Whether the tag is marked as being in use.
 
@@ -158,7 +129,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return (self._flags & 0x8000) > 0
 
     @property
-    def is_temporary(self):
+    def is_temporary(self) -> bool:
         """
         Whether the tag is temporary.
 
@@ -167,10 +138,10 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return (self._flags & 0x4000) > 0
 
     @property
-    def is_arp(self):
+    def is_arp(self) -> bool:
         """
-        Whether the tag is in the ARP state (where the MAC address is
-        being looked up).
+        Whether the tag is in the Address Resolution Protocol state
+        (where the MAC address is being looked up).
 
         .. note::
             This is a transient state; it is unlikely to be observed.
@@ -180,7 +151,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return (self._flags & 0x2000) > 0
 
     @property
-    def is_reverse(self):
+    def is_reverse(self) -> bool:
         """
         Whether the tag is a reverse tag.
 
@@ -189,7 +160,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return (self._flags & 0x0200) > 0
 
     @property
-    def strip_sdp(self):
+    def strip_sdp(self) -> bool:
         """
         Whether the tag is to strip the SDP header.
 
@@ -198,7 +169,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return (self._flags & 0x0100) > 0
 
     @property
-    def count(self):
+    def count(self) -> int:
         """
         The count of the number of packets that have been sent with the tag.
 
@@ -207,7 +178,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._count
 
     @property
-    def rx_port(self):
+    def rx_port(self) -> int:
         """
         The receive port of the tag.
 
@@ -216,7 +187,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._rx_port
 
     @property
-    def spin_chip_x(self):
+    def spin_chip_x(self) -> int:
         """
         The X-coordinate of the chip on which the tag is defined.
 
@@ -225,7 +196,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._spin_chip_x
 
     @property
-    def spin_chip_y(self):
+    def spin_chip_y(self) -> int:
         """
         The Y-coordinate of the chip on which the tag is defined.
 
@@ -234,7 +205,7 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._spin_chip_y
 
     @property
-    def spin_port(self):
+    def spin_port(self) -> int:
         """
         The spin-port of the IP tag.
 
@@ -243,10 +214,36 @@ class _SCPIPTagGetResponse(AbstractSCPResponse):
         return self._spin_port
 
     @property
-    def spin_cpu(self):
+    def spin_cpu(self) -> int:
         """
         The CPU ID of the IP tag.
 
         :rtype: int
         """
         return self._spin_cpu
+
+
+class IPTagGet(AbstractSCPRequest[IPTagGetResponse]):
+    """
+    An SCP Request to get an IP tag.
+    """
+    __slots__ = ()
+
+    def __init__(self, x: int, y: int, tag: int):
+        """
+        :param int x: The x-coordinate of a chip, between 0 and 255
+        :param int y: The y-coordinate of a chip, between 0 and 255
+        :param int tag: The tag to get details of, between 0 and 7
+        """
+        super().__init__(
+            SDPHeader(
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                destination_cpu=0, destination_chip_x=x,
+                destination_chip_y=y),
+            SCPRequestHeader(command=SCPCommand.CMD_IPTAG),
+            argument_1=(_IPTAG_GET << 16) | tag,
+            argument_2=1)
+
+    @overrides(AbstractSCPRequest.get_scp_response)
+    def get_scp_response(self) -> IPTagGetResponse:
+        return IPTagGetResponse()

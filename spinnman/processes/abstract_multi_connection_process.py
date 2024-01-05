@@ -12,23 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import logging
 import sys
+from types import TracebackType
+from typing import (
+    Callable, Dict, Generator, Generic, List, Optional, TypeVar, cast, Set)
+from typing_extensions import Self, TypeAlias
 from spinn_utilities.log import FormatAdapter
 from spinnman.connections import SCPRequestPipeLine
 from spinnman.constants import SCP_TIMEOUT, N_RETRIES
 from spinnman.exceptions import (
     SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
+from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest, AbstractSCPResponse)
+from spinnman.messages.scp.enums.scp_result import SCPResult
+#: Type of responses.
+#: :meta private:
+R = TypeVar("R", bound=AbstractSCPResponse)
+#: Error handling callback.
+#: :meta private:
+ECB: TypeAlias = Callable[
+    [AbstractSCPRequest[R], Exception, TracebackType, SCAMPConnection], None]
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class AbstractMultiConnectionProcess:
+class AbstractMultiConnectionProcess(Generic[R]):
     """
     A process for talking to SpiNNaker efficiently that uses multiple
     connections in communication if relevant.
     """
-    __slots__ = [
+    __slots__ = (
         "_error_requests",
         "_exceptions",
         "_tracebacks",
@@ -36,18 +54,18 @@ class AbstractMultiConnectionProcess:
         "_intermediate_channel_waits",
         "_n_channels",
         "_n_retries",
+        "_non_fail_retry_codes",
         "_conn_selector",
         "_scp_request_pipelines",
-        "_timeout"]
+        "_timeout")
 
-    def __init__(self, next_connection_selector,
-                 n_retries=N_RETRIES, timeout=SCP_TIMEOUT, n_channels=8,
-                 intermediate_channel_waits=7):
+    def __init__(self, next_connection_selector: ConnectionSelector,
+                 n_retries: int = N_RETRIES, timeout: float = SCP_TIMEOUT,
+                 n_channels: int = 8, intermediate_channel_waits: int = 7,
+                 non_fail_retry_codes: Optional[Set[SCPResult]] = None):
         """
-        :param next_connection_selector:
+        :param ConnectionSelector next_connection_selector:
             How to choose the connection.
-        :type next_connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
         :param int n_retries:
             The number of retries of a message to use. Passed to
             :py:class:`SCPRequestPipeLine`
@@ -59,55 +77,91 @@ class AbstractMultiConnectionProcess:
         :param int intermediate_channel_waits:
             The maximum number of outstanding message/reply pairs to have on a
             particular connection. Passed to :py:class:`SCPRequestPipeLine`
+        :param Optional[Set[SCPResult]] non_fail_retry_codes:
+            Optional set of responses that result in retry but after retrying
+            don't then result in failure even if returned on the last call.
         """
-        self._exceptions = []
-        self._tracebacks = []
-        self._error_requests = []
-        self._connections = []
-        self._scp_request_pipelines = dict()
+        self._exceptions: List[Exception] = []
+        self._tracebacks: List[TracebackType] = []
+        self._error_requests: List[AbstractSCPRequest[R]] = []
+        self._connections: List[SCAMPConnection] = []
+        self._scp_request_pipelines: Dict[
+            SCAMPConnection, SCPRequestPipeLine[R]] = dict()
         self._n_retries = n_retries
         self._timeout = timeout
         self._n_channels = n_channels
         self._intermediate_channel_waits = intermediate_channel_waits
         self._conn_selector = next_connection_selector
+        self._non_fail_retry_codes = non_fail_retry_codes
 
-    def _send_request(self, request, callback=None, error_callback=None):
+    def _send_request(self, request: AbstractSCPRequest[R],
+                      callback: Optional[Callable[[R], None]] = None,
+                      error_callback: Optional[ECB] = None):
         if error_callback is None:
             error_callback = self._receive_error
         connection = self._conn_selector.get_next_connection(request)
         if connection not in self._scp_request_pipelines:
-            scp_request_set = SCPRequestPipeLine(
+            self._scp_request_pipelines[connection] = SCPRequestPipeLine(
                 connection, n_retries=self._n_retries,
                 packet_timeout=self._timeout,
                 n_channels=self._n_channels,
-                intermediate_channel_waits=self._intermediate_channel_waits)
-            self._scp_request_pipelines[connection] = scp_request_set
+                intermediate_channel_waits=self._intermediate_channel_waits,
+                non_fail_retry_codes=self._non_fail_retry_codes)
         self._scp_request_pipelines[connection].send_request(
             request, callback, error_callback)
 
-    def _receive_error(self, request, exception, tb, connection):
+    def _receive_error(
+            self, request: AbstractSCPRequest[R], exception: Exception,
+            tb: TracebackType, connection: SCAMPConnection):
         self._error_requests.append(request)
         self._exceptions.append(exception)
         self._tracebacks.append(tb)
         self._connections.append(connection)
 
-    def is_error(self):
+    def is_error(self) -> bool:
         return bool(self._exceptions)
 
-    def _finish(self):
+    def _finish(self) -> None:
         for request_pipeline in self._scp_request_pipelines.values():
             request_pipeline.finish()
 
+    @contextlib.contextmanager
+    def _collect_responses(
+            self, *, print_exception: bool = False,
+            check_error: bool = True) -> Generator[Self, None, None]:
+        """
+        A simple context for calls. Lets you do this::
+
+            with self._collect_responses():
+                self._send_request(...)
+
+        instead of this::
+
+            self._send_request(...)
+            self._finish()
+            self.check_for_error()
+
+        :param bool print_exception:
+            Whether to log errors as well as raising
+        :param bool check_error:
+            Whether to check for errors; if not, caller must handle
+        """
+        yield self
+        for request_pipeline in self._scp_request_pipelines.values():
+            request_pipeline.finish()
+        if check_error and self._exceptions:
+            self.check_for_error(print_exception=print_exception)
+
     @property
-    def connection_selector(self):
+    def connection_selector(self) -> ConnectionSelector:
         """
         The connection selector of the process.
 
-        :rtype: AbstractMultiConnectionProcessConnectionSelector
+        :rtype: ConnectionSelector
         """
         return self._conn_selector
 
-    def check_for_error(self, print_exception=False):
+    def check_for_error(self, print_exception: bool = False):
         if len(self._exceptions) == 1:
             exc_info = sys.exc_info()
             sdp_header = self._error_requests[0].sdp_header
@@ -124,7 +178,7 @@ class AbstractMultiConnectionProcess:
                     phys_p)
 
             raise SpinnmanGenericProcessException(
-                self._exceptions[0], exc_info[2],
+                self._exceptions[0], cast(TracebackType, exc_info[2]),
                 sdp_header.destination_chip_x,
                 sdp_header.destination_chip_y, sdp_header.destination_cpu,
                 phys_p, self._tracebacks[0])

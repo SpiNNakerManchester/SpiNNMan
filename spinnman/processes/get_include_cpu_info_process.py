@@ -12,25 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Container
+from spinn_utilities.overrides import overrides
 from spinnman.model import CPUInfo
 from spinnman.model.enums import CPUState
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 from .get_cpu_info_process import GetCPUInfoProcess
 
 
 class GetIncludeCPUInfoProcess(GetCPUInfoProcess):
-    __slots__ = [
-        "_states"]
+    __slots__ = ("__states", )
 
-    def __init__(self, connection_selector, states):
+    def __init__(self, connection_selector: ConnectionSelector,
+                 states: Container[CPUState]):
         """
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector)
-        self._states = states
+        self.__states = states
 
-    def _filter_and_add_repsonse(self, x, y, p, cpu_data):
-        state = CPUState(cpu_data[6])
-        if state in self._states:
-            self._cpu_infos.add_info(CPUInfo(x, y, p, cpu_data))
+    @overrides(GetCPUInfoProcess._is_desired)
+    def _is_desired(self, cpu_info: CPUInfo):
+        return cpu_info.state in self.__states

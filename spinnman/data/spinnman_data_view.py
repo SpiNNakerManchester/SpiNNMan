@@ -11,11 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from __future__ import annotations
 import logging
+from typing import BinaryIO, Optional, Tuple, Union, TYPE_CHECKING
 from spinn_utilities.log import FormatAdapter
 from spinn_machine.data import MachineDataView
 from spinnman.utilities.appid_tracker import AppIdTracker
+if TYPE_CHECKING:
+    from spinnman.processes import MostDirectConnectionSelector
+    from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 # pylint: disable=protected-access
@@ -46,7 +50,7 @@ class _SpiNNManDataModel(object):
         "_transceiver",
     ]
 
-    def __new__(cls):
+    def __new__(cls) -> _SpiNNManDataModel:
         if cls.__singleton:
             return cls.__singleton
         obj = object.__new__(cls)
@@ -55,29 +59,30 @@ class _SpiNNManDataModel(object):
         obj._clear()
         return obj
 
-    def _clear(self):
+    def _clear(self) -> None:
         """
         Clears out all data.
         """
         self._hard_reset()
 
-    def _hard_reset(self):
+    def _hard_reset(self) -> None:
         """
         Clears out all data that should change after a reset and graph change.
         """
-        self._app_id = None
-        self._app_id_tracker = None
+        self._app_id: Optional[int] = None
+        self._app_id_tracker: Optional[AppIdTracker] = None
         self._soft_reset()
-        self._scamp_connection_selector = None
+        self._scamp_connection_selector: Optional[
+            MostDirectConnectionSelector] = None
         if self._transceiver:
             try:
                 self._transceiver.close()
             except Exception as ex:  # pylint: disable=broad-except
                 logger.exception(
                     f"Error {ex} when closing the transceiver ignored")
-        self._transceiver = None
+        self._transceiver: Optional[Transceiver] = None
 
-    def _soft_reset(self):
+    def _soft_reset(self) -> None:
         """
         Clears timing and other data that should changed every reset.
         """
@@ -96,12 +101,12 @@ class SpiNNManDataView(MachineDataView):
     """
 
     __data = _SpiNNManDataModel()
-    __slots__ = []
+    __slots__ = ()
 
     # transceiver methods
 
     @classmethod
-    def has_transceiver(cls):
+    def has_transceiver(cls) -> bool:
         """
         Reports if a transceiver is currently set.
 
@@ -110,7 +115,7 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver is not None
 
     @classmethod
-    def get_transceiver(cls):
+    def get_transceiver(cls) -> Transceiver:
         """
         The transceiver description.
 
@@ -123,7 +128,9 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._transceiver
 
     @classmethod
-    def read_memory(cls, x, y, base_address, length, cpu=0):
+    def read_memory(
+            cls, x: int, y: int, base_address: int, length: int, *,
+            cpu: int = 0) -> bytes:
         """
         Read some areas of memory (usually SDRAM) from the board.
 
@@ -154,14 +161,17 @@ class SpiNNManDataView(MachineDataView):
             If a response indicates an error during the exchange
         """
         try:
-            return cls.__data._transceiver.read_memory(
-                x, y, base_address, length, cpu)
+            return cls.get_transceiver().read_memory(
+                x, y, base_address, length, cpu=cpu)
         except AttributeError as ex:
             raise cls._exception("transceiver") from ex
 
     @classmethod
-    def write_memory(cls, x, y, base_address, data, n_bytes=None, offset=0,
-                     cpu=0, is_filename=False):
+    def write_memory(
+            cls, x: int, y: int, base_address: int, data: Union[
+                BinaryIO, bytes, bytearray, int, str], *,
+            n_bytes: Optional[int] = None, offset: int = 0,
+            cpu: int = 0) -> Tuple[int, int]:
         """
         Write to the SDRAM on the board.
 
@@ -178,8 +188,7 @@ class SpiNNManDataView(MachineDataView):
             * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
-            * A filename of a data file (in which case `is_filename` must be\
-              set to True)
+            * A filename of a data file
         :type data:
             ~io.RawIOBase or bytes or bytearray or int or str
         :param int n_bytes:
@@ -192,7 +201,6 @@ class SpiNNManDataView(MachineDataView):
             * If `data` is a str, the length of the file will be used
         :param int offset: The offset from which the valid data begins
         :param int cpu: The optional CPU to write to
-        :param bool is_filename: True if `data` is a filename
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         :raise SpinnmanIOException:
@@ -210,15 +218,14 @@ class SpiNNManDataView(MachineDataView):
         :raise SpinnmanUnexpectedResponseCodeException:
             If a response indicates an error during the exchange
         """
-        if cls.__data._transceiver is None:
-            raise cls._exception("transceiver")
-        return cls.__data._transceiver.write_memory(
-            x, y, base_address, data, n_bytes, offset, cpu, is_filename)
+        return cls.get_transceiver().write_memory(
+            x, y, base_address, data,
+            n_bytes=n_bytes, offset=offset, cpu=cpu)
 
     # app_id methods
 
     @classmethod
-    def get_app_id(cls):
+    def get_app_id(cls) -> int:
         """
         Gets the main app_id used by the transceiver.
 
@@ -231,7 +238,7 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._app_id
 
     @classmethod
-    def get_new_id(cls):
+    def get_new_id(cls) -> int:
         """
         Gets a new id from the current `app_id_tracker`
 
@@ -244,7 +251,7 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._app_id_tracker.get_new_id()
 
     @classmethod
-    def free_id(cls, app_id):
+    def free_id(cls, app_id: int):
         """
         Frees up an app_id.
 
@@ -256,19 +263,17 @@ class SpiNNManDataView(MachineDataView):
             cls.__data._app_id_tracker.free_id(app_id)
 
     @classmethod
-    def get_scamp_connection_selector(cls):
+    def get_scamp_connection_selector(cls) -> MostDirectConnectionSelector:
         """
         Gets the SCAMP connection selector from the transceiver.
 
-        Syntactic sugar for `get_transceiver().scamp_connection_selector()`
+        Syntactic sugar for `get_transceiver().get_scamp_connection_selector()`
 
         :rtype: MostDirectConnectionSelector
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """
         if not cls.__data._scamp_connection_selector:
-            if cls.__data._transceiver is None:
-                raise cls._exception("transceiver")
             cls.__data._scamp_connection_selector =\
-                cls.__data._transceiver._scamp_connection_selector
+                cls. get_transceiver().get_scamp_connection_selector()
         return cls.__data._scamp_connection_selector

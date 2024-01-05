@@ -23,13 +23,13 @@ _IPTAG_INFO = 4
 _IPTAG_MAX = 255
 
 
-class IPTagGetInfo(AbstractSCPRequest):
+class IPTagGetInfo(AbstractSCPRequest[IPTagGetInfoResponse]):
     """
     An SCP Request information about IP tags.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int):
         """
         :param int x: The x-coordinate of a chip, between 0 and 255
         :param int y: The y-coordinate of a chip, between 0 and 255
@@ -44,5 +44,5 @@ class IPTagGetInfo(AbstractSCPRequest):
             argument_2=_IPTAG_MAX)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> IPTagGetInfoResponse:
         return IPTagGetInfoResponse()

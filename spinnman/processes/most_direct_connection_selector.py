@@ -11,53 +11,51 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Dict, List
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XY
 from spinnman.data import SpiNNManDataView
+from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from .abstract_multi_connection_process_connection_selector import (
-    AbstractMultiConnectionProcessConnectionSelector)
+    ConnectionSelector)
 
 
-class MostDirectConnectionSelector(
-        AbstractMultiConnectionProcessConnectionSelector):
+class MostDirectConnectionSelector(ConnectionSelector):
     """
     A selector that goes for the most direct connection for the message.
     """
-    __slots__ = [
+    __slots__ = (
         "_connections",
-        "_first_connection"]
+        "_lead_connection")
 
-    # pylint: disable=super-init-not-called
-    def __init__(self, connections):
+    def __init__(self, connections: List[SCAMPConnection]):
         """
         :param list(SCAMPConnection) connections:
             The connections to be used
         """
-        self._connections = dict()
-        self._first_connection = None
-        for connection in connections:
-            if connection.chip_x == 0 and connection.chip_y == 0:
-                self._first_connection = connection
-            self._connections[
-                (connection.chip_x, connection.chip_y)] = connection
-        if self._first_connection is None:
-            self._first_connection = next(iter(connections))
+        self._connections: Dict[XY, SCAMPConnection] = dict()
+        lead_connection = None
+        for conn in connections:
+            if conn.chip_x == 0 and conn.chip_y == 0:
+                lead_connection = conn
+            self._connections[conn.chip_x, conn.chip_y] = conn
+        if lead_connection is None:
+            lead_connection = next(iter(connections))
+        self._lead_connection = lead_connection
 
-    @overrides(
-        AbstractMultiConnectionProcessConnectionSelector.get_next_connection)
-    def get_next_connection(self, message):
+    @overrides(ConnectionSelector.get_next_connection)
+    def get_next_connection(
+            self, message: AbstractSCPRequest) -> SCAMPConnection:
         key = (message.sdp_header.destination_chip_x,
                message.sdp_header.destination_chip_y)
         if key in self._connections:
             return self._connections[key]
 
         if not SpiNNManDataView.has_machine() or len(self._connections) == 1:
-            return self._first_connection
+            return self._lead_connection
 
         x, y = key
         key = SpiNNManDataView.get_nearest_ethernet(x, y)
 
-        if key in self._connections:
-            return self._connections[key]
-        else:
-            return self._first_connection
+        return self._connections.get(key, self._lead_connection)

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from spinnman.messages.eieio.eieio_type import EIEIOType
 
 
 class AbstractDataElement(object, metaclass=AbstractBase):
@@ -23,7 +24,7 @@ class AbstractDataElement(object, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def get_bytestring(self, eieio_type):
+    def get_bytestring(self, eieio_type: EIEIOType) -> bytes:
         """
         Get a byte-string for the given type
 
@@ -33,3 +34,4 @@ class AbstractDataElement(object, metaclass=AbstractBase):
         :raise SpinnmanInvalidParameterException:
             If the type is incompatible with the element
         """
+        raise NotImplementedError

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Iterable, Optional
 
 _MIN_APP_ID = 17
 _MAX_APP_ID = 254
@@ -20,17 +21,18 @@ class AppIdTracker(object):
     """
     A tracker of application IDs to make it easier to allocate new IDs.
     """
-    __slots__ = [
+    __slots__ = (
         "_free_ids",
         "_max_app_id",
-        "_min_app_id"]
+        "_min_app_id")
 
     # Keep a class-global reference to the free ID range, so IDs are
     # allocated globally
 
     def __init__(
-            self, app_ids_in_use=None, min_app_id=_MIN_APP_ID,
-            max_app_id=_MAX_APP_ID):
+            self, app_ids_in_use: Optional[Iterable[int]] = None,
+            min_app_id: int = _MIN_APP_ID,
+            max_app_id: int = _MAX_APP_ID):
         """
         :param app_ids_in_use: The IDs that are already in use
         :type app_ids_in_use: list(int) or None
@@ -43,7 +45,7 @@ class AppIdTracker(object):
         self._min_app_id = min_app_id
         self._max_app_id = max_app_id
 
-    def get_new_id(self):
+    def get_new_id(self) -> int:
         """
         Get a new unallocated ID
 
@@ -51,7 +53,7 @@ class AppIdTracker(object):
         """
         return self._free_ids.pop()
 
-    def allocate_id(self, allocated_id):
+    def allocate_id(self, allocated_id: int):
         """
         Allocate a given ID.
 
@@ -60,7 +62,7 @@ class AppIdTracker(object):
         """
         self._free_ids.remove(allocated_id)
 
-    def free_id(self, id_to_free):
+    def free_id(self, id_to_free: int):
         """
         Free a given ID.
 

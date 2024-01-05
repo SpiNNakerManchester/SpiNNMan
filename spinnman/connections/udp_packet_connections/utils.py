@@ -12,19 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-_SDP_SOURCE_PORT = 7
-_SDP_SOURCE_CPU = 31
-_SDP_TAG = 0xFF
 
-
+# Kept for spalloc_server to use
 def update_sdp_header_for_udp_send(sdp_header, source_x, source_y):
     """
     Apply defaults to the SDP header for sending over UDP.
 
-    :param SDPHeader sdp_header: The SDP header values
+    .. deprecated:: 7.0
+        Use :py:meth:`SDPHeader.update_for_send` instead.
+
+    :param SDPHeader sdp_header: The SDP header to update
+    :param int source_x: Where the packet is deemed to originate: X coordinate
+    :param int source_y: Where the packet is deemed to originate: Y coordinate
     """
-    sdp_header.tag = _SDP_TAG
-    sdp_header.source_port = _SDP_SOURCE_PORT
-    sdp_header.source_cpu = _SDP_SOURCE_CPU
-    sdp_header.source_chip_x = source_x
-    sdp_header.source_chip_y = source_y
+    sdp_header.update_for_send(source_x, source_y)

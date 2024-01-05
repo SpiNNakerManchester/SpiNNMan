@@ -11,26 +11,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from spinn_utilities.abstract_base import abstractproperty, AbstractBase
+from __future__ import annotations
+from typing import Union, TYPE_CHECKING
+from spinn_utilities.abstract_base import abstractmethod, AbstractBase
+if TYPE_CHECKING:
+    from spinnman.messages.eieio.command_messages import EIEIOCommandHeader
+    from spinnman.messages.eieio.data_messages import EIEIODataHeader
 
 
 class AbstractEIEIOMessage(object, metaclass=AbstractBase):
     """
     Interface for an EIEIOMessage.
     """
-
     __slots__ = ()
 
-    @abstractproperty
-    def eieio_header(self):
+    @property
+    @abstractmethod
+    def eieio_header(self) -> Union[EIEIOCommandHeader, EIEIODataHeader]:
         """
         The header of the message.
         """
+        raise NotImplementedError
 
-    @abstractproperty
-    def bytestring(self):
+    @property
+    @abstractmethod
+    def bytestring(self) -> bytes:
         """
         The bytes of the message.
 
         :rtype: bytes
         """
+        raise NotImplementedError

@@ -11,34 +11,38 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from spinnman.messages.scp.impl.fixed_route_read import FixedRouteRead
+from typing import Optional
+from spinnman.messages.scp.impl.fixed_route_read import (
+    FixedRouteRead, _FixedRouteResponse)
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
+from spinn_machine.fixed_route_entry import FixedRouteEntry
 
 
-class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
+class ReadFixedRouteRoutingEntryProcess(
+        AbstractMultiConnectionProcess[_FixedRouteResponse]):
     """
     A process for reading a fixed route routing table entry.
     """
 
     __slots__ = (
         # the fixed route routing entry from the response
-        "_route",
-    )
+        "_route", )
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector: the SC&MP connection selector
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
+            the SC&MP connection selector
         """
         super().__init__(connection_selector)
-        self._route = None
+        self._route: Optional[FixedRouteEntry] = None
 
-    def __handle_read_response(self, response):
+    def __handle_read_response(self, response: _FixedRouteResponse):
         self._route = response.route
 
-    def read_fixed_route(self, x, y, app_id=0):
+    def read_fixed_route(
+            self, x: int, y: int, app_id: int = 0) -> FixedRouteEntry:
         """
         Read the fixed route entry installed on a particular chip's router.
 
@@ -51,8 +55,8 @@ class ReadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
             routes.  If not specified, defaults to 0.
         :rtype: ~spinn_machine.FixedRouteEntry
         """
-        self._send_request(FixedRouteRead(x, y, app_id),
-                           self.__handle_read_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(FixedRouteRead(x, y, app_id),
+                               self.__handle_read_response)
+        assert self._route is not None
         return self._route

@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .bmp_response import BMPResponse
+from .bmp_response import BMPResponse, BMPOKResponse
 from .bmp_request import BMPRequest
 from .scp_request import AbstractSCPRequest
 from .scp_response import AbstractSCPResponse
 
 __author__ = 'stokesa6'
-__all__ = ["BMPRequest", "BMPResponse",
+__all__ = ["BMPRequest", "BMPResponse", "BMPOKResponse",
            "AbstractSCPRequest", "AbstractSCPResponse"]

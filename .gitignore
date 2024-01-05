@@ -29,3 +29,5 @@ SpiNNMan.egg-info
 .coverage
 .cache/
 .pytest_cache/
+/.mypy_cache/
+/scripts/

@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from typing import Optional
 from spinnman.messages.scp.impl import SDRAMDeAlloc
-from spinnman.processes.abstract_multi_connection_process import (
-    AbstractMultiConnectionProcess)
+from spinnman.processes import AbstractMultiConnectionProcess
+from spinnman.processes import ConnectionSelector
 
 
 class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
@@ -25,19 +25,16 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         known use except for Transceiver.free_sdram and free_sdram_by_app_id
         which are both themselves deprecated.
     """
-    __slots__ = [
-        "_no_blocks_freed"]
+    __slots__ = ("_no_blocks_freed", )
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
-        self._no_blocks_freed = None
+        self._no_blocks_freed: Optional[int] = None
 
-    def de_alloc_sdram(self, x, y, app_id, base_address=None):
+    def de_alloc_all_app_sdram(self, x: int, y: int, app_id: int):
         """
         :param int x:
         :param int y:
@@ -45,20 +42,26 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         :param base_address:
         :type base_address: int or None
         """
-        callback = None
         # deallocate space in the SDRAM
-        if base_address is None:
-            callback = self._handle_sdram_alloc_response
-        self._send_request(SDRAMDeAlloc(x, y, app_id, base_address),
-                           callback=callback)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(SDRAMDeAlloc(x, y, app_id=app_id),
+                               callback=self.__handle_sdram_alloc_response)
 
-    def _handle_sdram_alloc_response(self, response):
+    def de_alloc_sdram(self, x: int, y: int, base_address: int):
+        """
+        :param int x:
+        :param int y:
+        :param int base_address:
+        """
+        with self._collect_responses():
+            self._send_request(SDRAMDeAlloc(x, y, base_address=base_address),
+                               callback=None)
+
+    def __handle_sdram_alloc_response(self, response):
         self._no_blocks_freed = response.number_of_blocks_freed
 
     @property
-    def no_blocks_freed(self):
+    def no_blocks_freed(self) -> Optional[int]:
         """
         :rtype: int
         """

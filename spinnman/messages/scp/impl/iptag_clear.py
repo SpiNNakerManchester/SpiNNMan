@@ -22,13 +22,13 @@ from .check_ok_response import CheckOKResponse
 _IPTAG_CLEAR = 3
 
 
-class IPTagClear(AbstractSCPRequest):
+class IPTagClear(AbstractSCPRequest[CheckOKResponse]):
     """
     An SCP Request to clear an IP Tag.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, x, y, tag):
+    def __init__(self, x: int, y: int, tag: int):
         """
         :param int x: The x-coordinate of a chip, between 0 and 255
         :param int y: The y-coordinate of a chip, between 0 and 255
@@ -43,5 +43,5 @@ class IPTagClear(AbstractSCPRequest):
             argument_1=(_IPTAG_CLEAR << 16) | tag)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
+    def get_scp_response(self) -> CheckOKResponse:
         return CheckOKResponse("Clear IP Tag", "CMD_IPTAG")

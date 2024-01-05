@@ -15,11 +15,13 @@ from functools import wraps
 from logging import getLogger
 import re
 import requests
-from typing import Dict, Tuple
-import websocket
+from json.decoder import JSONDecodeError
+from typing import Dict, Tuple, cast, Optional
+import websocket  # type: ignore
 from spinn_utilities.log import FormatAdapter
-from .utils import clean_url
+from spinn_utilities.typing.json import JsonObject
 from spinnman.exceptions import SpallocException
+from .utils import clean_url
 
 logger = FormatAdapter(getLogger(__name__))
 #: The name of the session cookie issued by Spring Security
@@ -29,26 +31,28 @@ _debug_pretty_print = False
 
 
 def _may_renew(method):
-    def pp_req(req: requests.PreparedRequest):
+    def pp_req(request: requests.PreparedRequest):
         """
-        :param ~requests.PreparedRequest req:
+        :param ~requests.PreparedRequest request:
         """
-        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
-            '>>>>>>>>>>>START>>>>>>>>>>>',
-            req.method + ' ' + req.url,
-            '\r\n'.join('{}: {}'.format(*kv) for kv in req.headers.items()),
-            req.body if req.body else ""))
+        print(">>>>>>>>>>>START>>>>>>>>>>>\n")
+        print(f"{request.method} {request.url}")
+        print('\r\n'.join('{}: {}'.format(*kv)
+                          for kv in request.headers.items()))
+        if request.body:
+            print(request.body)
 
-    def pp_resp(resp: requests.Response):
+    def pp_resp(response: requests.Response):
         """
-        :param ~requests.Response resp:
+        :param ~requests.Response response:
         """
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '<<<<<<<<<<<START<<<<<<<<<<<',
-            str(resp.status_code) + " " + resp.reason,
-            '\r\n'.join('{}: {}'.format(*kv) for kv in resp.headers.items()),
+            str(response.status_code) + " " + response.reason,
+            '\r\n'.join('{}: {}'.format(*kv)
+                        for kv in response.headers.items()),
             # Assume we only get textual responses
-            str(resp.content, "UTF-8") if resp.content else ""))
+            str(response.content, "UTF-8") if response.content else ""))
 
     @wraps(method)
     def call(self, *args, **kwargs):
@@ -83,8 +87,10 @@ class Session:
 
     def __init__(
             self, service_url: str,
-            username: str = None, password: str = None, token: str = None,
-            session_credentials: Tuple[Dict[str, str], Dict[str, str]] = None):
+            username: Optional[str] = None, password: Optional[str] = None,
+            token: Optional[str] = None,
+            session_credentials: Optional[
+                Tuple[Dict[str, str], Dict[str, str]]] = None):
         """
         :param str service_url: The reference to the service.
             *Should not* include a username or password in it.
@@ -113,7 +119,7 @@ class Session:
                     self.__csrf_header = key
                     self.__csrf = value
 
-    def __handle_error_or_return(self, response):
+    def __handle_error_or_return(self, response: requests.Response):
         code = response.status_code
         if code >= 200 and code < 400:
             return response
@@ -139,20 +145,20 @@ class Session:
         return self.__handle_error_or_return(r)
 
     @_may_renew
-    def post(self, url: str, jsonobj: dict, timeout: int = 10,
+    def post(self, url: str, json_dict: dict, timeout: int = 10,
              **kwargs) -> requests.Response:
         """
         Do an HTTP ``POST`` in the session.
 
         :param str url:
         :param int timeout:
-        :param dict jsonobj:
+        :param dict json_dict:
         :rtype: ~requests.Response
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
         cookies, headers = self._credentials
-        r = requests.post(url, params=params, json=jsonobj,
+        r = requests.post(url, params=params, json=json_dict,
                           cookies=cookies, headers=headers,
                           allow_redirects=False, timeout=timeout)
         logger.debug("POST {} returned {}", url, r.status_code)
@@ -198,7 +204,7 @@ class Session:
         logger.debug("DELETE {} returned {}", url, r.status_code)
         return self.__handle_error_or_return(r)
 
-    def renew(self) -> dict:
+    def renew(self) -> JsonObject:
         """
         Renews the session, logging the user into it so that state modification
         operations can be performed.
@@ -214,7 +220,8 @@ class Session:
                 headers={"Authorization": f"Bearer {self.__token}"},
                 allow_redirects=False, timeout=10)
             if not r.ok:
-                raise SpallocException(f"Could not renew session: {r.content}")
+                raise SpallocException(
+                    f"Could not renew session: {cast(str, r.content)}")
             self._session_id = r.cookies[_SESSION_COOKIE]
         else:
             # Step one: a temporary session so we can log in
@@ -244,13 +251,23 @@ class Session:
                               data=form, timeout=10)
             logger.debug("POST {} returned {}",
                          self.__login_submit_url, r.status_code)
-            self._session_id = r.cookies[_SESSION_COOKIE]
-            # We don't need to follow that redirect
+            try:
+                self._session_id = r.cookies[_SESSION_COOKIE]
+            except KeyError as e:
+                try:
+                    json_error = r.json()
+                    if 'message' in json_error:
+                        error = json_error['message']
+                    else:
+                        error = str(json_error)
+                except JSONDecodeError:
+                    error = r.raw
+                raise SpallocException(f"Unable to login: {error}") from e
 
         # Step three: get the basic service data and new CSRF token
-        obj = self.get(self.__srv_base).json()
-        self.__csrf_header = obj["csrf-header"]
-        self.__csrf = obj["csrf-token"]
+        obj: JsonObject = self.get(self.__srv_base).json()
+        self.__csrf_header = cast(str, obj["csrf-header"])
+        self.__csrf = cast(str, obj["csrf-token"])
         del obj["csrf-header"]
         del obj["csrf-token"]
         return obj
@@ -268,8 +285,8 @@ class Session:
         return cookies, headers
 
     def websocket(
-            self, url: str, header: dict = None, cookie: str = None,
-            **kwargs) -> websocket.WebSocket:
+            self, url: str, header: Optional[dict] = None,
+            cookie: Optional[str] = None, **kwargs) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.
@@ -340,8 +357,8 @@ class SessionAware:
     def _get(self, url: str, **kwargs) -> requests.Response:
         return self.__session.get(url, **kwargs)
 
-    def _post(self, url: str, jsonobj: dict, **kwargs) -> requests.Response:
-        return self.__session.post(url, jsonobj, **kwargs)
+    def _post(self, url: str, json_dict: dict, **kwargs) -> requests.Response:
+        return self.__session.post(url, json_dict, **kwargs)
 
     def _put(self, url: str, data: str, **kwargs) -> requests.Response:
         return self.__session.put(url, data, **kwargs)

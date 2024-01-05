@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Mapping
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -20,22 +21,24 @@ from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
 
 
-class SetLED(AbstractSCPRequest):
+class SetLED(AbstractSCPRequest[CheckOKResponse]):
     """
-    A request to change the state of an SetLED.
+    A request to change the state of a chip's LED.
 
     This class is currently deprecated and untested as there is no
     known use except for Transceiver.set_led which is itself deprecated.
     """
-    __slots__ = []
+    __slots__ = ()
 
-    def __init__(self, x, y, cpu, led_states):
+    def __init__(
+            self, x: int, y: int, cpu: int, led_states: Mapping[int, int]):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255
         :param int y: The y-coordinate of the chip, between 0 and 255
-        :param int cpu: The CPU-number to use to set the SetLED.
+        :param int cpu:
+            The CPU-number to use to set the LED. Normally should be 0
         :param dict(int,int) led_states:
-            A dictionary mapping SetLED index to state with
+            A dictionary mapping LED index to state with
             0 being off, 1 on and 2 inverted.
         """
         encoded_led_states = 0
@@ -51,5 +54,5 @@ class SetLED(AbstractSCPRequest):
             argument_1=encoded_led_states)
 
     @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
-        return CheckOKResponse("Set SetLED", "CMD_LED")
+    def get_scp_response(self) -> CheckOKResponse:
+        return CheckOKResponse("Set chip LED", "CMD_LED")

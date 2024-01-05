@@ -16,10 +16,11 @@ import time
 import sys
 import signal
 import socket
+from typing import Callable
 from spinnman.connections.udp_packet_connections import IPAddressesConnection
 
 
-def locate_connected_machine(handler):
+def locate_connected_machine(handler: Callable[[str, float], None]):
     """
     Locates any SpiNNaker machines IP addresses from the auto-transmitted
     packets from non-booted SpiNNaker machines.
@@ -52,7 +53,7 @@ if __name__ == "__main__":
         print("Exiting")
         sys.exit()
 
-    def _print_connected(ip_address, timestamp):
+    def _print_connected(ip_address: str, timestamp: float):
         try:
             hostname = f" ({socket.gethostbyaddr(ip_address)[0]})"
         except Exception:  # pylint: disable=broad-except

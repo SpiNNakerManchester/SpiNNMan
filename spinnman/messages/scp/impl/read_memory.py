@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
+from spinn_utilities.typing.coords import XYP
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, AbstractSCPResponse)
@@ -22,68 +23,37 @@ from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.constants import address_length_dtype
 
 
-class ReadMemory(AbstractSCPRequest):
-    """
-    An SCP request to read a region of memory on a chip.
-    """
-    __slots__ = []
-
-    def __init__(self, x, y, base_address, size, cpu=0):
-        """
-        :param int x:
-            The x-coordinate of the chip to read from, between 0 and 255
-        :param int y:
-            The y-coordinate of the chip to read from, between 0 and 255
-        :param int base_address:
-            The positive base address to start the read from
-        :param int size: The number of bytes to read, between 1 and 256
-        :raise SpinnmanInvalidParameterException:
-            * If the chip coordinates are out of range
-            * If the base address is not a positive number
-            * If the size is out of range
-        """
-        # pylint: disable=too-many-arguments
-        super().__init__(
-            SDPHeader(
-                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
-                destination_cpu=cpu, destination_chip_x=x,
-                destination_chip_y=y),
-            SCPRequestHeader(command=SCPCommand.CMD_READ),
-            argument_1=base_address, argument_2=size,
-            argument_3=address_length_dtype[
-                (base_address % 4, size % 4)].value)
-
-    @overrides(AbstractSCPRequest.get_scp_response)
-    def get_scp_response(self):
-        return _SCPReadMemoryResponse()
-
-
-class _SCPReadMemoryResponse(AbstractSCPResponse):
+class Response(AbstractSCPResponse):
     """
     An SCP response to a request to read a region of memory on a chip.
     """
-    __slots__ = [
+    __slots__ = (
         "_data",
         "_length",
-        "_offset"]
+        "_offset",
+        "__op",
+        "__cmd")
 
-    def __init__(self):
+    def __init__(self, operation: str, command: str) -> None:
         super().__init__()
-        self._data = None
-        self._length = None
-        self._offset = None
+        self._data = b''
+        self._length = 0
+        self._offset = 0
+        self.__op = operation
+        self.__cmd = command
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
+        assert self._scp_response_header is not None
         if self._scp_response_header.result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
-                "Read", "CMD_READ", self._scp_response_header.result)
+                self.__op, self.__cmd, self._scp_response_header.result)
         self._data = data
         self._offset = offset
         self._length = len(data) - offset
 
     @property
-    def data(self):
+    def data(self) -> bytes:
         """
         The data read.
 
@@ -95,7 +65,7 @@ class _SCPReadMemoryResponse(AbstractSCPResponse):
         return self._data
 
     @property
-    def offset(self):
+    def offset(self) -> int:
         """
         The offset where the valid data starts.
 
@@ -104,10 +74,45 @@ class _SCPReadMemoryResponse(AbstractSCPResponse):
         return self._offset
 
     @property
-    def length(self):
+    def length(self) -> int:
         """
         The length of the valid data.
 
         :rtype: int
         """
         return self._length
+
+
+class ReadMemory(AbstractSCPRequest[Response]):
+    """
+    An SCP request to read a region of memory on a chip.
+    """
+    __slots__ = ()
+
+    def __init__(self, coordinates: XYP, base_address: int, size: int):
+        """
+        :param tuple coordinates:
+            The X,Y,P coordinates of the chip to read from;
+            X and Y between 0 and 255, P between 0 and 17
+        :param int base_address:
+            The positive base address to start the read from
+        :param int size: The number of bytes to read, between 1 and 256
+        :raise SpinnmanInvalidParameterException:
+            * If the chip coordinates are out of range
+            * If the base address is not a positive number
+            * If the size is out of range
+        """
+        x, y, cpu = coordinates
+        super().__init__(
+            SDPHeader(
+                flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
+                destination_cpu=cpu, destination_chip_x=x,
+                destination_chip_y=y),
+            SCPRequestHeader(command=SCPCommand.CMD_READ),
+            argument_1=base_address, argument_2=size,
+            argument_3=address_length_dtype[
+                (base_address % 4, size % 4)].value)
+
+    @overrides(AbstractSCPRequest.get_scp_response)
+    def get_scp_response(self) -> Response:
+        return Response("read memory", "CMD_READ")

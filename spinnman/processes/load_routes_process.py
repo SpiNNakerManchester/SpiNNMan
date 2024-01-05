@@ -13,11 +13,16 @@
 # limitations under the License.
 
 import struct
+from typing import Collection
 from spinn_machine import Router
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl import RouterInit, RouterAlloc
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
+from spinnman.messages.scp.impl.router_alloc import RouterAllocResponse
 from .write_memory_process import WriteMemoryProcess
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 
 _ROUTE_PATTERN = struct.Struct("<H2xIII")
 _END_PATTERN = struct.Struct("<IIII")
@@ -28,22 +33,21 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
     """
     A process for loading the multicast routing table on a SpiNNaker chip.
     """
-    __slots__ = [
-        "_base_address"]
+    __slots__ = ("_base_address", )
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
-        self._base_address = None
+        self._base_address = 0
 
-    def __handle_router_alloc_response(self, response):
+    def __handle_router_alloc_response(self, response: RouterAllocResponse):
         self._base_address = response.base_address
 
-    def load_routes(self, x, y, routes, app_id):
+    def load_routes(
+            self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
+            app_id: int):
         """
         :param int x:
         :param int y:
@@ -71,21 +75,18 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         # Upload the data
         process = WriteMemoryProcess(self._conn_selector)
         process.write_memory_from_bytearray(
-            x, y, 0, _TABLE_ADDRESS, routing_data, 0, len(routing_data))
+            (x, y, 0), _TABLE_ADDRESS, routing_data, 0, len(routing_data))
 
         # Allocate space in the router table
-        self._send_request(RouterAlloc(x, y, app_id, n_entries),
-                           self.__handle_router_alloc_response)
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            self._send_request(RouterAlloc(x, y, app_id, n_entries),
+                               self.__handle_router_alloc_response)
         if self._base_address == 0:
             raise SpinnmanInvalidParameterException(
                 "Allocation base address", str(self._base_address),
                 "Not enough space to allocate the entries")
 
         # Load the entries
-        self._send_request(
-            RouterInit(
+        with self._collect_responses():
+            self._send_request(RouterInit(
                 x, y, n_entries, _TABLE_ADDRESS, self._base_address, app_id))
-        self._finish()
-        self.check_for_error()

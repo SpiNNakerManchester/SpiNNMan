@@ -26,16 +26,6 @@ class P2PTableRoute(Enum):
     SOUTH_WEST = 0b100
     SOUTH = 0b101
     #: No route to this chip
-    NONE = (0b110, "No route to this chip")
+    NONE = 0b110
     #: Route to the monitor on the current chip
-    MONITOR = (0b111, "Route to the monitor on the current chip")
-
-    def __new__(cls, value, doc=""):
-        # pylint: disable=protected-access, unused-argument
-        obj = object.__new__(cls)
-        obj._value_ = value
-        return obj
-
-    def __init__(self, value, doc=""):
-        self._value_ = value
-        self.__doc__ = doc
+    MONITOR = 0b111

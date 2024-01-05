@@ -25,19 +25,19 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
     """
     An SCP response to a request for information about IP tags.
     """
-    __slots__ = [
+    __slots__ = (
         "_fixed_size",
         "_pool_size",
-        "_tto"]
+        "_tto")
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._tto = None
-        self._pool_size = None
-        self._fixed_size = None
+        self._tto = 0
+        self._pool_size = 0
+        self._fixed_size = 0
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -47,7 +47,7 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
             _BYTE_SKIP_BYTE_BYTE.unpack_from(data, offset)
 
     @property
-    def transient_timeout(self):
+    def transient_timeout(self) -> int:
         """
         The timeout for transient IP tags (i.e. responses to SCP commands).
 
@@ -56,7 +56,7 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
         return self._tto
 
     @property
-    def pool_size(self):
+    def pool_size(self) -> int:
         """
         The count of the IP tag pool size.
 
@@ -65,7 +65,7 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
         return self._pool_size
 
     @property
-    def fixed_size(self):
+    def fixed_size(self) -> int:
         """
         The count of the number of fixed IP tag entries.
 

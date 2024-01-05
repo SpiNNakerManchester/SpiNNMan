@@ -13,49 +13,54 @@
 # limitations under the License.
 
 import functools
+from typing import Callable
+from spinn_utilities.typing.coords import XYP
 from spinnman.messages.scp.impl import ReadLink, ReadMemory
+from spinnman.messages.scp.impl.read_memory import Response
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 
 
-class ReadMemoryProcess(AbstractMultiConnectionProcess):
+class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
     """
     A process for reading memory on a SpiNNaker chip.
     """
-    __slots__ = [
-        "_view"]
+    __slots__ = ("_view", )
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
+        :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
-        self._view = None
+        self._view = memoryview(b'')
 
-    def __handle_response(self, offset, response):
+    def __handle_response(self, offset: int, response: Response):
         self._view[offset:offset + response.length] = response.data[
             response.offset:response.offset + response.length]
 
-    def read_memory(self, x, y, p, base_address, length):
+    def read_memory(self, coordinates: XYP, base_address: int,
+                    length: int) -> bytearray:
         """
-        :param int x:
-        :param int y:
-        :param int p:
+        Read some memory from a core.
+
+        :param tuple(int,int,int) coordinates:
         :param int base_address:
         :param int length:
         :rtype: bytearray
         """
         return self._read_memory(
             base_address, length,
-            functools.partial(ReadMemory, x=x, y=y, cpu=p))
+            functools.partial(ReadMemory, coordinates))
 
-    def read_link_memory(self, x, y, p, link, base_address, length):
+    def read_link_memory(self, coordinates: XYP, link: int,
+                         base_address: int, length: int) -> bytearray:
         """
-        :param int x:
-        :param int y:
-        :param int p:
+        Read some memory from the neighbour of a core.
+
+        :param tuple(int,int,int) coordinates:
         :param int link:
         :param int base_address:
         :param int length:
@@ -63,23 +68,24 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess):
         """
         return self._read_memory(
             base_address, length,
-            functools.partial(ReadLink, x=x, y=y, cpu=p, link=link))
+            functools.partial(ReadLink, coordinates, link))
 
-    def _read_memory(self, base_address, length, packet_class):
+    def _read_memory(
+            self, base_address: int, length: int,
+            packet_class: Callable[
+                [int, int], AbstractSCPRequest[Response]]) -> bytearray:
         data = bytearray(length)
         self._view = memoryview(data)
         n_bytes = length
         offset = 0
-        while n_bytes > 0:
-            bytes_to_get = min((n_bytes, UDP_MESSAGE_MAX_SIZE))
-            self._send_request(
-                packet_class(
-                    base_address=base_address + offset, size=bytes_to_get),
-                functools.partial(self.__handle_response, offset))
-            n_bytes -= bytes_to_get
-            offset += bytes_to_get
 
-        self._finish()
-        self.check_for_error()
+        with self._collect_responses():
+            while n_bytes > 0:
+                bytes_to_get = min((n_bytes, UDP_MESSAGE_MAX_SIZE))
+                self._send_request(
+                    packet_class(base_address + offset, bytes_to_get),
+                    functools.partial(self.__handle_response, offset))
+                n_bytes -= bytes_to_get
+                offset += bytes_to_get
 
         return data
