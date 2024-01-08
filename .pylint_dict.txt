@@ -14,14 +14,14 @@
 
 # Our abbreviations/names
 bmp
+bmpc
 cpu
 iobuf
 scp
 Spalloc
-bmpc
-ybug
 txrx
 url
+ybug
 xy
 xys
 
