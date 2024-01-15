@@ -34,7 +34,7 @@ class SpallocJob(object, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def get_state(self, wait_for_change=False) -> SpallocState:
+    def get_state(self, wait_for_change: bool = False) -> SpallocState:
         """
         Get the current state of the machine.
 
@@ -183,7 +183,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def keepalive(self):
+    def keepalive(self) -> None:
         """
         Signal the job that we want it to stay alive for a while longer.
         """

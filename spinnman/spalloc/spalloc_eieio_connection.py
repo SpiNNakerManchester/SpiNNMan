@@ -45,7 +45,7 @@ class SpallocEIEIOConnection(
     __slots__ = ()
 
     @overrides(EIEIOConnection.send_eieio_message)
-    def send_eieio_message(self, eieio_message):
+    def send_eieio_message(self, eieio_message: AbstractEIEIOMessage):
         # Not normally used, as packets need headers to go to SpiNNaker
         self.send(eieio_message.bytestring)
 

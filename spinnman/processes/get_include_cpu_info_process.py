@@ -35,5 +35,5 @@ class GetIncludeCPUInfoProcess(GetCPUInfoProcess):
         self.__states = states
 
     @overrides(GetCPUInfoProcess._is_desired)
-    def _is_desired(self, cpu_info: CPUInfo):
+    def _is_desired(self, cpu_info: CPUInfo) -> bool:
         return cpu_info.state in self.__states

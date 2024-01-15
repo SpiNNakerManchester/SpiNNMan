@@ -25,7 +25,7 @@ from threading import Condition
 import time
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable, Iterator, List, Optional,
-    Sequence, Tuple, TypeVar, Union, cast)
+    Sequence, Set, Tuple, TypeVar, Union, cast)
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod)
 from spinn_utilities.config_holder import get_config_bool
@@ -422,7 +422,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self._scamp_connections)
 
     @overrides(Transceiver.get_connections)
-    def get_connections(self):
+    def get_connections(self) -> Set[Connection]:
         return self._all_connections
 
     def _get_machine_dimensions(self) -> MachineDimensions:
@@ -1232,7 +1232,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.malloc_sdram)
     def malloc_sdram(
-            self, x: int, y: int, size: int, app_id: int, tag=0) -> int:
+            self, x: int, y: int, size: int, app_id: int, tag: int = 0) -> int:
         try:
             process = MallocSDRAMProcess(self._scamp_connection_selector)
             process.malloc_sdram(x, y, size, app_id, tag)

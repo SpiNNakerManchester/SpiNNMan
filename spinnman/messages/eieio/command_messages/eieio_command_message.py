@@ -13,6 +13,7 @@
 # limitations under the License.
 from spinn_utilities.overrides import overrides
 from spinnman.messages.eieio import AbstractEIEIOMessage
+from spinnman.messages.eieio.command_messages import EIEIOCommandHeader
 
 
 class EIEIOCommandMessage(AbstractEIEIOMessage):
@@ -24,7 +25,8 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         "_eieio_command_header",
         "_offset")
 
-    def __init__(self, eieio_command_header, data=None, offset=0):
+    def __init__(self, eieio_command_header: EIEIOCommandHeader, data=None,
+                 offset=0):
         """
         :param EIEIOCommandHeader eieio_command_header:
             The header of the message
@@ -40,7 +42,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
 
     @property
     @overrides(AbstractEIEIOMessage.eieio_header)
-    def eieio_header(self):
+    def eieio_header(self) -> EIEIOCommandHeader:
         """
         :rtype: EIEIOCommandHeader
         """
@@ -60,7 +62,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
 
     @property
     @overrides(AbstractEIEIOMessage.bytestring)
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         return self._eieio_command_header.bytestring
 
     @staticmethod
