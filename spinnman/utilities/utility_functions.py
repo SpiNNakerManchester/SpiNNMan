@@ -99,7 +99,7 @@ def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
         connection.chip_x, connection.chip_y, [0, 0, 0, 0], 0, tag,
         strip=strip, use_sender=True)
     data = connection.get_scp_data(request)
-    exn = None
+    exception = None
     for _ in range(3):
         try:
             connection.send(data)
@@ -107,9 +107,9 @@ def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
             request.get_scp_response().read_bytestring(response, offset)
             return
         except SpinnmanTimeoutException as e:
-            exn = e
-    # Should be impossible to get here with exn=None
-    raise exn or Exception
+            exception = e
+    # Should be impossible to get here with xception=None
+    raise exception or Exception
 
 
 def reprogram_tag_to_listener(
