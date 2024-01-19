@@ -38,7 +38,7 @@ class HostDataReadAck(EIEIOCommandMessage):
         return self._sequence_no
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):  # @UnusedVariable
+    def from_bytestring(command_header, data, offset):
         sequence_no = _PATTERN_B.unpack_from(data, offset)[0]
 
         return HostDataReadAck(sequence_no)

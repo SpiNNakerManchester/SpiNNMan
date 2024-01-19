@@ -56,7 +56,7 @@ class HostSendSequencedData(EIEIOCommandMessage):
         return 4
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):  # @UnusedVariable
+    def from_bytestring(command_header, data, offset):
         region_id, sequence_no = _PATTERN_BB.unpack_from(data, offset)
         eieio_data_message = read_eieio_data_message(data, offset)
         return HostSendSequencedData(
