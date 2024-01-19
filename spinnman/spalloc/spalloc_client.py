@@ -277,7 +277,7 @@ class _ProxyServiceError(IOError):
     """
 
 
-def _SpallocKeepalive(url, interval, term_queue, cookies, headers):
+def _spalloc_keepalive(url, interval, term_queue, cookies, headers):
     """
     Actual keepalive task implementation. Don't use directly.
     """
@@ -670,7 +670,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         if self.__keepalive_handle is not None:
             raise SpallocException("cannot keep job alive from two tasks")
         q: Queue = Queue(1)
-        p = Process(target=_SpallocKeepalive, args=(
+        p = Process(target=_spalloc_keepalive, args=(
             self._keepalive_url, 0 + period, q,
             *self._session_credentials), daemon=True)
         p.start()

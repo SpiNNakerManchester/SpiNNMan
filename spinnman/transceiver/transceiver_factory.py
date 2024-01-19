@@ -29,7 +29,7 @@ from spinnman.connections.udp_packet_connections import (
 from spinnman.transceiver import Transceiver
 from spinnman.transceiver.version3transceiver import Version3Transceiver
 from spinnman.transceiver.version5transceiver import Version5Transceiver
-from spinnman.transceiver.virtual5Transceiver import Virtual5Transceiver
+from spinnman.transceiver.virtual5transceiver import Virtual5Transceiver
 from spinnman.constants import LOCAL_HOST
 
 logger = FormatAdapter(logging.getLogger(__name__))
