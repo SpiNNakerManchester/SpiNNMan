@@ -81,7 +81,7 @@ class HostDataRead(EIEIOCommandMessage):
         return 8
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):  # @UnusedVariable
+    def from_bytestring(command_header, data, offset):
         n_requests, sequence_no = _PATTERN_BB.unpack_from(data, offset)
 
         offset += 2
