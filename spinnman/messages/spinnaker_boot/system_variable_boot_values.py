@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import NamedTuple, Union, Optional
+from typing import Any, NamedTuple, Union, Optional
 from enum import Enum
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
@@ -359,11 +359,23 @@ class SystemVariableBootValues(object):
         for variable in SystemVariableDefinition:
             self._values[variable] = variable.default
 
-    def set_value(self, system_variable_definition, value):
+    def set_value(self, system_variable_definition: SystemVariableDefinition,
+                  value: Any):
+        """
+
+        :param system_variable_definition:
+        :param value:
+        :return:
+        """
         self._values[system_variable_definition] = value
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
+        """
+        Gets all the SystemVariableDefinition as bytes
+
+        :rtype: bytes
+        """
         data = b""
         for sys_var in SystemVariableDefinition:
             data += struct.pack(sys_var.data_type.struct_code,

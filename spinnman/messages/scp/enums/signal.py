@@ -58,4 +58,9 @@ class Signal(Enum):
 
     @property
     def signal_type(self) -> SignalType:
+        """
+        The "type" of the signal
+
+        :rtype: SignalType
+        """
         return self._signal_type

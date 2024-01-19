@@ -574,7 +574,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             logger.info(self.where_is_xy(x, y))
             raise
 
-    def get_router_diagnostic_filter(self, x, y, position):
+    def get_router_diagnostic_filter(
+            self, x: int, y: int, position: int) -> DiagnosticFilter:
         """
         Gets a router diagnostic filter from a router.
 

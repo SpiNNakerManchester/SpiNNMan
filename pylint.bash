@@ -28,5 +28,5 @@ cat "../SupportScripts/actions/pylint/default_dict.txt" >$dict
 cat ".pylint_dict.txt" >>$dict
 
 # pylint --output-format=colorized --disable=R --persistent=no --jobs=1 --rcfile=../SupportScripts/actions/pylint/strict_rcfile --spelling-dict=en_GB --spelling-private-dict-file=$dict --disable=import-error  spinnman
-pylint --enable=invalid-name --output-format=colorized --disable=R --persistent=no --jobs=1 --rcfile=../SupportScripts/actions/pylint/strict_rcfile --spelling-dict=en_GB --spelling-private-dict-file=$dict --disable=all  spinnman
+pylint --enable=missing-function-docstring --output-format=colorized --disable=R --persistent=no --jobs=1 --rcfile=../SupportScripts/actions/pylint/strict_rcfile --spelling-dict=en_GB --spelling-private-dict-file=$dict --disable=all  spinnman
 
