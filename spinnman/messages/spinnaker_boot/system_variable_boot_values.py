@@ -58,7 +58,7 @@ class SystemVariableDefinition(Enum):
     """
     Defines the system variables available.
     """
-
+    # pylint: disable=invalid-name
     y = _Definition(
         _DataType.BYTE, offset=0, doc="The y-coordinate of the chip")
     x = _Definition(

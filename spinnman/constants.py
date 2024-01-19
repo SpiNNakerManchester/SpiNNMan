@@ -15,6 +15,7 @@
 from enum import Enum
 from typing import Dict, Tuple
 
+# pylint: disable=invalid-name
 LOCAL_HOST = "127.0.0.1"
 
 #: the amount of time to wait in seconds between powering off and powering
