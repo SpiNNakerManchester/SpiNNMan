@@ -664,7 +664,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         :param int x: chip X coordinate to write new watchdog parameter to
         :param int y: chip Y coordinate to write new watchdog parameter to
         :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
+            Either a Boolean indicating whether to enable (True) or
             disable (False) the watchdog timer, or an int value to set the
             timer count to
         :type watch_dog: bool or int
@@ -694,7 +694,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             Retained in case needed for hardware debugging.
 
         :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
+            Either a Boolean indicating whether to enable (True) or
             disable (False) the watch dog timer, or an int value to set the
             timer count to.
         :type watch_dog: bool or int

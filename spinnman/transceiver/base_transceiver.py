@@ -256,7 +256,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             ) -> MostDirectConnectionSelector:
         for conn in connections:
 
-            # locate the only boot send conn
+            # locate the only boot send connection
             if isinstance(conn, BootConnection):
                 if self._boot_send_connection is not None:
                     raise SpinnmanInvalidParameterException(
@@ -266,7 +266,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
             # Locate any connections that talk to a BMP
             if isinstance(conn, BMPConnection):
-                # If it is a BMP conn, add it here
+                # If it is a BMP connection, add it here
                 if self._bmp_connection is not None:
                     raise NotImplementedError(
                         "Only one BMP connection supported")
@@ -276,7 +276,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             elif isinstance(conn, SCAMPConnection):
                 self._scamp_connections.append(conn)
 
-        # update the transceiver with the conn selectors.
+        # update the transceiver with the connection selectors.
         return MostDirectConnectionSelector(self._scamp_connections)
 
     def __check_bmp_connection(self) -> None:
@@ -285,12 +285,11 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         :raise SpinnmanIOException: when a connection is not linked to a BMP
         """
-        # check that the UDP BMP conn is actually connected to a BMP
-        # via the sver command
+        # check that the UDP BMP connection is actually connected to a BMP
+        # via the get_scamp_version command
         if self._bmp_connection is not None:
             conn = self._bmp_connection
 
-            # try to send a BMP sver to check if it responds as expected
             try:
                 version_info = self._get_scamp_version(
                     conn.chip_x, conn.chip_y, self._bmp_selector)
@@ -802,7 +801,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
                 SystemVariableDefinition.iobuf_size))
         # Get all the cores if the subsets are not given
-        # todo is core_subsets ever None
+        # TODO is core_subsets ever None
         if core_subsets is None:
             core_subsets = CoreSubsets()
             for chip in SpiNNManDataView.get_machine().chips:
@@ -848,7 +847,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         if isinstance(executable, int):
             # No executable is 4 bytes long
             raise TypeError("executable may not be int")
-        # Lock against other executable's
+        # Lock against other executables
         with self.__flood_execute_lock():
             # Flood fill the system with the binary
             n_bytes, chksum = self.write_memory(
@@ -1018,7 +1017,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         xys = set()
         for cpu_info in cpu_infos:
-            # todo: Is it ever not a CPUInfo
+            # TODO: Is it ever not a CPUInfo
             if isinstance(cpu_info, CPUInfo):
                 xys.add((cpu_info.x, cpu_info.y))
             else:

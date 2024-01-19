@@ -481,7 +481,7 @@ class _ProxyReceiver(threading.Thread):
 
     def unlisten(self, channel_id: int):
         """
-        De-register a listener for a channel
+        Deregister a listener for a channel
         """
         self.__handlers.pop(channel_id)
 
