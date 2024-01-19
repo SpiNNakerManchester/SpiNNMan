@@ -61,8 +61,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = (
         "_chip_info",
-        # Used if there are any ignores with ip addresses
-        # Holds a mapping from ip to board root (x,y)
+        # Used if there are any ignores with IP addresses
+        # Holds a mapping from IP to board root (x,y)
         "_ethernets",
         # Holds a map from x,y to a set of virtual cores to ignores
         "_ignore_cores_map",
@@ -87,7 +87,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info: Dict[XY, ChipSummaryInfo] = dict()
 
-        # Set ethernets to None meaning not computed yet
+        # Set to None meaning not computed yet
         self._ethernets: Optional[Dict[str, XY]] = None
 
         # Maps between virtual and physical cores
@@ -362,7 +362,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param ~spinn_machine.Machine machine:
             An empty machine to handle wrap-arounds
         """
-        # Convert by ip to global
+        # Convert by IP to global
         for ignore in IgnoreCore.parse_string(
                 get_config_str_or_none("Machine", "down_cores")):
             global_xy = self._ignores_local_to_global(
@@ -389,7 +389,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         for ignore in IgnoreChip.parse_string(
                 get_config_str_or_none("Machine", "down_chips")):
-            # Convert by ip to global
+            # Convert by IP to global
             global_xy = self._ignores_local_to_global(
                 ignore.x, ignore.y, ignore.ip_address, machine)
             if global_xy is None:

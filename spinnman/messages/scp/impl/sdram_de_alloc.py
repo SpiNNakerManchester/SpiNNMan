@@ -107,7 +107,7 @@ class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
                 SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
                 argument_1=(
                     AllocFree.
-                    FREE_SDRAM_BY_POINTER.value),  # @UndefinedVariable
+                    FREE_SDRAM_BY_POINTER.value),
                 argument_2=base_address)
             self._read_n_blocks_freed = False
         else:
@@ -121,7 +121,7 @@ class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
                 argument_1=(
                     app_id << 8 |
                     AllocFree.
-                    FREE_SDRAM_BY_APP_ID.value))  # @UndefinedVariable
+                    FREE_SDRAM_BY_APP_ID.value))
             self._read_n_blocks_freed = True
 
     @overrides(AbstractSCPRequest.get_scp_response)

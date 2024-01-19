@@ -115,7 +115,6 @@ class Session:
                     # TODO: extract this?
                     pass
                 else:
-                    # Urgh
                     self.__csrf_header = key
                     self.__csrf = value
 

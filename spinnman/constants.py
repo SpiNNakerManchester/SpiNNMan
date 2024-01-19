@@ -75,7 +75,7 @@ CPU_IOBUF_ADDRESS_OFFSET: int = 88
 #: Max user requested tag value
 MAX_TAG_ID: int = 7
 
-#: The range of values the BMP's 12-bit ADCs can measure.
+#: The range of values the BMP 12-bit ADCs can measure.
 BMP_ADC_MAX: int = 1 << 12
 
 #: Multiplier to convert from ADC value to volts for lines less than 2.5 V.
