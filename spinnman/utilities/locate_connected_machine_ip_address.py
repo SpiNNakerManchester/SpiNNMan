@@ -43,10 +43,9 @@ def locate_connected_machine(handler: Callable[[str, float], None]):
 
 
 if __name__ == "__main__":
+
     def _ctrlc_handler(sig, frame):  # @UnusedVariable
         """
-        :param sig:
-        :param frame:
         :return: Never returns as it causes a sys.exit()
         """
         # pylint: disable=unused-argument
