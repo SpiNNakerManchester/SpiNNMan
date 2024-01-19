@@ -72,7 +72,7 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         return 12
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):  # @UnusedVariable
+    def from_bytestring(command_header, data, offset):
         y, x, processor, region_id, sequence_no, space = \
             _PATTERN_BBBxBBI.unpack_from(data, offset)
         p = (processor >> 3) & 0x1F
