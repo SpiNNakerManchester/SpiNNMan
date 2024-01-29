@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from spinn_utilities.overrides import overrides
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
@@ -68,10 +69,12 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         return self._space_available
 
     @staticmethod
+    @overrides(EIEIOCommandMessage.get_min_packet_length)
     def get_min_packet_length():
         return 12
 
     @staticmethod
+    @overrides(EIEIOCommandMessage.from_bytestring)
     def from_bytestring(command_header, data, offset):
         y, x, processor, region_id, sequence_no, space = \
             _PATTERN_BBBxBBI.unpack_from(data, offset)
@@ -80,6 +83,7 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
             x, y, p, region_id & 0xF, sequence_no, space)
 
     @property
+    @overrides(EIEIOCommandMessage.bytestring)
     def bytestring(self):
         return (super().bytestring + _PATTERN_BBBxBBI.pack(
             self._y, self._x, self._p << 3, self._region_id,

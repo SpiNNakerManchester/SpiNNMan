@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import struct
+from spinn_utilities.overrides import overrides
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
@@ -38,12 +40,14 @@ class HostDataReadAck(EIEIOCommandMessage):
         return self._sequence_no
 
     @staticmethod
+    @overrides(EIEIOCommandMessage.from_bytestring)
     def from_bytestring(command_header, data, offset):
         sequence_no = _PATTERN_B.unpack_from(data, offset)[0]
 
         return HostDataReadAck(sequence_no)
 
     @property
+    @overrides(EIEIOCommandMessage.bytestring)
     def bytestring(self):
         byte_string = super().bytestring
         byte_string += _PATTERN_B.pack(self.sequence_no)
