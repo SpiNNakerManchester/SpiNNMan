@@ -50,7 +50,7 @@ class EIEIOCommandHeader(object):
         return self._command
 
     @staticmethod
-    def from_bytestring(data, offset):
+    def from_bytestring(data: bytes, offset: int) -> "EIEIOCommandHeader":
         """
         Read an EIEIO command header from a byte-string.
 
@@ -70,7 +70,7 @@ class EIEIOCommandHeader(object):
         return EIEIOCommandHeader(command)
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         """
         The byte-string of the header.
 

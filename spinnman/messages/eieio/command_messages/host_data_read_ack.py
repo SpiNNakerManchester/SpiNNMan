@@ -50,14 +50,15 @@ class HostDataReadAck(EIEIOCommandMessage):
 
     @staticmethod
     @overrides(EIEIOCommandMessage.from_bytestring)
-    def from_bytestring(command_header, data, offset):
+    def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
+                        offset: int) -> "HostDataReadAck":
         sequence_no = _PATTERN_B.unpack_from(data, offset)[0]
 
         return HostDataReadAck(sequence_no)
 
     @property
     @overrides(EIEIOCommandMessage.bytestring)
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         byte_string = super().bytestring
         byte_string += _PATTERN_B.pack(self.sequence_no)
         return byte_string

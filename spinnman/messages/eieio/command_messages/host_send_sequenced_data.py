@@ -78,12 +78,13 @@ class HostSendSequencedData(EIEIOCommandMessage):
 
     @staticmethod
     @overrides(EIEIOCommandMessage.get_min_packet_length)
-    def get_min_packet_length():
+    def get_min_packet_length() -> int:
         return 4
 
     @staticmethod
     @overrides(EIEIOCommandMessage.from_bytestring)
-    def from_bytestring(command_header, data, offset):
+    def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
+                        offset: int) -> "HostSendSequencedData":
         region_id, sequence_no = _PATTERN_BB.unpack_from(data, offset)
         eieio_data_message = read_eieio_data_message(data, offset)
         return HostSendSequencedData(
@@ -91,7 +92,7 @@ class HostSendSequencedData(EIEIOCommandMessage):
 
     @property
     @overrides(EIEIOCommandMessage.bytestring)
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         return (super().bytestring +
                 _PATTERN_BB.pack(self._region_id, self._sequence_no) +
                 self._eieio_data_message.bytestring)

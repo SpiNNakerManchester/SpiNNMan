@@ -111,12 +111,13 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
 
     @staticmethod
     @overrides(EIEIOCommandMessage.get_min_packet_length)
-    def get_min_packet_length():
+    def get_min_packet_length() -> int:
         return 12
 
     @staticmethod
     @overrides(EIEIOCommandMessage.from_bytestring)
-    def from_bytestring(command_header, data, offset):
+    def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
+                        offset: int) -> "SpinnakerRequestBuffers":
         y, x, processor, region_id, sequence_no, space = \
             _PATTERN_BBBxBBI.unpack_from(data, offset)
         p = (processor >> 3) & 0x1F
@@ -125,7 +126,7 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
 
     @property
     @overrides(EIEIOCommandMessage.bytestring)
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         return (super().bytestring + _PATTERN_BBBxBBI.pack(
             self._y, self._x, self._p << 3, self._region_id,
             self._sequence_no, self._space_available))
