@@ -50,7 +50,7 @@ class _FixedRouteResponse(AbstractSCPResponse):
     @property
     def route(self) -> FixedRouteEntry:
         """
-        Converts this reponse into a Route
+        Converts this response into a Route
 
         :rtype: FixedRouteEntry
         """
