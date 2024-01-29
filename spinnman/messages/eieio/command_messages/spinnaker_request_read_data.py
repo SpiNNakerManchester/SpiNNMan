@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from spinn_utilities.overrides import overrides
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
 from .eieio_command_message import EIEIOCommandMessage
@@ -104,11 +105,14 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         return self._requests.space_to_be_read(request_id)
 
     @staticmethod
-    def get_min_packet_length():
+    @overrides(EIEIOCommandMessage.get_min_packet_length)
+    def get_min_packet_length() -> int:
         return 16
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
+    @overrides(EIEIOCommandMessage.from_bytestring)
+    def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
+                        offset: int) -> "SpinnakerRequestReadData":
         (y, x, processor_and_requests, sequence_no) = \
             _PATTERN_BBBB.unpack_from(data, offset)
         p = (processor_and_requests >> 3) & 0x1F
@@ -139,7 +143,8 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
             start_address, space_to_be_read)
 
     @property
-    def bytestring(self):
+    @overrides(EIEIOCommandMessage.bytestring)
+    def bytestring(self) -> bytes:
         byte_string = super().bytestring
         byte_string += _PATTERN_BB.pack(self.x, self.y)
         n_requests = self.n_requests
