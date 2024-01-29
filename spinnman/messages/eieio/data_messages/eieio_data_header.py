@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import struct
+from typing import Optional
+
 from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
 from spinnman.exceptions import SpinnmanInvalidPacketException
 
@@ -37,9 +39,11 @@ class EIEIODataHeader(object):
         "_prefix_type",
         "_tag")
 
-    def __init__(self, eieio_type, tag=0, prefix=None,
-                 prefix_type=EIEIOPrefix.LOWER_HALF_WORD,
-                 payload_base=None, is_time=False, count=0):
+    def __init__(self, eieio_type: EIEIOType, tag: int = 0,
+                 prefix: Optional[int] = None,
+                 prefix_type: EIEIOPrefix = EIEIOPrefix.LOWER_HALF_WORD,
+                 payload_base: Optional[int] = None, is_time: bool = False,
+                 count: int = 0):
         """
         EIEIO header for data packets.
 
@@ -67,39 +71,84 @@ class EIEIODataHeader(object):
         self._count = count
 
     @property
-    def eieio_type(self):
+    def eieio_type(self) -> EIEIOType:
+        """
+        Gets the eieio_type passed into the init.
+
+        :rtype: EIEIOType
+        """
         return self._eieio_type
 
     @property
-    def tag(self):
+    def tag(self) -> int:
+        """
+        Gets the tag value passed into the init.
+
+        :rtype: int
+        """
         return self._tag
 
     @property
-    def prefix(self):
+    def prefix(self) -> Optional[int]:
+        """
+        Gets prefix passed into the init (if applicable).
+
+        :rtype: int or None
+        """
         return self._prefix
 
     @property
-    def prefix_type(self):
+    def prefix_type(self) -> EIEIOPrefix:
+        """
+        Gets the prefix_type passed into the init.
+
+        :rtype: EIEIOPrefix
+        """
         return self._prefix_type
 
     @property
-    def payload_base(self):
+    def payload_base(self) -> Optional[int]:
+        """
+        Gets the payload_base value passed into the init (if applicable).
+
+        :rtype: int or None
+        """
         return self._payload_base
 
     @property
     def is_time(self) -> bool:
+        """
+        Gets the is_time value passed into the init.
+
+        :rtype: bool
+        """
         return self._is_time
 
     @property
     def count(self) -> int:
+        """
+        Count of the number of items in the packet
+
+        :rtype: int
+        """
         return self._count
 
     @count.setter
-    def count(self, count):
+    def count(self, count: int):
+        """
+        Sets the Count of the number of items in the packet
+
+        :param int count: the new value
+        """
         self._count = count
 
     @property
     def size(self) -> int:
+        """
+        Get the size of a header with the given parameters.
+
+        :rtype: int
+        """
         return EIEIODataHeader.get_header_size(
             self._eieio_type, self._prefix is not None,
             self._payload_base is not None)
@@ -124,9 +173,15 @@ class EIEIODataHeader(object):
         return size
 
     def increment_count(self) -> None:
+        """
+        Increase the count by 1.
+        """
         self._count += 1
 
     def reset_count(self) -> None:
+        """
+        Resets the count back to zero.
+        """
         self._count = 0
 
     @property

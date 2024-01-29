@@ -33,7 +33,18 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         "_space_available",
         "_p", "_x", "_y")
 
-    def __init__(self, x, y, p, region_id, sequence_no, space_available):
+    def __init__(
+            self, x: int, y: int, p: int, region_id: int, sequence_no: int,
+            space_available: int):
+        """
+
+        :param int x:
+        :param int y:
+        :param int p:
+        :param int region_id:
+        :param int sequence_no:
+        :param int space_available:
+        """
         # pylint: disable=too-many-arguments
         super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS))
@@ -45,27 +56,57 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         self._space_available = space_available
 
     @property
-    def x(self):
+    def x(self) -> int:
+        """
+        Gets the x value passed into the init
+
+        :rtype: int
+        """
         return self._x
 
     @property
-    def y(self):
+    def y(self) -> int:
+        """
+        Gets the y value passed into the init
+
+        :rtype: int
+        """
         return self._y
 
     @property
-    def p(self):
+    def p(self) -> int:
+        """
+        Gets the p value passed into the init
+
+        :rtype: int
+        """
         return self._p
 
     @property
-    def region_id(self):
+    def region_id(self) -> int:
+        """
+        Gets the region_id value passed into the init
+
+        :rtype: int
+        """
         return self._region_id
 
     @property
-    def sequence_no(self):
+    def sequence_no(self) -> int:
+        """
+        Gets the sequence_no value passed into the init
+
+        :rtype: int
+        """
         return self._sequence_no
 
     @property
-    def space_available(self):
+    def space_available(self) -> int:
+        """
+        Gets the space_available value passed into the init
+
+        :rtype: int
+        """
         return self._space_available
 
     @staticmethod

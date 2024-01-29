@@ -33,6 +33,11 @@ class KeyDataElement(AbstractDataElement):
 
     @property
     def key(self) -> int:
+        """
+        The key value passed into the init.
+
+        :rtype: int
+        """
         return self._key
 
     @overrides(AbstractDataElement.get_bytestring)

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
@@ -40,7 +41,14 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
             self._database_path = database_path.encode()
 
     @property
-    def database_path(self):
+    def database_path(self) -> Optional[str]:
+        """
+        Gets the database path passed into the init.
+
+        The path is encoded by the init and decode back to a str here.
+
+        :rtype: str
+        """
         if self._database_path is not None:
             return self._database_path.decode()
         else:
