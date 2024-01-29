@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from spinn_utilities.overrides import overrides
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
@@ -52,10 +53,12 @@ class HostSendSequencedData(EIEIOCommandMessage):
         return self._eieio_data_message
 
     @staticmethod
+    @overrides(EIEIOCommandMessage.get_min_packet_length)
     def get_min_packet_length():
         return 4
 
     @staticmethod
+    @overrides(EIEIOCommandMessage.from_bytestring)
     def from_bytestring(command_header, data, offset):
         region_id, sequence_no = _PATTERN_BB.unpack_from(data, offset)
         eieio_data_message = read_eieio_data_message(data, offset)
@@ -63,6 +66,7 @@ class HostSendSequencedData(EIEIOCommandMessage):
             region_id, sequence_no, eieio_data_message)
 
     @property
+    @overrides(EIEIOCommandMessage.bytestring)
     def bytestring(self):
         return (super().bytestring +
                 _PATTERN_BB.pack(self._region_id, self._sequence_no) +
