@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Union
 import struct
 from enum import Enum
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -25,7 +26,12 @@ class EIEIOCommandHeader(object):
     """
     __slots__ = "_command",
 
-    def __init__(self, command):
+    def __init__(self, command: Union[int, Enum]):
+        """
+
+        :param command:
+        :type command: int or Enum
+        """
         if isinstance(command, Enum):
             command = command.value
         if command < 0 or command >= 16384:
@@ -35,7 +41,12 @@ class EIEIOCommandHeader(object):
         self._command = command
 
     @property
-    def command(self):
+    def command(self) -> int:
+        """
+        The command/ value of the command passed into the init.
+
+        :rtype: int
+        """
         return self._command
 
     @staticmethod

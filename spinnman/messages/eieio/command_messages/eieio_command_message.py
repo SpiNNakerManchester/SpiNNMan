@@ -61,7 +61,6 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         return EIEIOCommandMessage(command_header, data, offset)
 
     @property
-    @overrides(AbstractEIEIOMessage.bytestring)
     def bytestring(self) -> bytes:
         return self._eieio_command_header.bytestring
 

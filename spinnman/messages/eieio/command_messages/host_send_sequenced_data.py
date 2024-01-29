@@ -17,7 +17,9 @@ from spinn_utilities.overrides import overrides
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
+from spinnman.messages.eieio import AbstractEIEIOMessage
 from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
+
 
 _PATTERN_BB = struct.Struct("<BB")
 
@@ -33,7 +35,14 @@ class HostSendSequencedData(EIEIOCommandMessage):
         "_region_id",
         "_sequence_no")
 
-    def __init__(self, region_id, sequence_no, eieio_data_message):
+    def __init__(self, region_id: int, sequence_no: int,
+                 eieio_data_message: AbstractEIEIOMessage):
+        """
+
+        :param int region_id:
+        :param int sequence_no:
+        :param AbstractEIEIOMessage eieio_data_message:
+        """
         super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.HOST_SEND_SEQUENCED_DATA))
         self._region_id = region_id
@@ -41,15 +50,30 @@ class HostSendSequencedData(EIEIOCommandMessage):
         self._eieio_data_message = eieio_data_message
 
     @property
-    def region_id(self):
+    def region_id(self) -> int:
+        """
+        The region_id passed into the init.
+
+        :rtype: int
+        """
         return self._region_id
 
     @property
-    def sequence_no(self):
+    def sequence_no(self) -> int:
+        """
+        The sequence_no passed into the init.
+
+        :rtype: int
+        """
         return self._sequence_no
 
     @property
-    def eieio_data_message(self):
+    def eieio_data_message(self) -> AbstractEIEIOMessage:
+        """
+        The eieio_data_message passed into the init.
+
+        :return: AbstractEIEIOMessage
+        """
         return self._eieio_data_message
 
     @staticmethod
