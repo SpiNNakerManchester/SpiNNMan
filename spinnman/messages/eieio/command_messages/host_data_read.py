@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+from typing import List, Union
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
 from .eieio_command_message import EIEIOCommandMessage
@@ -35,7 +36,20 @@ class HostDataRead(EIEIOCommandMessage):
         "_header")
 
     def __init__(
-            self, n_requests, sequence_no, channel, region_id, space_read):
+            self, n_requests: int, sequence_no: int,
+            channel: Union[List[int], int], region_id: Union[List[int], int],
+            space_read: Union[List[int], int]):
+        """
+
+        :param int n_requests:
+        :param int sequence_no:
+        :param channel:
+        :type channel: list(int) or int
+        :param region_id:
+        :type region_id: list(int) or int
+        :param space_read:
+        :type space_read: list(int) or int
+        """
         # pylint: disable=too-many-arguments
         if not isinstance(channel, list):
             channel = [channel]
@@ -60,20 +74,54 @@ class HostDataRead(EIEIOCommandMessage):
         self._acks = _HostDataReadAck(channel, region_id, space_read)
 
     @property
-    def n_requests(self):
+    def n_requests(self) -> int:
+        """
+        Gets the n_requests passed into the init.
+
+        :rtype: int
+        """
         return self._header.n_requests
 
     @property
-    def sequence_no(self):
+    def sequence_no(self) -> int:
+        """
+        Gets the sequence_no passed into the init.
+
+        :rtype: int
+        """
         return self._header.sequence_no
 
-    def channel(self, ack_id):
+    def channel(self, ack_id: int) -> int:
+        """
+        Gets the channel value for this ack_id.
+
+        :param int ack_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            If the ack_id is invalid
+        """
         return self._acks.channel(ack_id)
 
-    def region_id(self, ack_id):
+    def region_id(self, ack_id: int) -> int:
+        """
+        Gets the region_id value for this ack_id.
+
+        :param int ack_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            If the ack_id is invalid
+        """
         return self._acks.region_id(ack_id)
 
-    def space_read(self, ack_id):
+    def space_read(self, ack_id: int) -> int:
+        """
+        Gets the space_read value for this ack_id.
+
+        :param int ack_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            If the ack_id is invalid
+        """
         return self._acks.space_read(ack_id)
 
     @staticmethod
@@ -120,16 +168,31 @@ class _HostDataReadHeader(object):
         "_n_requests",
         "_sequence_no"]
 
-    def __init__(self, n_requests, sequence_no):
+    def __init__(self, n_requests: int, sequence_no: int):
+        """
+
+        :param int n_requests:
+        :param int sequence_no:
+        """
         self._n_requests = n_requests
         self._sequence_no = sequence_no
 
     @property
-    def sequence_no(self):
+    def sequence_no(self) -> int:
+        """
+        Gets the sequence_no passed into the init.
+
+        :rtype: int
+        """
         return self._sequence_no
 
     @property
-    def n_requests(self):
+    def n_requests(self) -> int:
+        """
+        Gets the n_requests passed into the init.
+
+        :rtype: int
+        """
         return self._n_requests
 
 
@@ -142,7 +205,18 @@ class _HostDataReadAck(object):
         "_region_id",
         "_space_read"]
 
-    def __init__(self, channel, region_id, space_read):
+    def __init__(self, channel: Union[List[int], int],
+                 region_id: Union[List[int], int],
+                 space_read: Union[List[int], int]):
+        """
+
+        :param channel:
+        :type channel: list(int) or int
+        :param region_id:
+        :type region_id: list(int) or int
+        :param space_read:
+        :type space_read: list(int) or int
+        """
         if not isinstance(channel, list):
             self._channel = [channel]
         else:
@@ -158,7 +232,15 @@ class _HostDataReadAck(object):
         else:
             self._space_read = space_read
 
-    def channel(self, ack_id):
+    def channel(self, ack_id: int) -> int:
+        """
+        Gets the channel value for this ack_id.
+
+        :param int ack_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            If the ack_id is invalid
+        """
         if len(self._channel) > ack_id:
             return self._channel[ack_id]
         raise SpinnmanInvalidParameterTypeException(
@@ -166,7 +248,15 @@ class _HostDataReadAck(object):
             "comprised between 0 and {0:d}; current value: {1:d}".format(
                 len(self._channel) - 1, ack_id))
 
-    def region_id(self, ack_id):
+    def region_id(self, ack_id: int) -> int:
+        """
+        Gets the region_id value for this ack_id.
+
+        :param int ack_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            If the ack_id is invalid
+        """
         if len(self._region_id) > ack_id:
             return self._region_id[ack_id]
         raise SpinnmanInvalidParameterTypeException(
@@ -174,7 +264,15 @@ class _HostDataReadAck(object):
             "comprised between 0 and {0:d}; current value: {1:d}".format(
                 len(self._region_id) - 1, ack_id))
 
-    def space_read(self, ack_id):
+    def space_read(self, ack_id: int) -> int:
+        """
+        Gets the space_read value for this ack_id.
+
+        :param int ack_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            If the ack_id is invalid
+        """
         if len(self._space_read) > ack_id:
             return self._space_read[ack_id]
         raise SpinnmanInvalidParameterTypeException(
