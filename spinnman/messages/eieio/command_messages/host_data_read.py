@@ -14,6 +14,7 @@
 
 import struct
 from typing import List, Union
+from spinn_utilities.overrides import overrides
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
 from .eieio_command_message import EIEIOCommandMessage
@@ -125,11 +126,14 @@ class HostDataRead(EIEIOCommandMessage):
         return self._acks.space_read(ack_id)
 
     @staticmethod
-    def get_min_packet_length():
+    @overrides(EIEIOCommandMessage.get_min_packet_length)
+    def get_min_packet_length() -> int:
         return 8
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
+    @overrides(EIEIOCommandMessage.from_bytestring)
+    def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
+                        offset: int) -> "HostDataRead":
         n_requests, sequence_no = _PATTERN_BB.unpack_from(data, offset)
 
         offset += 2
@@ -149,7 +153,8 @@ class HostDataRead(EIEIOCommandMessage):
             n_requests, sequence_no, channel, region_id, space_read)
 
     @property
-    def bytestring(self):
+    @overrides(EIEIOCommandMessage.bytestring)
+    def bytestring(self) -> bytes:
         byte_string = super().bytestring
         n_requests = self.n_requests
         byte_string += _PATTERN_BB.pack(n_requests, self.sequence_no)
