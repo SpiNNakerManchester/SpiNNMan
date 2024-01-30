@@ -68,7 +68,13 @@ _msg = struct.Struct("<II")
 _msg_to = struct.Struct("<IIIII")
 
 
-def fix_url(url):
+def fix_url(url: Any) -> str:
+    """
+    Makes sure the url is the correct format.
+
+    :param str url: original url
+    :rtype: str
+    """
     parts = urlparse(url)
     if parts.scheme != 'https':
         parts = ParseResult("https", parts.netloc, parts.path,
@@ -887,10 +893,19 @@ class _ProxiedBidirectionalConnection(
 
     @overrides(Connection.is_connected)
     def is_connected(self) -> bool:
+        """
+        Determines if the medium is connected at this point in time.
+
+        :return: True if the medium is connected, False otherwise
+        :rtype: bool
+        """
         return self._connected
 
     @overrides(Connection.close)
     def close(self) -> None:
+        """
+        Closes the connection.
+        """
         self._close()
 
     @overrides(SpallocProxiedConnection.send)
@@ -942,10 +957,19 @@ class _ProxiedUnboundConnection(
 
     @overrides(Connection.is_connected)
     def is_connected(self) -> bool:
+        """
+        Determines if the medium is connected at this point in time.
+
+        :return: True if the medium is connected, False otherwise
+        :rtype: bool
+        """
         return self._connected
 
     @overrides(Connection.close)
     def close(self) -> None:
+        """
+        Closes the connection.
+        """
         self._close()
 
     @overrides(SpallocProxiedConnection.send)

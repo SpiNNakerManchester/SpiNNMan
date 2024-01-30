@@ -51,6 +51,14 @@ class SpallocEIEIOConnection(
 
     def send_eieio_message_to_core(
             self, eieio_message: AbstractEIEIOMessage, x: int, y: int, p: int):
+        """
+
+        :param AbstractEIEIOMessage eieio_message:
+        :param int x:
+        :param int y:
+        :param int p:
+        :rtype: None
+        """
         sdp_message = SDPMessage(
             SDPHeader(
                 flags=SDPFlag.REPLY_NOT_EXPECTED, tag=0,

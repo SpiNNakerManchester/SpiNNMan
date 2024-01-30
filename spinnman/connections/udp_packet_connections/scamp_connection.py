@@ -69,6 +69,12 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         return self._chip_y
 
     def update_chip_coordinates(self, x: int, y: int):
+        """
+        Sets the coordinates without checking they are valid.
+
+        :param int x:
+        :param int y:
+        """
         self._chip_x = x
         self._chip_y = y
 
@@ -99,6 +105,11 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
     def receive_scp_response_with_address(
             self, timeout: float = 1.0) -> Tuple[
                 SCPResult, int, bytes, int, str, int]:
+        """
+
+        :param float timeout:
+        :rtype: tuple(SCPResult, int, bytes, int, str, int)
+        """
         data, (addr, port) = self.receive_with_address(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2, addr, port
@@ -110,6 +121,13 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
     def send_scp_request_to(
             self, scp_request: AbstractSCPRequest,
             x: int, y: int, ip_address: str):
+        """
+
+        :param AbstractSCPRequest scp_request:
+        :param int x:
+        :param int y:
+        :param str ip_address:
+        """
         self.send_to(
             self.get_scp_data(scp_request, x, y),
             (str(ip_address), SCP_SCAMP_PORT))

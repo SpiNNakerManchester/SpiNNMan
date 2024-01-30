@@ -21,6 +21,13 @@ class ApplicationRunProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     __slots__ = ()
 
     def run(self, app_id: int, core_subsets: CoreSubsets, wait: bool):
+        """
+        Runs the application.
+
+        :param int app_id:
+        :param CoreSubsets core_subsets:
+        :param bool wait:
+`        """
         with self._collect_responses():
             for core_subset in core_subsets:
                 self._send_request(ApplicationRun(

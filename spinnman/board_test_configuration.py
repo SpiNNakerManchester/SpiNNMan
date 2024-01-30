@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional
 import unittest
 from spinn_utilities.config_holder import set_config
 from spinn_utilities.ping import Ping
@@ -24,7 +25,25 @@ class BoardTestConfiguration(object):
         self.remotehost = None
         self.auto_detect_bmp = None
 
-    def set_up_remote_board(self, version=None):
+    def set_up_remote_board(self, version: Optional[int] = None):
+        """
+        Gets a remote board to test, returning the first that it finds.
+
+        Search order is
+        - Local 4 Chip board
+        - 48 Chip board "spinn-4.cs.man.ac.uk"
+        - Local 48 Chip board if at 192.168.240.1
+        - Virtual machine
+
+        The first three ignore the version param the last needs it
+
+        Sets the version field in the configs.
+
+        :param version: Version for a virtual if no physical board found
+        :type version: into or None
+        :raises unittest.SkipTest:
+            If no physical machine found and no version provided
+        """
         if Ping.host_is_reachable("192.168.240.253"):
             self.remotehost = "192.168.240.253"
             set_config("Machine", "version", 3)

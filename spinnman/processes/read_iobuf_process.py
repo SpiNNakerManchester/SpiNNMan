@@ -47,11 +47,23 @@ class _NextRegion:
     first_read_size: int
 
     def next_at(self, address: int) -> '_NextRegion':
+        """
+
+        :param int address:
+        :rtype: _NextRegion
+        """
         return _NextRegion(
             self.scamp_coords, self.core_coords, self.n + 1, address,
             self.first_read_size)
 
     def tail(self, address: int, size: int, offset: int) -> _RegionTail:
+        """
+
+        :param int address:
+        :param int size:
+        :param int offset:
+        :rtype: _RegionTail
+        """
         return _RegionTail(
             self.scamp_coords, self.core_coords, self.n, address, size, offset)
 
