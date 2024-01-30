@@ -18,6 +18,9 @@ from spinn_machine.core_subsets import CoreSubsets
 
 
 class ApplicationRunProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
+    """
+    A process to run an application.
+    """
     __slots__ = ()
 
     def run(self, app_id: int, core_subsets: CoreSubsets, wait: bool):

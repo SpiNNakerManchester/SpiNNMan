@@ -21,6 +21,9 @@ GET_CORE_COUNT_TIMEOUT = 2.0
 
 
 class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
+    """
+    Gets the state of a core over the provided connection.
+    """
     __slots__ = [
         "_n_cores"]
 

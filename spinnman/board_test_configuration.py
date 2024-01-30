@@ -20,6 +20,9 @@ from spinnman.constants import LOCAL_HOST
 
 
 class BoardTestConfiguration(object):
+    """
+    Configuration to use for a test board
+    """
 
     def __init__(self):
         self.remotehost = None

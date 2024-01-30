@@ -30,6 +30,9 @@ _PATTERN_I = struct.Struct("<I")
 
 
 class EIEIODataHeader(object):
+    """
+    The header part of EIEIO data.
+    """
     __slots__ = (
         "_count",
         "_eieio_type",

@@ -26,6 +26,9 @@ from .abstract_multi_connection_process_connection_selector import (
 
 
 class GetTagsProcess(AbstractMultiConnectionProcess):
+    """
+    Gets information about the tags over the provided connection.
+    """
     __slots__ = (
         "_tags",
         "_tag_info")
