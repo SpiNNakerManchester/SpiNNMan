@@ -286,8 +286,8 @@ class SpinnmanGroupedProcessException(SpinnmanException):
             location = f"board {connection.remote_ip_address} with ethernet " \
                        f"chip {connection.chip_x}:{connection.chip_y} " \
                        f"[{sdp_header.destination_chip_x}:" \
-                       f"{sdp_header.destination_chip_y,}:" \
-                       f"{sdp_header.destination_cpu}{phys_p}]"
+                       f"{sdp_header.destination_chip_y}:" \
+                       f"{sdp_header.destination_cpu}({phys_p})]"
             problem += \
                 f"   Received exception class: " \
                 f"{exception.__class__.__name__}\n" \
