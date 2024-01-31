@@ -289,7 +289,8 @@ class SpinnmanGroupedProcessException(SpinnmanException):
                        f"{sdp_header.destination_chip_y,}:" \
                        f"{sdp_header.destination_cpu}{phys_p}]"
             problem += \
-                f"   Received exception class: {exception.__class__.__name__}\n" \
+                f"   Received exception class: " \
+                f"{exception.__class__.__name__}\n" \
                 f"       With message {str(exception)}\n" \
                 f"       When sending to {location}\n" \
                 f"       Stack trace: {traceback.format_tb(trace_back)}\n"
