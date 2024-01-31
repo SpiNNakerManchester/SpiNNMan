@@ -298,11 +298,11 @@ class EIEIODataHeader(object):
             is_time=bool(payload_is_timestamp), count=count)
 
     def __str__(self):
-        return ("EIEIODataHeader:prefix={}:prefix_type={}:payload_base={}:"
-                "is_time={}:type={}:tag={}:count={}".format(
-                    self._prefix, self._prefix_type, self._payload_base,
-                    self._is_time, self._eieio_type.value, self._tag,
-                    self._count))
+        return (f"EIEIODataHeader:prefix={self._prefix}:"
+                f"prefix_type={self._prefix_type}:"
+                f"payload_base={self._payload_base}:"
+                "is_time={self._is_time}:type={self._eieio_type.value}:"
+                "tag={self._tag}:count={self._count}")
 
     def __repr__(self):
         return self.__str__()

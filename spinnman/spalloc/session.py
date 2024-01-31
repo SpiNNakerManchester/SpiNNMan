@@ -37,6 +37,7 @@ def _may_renew(method):
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
         print(f"{request.method} {request.url}")
+        # pylint: disable=consider-using-f-string
         print('\r\n'.join('{}: {}'.format(*kv)
                           for kv in request.headers.items()))
         if request.body:
@@ -46,6 +47,7 @@ def _may_renew(method):
         """
         :param ~requests.Response response:
         """
+        # pylint: disable=consider-using-f-string
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '<<<<<<<<<<<START<<<<<<<<<<<',
             str(response.status_code) + " " + response.reason,

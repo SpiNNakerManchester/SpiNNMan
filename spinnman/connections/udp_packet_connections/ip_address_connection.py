@@ -45,5 +45,5 @@ class IPAddressesConnection(UDPConnection):
         return None
 
     def __repr__(self):
-        return "IPAddressesConnection(local_host={}, local_port={})".format(
-            self.local_ip_address, self.local_port)
+        return f"IPAddressesConnection(local_host={self.local_ip_address}," \
+               f" local_port={self.local_port})"

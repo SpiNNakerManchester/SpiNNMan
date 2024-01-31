@@ -249,9 +249,9 @@ class _HostDataReadAck(object):
         if len(self._channel) > ack_id:
             return self._channel[ack_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "channel ack_id needs to be"
-            "comprised between 0 and {0:d}; current value: {1:d}".format(
-                len(self._channel) - 1, ack_id))
+            "request_id", "integer",
+            f"channel ack_id needs to be comprised between 0 and "
+            f"{len(self._channel) - 1:d}; current value: {ack_id:d}")
 
     def region_id(self, ack_id: int) -> int:
         """
@@ -265,9 +265,9 @@ class _HostDataReadAck(object):
         if len(self._region_id) > ack_id:
             return self._region_id[ack_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "region ID ack_id needs to be"
-            "comprised between 0 and {0:d}; current value: {1:d}".format(
-                len(self._region_id) - 1, ack_id))
+            "request_id", "integer",
+            f"region ID ack_id needs to be comprised between 0 and "
+            f"{len(self._region_id) - 1:d}; current value: {ack_id:d}")
 
     def space_read(self, ack_id: int) -> int:
         """
@@ -281,6 +281,6 @@ class _HostDataReadAck(object):
         if len(self._space_read) > ack_id:
             return self._space_read[ack_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "start address ack_id needs to be"
-            "comprised between 0 and {0:d}; current value: {1:d}".format(
-                len(self._space_read) - 1, ack_id))
+            "request_id", "integer",
+            f"start address ack_id needs to be comprised between 0 and "
+            f"{len(self._space_read) - 1:d}; current value: {ack_id:d}")

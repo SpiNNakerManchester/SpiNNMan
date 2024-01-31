@@ -343,9 +343,9 @@ class CPUInfo(object):
         return self.__software_version
 
     def __str__(self) -> str:
-        return "{}:{}:{:02n} ({:02n}) {:18} {:16s} {:3n}".format(
-            self.x, self.y, self.p, self.physical_cpu_id, self.__state.name,
-            self.__application_name, self.__application_id)
+        return (f"{self.x}:{self.y}:{self.p:02n} ({self.physical_cpu_id:02n}) "
+                f"{self.__state.name:18} {self.__application_name:16s} "
+                f"{self.__application_id:3n}")
 
     def get_status_string(self) -> str:
         """
