@@ -19,4 +19,4 @@ class ExtendedVersion3Transceiver(Version3Transceiver, ExtendedTransceiver):
     """
     A Transceiver specific for a 4 chip (spin 1) with the extended methods.
     """
-    pass
+

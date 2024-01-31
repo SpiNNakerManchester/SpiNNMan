@@ -19,4 +19,3 @@ class ExtendedVersion5Transceiver(Version5Transceiver, ExtendedTransceiver):
     """
     A Transceiver specific for a 48 chip (spin 1) with the extended methods.
     """
-    pass
