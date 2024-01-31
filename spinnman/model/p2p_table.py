@@ -38,11 +38,10 @@ class P2PTable(object):
         self._routes: Dict[Tuple[int, int], P2PTableRoute] = dict()
         self._width = width
         self._height = height
-        for x in range(len(column_data)):
+        for x, (data, offset) in enumerate(column_data):
             y = 0
             pos = 0
             while y < height:
-                data, offset = column_data[x]
                 next_word, = _ONE_WORD.unpack_from(data, offset + (pos * 4))
                 pos += 1
                 for entry in range(min(8, height - y)):
