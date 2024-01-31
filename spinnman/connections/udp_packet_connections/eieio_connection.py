@@ -14,12 +14,15 @@
 
 import struct
 from typing import Callable, Optional
-from .udp_connection import UDPConnection
+
+from spinn_utilities.overrides import overrides
+
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.messages.eieio import (
     read_eieio_command_message, read_eieio_data_message)
-from spinn_utilities.overrides import overrides
 from spinnman.messages.eieio import AbstractEIEIOMessage
+
+from .udp_connection import UDPConnection
 
 _ONE_SHORT = struct.Struct("<H")
 _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\

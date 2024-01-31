@@ -18,25 +18,26 @@ Implementation of the client for the Spalloc web service.
 from contextlib import contextmanager
 from logging import getLogger
 from multiprocessing import Process, Queue
-from time import sleep
-from packaging.version import Version
-from urllib.parse import urlparse, urlunparse, ParseResult
 import queue
-import requests
 import struct
 import threading
-from typing import (
-    Any, ContextManager,
-    Callable, Dict, FrozenSet, Iterable, Iterator, List, Mapping,
-    Optional, Tuple, cast)
+from time import sleep
+from typing import (Any, ContextManager, Callable, Dict, FrozenSet, Iterable,
+                    Iterator, List, Mapping, Optional, Tuple, cast)
+from urllib.parse import urlparse, urlunparse, ParseResult
+
+from packaging.version import Version
+import requests
 from typing_extensions import TypeAlias
 from websocket import WebSocket  # type: ignore
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
 from spinn_utilities.overrides import overrides
+
 from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
@@ -44,18 +45,19 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpallocException
 from spinnman.transceiver import (
     Transceiver, create_transceiver_from_connections)
-from .spalloc_state import SpallocState
+
+from .abstract_spalloc_client import AbstractSpallocClient
 from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware
-from .utils import parse_service_url, get_hostname
-from .abstract_spalloc_client import AbstractSpallocClient
-from .spalloc_machine import SpallocMachine
-from .spalloc_job import SpallocJob
-from .spalloc_proxied_connection import SpallocProxiedConnection
 from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
 from .spalloc_eieio_listener import SpallocEIEIOListener
+from .spalloc_job import SpallocJob
+from .spalloc_machine import SpallocMachine
+from .spalloc_proxied_connection import SpallocProxiedConnection
 from .spalloc_scp_connection import SpallocSCPConnection
+from .spalloc_state import SpallocState
+from .utils import parse_service_url, get_hostname
 
 logger = FormatAdapter(getLogger(__name__))
 _open_req = struct.Struct("<IIIII")

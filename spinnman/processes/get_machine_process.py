@@ -18,31 +18,35 @@ import logging
 import functools
 from os.path import join
 from typing import Dict, List, Optional, Set, Tuple, cast
+
 from spinn_utilities.config_holder import (
     get_config_bool, get_config_int_or_none, get_config_str_or_none)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
+
 from spinn_machine import (Router, Chip, Link, Machine)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
 from spinn_machine.machine_factory import machine_repair
+
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
 from spinnman.data import SpiNNManDataView
-from spinnman.messages.spinnaker_boot import (
-    SystemVariableDefinition)
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
 from spinnman.messages.scp.impl.get_chip_info_response import (
     GetChipInfoResponse)
 from spinnman.messages.scp.impl.read_memory import Response
+from spinnman.messages.spinnaker_boot import (
+    SystemVariableDefinition)
 from spinnman.model import ChipSummaryInfo, P2PTable
 from spinnman.model.enums import CPUState
+
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import \
     ConnectionSelector
-from spinn_utilities.progress_bar import ProgressBar
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

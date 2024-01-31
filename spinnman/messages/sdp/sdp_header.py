@@ -14,8 +14,8 @@
 
 import struct
 from typing import Optional
-from .sdp_flag import SDPFlag
 from spinnman.data import SpiNNManDataView
+from .sdp_flag import SDPFlag
 
 N_BYTES = 8
 _EIGHT_BYTES = struct.Struct("<8B")

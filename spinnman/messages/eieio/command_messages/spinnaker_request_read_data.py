@@ -14,12 +14,14 @@
 
 from typing import List, Union
 import struct
+
 from spinn_utilities.overrides import overrides
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
+from spinnman.constants import EIEIO_COMMAND_IDS
+
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
-from spinnman.constants import EIEIO_COMMAND_IDS
 
 _PATTERN_BBBB = struct.Struct("<BBBB")
 _PATTERN_BBII = struct.Struct("<BBII")

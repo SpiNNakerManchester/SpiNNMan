@@ -11,16 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from functools import wraps
 from logging import getLogger
-import re
-import requests
 from json.decoder import JSONDecodeError
+import re
 from typing import Dict, Tuple, cast, Optional
 import websocket  # type: ignore
+
+import requests
+
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.json import JsonObject
 from spinnman.exceptions import SpallocException
+
 from .utils import clean_url
 
 logger = FormatAdapter(getLogger(__name__))

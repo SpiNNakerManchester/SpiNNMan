@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from spinn_machine.core_subsets import CoreSubsets
 from spinnman.messages.scp.impl import ApplicationRun, CheckOKResponse
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from spinn_machine.core_subsets import CoreSubsets
 
 
 class ApplicationRunProcess(AbstractMultiConnectionProcess[CheckOKResponse]):

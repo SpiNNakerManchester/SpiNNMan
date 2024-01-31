@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from spinnman.messages.scp.impl import CountState
-from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from spinnman.messages.scp.enums.scp_result import SCPResult
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 # Timeout for getting core state count; higher due to more waiting needed
 GET_CORE_COUNT_TIMEOUT = 2.0

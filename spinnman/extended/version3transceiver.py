@@ -11,8 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from .extended_transceiver import ExtendedTransceiver
+
 from spinnman.transceiver.version3transceiver import Version3Transceiver
+from .extended_transceiver import ExtendedTransceiver
 
 
 class ExtendedVersion3Transceiver(Version3Transceiver, ExtendedTransceiver):

@@ -13,9 +13,9 @@
 # limitations under the License.
 
 from typing import Optional
+from spinnman.constants import EIEIO_COMMAND_IDS
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
-from spinnman.constants import EIEIO_COMMAND_IDS
 
 
 class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):

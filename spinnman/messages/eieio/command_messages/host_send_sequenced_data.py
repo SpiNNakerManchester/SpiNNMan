@@ -13,12 +13,14 @@
 # limitations under the License.
 
 import struct
+
 from spinn_utilities.overrides import overrides
-from .eieio_command_message import EIEIOCommandMessage
-from .eieio_command_header import EIEIOCommandHeader
 from spinnman.constants import EIEIO_COMMAND_IDS
 from spinnman.messages.eieio import AbstractEIEIOMessage
 from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
+
+from .eieio_command_message import EIEIOCommandMessage
+from .eieio_command_header import EIEIOCommandHeader
 
 
 _PATTERN_BB = struct.Struct("<BB")
