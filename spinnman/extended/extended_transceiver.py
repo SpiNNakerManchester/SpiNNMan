@@ -20,7 +20,9 @@ import logging
 import random
 import struct
 import time
-from spinn_utilities.abstract_base import AbstractBase
+from spinn_utilities.overrides import overrides
+from spinn_utilities.abstract_base import (
+    AbstractBase, abstractmethod)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_utilities.require_subclass import require_subclass
@@ -41,11 +43,12 @@ from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.processes import (
-    GetHeapProcess, ReadMemoryProcess, SendSingleCommandProcess,
-    WriteMemoryProcess)
+    ConnectionSelector, GetHeapProcess, ReadMemoryProcess,
+    SendSingleCommandProcess, WriteMemoryProcess)
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 
 _ONE_BYTE = struct.Struct("B")
+_ONE_WORD = struct.Struct("<I")
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -68,6 +71,23 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     # pylint: disable=no-member,assigning-non-slot
     # pylint: disable=access-member-before-definition
     # pylint: disable=attribute-defined-outside-init
+    # pylint: disable=protected-access
+
+    @abstractmethod
+    @overrides(ExtendableTransceiver._where_is_xy)
+    def _where_is_xy(self, x: int, y: int):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    @overrides(ExtendableTransceiver.scamp_connection_selector)
+    def scamp_connection_selector(self) -> ConnectionSelector:
+        """
+        Returns the scamp selector
+
+        :rtype: AbstractMultiConnectionProcessConnectionSelector
+        """
+        raise NotImplementedError
 
     def send_scp_message(self, message, connection=None):
         """
@@ -606,7 +626,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
                 ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
                 position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-            process = SendSingleCommandProcess(
+            process: SendSingleCommandProcess = SendSingleCommandProcess(
                 self.scamp_connection_selector)
             response = process.execute(
                 ReadMemory((x, y, 0), memory_position, 4))
