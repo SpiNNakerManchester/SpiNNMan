@@ -232,7 +232,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def scamp_connection_selector(self) -> MostDirectConnectionSelector:
         return self._scamp_connection_selector
 
-    def _where_is_xy(self, x: int, y: int):
+    def _where_is_xy(self, x: int, y: int) -> Optional[str]:
         """
         Attempts to get where_is_x_y info from the machine
 
