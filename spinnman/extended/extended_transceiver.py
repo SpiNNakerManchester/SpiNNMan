@@ -20,6 +20,7 @@ import logging
 import random
 import struct
 import time
+from typing import Optional
 from spinn_utilities.overrides import overrides
 from spinn_utilities.abstract_base import (
     AbstractBase, abstractmethod)
@@ -74,8 +75,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     # pylint: disable=protected-access
 
     @abstractmethod
-    @overrides(ExtendableTransceiver._where_is_xy)
-    def _where_is_xy(self, x: int, y: int):
+    def _where_is_xy(self, x: int, y: int) -> Optional[str]:
         raise NotImplementedError
 
     @property
