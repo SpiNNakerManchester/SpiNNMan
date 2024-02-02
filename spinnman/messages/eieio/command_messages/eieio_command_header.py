@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Union
+from typing import cast, Union
 import struct
 from enum import Enum
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -33,12 +33,14 @@ class EIEIOCommandHeader(object):
         :type command: int or Enum
         """
         if isinstance(command, Enum):
-            command = command.value
-        if command < 0 or command >= 16384:
+            command_value = command.value
+        else:
+            command_value = cast(int, command)
+        if command_value < 0 or command_value >= 16384:
             raise SpinnmanInvalidParameterException(
                 "command", command,
                 "parameter command is outside the allowed range (0 to 16383)")
-        self._command = command
+        self._command = command_value
 
     @property
     def command(self) -> int:

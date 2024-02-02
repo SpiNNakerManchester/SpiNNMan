@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from contextlib import suppress
-from typing import Optional, Tuple
+from typing import Optional
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 from .udp_connection import UDPConnection
 
@@ -31,12 +31,12 @@ class IPAddressesConnection(UDPConnection):
         super().__init__(local_host=local_host, local_port=local_port)
 
     def receive_ip_address(self, timeout:  Optional[float] = None
-                           ) -> Optional[Tuple[bytes, Tuple[str, int]]]:
+                           ) -> Optional[str]:
         """
 
         :param timeout:
         :type timeout: float or None
-        :rtype: tuple(byte, tuple(str, int)) or None
+        :rtype: str or None
         """
         with suppress(Exception):
             (_, (ip_address, port)) = self.receive_with_address(timeout)

@@ -49,16 +49,16 @@ class BoardTestConfiguration(object):
         """
         if Ping.host_is_reachable("192.168.240.253"):
             self.remotehost = "192.168.240.253"
-            set_config("Machine", "version", 3)
+            set_config("Machine", "version", "3")
             self.auto_detect_bmp = False
         elif Ping.host_is_reachable("spinn-4.cs.man.ac.uk"):
             self.remotehost = "spinn-4.cs.man.ac.uk"
-            set_config("Machine", "version", 5)
+            set_config("Machine", "version", "5")
         elif Ping.host_is_reachable("192.168.240.1"):
             self.remotehost = "192.168.240.1"
-            set_config("Machine", "version", 5)
+            set_config("Machine", "version", "5")
         elif version is not None:
             self.remotehost = LOCAL_HOST
-            set_config("Machine", "version", version)
+            set_config("Machine", "version", str(version))
         else:
             raise unittest.SkipTest("None of the test boards reachable")
