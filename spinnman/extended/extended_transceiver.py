@@ -630,11 +630,11 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
                 self.scamp_connection_selector)
             response = process.execute(
                 ReadMemory((x, y, 0), memory_position, 4))
-            return DiagnosticFilter.read_from_int(self._ONE_WORD.unpack_from(
+            return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
             # pylint: disable=no-member
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @property
