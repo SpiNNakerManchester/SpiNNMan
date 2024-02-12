@@ -78,8 +78,9 @@ def _make_transceiver(host, version, bmp_names) -> Transceiver:
     :param version: Board version to use (`None` defaults to 5 unless host is
         192.168.240.253 (spin 3)
     :type version: int or None
-    :param bmp: bmp connection or `None` to auto detect (if applicable)
-    :type bmp: str or None
+    :param bmp_names: names of BMP connection
+        or `None` to auto detect (if applicable)
+    :type bmp_names: str or None
     :rtype: Transceiver
     """
     if host is None:
