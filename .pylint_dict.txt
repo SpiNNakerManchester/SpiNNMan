@@ -12,34 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Our abbreviations/names
-bmp
-bmpc
-Spalloc
-ybug
-
-# Our special words
-keepalive
+# We use a single exception files for all the main repsitories
+# It can be found at:
+# https://github.com/SpiNNakerManchester/SupportScripts/blob/master/actions/pylint/default_dict.txt
 
 
-# Python packages
-websocket
 
-# Python types
-BufferedIOBase
-CPUInfo
-CPUInfos
-DiagnosticFilter
-DiagnosticFilterDestination
-DiagnosticFilterDefaultRoutingStatus
-DiagnosticFilterEmergencyRoutingStatus
-DiagnosticFilterPacketType
-DiagnosticFilterPayloadStatus
-DiagnosticFilterSource
-HeapElement
-PreparedRequest
-SCPResult
-SpallocMachine
-SpinnakerBootMessage
-SystemVariableDefinition
-WebSocket
