@@ -19,7 +19,6 @@ from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
 #: Size of `vcpu_t` in SARK.
 CPU_INFO_BYTES = 128
-# pylint: disable=invalid-name
 CPU_USER_0_START_ADDRESS = 112
 #: Offset into data of byte of processor state field.
 STATE_FIELD_OFFSET = 48
