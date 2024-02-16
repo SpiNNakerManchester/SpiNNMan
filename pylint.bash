@@ -22,11 +22,16 @@
 # requires the spelling dicts
 # sudo apt-get -o Dpkg::Use-Pty=0 install --fix-missing enchant-2 hunspell hunspell-en-gb
 
-pylint --output-format=colorized --disable=R --persistent=no --jobs=1 --rcfile=../SupportScripts/actions/pylint/strict_rcfile --spelling-dict=en_GB --spelling-private-dict-file="../SupportScripts/actions/pylint/default_dict.txt" --disable=import-error  spinnman
-
+rcfile="--rcfile=../SupportScripts/actions/pylint/strict_rcfile"
+dict="--spelling-private-dict-file=../SupportScripts/actions/pylint/default_dict.txt"
+params="--output-format=colorized --disable=R --persistent=no --jobs=1 --spelling-dict=en_GB"
+check=
 # one test
-# pylint --enable=wrong-import-order --output-format=colorized --disable=R --persistent=no --jobs=1 --rcfile=../SupportScripts/actions/pylint/strict_rcfile --spelling-dict=en_GB --spelling-private-dict-file="../SupportScripts/actions/pylint/default_dict.txt" --disable=all  spinnman
-
+# check="--enable=wrong-import-order --disable=all"
 # check docs
-# pylint --enable=missing-function-docstring,missing-class-docstring,invalid-characters-in-docstring,wrong-spelling-in-comment,wrong-spelling-in-docstring  --output-format=colorized --disable=R --persistent=no --jobs=1 --rcfile=../SupportScripts/actions/pylint/strict_rcfile --spelling-dict=en_GB --spelling-private-dict-file="../SupportScripts/actions/pylint/default_dict.txt" --disable=all  spinnman
+check="--enable=missing-function-docstring,missing-class-docstring,invalid-characters-in-docstring,wrong-spelling-in-comment,wrong-spelling-in-docstring --disable=all"
+
+pylint $check $rcfile $dict $params spinnman
+
+
 
