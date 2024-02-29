@@ -53,7 +53,7 @@ class RunTimeError(Enum):
     ENABLE = 15
     #: Generic null pointer error
     NULL = 16
-    #: Pkt startup failure
+    #: Packet startup failure
     PKT = 17
     #: Timer startup failure
     TIMER = 18
