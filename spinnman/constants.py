@@ -75,7 +75,7 @@ CPU_IOBUF_ADDRESS_OFFSET: int = 88
 #: Max user requested tag value
 MAX_TAG_ID: int = 7
 
-#: The range of values the BMP's 12-bit ADCs can measure.
+#: The range of values the BMP 12-bit ADCs can measure.
 BMP_ADC_MAX: int = 1 << 12
 
 #: Multiplier to convert from ADC value to volts for lines less than 2.5 V.
@@ -107,6 +107,7 @@ BMP_POST_POWER_ON_SLEEP_TIME: float = 5.0
 
 
 class EIEIO_COMMAND_IDS(Enum):
+    # pylint: disable=invalid-name
     """
     A listing of what SpiNNaker specific EIEIO commands there are.
     """
@@ -139,6 +140,7 @@ class EIEIO_COMMAND_IDS(Enum):
 
 
 class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
+    # pylint: disable=invalid-name
     """
     The values used by the SCP IP tag time outs. These control how long to wait
     for any message request which requires a response, before raising an error.
@@ -159,6 +161,7 @@ class IPTAG_TIME_OUT_WAIT_TIMES(Enum):
 
 
 class ROUTER_REGISTER_REGISTERS(Enum):
+    # pylint: disable=invalid-name
     """
     The indices to the router registers.
     """
@@ -181,6 +184,7 @@ class ROUTER_REGISTER_REGISTERS(Enum):
 
 
 class READ_TYPES(Enum):
+    # pylint: disable=invalid-name
     """
     The types of read available from SARK. These values are used to tell
     SARK how to read the data in a time efficient manner.

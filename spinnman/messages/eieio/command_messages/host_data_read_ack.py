@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import struct
+from spinn_utilities.overrides import overrides
+from spinnman.constants import EIEIO_COMMAND_IDS
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
-from spinnman.constants import EIEIO_COMMAND_IDS
 
 _PATTERN_B = struct.Struct("<B")
 
@@ -28,23 +30,35 @@ class HostDataReadAck(EIEIOCommandMessage):
     """
     __slots__ = "_sequence_no",
 
-    def __init__(self, sequence_no):
+    def __init__(self, sequence_no: int):
+        """
+
+        :param int sequence_no:
+        """
         super().__init__(
             EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ_ACK))
         self._sequence_no = sequence_no
 
     @property
-    def sequence_no(self):
+    def sequence_no(self) -> int:
+        """
+        Gets the sequence_no passed into the init.
+
+        :rtype: int
+        """
         return self._sequence_no
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
+    @overrides(EIEIOCommandMessage.from_bytestring)
+    def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
+                        offset: int) -> "HostDataReadAck":
         sequence_no = _PATTERN_B.unpack_from(data, offset)[0]
 
         return HostDataReadAck(sequence_no)
 
     @property
-    def bytestring(self):
+    @overrides(EIEIOCommandMessage.bytestring)
+    def bytestring(self) -> bytes:
         byte_string = super().bytestring
         byte_string += _PATTERN_B.pack(self.sequence_no)
         return byte_string

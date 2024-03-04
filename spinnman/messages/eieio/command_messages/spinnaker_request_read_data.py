@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List, Union
 import struct
+
+from spinn_utilities.overrides import overrides
 from spinnman.exceptions import (
     SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
+from spinnman.constants import EIEIO_COMMAND_IDS
+
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
-from spinnman.constants import EIEIO_COMMAND_IDS
 
 _PATTERN_BBBB = struct.Struct("<BBBB")
 _PATTERN_BBII = struct.Struct("<BBII")
@@ -36,8 +40,27 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         "_header",
         "_requests")
 
-    def __init__(self, x, y, p, region_id, sequence_no, n_requests,
-                 channel, start_address, space_to_be_read):
+    def __init__(
+            self, x: int, y: int, p: int, region_id: Union[List[int], int],
+            sequence_no: int, n_requests: int, channel: Union[List[int], int],
+            start_address: Union[List[int], int],
+            space_to_be_read: Union[List[int], int]):
+        """
+
+        :param int x:
+        :param int y:
+        :param int p:
+        :param region_id:
+        :type region_id: list(int) or int
+        :param int sequence_no:
+        :param int n_requests:
+        :param channel:
+        :type channel: list(int) or int
+        :param start_address:
+        :type start_address:: list(int) or int
+        :param space_to_be_read:
+        :type space_to_be_read: list(int) or int
+        """
         # pylint: disable=too-many-arguments
         if not isinstance(channel, list):
             channel = [channel]
@@ -58,11 +81,11 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
             raise SpinnmanInvalidPacketException(
                 "SpinnakerRequestReadData",
                 "The format for a SpinnakerRequestReadData packet is "
-                "invalid: {0:d} request(s), {1:d} start address(es) "
-                "defined, {2:d} space(s) to be read defined, {3:d} region(s) "
-                "defined, {4:d} channel(s) defined".format(
-                    n_requests, len(start_address), len(space_to_be_read),
-                    len(region_id), len(channel)))
+                f"invalid: {n_requests:d} request(s), "
+                f"{len(start_address):d} start address(es) defined, "
+                f"{len(space_to_be_read):d} space(s) to be read defined, "
+                f"{len(region_id):d} region(s) defined, "
+                f"{len(channel):d} channel(s) defined")
 
         super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_READ_DATA))
@@ -72,43 +95,99 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
             channel, region_id, start_address, space_to_be_read)
 
     @property
-    def x(self):
+    def x(self) -> int:
+        """
+        The x value passed into the init.
+
+        :rtype: int
+        """
         return self._header.x
 
     @property
-    def y(self):
+    def y(self) -> int:
+        """
+        The y value passed into the init.
+
+        :rtype: int
+        """
         return self._header.y
 
     @property
-    def p(self):
+    def p(self) -> int:
+        """
+        The p value passed into the init.
+
+        :rtype: int
+        """
         return self._header.p
 
     @property
-    def n_requests(self):
+    def n_requests(self) -> int:
+        """
+        The n_requests value passed into the init.
+
+        :rtype: int
+        """
         return self._header.n_requests
 
     @property
-    def sequence_no(self):
+    def sequence_no(self) -> int:
+        """
+        The sequence_no value passed into the init.
+
+        :rtype: int
+        """
         return self._header.sequence_no
 
-    def channel(self, request_id):
+    def channel(self, request_id: int) -> int:
+        """
+        The channel for this request_id.
+
+        :param int request_id:
+        :rtype: int
+        :raises IndexError: If the request_id is invalid
+        """
         return self._requests.channel(request_id)
 
-    def region_id(self, request_id):
+    def region_id(self, request_id) -> int:
+        """
+        The region_id for this request_id.
+
+        :param int request_id:
+        :rtype: int
+        :raises IndexError: If the request_id is invalid
+        """
         return self._requests.region_id(request_id)
 
-    def start_address(self, request_id):
+    def start_address(self, request_id) -> int:
+        """
+        The start_address for this request_id.
+
+        :param int request_id:
+        :rtype: int
+        :raises IndexError: If the request_id is invalid
+        """
         return self._requests.start_address(request_id)
 
-    def space_to_be_read(self, request_id):
+    def space_to_be_read(self, request_id) -> int:
+        """
+        The space_to_be_read for this request_id.
+
+        :param int request_id:
+        :rtype: int
+        :raises IndexError: If the request_id is invalid
+        """
         return self._requests.space_to_be_read(request_id)
 
     @staticmethod
-    def get_min_packet_length():
+    @overrides(EIEIOCommandMessage.get_min_packet_length)
+    def get_min_packet_length() -> int:
         return 16
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
+    @overrides(EIEIOCommandMessage.from_bytestring)
+    def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
+                        offset: int) -> "SpinnakerRequestReadData":
         (y, x, processor_and_requests, sequence_no) = \
             _PATTERN_BBBB.unpack_from(data, offset)
         p = (processor_and_requests >> 3) & 0x1F
@@ -139,7 +218,8 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
             start_address, space_to_be_read)
 
     @property
-    def bytestring(self):
+    @overrides(EIEIOCommandMessage.bytestring)
+    def bytestring(self) -> bytes:
         byte_string = super().bytestring
         byte_string += _PATTERN_BB.pack(self.x, self.y)
         n_requests = self.n_requests
@@ -168,7 +248,16 @@ class _SpinnakerRequestReadDataHeader(object):
         "_sequence_no",
         "_p", "_x", "_y"]
 
-    def __init__(self, x, y, p, n_requests, sequence_no):
+    def __init__(
+            self, x: int, y: int, p: int, n_requests: int, sequence_no: int):
+        """
+
+        :param int x:
+        :param int y:
+        :param int p:
+        :param int n_requests:
+        :param int sequence_no:
+        """
         # pylint: disable=too-many-arguments
         self._x = x
         self._y = y
@@ -177,23 +266,48 @@ class _SpinnakerRequestReadDataHeader(object):
         self._sequence_no = sequence_no
 
     @property
-    def x(self):
+    def x(self) -> int:
+        """
+        The x value passed into the init.
+
+        :rtype: int
+        """
         return self._x
 
     @property
-    def y(self):
+    def y(self) -> int:
+        """
+        The y value passed into the init.
+
+        :rtype: int
+        """
         return self._y
 
     @property
-    def p(self):
+    def p(self) -> int:
+        """
+        The p value passed into the init.
+
+        :rtype: int
+        """
         return self._p
 
     @property
-    def sequence_no(self):
+    def sequence_no(self) -> int:
+        """
+        The sequence_no value passed into the init.
+
+        :rtype: int
+        """
         return self._sequence_no
 
     @property
-    def n_requests(self):
+    def n_requests(self) -> int:
+        """
+        The n_request value passed into the init.
+
+        :rtype: int
+        """
         return self._n_requests
 
 
@@ -207,7 +321,21 @@ class _SpinnakerRequestReadDataRequest(object):
         "_start_address",
         "_space_to_be_read"]
 
-    def __init__(self, channel, region_id, start_address, space_to_be_read):
+    def __init__(self, channel: Union[List[int], int],
+                 region_id: Union[List[int], int],
+                 start_address: Union[List[int], int],
+                 space_to_be_read: Union[List[int], int]):
+        """
+
+        :param channel:
+        :type channel: list(int) or int
+        :param region_id:
+        :type region_id: list(int) or int
+        :param start_address:
+        :type start_address: list(int) or int
+        :param space_to_be_read:
+        :type space_to_be_read: list(int) or int
+        """
         if not isinstance(channel, list):
             self._channel = [channel]
         else:
@@ -228,34 +356,67 @@ class _SpinnakerRequestReadDataRequest(object):
         else:
             self._space_to_be_read = space_to_be_read
 
-    def channel(self, request_id):
+    def channel(self, request_id) -> int:
+        """
+        Gets the channel for this request_id
+
+        :param int request_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            if the request_id os too high
+        """
+
         if len(self._channel) > request_id:
             return self._channel[request_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "channel request needs to be"
-            "comprised between 0 and {0:d}; current value: {1:d}".format(
-                len(self._channel) - 1, request_id))
+            "request_id", "integer",
+            f"channel request needs to be comprised between 0 and "
+            f"{len(self._channel) - 1:d}; current value: {request_id:d}")
 
-    def region_id(self, request_id):
+    def region_id(self, request_id) -> int:
+        """
+        Gets the region_id for this request_id
+
+        :param int request_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            if the request_id os too high
+        """
         if len(self._region_id) > request_id:
             return self._region_id[request_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "region ID request needs to be"
-            "comprised between 0 and {0:d}; current value: {1:d}".format(
-                len(self._region_id) - 1, request_id))
+            "request_id", "integer",
+            f"region ID request needs to be comprised between 0 and "
+            f"{len(self._region_id) - 1:d}; current value: {request_id:d}")
 
-    def start_address(self, request_id):
+    def start_address(self, request_id: int) -> int:
+        """
+        Gets the start address for this request_id
+
+        :param int request_id:
+        :rtype: int
+        :raises SpinnmanInvalidParameterTypeException:
+            if the request_id os too high
+        """
         if len(self._start_address) > request_id:
             return self._start_address[request_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "start address request needs to be"
-            "comprised between 0 and {0:d}; current value: {1:d}".format(
-                len(self._start_address) - 1, request_id))
+            "request_id", "integer",
+            f"start address request needs to be comprised between 0 and "
+            f"{len(self._start_address) - 1:d}; current value: {request_id:d}")
 
-    def space_to_be_read(self, request_id):
+    def space_to_be_read(self, request_id: int) -> int:
+        """
+        Checks if there is enough space to request this id
+
+        :rtype: bool
+        :raises SpinnmanInvalidParameterTypeException:
+            if the request_id os too high
+        """
         if len(self._space_to_be_read) > request_id:
             return self._space_to_be_read[request_id]
         raise SpinnmanInvalidParameterTypeException(
-            "request_id", "integer", "space to be read request needs to be"
-            "comprised between 0 and {0:d}; current value: {1:d}".format(
-                len(self._space_to_be_read) - 1, request_id))
+            "request_id", "integer",
+            f"space to be read request needs to be comprised between 0 and "
+            f"{len(self._space_to_be_read) - 1:d}; "
+            f"current value: {request_id:d}")

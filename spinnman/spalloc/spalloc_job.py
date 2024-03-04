@@ -200,7 +200,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         :param int period:
             How often to send a keepalive message (in seconds)
         :return:
-            Some kind of closable task handle; closing it terminates the task.
+            Some kind of closeable task handle; closing it terminates the task.
             Destroying the job will also terminate the task.
         """
         raise NotImplementedError()

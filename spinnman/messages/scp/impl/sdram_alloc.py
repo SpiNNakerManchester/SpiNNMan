@@ -112,7 +112,7 @@ class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
             argument_1=(
                 (extra_flag << 16) |
                 (app_id << 8) |
-                AllocFree.ALLOC_SDRAM.value),  # @UndefinedVariable
+                AllocFree.ALLOC_SDRAM.value),
             argument_2=size, argument_3=tag)
         self._size = size
 

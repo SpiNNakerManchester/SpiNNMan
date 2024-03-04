@@ -23,7 +23,7 @@ from .check_ok_response import CheckOKResponse
 
 class RouterInit(AbstractSCPRequest[CheckOKResponse]):
     """
-    A request to initialize the router on a chip.
+    A request to initialise the router on a chip.
     """
     __slots__ = ()
 

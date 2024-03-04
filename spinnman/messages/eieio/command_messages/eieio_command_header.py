@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import cast, Union
 import struct
 from enum import Enum
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -25,21 +26,33 @@ class EIEIOCommandHeader(object):
     """
     __slots__ = "_command",
 
-    def __init__(self, command):
+    def __init__(self, command: Union[int, Enum]):
+        """
+
+        :param command:
+        :type command: int or Enum
+        """
         if isinstance(command, Enum):
-            command = command.value
-        if command < 0 or command >= 16384:
+            command_value = command.value
+        else:
+            command_value = cast(int, command)
+        if command_value < 0 or command_value >= 16384:
             raise SpinnmanInvalidParameterException(
                 "command", command,
                 "parameter command is outside the allowed range (0 to 16383)")
-        self._command = command
+        self._command = command_value
 
     @property
-    def command(self):
+    def command(self) -> int:
+        """
+        The command/ value of the command passed into the init.
+
+        :rtype: int
+        """
         return self._command
 
     @staticmethod
-    def from_bytestring(data, offset):
+    def from_bytestring(data: bytes, offset: int) -> "EIEIOCommandHeader":
         """
         Read an EIEIO command header from a byte-string.
 
@@ -59,7 +72,7 @@ class EIEIOCommandHeader(object):
         return EIEIOCommandHeader(command)
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         """
         The byte-string of the header.
 

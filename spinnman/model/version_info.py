@@ -146,6 +146,6 @@ class VersionInfo(object):
         return self._version_string
 
     def __str__(self) -> str:
-        return "[Version: {} {} at {}:{}:{}:{} (built {})]".format(
-            self._name, self._version_string, self._hardware, self._x, self._y,
-            self._p, asctime(localtime(self._build_date)))
+        return (f"[Version: {self._name} {self._version_string} at "
+                f"{self._hardware}:{self._x}:{self._y}:{self._p} "
+                f"(built {asctime(localtime(self._build_date))})]")
