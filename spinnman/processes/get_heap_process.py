@@ -32,6 +32,10 @@ _ELEMENT_HEADER = struct.Struct("<II")
 
 
 class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
+    """
+    Gets Heap information using the provided connector.
+
+    """
     __slots__ = (
         "_blocks",
         "_heap_address",

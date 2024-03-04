@@ -20,7 +20,10 @@ import logging
 import random
 import struct
 import time
-from spinn_utilities.abstract_base import AbstractBase
+from typing import Optional
+from spinn_utilities.overrides import overrides
+from spinn_utilities.abstract_base import (
+    AbstractBase, abstractmethod)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_utilities.require_subclass import require_subclass
@@ -41,11 +44,12 @@ from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.processes import (
-    GetHeapProcess, ReadMemoryProcess, SendSingleCommandProcess,
-    WriteMemoryProcess)
+    ConnectionSelector, GetHeapProcess, ReadMemoryProcess,
+    SendSingleCommandProcess, WriteMemoryProcess)
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 
 _ONE_BYTE = struct.Struct("B")
+_ONE_WORD = struct.Struct("<I")
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -68,6 +72,22 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     # pylint: disable=no-member,assigning-non-slot
     # pylint: disable=access-member-before-definition
     # pylint: disable=attribute-defined-outside-init
+    # pylint: disable=protected-access
+
+    @abstractmethod
+    def _where_is_xy(self, x: int, y: int) -> Optional[str]:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    @overrides(ExtendableTransceiver.scamp_connection_selector)
+    def scamp_connection_selector(self) -> ConnectionSelector:
+        """
+        Returns the scamp selector
+
+        :rtype: AbstractMultiConnectionProcessConnectionSelector
+        """
+        raise NotImplementedError
 
     def send_scp_message(self, message, connection=None):
         """
@@ -574,7 +594,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             logger.info(self.where_is_xy(x, y))
             raise
 
-    def get_router_diagnostic_filter(self, x, y, position):
+    def get_router_diagnostic_filter(
+            self, x: int, y: int, position: int) -> DiagnosticFilter:
         """
         Gets a router diagnostic filter from a router.
 
@@ -605,15 +626,15 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
                 ROUTER_REGISTER_BASE_ADDRESS + ROUTER_FILTER_CONTROLS_OFFSET +
                 position * ROUTER_DIAGNOSTIC_FILTER_SIZE)
 
-            process = SendSingleCommandProcess(
+            process: SendSingleCommandProcess = SendSingleCommandProcess(
                 self.scamp_connection_selector)
             response = process.execute(
                 ReadMemory((x, y, 0), memory_position, 4))
-            return DiagnosticFilter.read_from_int(self._ONE_WORD.unpack_from(
+            return DiagnosticFilter.read_from_int(_ONE_WORD.unpack_from(
                 response.data, response.offset)[0])
             # pylint: disable=no-member
         except Exception:
-            logger.info(self.where_is_xy(x, y))
+            logger.info(self._where_is_xy(x, y))
             raise
 
     @property
@@ -664,7 +685,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         :param int x: chip X coordinate to write new watchdog parameter to
         :param int y: chip Y coordinate to write new watchdog parameter to
         :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
+            Either a Boolean indicating whether to enable (True) or
             disable (False) the watchdog timer, or an int value to set the
             timer count to
         :type watch_dog: bool or int
@@ -694,7 +715,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             Retained in case needed for hardware debugging.
 
         :param watch_dog:
-            Either a boolean indicating whether to enable (True) or
+            Either a Boolean indicating whether to enable (True) or
             disable (False) the watch dog timer, or an int value to set the
             timer count to.
         :type watch_dog: bool or int

@@ -14,13 +14,16 @@
 
 import struct
 from typing import Optional, Sequence, Tuple
+
 from spinn_utilities.overrides import overrides
-from .udp_connection import UDPConnection
+
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.connections.abstract_classes import AbstractSCPConnection
 from spinnman.model import BMPConnectionData
+
+from .udp_connection import UDPConnection
 
 _TWO_SHORTS = struct.Struct("<2H")
 _TWO_SKIP = struct.Struct("<2x")

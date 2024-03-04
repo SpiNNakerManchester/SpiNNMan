@@ -11,14 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import Generic, Optional, TypeVar, Set
-from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+
 from spinnman.constants import SCP_TIMEOUT
+
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.enums.scp_result import SCPResult
+
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
-from spinnman.messages.scp.enums.scp_result import SCPResult
 #: Type of responses.
 #: :meta private:
 R = TypeVar("R", bound=AbstractSCPResponse)

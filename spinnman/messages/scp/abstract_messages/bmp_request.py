@@ -11,12 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import Generic, Iterable, Optional, TypeVar, Union
 from typing_extensions import TypeAlias
-from .scp_request import AbstractSCPRequest
+
 from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.messages.scp import SCPRequestHeader
+
 from .bmp_response import BMPResponse
+from .scp_request import AbstractSCPRequest
+
 #: The type of boards parameters.
 Boards: TypeAlias = Union[int, Iterable[int]]
 R = TypeVar("R", bound=BMPResponse)

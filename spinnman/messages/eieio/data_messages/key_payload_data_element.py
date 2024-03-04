@@ -31,21 +31,37 @@ class KeyPayloadDataElement(AbstractDataElement):
         "_payload",
         "_payload_is_timestamp")
 
-    def __init__(self, key: int, payload: int, payload_is_timestamp=False):
+    def __init__(
+            self, key: int, payload: int, payload_is_timestamp: bool = False):
         self._key = key
         self._payload = payload
         self._payload_is_timestamp = payload_is_timestamp
 
     @property
     def key(self) -> int:
+        """
+        The key value passed into the init.
+
+        :rtype: int
+        """
         return self._key
 
     @property
     def payload(self) -> int:
+        """
+        Gets the payload value passed into the init.
+
+        :rtype: int
+        """
         return self._payload
 
     @property
     def payload_is_timestamp(self) -> bool:
+        """
+        Gets the payload_is_timestamp passed into the init.
+
+        :rtype: int
+        """
         return self._payload_is_timestamp
 
     @overrides(AbstractDataElement.get_bytestring)

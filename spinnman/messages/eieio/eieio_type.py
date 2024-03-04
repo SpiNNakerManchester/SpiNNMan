@@ -35,7 +35,7 @@ class EIEIOType(Enum):
         return obj
 
     def __init__(self, encoded_value: int,
-                 # Optionals just to make mypy SHUT UP!
+                 # Default values just to make mypy SHUT UP!
                  # https://github.com/python/mypy/issues/10573
                  key_bytes: int = 0, payload_bytes: int = 0):
         self._encoded_value = encoded_value

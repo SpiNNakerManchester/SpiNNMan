@@ -170,14 +170,12 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         if key > self._header.eieio_type.max_value:
             raise SpinnmanInvalidParameterException(
-                "key", key,
-                "Larger than the maximum allowed of {}".format(
-                    self._header.eieio_type.max_value))
+                "key", key, "Larger than the maximum allowed of "
+                f"{self._header.eieio_type.max_value}")
         if payload > self._header.eieio_type.max_value:
             raise SpinnmanInvalidParameterException(
-                "payload", payload,
-                "Larger than the maximum allowed of {}".format(
-                    self._header.eieio_type.max_value))
+                "payload", payload, "Larger than the maximum allowed of "
+                f"{self._header.eieio_type.max_value}")
 
         self.add_element(KeyPayloadDataElement(
             key, payload, self._header.is_time))
@@ -193,9 +191,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         if key > self._header.eieio_type.max_value:
             raise SpinnmanInvalidParameterException(
-                "key", key,
-                "Larger than the maximum allowed of {}".format(
-                    self._header.eieio_type.max_value))
+                "key", key, "Larger than the maximum allowed of "
+                f"{self._header.eieio_type.max_value}")
         self.add_element(KeyDataElement(key))
 
     def add_element(self, element: AbstractDataElement):

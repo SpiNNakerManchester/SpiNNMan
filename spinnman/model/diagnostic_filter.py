@@ -129,36 +129,78 @@ class DiagnosticFilter(object):
 
     @property
     def enable_interrupt_on_counter_event(self) -> bool:
+        """
+        Returns the enable interrupt on counter event passed into
+        the init unchanged
+
+        Currently unused
+        """
         return self._enable_interrupt_on_counter_event
 
     @property
     def match_emergency_routing_status_to_incoming_packet(self) -> bool:
+        """
+        Returns the match emergency routing status to incoming packet passed
+        into the init unchanged
+
+        Currently unused
+        """
         return self._match_emergency_routing_status_to_incoming_packet
 
     @property
     def destinations(self) -> List[DiagnosticFilterDestination]:
+        """
+        Returns the destinations passed into the init unchanged
+
+        Currently unused
+        """
         return self._destinations
 
     @property
     def sources(self) -> List[DiagnosticFilterSource]:
+        """
+        Returns the sources passed into the init unchanged
+
+        Currently unused
+        """
         return self._sources
 
     @property
     def payload_statuses(self) -> List[DiagnosticFilterPayloadStatus]:
+        """
+        Returns the payload statuses passed into the init unchanged
+
+        Currently unused
+        """
         return self._payload_statuses
 
     @property
     def default_routing_statuses(self) -> List[
             DiagnosticFilterDefaultRoutingStatus]:
+        """
+        Returns the default routing statuses passed into the init unchanged
+
+        Currently unused
+        """
         return self._default_routing_statuses
 
     @property
     def emergency_routing_statuses(self) -> List[
             DiagnosticFilterEmergencyRoutingStatus]:
+        """
+        Returns the emergency routing statuses passed into the init unchanged
+
+        Currently unused
+        """
         return self._emergency_routing_statuses
 
     @property
     def packet_types(self) -> List[DiagnosticFilterPacketType]:
+        """
+        Returns the packet types passed into the init unchanged
+
+        Currently unused
+        """
         return self._packet_types
 
     @property
@@ -194,6 +236,14 @@ class DiagnosticFilter(object):
 
     @staticmethod
     def read_from_int(int_value: int) -> DiagnosticFilter:
+        """
+        Claims to returns a filter that reads an int
+
+        Currently only called by unused Transceiver methods
+
+        :param int int_value:
+        :rtype: DiagnosticFilter
+        """
         enable_interrupt_on_counter_event = (
             (int_value >> _ENABLE_INTERRUPT_OFFSET) & 0x1) == 1
         match_emergency_routing_status_to_incoming_packet = (

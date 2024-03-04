@@ -14,9 +14,11 @@
 
 import time
 from typing import Optional
-from .udp_connection import UDPConnection
+
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
+
+from .udp_connection import UDPConnection
 
 _ANTI_FLOOD_DELAY = 0.1
 

@@ -200,7 +200,8 @@ class UDPConnection(Connection, Listenable[bytes]):
             raise SpinnmanEOFException()
         return receive_message(self._socket, timeout, _MSG_MAX)
 
-    def receive_with_address(self, timeout=None):
+    def receive_with_address(self, timeout: Optional[float] = None) -> Tuple[
+            bytes, Tuple[str, int]]:
         """
         Receive data from the connection along with the address where the
         data was received from.

@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import Any, Generic, TypeVar
 from spinn_utilities.overrides import overrides
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
 from spinnman.connections.udp_packet_connections import (
     SCAMPConnection, BMPConnection)
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 
 #: Type of connections selected between.
 #: :meta private:

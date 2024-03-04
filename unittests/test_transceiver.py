@@ -32,6 +32,12 @@ from spinnman.board_test_configuration import BoardTestConfiguration
 class MockExtendedTransceiver(MockableTransceiver, ExtendedTransceiver):
     pass
 
+    def _where_is_xy(self, x: int, y: int) -> None:
+        return None
+
+    def scamp_connection_selector(self):
+        raise NotImplementedError
+
 
 class TestTransceiver(unittest.TestCase):
 
