@@ -17,7 +17,6 @@ from contextlib import contextmanager
 import io
 import os
 import logging
-import random
 import struct
 import time
 from typing import Optional
