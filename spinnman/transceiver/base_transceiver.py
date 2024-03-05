@@ -707,9 +707,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         if core_subsets is None:
             core_subsets = CoreSubsets()
             for chip in SpiNNManDataView.get_machine().chips:
-                for processor in chip.processors:
-                    core_subsets.add_processor(
-                        chip.x, chip.y, processor.processor_id)
+                for p in chip.all_processor_ids:
+                    core_subsets.add_processor(chip.x, chip.y, p)
 
         if states is None:
             process = GetCPUInfoProcess(self._scamp_connection_selector)
@@ -805,9 +804,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         if core_subsets is None:
             core_subsets = CoreSubsets()
             for chip in SpiNNManDataView.get_machine().chips:
-                for processor in chip.processors:
-                    core_subsets.add_processor(
-                        chip.x, chip.y, processor.processor_id)
+                for p in chip.all_processor_ids:
+                    core_subsets.add_processor(chip.x, chip.y, p)
 
         # read iobuf from machine
         process = ReadIOBufProcess(self._scamp_connection_selector)
