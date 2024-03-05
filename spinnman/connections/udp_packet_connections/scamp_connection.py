@@ -114,24 +114,6 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2, addr, port
 
-    @overrides(AbstractSCPConnection.send_scp_request)
-    def send_scp_request(self, scp_request: AbstractSCPRequest):
-        self.send(self.get_scp_data(scp_request))
-
-    def send_scp_request_to(
-            self, scp_request: AbstractSCPRequest,
-            x: int, y: int, ip_address: str):
-        """
-
-        :param AbstractSCPRequest scp_request:
-        :param int x:
-        :param int y:
-        :param str ip_address:
-        """
-        self.send_to(
-            self.get_scp_data(scp_request, x, y),
-            (str(ip_address), SCP_SCAMP_PORT))
-
     def __repr__(self) -> str:
         return (
             f"SCAMPConnection(chip_x={self._chip_x}, chip_y={self._chip_y}, "

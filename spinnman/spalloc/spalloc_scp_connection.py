@@ -61,10 +61,6 @@ class SpallocSCPConnection(
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
-    @overrides(SCAMPConnection.send_scp_request)
-    def send_scp_request(self, scp_request: AbstractSCPRequest):
-        self.send(self.get_scp_data(scp_request))
-
     @overrides(SCAMPConnection.get_scp_data)
     def get_scp_data(
             self, scp_request: AbstractSCPRequest,

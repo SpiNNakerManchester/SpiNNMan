@@ -83,10 +83,6 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
-    @overrides(AbstractSCPConnection.send_scp_request)
-    def send_scp_request(self, scp_request: AbstractSCPRequest):
-        self.send(self.get_scp_data(scp_request))
-
     def __repr__(self):
         return (
             f"BMPConnection("
