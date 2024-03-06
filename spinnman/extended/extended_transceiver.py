@@ -17,7 +17,6 @@ from contextlib import contextmanager
 import io
 import os
 import logging
-import random
 import struct
 import time
 from typing import Optional
@@ -88,34 +87,6 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         :rtype: AbstractMultiConnectionProcessConnectionSelector
         """
         raise NotImplementedError
-
-    def send_scp_message(self, message, connection=None):
-        """
-        Sends an SCP message, without expecting a response.
-
-        :param message: The message to send
-        :type message:
-            spinnman.messages.scp.abstract_messages.AbstractSCPRequest
-        :param SCAMPConnection connection:
-            The connection to use (omit to pick a random one)
-        :raise SpinnmanTimeoutException:
-            If there is a timeout before a message is received
-        :raise SpinnmanInvalidParameterException:
-            If one of the fields of the received message is invalid
-        :raise SpinnmanInvalidPacketException:
-            * If the message is not a recognised packet type
-            * If a packet is received that is not a valid response
-        :raise SpinnmanUnsupportedOperationException:
-            If no connection can send the type of message given
-        :raise SpinnmanIOException:
-            If there is an error sending the message or receiving the response
-        :raise SpinnmanUnexpectedResponseCodeException:
-            If the response is not one of the expected codes
-        """
-        if connection is None:
-            connection = self.scamp_connections[random.randint(
-                0, len(self.scamp_connections) - 1)]
-        connection.send_scp_request(message)
 
     def is_connected(self, connection=None):
         """
