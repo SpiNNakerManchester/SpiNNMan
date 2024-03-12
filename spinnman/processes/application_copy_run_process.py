@@ -126,7 +126,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         while next_chips:
             # Do all the chips at the current level
             for chip in next_chips:
-                subset = core_subsets.get_core_subset_for_chip(chip)
+                subset = core_subsets.get_core_subset_for_chip(chip.x, chip.y)
                 self._send_request(AppCopyRun(
                     chip.x, chip.y, cast(int, chip.parent_link), size, app_id,
                     subset.processor_ids, checksum, wait))

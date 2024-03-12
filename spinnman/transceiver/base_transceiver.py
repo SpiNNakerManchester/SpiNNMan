@@ -816,6 +816,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self, app_id: int, state: CPUState,
             xys: Optional[Iterable[Tuple[int, int]]] = None) -> int:
         process = GetNCoresInStateProcess(self._scamp_connection_selector)
+        chip_xys: Iterable[Tuple[int, int]]
         if xys is None:
             machine = SpiNNManDataView.get_machine()
             chip_xys = machine.ethernet_connected_chips
