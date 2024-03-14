@@ -15,7 +15,6 @@
 import struct
 from typing import Collection
 
-from spinn_machine import Router
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
 from spinnman.exceptions import SpinnmanInvalidParameterException

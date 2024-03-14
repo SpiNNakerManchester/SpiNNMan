@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinn_machine import FixedRouteEntry, Router
+from spinn_machine import FixedRouteEntry
 from spinnman.messages.scp.impl import FixedRouteInit
 from spinnman.processes import AbstractMultiConnectionProcess
 

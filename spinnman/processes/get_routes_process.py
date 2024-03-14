@@ -16,7 +16,7 @@ import struct
 from functools import partial
 from typing import List, Optional
 
-from spinn_machine import MulticastRoutingEntry, Router
+from spinn_machine import MulticastRoutingEntry
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
