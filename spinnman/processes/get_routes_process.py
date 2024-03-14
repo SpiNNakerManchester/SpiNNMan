@@ -64,13 +64,8 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
         if self._app_id is not None and self._app_id != app_id:
             return
 
-        # Convert bit-set into list of (set) IDs
-        processor_ids, link_ids = \
-            Router.convert_spinnaker_route_to_routing_ids(route)
-
         self._entries[route_no + offset] = MulticastRoutingEntry(
-            key, mask, processor_ids=processor_ids, link_ids=link_ids,
-            defaultable=False)
+            key, mask, defaultable=False, spinnaker_route=route)
 
     def __handle_response(self, offset: int, response: Response):
         for route_no in range(_ENTRIES_PER_READ):
