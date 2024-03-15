@@ -48,7 +48,8 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
 
     all_cores = []
     for chip in machine.chips:
-        all_cores.append(CoreSubset(chip.x, chip.y, range(1, 17)))
+        all_cores.append(CoreSubset(
+            chip.x, chip.y, chip.placable_processors_ids))
 
     all_cores = CoreSubsets(core_subsets=all_cores)
 
