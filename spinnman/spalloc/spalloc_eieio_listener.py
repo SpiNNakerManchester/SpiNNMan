@@ -57,7 +57,7 @@ class SpallocEIEIOListener(
         return read_eieio_data_message(data, 0)
 
     @overrides(SpallocProxiedConnection.send)
-    def send(self, data):
+    def send(self, data: bytes):
         """
         .. note::
             This class does not allow sending.

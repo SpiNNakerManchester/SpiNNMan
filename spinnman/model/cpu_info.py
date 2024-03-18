@@ -26,6 +26,7 @@ STATE_FIELD_OFFSET = 48
 #: Corresponds to vcpu_t in sark.h
 _VCPU_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
 _vcpu_t: TypeAlias = Tuple[
+    # pylint: disable=wrong-spelling-in-comment
     bytes,             # 32s - r0-r7
     int, int, int,     # 3I  - psr, sp, lr
     int, int,          # 2B  - RT error code, Physical CPU
@@ -341,9 +342,9 @@ class CPUInfo(object):
         return self.__software_version
 
     def __str__(self) -> str:
-        return "{}:{}:{:02n} ({:02n}) {:18} {:16s} {:3n}".format(
-            self.x, self.y, self.p, self.physical_cpu_id, self.__state.name,
-            self.__application_name, self.__application_id)
+        return (f"{self.x}:{self.y}:{self.p:02n} ({self.physical_cpu_id:02n}) "
+                f"{self.__state.name:18} {self.__application_name:16s} "
+                f"{self.__application_id:3n}")
 
     def get_status_string(self) -> str:
         """

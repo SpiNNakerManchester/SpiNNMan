@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from contextlib import suppress
+from typing import Optional
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 from .udp_connection import UDPConnection
 
@@ -29,7 +30,14 @@ class IPAddressesConnection(UDPConnection):
                  local_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
         super().__init__(local_host=local_host, local_port=local_port)
 
-    def receive_ip_address(self, timeout=None):
+    def receive_ip_address(self, timeout:  Optional[float] = None
+                           ) -> Optional[str]:
+        """
+
+        :param timeout:
+        :type timeout: float or None
+        :rtype: str or None
+        """
         with suppress(Exception):
             (_, (ip_address, port)) = self.receive_with_address(timeout)
             if port == _BOOTROM_SPINN_PORT:
@@ -37,5 +45,5 @@ class IPAddressesConnection(UDPConnection):
         return None
 
     def __repr__(self):
-        return "IPAddressesConnection(local_host={}, local_port={})".format(
-            self.local_ip_address, self.local_port)
+        return f"IPAddressesConnection(local_host={self.local_ip_address}," \
+               f" local_port={self.local_port})"

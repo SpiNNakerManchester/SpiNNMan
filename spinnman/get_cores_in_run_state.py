@@ -16,15 +16,16 @@
 This is a script used to check the state of a SpiNNaker machine.
 """
 
-import sys
 import argparse
+import sys
+
 from spinn_utilities.config_holder import set_config
-from spinnman.transceiver import create_transceiver_from_hostname
 from spinn_machine import CoreSubsets, CoreSubset
+
 from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
 from spinnman.model.enums import CPUState
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver import create_transceiver_from_hostname, Transceiver
 
 SCAMP_ID = 0
 IGNORED_IDS = {SCAMP_ID, 16}  # WHY 16?
@@ -47,7 +48,8 @@ def get_cores_in_run_state(txrx, app_id, print_all_chips):
 
     all_cores = []
     for chip in machine.chips:
-        all_cores.append(CoreSubset(chip.x, chip.y, range(1, 17)))
+        all_cores.append(CoreSubset(
+            chip.x, chip.y, chip.placable_processors_ids))
 
     all_cores = CoreSubsets(core_subsets=all_cores)
 
@@ -77,8 +79,9 @@ def _make_transceiver(host, version, bmp_names) -> Transceiver:
     :param version: Board version to use (`None` defaults to 5 unless host is
         192.168.240.253 (spin 3)
     :type version: int or None
-    :param bmp: bmp connection or `None` to auto detect (if applicable)
-    :type bmp: str or None
+    :param bmp_names: names of BMP connection
+        or `None` to auto detect (if applicable)
+    :type bmp_names: str or None
     :rtype: Transceiver
     """
     if host is None:

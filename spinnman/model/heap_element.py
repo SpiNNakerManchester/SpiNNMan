@@ -103,9 +103,8 @@ class HeapElement(object):
 
     def __str__(self) -> str:
         if self._is_free:
-            return "FREE  0x{:8X} SIZE: {:9d}".format(
-                self._block_address, self.size)
+            return f"FREE  0x{self._block_address:8X} SIZE: {self.size:9d}"
         assert self._tag is not None
         assert self._app_id is not None
-        return "BLOCK 0x{:8X} SIZE: {:9d} TAG: {:3d} APP_ID: {:3d}".format(
-            self._block_address, self.size, self._tag, self._app_id)
+        return "BLOCK 0x{self._block_address:8X} SIZE: {self.size:9d} " \
+               "TAG: {self._tag:3d} APP_ID: {self._app_id:3d}"

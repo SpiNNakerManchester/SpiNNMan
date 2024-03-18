@@ -12,52 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Our abbreviations/names
-bmp
-cpu
-iobuf
-scp
-Spalloc
-bmpc
-ybug
-txrx
-url
-xy
-xys
-
-# Our special words
-keepalive
-# Our special words ("wrap-arounds" gets split up)
-arounds
+# We use a single exception files for all the main repsitories
+# It can be found at:
+# https://github.com/SpiNNakerManchester/SupportScripts/blob/master/actions/pylint/default_dict.txt
 
 
-# Python packages
-spinnman
-websocket
 
-# Python types
-BMPConnectionData
-BufferedIOBase
-CoreSubset
-CPUInfo
-CPUInfos
-CPUState
-DiagnosticFilter
-DiagnosticFilterDestination
-DiagnosticFilterDefaultRoutingStatus
-DiagnosticFilterEmergencyRoutingStatus
-DiagnosticFilterPacketType
-DiagnosticFilterPayloadStatus
-DiagnosticFilterSource
-ExecutableType
-HeapElement
-IOBuffer
-PreparedRequest
-RawIOBase
-SCAMPConnection
-SCPResult
-SpallocJob
-SpallocMachine
-SpinnakerBootMessage
-SystemVariableDefinition
-WebSocket

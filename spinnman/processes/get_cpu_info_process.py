@@ -26,6 +26,11 @@ from .abstract_multi_connection_process_connection_selector import (
 
 
 class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
+    """
+    Gets the CPU for processors over the provided connection.
+
+    This base class returns info for all states.
+    """
     __slots__ = ("__cpu_infos", )
 
     def __init__(self, connection_selector: ConnectionSelector):

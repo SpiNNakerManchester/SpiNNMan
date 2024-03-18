@@ -55,19 +55,16 @@ class SpallocSCPConnection(
         self.send(_TWO_SKIP + sdp_message.bytestring)
 
     @overrides(SCAMPConnection.receive_scp_response)
-    def receive_scp_response(
-            self, timeout=1.0) -> Tuple[SCPResult, int, bytes, int]:
+    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> Tuple[
+            SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
-    @overrides(SCAMPConnection.send_scp_request)
-    def send_scp_request(self, scp_request: AbstractSCPRequest):
-        self.send(self.get_scp_data(scp_request))
-
     @overrides(SCAMPConnection.get_scp_data)
     def get_scp_data(
-            self, scp_request: AbstractSCPRequest, x=None, y=None) -> bytes:
+            self, scp_request: AbstractSCPRequest,
+            x: Optional[int] = None, y: Optional[int] = None) -> bytes:
         if x is None:
             x = self.chip_x
         if y is None:
