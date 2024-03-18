@@ -45,12 +45,20 @@ class SpallocEIEIOConnection(
     __slots__ = ()
 
     @overrides(EIEIOConnection.send_eieio_message)
-    def send_eieio_message(self, eieio_message):
+    def send_eieio_message(self, eieio_message: AbstractEIEIOMessage):
         # Not normally used, as packets need headers to go to SpiNNaker
         self.send(eieio_message.bytestring)
 
     def send_eieio_message_to_core(
             self, eieio_message: AbstractEIEIOMessage, x: int, y: int, p: int):
+        """
+
+        :param AbstractEIEIOMessage eieio_message:
+        :param int x:
+        :param int y:
+        :param int p:
+        :rtype: None
+        """
         sdp_message = SDPMessage(
             SDPHeader(
                 flags=SDPFlag.REPLY_NOT_EXPECTED, tag=0,

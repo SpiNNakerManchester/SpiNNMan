@@ -14,8 +14,8 @@
 
 import struct
 from typing import Optional
-from .sdp_flag import SDPFlag
 from spinnman.data import SpiNNManDataView
+from .sdp_flag import SDPFlag
 
 N_BYTES = 8
 _EIGHT_BYTES = struct.Struct("<8B")
@@ -325,6 +325,11 @@ class SDPHeader(object):
             source_chip_x, source_chip_y)
 
     def get_physical_cpu_id(self) -> str:
+        """
+        A String describing the physical core of the destination.
+
+        :rtype: str
+        """
         if SpiNNManDataView.has_machine():
             chip = SpiNNManDataView.get_machine().get_chip_at(
                 self._destination_chip_x,  self._destination_chip_y)

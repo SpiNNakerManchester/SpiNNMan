@@ -15,12 +15,14 @@
 import struct
 from functools import partial
 from typing import List, Optional
-from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
+
 from spinn_machine import MulticastRoutingEntry, Router
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
+from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
-from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 
 # There are 1024 entries in a routing table
 _N_ENTRIES = 1024

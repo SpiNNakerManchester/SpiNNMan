@@ -283,19 +283,17 @@ class SpinnmanGroupedProcessException(SpinnmanException):
                 error_requests, exceptions, tracebacks, connections):
             sdp_header = error_request.sdp_header
             phys_p = sdp_header.get_physical_cpu_id()
-            location = "board {} with ethernet chip {}:{} [{}:{}:{}{}]".format(
-                connection.remote_ip_address, connection.chip_x,
-                connection.chip_y, sdp_header.destination_chip_x,
-                sdp_header.destination_chip_y,
-                sdp_header.destination_cpu, phys_p)
+            location = f"board {connection.remote_ip_address} with ethernet " \
+                       f"chip {connection.chip_x}:{connection.chip_y} " \
+                       f"[{sdp_header.destination_chip_x}:" \
+                       f"{sdp_header.destination_chip_y}:" \
+                       f"{sdp_header.destination_cpu}({phys_p})]"
             problem += \
-                "   Received exception class: {}\n" \
-                "       With message {}\n" \
-                "       When sending to {}\n" \
-                "       Stack trace: {}\n".format(
-                    exception.__class__.__name__, str(exception),
-                    location,
-                    traceback.format_tb(trace_back))
+                f"   Received exception class: " \
+                f"{exception.__class__.__name__}\n" \
+                f"       With message {str(exception)}\n" \
+                f"       When sending to {location}\n" \
+                f"       Stack trace: {traceback.format_tb(trace_back)}\n"
         super().__init__(problem)
 
 
@@ -317,12 +315,10 @@ class SpinnmanGenericProcessException(SpinnmanException):
         """
         # pylint: disable=too-many-arguments
         super().__init__(
-            "   Received exception class: {} \n"
-            "      With message: {} \n"
-            "      When sending to {}:{}:{}{}\n"
-            "      Stack trace: {}\n".format(
-                exception.__class__.__name__, str(exception), x, y, p,
-                phys_p, traceback.format_tb(tb)))
+            f"   Received exception class: {exception.__class__.__name__} \n"
+            f"      With message: {str(exception)} \n"
+            f"      When sending to {x}:{y}:{p}{phys_p}\n"
+            f"      Stack trace: {traceback.format_tb(tb)}\n")
 
         self._stored_exception = exception
         if tb2 is not None:

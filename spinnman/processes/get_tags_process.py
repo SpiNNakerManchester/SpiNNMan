@@ -14,18 +14,24 @@
 
 from functools import partial
 from typing import List, Optional
+
 from spinn_machine.tags import AbstractTag, ReverseIPTag, IPTag
-from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+
 from spinnman.messages.scp.impl.iptag_get import IPTagGet, IPTagGetResponse
 from spinnman.messages.scp.impl.iptag_get_info import IPTagGetInfo
 from spinnman.messages.scp.impl.iptag_get_info_response import (
     IPTagGetInfoResponse)
 from spinnman.connections.udp_packet_connections import SCAMPConnection
+
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
 
 
 class GetTagsProcess(AbstractMultiConnectionProcess):
+    """
+    Gets information about the tags over the provided connection.
+    """
     __slots__ = (
         "_tags",
         "_tag_info")

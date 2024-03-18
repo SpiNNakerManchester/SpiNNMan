@@ -17,7 +17,7 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 T = TypeVar("T")
 
 
-# Should inherit from Connection, but doesn't for MRO reasons
+# Should inherit from Connection, but doesn't for Multiple Inheritance reasons
 class Listenable(Generic[T], metaclass=AbstractBase):
     """
     An interface for connections that can listen for incoming messages.

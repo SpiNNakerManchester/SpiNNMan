@@ -11,13 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import Optional
+
+from spinn_machine.fixed_route_entry import FixedRouteEntry
 from spinnman.messages.scp.impl.fixed_route_read import (
     FixedRouteRead, _FixedRouteResponse)
+
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
-from spinn_machine.fixed_route_entry import FixedRouteEntry
 
 
 class ReadFixedRouteRoutingEntryProcess(

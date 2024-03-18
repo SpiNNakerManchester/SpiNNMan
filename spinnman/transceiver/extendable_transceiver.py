@@ -53,7 +53,7 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
     @abstractmethod
     def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
         """
-        Returns the bmp selector
+        Returns the BMP selector
 
         :rtype: AbstractMultiConnectionProcessConnectionSelector
         """

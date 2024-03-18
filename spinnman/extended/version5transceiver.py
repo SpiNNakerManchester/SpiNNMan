@@ -11,9 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from .extended_transceiver import ExtendedTransceiver
+
 from spinnman.transceiver.version5transceiver import Version5Transceiver
+from .extended_transceiver import ExtendedTransceiver
 
 
 class ExtendedVersion5Transceiver(Version5Transceiver, ExtendedTransceiver):
-    pass
+    """
+    A Transceiver specific for a 48 chip (spin 1) with the extended methods.
+    """

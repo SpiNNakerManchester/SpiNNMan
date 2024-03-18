@@ -18,25 +18,26 @@ Implementation of the client for the Spalloc web service.
 from contextlib import contextmanager
 from logging import getLogger
 from multiprocessing import Process, Queue
-from time import sleep
-from packaging.version import Version
-from urllib.parse import urlparse, urlunparse, ParseResult
 import queue
-import requests
 import struct
 import threading
-from typing import (
-    Any, ContextManager,
-    Callable, Dict, FrozenSet, Iterable, Iterator, List, Mapping,
-    Optional, Tuple, cast)
+from time import sleep
+from typing import (Any, ContextManager, Callable, Dict, FrozenSet, Iterable,
+                    Iterator, List, Mapping, Optional, Tuple, cast)
+from urllib.parse import urlparse, urlunparse, ParseResult
+
+from packaging.version import Version
+import requests
 from typing_extensions import TypeAlias
 from websocket import WebSocket  # type: ignore
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
 from spinn_utilities.overrides import overrides
+
 from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
@@ -44,18 +45,19 @@ from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpallocException
 from spinnman.transceiver import (
     Transceiver, create_transceiver_from_connections)
-from .spalloc_state import SpallocState
+
+from .abstract_spalloc_client import AbstractSpallocClient
 from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware
-from .utils import parse_service_url, get_hostname
-from .abstract_spalloc_client import AbstractSpallocClient
-from .spalloc_machine import SpallocMachine
-from .spalloc_job import SpallocJob
-from .spalloc_proxied_connection import SpallocProxiedConnection
 from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
 from .spalloc_eieio_listener import SpallocEIEIOListener
+from .spalloc_job import SpallocJob
+from .spalloc_machine import SpallocMachine
+from .spalloc_proxied_connection import SpallocProxiedConnection
 from .spalloc_scp_connection import SpallocSCPConnection
+from .spalloc_state import SpallocState
+from .utils import parse_service_url, get_hostname
 
 logger = FormatAdapter(getLogger(__name__))
 _open_req = struct.Struct("<IIIII")
@@ -68,7 +70,13 @@ _msg = struct.Struct("<II")
 _msg_to = struct.Struct("<IIIII")
 
 
-def fix_url(url):
+def fix_url(url: Any) -> str:
+    """
+    Makes sure the url is the correct format.
+
+    :param str url: original url
+    :rtype: str
+    """
     parts = urlparse(url)
     if parts.scheme != 'https':
         parts = ParseResult("https", parts.netloc, parts.path,
@@ -212,8 +220,11 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
 
     @overrides(AbstractSpallocClient.create_job_board)
     def create_job_board(
-            self, triad=None, physical=None, ip_address=None,
-            machine_name=None, keepalive=45) -> SpallocJob:
+            self, triad: Optional[Tuple[int, int, int]] = None,
+            physical: Optional[Tuple[int, int, int]] = None,
+            ip_address: Optional[str] = None,
+            machine_name: Optional[str] = None,
+            keepalive: int = 45) -> SpallocJob:
         board: JsonObject
         if triad:
             x, y, z = triad
@@ -233,8 +244,13 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
 
     @overrides(AbstractSpallocClient.create_job_rect_at_board)
     def create_job_rect_at_board(
-            self, width, height, triad=None, physical=None, ip_address=None,
-            machine_name=None, keepalive=45, max_dead_boards=0):
+            self, width: int, height: int,
+            triad: Optional[Tuple[int, int, int]] = None,
+            physical: Optional[Tuple[int, int, int]] = None,
+            ip_address: Optional[str] = None,
+            machine_name: Optional[str] = None, keepalive: int = 45,
+            max_dead_boards: int = 0) -> SpallocJob:
+        board: JsonObject
         if triad:
             x, y, z = triad
             board = {"x": int(x), "y": int(y), "z": int(z)}
@@ -269,7 +285,7 @@ class _ProxyServiceError(IOError):
     """
 
 
-def _SpallocKeepalive(url, interval, term_queue, cookies, headers):
+def _spalloc_keepalive(url, interval, term_queue, cookies, headers):
     """
     Actual keepalive task implementation. Don't use directly.
     """
@@ -473,7 +489,7 @@ class _ProxyReceiver(threading.Thread):
 
     def unlisten(self, channel_id: int):
         """
-        De-register a listener for a channel
+        Deregister a listener for a channel
         """
         self.__handlers.pop(channel_id)
 
@@ -510,14 +526,14 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__proxy_ping: Optional[_ProxyPing] = None
 
     @overrides(SpallocJob.get_session_credentials_for_db)
-    def get_session_credentials_for_db(self):
+    def get_session_credentials_for_db(self) -> Mapping[Tuple[str, str], str]:
         config = {}
         config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
         cookies, headers = self._session_credentials
         if "Authorization" in headers:
-            # We never write the auth headers themselves; we just extend the
-            # session
+            # We never write the authorisation headers themselves;
+            # we just extend the session
             del headers["Authorization"]
         for k, v in cookies.items():
             config["COOKIE", k] = v
@@ -634,7 +650,7 @@ class _SpallocJob(SessionAware, SpallocJob):
                 raise SpallocException("job was unexpectedly destroyed")
 
     @overrides(SpallocJob.destroy)
-    def destroy(self, reason: str = "finished") -> None:
+    def destroy(self, reason: str = "finished"):
         if self.__keepalive_handle:
             self.__keepalive_handle.close()
             self.__keepalive_handle = None
@@ -662,7 +678,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         if self.__keepalive_handle is not None:
             raise SpallocException("cannot keep job alive from two tasks")
         q: Queue = Queue(1)
-        p = Process(target=_SpallocKeepalive, args=(
+        p = Process(target=_spalloc_keepalive, args=(
             self._keepalive_url, 0 + period, q,
             *self._session_credentials), daemon=True)
         p.start()
@@ -871,7 +887,7 @@ class _ProxiedBidirectionalConnection(
         super().__init__(ws, receiver)
 
     @overrides(_ProxiedConnection._open_connection)
-    def _open_connection(self):
+    def _open_connection(self) -> int:
         handle, = self._call(
             ProxyProtocol.OPEN, _open_req, _open_close_res,
             *self.__connect_args)
@@ -879,10 +895,19 @@ class _ProxiedBidirectionalConnection(
 
     @overrides(Connection.is_connected)
     def is_connected(self) -> bool:
+        """
+        Determines if the medium is connected at this point in time.
+
+        :return: True if the medium is connected, False otherwise
+        :rtype: bool
+        """
         return self._connected
 
     @overrides(Connection.close)
-    def close(self):
+    def close(self) -> None:
+        """
+        Closes the connection.
+        """
         self._close()
 
     @overrides(SpallocProxiedConnection.send)
@@ -934,14 +959,23 @@ class _ProxiedUnboundConnection(
 
     @overrides(Connection.is_connected)
     def is_connected(self) -> bool:
+        """
+        Determines if the medium is connected at this point in time.
+
+        :return: True if the medium is connected, False otherwise
+        :rtype: bool
+        """
         return self._connected
 
     @overrides(Connection.close)
     def close(self) -> None:
+        """
+        Closes the connection.
+        """
         self._close()
 
     @overrides(SpallocProxiedConnection.send)
-    def send(self, data: bytes) -> None:
+    def send(self, data: bytes):
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 

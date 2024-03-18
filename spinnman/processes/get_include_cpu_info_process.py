@@ -22,6 +22,11 @@ from .get_cpu_info_process import GetCPUInfoProcess
 
 
 class GetIncludeCPUInfoProcess(GetCPUInfoProcess):
+    """
+    Gets the CPU for processors over the provided connection.
+
+    This class returns only infos for the requested states.
+    """
     __slots__ = ("__states", )
 
     def __init__(self, connection_selector: ConnectionSelector,
@@ -30,10 +35,12 @@ class GetIncludeCPUInfoProcess(GetCPUInfoProcess):
         :param connection_selector:
         :type connection_selector:
             AbstractMultiConnectionProcessConnectionSelector
+        :param iterable(CPUState) states:
+            The states for which info is required.
         """
         super().__init__(connection_selector)
         self.__states = states
 
     @overrides(GetCPUInfoProcess._is_desired)
-    def _is_desired(self, cpu_info: CPUInfo):
+    def _is_desired(self, cpu_info: CPUInfo) -> bool:
         return cpu_info.state in self.__states

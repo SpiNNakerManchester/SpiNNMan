@@ -22,13 +22,26 @@ from .get_cpu_info_process import GetCPUInfoProcess
 
 
 class GetExcludeCPUInfoProcess(GetCPUInfoProcess):
+    """
+    Gets the CPU for processors over the provided connection.
+
+    This class returns all but infos for the requested states.
+    """
+
     __slots__ = ("__states", )
 
     def __init__(self, connection_selector: ConnectionSelector,
                  states: Container[CPUState]):
+        """
+        :param connection_selector:
+        :type connection_selector:
+            AbstractMultiConnectionProcessConnectionSelector
+        :param iterable(CPUState) states:
+            The states for which info is NOT required.
+        """
         super().__init__(connection_selector)
         self.__states = states
 
     @overrides(GetCPUInfoProcess._is_desired)
-    def _is_desired(self, cpu_info: CPUInfo):
+    def _is_desired(self, cpu_info: CPUInfo) -> bool:
         return cpu_info.state not in self.__states

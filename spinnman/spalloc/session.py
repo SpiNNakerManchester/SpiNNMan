@@ -11,16 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from functools import wraps
 from logging import getLogger
-import re
-import requests
 from json.decoder import JSONDecodeError
+import re
 from typing import Dict, Tuple, cast, Optional
 import websocket  # type: ignore
+
+import requests
+
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.json import JsonObject
 from spinnman.exceptions import SpallocException
+
 from .utils import clean_url
 
 logger = FormatAdapter(getLogger(__name__))
@@ -37,6 +41,7 @@ def _may_renew(method):
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
         print(f"{request.method} {request.url}")
+        # pylint: disable=consider-using-f-string
         print('\r\n'.join('{}: {}'.format(*kv)
                           for kv in request.headers.items()))
         if request.body:
@@ -46,6 +51,7 @@ def _may_renew(method):
         """
         :param ~requests.Response response:
         """
+        # pylint: disable=consider-using-f-string
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(
             '<<<<<<<<<<<START<<<<<<<<<<<',
             str(response.status_code) + " " + response.reason,
@@ -115,7 +121,6 @@ class Session:
                     # TODO: extract this?
                     pass
                 else:
-                    # Urgh
                     self.__csrf_header = key
                     self.__csrf = value
 

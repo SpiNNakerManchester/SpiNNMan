@@ -61,10 +61,7 @@ class ChipInfo(object):
             "virtual_to_physical_core_map")
 
         self._virtual_core_ids: List[int] = list()
-        for physical_core_id in range(
-                0, len(self._physical_to_virtual_core_map)):
-            virtual_core_id = self._physical_to_virtual_core_map[
-                physical_core_id]
+        for virtual_core_id in self._physical_to_virtual_core_map:
             if virtual_core_id != 0xFF:
                 self._virtual_core_ids.append(virtual_core_id)
         self._virtual_core_ids.sort()

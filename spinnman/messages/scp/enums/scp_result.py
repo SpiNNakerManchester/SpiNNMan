@@ -37,7 +37,7 @@ class SCPResult(Enum):
     RC_ROUTE = 0x87
     #: Bad CPU number.
     RC_CPU = 0x88
-    #: SHM destination dead.
+    #: destination dead.
     RC_DEAD = 0x89
     #: No free Shared Memory buffers.
     RC_BUF = 0x8a

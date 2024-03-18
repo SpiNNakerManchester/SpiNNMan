@@ -78,7 +78,7 @@ class RouterAlloc(AbstractSCPRequest[RouterAllocResponse]):
             SCPRequestHeader(command=SCPCommand.CMD_ALLOC),
             argument_1=(
                 (app_id << 8) |
-                AllocFree.ALLOC_ROUTING.value),  # @UndefinedVariable
+                AllocFree.ALLOC_ROUTING.value),
             argument_2=n_entries)
 
     @overrides(AbstractSCPRequest.get_scp_response)

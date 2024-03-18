@@ -25,17 +25,17 @@ class RunTimeError(Enum):
     RESET = 1
     #: Undefined instruction
     UNDEF = 2
-    #: Undefined SVC or no handler
+    #: Undefined Supervisor Call instruction or no handler
     SVC = 3
     #: Prefetch abort
     PABT = 4
     #: Data abort
     DABT = 5
-    #: Unhandled IRQ
+    #: Unhandled interrupt request
     IRQ = 6
-    #: Unhandled FIQ
+    #: Unhandled Fast interrupt request
     FIQ = 7
-    #: Unconfigured VIC vector
+    #: Unconfigured Vectored Interrupt Controller
     VIC = 8
     #: Generic user abort
     ABORT = 9
@@ -45,7 +45,7 @@ class RunTimeError(Enum):
     DIVBY0 = 11
     #: Event startup failure
     EVENT = 12
-    #: Fatal SW error
+    #: Fatal Software error
     SWERR = 13
     #: Failed to allocate IO buffer
     IOBUF = 14
@@ -53,11 +53,11 @@ class RunTimeError(Enum):
     ENABLE = 15
     #: Generic null pointer error
     NULL = 16
-    #: Pkt startup failure
+    #: Packet startup failure
     PKT = 17
     #: Timer startup failure
     TIMER = 18
     #: API startup failure
     API = 19
-    #: SW version conflict
+    #: Sark software version conflict
     SARK_VERSRION_INCORRECT = 20

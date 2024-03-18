@@ -22,13 +22,13 @@ from .check_ok_response import CheckOKResponse
 
 class DoSync(AbstractSCPRequest[CheckOKResponse]):
     """
-    An SCP Request to control synchronization.
+    An SCP Request to control synchronisation.
     """
     __slots__ = ()
 
     def __init__(self, do_sync: bool):
         """
-        :param bool do_sync: Whether to synchronize or not
+        :param bool do_sync: Whether to synchronise or not
         """
         super().__init__(
             SDPHeader(
