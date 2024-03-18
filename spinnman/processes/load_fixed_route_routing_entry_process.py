@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinn_machine import FixedRouteEntry, Router
+from spinn_machine import FixedRouteEntry
 from spinnman.messages.scp.impl import FixedRouteInit
 from spinnman.processes import AbstractMultiConnectionProcess
 
@@ -36,7 +36,6 @@ class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
         :param int app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
         """
-        route_entry = Router.convert_routing_table_entry_to_spinnaker_route(
-            fixed_route)
         with self._collect_responses():
-            self._send_request(FixedRouteInit(x, y, route_entry, app_id))
+            self._send_request(FixedRouteInit(
+                x, y, fixed_route.spinnaker_route, app_id))

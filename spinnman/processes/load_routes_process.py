@@ -15,7 +15,6 @@
 import struct
 from typing import Collection
 
-from spinn_machine import Router
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
@@ -62,12 +61,9 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         routing_data = bytearray(16 * (len(routes) + 1))
         n_entries = 0
         for route in routes:
-            route_entry = \
-                Router.convert_routing_table_entry_to_spinnaker_route(route)
-
             _ROUTE_PATTERN.pack_into(
                 routing_data, n_entries * 16, n_entries,
-                route_entry, route.routing_entry_key, route.mask)
+                route.spinnaker_route, route.routing_entry_key, route.mask)
             n_entries += 1
 
         # Add an entry to mark the end
