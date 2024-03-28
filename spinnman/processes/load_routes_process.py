@@ -67,7 +67,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
             _ROUTE_PATTERN.pack_into(
                 routing_data, n_entries * 16, n_entries,
-                route_entry, route.routing_entry_key, route.mask)
+                route_entry, route.key, route.mask)
             n_entries += 1
 
         # Add an entry to mark the end

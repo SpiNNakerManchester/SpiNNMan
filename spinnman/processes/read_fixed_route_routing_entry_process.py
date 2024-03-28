@@ -14,7 +14,7 @@
 
 from typing import Optional
 
-from spinn_machine.fixed_route_entry import FixedRouteEntry
+from spinn_machine import RoutingEntry
 from spinnman.messages.scp.impl.fixed_route_read import (
     FixedRouteRead, _FixedRouteResponse)
 
@@ -39,13 +39,13 @@ class ReadFixedRouteRoutingEntryProcess(
             the SC&MP connection selector
         """
         super().__init__(connection_selector)
-        self._route: Optional[FixedRouteEntry] = None
+        self._route: Optional[RoutingEntry] = None
 
     def __handle_read_response(self, response: _FixedRouteResponse):
         self._route = response.route
 
     def read_fixed_route(
-            self, x: int, y: int, app_id: int = 0) -> FixedRouteEntry:
+            self, x: int, y: int, app_id: int = 0) -> RoutingEntry:
         """
         Read the fixed route entry installed on a particular chip's router.
 
@@ -56,7 +56,7 @@ class ReadFixedRouteRoutingEntryProcess(
         :param int app_id:
             The ID of the application with which to associate the
             routes.  If not specified, defaults to 0.
-        :rtype: ~spinn_machine.FixedRouteEntry
+        :rtype: ~spinn_machine.RoutingEntry
         """
         with self._collect_responses():
             self._send_request(FixedRouteRead(x, y, app_id),
