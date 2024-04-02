@@ -331,7 +331,7 @@ class SDPHeader(object):
         :rtype: str
         """
         return SpiNNManDataView.get_physical_core_string(
-            self._destination_chip_x, self._destination_chip_y,
+            (self._destination_chip_x, self._destination_chip_y),
             self._destination_cpu)
 
     def update_for_send(self, source_x: int, source_y: int):
