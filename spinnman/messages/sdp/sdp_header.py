@@ -330,13 +330,9 @@ class SDPHeader(object):
 
         :rtype: str
         """
-        if SpiNNManDataView.has_machine():
-            chip = SpiNNManDataView.get_machine().get_chip_at(
-                self._destination_chip_x,  self._destination_chip_y)
-            if chip is not None:
-                return chip.get_physical_core_string(
-                    self._destination_cpu)
-        return ""
+        return SpiNNManDataView.get_physical_core_string(
+            self._destination_chip_x, self._destination_chip_y,
+            self._destination_cpu)
 
     def update_for_send(self, source_x: int, source_y: int):
         """
