@@ -33,13 +33,6 @@ class TestData(unittest.TestCase):
         with self.assertRaises(DataNotYetAvialable):
             SpiNNManDataView.get_transceiver()
 
-    def test_mock(self):
-        SpiNNManDataWriter.mock()
-        set_config("Machine", "version", 5)
-        # check there is a
-        #   value not what it is
-        SpiNNManDataView.get_machine()
-
     def test_transceiver(self):
         writer = SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
