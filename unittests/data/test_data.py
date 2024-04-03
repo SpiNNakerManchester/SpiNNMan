@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import unittest
-from spinn_utilities.config_holder import set_config
 from spinn_utilities.exceptions import (DataNotYetAvialable)
 from spinnman.config_setup import unittest_setup
 from spinnman.data import SpiNNManDataView
