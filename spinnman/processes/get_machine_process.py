@@ -119,7 +119,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             (chip_info.x, chip_info.y), set())
         if 0 in down_cores:
             raise NotImplementedError(
-                f"Declaring scamp core (0) as down is not supported")
+                "Declaring scamp core (0) as down is not supported")
         cores = list()
         for i in range(1, n_cores):
             if i in down_cores:
