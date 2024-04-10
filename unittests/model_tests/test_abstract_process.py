@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinn_utilities.config_holder import set_config
+from spinn_machine.version import ANY_VERSION
 from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess)
 from spinnman.messages.scp.impl import ReadMemory
@@ -40,7 +41,7 @@ class MockConnection(SCAMPConnection):
 
 def test_error_print():
     unittest_setup()
-    set_config("Machine", "version", 5)
+    set_config("Machine", "version", ANY_VERSION)
     connection = MockConnection(0, 0)
     process = MockProcess(RoundRobinConnectionSelector([connection]))
     with pytest.raises(SpinnmanGenericProcessException):
