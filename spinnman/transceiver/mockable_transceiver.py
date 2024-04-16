@@ -21,7 +21,7 @@ from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
 from spinn_machine import (
-    CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
+    CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 from spinnman.data import SpiNNManDataView
 from spinnman.connections.abstract_classes import Connection
@@ -208,11 +208,11 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.load_fixed_route)
     def load_fixed_route(
-            self, x: int, y: int, fixed_route: FixedRouteEntry, app_id: int):
+            self, x: int, y: int, fixed_route: RoutingEntry, app_id: int):
         pass
 
     @overrides(Transceiver.read_fixed_route)
-    def read_fixed_route(self, x: int, y: int, app_id: int) -> FixedRouteEntry:
+    def read_fixed_route(self, x: int, y: int, app_id: int) -> RoutingEntry:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_multicast_routes)

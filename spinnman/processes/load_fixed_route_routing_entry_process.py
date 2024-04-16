@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinn_machine import FixedRouteEntry, Router
+from spinn_machine import Router, RoutingEntry
 from spinnman.messages.scp.impl import FixedRouteInit
 from spinnman.processes import AbstractMultiConnectionProcess
 
@@ -24,14 +24,14 @@ class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
     __slots__ = ()
 
     def load_fixed_route(
-            self, x: int, y: int, fixed_route: FixedRouteEntry,
+            self, x: int, y: int, fixed_route: RoutingEntry,
             app_id: int = 0):
         """
         :param int x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions.
         :param int y: The y-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions.
-        :param ~spinn_machine.FixedRouteEntry fixed_route:
+        :param ~spinn_machine.RoutingEntry fixed_route:
             the fixed route entry
         :param int app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
