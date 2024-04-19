@@ -15,6 +15,7 @@
 import unittest
 import struct
 from spinn_utilities.config_holder import set_config
+from spinn_machine.version.version_strings import VersionStrings
 from spinnman.config_setup import unittest_setup
 from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
@@ -83,7 +84,7 @@ class TestTransceiver(unittest.TestCase):
         trans._boot_board()
 
     def test_set_watch_dog(self):
-        set_config("Machine", "version", 5)
+        set_config("Machine", "versions", VersionStrings.ANY.text)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
         tx = MockExtendedTransceiver()
