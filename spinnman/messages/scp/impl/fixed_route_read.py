@@ -15,7 +15,7 @@
 import struct
 from typing import List
 from spinn_utilities.overrides import overrides
-from spinn_machine import FixedRouteEntry
+from spinn_machine import RoutingEntry
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
@@ -48,11 +48,11 @@ class _FixedRouteResponse(AbstractSCPResponse):
         self._route = _ONE_WORD.unpack_from(data, offset)[0]
 
     @property
-    def route(self) -> FixedRouteEntry:
+    def route(self) -> RoutingEntry:
         """
         Converts this response into a Route
 
-        :rtype: FixedRouteEntry
+        :rtype: RoutingEntry
         """
         processor_ids: List[int] = list()
         for processor_id in range(26):
@@ -62,7 +62,7 @@ class _FixedRouteResponse(AbstractSCPResponse):
         for link_id in range(6):
             if self._route & (1 << link_id) != 0:
                 link_ids.append(link_id)
-        return FixedRouteEntry(processor_ids, link_ids)
+        return RoutingEntry(processor_ids=processor_ids, link_ids=link_ids)
 
 
 class FixedRouteRead(AbstractSCPRequest[_FixedRouteResponse]):
