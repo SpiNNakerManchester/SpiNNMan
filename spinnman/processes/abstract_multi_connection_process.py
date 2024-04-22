@@ -18,18 +18,23 @@ import sys
 from types import TracebackType
 from typing import (
     Callable, Dict, Generator, Generic, List, Optional, TypeVar, cast, Set)
+
 from typing_extensions import Self, TypeAlias
+
 from spinn_utilities.log import FormatAdapter
+
 from spinnman.connections import SCPRequestPipeLine
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import SCP_TIMEOUT, N_RETRIES
 from spinnman.exceptions import (
     SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
-from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.messages.scp.abstract_messages import (
     AbstractSCPRequest, AbstractSCPResponse)
 from spinnman.messages.scp.enums.scp_result import SCPResult
+
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
+
 #: Type of responses.
 #: :meta private:
 R = TypeVar("R", bound=AbstractSCPResponse)
@@ -119,6 +124,11 @@ class AbstractMultiConnectionProcess(Generic[R]):
         self._connections.append(connection)
 
     def is_error(self) -> bool:
+        """
+        Checks if any errors have been cached.
+
+        :rtype: bool
+        """
         return bool(self._exceptions)
 
     def _finish(self) -> None:
@@ -162,6 +172,14 @@ class AbstractMultiConnectionProcess(Generic[R]):
         return self._conn_selector
 
     def check_for_error(self, print_exception: bool = False):
+        """
+        Check if any errors have been cached and raises them
+
+        if print_exception it also logs the error.
+
+        :param bool print_exception:
+        :raises SpinnmanGenericProcessException: If any was found
+        """
         if len(self._exceptions) == 1:
             exc_info = sys.exc_info()
             sdp_header = self._error_requests[0].sdp_header

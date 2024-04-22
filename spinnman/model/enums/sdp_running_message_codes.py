@@ -15,6 +15,7 @@
 from enum import Enum
 
 
+# pylint: disable=invalid-name
 class SDP_RUNNING_MESSAGE_CODES(Enum):
     """
     Codes for sending control messages to spin1_api.

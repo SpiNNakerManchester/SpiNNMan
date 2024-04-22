@@ -14,15 +14,18 @@
 
 import struct
 from typing import Collection
+
 from spinn_machine import Router
+from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
+
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp.impl import RouterInit, RouterAlloc
-from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 from spinnman.messages.scp.impl.router_alloc import RouterAllocResponse
-from .write_memory_process import WriteMemoryProcess
+
+from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
+from .write_memory_process import WriteMemoryProcess
 
 _ROUTE_PATTERN = struct.Struct("<H2xIII")
 _END_PATTERN = struct.Struct("<IIII")
@@ -64,7 +67,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
             _ROUTE_PATTERN.pack_into(
                 routing_data, n_entries * 16, n_entries,
-                route_entry, route.routing_entry_key, route.mask)
+                route_entry, route.key, route.mask)
             n_entries += 1
 
         # Add an entry to mark the end

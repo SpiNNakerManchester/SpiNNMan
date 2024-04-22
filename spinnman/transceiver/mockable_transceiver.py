@@ -16,14 +16,15 @@
 
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable,
-    List, Optional, Tuple, Union)
+    List, Optional, Set, Tuple, Union)
 from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
 from spinn_machine import (
-    CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
+    CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 from spinnman.data import SpiNNManDataView
+from spinnman.connections.abstract_classes import Connection
 from spinnman.connections.udp_packet_connections import BMPConnection
 from spinnman.connections.udp_packet_connections import (
     SCAMPConnection, SDPConnection)
@@ -69,7 +70,7 @@ class MockableTransceiver(ExtendableTransceiver):
         return SpiNNManDataView.get_machine()
 
     @overrides(Transceiver.get_connections)
-    def get_connections(self):
+    def get_connections(self) -> Set[Connection]:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_cpu_infos)
@@ -80,7 +81,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_clock_drift)
-    def get_clock_drift(self, x, y):
+    def get_clock_drift(self, x: int, y: int) -> float:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.read_user)
@@ -196,7 +197,7 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.malloc_sdram)
     def malloc_sdram(
-            self, x: int, y: int, size: int, app_id: int, tag=0) -> int:
+            self, x: int, y: int, size: int, app_id: int, tag: int = 0) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.load_multicast_routes)
@@ -207,11 +208,11 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.load_fixed_route)
     def load_fixed_route(
-            self, x: int, y: int, fixed_route: FixedRouteEntry, app_id: int):
+            self, x: int, y: int, fixed_route: RoutingEntry, app_id: int):
         pass
 
     @overrides(Transceiver.read_fixed_route)
-    def read_fixed_route(self, x: int, y: int, app_id: int) -> FixedRouteEntry:
+    def read_fixed_route(self, x: int, y: int, app_id: int) -> RoutingEntry:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_multicast_routes)

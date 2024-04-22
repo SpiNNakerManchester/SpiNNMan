@@ -54,7 +54,7 @@ def _get_next_chips(
                 on_same_board = _on_same_board(chip, chip_xy)
                 eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
                 if (eth not in chips_done or
-                        (chip.x, chip.y) not in chips_done[eth]):
+                        chip not in chips_done[eth]):
                     if on_same_board or not off_board_copy_done:
                         next_chips.append(chip)
                         if not on_same_board:
@@ -119,7 +119,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         boot_chip = machine.boot_chip
         chips_done: Mapping[Tuple[int, int], List[Tuple[int, int]]] = \
             defaultdict(list)
-        chips_done[boot_chip.x, boot_chip.y].append((boot_chip.x, boot_chip.y))
+        chips_done[boot_chip].append((boot_chip))
         parent_chips = _compute_parent_chips(machine)
         next_chips = _get_next_chips(chips_done, parent_chips, machine)
 
@@ -131,7 +131,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
                     chip.x, chip.y, cast(int, chip.parent_link), size, app_id,
                     subset.processor_ids, checksum, wait))
                 eth = (chip.nearest_ethernet_x, chip.nearest_ethernet_y)
-                chips_done[eth].append((chip.x, chip.y))
+                chips_done[eth].append(chip)
             self._finish()
             self.check_for_error()
             next_chips = _get_next_chips(chips_done, parent_chips, machine)

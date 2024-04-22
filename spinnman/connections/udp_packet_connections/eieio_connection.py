@@ -14,12 +14,15 @@
 
 import struct
 from typing import Callable, Optional
-from .udp_connection import UDPConnection
+
+from spinn_utilities.overrides import overrides
+
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.messages.eieio import (
     read_eieio_command_message, read_eieio_data_message)
-from spinn_utilities.overrides import overrides
 from spinnman.messages.eieio import AbstractEIEIOMessage
+
+from .udp_connection import UDPConnection
 
 _ONE_SHORT = struct.Struct("<H")
 _REPR_TEMPLATE = "EIEIOConnection(local_host={}, local_port={},"\
@@ -72,6 +75,12 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
     def send_eieio_message_to(
             self, eieio_message: AbstractEIEIOMessage,
             ip_address: str, port: int):
+        """
+
+        :param AbstractEIEIOMessage eieio_message:
+        :param str ip_address:
+        :param int port:
+        """
         self.send_to(eieio_message.bytestring, (ip_address, port))
 
     @overrides(Listenable.get_receive_method)

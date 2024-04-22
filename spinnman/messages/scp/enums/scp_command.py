@@ -59,7 +59,7 @@ class SCPCommand(Enum):
     CMD_DPRI = 30
     #: Get Chip Summary Information.
     CMD_INFO = 31
-    #: Control sending of synchronization messages.
+    #: Control sending of synchronisation messages.
     CMD_SYNC = 32
 
     # ======== BMP ========

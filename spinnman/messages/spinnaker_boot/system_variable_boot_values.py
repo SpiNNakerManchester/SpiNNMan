@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import NamedTuple, Union, Optional
+from typing import Any, NamedTuple, Union, Optional
 from enum import Enum
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
@@ -35,10 +35,20 @@ class _DataType(Enum):
 
     @property
     def struct_code(self) -> str:
+        """
+        Gets the struct_code value passed into the init
+
+        :rtype: str
+        """
         return self._struct_code
 
     @property
     def is_byte_array(self) -> bool:
+        """
+        Detects if enum is a BYTE_ARRAY without exposing the Class
+
+        :rtype: bool
+        """
         # can't use BYTE_ARRAY.value directly here
         return self._value_ == 16
 
@@ -58,7 +68,7 @@ class SystemVariableDefinition(Enum):
     """
     Defines the system variables available.
     """
-
+    # pylint: disable=invalid-name
     y = _Definition(
         _DataType.BYTE, offset=0, doc="The y-coordinate of the chip")
     x = _Definition(
@@ -331,18 +341,38 @@ class SystemVariableDefinition(Enum):
 
     @property
     def data_type(self) -> _DataType:
+        """
+        Gets the data_type passed into the init.
+
+        :rtype: _DataType
+        """
         return self._data_type
 
     @property
     def array_size(self) -> Optional[int]:
+        """
+        Gets the array size passed into the init (if applicable)
+
+        :rtype: int or None
+        """
         return self._array_size
 
     @property
     def offset(self) -> int:
+        """
+        Gets the Offset passed into the init
+
+        :rtype: int
+        """
         return self._offset
 
     @property
     def default(self) -> Union[int, bytes]:
+        """
+        Gets the default Value passed into the init
+
+        :rtype: int or bytes
+        """
         return self._default
 
 
@@ -359,11 +389,25 @@ class SystemVariableBootValues(object):
         for variable in SystemVariableDefinition:
             self._values[variable] = variable.default
 
-    def set_value(self, system_variable_definition, value):
+    def set_value(self, system_variable_definition: SystemVariableDefinition,
+                  value: Any):
+        """
+        Save a value to the system_variable_definition Enum as the key
+
+        :param system_variable_definition: Key to save value with
+        :type system_variable_definition: SystemVariableDefinition
+        :param value:
+        :return:
+        """
         self._values[system_variable_definition] = value
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
+        """
+        Gets all the SystemVariableDefinition as bytes
+
+        :rtype: bytes
+        """
         data = b""
         for sys_var in SystemVariableDefinition:
             data += struct.pack(sys_var.data_type.struct_code,

@@ -42,7 +42,7 @@ class _AllocResponse(AbstractSCPResponse):
         self._base_address: Optional[int] = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data, offset):
+    def read_data_bytestring(self, data: bytes, offset: int):
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(
@@ -112,7 +112,7 @@ class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
             argument_1=(
                 (extra_flag << 16) |
                 (app_id << 8) |
-                AllocFree.ALLOC_SDRAM.value),  # @UndefinedVariable
+                AllocFree.ALLOC_SDRAM.value),
             argument_2=size, argument_3=tag)
         self._size = size
 

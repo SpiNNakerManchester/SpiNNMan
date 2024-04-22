@@ -16,13 +16,14 @@
 
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable,
-    List, Optional, Tuple, Union)
+    List, Optional, Set, Tuple, Union)
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
 from spinn_machine import (
-    CoreSubsets, FixedRouteEntry, Machine, MulticastRoutingEntry)
+    CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
+from spinnman.connections.abstract_classes import Connection
 from spinnman.connections.udp_packet_connections import (
     SCAMPConnection, SDPConnection)
 from spinnman.messages.scp.enums import Signal
@@ -111,7 +112,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_connections(self):
+    def get_connections(self) -> Set[Connection]:
         """
         Get the currently known connections to the board, made up of those
         passed in to the transceiver and those that are discovered during
@@ -732,7 +733,7 @@ class Transceiver(object):
 
     @abstractmethod
     def malloc_sdram(
-            self, x: int, y: int, size: int, app_id: int, tag=0) -> int:
+            self, x: int, y: int, size: int, app_id: int, tag: int = 0) -> int:
         """
         Allocates a chunk of SDRAM on a chip on the machine.
 
@@ -778,7 +779,7 @@ class Transceiver(object):
 
     @abstractmethod
     def load_fixed_route(
-            self, x: int, y: int, fixed_route: FixedRouteEntry, app_id: int):
+            self, x: int, y: int, fixed_route: RoutingEntry, app_id: int):
         """
         Loads a fixed route routing table entry onto a chip's router.
 
@@ -786,7 +787,7 @@ class Transceiver(object):
             The x-coordinate of the chip onto which to load the routes
         :param int y:
             The y-coordinate of the chip onto which to load the routes
-        :param ~spinn_machine.FixedRouteEntry fixed_route:
+        :param ~spinn_machine.RoutingEntry fixed_route:
             the route for the fixed route entry on this chip
         :param int app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
@@ -803,7 +804,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def read_fixed_route(self, x: int, y: int, app_id: int) -> FixedRouteEntry:
+    def read_fixed_route(self, x: int, y: int, app_id: int) -> RoutingEntry:
         """
         Reads a fixed route routing table entry from a chip's router.
 

@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import array
 import math
+import os
 import time
 from typing import Any, Dict, Iterable, Optional, Tuple
-import array
+
 from spinnman.data import SpiNNManDataView
+from spinnman.exceptions import SpinnmanIOException
+
 from .system_variable_boot_values import (
     SystemVariableBootValues, SystemVariableDefinition)
 from .spinnaker_boot_message import SpinnakerBootMessage
 from .spinnaker_boot_op_code import SpinnakerBootOpCode
-from spinnman.exceptions import SpinnmanIOException
 
 _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4

@@ -14,11 +14,13 @@
 
 import struct
 from typing import Callable, Optional
+
 from spinn_utilities.overrides import overrides
 from spinnman.messages.sdp import SDPMessage, SDPFlag
-from .udp_connection import UDPConnection
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
+
+from .udp_connection import UDPConnection
 
 _TWO_SKIP = struct.Struct("<2x")
 

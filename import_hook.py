@@ -1,4 +1,4 @@
-# Copyright (c) 2023 The University of Manchester
+# Copyright (c) 2017 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinnman.transceiver.version3transceiver import Version3Transceiver
-from .extended_transceiver import ExtendedTransceiver
+"""
+This file is imported by init-hook in the rcfile
+https://github.com/SpiNNakerManchester/SupportScripts/blob/master/actions/pylint/strict_rcfile
 
+It allows you to temporarily add the other spinnaker repositories without making them part of the permemnant python path
 
-class ExtendedVersion3Transceiver(Version3Transceiver, ExtendedTransceiver):
-    """
-    A Transceiver specific for a 4 chip (spin 1) with the extended methods.
-    """
+Intended for use when running pylint.bash
+"""
+import sys
+sys.path.append("../SpiNNUtils")
+sys.path.append("../SpiNNMachine")
