@@ -330,7 +330,7 @@ class SDPHeader(object):
 
         :rtype: str
         """
-        return SpiNNManDataView.get_physical_core_string(
+        return SpiNNManDataView.get_physical_string(
             (self._destination_chip_x, self._destination_chip_y),
             self._destination_cpu)
 
