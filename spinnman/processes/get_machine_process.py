@@ -116,15 +116,20 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         n_cores = min(chip_info.n_cores, n_cores)
         core_states = chip_info.core_states
         down_cores = self._ignore_cores_map.get(
-            (chip_info.x, chip_info.y), None)
+            (chip_info.x, chip_info.y), set())
+        if 0 in down_cores:
+            raise NotImplementedError(
+                "Declaring scamp core (0) as down is not supported")
+        cores = list()
         for i in range(1, n_cores):
-            if core_states[i] != CPUState.IDLE:
+            if i in down_cores:
+                pass
+            elif core_states[i] != CPUState.IDLE:
                 self._report_ignore(
                     "Not using core {}, {}, {} in state {}",
                     chip_info.x, chip_info.y, i,  core_states[i])
-                if down_cores is None:
-                    down_cores = set()
-                down_cores.add(i)
+            else:
+                cores.append(i)
 
         # Create the router
         router = self._make_router(chip_info, machine)
@@ -139,14 +144,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         # Create the chip
         return Chip(
-            x=chip_info.x, y=chip_info.y, n_processors=n_cores,
+            x=chip_info.x, y=chip_info.y, scamp_processors=[0],
+            placable_processors=cores,
             router=router, sdram=sdram_size,
             ip_address=chip_info.ethernet_ip_address,
             nearest_ethernet_x=chip_info.nearest_ethernet_x,
             nearest_ethernet_y=chip_info.nearest_ethernet_y,
-            down_cores=down_cores, parent_link=chip_info.parent_link,
-            v_to_p_map=self._virtual_to_physical_map.get(
-                (chip_info.x, chip_info.y)))
+            parent_link=chip_info.parent_link)
 
     def _make_router(
             self, chip_info: ChipSummaryInfo, machine: Machine) -> Router:
@@ -255,6 +259,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     ReadMemory((x, y, 0), P_TO_V_ADDR, P_MAPS_SIZE),
                     functools.partial(self._receive_p_maps, x, y))
         self._progress.end()
+        SpiNNManDataView.set_v_to_p_map(self._virtual_to_physical_map)
 
         # Warn about unexpected missing chips
         for (x, y) in p2p_table.iterchips():
