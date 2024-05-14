@@ -183,29 +183,6 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def keepalive(self) -> None:
-        """
-        Signal the job that we want it to stay alive for a while longer.
-        """
-        raise NotImplementedError()
-
-    @abstractmethod
-    def launch_keepalive_task(
-            self, period: int = 30) -> AbstractContextManager:
-        """
-        Starts a periodic task to keep a job alive.
-
-        :param SpallocJob job:
-            The job to keep alive
-        :param int period:
-            How often to send a keepalive message (in seconds)
-        :return:
-            Some kind of closeable task handle; closing it terminates the task.
-            Destroying the job will also terminate the task.
-        """
-        raise NotImplementedError()
-
-    @abstractmethod
     def where_is_machine(self, x: int, y: int) -> Optional[
             Tuple[int, int, int]]:
         """
