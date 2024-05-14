@@ -59,6 +59,17 @@ jobs:
         cover-packages: spinnman
         coveralls-token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Integration tests
+      uses: ./support/actions/pytest
+      env:
+        SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
+        SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
+      with:
+        tests: spinnman_integration_tests
+        coverage: ${{ matrix.python-version == 3.12 }}
+        cover-packages: spinnman
+        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Lint with flake8
       run: flake8 spinnman unittests
     - name: Lint with pylint
