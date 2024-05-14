@@ -30,7 +30,9 @@ class TestTransceiver(unittest.TestCase):
         self.spalloc_machine = "SpiNNaker1M"
         self.spalloc_user = os.environ["SPALLOC_USER"]
         self.spalloc_password = os.environ["SPALLOC_PASSWORD"]
-        print (f"{self.spalloc_user=}, {self.spalloc_password=}")
+        a = "X" + self.spalloc_user + "X"
+        b = "X" + self.spalloc_password + "X"
+        print (f"!{a=}!, !{b=}!")
 
     def test_create_job(self):
         client = SpallocClient(
