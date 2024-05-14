@@ -28,9 +28,9 @@ class TestTransceiver(unittest.TestCase):
         set_config("Machine", "version", FIVE)
         self.spalloc_url = "https://spinnaker.cs.man.ac.uk/spalloc"
         self.spalloc_machine = "SpiNNaker1M"
-        a = os.environ
         self.spalloc_user = os.environ["SPALLOC_USER"]
         self.spalloc_password = os.environ["SPALLOC_PASSWORD"]
+        print ("f{self.spalloc_user=}, f{self.spalloc_password=}")
 
     def test_create_job(self):
         client = SpallocClient(
