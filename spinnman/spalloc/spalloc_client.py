@@ -70,6 +70,7 @@ _msg_to = struct.Struct("<IIIII")
 
 KEEP_ALIVE_PERIOND = 30
 
+
 def fix_url(url: Any) -> str:
     """
     Makes sure the url is the correct format.
@@ -199,7 +200,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     def create_job(
             self, num_boards: int = 1,
             machine_name: Optional[str] = None,
-            keepalive = KEEP_ALIVE_PERIOND) -> SpallocJob:
+            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
         return self._create({
             "num-boards": int(num_boards),
             "keepalive-interval": f"PT{int(keepalive)}S"
@@ -209,7 +210,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     def create_job_rect(
             self, width: int, height: int,
             machine_name: Optional[str] = None,
-            keepalive = KEEP_ALIVE_PERIOND) -> SpallocJob:
+            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
         return self._create({
             "dimensions": {
                 "width": int(width),
@@ -224,7 +225,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             physical: Optional[Tuple[int, int, int]] = None,
             ip_address: Optional[str] = None,
             machine_name: Optional[str] = None,
-            keepalive = KEEP_ALIVE_PERIOND) -> SpallocJob:
+            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
         board: JsonObject
         if triad:
             x, y, z = triad
@@ -248,7 +249,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             triad: Optional[Tuple[int, int, int]] = None,
             physical: Optional[Tuple[int, int, int]] = None,
             ip_address: Optional[str] = None,
-            machine_name: Optional[str] = None, keepalive = KEEP_ALIVE_PERIOND,
+            machine_name: Optional[str] = None,
+            keepalive: int = KEEP_ALIVE_PERIOND,
             max_dead_boards: int = 0) -> SpallocJob:
         board: JsonObject
         if triad:
@@ -498,11 +500,12 @@ class _SpallocJob(SessionAware, SpallocJob):
         logger.info("established job at {}", job_handle)
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
-        self._keepalive_url = self._url + "keepalive"
+        self._keepalive_url: Optional[str] = self._url + "keepalive"
         self.__proxy_handle: Optional[WebSocket] = None
         self.__proxy_thread: Optional[_ProxyReceiver] = None
         self.__proxy_ping: Optional[_ProxyPing] = None
-        keep_alive = threading.Thread(target=self.__start_keepalive, daemon=True)
+        keep_alive = threading.Thread(
+            target=self.__start_keepalive, daemon=True)
         keep_alive.start()
 
     @overrides(SpallocJob.get_session_credentials_for_db)
@@ -649,7 +652,6 @@ class _SpallocJob(SessionAware, SpallocJob):
          :rtype: bool
          """
         if self._keepalive_url is None:
-            print("False")
             return False
         cookies, headers = self._session_credentials
         headers["Content-Type"] = "text/plain; charset=UTF-8"
