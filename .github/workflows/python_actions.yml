@@ -42,10 +42,6 @@ jobs:
             tests: tests
 
           - runner: ubuntu-latest
-            python-version: "3.13.0-beta"
-            tests: tests
-
-          - runner: ubuntu-latest
             python-version: "3.11"
             tests: tests
 
