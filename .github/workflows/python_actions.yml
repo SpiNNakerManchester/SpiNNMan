@@ -114,7 +114,7 @@ jobs:
         coveralls-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Simple pytest
-      if: ${{matrix.check == 'tests'}}
+      if: ${{ matrix.check == 'tests'}}
       env:
         SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
         SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
