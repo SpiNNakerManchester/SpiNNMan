@@ -18,12 +18,12 @@
 name: Windows Actions
 on: [push]
 jobs:
-  windows_latest:
-    runs-on: windows-latest
-    timeout-minutes: 10
+  windows:
     strategy:
       matrix:
-        python-version: ["3.12"]
+        runs-on: [windows-2022, windows-2019]
+    timeout-minutes: 10
+    python-version: "3.12"
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
