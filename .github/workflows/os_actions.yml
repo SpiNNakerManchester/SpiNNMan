@@ -18,7 +18,7 @@
 name: Os Actions
 on: [push]
 jobs:
-  windows:
+  os:
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 10
     strategy:
