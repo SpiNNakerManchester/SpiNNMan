@@ -38,6 +38,11 @@ jobs:
             checks: 'full'
 
           - runner: ubuntu-latest
+            python-version: "3.13"
+            checks: 'tests'
+            allow-prereleases: true
+
+          - runner: ubuntu-latest
             python-version: "3.11"
             checks: 'tests'
 
@@ -74,6 +79,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        allow-prereleases: ${{ matrix.allow-prereleases }}
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -114,7 +120,7 @@ jobs:
         coveralls-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Simple pytest
-      if: ${{ matrix.check == 'tests'}}
+      if: ${{ matrix.checks == 'tests'}}
       env:
         SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
         SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
