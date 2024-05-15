@@ -24,20 +24,33 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: windows-2022
+          - runner: ubuntu-22.04
             python-version: "3.12"
-          - runner: windows-2019
-            python-version: 3.8
-          - runner: macos-14
-            python-version: "3.12"
-          - runner: macos-13
-            python-version: "3.11"
-          - runner: macos-12
-            python-version: "3.10"
-          - runner: macos-11
-            python-version: 3.9
+            style: True
           - runner: ubuntu-20.04
             python-version: 3.8
+            style: True
+          - runner: ubuntu-20.04
+            python-version: 3.8
+            style: True
+          - runner: windows-2022
+            python-version: "3.12"
+            style: False
+          - runner: windows-2019
+            python-version: 3.8
+            style: False
+          - runner: macos-14
+            python-version: "3.12"
+            style: False
+          - runner: macos-13
+            python-version: "3.11"
+            style: False
+          - runner: macos-12
+            python-version: "3.10"
+            style: False
+          - runner: macos-11
+            python-version: 3.9
+            style: False
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
@@ -51,6 +64,13 @@ jobs:
       with:
         repository: SpiNNakerManchester/SupportScripts
         path: support
+
+    - name: Install pip, etc
+      if: ${{ matrix.check == TRUE }}
+      uses: ./support/actions/python-tools
+    - name: Install mypy
+      if: ${{ matrix.check == TRUE }}
+      run: pip install mypy
 
     - name: Install Spinnaker Dependencies
       uses: ./support/actions/install-spinn-deps
