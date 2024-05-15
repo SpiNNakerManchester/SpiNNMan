@@ -66,10 +66,10 @@ jobs:
         path: support
 
     - name: Install pip, etc
-      if: ${{ matrix.check == TRUE }}
+      if: ${{ matrix.check }}
       uses: ./support/actions/python-tools
     - name: Install mypy
-      if: ${{ matrix.check == TRUE }}
+      if: ${{ matrix.check }}
       run: pip install mypy
 
     - name: Install Spinnaker Dependencies
