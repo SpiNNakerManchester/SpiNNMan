@@ -42,7 +42,7 @@ jobs:
             tests: tests
 
           - runner: ubuntu-latest
-            python-version: "3.13"
+            python-version: "3.13.0-beta"
             tests: tests
 
           - runner: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
             tests: tests
 
           - runner: ubuntu-latest
-            python-version: "3.09"
+            python-version: 3.9
             tests: tests
 
           - runner: windows-2022
