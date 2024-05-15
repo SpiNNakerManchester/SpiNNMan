@@ -19,7 +19,8 @@ from spinn_utilities.config_holder import set_config
 
 from spinn_machine.version import FIVE
 from spinnman.config_setup import unittest_setup
-from spinnman.spalloc import SpallocClient
+from spinnman.spalloc import SpallocClient, SpallocState
+
 
 class TestTransceiver(unittest.TestCase):
 
@@ -43,15 +44,28 @@ class TestTransceiver(unittest.TestCase):
             job.launch_keepalive_task()
             job.wait_until_ready()
 
-            print(job.get_connections())
             connections = job.get_connections()
             self.assertGreaterEqual(len(connections), 2)
             self.assertIn((0,0), connections)
+
             txrx = job.create_transceiver()
+
             dims = txrx._get_machine_dimensions()
             # May be 12 as we only asked for 2 boards
             self.assertGreaterEqual(dims.height, 12)
             self.assertGreaterEqual(dims.width, 12)
+
+            machine = txrx.get_machine_details()
+            self.assertGreaterEqual(len(machine.ethernet_connected_chips), 2)
+
+            state = job.get_state()
+            self.assertEqual(state, SpallocState.READY)
+
+            credentials = job.get_session_credentials_for_db()
+            self.assertIn(('SPALLOC', 'service uri'), credentials)
+            self.assertIn(('SPALLOC', 'job uri'), credentials)
+            self.assertIn(('COOKIE', 'JSESSIONID'), credentials)
+            self.assertIn(('HEADER', 'X-CSRF-TOKEN'), credentials)
 
         client.close()  # print(2^(1/(2^1)
 
