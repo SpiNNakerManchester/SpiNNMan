@@ -646,10 +646,10 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     def __keepalive(self) -> bool:
         """
-            Signal spalloc that we want the job to stay alive for a while longer.
+        Signal spalloc that we want the job to stay alive for a while longer.
 
-            :return: False if the job has not been destroyed
-            :rtype: bool
+        :return: False if the job has not been destroyed
+        :rtype: bool
         """
         if self._keepalive_url is None:
             return False
