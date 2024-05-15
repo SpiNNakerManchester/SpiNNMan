@@ -15,7 +15,7 @@
 # This workflow will install Python dependencies, run tests, lint and rat with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Windows Actions
+name: Os Actions
 on: [push]
 jobs:
   windows:
@@ -23,8 +23,21 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        runner: [windows-2022, windows-2019]
-        python-version: ["3.12"]
+        include:
+          - runner: windows-2022
+            python-version: "3.12"
+          - runner: windows-2019
+            python-version: 3.8
+          - runner: macos-14
+            python-version: "3.12"
+          - runner: macos-13
+            python-version: "3.11"
+          - runner: macos-12
+            python-version: "3.10"
+          - runner: macos-11
+            python-version: 3.9
+          - runner: ubuntu-20.04
+            python-version: 3.8
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
