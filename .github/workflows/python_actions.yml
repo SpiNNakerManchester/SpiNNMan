@@ -19,27 +19,75 @@ name: Python Actions
 on: [push]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 10
     strategy:
       matrix:
-        python-version: [3.8, 3.9, "3.10", "3.11", "3.12"]
+        include:
+          - runner: ubuntu-24.04
+            python-version: "3.13"
+            tests: true
+
+          - runner: ubuntu-22.04
+            python-version: "3.12"
+            style: true
+            coverage: true
+
+          - runner: ubuntu-22.04
+            python-version: "3.12"
+            validate: true
+
+          - runner: ubuntu-20.04
+            python-version: 3.8
+            style: true
+            mypy: true
+            tests: true
+
+          - runner: windows-2022
+            python-version: "3.12"
+            tests: true
+
+          - runner: windows-2019
+            python-version: 3.8
+            tests: true
+
+          - runner: macos-14
+            python-version: "3.12"
+            tests: true
+
+          - runner: macos-13
+            python-version: "3.11"
+            tests: true
+
+          - runner: macos-12
+            python-version: "3.10"
+            tests: true
+
+          - runner: macos-11
+            python-version: 3.9
+            tests: true
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Checkout
       uses: actions/checkout@v4
+
     - name: Checkout SupportScripts
       uses: actions/checkout@v4
       with:
         repository: SpiNNakerManchester/SupportScripts
         path: support
+
     - name: Install pip, etc
+      if: ${{ matrix.style || matrix.validate}}
       uses: ./support/actions/python-tools
+
     - name: Install mypy
+      if: ${{ matrix.style}}
       run: pip install mypy
 
     - name: Install Spinnaker Dependencies
@@ -51,71 +99,52 @@ jobs:
     - name: Run Install
       uses: ./support/actions/run-install
 
-    - name: Test with pytest
-      uses: ./support/actions/pytest
-      with:
-        tests: unittests
-        coverage: ${{ matrix.python-version == 3.12 }}
-        cover-packages: spinnman
-        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Integration tests
+    - name: Test with pytest and coverage
+      if: ${{ matrix.coverage}}
       uses: ./support/actions/pytest
       env:
         SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
         SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
       with:
-        tests: spinnman_integration_tests
-        coverage: ${{ matrix.python-version == 3.12 }}
-        cover-packages: spinnman
+        tests: unittests
+        coverage: ${{ matrix.coverage }}
+        cover-packages: spinnman, spinnman_integration_tests
         coveralls-token: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Test unittests
+      if: ${{matrix.test &&  !matrix.coverage}}
+      env:
+        SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
+        SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
+      run: | 
+        pytest unittests
+        pytest spinnman_integration_tests
+
     - name: Lint with flake8
+      if: ${{ matrix.style }}
       run: flake8 spinnman unittests
+
     - name: Lint with pylint
+      if: ${{ matrix.style }}
       uses: ./support/actions/pylint
       with: 
         package: spinnman
         exitcheck: 31 # Action fails on any message
         language: en_GB
         rcfile: global_strict
+
     - name: Lint with mypy
+      if: ${{ matrix.style }}
       run: mypy spinnman
 
-  validate:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    strategy:
-      matrix:
-        python-version: [3.12]
-
-    steps:
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Checkout SupportScripts
-      uses: actions/checkout@v4
-      with:
-        repository: SpiNNakerManchester/SupportScripts
-        path: support
-    - name: Install pip, etc
-      uses: ./support/actions/python-tools
-    - name: Install Spinnaker Dependencies
-      uses: ./support/actions/install-spinn-deps
-      with:
-        repositories: SpiNNUtils SpiNNMachine
-        install: true
-    - name: Run Install
-      uses: ./support/actions/run-install
-
     - name: Run rat copyright enforcement
+      if: ${{ matrix.validate}}
       uses: ./support/actions/check-copyrights
       with:
         config_file: rat_asl20.xml
+
     - name: Build documentation with sphinx
+      if: ${{ matrix.validate}}
       uses: ./support/actions/sphinx
       with:
         directory: doc/source
