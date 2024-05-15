@@ -68,7 +68,7 @@ _open_listen_res = struct.Struct("<IIIBBBBI")
 _msg = struct.Struct("<II")
 _msg_to = struct.Struct("<IIIII")
 
-KEEP_ALIVE_PERIOND = 30
+KEEP_ALIVE_PERIOND = 120
 
 
 def fix_url(url: Any) -> str:
