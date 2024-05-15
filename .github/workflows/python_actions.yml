@@ -40,7 +40,6 @@ jobs:
           - runner: ubuntu-latest
             python-version: "3.13"
             checks: 'tests'
-            allow-prereleases: true
 
           - runner: ubuntu-latest
             python-version: "3.11"
@@ -79,7 +78,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-        allow-prereleases: ${{ matrix.allow-prereleases }}
+        allow-prereleases: ${{ matrix.python-version == 3.13 }}
 
     - name: Checkout
       uses: actions/checkout@v4
