@@ -26,52 +26,48 @@ jobs:
         include:
           - runner: ubuntu-24.04
             python-version: "3.12"
-            tests: tests
+            checks: tests
 
           - runner: ubuntu-22.04
             python-version: "3.12"
-            style: style
-            tests: tests
-            mypy: mypy
+            checks: full
             coverage: coverage
 
           - runner: ubuntu-20.04
             python-version: 3.8
-            style: style
-            mypy: mypy
-            tests: tests
+            checks: full
 
           - runner: ubuntu-latest
             python-version: "3.11"
-            tests: tests
+            checks: tests
 
           - runner: ubuntu-latest
             python-version: "3.10"
-            tests: tests
+            checks: tests
 
           - runner: ubuntu-latest
             python-version: 3.9
-            tests: tests
+            checks: tests
 
           - runner: windows-2022
             python-version: "3.12"
-            tests: tests
+            checks: tests
 
           - runner: windows-2019
             python-version: 3.8
-            tests: tests
+            checks: tests
 
           - runner: macos-14
             python-version: "3.12"
-            tests: tests
+            checks: tests
 
           - runner: macos-11
             python-version: 3.8
-            tests: tests
+            checks: tests
 
           - runner: ubuntu-22.04
             python-version: "3.12"
-            validate: validate
+            checks: validate
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
@@ -89,11 +85,11 @@ jobs:
         path: support
 
     - name: Install pip, etc
-      if: ${{ matrix.style || matrix.validate}}
+      if: ${{ matrix.checks == 'full' || matrix.checks == 'validate' }}
       uses: ./support/actions/python-tools
 
     - name: Install mypy
-      if: ${{ matrix.style}}
+      if: ${{ matrix.checks == 'full' }}
       run: pip install mypy
 
     - name: Install Spinnaker Dependencies
@@ -105,20 +101,20 @@ jobs:
     - name: Run Install
       uses: ./support/actions/run-install
 
-    - name: Test with pytest and coverage
-      if: ${{ matrix.coverage}}
+    - name: Test with pytest (and coverage)
+      if: ${{ matrix.checks == 'full' }}
       uses: ./support/actions/pytest
       env:
         SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
         SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
       with:
         tests: unittests
-        coverage: ${{ matrix.coverage }}
+        coverage: ${{ matrix.coverage == 'coverage' }}
         cover-packages: spinnman, spinnman_integration_tests
         coveralls-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Test unittests
-      if: ${{matrix.test &&  !matrix.coverage}}
+    - name: Simple pytest
+      if: ${{matrix.check == 'tests'}}
       env:
         SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
         SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
@@ -127,11 +123,11 @@ jobs:
         pytest spinnman_integration_tests
 
     - name: Lint with flake8
-      if: ${{ matrix.style }}
+      if: ${{ matrix.checks == 'full' }}
       run: flake8 spinnman unittests
 
     - name: Lint with pylint
-      if: ${{ matrix.style }}
+      if: ${{ matrix.checks == 'full' }}
       uses: ./support/actions/pylint
       with: 
         package: spinnman
@@ -140,19 +136,21 @@ jobs:
         rcfile: global_strict
 
     - name: Lint with mypy
-      if: ${{ matrix.style }}
+      if: ${{ matrix.checks == 'full' }}
       run: mypy spinnman
 
     - name: Run rat copyright enforcement
-      if: ${{ matrix.validate}}
+      if: ${{ matrix.checks == 'validate' }}
       uses: ./support/actions/check-copyrights
       with:
         config_file: rat_asl20.xml
 
     - name: Build documentation with sphinx
-      if: ${{ matrix.validate}}
+      if: ${{ matrix.checks == 'validate' }}
       uses: ./support/actions/sphinx
       with:
         directory: doc/source
+
     - name: Validate CITATION.cff
+      if: ${{ matrix.checks == 'validate' }}
       uses: dieghernan/cff-validator@main
