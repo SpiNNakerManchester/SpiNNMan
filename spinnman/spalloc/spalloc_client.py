@@ -646,11 +646,11 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     def __keepalive(self) -> bool:
         """
-         Signal the that we want it to stay alive for a while longer.
+            Signal spalloc that we want the job to stay alive for a while longer.
 
-         :return: True if the job has not been destroyed
-         :rtype: bool
-         """
+            :return: False if the job has not been destroyed
+            :rtype: bool
+        """
         if self._keepalive_url is None:
             return False
         cookies, headers = self._session_credentials
@@ -661,6 +661,10 @@ class _SpallocJob(SessionAware, SpallocJob):
         return True
 
     def __start_keepalive(self) -> None:
+        """
+        Method for keep alive thread to start the keep alive class
+
+        """
         try:
             while self.__keepalive():
                 time.sleep(KEEP_ALIVE_PERIOND / 2)
