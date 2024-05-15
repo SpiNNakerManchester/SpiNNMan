@@ -47,21 +47,15 @@ jobs:
     - name: Run Install
       uses: ./support/actions/run-install
 
+    - name: install pytest
+      run: |
+        python -m pip install pytest-timeout pytest-forked pytest-progress
+
     - name: Test with pytest
-      uses: ./support/actions/pytest
-      with:
-        tests: unittests
-        coverage: ${{ matrix.python-version == 3.12 }}
-        cover-packages: spinnman
-        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
+      run: pytest unittests
 
     - name: Integration tests
-      uses: ./support/actions/pytest
       env:
         SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
         SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
-      with:
-        tests: spinnman_integration_tests
-        coverage: ${{ matrix.python-version == 3.12 }}
-        cover-packages: spinnman
-        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
+      run: pytest spinnman_integration_tests
