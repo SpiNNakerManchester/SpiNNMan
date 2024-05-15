@@ -25,47 +25,57 @@ jobs:
       matrix:
         include:
           - runner: ubuntu-24.04
-            python-version: "3.13"
-            tests: true
+            python-version: "3.12"
+            tests: tests
 
           - runner: ubuntu-22.04
             python-version: "3.12"
-            style: true
-            coverage: true
-
-          - runner: ubuntu-22.04
-            python-version: "3.12"
-            validate: true
+            style: style
+            tests: tests
+            mypy: mypy
+            coverage: coverage
 
           - runner: ubuntu-20.04
             python-version: 3.8
-            style: true
-            mypy: true
-            tests: true
+            style: style
+            mypy: mypy
+            tests: tests
+
+          - runner: ubuntu-latest
+            python-version: "3.13"
+            tests: tests
+
+          - runner: ubuntu-latest
+            python-version: "3.11"
+            tests: tests
+
+          - runner: ubuntu-latest
+            python-version: "3.10"
+            tests: tests
+
+          - runner: ubuntu-latest
+            python-version: "3.09"
+            tests: tests
 
           - runner: windows-2022
             python-version: "3.12"
-            tests: true
+            tests: tests
 
           - runner: windows-2019
             python-version: 3.8
-            tests: true
+            tests: tests
 
           - runner: macos-14
             python-version: "3.12"
-            tests: true
-
-          - runner: macos-13
-            python-version: "3.11"
-            tests: true
-
-          - runner: macos-12
-            python-version: "3.10"
-            tests: true
+            tests: tests
 
           - runner: macos-11
-            python-version: 3.9
-            tests: true
+            python-version: 3.8
+            tests: tests
+
+          - runner: ubuntu-22.04
+            python-version: "3.12"
+            validate: validate
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
