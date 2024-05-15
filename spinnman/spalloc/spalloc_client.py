@@ -14,16 +14,15 @@
 """
 Implementation of the client for the Spalloc web service.
 """
-
-from contextlib import contextmanager
+import time
 from logging import getLogger
-from multiprocessing import Process, Queue
+
 import queue
 import struct
 import threading
 from time import sleep
-from typing import (Any, ContextManager, Callable, Dict, FrozenSet, Iterable,
-                    Iterator, List, Mapping, Optional, Tuple, cast)
+from typing import (Any, Callable, Dict, FrozenSet, Iterable, List, Mapping,
+                    Optional, Tuple, cast)
 from urllib.parse import urlparse, urlunparse, ParseResult
 
 from packaging.version import Version
@@ -68,6 +67,8 @@ _open_close_res = struct.Struct("<III")
 _open_listen_res = struct.Struct("<IIIBBBBI")
 _msg = struct.Struct("<II")
 _msg_to = struct.Struct("<IIIII")
+
+KEEP_ALIVE_PERIOND = 120
 
 
 def fix_url(url: Any) -> str:
@@ -199,7 +200,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     def create_job(
             self, num_boards: int = 1,
             machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
+            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
         return self._create({
             "num-boards": int(num_boards),
             "keepalive-interval": f"PT{int(keepalive)}S"
@@ -209,7 +210,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     def create_job_rect(
             self, width: int, height: int,
             machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
+            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
         return self._create({
             "dimensions": {
                 "width": int(width),
@@ -224,7 +225,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             physical: Optional[Tuple[int, int, int]] = None,
             ip_address: Optional[str] = None,
             machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
+            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
         board: JsonObject
         if triad:
             x, y, z = triad
@@ -248,7 +249,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             triad: Optional[Tuple[int, int, int]] = None,
             physical: Optional[Tuple[int, int, int]] = None,
             ip_address: Optional[str] = None,
-            machine_name: Optional[str] = None, keepalive: int = 45,
+            machine_name: Optional[str] = None,
+            keepalive: int = KEEP_ALIVE_PERIOND,
             max_dead_boards: int = 0) -> SpallocJob:
         board: JsonObject
         if triad:
@@ -283,27 +285,6 @@ class _ProxyServiceError(IOError):
     """
     An error passed to us from the server over the proxy channel.
     """
-
-
-def _spalloc_keepalive(url, interval, term_queue, cookies, headers):
-    """
-    Actual keepalive task implementation. Don't use directly.
-    """
-    headers["Content-Type"] = "text/plain; charset=UTF-8"
-    while True:
-        requests.put(url, data="alive", cookies=cookies, headers=headers,
-                     allow_redirects=False, timeout=10)
-        try:
-            term_queue.get(True, interval)
-            break
-        except queue.Empty:
-            continue
-        # On ValueError or OSError, just terminate the keepalive process
-        # They happen when the term_queue is directly closed
-        except ValueError:
-            break
-        except OSError:
-            break
 
 
 class _SpallocMachine(SessionAware, SpallocMachine):
@@ -507,7 +488,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
     __slots__ = ("__machine_url", "__chip_url",
-                 "_keepalive_url", "__keepalive_handle", "__proxy_handle",
+                 "_keepalive_url", "__proxy_handle",
                  "__proxy_thread", "__proxy_ping")
 
     def __init__(self, session: Session, job_handle: str):
@@ -519,11 +500,13 @@ class _SpallocJob(SessionAware, SpallocJob):
         logger.info("established job at {}", job_handle)
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
-        self._keepalive_url = self._url + "keepalive"
-        self.__keepalive_handle: Optional[Queue] = None
+        self._keepalive_url: Optional[str] = self._url + "keepalive"
         self.__proxy_handle: Optional[WebSocket] = None
         self.__proxy_thread: Optional[_ProxyReceiver] = None
         self.__proxy_ping: Optional[_ProxyPing] = None
+        keep_alive = threading.Thread(
+            target=self.__start_keepalive, daemon=True)
+        keep_alive.start()
 
     @overrides(SpallocJob.get_session_credentials_for_db)
     def get_session_credentials_for_db(self) -> Mapping[Tuple[str, str], str]:
@@ -651,9 +634,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.destroy)
     def destroy(self, reason: str = "finished"):
-        if self.__keepalive_handle:
-            self.__keepalive_handle.close()
-            self.__keepalive_handle = None
+        self._keepalive_url = None
         if self.__proxy_handle is not None:
             if self.__proxy_thread:
                 self.__proxy_thread.close()
@@ -663,38 +644,32 @@ class _SpallocJob(SessionAware, SpallocJob):
         self._delete(self._url, reason=str(reason))
         logger.info("deleted job at {}", self._url)
 
-    @overrides(SpallocJob.keepalive)
-    def keepalive(self) -> None:
-        self._put(self._keepalive_url, "alive")
-
-    @overrides(SpallocJob.launch_keepalive_task, extend_doc=True)
-    def launch_keepalive_task(
-            self, period: float = 30) -> ContextManager[Process]:
+    def __keepalive(self) -> bool:
         """
-        .. note::
-            Tricky! *Cannot* be done with a thread, as the main thread is known
-            to do significant amounts of CPU-intensive work.
-        """
-        if self.__keepalive_handle is not None:
-            raise SpallocException("cannot keep job alive from two tasks")
-        q: Queue = Queue(1)
-        p = Process(target=_spalloc_keepalive, args=(
-            self._keepalive_url, 0 + period, q,
-            *self._session_credentials), daemon=True)
-        p.start()
-        self.__keepalive_handle = q
-        return self.__closer(q, p)
+        Signal spalloc that we want the job to stay alive for a while longer.
 
-    @contextmanager
-    def __closer(self, q: Queue, p: Process) -> Iterator[Process]:
+        :return: False if the job has not been destroyed
+        :rtype: bool
+        """
+        if self._keepalive_url is None:
+            return False
+        cookies, headers = self._session_credentials
+        headers["Content-Type"] = "text/plain; charset=UTF-8"
+        logger.debug(self._keepalive_url)
+        requests.put(self._keepalive_url, data="alive", cookies=cookies,
+                     headers=headers, allow_redirects=False, timeout=10)
+        return True
+
+    def __start_keepalive(self) -> None:
+        """
+        Method for keep alive thread to start the keep alive class
+
+        """
         try:
-            yield p
-        finally:
-            q.put("quit")
-            # Give it a second, and if it still isn't dead, kill it
-            p.join(1)
-            if p.is_alive():
-                p.kill()
+            while self.__keepalive():
+                time.sleep(KEEP_ALIVE_PERIOND / 2)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.exception(ex)
 
     @overrides(SpallocJob.where_is_machine)
     def where_is_machine(self, x: int, y: int) -> Optional[
@@ -704,16 +679,6 @@ class _SpallocJob(SessionAware, SpallocJob):
             return None
         return cast(Tuple[int, int, int], tuple(
             r.json()["physical-board-coordinates"]))
-
-    @property
-    def _keepalive_handle(self) -> Optional[Queue]:
-        return self.__keepalive_handle
-
-    @_keepalive_handle.setter
-    def _keepalive_handle(self, handle: Queue):
-        if self.__keepalive_handle is not None:
-            raise SpallocException("cannot keep job alive from two tasks")
-        self.__keepalive_handle = handle
 
     @overrides(SpallocJob.create_transceiver)
     def create_transceiver(self) -> Transceiver:

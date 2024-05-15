@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from contextlib import AbstractContextManager
 from typing import Dict, Mapping, Optional, Tuple
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.constants import SCP_SCAMP_PORT
@@ -179,29 +178,6 @@ class SpallocJob(object, metaclass=AbstractBase):
         Destroy the job.
 
         :param str reason: Why the job is being destroyed.
-        """
-        raise NotImplementedError()
-
-    @abstractmethod
-    def keepalive(self) -> None:
-        """
-        Signal the job that we want it to stay alive for a while longer.
-        """
-        raise NotImplementedError()
-
-    @abstractmethod
-    def launch_keepalive_task(
-            self, period: int = 30) -> AbstractContextManager:
-        """
-        Starts a periodic task to keep a job alive.
-
-        :param SpallocJob job:
-            The job to keep alive
-        :param int period:
-            How often to send a keepalive message (in seconds)
-        :return:
-            Some kind of closeable task handle; closing it terminates the task.
-            Destroying the job will also terminate the task.
         """
         raise NotImplementedError()
 
