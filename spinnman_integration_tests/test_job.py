@@ -41,7 +41,6 @@ class TestTransceiver(unittest.TestCase):
         job = client.create_job(
             num_boards=2, machine_name=self.spalloc_machine)
         with job:
-            job.launch_keepalive_task()
             job.wait_until_ready()
 
             connections = job.get_connections()
