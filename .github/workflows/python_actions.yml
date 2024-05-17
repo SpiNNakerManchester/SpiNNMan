@@ -25,21 +25,13 @@ jobs:
       matrix:
         include:
           - runner: ubuntu-24.04
-            python-version: "3.12"
+            python-version: "3.13"
             checks: 'tests'
 
           - runner: ubuntu-22.04
             python-version: "3.12"
             checks: 'full'
             coverage: 'coverage'
-
-          - runner: ubuntu-20.04
-            python-version: 3.8
-            checks: 'full'
-
-          - runner: ubuntu-latest
-            python-version: "3.13"
-            checks: 'tests'
 
           - runner: ubuntu-latest
             python-version: "3.11"
@@ -52,6 +44,10 @@ jobs:
           - runner: ubuntu-latest
             python-version: 3.9
             checks: 'tests'
+
+          - runner: ubuntu-20.04
+            python-version: 3.8
+            checks: 'full'
 
           - runner: windows-latest
             python-version: "3.12"
@@ -106,18 +102,6 @@ jobs:
     - name: Run Install
       uses: ./support/actions/run-install
 
-    - name: Test with pytest (and coverage)
-      if: ${{ matrix.checks == 'full' }}
-      uses: ./support/actions/pytest
-      env:
-        SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
-        SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
-      with:
-        tests: unittests
-        coverage: ${{ matrix.coverage == 'coverage' }}
-        cover-packages: spinnman, spinnman_integration_tests
-        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
-
     - name: Simple pytest
       if: ${{ matrix.checks == 'tests'}}
       env:
@@ -143,6 +127,18 @@ jobs:
     - name: Lint with mypy
       if: ${{ matrix.checks == 'full' }}
       run: mypy spinnman
+
+    - name: Test with pytest (and coverage)
+      if: ${{ matrix.checks == 'full' }}
+      uses: ./support/actions/pytest
+      env:
+        SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
+        SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
+      with:
+        tests: unittests
+        coverage: ${{ matrix.coverage == 'coverage' }}
+        cover-packages: spinnman, spinnman_integration_tests
+        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run rat copyright enforcement
       if: ${{ matrix.checks == 'validate' }}
