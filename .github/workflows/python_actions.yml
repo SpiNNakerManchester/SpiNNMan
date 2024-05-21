@@ -80,6 +80,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         dependencies:
+        install: true
 
     - name: Unittests and style checks
       if: ${{ matrix.checks == 'full' || matrix.checks == 'validate' }}
