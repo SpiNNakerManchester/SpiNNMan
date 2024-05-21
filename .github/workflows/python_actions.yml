@@ -83,7 +83,7 @@ jobs:
         install: true
 
     - name: Validation actions
-      if: {{ matrix.checks == 'validate' }}
+      if: ${{ matrix.checks == 'validate' }}
       uses: ./support/actions/validate
 
     - name: Unittests and style checks
