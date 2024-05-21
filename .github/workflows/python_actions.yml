@@ -79,7 +79,7 @@ jobs:
       uses: ./support/actions/prepare
       with:
         python-version: ${{ matrix.python-version }}
-        dependencies:
+        dependencies: SpiNNUtils SpiNNMachine
         install: true
 
     - name: Unittests and style checks
