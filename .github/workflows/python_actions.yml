@@ -82,14 +82,20 @@ jobs:
         dependencies: SpiNNUtils SpiNNMachine
         install: true
 
+    - name: Validation actions
+      if: {{ matrix.checks == 'validate' }}
+      uses: ./support/actions/validate
+
     - name: Unittests and style checks
       if: ${{ matrix.checks == 'full' || matrix.checks == 'validate' }}
       uses: ./support/actions/test-and-check
       with:
         python-version: ${{ matrix.python-version }}
-        cover-packages: $ROOT_PKG
+        tests: unittests
+        cover-packages: spinnman
         coveralls-token: ${{ secrets.GITHUB_TOKEN }}
-        pylint_package: $ROOT_PKG unittests
+        flake8_packages: spinnman unittests
+        pylint_package: spinnman unittests
 
     - name: Simple pytest
       if: ${{ matrix.checks == 'tests'}}
@@ -99,4 +105,3 @@ jobs:
       run: | 
         pytest unittests
         pytest spinnman_integration_tests
-
