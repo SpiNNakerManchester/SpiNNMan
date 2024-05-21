@@ -95,7 +95,7 @@ jobs:
         cover-packages: spinnman
         coveralls-token: ${{ secrets.GITHUB_TOKEN }}
         flake8_packages: spinnman unittests
-        pylint_package: spinnman unittests
+        pylint_packages: spinnman
 
     - name: Simple pytest
       if: ${{ matrix.checks == 'tests'}}
