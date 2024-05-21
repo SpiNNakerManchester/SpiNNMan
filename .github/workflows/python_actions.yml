@@ -85,22 +85,20 @@ jobs:
         repository: SpiNNakerManchester/SupportScripts
         path: support
 
-    - name: Install pip, etc
-      if: ${{ matrix.checks == 'full' || matrix.checks == 'validate' }}
-      uses: ./support/actions/python-tools
-
-    - name: Install mypy
-      if: ${{ matrix.checks == 'full' }}
-      run: pip install mypy
-
-    - name: Install Spinnaker Dependencies
-      uses: ./support/actions/install-spinn-deps
+    - name: Preparation actions
+      uses: ./support/actions/prepare
       with:
-        repositories: SpiNNUtils SpiNNMachine
-        install: true
+        python-version: ${{ matrix.python-version }}
+        dependencies:
 
-    - name: Run Install
-      uses: ./support/actions/run-install
+    - name: Unittests and style checks
+      if: ${{ matrix.checks == 'full' || matrix.checks == 'validate' }}
+      uses: ./support/actions/test-and-check
+      with:
+        python-version: ${{ matrix.python-version }}
+        cover-packages: $ROOT_PKG
+        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
+        pylint_package: $ROOT_PKG unittests
 
     - name: Simple pytest
       if: ${{ matrix.checks == 'tests'}}
@@ -111,47 +109,3 @@ jobs:
         pytest unittests
         pytest spinnman_integration_tests
 
-    - name: Lint with flake8
-      if: ${{ matrix.checks == 'full' }}
-      run: flake8 spinnman unittests
-
-    - name: Lint with pylint
-      if: ${{ matrix.checks == 'full' }}
-      uses: ./support/actions/pylint
-      with: 
-        package: spinnman
-        exitcheck: 31 # Action fails on any message
-        language: en_GB
-        rcfile: global_strict
-
-    - name: Lint with mypy
-      if: ${{ matrix.checks == 'full' }}
-      run: mypy spinnman
-
-    - name: Test with pytest (and coverage)
-      if: ${{ matrix.checks == 'full' }}
-      uses: ./support/actions/pytest
-      env:
-        SPALLOC_USER: ${{ secrets.SPALLOC_USER }}
-        SPALLOC_PASSWORD: ${{ secrets.SPALLOC_PASSWORD }}
-      with:
-        tests: unittests
-        coverage: ${{ matrix.coverage == 'coverage' }}
-        cover-packages: spinnman, spinnman_integration_tests
-        coveralls-token: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Run rat copyright enforcement
-      if: ${{ matrix.checks == 'validate' }}
-      uses: ./support/actions/check-copyrights
-      with:
-        config_file: rat_asl20.xml
-
-    - name: Build documentation with sphinx
-      if: ${{ matrix.checks == 'validate' }}
-      uses: ./support/actions/sphinx
-      with:
-        directory: doc/source
-
-    - name: Validate CITATION.cff
-      if: ${{ matrix.checks == 'validate' }}
-      uses: dieghernan/cff-validator@main
