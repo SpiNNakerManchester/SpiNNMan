@@ -26,24 +26,24 @@ jobs:
         include:
           - runner: ubuntu-24.04
             python-version: "3.13"
-            checks: 'tests'
+            checks: 'full'
 
-          - runner: ubuntu-22.04
+          - runner: ubuntu-latest
             python-version: "3.12"
+            checks: 'validate'
+
+          - runner: ubuntu-latest
+            python-version: "3.11"
             checks: 'full'
             coverage: 'coverage'
 
           - runner: ubuntu-latest
-            python-version: "3.11"
-            checks: 'tests'
-
-          - runner: ubuntu-latest
             python-version: "3.10"
-            checks: 'tests'
+            checks: 'full'
 
-          - runner: ubuntu-latest
+          - runner: ubuntu-22.04
             python-version: 3.9
-            checks: 'tests'
+            checks: 'full'
 
           - runner: ubuntu-20.04
             python-version: 3.8
@@ -64,10 +64,6 @@ jobs:
           - runner: macos-11
             python-version: 3.8
             checks: 'tests'
-
-          - runner: ubuntu--latest
-            python-version: "3.12"
-            checks: 'validate'
 
     steps:
     - name: Set up Python ${{ matrix.python-version }}
