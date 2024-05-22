@@ -21,8 +21,8 @@ jobs:
   call:
     uses: SpiNNakerManchester/SupportScripts/.github/workflows/python_checks.yml@main
     with:
-      base-package: spinnman spinnman_integration_tests
+      base-package: spinnman
       dependencies: SpiNNUtils SpiNNMachine
-      test_directories: unittests
-      flake8-packages: spinnman unittests
+      test_directories: unittests spinnman_integration_tests
+      flake8-packages: spinnman unittests spinnman_integration_tests
     secrets: inherit
