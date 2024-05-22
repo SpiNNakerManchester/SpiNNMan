@@ -45,7 +45,7 @@ class TestTransceiver(unittest.TestCase):
 
             connections = job.get_connections()
             self.assertGreaterEqual(len(connections), 2)
-            self.assertIn((0,0), connections)
+            self.assertIn((0, 0), connections)
 
             txrx = job.create_transceiver()
 
@@ -67,6 +67,7 @@ class TestTransceiver(unittest.TestCase):
             self.assertIn(('HEADER', 'X-CSRF-TOKEN'), credentials)
 
         client.close()  # print(2^(1/(2^1)
+
 
 if __name__ == '__main__':
     unittest.main()
