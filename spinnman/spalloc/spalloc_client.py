@@ -120,9 +120,9 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         if username is None and password is None:
             service_url, username, password = parse_service_url(service_url)
         if username is None:
-            username = os.environ["SPALLOC_USER"]
+            username = os.getenv("SPALLOC_USER", None)
         if password is None:
-            password = os.environ["SPALLOC_PASSWORD"]
+            password = os.getenv("SPALLOC_PASSWORD", None)
 
         self.__session: Optional[Session] = Session(
             service_url, username, password, bearer_token)
