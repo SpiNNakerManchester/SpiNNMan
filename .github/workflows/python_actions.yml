@@ -23,9 +23,9 @@ jobs:
     with:
 
       dependencies: SpiNNUtils SpiNNMachine
-      test_directories: unittests spinnman_integration_tests
+      test_directories: spinnman_tests spinnman_integration_tests
       coverage-package: spinnman
-      flake8-packages: spinnman unittests spinnman_integration_tests
+      flake8-packages: spinnman spinnman_tests spinnman_integration_tests
       pylint-packages: spinnman
-      mypy-packages: spinnman unittests spinnman_integration_tests
+      mypy-packages: spinnman spinnman_tests spinnman_integration_tests
     secrets: inherit
