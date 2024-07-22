@@ -14,6 +14,7 @@
 """
 Implementation of the client for the Spalloc web service.
 """
+import os
 import time
 from logging import getLogger
 
@@ -108,12 +109,21 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             location; if so, the ``username`` and ``password`` arguments
             *must* be ``None``. If ``username`` and ``password`` are not given,
             not even within the URL, the ``bearer_token`` must be not ``None``.
-        :param str username: The user name to use
-        :param str password: The password to use
+        :param str username:
+            The user name to use. If not provided nor in service_url
+            environment variable SPALLOC_USER will be used.
+        :param str password:
+            The password to use. If not provided nor in service_url
+            environment variable SPALLOC_PASSWORD will be used.
         :param str bearer_token: The bearer token to use
         """
         if username is None and password is None:
             service_url, username, password = parse_service_url(service_url)
+        if username is None:
+            username = os.getenv("SPALLOC_USER", None)
+        if password is None:
+            password = os.getenv("SPALLOC_PASSWORD", None)
+
         self.__session: Optional[Session] = Session(
             service_url, username, password, bearer_token)
         obj = self.__session.renew()

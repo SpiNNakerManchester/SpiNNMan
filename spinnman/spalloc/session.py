@@ -238,7 +238,13 @@ class Session:
                          self.__login_form_url, r.status_code)
             m = csrf_matcher.search(r.text)
             if not m:
-                raise SpallocException("could not establish temporary session")
+                msg = ("Could not establish temporary session to "
+                       f"{self._service_url} for user {self.__username} ")
+                if self.__password is None:
+                    msg += "with a no password"
+                else:
+                    msg += f"with a {len(self.__password)} character password."
+                raise SpallocException(msg)
             csrf = m.group(1)
             session = r.cookies[_SESSION_COOKIE]
 
