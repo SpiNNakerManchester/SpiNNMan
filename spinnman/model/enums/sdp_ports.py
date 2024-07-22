@@ -33,5 +33,8 @@ class SDP_PORTS(Enum):
     EXTRA_MONITOR_CORE_REINJECTION = 4
     #: Extra monitor core outbound data transfer protocol
     EXTRA_MONITOR_CORE_DATA_SPEED_UP = 5
+    #: Extra monitor core inbound data transfer protocol
+    #: See :py:class:`SpeedupInSCPCommands`
+    EXTRA_MONITOR_CORE_DATA_IN_SPEED_UP = 6
     #: Extra monitor core data copy
     EXTRA_MONITOR_CORE_COPY_DATA_IN = 7
