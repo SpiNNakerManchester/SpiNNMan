@@ -51,7 +51,7 @@ if __name__ == "__main__":
         print("Exiting")
         sys.exit()
 
-    def _print_connected(ip_address: str, timestamp: float):
+    def _print_connected(ip_address: str, timestamp: float) -> bool:
         try:
             hostname = f" ({socket.gethostbyaddr(ip_address)[0]})"
         except Exception:  # pylint: disable=broad-except
