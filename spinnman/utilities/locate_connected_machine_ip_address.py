@@ -20,7 +20,7 @@ from typing import Callable
 from spinnman.connections.udp_packet_connections import IPAddressesConnection
 
 
-def locate_connected_machine(handler: Callable[[str, float], None]):
+def locate_connected_machine(handler: Callable[[str, float], bool]):
     """
     Locates any SpiNNaker machines IP addresses from the auto-transmitted
     packets from non-booted SpiNNaker machines.
