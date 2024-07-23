@@ -145,6 +145,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         :param str job_id: The job id.
         :rtype: SpallocJob
         """
+        assert self.__session
         return _SpallocJob(
             self.__session, fix_url(f"{self.__jobs_url}/{job_id}"))
 
