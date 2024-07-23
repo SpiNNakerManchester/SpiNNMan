@@ -27,5 +27,5 @@ jobs:
       coverage-package: spinnman
       flake8-packages: spinnman unittests spinnman_integration_tests
       pylint-packages: spinnman
-      mypy-packages: spinnman
+      mypy-packages: spinnman unittests spinnman_integration_tests
     secrets: inherit
