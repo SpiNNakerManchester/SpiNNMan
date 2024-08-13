@@ -138,6 +138,17 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         self.__nmpi_user = nmpi_user
         logger.info("established session to {} for {}", service_url, username)
 
+    def get_job(self, job_id: str) -> SpallocJob:
+        """
+        Get a job by its job id.
+
+        :param str job_id: The job id.
+        :rtype: SpallocJob
+        """
+        assert self.__session
+        return _SpallocJob(
+            self.__session, fix_url(f"{self.__jobs_url}/{job_id}"))
+
     @staticmethod
     def open_job_from_database(
             service_url, job_url, cookies, headers) -> SpallocJob:
