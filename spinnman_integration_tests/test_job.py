@@ -31,8 +31,8 @@ class TestTransceiver(unittest.TestCase):
     def test_create_job(self):
         try:
             client = SpallocClient(self.spalloc_url)
-        except ConnectionError as ex:
-            raise unittest.skip(str(ex))
+        except Exception as ex:
+            raise Exception(str(type(ex)))
         # job = client.create_job_rect_at_board(
         #    WIDTH, HEIGHT, triad=(x, y, b), machine_name=SPALLOC_MACHINE,
         #    max_dead_boards=1)
