@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import unittest
-
+from urllib3.exceptions import MaxRetryError
 from spinn_utilities.config_holder import set_config
 
 from spinn_machine.version import FIVE
@@ -30,7 +30,10 @@ class TestTransceiver(unittest.TestCase):
         self.spalloc_machine = "SpiNNaker1M"
 
     def test_create_job(self):
-        client = SpallocClient(self.spalloc_url)
+        try:
+            client = SpallocClient(self.spalloc_url)
+        except MaxRetryError as ex:
+            raise unittest.skip(str(ex))
         # job = client.create_job_rect_at_board(
         #    WIDTH, HEIGHT, triad=(x, y, b), machine_name=SPALLOC_MACHINE,
         #    max_dead_boards=1)
