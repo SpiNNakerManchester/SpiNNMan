@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from requests.exceptions import ConnectionError
 import unittest
 from spinn_utilities.config_holder import set_config
 
@@ -31,6 +32,8 @@ class TestTransceiver(unittest.TestCase):
     def test_create_job(self):
         try:
             client = SpallocClient(self.spalloc_url)
+        except ConnectionError as ex:
+            raise unittest.SkipTest(str(ex))
         except Exception as ex:
             raise NotImplementedError(str(type(ex)))
         # job = client.create_job_rect_at_board(
