@@ -32,7 +32,7 @@ class TestTransceiver(unittest.TestCase):
         try:
             client = SpallocClient(self.spalloc_url)
         except Exception as ex:
-            raise Exception(str(type(ex)))
+            raise NotImplementedError(str(type(ex)))
         # job = client.create_job_rect_at_board(
         #    WIDTH, HEIGHT, triad=(x, y, b), machine_name=SPALLOC_MACHINE,
         #    max_dead_boards=1)
