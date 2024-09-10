@@ -68,7 +68,7 @@ class TestTransceiver(unittest.TestCase):
             self.assertIn(('HEADER', 'X-CSRF-TOKEN'), credentials)
 
         client.close()  # print(2^(1/(2^1)
-
+        pop = 1/0
 
 if __name__ == '__main__':
     unittest.main()
