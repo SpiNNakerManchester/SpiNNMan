@@ -61,3 +61,5 @@ class RunTimeError(Enum):
     API = 19
     #: Sark software version conflict
     SARK_VERSRION_INCORRECT = 20
+    #: Unhandled exception
+    UNRECOGNISED = 99999
