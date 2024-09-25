@@ -61,6 +61,7 @@ class CPUInfo(object):
         "__processor_state_register",
         "__registers",
         "__run_time_error",
+        "__run_time_error_value",
         "__software_error_count",
         "__filename_address",
         "__line_number",
@@ -102,7 +103,11 @@ class CPUInfo(object):
         self.__application_name = app_name.decode('ascii')
 
         self.__registers: Sequence[int] = _REGISTERS_PATTERN.unpack(registers)
-        self.__run_time_error = RunTimeError(run_time_error)
+        self.__run_time_error_value = run_time_error
+        try:
+            self.__run_time_error = RunTimeError(run_time_error)
+        except ValueError:
+            self.__run_time_error = RunTimeError.UNRECOGNISED
         self.__state = CPUState(state)
 
         self.__application_mailbox_command = MailboxCommand(app_mailbox_cmd)
@@ -353,10 +358,13 @@ class CPUInfo(object):
         :rtype: str
         """
         if self.state == CPUState.RUN_TIME_EXCEPTION:
+            rte_string = f"{self.run_time_error.name}"
+            if self.run_time_error == RunTimeError.UNRECOGNISED:
+                rte_string += f" ({self.__run_time_error_value})"
             return (
                 f"{self.__x}:{self.__y}:{self.__p} "
                 f"(ph: {self.__physical_cpu_id}) "
-                f"in state {self.__state.name}:{self.__run_time_error.name}\n"
+                f"in state {self.__state.name}:{rte_string}\n"
                 f"    r0={self.__registers[0]}, r1={self.__registers[1]}, "
                 f"r2={self.__registers[2]}, r3={self.__registers[3]}\n"
                 f"    r4={self.__registers[4]}, r5={self.__registers[5]}, "
