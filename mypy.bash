@@ -1,4 +1,6 @@
-# Copyright (c) 2017 The University of Manchester
+#!/bin/bash
+
+# Copyright (c) 2024 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = "1!7.3.1"
-__version_month__ = "TBD"
-__version_year__ = "TBD"
-__version_day__ = "TBD"
-__version_name__ = "To Do"
+# This bash assumes that other repositories are installed in paralled
+
+# requires the latest mypy
+# pip install --upgrade mypy
+
+utils="../SpiNNUtils/spinn_utilities"
+machine="../SpiNNMachine/spinn_machine"
+
+mypy $utils $machine spinnman
