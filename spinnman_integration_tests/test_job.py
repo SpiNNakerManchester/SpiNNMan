@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import unittest
-
+from requests.exceptions import ConnectionError
 from spinn_utilities.config_holder import set_config
 
 from spinn_machine.version import FIVE
@@ -29,12 +28,12 @@ class TestTransceiver(unittest.TestCase):
         set_config("Machine", "version", FIVE)
         self.spalloc_url = "https://spinnaker.cs.man.ac.uk/spalloc"
         self.spalloc_machine = "SpiNNaker1M"
-        self.spalloc_user = os.environ["SPALLOC_USER"]
-        self.spalloc_password = os.environ["SPALLOC_PASSWORD"]
 
     def test_create_job(self):
-        client = SpallocClient(
-            self.spalloc_url, self.spalloc_user, self.spalloc_password)
+        try:
+            client = SpallocClient(self.spalloc_url)
+        except ConnectionError as ex:
+            raise unittest.SkipTest(str(ex))
         # job = client.create_job_rect_at_board(
         #    WIDTH, HEIGHT, triad=(x, y, b), machine_name=SPALLOC_MACHINE,
         #    max_dead_boards=1)
