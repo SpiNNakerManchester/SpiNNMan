@@ -140,6 +140,7 @@ class UDPConnection(Connection, Listenable[bytes]):
         # check if machine is active and on the network
         for _ in range(_PING_COUNT):
             # Assume connected if ping works
+            assert self._remote_ip_address is not None
             if Ping.ping(self._remote_ip_address) == 0:
                 return True
 
