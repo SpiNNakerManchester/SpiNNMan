@@ -151,7 +151,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
 
     @staticmethod
     def open_job_from_database(
-            service_url, job_url, cookies, headers) -> SpallocJob:
+            service_url: str, job_url: str, cookies: Dict[str, str],
+            headers: Dict[str, str]) -> SpallocJob:
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
@@ -365,7 +366,7 @@ class _SpallocMachine(SessionAware, SpallocMachine):
     def area(self) -> Tuple[int, int]:
         return (self.width, self.height)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "SpallocMachine" + str((
             self.name, self.tags, self.width, self.height, self.dead_boards,
             self.dead_links))
@@ -376,14 +377,14 @@ class _ProxyPing(threading.Thread):
     Sends ping messages to an open websocket
     """
 
-    def __init__(self, ws, sleep_time=30):
+    def __init__(self, ws: WebSocket, sleep_time: int = 30):
         super().__init__(daemon=True)
         self.__ws = ws
         self.__sleep_time = sleep_time
         self.__closed = False
         self.start()
 
-    def run(self):
+    def run(self) -> None:
         """
         The handler loop of this thread
         """
@@ -399,7 +400,7 @@ class _ProxyPing(threading.Thread):
                 logger.exception("Error in websocket before close")
             sleep(self.__sleep_time)
 
-    def close(self):
+    def close(self) -> None:
         """
         Mark as closed to avoid error messages.
         """
@@ -467,13 +468,13 @@ class _ProxyReceiver(threading.Thread):
         self.__returns[c] = handler
         return c
 
-    def listen(self, channel_id: int, handler: _WSCB):
+    def listen(self, channel_id: int, handler: _WSCB) -> None:
         """
         Register a persistent listener for one-way messages.
         """
         self.__handlers[channel_id] = handler
 
-    def dispatch_return(self, correlation_id: int, msg: bytes):
+    def dispatch_return(self, correlation_id: int, msg: bytes) -> None:
         """
         Dispatch a received call-return message.
         """
@@ -481,7 +482,7 @@ class _ProxyReceiver(threading.Thread):
         if handler:
             handler(msg)
 
-    def dispatch_message(self, channel_id: int, msg: bytes):
+    def dispatch_message(self, channel_id: int, msg: bytes) -> None:
         """
         Dispatch a received one-way message.
         """
@@ -489,7 +490,7 @@ class _ProxyReceiver(threading.Thread):
         if handler:
             handler(msg)
 
-    def unlisten(self, channel_id: int):
+    def unlisten(self, channel_id: int) -> None:
         """
         Deregister a listener for a channel
         """
@@ -643,7 +644,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.wait_until_ready)
     def wait_until_ready(self, timeout: Optional[int] = None,
-                         n_retries: Optional[int] = None):
+                         n_retries: Optional[int] = None) -> None:
         state = self.get_state()
         retries = 0
         while (state != SpallocState.READY and
@@ -654,7 +655,7 @@ class _SpallocJob(SessionAware, SpallocJob):
                 raise SpallocException("job was unexpectedly destroyed")
 
     @overrides(SpallocJob.destroy)
-    def destroy(self, reason: str = "finished"):
+    def destroy(self, reason: str = "finished") -> None:
         self._keepalive_url = None
         if self.__proxy_handle is not None:
             if self.__proxy_thread:
@@ -711,7 +712,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         proxies.append(self.connect_for_booting())
         return create_transceiver_from_connections(connections=proxies)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"SpallocJob({self._url})"
 
 
@@ -739,7 +740,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         raise NotImplementedError
 
     def _call(self, protocol: ProxyProtocol, packer: struct.Struct,
-              unpacker: struct.Struct, *args) -> Tuple[Any, ...]:
+              unpacker: struct.Struct, *args: int) -> Tuple[Any, ...]:
         """
         Do a synchronous call.
 
@@ -804,7 +805,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         self.__ws = None
         self.__receiver = None
 
-    def _send(self, message: bytes):
+    def _send(self, message: bytes) -> None:
         self._throw_if_closed()
         # Put the header on the front and send it
         if not self.__ws:
@@ -812,7 +813,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         self.__ws.send_binary(_msg.pack(
             ProxyProtocol.MSG, self.__handle) + message)
 
-    def _send_to(self, message: bytes, x: int, y: int, port: int):
+    def _send_to(self, message: bytes, x: int, y: int, port: int) -> None:
         self._throw_if_closed()
         # Put the header on the front and send it
         if not self.__ws:
@@ -897,7 +898,7 @@ class _ProxiedBidirectionalConnection(
         self._close()
 
     @overrides(SpallocProxiedConnection.send)
-    def send(self, data: bytes):
+    def send(self, data: bytes) -> None:
         if not isinstance(data, (bytes, bytearray)):
             data = bytes(data)
         self._send(data)
@@ -961,7 +962,7 @@ class _ProxiedUnboundConnection(
         self._close()
 
     @overrides(SpallocProxiedConnection.send)
-    def send(self, data: bytes):
+    def send(self, data: bytes) -> None:
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
@@ -988,7 +989,7 @@ class _ProxiedSCAMPConnection(
         super().__init__(ws, receiver, x, y, port)
         SpallocSCPConnection.__init__(self, x, y)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"SCAMPConnection[proxied]({self.chip_x},{self.chip_y})"
 
 
@@ -999,7 +1000,7 @@ class _ProxiedBootConnection(
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         super().__init__(ws, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "BootConnection[proxied]()"
 
 
@@ -1023,14 +1024,15 @@ class _ProxiedEIEIOConnection(
 
     def send_to(
             self,
-            data: bytes, address: tuple):  # pylint: disable=unused-argument
+            data: bytes, address: tuple   # pylint: disable=unused-argument
+            ) -> None:
         """
         Direct ``send_to`` is unsupported.
         """
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"EIEIOConnection[proxied](remote:{self.__chip_x},"
                 f"{self.__chip_y})")
 
@@ -1045,8 +1047,8 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
         self.__conns = {ip: xy for (xy, ip) in conns.items()}
 
     @overrides(SpallocEIEIOListener.send_to_chip)
-    def send_to_chip(
-            self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
+    def send_to_chip(self, message: bytes, x: int, y: int,
+                     port: int = SCP_SCAMP_PORT) -> None:
         if not isinstance(message, (bytes, bytearray)):
             message = bytes(message)
         self._send_to(bytes(message), x, y, port)
@@ -1065,7 +1067,7 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
     def _get_chip_coords(self, ip_address: str) -> XY:
         return self.__conns[str(ip_address)]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"EIEIOConnection[proxied](local:{self._addr}:{self._port})"
 
 
@@ -1079,7 +1081,7 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
         self.__conns = {ip: xy for (xy, ip) in conns.items()}
 
     @overrides(UDPConnection.send_to)
-    def send_to(self, data: bytes, address: Tuple[str, int]):
+    def send_to(self, data: bytes, address: Tuple[str, int]) -> None:
         ip, port = address
         x, y = self.__conns[ip]
         self._send_to(data, x, y, port)
@@ -1094,5 +1096,5 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
     def local_port(self) -> int:
         return self._port or 0
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"UDPConnection[proxied](local:{self._addr}:{self._port})"
