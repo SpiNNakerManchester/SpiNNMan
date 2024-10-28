@@ -122,8 +122,8 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.write_fpga_register)
-    def write_fpga_register(
-            self, fpga_num: int, register: int, value: int, board: int = 0):
+    def write_fpga_register(self, fpga_num: int, register: int, value: int,
+                            board: int = 0) -> None:
         pass
 
     @overrides(Transceiver.read_bmp_version)
@@ -143,8 +143,8 @@ class MockableTransceiver(ExtendableTransceiver):
         return (-1, -1)
 
     @overrides(Transceiver.write_user)
-    def write_user(
-            self, x: int, y: int, p: int, user: UserRegister, value: int):
+    def write_user(self, x: int, y: int, p: int, user: UserRegister,
+                   value: int) -> None:
         pass
 
     @overrides(Transceiver.read_memory)
@@ -159,7 +159,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.stop_application)
-    def stop_application(self, app_id: int):
+    def stop_application(self, app_id: int) -> None:
         pass
 
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
@@ -171,11 +171,11 @@ class MockableTransceiver(ExtendableTransceiver):
             error_states: FrozenSet[CPUState] = frozenset((
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check: int = 100,
-            progress_bar: Optional[ProgressBar] = None):
+            progress_bar: Optional[ProgressBar] = None) -> None:
         pass
 
     @overrides(Transceiver.send_signal)
-    def send_signal(self, app_id: int, signal: Signal):
+    def send_signal(self, app_id: int, signal: Signal) -> None:
         pass
 
     @overrides(Transceiver.set_ip_tag)
@@ -183,7 +183,7 @@ class MockableTransceiver(ExtendableTransceiver):
         pass
 
     @overrides(Transceiver.set_reverse_ip_tag)
-    def set_reverse_ip_tag(self, reverse_ip_tag: ReverseIPTag):
+    def set_reverse_ip_tag(self, reverse_ip_tag: ReverseIPTag) -> None:
         pass
 
     @overrides(Transceiver.clear_ip_tag)
@@ -203,12 +203,12 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.load_multicast_routes)
     def load_multicast_routes(
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
-            app_id: int):
+            app_id: int) -> None:
         pass
 
     @overrides(Transceiver.load_fixed_route)
-    def load_fixed_route(
-            self, x: int, y: int, fixed_route: RoutingEntry, app_id: int):
+    def load_fixed_route(self, x: int, y: int, fixed_route: RoutingEntry,
+                         app_id: int) -> None:
         pass
 
     @overrides(Transceiver.read_fixed_route)
@@ -222,7 +222,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.clear_multicast_routes)
-    def clear_multicast_routes(self, x: int, y: int):
+    def clear_multicast_routes(self, x: int, y: int) -> None:
         pass
 
     @overrides(Transceiver.get_router_diagnostics)
@@ -236,11 +236,11 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.set_router_diagnostic_filter)
     def set_router_diagnostic_filter(
             self, x: int, y: int, position: int,
-            diagnostic_filter: DiagnosticFilter):
+            diagnostic_filter: DiagnosticFilter) -> None:
         pass
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
-    def clear_router_diagnostic_counters(self, x: int, y: int):
+    def clear_router_diagnostic_counters(self, x: int, y: int) -> None:
         pass
 
     @overrides(Transceiver.close)
@@ -248,15 +248,16 @@ class MockableTransceiver(ExtendableTransceiver):
         pass
 
     @overrides(Transceiver.control_sync)
-    def control_sync(self, do_sync: bool):
+    def control_sync(self, do_sync: bool) -> None:
         pass
 
     @overrides(Transceiver.update_provenance_and_exit)
-    def update_provenance_and_exit(self, x: int, y: int, p: int):
+    def update_provenance_and_exit(self, x: int, y: int, p: int) -> None:
         pass
 
     @overrides(Transceiver.send_chip_update_provenance_and_exit)
-    def send_chip_update_provenance_and_exit(self, x: int, y: int, p: int):
+    def send_chip_update_provenance_and_exit(
+            self, x: int, y: int, p: int) -> None:
         pass
 
     @property
