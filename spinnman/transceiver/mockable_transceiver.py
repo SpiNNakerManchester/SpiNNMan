@@ -54,7 +54,7 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.send_sdp_message)
     def send_sdp_message(self, message: SDPMessage,
-                         connection: Optional[SDPConnection] = None):
+                         connection: Optional[SDPConnection] = None) -> None:
         pass
 
     @overrides(Transceiver.discover_scamp_connections)
@@ -62,7 +62,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.add_scamp_connections)
-    def add_scamp_connections(self, connections: Dict[XY, str]):
+    def add_scamp_connections(self, connections: Dict[XY, str]) -> None:
         pass
 
     @overrides(Transceiver.get_machine_details)
@@ -85,17 +85,17 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.read_user)
-    def read_user(self, x: int, y: int, p: int, user: UserRegister):
+    def read_user(self, x: int, y: int, p: int, user: UserRegister) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.add_cpu_information_from_core)
     def add_cpu_information_from_core(
             self, cpu_infos: CPUInfos, x: int, y: int, p: int,
-            states: Iterable[CPUState]):
+            states: Iterable[CPUState]) -> None:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_region_base_address)
-    def get_region_base_address(self, x: int, y: int, p: int):
+    def get_region_base_address(self, x: int, y: int, p: int) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_iobuf)
@@ -113,7 +113,7 @@ class MockableTransceiver(ExtendableTransceiver):
     def execute_flood(
             self, core_subsets: CoreSubsets,
             executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False):
+            n_bytes: Optional[int] = None, wait: bool = False) -> None:
         pass
 
     @overrides(Transceiver.read_fpga_register)
@@ -179,7 +179,7 @@ class MockableTransceiver(ExtendableTransceiver):
         pass
 
     @overrides(Transceiver.set_ip_tag)
-    def set_ip_tag(self, ip_tag: IPTag, use_sender: bool = False):
+    def set_ip_tag(self, ip_tag: IPTag, use_sender: bool = False) -> None:
         pass
 
     @overrides(Transceiver.set_reverse_ip_tag)
@@ -187,7 +187,8 @@ class MockableTransceiver(ExtendableTransceiver):
         pass
 
     @overrides(Transceiver.clear_ip_tag)
-    def clear_ip_tag(self, tag: int, board_address: Optional[str] = None):
+    def clear_ip_tag(
+            self, tag: int, board_address: Optional[str] = None) -> None:
         pass
 
     @overrides(Transceiver.get_tags)

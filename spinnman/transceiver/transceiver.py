@@ -55,7 +55,7 @@ class Transceiver(object):
 
     @abstractmethod
     def send_sdp_message(self, message: SDPMessage,
-                         connection: Optional[SDPConnection] = None):
+                         connection: Optional[SDPConnection] = None) -> None:
         """
         Sends an SDP message using one of the connections.
 
@@ -89,7 +89,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def add_scamp_connections(self, connections: Dict[XY, str]):
+    def add_scamp_connections(self, connections: Dict[XY, str]) -> None:
         """
         Check connections to the board and store these for future use.
 
@@ -193,7 +193,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def read_user(self, x: int, y: int, p: int, user: UserRegister):
+    def read_user(self, x: int, y: int, p: int, user: UserRegister) -> int:
         """
         Get the contents of the this user register for the given processor.
 
@@ -226,7 +226,7 @@ class Transceiver(object):
     @abstractmethod
     def add_cpu_information_from_core(
             self, cpu_infos: CPUInfos, x: int, y: int, p: int,
-            states: Iterable[CPUState]):
+            states: Iterable[CPUState]) -> None:
         """
         Adds information about a specific processor on the board to the info
 
@@ -252,7 +252,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_region_base_address(self, x: int, y: int, p: int):
+    def get_region_base_address(self, x: int, y: int, p: int) -> int:
         """
         Gets the base address of the Region Table
 
@@ -329,7 +329,7 @@ class Transceiver(object):
     def execute_flood(
             self, core_subsets: CoreSubsets,
             executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False):
+            n_bytes: Optional[int] = None, wait: bool = False) -> None:
         """
         Start an executable running on multiple places on the board.  This
         will be optimised based on the selected cores, but it may still
@@ -634,7 +634,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def set_ip_tag(self, ip_tag: IPTag, use_sender: bool = False):
+    def set_ip_tag(self, ip_tag: IPTag, use_sender: bool = False) -> None:
         """
         Set up an IP tag.
 
@@ -685,7 +685,8 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_ip_tag(self, tag: int, board_address: Optional[str] = None):
+    def clear_ip_tag(
+            self, tag: int, board_address: Optional[str] = None) -> None:
         """
         Clear the setting of an IP tag.
 

@@ -352,7 +352,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.send_sdp_message)
     def send_sdp_message(self, message: SDPMessage,
-                         connection: Optional[SDPConnection] = None):
+                         connection: Optional[SDPConnection] = None) -> None:
         if connection is None:
             connection_to_use: SDPConnection = self._scamp_connections[
                 random.randint(0, len(self._scamp_connections) - 1)]
@@ -361,7 +361,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         connection_to_use.send_sdp_message(message)
 
     def _check_and_add_scamp_connections(
-            self, x: int, y: int, ip_address: str):
+            self, x: int, y: int, ip_address: str) -> None:
         """
         :param int x: X coordinate of target chip
         :param int y: Y coordinate of target chip
@@ -414,7 +414,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self._scamp_connections)
 
     @overrides(Transceiver.add_scamp_connections)
-    def add_scamp_connections(self, connections: Dict[XY, str]):
+    def add_scamp_connections(self, connections: Dict[XY, str]) -> None:
         for ((x, y), ip_address) in connections.items():
             self._check_and_add_scamp_connections(x, y, ip_address)
         self._scamp_connection_selector = MostDirectConnectionSelector(
@@ -513,7 +513,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         raise NotImplementedError
 
     def _boot_board(self, extra_boot_values: Optional[Dict[
-            SystemVariableDefinition, object]] = None):
+            SystemVariableDefinition, object]] = None) -> None:
         """
         Attempt to boot the board. No check is performed to see if the
         board is already booted.
@@ -542,14 +542,14 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self._boot_send_connection.send_boot_message(boot_message)
         time.sleep(2.0)
 
-    def _call(self, req: AbstractSCPRequest[_AbstractSCPResponse],
-              **kwargs) -> _AbstractSCPResponse:
+    def _call(self, req: AbstractSCPRequest[_AbstractSCPResponse]
+              ) -> _AbstractSCPResponse:
         """
         Wrapper that makes doing simple SCP calls easier,
         especially with types.
         """
         proc: SendSingleCommandProcess[_AbstractSCPResponse] = \
-            SendSingleCommandProcess(self._scamp_connection_selector, **kwargs)
+            SendSingleCommandProcess(self._scamp_connection_selector)
         return proc.execute(req)
 
     @staticmethod
@@ -575,7 +575,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     def _ensure_board_is_ready(
             self, n_retries: int = 5, extra_boot_values: Optional[Dict[
-            SystemVariableDefinition, object]] = None):
+            SystemVariableDefinition, object]] = None) -> None:
         """
         Ensure that the board is ready to interact with this version of the
         transceiver. Boots the board if not already booted and verifies that
@@ -753,7 +753,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
 
     @staticmethod
-    def __get_user_register_address_from_core(p: int, user: UserRegister):
+    def __get_user_register_address_from_core(
+            p: int, user: UserRegister) -> int:
         """
         Get the address of user *N* for a given processor on the board.
 
@@ -773,21 +774,21 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 CPU_USER_OFFSET * user)
 
     @overrides(Transceiver.read_user)
-    def read_user(self, x: int, y: int, p: int, user: UserRegister):
+    def read_user(self, x: int, y: int, p: int, user: UserRegister) -> int:
         addr = self.__get_user_register_address_from_core(p, user)
         return self.read_word(x, y, addr)
 
     @overrides(Transceiver.add_cpu_information_from_core)
     def add_cpu_information_from_core(
             self, cpu_infos: CPUInfos, x: int, y: int, p: int,
-            states: Iterable[CPUState]):
+            states: Iterable[CPUState]) -> None:
         core_subsets = CoreSubsets()
         core_subsets.add_processor(x, y, p)
         new_infos = self.get_cpu_infos(core_subsets)
         cpu_infos.add_infos(new_infos, states)
 
     @overrides(Transceiver.get_region_base_address)
-    def get_region_base_address(self, x: int, y: int, p: int):
+    def get_region_base_address(self, x: int, y: int, p: int) -> int:
         return self.read_user(x, y, p, UserRegister.USER_0)
 
     @overrides(Transceiver.get_iobuf)
@@ -840,7 +841,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def execute_flood(
             self, core_subsets: CoreSubsets,
             executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False,):
+            n_bytes: Optional[int] = None, wait: bool = False) -> None :
         if isinstance(executable, int):
             # No executable is 4 bytes long
             raise TypeError("executable may not be int")
@@ -888,7 +889,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         logger.warning("Power cycle wait complete")
 
     def _bmp_call(self, req: AbstractSCPRequest[_AbstractSCPResponse],
-                  **kwargs) -> _AbstractSCPResponse:
+                  timeout: Optional[float] = None,
+                  n_retries: Optional[int] = None) -> _AbstractSCPResponse:
         """
         Wrapper that makes doing simple BMP calls easier,
         especially with types.
@@ -896,8 +898,20 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         if self._bmp_selector is None:
             raise SpinnmanException(
                 "this transceiver does not support BMP operations")
-        proc: SendSingleCommandProcess[_AbstractSCPResponse] =\
-            SendSingleCommandProcess(self._bmp_selector, **kwargs)
+        proc: SendSingleCommandProcess[_AbstractSCPResponse]
+        if timeout is None:
+            if n_retries is None:
+                proc = SendSingleCommandProcess(self._bmp_selector)
+            else:
+                proc = SendSingleCommandProcess(
+                    self._bmp_selector, n_retries=n_retries)
+        else:
+            if n_retries is None:
+                proc = SendSingleCommandProcess(
+                    self._bmp_selector, timeout=timeout)
+            else:
+                proc = SendSingleCommandProcess(
+                    self._bmp_selector, n_retries=n_retries, timeout=timeout)
         return proc.execute(req)
 
     def _power(self, power_command: PowerCommand) -> None:
@@ -1214,7 +1228,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 reverse_ip_tag.sdp_port))
 
     @overrides(Transceiver.clear_ip_tag)
-    def clear_ip_tag(self, tag: int, board_address: Optional[str] = None) -> None:
+    def clear_ip_tag(
+            self, tag: int, board_address: Optional[str] = None) -> None:
         for conn in self.__get_connection_list(board_address=board_address):
             self._call(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
