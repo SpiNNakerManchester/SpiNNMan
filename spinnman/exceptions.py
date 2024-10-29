@@ -14,7 +14,7 @@
 from __future__ import annotations
 import traceback
 from types import TracebackType
-from typing import List, Optional, FrozenSet, Union, TYPE_CHECKING
+from typing import Any, List, Optional, FrozenSet, Union, TYPE_CHECKING
 if TYPE_CHECKING:
     from spinnman.messages.scp.enums import SCPResult
     from spinnman.model.enums import CPUState
@@ -192,11 +192,11 @@ class SpinnmanTimeoutException(SpinnmanException):
     could finish.
     """
 
-    def __init__(self, operation: str, timeout: Optional[float],
+    def __init__(self, operation: Any, timeout: Optional[float],
                  msg: Optional[str] = None):
         """
-        :param str operation: The operation being performed
-        :param float timeout: The timeout value in seconds
+        :param operation: The operation being performed
+        :param timeout: The timeout value in seconds
         """
         if msg is None:
             msg = f"Operation {operation} timed out after {timeout} seconds"

@@ -41,7 +41,7 @@ class ReadFixedRouteRoutingEntryProcess(
         super().__init__(connection_selector)
         self._route: Optional[RoutingEntry] = None
 
-    def __handle_read_response(self, response: _FixedRouteResponse):
+    def __handle_read_response(self, response: _FixedRouteResponse) -> None:
         self._route = response.route
 
     def read_fixed_route(

@@ -26,7 +26,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def is_ready_to_receive(self, timeout: float = 0):
+    def is_ready_to_receive(self, timeout: float = 0) -> bool:
         """
         Determines if there is an SCP packet to be read without blocking.
 

@@ -42,15 +42,15 @@ class ReadRouterDiagnosticsProcess(
         self._error_status = 0
         self._register_values = [0] * _N_REGISTERS
 
-    def __handle_control_register_response(self, response: Response):
+    def __handle_control_register_response(self, response: Response) -> None:
         self._control_register = _ONE_WORD.unpack_from(
             response.data, response.offset)[0]
 
-    def __handle_error_status_response(self, response: Response):
+    def __handle_error_status_response(self, response: Response) -> None:
         self._error_status = _ONE_WORD.unpack_from(
             response.data, response.offset)[0]
 
-    def __handle_register_response(self, response: Response):
+    def __handle_register_response(self, response: Response) -> None:
         for register in range(_N_REGISTERS):
             self._register_values[register] = _ONE_WORD.unpack_from(
                 response.data, response.offset + (register * 4))[0]

@@ -219,7 +219,7 @@ class UDPConnection(Connection, Listenable[bytes]):
             raise SpinnmanEOFException()
         return receive_message_and_address(self._socket, timeout, _MSG_MAX)
 
-    def send(self, data: bytes):
+    def send(self, data: bytes) -> None:
         """
         Send data down this connection.
 
@@ -237,7 +237,7 @@ class UDPConnection(Connection, Listenable[bytes]):
             if self.__is_closed:
                 raise SpinnmanEOFException()
 
-    def send_to(self, data: bytes, address: Tuple[str, int]):
+    def send_to(self, data: bytes, address: Tuple[str, int]) -> None:
         """
         Send data down this connection.
 
@@ -261,7 +261,7 @@ class UDPConnection(Connection, Listenable[bytes]):
             self._socket.shutdown(socket.SHUT_WR)
         self._socket.close()
 
-    def is_ready_to_receive(self, timeout: float = 0):
+    def is_ready_to_receive(self, timeout: float = 0) -> bool:
         if self.__is_closed:
             return True
         return len(select.select([self._socket], [], [], timeout)[0]) == 1

@@ -45,12 +45,13 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         super().__init__(connection_selector)
         self._base_address = 0
 
-    def __handle_router_alloc_response(self, response: RouterAllocResponse):
+    def __handle_router_alloc_response(
+            self, response: RouterAllocResponse) -> None:
         self._base_address = response.base_address
 
     def load_routes(
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
-            app_id: int):
+            app_id: int) -> None:
         """
         :param int x:
         :param int y:

@@ -44,11 +44,12 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         self._tag_info: Optional[IPTagGetInfoResponse] = None
         self._tags: List[Optional[AbstractTag]] = []
 
-    def __handle_tag_info_response(self, response: IPTagGetInfoResponse):
+    def __handle_tag_info_response(
+            self, response: IPTagGetInfoResponse) -> None:
         self._tag_info = response
 
-    def __handle_get_tag_response(
-            self, tag: int, board_address, response: IPTagGetResponse):
+    def __handle_get_tag_response(self, tag: int, board_address: Optional[str],
+                                  response: IPTagGetResponse) -> None:
         if response.in_use:
             ip = response.ip_address
             host = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"

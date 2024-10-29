@@ -44,7 +44,7 @@ class BootConnection(UDPConnection):
         super().__init__(remote_host=remote_host,
                          remote_port=UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
-    def send_boot_message(self, boot_message: SpinnakerBootMessage):
+    def send_boot_message(self, boot_message: SpinnakerBootMessage) -> None:
         """
         Sends a SpiNNaker boot message using this connection.
 
@@ -80,7 +80,7 @@ class BootConnection(UDPConnection):
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self._REPR_TEMPLATE.format(
             self.local_ip_address, self.local_port,
             self.remote_ip_address, self.remote_port)

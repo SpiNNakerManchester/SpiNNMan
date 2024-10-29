@@ -12,9 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Iterable, Tuple
+
+from spinnman.model.enums import CPUState
 from spinnman.messages.scp.impl import CountState
+from spinnman.messages.scp.impl.count_state_response import CountStateResponse
 from spinnman.messages.scp.enums.scp_result import SCPResult
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector)
 
 # Timeout for getting core state count; higher due to more waiting needed
 GET_CORE_COUNT_TIMEOUT = 2.0
@@ -27,20 +33,19 @@ class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
     __slots__ = [
         "_n_cores"]
 
-    def __init__(self, connection_selector):
+    def __init__(self, connection_selector: ConnectionSelector):
         """
         :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
         """
         super().__init__(connection_selector, timeout=GET_CORE_COUNT_TIMEOUT,
                          non_fail_retry_codes={SCPResult.RC_P2P_NOREPLY})
         self._n_cores = 0
 
-    def __handle_response(self, response):
+    def __handle_response(self, response: CountStateResponse) -> None:
         self._n_cores += response.count
 
-    def get_n_cores_in_state(self, xys, app_id, state):
+    def get_n_cores_in_state(self, xys: Iterable[Tuple[int, int]],
+                             app_id: int, state: CPUState) -> int:
         """
         :param list(int,int) xys:
         :param int app_id:

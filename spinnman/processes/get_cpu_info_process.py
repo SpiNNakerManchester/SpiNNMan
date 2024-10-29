@@ -44,7 +44,8 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
         # pylint: disable=unused-argument
         return True
 
-    def __handle_response(self, x: int, y: int, p: int, response: Response):
+    def __handle_response(
+            self, x: int, y: int, p: int, response: Response) -> None:
         cpu_data = cast(_vcpu_t, _VCPU_PATTERN.unpack_from(
             response.data, response.offset))
         cpu_info = CPUInfo(x, y, p, cpu_data)

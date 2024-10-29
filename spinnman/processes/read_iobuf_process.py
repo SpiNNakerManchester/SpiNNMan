@@ -108,7 +108,8 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         # read = list of (x, y, p, n, next_address, first_read_size)
         self._next_reads: List[_NextRegion] = list()
 
-    def _request_iobuf_address(self, iobuf_size: int, x: int, y: int, p: int):
+    def _request_iobuf_address(
+            self, iobuf_size: int, x: int, y: int, p: int) -> None:
         scamp_coords = (x, y, 0)
         base_address = get_vcpu_address(p) + CPU_IOBUF_ADDRESS_OFFSET
         self._send_request(
@@ -118,34 +119,34 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
 
     def __handle_iobuf_address_response(
             self, iobuf_size: int, scamp_coords: XYP, xyp: XYP,
-            response: Response):
+            response: Response) -> None:
         iobuf_address, = _ONE_WORD.unpack_from(response.data, response.offset)
         if iobuf_address != 0:
             first_read_size = min((iobuf_size + 16, UDP_MESSAGE_MAX_SIZE))
             self._next_reads.append(_NextRegion(
                 scamp_coords, xyp, 0, iobuf_address, first_read_size))
 
-    def _request_iobuf_region_tail(self, tail: _RegionTail):
+    def _request_iobuf_region_tail(self, tail: _RegionTail) -> None:
         self._send_request(
             ReadMemory(tail.scamp_coords, tail.base_address, tail.size),
             functools.partial(
                 self.__handle_extra_iobuf_response, tail))
 
     def __handle_extra_iobuf_response(
-            self, tail: _RegionTail, response: Response):
+            self, tail: _RegionTail, response: Response) -> None:
         view = self._iobuf_view[tail.core_coords][tail.n]
         base = tail.offset
         view[base:base + response.length] = response.data[
             response.offset:response.offset + response.length]
 
-    def _request_iobuf_region(self, region: _NextRegion):
+    def _request_iobuf_region(self, region: _NextRegion) -> None:
         self._send_request(
             ReadMemory(region.scamp_coords, region.next_address,
                        region.first_read_size),
             functools.partial(self.__handle_first_iobuf_response, region))
 
     def __handle_first_iobuf_response(
-            self, region: _NextRegion, response: Response):
+            self, region: _NextRegion, response: Response) -> None:
         base_address = region.next_address
 
         # Unpack the iobuf header

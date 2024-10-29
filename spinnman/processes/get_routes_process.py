@@ -57,7 +57,7 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
 
     def _add_routing_entry(
             self, route_no: int, offset: int, app_id: int, route: int,
-            key: int, mask: int):
+            key: int, mask: int) -> None:
         # pylint: disable=too-many-arguments
         if route >= 0xFF000000:
             return
@@ -67,7 +67,7 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
         self._entries[route_no + offset] = MulticastRoutingEntry(
             key, mask, RoutingEntry(spinnaker_route=route))
 
-    def __handle_response(self, offset: int, response: Response):
+    def __handle_response(self, offset: int, response: Response) -> None:
         for route_no in range(_ENTRIES_PER_READ):
             entry = _ROUTE_ENTRY_PATTERN.unpack_from(
                 response.data,

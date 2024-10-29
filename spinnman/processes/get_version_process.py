@@ -38,7 +38,7 @@ class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):
         super().__init__(connection_selector, n_retries)
         self._version_info: Optional[VersionInfo] = None
 
-    def _get_response(self, version_response: GetVersionResponse):
+    def _get_response(self, version_response: GetVersionResponse) -> None:
         """
         :param GetVersionResponse version_response:
         """

@@ -62,7 +62,7 @@ class _SCPReadADCResponse(BMPResponse[ADCInfo]):
         return ADCInfo(data, offset)
 
     @property
-    def adc_info(self):
+    def adc_info(self) -> ADCInfo:
         """
         The ADC information.
         """

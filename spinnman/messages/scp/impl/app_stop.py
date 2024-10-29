@@ -22,7 +22,7 @@ from .check_ok_response import CheckOKResponse
 _APP_MASK = 0xFF
 
 
-def _get_data(app_id, signal):
+def _get_data(app_id: int, signal: Signal) -> int:
     data = (_APP_MASK << 8) | app_id
     data += signal.value << 16
     return data
