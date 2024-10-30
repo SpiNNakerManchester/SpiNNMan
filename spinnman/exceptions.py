@@ -14,13 +14,16 @@
 from __future__ import annotations
 import traceback
 from types import TracebackType
-from typing import Any, List, Optional, FrozenSet, Union, TYPE_CHECKING
+from typing import (
+    Any, Generic, List, Optional, FrozenSet, TYPE_CHECKING, TypeVar, Union)
 if TYPE_CHECKING:
     from spinnman.messages.scp.enums import SCPResult
     from spinnman.model.enums import CPUState
     from spinnman.model import CPUInfos
     from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
     from spinnman.connections.udp_packet_connections import SCAMPConnection
+
+T = TypeVar("T")
 
 
 class SpinnmanException(Exception):
@@ -64,13 +67,13 @@ class SpinnmanInvalidPacketException(SpinnmanException):
         return self._problem
 
 
-class SpinnmanInvalidParameterException(SpinnmanException):
+class SpinnmanInvalidParameterException(SpinnmanException, Generic[T]):
     """
     An exception that indicates that the value of one of the parameters
     passed was invalid.
     """
 
-    def __init__(self, parameter: str, value, problem: str):
+    def __init__(self, parameter: str, value: T, problem: str):
         """
         :param str parameter: The name of the parameter that is invalid
         :param str value: The value of the parameter that is invalid
@@ -93,7 +96,7 @@ class SpinnmanInvalidParameterException(SpinnmanException):
         return self._parameter
 
     @property
-    def value(self):
+    def value(self) -> T:
         """
         The value that is invalid.
         """
@@ -115,7 +118,7 @@ class SpinnmanInvalidParameterTypeException(SpinnmanException):
     passed was invalid.
     """
 
-    def __init__(self, parameter: str, param_type, problem: str):
+    def __init__(self, parameter: str, param_type: str, problem: str):
         """
         :param str parameter: The name of the parameter that is invalid
         :param str param_type: The type of the parameter that is invalid
@@ -138,7 +141,7 @@ class SpinnmanInvalidParameterTypeException(SpinnmanException):
         return self._parameter
 
     @property
-    def type(self):
+    def type(self) -> str:
         """
         The value that is invalid.
         """
@@ -186,13 +189,13 @@ class SpinnmanEOFException(SpinnmanIOException):
         super().__init__("connection is closed")
 
 
-class SpinnmanTimeoutException(SpinnmanException):
+class SpinnmanTimeoutException(SpinnmanException, Generic[T]):
     """
     An exception that indicates that a timeout occurred before an operation
     could finish.
     """
 
-    def __init__(self, operation: Any, timeout: Optional[float],
+    def __init__(self, operation: T, timeout: Optional[float],
                  msg: Optional[str] = None):
         """
         :param operation: The operation being performed
@@ -206,11 +209,10 @@ class SpinnmanTimeoutException(SpinnmanException):
         self._timeout = timeout
 
     @property
-    def operation(self) -> str:
+    def operation(self) -> T:
         """
         The operation that was performed.
 
-        :rtype: str
         """
         return self._operation
 
@@ -230,7 +232,7 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
     for the current operation.
     """
 
-    def __init__(self, operation: str, command,
+    def __init__(self, operation: str, command: str,
                  response: Union[str, SCPResult]):
         """
         :param str operation: The operation being performed
@@ -254,7 +256,7 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
         return self._operation
 
     @property
-    def command(self):
+    def command(self) -> str:
         """
         The command being executed.
         """

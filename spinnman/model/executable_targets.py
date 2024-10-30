@@ -43,7 +43,7 @@ class ExecutableTargets(object):
 
     def add_subsets(
             self, binary: str, subsets: CoreSubsets,
-            executable_type: Optional[ExecutableType] = None):
+            executable_type: Optional[ExecutableType] = None) -> None:
         """
         Add core subsets to a binary.
 
@@ -66,7 +66,7 @@ class ExecutableTargets(object):
 
     def add_processor(
             self, binary: str, chip_x: int, chip_y: int, chip_p: int,
-            executable_type: Optional[ExecutableType] = None):
+            executable_type: Optional[ExecutableType] = None) -> None:
         """
         Add a processor to the executable targets
 
@@ -160,7 +160,8 @@ class ExecutableTargets(object):
         """
         return self._all_core_subsets
 
-    def known(self, binary, chip_x, chip_y, chip_p) -> bool:
+    def known(
+            self, binary: str, chip_x: int, chip_y: int, chip_p: int) -> bool:
         """
         :param str binary:
         :param int chip_x:

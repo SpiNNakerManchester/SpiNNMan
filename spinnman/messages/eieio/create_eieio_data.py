@@ -16,7 +16,7 @@ from spinnman.messages.eieio.data_messages import (
     EIEIODataMessage, EIEIODataHeader)
 
 
-def read_eieio_data_message(data, offset):
+def read_eieio_data_message(data: bytes, offset: int) -> EIEIODataMessage:
     """
     Reads the content of an EIEIO data message and returns an object
     identifying the data which was contained in the packet.

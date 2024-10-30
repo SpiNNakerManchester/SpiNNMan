@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from typing import Dict, Iterable, Iterator
+from typing_extensions import Self
 from spinn_utilities.typing.coords import XYP
 from spinnman.model.enums import CPUState
 from .cpu_info import CPUInfo
@@ -28,7 +29,7 @@ class CPUInfos(object):
     def __init__(self) -> None:
         self._cpu_infos: Dict[XYP, CPUInfo] = dict()
 
-    def add_info(self, cpu_info: CPUInfo):
+    def add_info(self, cpu_info: CPUInfo) -> None:
         """
         Add a info on using its core coordinates.
 
@@ -36,7 +37,7 @@ class CPUInfos(object):
         """
         self._cpu_infos[cpu_info.x, cpu_info.y, cpu_info.p] = cpu_info
 
-    def add_infos(self, other, states: Iterable[CPUState]):
+    def add_infos(self, other: Self, states: Iterable[CPUState]) -> None:
         """
         Adds all the infos in the other CPUInfos if the have one of the
         required states

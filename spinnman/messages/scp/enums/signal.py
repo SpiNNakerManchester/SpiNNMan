@@ -43,9 +43,9 @@ class Signal(Enum):
     USER_2 = (12, SignalType.MULTICAST)
     USER_3 = (13, SignalType.MULTICAST)
 
-    def __new__(cls, *args) -> 'Signal':
+    def __new__(cls, value: int, signal_type: SignalType) -> 'Signal':
         obj = object.__new__(cls)
-        obj._value_ = args[0]
+        obj._value_ = value
         return obj
 
     def __init__(self, value: int, signal_type: SignalType) -> None:

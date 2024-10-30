@@ -29,9 +29,10 @@ class EIEIOType(Enum):
     #: Indicates that data is keys and payloads of 32 bits.
     KEY_PAYLOAD_32_BIT = (3, 4, 4)
 
-    def __new__(cls, *args) -> 'EIEIOType':
+    def __new__(cls, encoded_value: int, key_bytes: int,
+                payload_bytes: int) -> 'EIEIOType':
         obj = object.__new__(cls)
-        obj._value_ = args[0]
+        obj._value_ = encoded_value
         return obj
 
     def __init__(self, encoded_value: int,

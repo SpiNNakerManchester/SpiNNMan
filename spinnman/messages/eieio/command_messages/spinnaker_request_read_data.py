@@ -149,7 +149,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         """
         return self._requests.channel(request_id)
 
-    def region_id(self, request_id) -> int:
+    def region_id(self, request_id: int) -> int:
         """
         The region_id for this request_id.
 
@@ -159,7 +159,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         """
         return self._requests.region_id(request_id)
 
-    def start_address(self, request_id) -> int:
+    def start_address(self, request_id: int) -> int:
         """
         The start_address for this request_id.
 
@@ -169,7 +169,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         """
         return self._requests.start_address(request_id)
 
-    def space_to_be_read(self, request_id) -> int:
+    def space_to_be_read(self, request_id: int) -> int:
         """
         The space_to_be_read for this request_id.
 
@@ -356,7 +356,7 @@ class _SpinnakerRequestReadDataRequest(object):
         else:
             self._space_to_be_read = space_to_be_read
 
-    def channel(self, request_id) -> int:
+    def channel(self, request_id: int) -> int:
         """
         Gets the channel for this request_id
 
@@ -373,7 +373,7 @@ class _SpinnakerRequestReadDataRequest(object):
             f"channel request needs to be comprised between 0 and "
             f"{len(self._channel) - 1:d}; current value: {request_id:d}")
 
-    def region_id(self, request_id) -> int:
+    def region_id(self, request_id: int) -> int:
         """
         Gets the region_id for this request_id
 

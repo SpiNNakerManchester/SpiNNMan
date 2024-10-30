@@ -55,8 +55,8 @@ class KeyDataElement(AbstractDataElement):
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type, "Unknown type")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"KeyDataElement:0x{self._key:x}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
