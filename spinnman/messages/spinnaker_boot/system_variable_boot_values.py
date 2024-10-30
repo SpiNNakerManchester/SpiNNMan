@@ -30,6 +30,7 @@ class _DataType(Enum):
     BYTE_ARRAY = (16, "s")
 
     def __new__(cls, value: int, struct_code: str) -> "_DataType":
+        # pylint: disable=unused-argument
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
