@@ -34,5 +34,5 @@ class NotificationProtocolStartResume(EIEIOCommandMessage):
     @staticmethod
     @overrides(EIEIOCommandMessage.from_bytestring)
     def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
-                        offset: int)  -> "NotificationProtocolStartResume":
+                        offset: int) -> "NotificationProtocolStartResume":
         return NotificationProtocolStartResume()

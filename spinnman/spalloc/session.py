@@ -302,7 +302,8 @@ class Session:
 
     def websocket(
             self, url: str, header: Optional[dict] = None,
-            cookie: Optional[str] = None, **kwargs: Any) -> websocket.WebSocket:
+            cookie: Optional[str] = None,
+            **kwargs: Any) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.
@@ -374,7 +375,8 @@ class SessionAware:
     def _get(self, url: str, **kwargs: Any) -> requests.Response:
         return self.__session.get(url, **kwargs)
 
-    def _post(self, url: str, json_dict: dict, **kwargs: Any) -> requests.Response:
+    def _post(self, url: str, json_dict: dict,
+              **kwargs: Any) -> requests.Response:
         return self.__session.post(url, json_dict, **kwargs)
 
     def _put(self, url: str, data: str, **kwargs: Any) -> requests.Response:

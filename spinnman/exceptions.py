@@ -15,7 +15,7 @@ from __future__ import annotations
 import traceback
 from types import TracebackType
 from typing import (
-    Any, Generic, List, Optional, FrozenSet, TYPE_CHECKING, TypeVar, Union)
+    Generic, List, Optional, FrozenSet, TYPE_CHECKING, TypeVar, Union)
 if TYPE_CHECKING:
     from spinnman.messages.scp.enums import SCPResult
     from spinnman.model.enums import CPUState

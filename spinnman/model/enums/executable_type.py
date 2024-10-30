@@ -13,7 +13,7 @@
 # limitations under the License.
 from __future__ import annotations
 from enum import Enum
-from typing import FrozenSet, Sequence, Tuple
+from typing import FrozenSet, Sequence
 from spinnman.model.enums import CPUState
 
 
@@ -68,9 +68,9 @@ class ExecutableType(Enum):
         "Runs immediately without waiting for barrier and never ends")
 
     def __new__(cls, value: int, start_state: Sequence[CPUState],
-                 end_state: Sequence[CPUState],
-                 supports_auto_pause_and_resume: bool,
-                 doc: str = "") -> 'ExecutableType':
+                end_state: Sequence[CPUState],
+                supports_auto_pause_and_resume: bool,
+                doc: str = "") -> 'ExecutableType':
         obj = object.__new__(cls)
         obj._value_ = value
         obj. __doc__ = doc

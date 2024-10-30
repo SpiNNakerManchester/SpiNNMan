@@ -841,7 +841,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def execute_flood(
             self, core_subsets: CoreSubsets,
             executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False) -> None :
+            n_bytes: Optional[int] = None, wait: bool = False) -> None:
         if isinstance(executable, int):
             # No executable is 4 bytes long
             raise TypeError("executable may not be int")
