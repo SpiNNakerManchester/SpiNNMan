@@ -89,7 +89,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
                     connection.chip_x, connection.chip_y, tag),
                     partial(
                         self.__handle_get_tag_response, tag,
-                        connection.remote_ip_address))
+                        board_address))
 
         # Return the tags
         return [tag for tag in self._tags if tag is not None]
