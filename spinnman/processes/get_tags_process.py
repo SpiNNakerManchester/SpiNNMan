@@ -48,7 +48,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
             self, response: IPTagGetInfoResponse) -> None:
         self._tag_info = response
 
-    def __handle_get_tag_response(self, tag: int, board_address: Optional[str],
+    def __handle_get_tag_response(self, tag: int, board_address: str,
                                   response: IPTagGetResponse) -> None:
         if response.in_use:
             ip = response.ip_address
@@ -82,6 +82,8 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         n_tags = self._tag_info.pool_size + self._tag_info.fixed_size
         self._tags = [None] * n_tags
         with self._collect_responses():
+            board_address = connection.remote_ip_address
+            assert board_address is not None
             for tag in range(n_tags):
                 self._send_request(IPTagGet(
                     connection.chip_x, connection.chip_y, tag),
