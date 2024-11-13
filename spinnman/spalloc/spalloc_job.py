@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from contextlib import AbstractContextManager
 from types import TracebackType
 from typing import Dict, Mapping, Optional, Tuple, Type
 from typing_extensions import Literal, Self
 
-from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from spinn_utilities.abstract_base import abstractmethod
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections import UDPConnection
@@ -27,7 +28,7 @@ from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_scp_connection import SpallocSCPConnection
 
 
-class SpallocJob(object, metaclass=AbstractBase):
+class SpallocJob(AbstractContextManager):
     """
     Represents a job in Spalloc.
 
@@ -216,8 +217,9 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
         return self
 
-    def __exit__(self, exc_type: Optional[Type], exc_value: Exception,
-                 exc_tb: TracebackType) -> Literal[False]:
+    def __exit__(self, exc_type: Optional[Type],
+                 exc_value: Optional[BaseException],
+                 exc_tb: Optional[TracebackType]) -> Literal[False]:
         """
         Handle exceptions by killing the job and logging the exception in the
         job's destroy reason.
