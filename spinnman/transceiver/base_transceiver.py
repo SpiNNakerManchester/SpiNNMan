@@ -1146,7 +1146,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         for connection in connections:
             # Convert the host string
             host_string = ip_tag.ip_address
-            assert host_string is not None
             if host_string in ("localhost", ".", "0.0.0.0"):
                 host_string = connection.local_ip_address
             ip_string = socket.gethostbyname(host_string)
