@@ -51,15 +51,15 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
         self._next_block_address = 0
         self._blocks: List[HeapElement] = list()
 
-    def _read_heap_address_response(self, response: Response):
+    def _read_heap_address_response(self, response: Response) -> None:
         self._heap_address = _ADDRESS.unpack_from(
             response.data, response.offset)[0]
 
-    def _read_heap_pointer(self, response: Response):
+    def _read_heap_pointer(self, response: Response) -> None:
         self._next_block_address = _HEAP_POINTER.unpack_from(
             response.data, response.offset)[0]
 
-    def _read_next_block(self, block_address: int, response: Response):
+    def _read_next_block(self, block_address: int, response: Response) -> None:
         self._next_block_address, free = _ELEMENT_HEADER.unpack_from(
             response.data, response.offset)
         if self._next_block_address != 0:
@@ -68,7 +68,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
 
     def __read_address(
             self, core_coords: XYP, address: int, size: int,
-            callback: Callable[[Response], None]):
+            callback: Callable[[Response], None]) -> None:
         with self._collect_responses():
             self._send_request(
                 ReadMemory(core_coords, address, size), callback)

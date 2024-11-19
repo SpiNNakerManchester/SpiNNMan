@@ -60,7 +60,7 @@ def get_vcpu_address(p: int) -> int:
 
 
 def send_port_trigger_message(
-        connection: UDPConnection, board_address: str):
+        connection: UDPConnection, board_address: str) -> None:
     """
     Sends a port trigger message using a connection to (hopefully) open a
     port in a NAT and/or firewall to allow incoming packets to be received.
@@ -84,7 +84,8 @@ def send_port_trigger_message(
         trigger_message.bytestring, (board_address, SCP_SCAMP_PORT))
 
 
-def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
+def reprogram_tag(
+        connection: SCAMPConnection, tag: int, strip: bool = True) -> None:
     """
     Reprogram an IP Tag to send responses to a given SCAMPConnection.
 
@@ -114,7 +115,7 @@ def reprogram_tag(connection: SCAMPConnection, tag: int, strip: bool = True):
 
 def reprogram_tag_to_listener(
         connection: UDPConnection, x: int, y: int, ip_address: str, tag: int,
-        strip: bool = True, read_response: bool = True):
+        strip: bool = True, read_response: bool = True) -> None:
     """
     Reprogram an IP Tag to send responses to a given connection that is
     not connected to a specific board. Such connections are normally

@@ -16,11 +16,14 @@ import time
 import sys
 import signal
 import socket
-from typing import Callable
+from types import FrameType
+from typing import Callable, Optional
+
+from typing_extensions import Never
 from spinnman.connections.udp_packet_connections import IPAddressesConnection
 
 
-def locate_connected_machine(handler: Callable[[str, float], bool]):
+def locate_connected_machine(handler: Callable[[str, float], bool]) -> None:
     """
     Locates any SpiNNaker machines IP addresses from the auto-transmitted
     packets from non-booted SpiNNaker machines.
@@ -43,7 +46,7 @@ def locate_connected_machine(handler: Callable[[str, float], bool]):
 
 
 if __name__ == "__main__":
-    def _ctrlc_handler(sig, frame):
+    def _ctrlc_handler(sig: int, frame: Optional[FrameType]) -> Never:
         """
         :return: Never returns as it causes a sys.exit()
         """

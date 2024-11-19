@@ -94,7 +94,7 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         MachineDataWriter._soft_reset(self)
         self._local_soft_reset()
 
-    def set_transceiver(self, transceiver: Transceiver):
+    def set_transceiver(self, transceiver: Transceiver) -> None:
         """
         Sets the transceiver object.
 

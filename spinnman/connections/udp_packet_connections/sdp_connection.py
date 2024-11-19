@@ -84,7 +84,7 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
         data = self.receive(timeout)
         return SDPMessage.from_bytestring(data, 2)
 
-    def send_sdp_message(self, sdp_message: SDPMessage):
+    def send_sdp_message(self, sdp_message: SDPMessage) -> None:
         """
         Sends an SDP message down this connection.
 

@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from enum import Enum
+from typing import Union
+
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
@@ -26,7 +29,7 @@ class CheckOKResponse(AbstractSCPResponse):
         "_command",
         "_operation")
 
-    def __init__(self, operation: str, command):
+    def __init__(self, operation: str, command: Union[Enum, int, str]):
         """
         :param str operation: The operation being performed
         :param command: The command that was sent
@@ -37,7 +40,7 @@ class CheckOKResponse(AbstractSCPResponse):
         self._command = command
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data: bytes, offset: int):
+    def read_data_bytestring(self, data: bytes, offset: int) -> None:
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

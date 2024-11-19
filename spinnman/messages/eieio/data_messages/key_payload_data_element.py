@@ -79,8 +79,8 @@ class KeyPayloadDataElement(AbstractDataElement):
             raise SpinnmanInvalidParameterException(
                 "eieio_type", eieio_type, "Unknown type")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"KeyPayloadDataElement:0x{self._key:x}:0x{self._payload:x}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()

@@ -32,20 +32,21 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             self, next_connection_selector, n_channels=3,
             intermediate_channel_waits=2)
 
-    def _start_flood_fill(self, n_bytes: int, nearest_neighbour_id: int):
+    def _start_flood_fill(
+            self, n_bytes: int, nearest_neighbour_id: int) -> None:
         n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /
                                  UDP_MESSAGE_MAX_SIZE))
         with self._collect_responses():
             self._send_request(
                 FloodFillStart(nearest_neighbour_id, n_blocks))
 
-    def _end_flood_fill(self, nearest_neighbour_id: int):
+    def _end_flood_fill(self, nearest_neighbour_id: int) -> None:
         with self._collect_responses():
             self._send_request(FloodFillEnd(nearest_neighbour_id))
 
     def write_memory_from_bytearray(
             self, nearest_neighbour_id: int, base_address: int,
-            data: bytes, offset: int, n_bytes: Optional[int] = None):
+            data: bytes, offset: int, n_bytes: Optional[int] = None) -> None:
         """
         :param int nearest_neighbour_id:
         :param int base_address:
@@ -79,7 +80,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
     def write_memory_from_reader(
             self, nearest_neighbour_id: int, base_address: int,
-            reader: BinaryIO, n_bytes: int):
+            reader: BinaryIO, n_bytes: int) -> None:
         """
         :param int nearest_neighbour_id:
         :param int base_address:

@@ -68,7 +68,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
     def chip_y(self) -> int:
         return self._chip_y
 
-    def update_chip_coordinates(self, x: int, y: int):
+    def update_chip_coordinates(self, x: int, y: int) -> None:
         """
         Sets the coordinates without checking they are valid.
 

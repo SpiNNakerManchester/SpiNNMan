@@ -26,8 +26,8 @@ class IPAddressesConnection(UDPConnection):
     """
     __slots__ = ()
 
-    def __init__(self, local_host=None,
-                 local_port=UDP_BOOT_CONNECTION_DEFAULT_PORT):
+    def __init__(self, local_host: Optional[str] = None,
+                 local_port: int = UDP_BOOT_CONNECTION_DEFAULT_PORT):
         super().__init__(local_host=local_host, local_port=local_port)
 
     def receive_ip_address(self, timeout:  Optional[float] = None
@@ -44,6 +44,6 @@ class IPAddressesConnection(UDPConnection):
                 return ip_address
         return None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"IPAddressesConnection(local_host={self.local_ip_address}," \
                f" local_port={self.local_port})"

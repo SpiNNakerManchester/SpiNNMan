@@ -41,7 +41,7 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         self._read_n_blocks_freed = read_n_blocks_freed
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data: bytes, offset: int):
+    def read_data_bytestring(self, data: bytes, offset: int) -> None:
         result = self.scp_response_header.result
         if result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

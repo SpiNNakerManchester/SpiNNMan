@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional
 import struct
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
@@ -27,12 +28,12 @@ class CountStateResponse(AbstractSCPResponse):
     """
     __slots__ = "_count",
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self._count = None
+        self._count: Optional[int] = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data: bytes, offset: int):
+    def read_data_bytestring(self, data: bytes, offset: int) -> None:
         result = self.scp_response_header.result
         # We can accept a no-reply response here; that could just mean
         # that the count wasn't complete (but might be enough anyway)
@@ -46,6 +47,6 @@ class CountStateResponse(AbstractSCPResponse):
         """
         The count of the number of cores with the requested state.
 
-        :rtype: int
         """
+        assert self._count is not None
         return self._count

@@ -27,7 +27,7 @@ class TokenBucket(object):
     """
     __slots__ = ('_capacity', '_tokens', '_fill_rate', '_timestamp')
 
-    def __init__(self, tokens, fill_rate):
+    def __init__(self, tokens: int, fill_rate: float):
         """
         :param int tokens: the total tokens in the bucket
         :param float fill_rate:
@@ -38,7 +38,7 @@ class TokenBucket(object):
         self._fill_rate = float(fill_rate)
         self._timestamp = time.time()
 
-    def consume(self, tokens, block=True):
+    def consume(self, tokens: int, block: bool = True) -> bool:
         """
         Consume tokens from the bucket. Returns True if there were
         sufficient tokens.
@@ -65,11 +65,10 @@ class TokenBucket(object):
         return False
 
     @property
-    def tokens(self):
+    def tokens(self) -> float:
         """
         The number of tokens currently in the bucket.
 
-        :rtype: int
         """
         if self._tokens < self._capacity:
             now = time.time()

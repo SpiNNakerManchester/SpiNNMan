@@ -26,7 +26,7 @@ class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):
     __slots__ = ()
 
     @abstractmethod
-    def send(self, data: bytes):
+    def send(self, data: bytes) -> None:
         """
         Send a message on an open socket.
 

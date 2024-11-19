@@ -55,7 +55,7 @@ class Transceiver(object):
 
     @abstractmethod
     def send_sdp_message(self, message: SDPMessage,
-                         connection: Optional[SDPConnection] = None):
+                         connection: Optional[SDPConnection] = None) -> None:
         """
         Sends an SDP message using one of the connections.
 
@@ -89,7 +89,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def add_scamp_connections(self, connections: Dict[XY, str]):
+    def add_scamp_connections(self, connections: Dict[XY, str]) -> None:
         """
         Check connections to the board and store these for future use.
 
@@ -193,7 +193,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def read_user(self, x: int, y: int, p: int, user: UserRegister):
+    def read_user(self, x: int, y: int, p: int, user: UserRegister) -> int:
         """
         Get the contents of the this user register for the given processor.
 
@@ -226,7 +226,7 @@ class Transceiver(object):
     @abstractmethod
     def add_cpu_information_from_core(
             self, cpu_infos: CPUInfos, x: int, y: int, p: int,
-            states: Iterable[CPUState]):
+            states: Iterable[CPUState]) -> None:
         """
         Adds information about a specific processor on the board to the info
 
@@ -252,7 +252,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_region_base_address(self, x: int, y: int, p: int):
+    def get_region_base_address(self, x: int, y: int, p: int) -> int:
         """
         Gets the base address of the Region Table
 
@@ -329,7 +329,7 @@ class Transceiver(object):
     def execute_flood(
             self, core_subsets: CoreSubsets,
             executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False):
+            n_bytes: Optional[int] = None, wait: bool = False) -> None:
         """
         Start an executable running on multiple places on the board.  This
         will be optimised based on the selected cores, but it may still
@@ -392,8 +392,8 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def write_fpga_register(
-            self, fpga_num: int, register: int, value: int, board: int = 0):
+    def write_fpga_register(self, fpga_num: int, register: int, value: int,
+                            board: int = 0) -> None:
         """
         Write a register on a FPGA of a board. The meaning of setting the
         register's contents will depend on the FPGA's configuration.
@@ -471,8 +471,8 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def write_user(
-            self, x: int, y: int, p: int, user: UserRegister, value: int):
+    def write_user(self, x: int, y: int, p: int, user: UserRegister,
+                   value: int) -> None:
         """
         Write to the user *N* "register" for the given processor.
 
@@ -557,7 +557,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def stop_application(self, app_id: int):
+    def stop_application(self, app_id: int) -> None:
         """
         Sends a stop request for an app_id.
 
@@ -583,7 +583,7 @@ class Transceiver(object):
             error_states: FrozenSet[CPUState] = frozenset((
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check: int = 100,
-            progress_bar: Optional[ProgressBar] = None):
+            progress_bar: Optional[ProgressBar] = None) -> None:
         """
         Waits for the specified cores running the given application to be
         in some target state or states. Handles failures.
@@ -613,7 +613,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def send_signal(self, app_id: int, signal: Signal):
+    def send_signal(self, app_id: int, signal: Signal) -> None:
         """
         Send a signal to an application.
 
@@ -634,7 +634,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def set_ip_tag(self, ip_tag: IPTag, use_sender: bool = False):
+    def set_ip_tag(self, ip_tag: IPTag, use_sender: bool = False) -> None:
         """
         Set up an IP tag.
 
@@ -660,7 +660,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def set_reverse_ip_tag(self, reverse_ip_tag: ReverseIPTag):
+    def set_reverse_ip_tag(self, reverse_ip_tag: ReverseIPTag) -> None:
         """
         Set up a reverse IP tag.
 
@@ -685,7 +685,8 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_ip_tag(self, tag: int, board_address: Optional[str] = None):
+    def clear_ip_tag(
+            self, tag: int, board_address: Optional[str] = None) -> None:
         """
         Clear the setting of an IP tag.
 
@@ -753,7 +754,7 @@ class Transceiver(object):
     @abstractmethod
     def load_multicast_routes(
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
-            app_id: int):
+            app_id: int) -> None:
         """
         Load a set of multicast routes on to a chip.
 
@@ -778,8 +779,8 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def load_fixed_route(
-            self, x: int, y: int, fixed_route: RoutingEntry, app_id: int):
+    def load_fixed_route(self, x: int, y: int, fixed_route: RoutingEntry,
+                         app_id: int) -> None:
         """
         Loads a fixed route routing table entry onto a chip's router.
 
@@ -847,7 +848,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_multicast_routes(self, x: int, y: int):
+    def clear_multicast_routes(self, x: int, y: int) -> None:
         """
         Remove all the multicast routes on a chip.
 
@@ -898,7 +899,7 @@ class Transceiver(object):
     @abstractmethod
     def set_router_diagnostic_filter(
             self, x: int, y: int, position: int,
-            diagnostic_filter: DiagnosticFilter):
+            diagnostic_filter: DiagnosticFilter) -> None:
         """
         Sets a router diagnostic filter in a router.
 
@@ -929,7 +930,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_router_diagnostic_counters(self, x: int, y: int):
+    def clear_router_diagnostic_counters(self, x: int, y: int) -> None:
         """
         Clear router diagnostic information on a chip.
 
@@ -955,7 +956,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def control_sync(self, do_sync: bool):
+    def control_sync(self, do_sync: bool) -> None:
         """
         Control the synchronisation of the chips.
 
@@ -964,7 +965,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def update_provenance_and_exit(self, x: int, y: int, p: int):
+    def update_provenance_and_exit(self, x: int, y: int, p: int) -> None:
         """
         Sends a command to update provenance and exit
 
@@ -978,7 +979,8 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def send_chip_update_provenance_and_exit(self, x: int, y: int, p: int):
+    def send_chip_update_provenance_and_exit(
+            self, x: int, y: int, p: int) -> None:
         """
         Sends a signal to update the provenance and exit
 

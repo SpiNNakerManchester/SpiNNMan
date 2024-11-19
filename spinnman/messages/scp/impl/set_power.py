@@ -32,7 +32,7 @@ class SetPower(BMPRequest[BMPOKResponse]):
 
     def __init__(
             self, power_command: PowerCommand, boards: Boards, *,
-            delay=0.0, board_to_send_to=0):
+            delay: float = 0.0, board_to_send_to: int = 0):
         """
         .. note::
             There is currently a bug in the BMP that means some boards don't

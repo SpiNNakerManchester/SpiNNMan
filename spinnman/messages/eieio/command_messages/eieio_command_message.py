@@ -101,8 +101,8 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         """
         return 2
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"EIEIOCommandMessage:{self._eieio_command_header}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()

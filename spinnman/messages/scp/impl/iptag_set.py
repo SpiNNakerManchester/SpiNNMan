@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List, Union
+
 from spinn_utilities.overrides import overrides
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -28,7 +30,8 @@ class IPTagSet(AbstractSCPRequest[CheckOKResponse]):
     """
     __slots__ = ()
 
-    def __init__(self, x: int, y: int, host, port: int, tag: int, *,
+    def __init__(self, x: int, y: int, host: Union[bytearray, List[int]],
+                 port: int, tag: int, *,
                  strip: bool = False, use_sender: bool = False):
         """
         :param int x: The x-coordinate of a chip, between 0 and 255

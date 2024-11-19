@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from typing import Optional
+
 from spinnman.constants import EIEIO_COMMAND_IDS
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
@@ -29,9 +30,9 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
     """
     __slots__ = "_database_path",
 
-    def __init__(self, database_path=None):
+    def __init__(self, database_path: Optional[str] = None):
         """
-        :param str database_path:
+        :param database_path:
             The location of the database. If ``None``, this is an
             acknowledgement, stating that the database has now been read.
         """
@@ -55,15 +56,19 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
             return None
 
     @property
-    def bytestring(self):
+    def bytestring(self) -> bytes:
         data = super().bytestring
         if self._database_path is not None:
             data += self._database_path
         return data
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
+    def from_bytestring(
+            command_header: EIEIOCommandHeader, data: bytes,
+            offset: int) -> 'NotificationProtocolDatabaseLocation':
         database_path = None
         if len(data) - offset > 0:
-            database_path = data[offset:]
+            raise Exception(
+                "https://github.com/SpiNNakerManchester/SpiNNMan/issues/424")
+            # database_path = data[offset:]
         return NotificationProtocolDatabaseLocation(database_path)

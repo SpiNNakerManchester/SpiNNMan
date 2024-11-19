@@ -101,7 +101,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
 
     def _send_request(self, request: AbstractSCPRequest[R],
                       callback: Optional[Callable[[R], None]] = None,
-                      error_callback: Optional[ECB] = None):
+                      error_callback: Optional[ECB] = None) -> None:
         if error_callback is None:
             error_callback = self._receive_error
         connection = self._conn_selector.get_next_connection(request)
@@ -117,7 +117,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
 
     def _receive_error(
             self, request: AbstractSCPRequest[R], exception: Exception,
-            tb: TracebackType, connection: SCAMPConnection):
+            tb: TracebackType, connection: SCAMPConnection) -> None:
         self._error_requests.append(request)
         self._exceptions.append(exception)
         self._tracebacks.append(tb)
@@ -171,7 +171,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
         """
         return self._conn_selector
 
-    def check_for_error(self, print_exception: bool = False):
+    def check_for_error(self, print_exception: bool = False) -> None:
         """
         Check if any errors have been cached and raises them
 

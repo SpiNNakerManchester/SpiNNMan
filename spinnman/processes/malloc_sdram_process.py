@@ -31,10 +31,11 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
         super().__init__(connection_selector)
         self._base_address = 0
 
-    def __handle_sdram_alloc_response(self, response: _AllocResponse):
+    def __handle_sdram_alloc_response(self, response: _AllocResponse) -> None:
         self._base_address = response.base_address
 
-    def malloc_sdram(self, x: int, y: int, size: int, app_id: int, tag: int):
+    def malloc_sdram(
+            self, x: int, y: int, size: int, app_id: int, tag: int) -> None:
         """
         Allocate space in the SDRAM space.
 

@@ -16,7 +16,7 @@ from functools import wraps
 from logging import getLogger
 from json.decoder import JSONDecodeError
 import re
-from typing import Dict, Tuple, cast, Optional
+from typing import Any, Callable, Dict, Tuple, cast, Optional
 import websocket  # type: ignore
 
 import requests
@@ -34,8 +34,8 @@ _SESSION_COOKIE = "JSESSIONID"
 _debug_pretty_print = False
 
 
-def _may_renew(method):
-    def pp_req(request: requests.PreparedRequest):
+def _may_renew(method: Callable) -> Callable:
+    def pp_req(request: requests.PreparedRequest) -> None:
         """
         :param ~requests.PreparedRequest request:
         """
@@ -47,7 +47,7 @@ def _may_renew(method):
         if request.body:
             print(request.body)
 
-    def pp_resp(response: requests.Response):
+    def pp_resp(response: requests.Response) -> None:
         """
         :param ~requests.Response response:
         """
@@ -61,7 +61,7 @@ def _may_renew(method):
             str(response.content, "UTF-8") if response.content else ""))
 
     @wraps(method)
-    def call(self, *args, **kwargs):
+    def call(self: 'Session', *args: Any, **kwargs: Any) -> None:
         renew_count = 0
         while True:
             r = method(self, *args, **kwargs)
@@ -115,16 +115,17 @@ class Session:
         if session_credentials:
             cookies, headers = session_credentials
             if _SESSION_COOKIE in cookies:
-                self._session_id = cookies[_SESSION_COOKIE]
+                self._session_id: Optional[str] = cookies[_SESSION_COOKIE]
             for key, value in headers.items():
                 if key == "Authorization":
                     # TODO: extract this?
                     pass
                 else:
                     self.__csrf_header = key
-                    self.__csrf = value
+                    self.__csrf: Optional[str] = value
 
-    def __handle_error_or_return(self, response: requests.Response):
+    def __handle_error_or_return(self, response: requests.Response
+                                 ) -> Optional[requests.Response]:
         code = response.status_code
         if code >= 200 and code < 400:
             return response
@@ -133,7 +134,8 @@ class Session:
                          f"    {str(result)}")
 
     @_may_renew
-    def get(self, url: str, timeout: int = 10, **kwargs) -> requests.Response:
+    def get(self, url: str, timeout: int = 10, **kwargs: Any
+            ) -> Optional[requests.Response]:
         """
         Do an HTTP ``GET`` in the session.
 
@@ -143,6 +145,7 @@ class Session:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
+        assert self._session_id is not None
         cookies = {_SESSION_COOKIE: self._session_id}
         r = requests.get(url, params=params, cookies=cookies,
                          allow_redirects=False, timeout=timeout)
@@ -151,7 +154,7 @@ class Session:
 
     @_may_renew
     def post(self, url: str, json_dict: dict, timeout: int = 10,
-             **kwargs) -> requests.Response:
+             **kwargs: Any) -> Optional[requests.Response]:
         """
         Do an HTTP ``POST`` in the session.
 
@@ -171,7 +174,7 @@ class Session:
 
     @_may_renew
     def put(self, url: str, data: str, timeout: int = 10,
-            **kwargs) -> requests.Response:
+            **kwargs: Any) -> Optional[requests.Response]:
         """
         Do an HTTP ``PUT`` in the session. Puts plain text *OR* JSON!
 
@@ -193,7 +196,7 @@ class Session:
 
     @_may_renew
     def delete(self, url: str, timeout: int = 10,
-               **kwargs) -> requests.Response:
+               **kwargs: Any) -> Optional[requests.Response]:
         """
         Do an HTTP ``DELETE`` in the session.
 
@@ -288,6 +291,8 @@ class Session:
         """
         The credentials for requests. *Serializable.*
         """
+        assert self._session_id is not None
+        assert self.__csrf is not None
         cookies = {_SESSION_COOKIE: self._session_id}
         headers = {self.__csrf_header: self.__csrf}
         if self.__token:
@@ -297,7 +302,8 @@ class Session:
 
     def websocket(
             self, url: str, header: Optional[dict] = None,
-            cookie: Optional[str] = None, **kwargs) -> websocket.WebSocket:
+            cookie: Optional[str] = None,
+            **kwargs: Any) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.
@@ -313,6 +319,7 @@ class Session:
         if header is None:
             header = {}
         header[self.__csrf_header] = self.__csrf
+        assert self._session_id is not None
         if cookie is not None:
             cookie += ";" + _SESSION_COOKIE + "=" + self._session_id
         else:
@@ -320,7 +327,7 @@ class Session:
         return websocket.create_connection(
             url, header=header, cookie=cookie, **kwargs)
 
-    def _purge(self):
+    def _purge(self) -> None:
         """
         Clears out all credentials from this session, rendering the session
         completely inoperable henceforth.
@@ -345,7 +352,7 @@ class SessionAware:
         self._url = clean_url(url)
 
     @property
-    def _session_credentials(self):
+    def _session_credentials(self) -> Tuple[Dict[str, str], Dict[str, str]]:
         """
         The current session credentials.
         Only supposed to be called by subclasses.
@@ -356,7 +363,7 @@ class SessionAware:
         return self.__session._credentials
 
     @property
-    def _service_url(self):
+    def _service_url(self) -> str:
         """
         The main service URL.
 
@@ -365,19 +372,20 @@ class SessionAware:
         # pylint: disable=protected-access
         return self.__session._service_url
 
-    def _get(self, url: str, **kwargs) -> requests.Response:
+    def _get(self, url: str, **kwargs: Any) -> requests.Response:
         return self.__session.get(url, **kwargs)
 
-    def _post(self, url: str, json_dict: dict, **kwargs) -> requests.Response:
+    def _post(self, url: str, json_dict: dict,
+              **kwargs: Any) -> requests.Response:
         return self.__session.post(url, json_dict, **kwargs)
 
-    def _put(self, url: str, data: str, **kwargs) -> requests.Response:
+    def _put(self, url: str, data: str, **kwargs: Any) -> requests.Response:
         return self.__session.put(url, data, **kwargs)
 
-    def _delete(self, url: str, **kwargs) -> requests.Response:
+    def _delete(self, url: str, **kwargs: Any) -> requests.Response:
         return self.__session.delete(url, **kwargs)
 
-    def _websocket(self, url: str, **kwargs) -> websocket.WebSocket:
+    def _websocket(self, url: str, **kwargs: Any) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.

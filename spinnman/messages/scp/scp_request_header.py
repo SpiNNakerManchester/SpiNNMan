@@ -59,7 +59,7 @@ class SCPRequestHeader(object):
         return self._sequence
 
     @sequence.setter
-    def sequence(self, sequence: int):
+    def sequence(self, sequence: int) -> None:
         """
         Set the sequence number of the SCP packet.
 

@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from spinnman.messages.sdp import SDPHeader
+
 
 # Kept for spalloc_server to use
-def update_sdp_header_for_udp_send(sdp_header, source_x, source_y):
+def update_sdp_header_for_udp_send(
+        sdp_header: SDPHeader, source_x: int, source_y: int) -> None:
     """
     Apply defaults to the SDP header for sending over UDP.
 

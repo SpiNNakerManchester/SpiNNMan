@@ -25,7 +25,7 @@ class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
 
     def load_fixed_route(
             self, x: int, y: int, fixed_route: RoutingEntry,
-            app_id: int = 0):
+            app_id: int = 0) -> None:
         """
         :param int x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions.
