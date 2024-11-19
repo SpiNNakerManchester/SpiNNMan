@@ -21,7 +21,7 @@ from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 BASE_CONFIG_FILE = "spinnman.cfg"
 
 
-def unittest_setup():
+def unittest_setup() -> None:
     """
     Resets the configurations so only the local default configuration is
     included.
@@ -34,7 +34,7 @@ def unittest_setup():
     SpiNNManDataWriter.mock()
 
 
-def add_spinnman_cfg():
+def add_spinnman_cfg() -> None:
     """
     Add the local configuration and all dependent configuration files.
     """

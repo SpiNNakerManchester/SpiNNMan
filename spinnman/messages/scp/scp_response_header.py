@@ -26,7 +26,7 @@ class SCPResponseHeader(object):
         "_result",
         "_sequence")
 
-    def __init__(self, result, sequence):
+    def __init__(self, result: SCPResult, sequence: int):
         """
         :param SCPResult result:
         :param int sequence:

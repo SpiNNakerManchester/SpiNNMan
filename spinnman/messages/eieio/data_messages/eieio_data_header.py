@@ -137,7 +137,7 @@ class EIEIODataHeader(object):
         return self._count
 
     @count.setter
-    def count(self, count: int):
+    def count(self, count: int) -> None:
         """
         Sets the Count of the number of items in the packet
 
@@ -157,7 +157,8 @@ class EIEIODataHeader(object):
             self._payload_base is not None)
 
     @staticmethod
-    def get_header_size(eieio_type, is_prefix=False, is_payload_base=False):
+    def get_header_size(eieio_type: EIEIOType, is_prefix: bool = False,
+                        is_payload_base: bool = False) -> int:
         """
         Get the size of a header with the given parameters.
 
@@ -297,12 +298,12 @@ class EIEIODataHeader(object):
             prefix_type=prefix_type, payload_base=payload_prefix,
             is_time=bool(payload_is_timestamp), count=count)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"EIEIODataHeader:prefix={self._prefix}:"
                 f"prefix_type={self._prefix_type}:"
                 f"payload_base={self._payload_base}:"
                 "is_time={self._is_time}:type={self._eieio_type.value}:"
                 "tag={self._tag}:count={self._count}")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()

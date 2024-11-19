@@ -42,7 +42,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         "_header",
         "_offset")
 
-    def __init__(self, eieio_header, data=None, offset=0):
+    def __init__(self, eieio_header: EIEIODataHeader,
+                 data: Optional[bytes] = None, offset: int = 0):
         """
         :param EIEIODataHeader eieio_header: The header of the message
         :param bytes data: Optional data contained within the packet
@@ -61,9 +62,13 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @staticmethod
     def create(
-            eieio_type, count=0, data=None, offset=0, key_prefix=None,
-            payload_prefix=None, timestamp=None,
-            prefix_type=EIEIOPrefix.LOWER_HALF_WORD):
+            eieio_type: EIEIOType, count: int = 0,
+            data: Optional[bytes] = None, offset: int = 0,
+            key_prefix: Optional[int] = None,
+            payload_prefix: Optional[int] = None,
+            timestamp: Optional[int] = None,
+            prefix_type: EIEIOPrefix = EIEIOPrefix.LOWER_HALF_WORD
+            ) -> "EIEIODataMessage":
         """
         Create a data message.
 
@@ -98,8 +103,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @staticmethod
     def min_packet_length(
-            eieio_type, is_prefix=False, is_payload_base=False,
-            is_timestamp=False):
+            eieio_type: EIEIOType, is_prefix: bool = False,
+            is_payload_base: bool = False, is_timestamp: bool = False) -> int:
         """
         The minimum length of a message with the given header, in bytes.
 
@@ -158,7 +163,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         return (self._header.size +
                 (ty.key_bytes + ty.payload_bytes) * self._header.count)
 
-    def add_key_and_payload(self, key: int, payload: int):
+    def add_key_and_payload(self, key: int, payload: int) -> None:
         """
         Adds a key and payload to the packet.
 
@@ -180,7 +185,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         self.add_element(KeyPayloadDataElement(
             key, payload, self._header.is_time))
 
-    def add_key(self, key: int):
+    def add_key(self, key: int) -> None:
         """
         Add a key to the packet.
 
@@ -195,7 +200,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                 f"{self._header.eieio_type.max_value}")
         self.add_element(KeyDataElement(key))
 
-    def add_element(self, element: AbstractDataElement):
+    def add_element(self, element: AbstractDataElement) -> None:
         """
         Add an element to the message.  The correct type of element must
         be added, depending on the header values.
@@ -235,6 +240,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
             return None
         self._elements_read += 1
         payload: Optional[int] = None
+        assert self._data is not None
         if self._header.eieio_type == EIEIOType.KEY_16_BIT:
             key = _ONE_SHORT.unpack_from(self._data, self._offset)[0]
             self._offset += 2
@@ -272,10 +278,10 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     def bytestring(self) -> bytes:
         return self._header.bytestring + self._elements
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self._data is not None:
             return f"EIEIODataMessage:{self._header}:{self._header.count}"
-        return f"EIEIODataMessage:{self._header}:{self._elements}"
+        return f"EIEIODataMessage:{self._header}:{self._elements!r}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()

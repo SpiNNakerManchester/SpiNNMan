@@ -37,7 +37,7 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         self._sdp_header: Optional[SDPHeader] = None
         self._scp_response_header: Optional[SCPResponseHeader] = None
 
-    def read_bytestring(self, data: bytes, offset: int):
+    def read_bytestring(self, data: bytes, offset: int) -> None:
         """
         Reads a packet from a byte-string of data.
 
@@ -51,7 +51,7 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         self.read_data_bytestring(data, _SCP_DATA_OFFSET + offset)
 
     @abstractmethod
-    def read_data_bytestring(self, data: bytes, offset: int):
+    def read_data_bytestring(self, data: bytes, offset: int) -> None:
         """
         Reads the remainder of the data following the header.
 

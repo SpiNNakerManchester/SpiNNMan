@@ -54,7 +54,7 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
             non_fail_retry_codes=non_fail_retry_codes)
         self._response: Optional[R] = None
 
-    def __handle_response(self, response: R):
+    def __handle_response(self, response: R) -> None:
         self._response = response
 
     def execute(self, request: AbstractSCPRequest[R]) -> R:

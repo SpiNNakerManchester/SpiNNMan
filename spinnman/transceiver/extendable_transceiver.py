@@ -39,7 +39,7 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
         "_nearest_neighbour_lock"
     ]
 
-    def __init__(self):
+    def __init__(self) -> None:
 
         # A lock against multiple flood fill writes - needed as SCAMP cannot
         # cope with this

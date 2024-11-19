@@ -40,7 +40,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         super().__init__(connection_selector)
         self._view = memoryview(b'')
 
-    def __handle_response(self, offset: int, response: Response):
+    def __handle_response(self, offset: int, response: Response) -> None:
         self._view[offset:offset + response.length] = response.data[
             response.offset:response.offset + response.length]
 

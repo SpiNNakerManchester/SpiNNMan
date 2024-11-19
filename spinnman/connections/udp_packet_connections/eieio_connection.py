@@ -61,7 +61,7 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
             return read_eieio_command_message(data, 0)
         return read_eieio_data_message(data, 0)
 
-    def send_eieio_message(self, eieio_message: AbstractEIEIOMessage):
+    def send_eieio_message(self, eieio_message: AbstractEIEIOMessage) -> None:
         """
         Sends an EIEIO message down this connection.
 
@@ -74,7 +74,7 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
 
     def send_eieio_message_to(
             self, eieio_message: AbstractEIEIOMessage,
-            ip_address: str, port: int):
+            ip_address: str, port: int) -> None:
         """
 
         :param AbstractEIEIOMessage eieio_message:

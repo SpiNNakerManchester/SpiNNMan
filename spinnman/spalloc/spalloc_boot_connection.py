@@ -45,7 +45,7 @@ class SpallocBootConnection(
     __slots__ = ()
 
     @overrides(BootConnection.send_boot_message)
-    def send_boot_message(self, boot_message: SpinnakerBootMessage):
+    def send_boot_message(self, boot_message: SpinnakerBootMessage) -> None:
         self.send(boot_message.bytestring)
 
         # Sleep between messages to avoid flooding the machine

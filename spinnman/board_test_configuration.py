@@ -24,11 +24,11 @@ class BoardTestConfiguration(object):
     Configuration to use for a test board
     """
 
-    def __init__(self):
-        self.remotehost = None
-        self.auto_detect_bmp = None
+    def __init__(self) -> None:
+        self.remotehost: str = "UNSET"
+        self.auto_detect_bmp: bool = False
 
-    def set_up_remote_board(self, version: Optional[int] = None):
+    def set_up_remote_board(self, version: Optional[int] = None) -> None:
         """
         Gets a remote board to test, returning the first that it finds.
 

@@ -25,6 +25,6 @@ class StopRequests(EIEIOCommandMessage):
     """
     __slots__ = ()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.STOP_SENDING_REQUESTS))

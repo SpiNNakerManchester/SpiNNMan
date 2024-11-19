@@ -45,12 +45,12 @@ class SpallocEIEIOConnection(
     __slots__ = ()
 
     @overrides(EIEIOConnection.send_eieio_message)
-    def send_eieio_message(self, eieio_message: AbstractEIEIOMessage):
+    def send_eieio_message(self, eieio_message: AbstractEIEIOMessage) -> None:
         # Not normally used, as packets need headers to go to SpiNNaker
         self.send(eieio_message.bytestring)
 
-    def send_eieio_message_to_core(
-            self, eieio_message: AbstractEIEIOMessage, x: int, y: int, p: int):
+    def send_eieio_message_to_core(self, eieio_message: AbstractEIEIOMessage,
+                                   x: int, y: int, p: int) -> None:
         """
 
         :param AbstractEIEIOMessage eieio_message:
@@ -88,7 +88,7 @@ class SpallocEIEIOConnection(
         """
         raise NotImplementedError
 
-    def update_tag(self, tag: int, do_receive: bool = True):
+    def update_tag(self, tag: int, do_receive: bool = True) -> None:
         """
         Update the given tag on the connected Ethernet-enabled chip to send
         messages to this connection.

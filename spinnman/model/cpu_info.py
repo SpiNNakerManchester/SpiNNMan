@@ -377,8 +377,8 @@ class CPUInfo(object):
                 f"in state {self.__state.name}\n")
 
     @staticmethod
-    def mock_info(
-            x: int, y: int, p: int, physical_cpu_id: int, state: CPUState):
+    def mock_info(x: int, y: int, p: int, physical_cpu_id: int,
+                  state: CPUState) -> "CPUInfo":
         """
         Makes a CPU_info object for Testing purposes
 

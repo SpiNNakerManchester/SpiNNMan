@@ -98,7 +98,7 @@ class SDPHeader(object):
         return self._flags
 
     @flags.setter
-    def flags(self, flags: SDPFlag):
+    def flags(self, flags: SDPFlag) -> None:
         """
         Set the flags of the packet.
 
@@ -117,7 +117,7 @@ class SDPHeader(object):
         return self._tag
 
     @tag.setter
-    def tag(self, tag: int):
+    def tag(self, tag: int) -> None:
         """
         Set the tag of the packet.
 
@@ -135,7 +135,7 @@ class SDPHeader(object):
         return self._destination_port
 
     @destination_port.setter
-    def destination_port(self, destination_port: int):
+    def destination_port(self, destination_port: int) -> None:
         """
         Set the destination port of the packet.
 
@@ -154,7 +154,7 @@ class SDPHeader(object):
         return self._destination_cpu
 
     @destination_cpu.setter
-    def destination_cpu(self, destination_cpu: int):
+    def destination_cpu(self, destination_cpu: int) -> None:
         """
         Set the ID of the destination processor of the packet.
 
@@ -174,7 +174,7 @@ class SDPHeader(object):
         return self._destination_chip_x
 
     @destination_chip_x.setter
-    def destination_chip_x(self, destination_chip_x: int):
+    def destination_chip_x(self, destination_chip_x: int) -> None:
         """
         Set the x-coordinate of the destination chip of the packet.
 
@@ -194,7 +194,7 @@ class SDPHeader(object):
         return self._destination_chip_y
 
     @destination_chip_y.setter
-    def destination_chip_y(self, destination_chip_y: int):
+    def destination_chip_y(self, destination_chip_y: int) -> None:
         """
         Set the y-coordinate of the destination chip of the packet.
 
@@ -214,7 +214,7 @@ class SDPHeader(object):
         return self._source_port
 
     @source_port.setter
-    def source_port(self, source_port: int):
+    def source_port(self, source_port: int) -> None:
         """
         Set the source port of the packet.
 
@@ -233,7 +233,7 @@ class SDPHeader(object):
         return self._source_cpu
 
     @source_cpu.setter
-    def source_cpu(self, source_cpu: int):
+    def source_cpu(self, source_cpu: int) -> None:
         """
         Set the ID of the source processor of the packet.
 
@@ -254,7 +254,7 @@ class SDPHeader(object):
         return self._source_chip_x
 
     @source_chip_x.setter
-    def source_chip_x(self, source_chip_x: int):
+    def source_chip_x(self, source_chip_x: int) -> None:
         """
         Set the x-coordinate of the source chip of the packet.
 
@@ -276,7 +276,7 @@ class SDPHeader(object):
         return self._source_chip_y
 
     @source_chip_y.setter
-    def source_chip_y(self, source_chip_y: int):
+    def source_chip_y(self, source_chip_y: int) -> None:
         """
         Set the y-coordinate of the source chip of the packet.
 
@@ -303,7 +303,7 @@ class SDPHeader(object):
             self.source_chip_y, self.source_chip_x)
 
     @staticmethod
-    def from_bytestring(data: bytes, offset: int):
+    def from_bytestring(data: bytes, offset: int) -> "SDPHeader":
         """
         Read the header from a byte-string.
 
@@ -334,7 +334,7 @@ class SDPHeader(object):
             (self._destination_chip_x, self._destination_chip_y),
             self._destination_cpu)
 
-    def update_for_send(self, source_x: int, source_y: int):
+    def update_for_send(self, source_x: int, source_y: int) -> None:
         """
         Apply defaults to the header for sending over UDP.
 

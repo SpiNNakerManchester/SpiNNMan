@@ -57,7 +57,7 @@ class SpallocEIEIOListener(
         return read_eieio_data_message(data, 0)
 
     @overrides(SpallocProxiedConnection.send)
-    def send(self, data: bytes):
+    def send(self, data: bytes) -> None:
         """
         .. note::
             This class does not allow sending.
@@ -76,8 +76,8 @@ class SpallocEIEIOListener(
         raise NotImplementedError
 
     @abstractmethod
-    def send_to_chip(
-            self, message: bytes, x: int, y: int, port: int = SCP_SCAMP_PORT):
+    def send_to_chip(self, message: bytes, x: int, y: int,
+                     port: int = SCP_SCAMP_PORT) -> None:
         """
         Send a message on an open socket to a particular board.
 
@@ -94,7 +94,7 @@ class SpallocEIEIOListener(
         """
         raise NotImplementedError
 
-    def send_to(self, data: bytes, address: Tuple[str, int]):
+    def send_to(self, data: bytes, address: Tuple[str, int]) -> None:
         """
         Send a message on an open socket.
 
@@ -133,7 +133,7 @@ class SpallocEIEIOListener(
 
     def send_eieio_message_to_core(
             self, eieio_message: AbstractEIEIOMessage, x: int, y: int, p: int,
-            ip_address: str):
+            ip_address: str) -> None:
         """
         Send an EIEIO message (one way) to a given core.
 
@@ -160,7 +160,8 @@ class SpallocEIEIOListener(
         self.send_to(
             _TWO_SKIP + sdp_message.bytestring, (ip_address, SCP_SCAMP_PORT))
 
-    def update_tag(self, x: int, y: int, tag: int, do_receive: bool = True):
+    def update_tag(
+            self, x: int, y: int, tag: int, do_receive: bool = True) -> None:
         """
         Update the given tag on the given Ethernet-enabled chip to send
         messages to this connection.
@@ -191,7 +192,7 @@ class SpallocEIEIOListener(
                 if _try + 1 == _NUM_UPDATE_TAG_TRIES:
                     raise e
 
-    def update_tag_by_ip(self, ip_address: str, tag: int):
+    def update_tag_by_ip(self, ip_address: str, tag: int) -> None:
         """
         Update a tag on a board at a given IP address to send messages to this
         connection.

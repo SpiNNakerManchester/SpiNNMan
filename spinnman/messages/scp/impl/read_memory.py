@@ -43,7 +43,7 @@ class Response(AbstractSCPResponse):
         self.__cmd = command
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
-    def read_data_bytestring(self, data: bytes, offset: int):
+    def read_data_bytestring(self, data: bytes, offset: int) -> None:
         assert self._scp_response_header is not None
         if self._scp_response_header.result != SCPResult.RC_OK:
             raise SpinnmanUnexpectedResponseCodeException(

@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Optional
-from spinnman.messages.scp.impl import SDRAMDeAlloc
+from spinnman.messages.scp.impl.sdram_de_alloc import (
+    SDRAMDeAlloc, _SCPSDRAMDeAllocResponse)
 from spinnman.processes import AbstractMultiConnectionProcess
 from spinnman.processes import ConnectionSelector
 
@@ -27,14 +28,14 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
     """
     __slots__ = ("_no_blocks_freed", )
 
-    def __init__(self, connection_selector: ConnectionSelector):
+    def __init__(self, connection_selector: ConnectionSelector) -> None:
         """
         :param ConnectionSelector connection_selector:
         """
         super().__init__(connection_selector)
         self._no_blocks_freed: Optional[int] = None
 
-    def de_alloc_all_app_sdram(self, x: int, y: int, app_id: int):
+    def de_alloc_all_app_sdram(self, x: int, y: int, app_id: int) -> None:
         """
         :param int x:
         :param int y:
@@ -47,7 +48,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
             self._send_request(SDRAMDeAlloc(x, y, app_id=app_id),
                                callback=self.__handle_sdram_alloc_response)
 
-    def de_alloc_sdram(self, x: int, y: int, base_address: int):
+    def de_alloc_sdram(self, x: int, y: int, base_address: int) -> None:
         """
         :param int x:
         :param int y:
@@ -57,7 +58,8 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
             self._send_request(SDRAMDeAlloc(x, y, base_address=base_address),
                                callback=None)
 
-    def __handle_sdram_alloc_response(self, response):
+    def __handle_sdram_alloc_response(
+            self, response: _SCPSDRAMDeAllocResponse) -> None:
         self._no_blocks_freed = response.number_of_blocks_freed
 
     @property

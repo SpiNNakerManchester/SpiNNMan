@@ -36,7 +36,7 @@ class SpallocSCPConnection(
     """
     __slots__ = ()
 
-    def __init__(self, x, y):
+    def __init__(self, x: int, y: int) -> None:
         super(SpallocSCPConnection, self).__init__(x, y)
 
     @overrides(SCAMPConnection.receive_sdp_message)
@@ -46,7 +46,7 @@ class SpallocSCPConnection(
         return SDPMessage.from_bytestring(data, 2)
 
     @overrides(SCAMPConnection.send_sdp_message)
-    def send_sdp_message(self, sdp_message: SDPMessage):
+    def send_sdp_message(self, sdp_message: SDPMessage) -> None:
         # If a reply is expected, the connection should
         if sdp_message.sdp_header.flags == SDPFlag.REPLY_EXPECTED:
             sdp_message.sdp_header.update_for_send(self.chip_x, self.chip_y)

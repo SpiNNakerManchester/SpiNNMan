@@ -138,11 +138,11 @@ class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
             data += bytes(self._data)
         return data
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # Default is to return just the command, but can be overridden
         return str(self._scp_request_header.command)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__repr__()
 
     @abstractmethod

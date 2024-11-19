@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, Mapping, Optional, Tuple
-from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from contextlib import AbstractContextManager
+from types import TracebackType
+from typing import Dict, Mapping, Optional, Tuple, Type
+from typing_extensions import Literal, Self
+
+from spinn_utilities.abstract_base import abstractmethod
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections import UDPConnection
@@ -24,7 +28,7 @@ from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_scp_connection import SpallocSCPConnection
 
 
-class SpallocJob(object, metaclass=AbstractBase):
+class SpallocJob(AbstractContextManager):
     """
     Represents a job in Spalloc.
 
@@ -159,7 +163,7 @@ class SpallocJob(object, metaclass=AbstractBase):
 
     @abstractmethod
     def wait_until_ready(self, timeout: Optional[int] = None,
-                         n_retries: Optional[int] = None):
+                         n_retries: Optional[int] = None) -> None:
         """
         Wait until the allocation is in the ``READY`` state.
 
@@ -173,7 +177,7 @@ class SpallocJob(object, metaclass=AbstractBase):
         raise NotImplementedError()
 
     @abstractmethod
-    def destroy(self, reason: str = "finished"):
+    def destroy(self, reason: str = "finished") -> None:
         """
         Destroy the job.
 
@@ -207,13 +211,15 @@ class SpallocJob(object, metaclass=AbstractBase):
         """
         raise NotImplementedError()
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         """
         Return self on entering context.
         """
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type: Optional[Type],
+                 exc_value: Optional[BaseException],
+                 exc_tb: Optional[TracebackType]) -> Literal[False]:
         """
         Handle exceptions by killing the job and logging the exception in the
         job's destroy reason.
@@ -223,4 +229,4 @@ class SpallocJob(object, metaclass=AbstractBase):
         except Exception:  # pylint: disable=broad-except
             # Ignore this exception; there's not much we can do with it
             pass
-        return None
+        return False

@@ -251,7 +251,7 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._app_id_tracker.get_new_id()
 
     @classmethod
-    def free_id(cls, app_id: int):
+    def free_id(cls, app_id: int) -> None:
         """
         Frees up an app_id.
 

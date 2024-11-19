@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional
+
 
 class MulticastMessage(object):
     """
@@ -22,16 +24,16 @@ class MulticastMessage(object):
         "_key",
         "_payload")
 
-    def __init__(self, key, payload=None):
+    def __init__(self, key: int, payload: Optional[int] = None):
         """
-        :param int key: The key of the packet
-        :param int payload: The optional payload of the packet
+        :param key: The key of the packet
+        :param payload: The optional payload of the packet
         """
         self._key = key
         self._payload = payload
 
     @property
-    def key(self):
+    def key(self) -> int:
         """
         The key of the packet.
 
@@ -40,7 +42,7 @@ class MulticastMessage(object):
         return self._key
 
     @property
-    def payload(self):
+    def payload(self) -> Optional[int]:
         """
         The payload of the packet if there is one, or `None` if there is no
         payload.

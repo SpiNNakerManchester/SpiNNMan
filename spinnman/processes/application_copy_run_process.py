@@ -23,7 +23,7 @@ from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 APP_COPY_RUN_TIMEOUT = 6.0
 
 
-def _on_same_board(chip_1: Chip, chip_2: Chip):
+def _on_same_board(chip_1: Chip, chip_2: Chip) -> bool:
     return (chip_1.nearest_ethernet_x == chip_2.nearest_ethernet_x and
             chip_1.nearest_ethernet_y == chip_2.nearest_ethernet_y)
 
@@ -104,7 +104,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
             self, next_connection_selector, timeout=timeout)
 
     def run(self, size: int, app_id: int, core_subsets: CoreSubsets,
-            checksum: int, wait: bool):
+            checksum: int, wait: bool) -> None:
         """
         Run the process.
 

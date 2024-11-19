@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Dict, List, Tuple
+from typing import Dict, Iterable, List, Tuple
 from spinnman.model.enums import P2PTableRoute
 
 _ONE_WORD = struct.Struct("<I")
@@ -87,7 +87,7 @@ class P2PTable(object):
         """
         return self._height
 
-    def iterchips(self):
+    def iterchips(self) -> Iterable[Tuple[int, int]]:
         """
         Get an iterator of tuples of (x, y) coordinates in the table.
 
@@ -95,7 +95,7 @@ class P2PTable(object):
         """
         return iter(self._routes.keys())
 
-    def is_route(self, x, y):
+    def is_route(self, x: int, y: int) -> bool:
         """
         Determines if there is a route in the P2P table to the given chip.
 
@@ -118,7 +118,7 @@ class P2PTable(object):
         return self._routes.get((x, y), P2PTableRoute.NONE)
 
     @property
-    def n_routes(self):
+    def n_routes(self) -> int:
         """ The number of routes in the table
 
         :rtype: int

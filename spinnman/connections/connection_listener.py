@@ -58,7 +58,7 @@ class ConnectionListener(Thread, Generic[T]):
         self.__done = False
         self.__callbacks: List[Callable[[T], None]] = []
 
-    def __run_step(self, handler: Callable[[], T]):
+    def __run_step(self, handler: Callable[[], T]) -> None:
         """
         :param ~collections.abc.Callable handler:
         """
@@ -69,7 +69,7 @@ class ConnectionListener(Thread, Generic[T]):
                     callback, message)
                 future.add_done_callback(self.__done_callback)
 
-    def __done_callback(self, future: Future[None]):
+    def __done_callback(self, future: Future[None]) -> None:
         """
         :param ~concurrent.futures.Future future:
         """
@@ -94,7 +94,7 @@ class ConnectionListener(Thread, Generic[T]):
                         logger.warning("problem when dispatching message",
                                        exc_info=True)
 
-    def add_callback(self, callback: Callable[[T], None]):
+    def add_callback(self, callback: Callable[[T], None]) -> None:
         """
         Add a callback to be called when a message is received.
 

@@ -29,8 +29,13 @@ class _DataType(Enum):
     LONG = (8, "<Q")
     BYTE_ARRAY = (16, "s")
 
-    def __init__(self, value, struct_code):
-        self._value_ = value
+    def __new__(cls, value: int, struct_code: str) -> "_DataType":
+        obj = object.__new__(cls)
+        obj._value_ = value
+        return obj
+
+    def __init__(self, value: int, struct_code: str):
+        # pylint: disable=unused-argument
         self._struct_code = struct_code
 
     @property
@@ -383,14 +388,14 @@ class SystemVariableBootValues(object):
     """
     __slot__ = "_values",
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Create a dict of variable values
         self._values = dict()
         for variable in SystemVariableDefinition:
             self._values[variable] = variable.default
 
     def set_value(self, system_variable_definition: SystemVariableDefinition,
-                  value: Any):
+                  value: Any) -> None:
         """
         Save a value to the system_variable_definition Enum as the key
 

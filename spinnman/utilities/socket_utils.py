@@ -53,7 +53,7 @@ def get_tcp_socket() -> socket.socket:
 
 
 # pylint: disable=wrong-spelling-in-docstring
-def set_receive_buffer_size(sock: socket.socket, size: int):
+def set_receive_buffer_size(sock: socket.socket, size: int) -> None:
     """
     Wrapper round setsockopt() system call.
     """
@@ -66,7 +66,7 @@ def set_receive_buffer_size(sock: socket.socket, size: int):
                        "receive buffer", exc_info=True)
 
 
-def bind_socket(sock: socket.socket, host: str, port: int):
+def bind_socket(sock: socket.socket, host: str, port: int) -> None:
     """
     Wrapper round bind() system call.
     """
@@ -89,7 +89,8 @@ def resolve_host(host: str) -> str:
             f"Error getting IP address for {host}: {e}") from e
 
 
-def connect_socket(sock: socket.socket, remote_address: str, remote_port: int):
+def connect_socket(
+        sock: socket.socket, remote_address: str, remote_port: int) -> None:
     """
     Wrapper round connect() system call.
     """
@@ -144,7 +145,7 @@ def receive_message_and_address(
         raise SpinnmanIOException(f"Error receiving: {e}") from e
 
 
-def send_message(sock: socket.socket, data: bytes):
+def send_message(sock: socket.socket, data: bytes) -> int:
     """
     Wrapper round send() system call.
     """
@@ -155,7 +156,7 @@ def send_message(sock: socket.socket, data: bytes):
 
 
 def send_message_to_address(
-        sock: socket.socket, data: bytes, address: Tuple[str, int]):
+        sock: socket.socket, data: bytes, address: Tuple[str, int]) -> int:
     """
     Wrapper round sendto() system call.
     """

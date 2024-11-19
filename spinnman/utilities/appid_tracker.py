@@ -53,7 +53,7 @@ class AppIdTracker(object):
         """
         return self._free_ids.pop()
 
-    def allocate_id(self, allocated_id: int):
+    def allocate_id(self, allocated_id: int) -> None:
         """
         Allocate a given ID.
 
@@ -62,7 +62,7 @@ class AppIdTracker(object):
         """
         self._free_ids.remove(allocated_id)
 
-    def free_id(self, id_to_free: int):
+    def free_id(self, id_to_free: int) -> None:
         """
         Free a given ID.
 

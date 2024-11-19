@@ -1,4 +1,6 @@
-# Copyright (c) 2015 The University of Manchester
+#!/bin/bash
+
+# Copyright (c) 2024 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinnman.constants import EIEIO_COMMAND_IDS
-from .eieio_command_message import EIEIOCommandMessage
-from .eieio_command_header import EIEIOCommandHeader
+# This bash assumes that other repositories are installed in paralled
 
+# requires the latest mypy
+# pip install --upgrade mypy
 
-class PaddingRequest(EIEIOCommandMessage):
-    """
-    Packet used to pad space in the buffering area, if needed.
-    """
-    __slots__ = ()
+utils="../SpiNNUtils/spinn_utilities"
+machine="../SpiNNMachine/spinn_machine"
 
-    def __init__(self) -> None:
-        super().__init__(EIEIOCommandHeader(EIEIO_COMMAND_IDS.EVENT_PADDING))
-
-    @staticmethod
-    def get_min_packet_length() -> int:
-        return 2
+mypy --python-version 3.8 --disallow-untyped-defs $utils $machine spinnman

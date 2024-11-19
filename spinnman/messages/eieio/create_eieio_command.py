@@ -20,7 +20,8 @@ from spinnman.messages.eieio.command_messages import (
 from spinnman.constants import EIEIO_COMMAND_IDS
 
 
-def read_eieio_command_message(data, offset):
+def read_eieio_command_message(
+        data: bytes, offset: int) -> EIEIOCommandMessage:
     """
     Reads the content of an EIEIO command message and returns an object
     identifying the command which was contained in the packet, including

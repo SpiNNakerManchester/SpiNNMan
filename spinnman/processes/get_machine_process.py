@@ -17,12 +17,14 @@ from contextlib import suppress
 import logging
 import functools
 from os.path import join
-from typing import Dict, List, Optional, Set, Tuple, cast
+from types import TracebackType
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from spinn_utilities.config_holder import (
     get_config_bool, get_config_int_or_none, get_config_str_or_none)
 from spinn_utilities.data import UtilsDataView
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
 
@@ -30,6 +32,7 @@ from spinn_machine import (Router, Chip, Link, Machine)
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
 from spinn_machine.machine_factory import machine_repair
 
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
 from spinnman.data import SpiNNManDataView
@@ -176,7 +179,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 chip_info.n_free_multicast_routing_entries))
 
     def __receive_p2p_data(
-            self, column: int, scp_read_response: Response):
+            self, column: int, scp_read_response: Response) -> None:
         """
         :param int column:
         :param Response scp_read_response:
@@ -185,7 +188,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             scp_read_response.data, scp_read_response.offset)
 
     def _receive_chip_info(
-            self, scp_read_chip_info_response: GetChipInfoResponse):
+            self, scp_read_chip_info_response: GetChipInfoResponse) -> None:
         """
         :param GetChipInfoResponse scp_read_chip_info_response:
         """
@@ -195,7 +198,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self._progress.update()
 
     def _receive_p_maps(
-            self, x: int, y: int, scp_read_response: Response):
+            self, x: int, y: int, scp_read_response: Response) -> None:
         """
         Receive the physical-to-virtual and virtual-to-physical maps.
 
@@ -207,8 +210,10 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         off += _P_TO_V_SIZE
         self._virtual_to_physical_map[x, y] = data[off:]
 
+    @overrides(AbstractMultiConnectionProcess._receive_error)
     def _receive_error(
-            self, request: AbstractSCPRequest, exception, tb, connection):
+            self, request: AbstractSCPRequest, exception: Exception,
+            tb: TracebackType, connection: SCAMPConnection) -> None:
         """
         :param AbstractSCPRequest request:
         :param Exception exception:
@@ -307,7 +312,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     # Stuff below here is purely for dealing with ignores
 
-    def _process_ignore_links(self, machine: Machine):
+    def _process_ignore_links(self, machine: Machine) -> None:
         """
         Processes the collection of ignore links to remove then from chip info.
 
@@ -356,7 +361,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                     "Discarding ignore link {} on chip {} as it is not/"
                     "no longer in info", link, global_xy)
 
-    def _preprocess_ignore_cores(self, machine: Machine):
+    def _preprocess_ignore_cores(self, machine: Machine) -> None:
         """
         Converts the collection of ignore cores into a map of ignore by x,y.
 
@@ -382,7 +387,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             if p is not None:
                 self._ignore_cores_map[global_xy].add(p)
 
-    def _preprocess_ignore_chips(self, machine: Machine):
+    def _preprocess_ignore_chips(self, machine: Machine) -> None:
         """
         Processes the collection of ignore chips and discards their chip info.
 
@@ -494,7 +499,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             "core {}", xy, virtual_p, physical)
         return virtual_p
 
-    def _report_ignore(self, message: str, *args):
+    def _report_ignore(self, message: str, *args: Any) -> None:
         """
         Writes the ignore message by either creating or appending the report.
 

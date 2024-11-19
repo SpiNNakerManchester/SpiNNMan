@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from spinn_utilities.overrides import overrides
 from spinnman.constants import EIEIO_COMMAND_IDS
 from .eieio_command_message import EIEIOCommandMessage
 from .eieio_command_header import EIEIOCommandHeader
@@ -26,10 +27,12 @@ class NotificationProtocolStartResume(EIEIOCommandMessage):
     """
     __slots__ = ()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.START_RESUME_NOTIFICATION))
 
     @staticmethod
-    def from_bytestring(command_header, data, offset):
+    @overrides(EIEIOCommandMessage.from_bytestring)
+    def from_bytestring(command_header: EIEIOCommandHeader, data: bytes,
+                        offset: int) -> "NotificationProtocolStartResume":
         return NotificationProtocolStartResume()
