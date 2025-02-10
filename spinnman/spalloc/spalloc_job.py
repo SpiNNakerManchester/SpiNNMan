@@ -211,6 +211,31 @@ class SpallocJob(AbstractContextManager):
         """
         raise NotImplementedError()
 
+    @abstractmethod
+    def write_data(self, x: int, y: int, address: int, data: bytes) -> None:
+        """
+        Write data to a given address on a given chip of the job.
+
+        :param int x: The X coordinate of the chip
+        :param int y: The Y coordinate of the chip
+        :param int address: The address to write to
+        :param bytes data: The data to write
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def read_data(self, x: int, y: int, address: int, size: int) -> bytes:
+        """
+        Write data to a given address on a given chip of the job.
+
+        :param int x: The X coordinate of the chip
+        :param int y: The Y coordinate of the chip
+        :param int address: The address to write to
+        :param int size: The number of bytes to read
+        :return: The data read
+        """
+        raise NotImplementedError()
+
     def __enter__(self) -> Self:
         """
         Return self on entering context.

@@ -510,6 +510,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
     __slots__ = ("__machine_url", "__chip_url",
+                 "__memory_url",
                  "_keepalive_url", "__proxy_handle",
                  "__proxy_thread", "__proxy_ping")
 
@@ -522,6 +523,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         logger.info("established job at {}", job_handle)
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
+        self.__memory_url = self._url + "memory"
         self._keepalive_url: Optional[str] = self._url + "keepalive"
         self.__proxy_handle: Optional[WebSocket] = None
         self.__proxy_thread: Optional[_ProxyReceiver] = None
@@ -665,6 +667,16 @@ class _SpallocJob(SessionAware, SpallocJob):
             self.__proxy_handle.close()
         self._delete(self._url, reason=str(reason))
         logger.info("deleted job at {}", self._url)
+
+    @overrides(SpallocJob.write_data)
+    def write_data(self, x: int, y: int, address: int, data: bytes) -> None:
+        self._post_raw(self.__memory_url, data=data, x=x, y=y, address=address)
+
+    @overrides(SpallocJob.read_data)
+    def read_data(self, x: int, y: int, address: int, size: int) -> bytes:
+        response = self._get(self.__memory_url, x=x, y=y, address=address,
+                             size=size)
+        return response.content
 
     def __keepalive(self) -> bool:
         """
