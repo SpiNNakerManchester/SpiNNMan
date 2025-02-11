@@ -27,10 +27,17 @@ _ONE_WORD = struct.Struct("<I")
 
 
 class SpallocTransceiver(BaseTransceiver):
+    """ A transceiver for a Spalloc job, where some functions use spalloc more
+        directly to speed up operation.
+    """
 
     __slots__ = ["__job"]
 
     def __init__(self, job: SpallocJob):
+        """ Create a Spalloc Transceiver.
+
+        :param job: The job to use to communicate with the machine via Spalloc
+        """
         self.__job: SpallocJob = job
         proxies: List[Connection] = [
             job.connect_to_board(x, y) for (x, y) in job.get_connections()]
