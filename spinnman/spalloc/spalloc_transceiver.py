@@ -91,5 +91,5 @@ class SpallocTransceiver(BaseTransceiver):
     @overrides(BaseTransceiver.read_memory)
     def read_memory(
             self, x: int, y: int, base_address: int, length: int,
-            cpu: int = 0) -> bytes:
-        return self.__job.read_data(x, y, base_address, length)
+            cpu: int = 0) -> bytearray:
+        return bytearray(self.__job.read_data(x, y, base_address, length))
