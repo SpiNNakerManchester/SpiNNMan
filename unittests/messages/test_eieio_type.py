@@ -20,9 +20,9 @@ from spinnman.messages.eieio import EIEIOType
 
 class TestEIEIOType(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_get(self):
+    def test_get(self) -> None:
         EIEIOType(2)
         EIEIOType["KEY_32_BIT"]

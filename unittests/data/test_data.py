@@ -22,10 +22,10 @@ from spinnman.transceiver import MockableTransceiver
 
 class TestData(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_setup(self):
+    def test_setup(self) -> None:
         # What happens before setup depends on the previous test
         # Use manual_check to verify this without dependency
         SpiNNManDataWriter.setup()

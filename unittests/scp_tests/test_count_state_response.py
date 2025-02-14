@@ -24,10 +24,10 @@ from spinnman.messages.sdp import SDPFlag
 
 class TestCPUStateResponse(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_new_count_state_response(self):
+    def test_new_count_state_response(self) -> None:
         response = CountStateResponse()
         # SCP Stuff
         rc = SCPResult.RC_OK.value
@@ -48,7 +48,7 @@ class TestCPUStateResponse(unittest.TestCase):
         response.read_bytestring(data, 0)
         self.assertEqual(response.count, 5)
 
-    def test_new_count_state_response_response_not_ok(self):
+    def test_new_count_state_response_response_not_ok(self) -> None:
         with self.assertRaises(SpinnmanUnexpectedResponseCodeException):
             response = CountStateResponse()
             # SCP Stuff
