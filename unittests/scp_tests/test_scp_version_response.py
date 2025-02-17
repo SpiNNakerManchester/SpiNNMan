@@ -22,13 +22,13 @@ from spinnman.messages.sdp import SDPFlag
 
 class TestSCPVersionResponse(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_new_scp_version_response(self):
+    def test_new_scp_version_response(self) -> None:
         GetVersionResponse()
 
-    def test_read_scp_response(self):
+    def test_read_scp_response(self) -> None:
         response = GetVersionResponse()
         # y
         # SCP Stuff

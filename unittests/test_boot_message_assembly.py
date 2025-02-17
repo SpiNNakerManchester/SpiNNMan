@@ -20,10 +20,10 @@ from spinnman.messages.spinnaker_boot import SpinnakerBootOpCode
 
 class TestSpiNNakerBootMessage(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_create_new_boot_message(self):
+    def test_create_new_boot_message(self) -> None:
         msg = boot_msg.SpinnakerBootMessage(SpinnakerBootOpCode.HELLO, 0, 0, 0)
         self.assertEqual(msg.data, None)
         self.assertEqual(msg.opcode, SpinnakerBootOpCode.HELLO)

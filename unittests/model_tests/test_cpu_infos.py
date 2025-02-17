@@ -20,10 +20,10 @@ from spinnman.model.enums.cpu_state import CPUState
 
 class TestCpuInfos(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_cpu_infos(self):
+    def test_cpu_infos(self) -> None:
         infos = CPUInfos()
 
         infos.add_info(CPUInfo.mock_info(0, 0, 1, 5, CPUState.RUNNING))
@@ -61,7 +61,7 @@ class TestCpuInfos(unittest.TestCase):
                          "    r4=0, r5=0, r6=0, r7=0\n"
                          "    PSR=0, SP=0, LR=0\n")
 
-    def test_add_info(self):
+    def test_add_info(self) -> None:
         infos1 = CPUInfos()
         infos1.add_info(CPUInfo.mock_info(0, 0, 1, 5, CPUState.RUNNING))
         infos1.add_info(CPUInfo.mock_info(0, 0, 2, 6, CPUState.FINISHED))

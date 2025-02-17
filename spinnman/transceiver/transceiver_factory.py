@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from typing import (List, Optional)
+from typing import (Iterable, List, Optional)
 from spinn_utilities.log import FormatAdapter
 from spinn_machine.version.version_3 import Version3
 from spinn_machine.version.version_5 import Version5
@@ -110,7 +110,7 @@ def create_transceiver_from_hostname(
 
 
 def create_transceiver_from_connections(
-        connections: List[Connection], virtual: bool = False,
+        connections: Iterable[Connection], virtual: bool = False,
         power_cycle: bool = False, extended: bool = False) -> Transceiver:
     """
     Create a Transceiver with these connections

@@ -21,10 +21,10 @@ from spinnman.config_setup import unittest_setup
 
 class TestCfgChecker(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_config_checks(self):
+    def test_config_checks(self) -> None:
         unittests = os.path.dirname(__file__)
         spinnman_dir = spinnman.__path__[0]
         run_config_checks(directories=[spinnman_dir, unittests])

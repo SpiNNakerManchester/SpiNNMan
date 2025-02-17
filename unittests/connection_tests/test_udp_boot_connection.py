@@ -19,10 +19,10 @@ from spinnman.config_setup import unittest_setup
 
 class MyTestCase(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_something(self):
+    def test_something(self) -> None:
         udp_connect = BootConnection()
         self.assertIsNotNone(udp_connect)
 

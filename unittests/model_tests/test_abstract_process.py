@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional
+from typing_extensions import Never
 from spinn_utilities.config_holder import set_config
+from spinn_utilities.overrides import overrides
 from spinn_machine.version.version_strings import VersionStrings
 from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess)
@@ -26,20 +29,23 @@ import pytest
 
 
 class MockProcess(AbstractMultiConnectionProcess):
-    def test(self):
+    def test(self) -> None:
         with self._collect_responses(print_exception=True):
             self._send_request(ReadMemory((0, 0, 0), 0, 4))
 
 
 class MockConnection(SCAMPConnection):
-    def send(self, data):
+
+    @overrides(SCAMPConnection.send)
+    def send(self, data: bytes) -> None:
         pass
 
-    def receive_scp_response(self, timeout=1.0):
+    @overrides(SCAMPConnection.receive_scp_response)
+    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> Never:
         raise SpinnmanTimeoutException("Test", timeout)
 
 
-def test_error_print():
+def test_error_print() -> None:
     unittest_setup()
     set_config("Machine", "versions", VersionStrings.ANY.text)
     connection = MockConnection(0, 0)

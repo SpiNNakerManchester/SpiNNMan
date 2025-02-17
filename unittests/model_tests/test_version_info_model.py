@@ -21,10 +21,10 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 
 class TestVersionInfo(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_retrieving_bits_from_version_data(self):
+    def test_retrieving_bits_from_version_data(self) -> None:
         p2p_adr = 0xf0a1
         phys_cpu = 0xff
         virt_cpu = 0x3b
@@ -48,7 +48,7 @@ class TestVersionInfo(unittest.TestCase):
         self.assertEqual(vi.build_date, build_date)
         self.assertEqual(vi.version_string, "my/spinnaker")
 
-    def test_retrieving_bits_from_invalid_version_data_format(self):
+    def test_retrieving_bits_from_invalid_version_data_format(self) -> None:
         with self.assertRaises(SpinnmanInvalidParameterException):
             p2p_adr = 0xf0a1
             phys_cpu = 0xff
@@ -67,7 +67,7 @@ class TestVersionInfo(unittest.TestCase):
             # Should be unreachable, but if it ever works, should pass this
             self.assertIsNotNone(vi)
 
-    def test_retrieving_bits_from_invalid_sized_version_data(self):
+    def test_retrieving_bits_from_invalid_sized_version_data(self) -> None:
         with self.assertRaises(SpinnmanInvalidParameterException):
             p2p_adr = 0xf0a1
             phys_cpu = 0xff

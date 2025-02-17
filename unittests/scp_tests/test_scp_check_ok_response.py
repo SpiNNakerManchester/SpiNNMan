@@ -23,16 +23,17 @@ from spinnman.messages.sdp import SDPFlag
 
 class TestOkResponse(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_new_scp_check_ok_response(self):
+    def test_new_scp_check_ok_response(self) -> None:
         CheckOKResponse("Testing operation", "Testing command")
 
-    def _encode_addr_tuple(self, dest_port, dest_cpu, src_port, src_cpu):
+    def _encode_addr_tuple(self, dest_port: int, dest_cpu: int,
+                           src_port: int, src_cpu: int) -> int:
         return dest_port << 13 | dest_cpu << 8 | src_port << 5 | src_cpu
 
-    def test_read_ok_response(self):
+    def test_read_ok_response(self) -> None:
         scp = CheckOKResponse("Testing operation", "Testing command")
         result = SCPResult.RC_OK.value
         flags = SDPFlag.REPLY_NOT_EXPECTED.value
@@ -60,7 +61,7 @@ class TestOkResponse(unittest.TestCase):
                                   dest_x_y_short, src_x_y_short, result, seq)
         scp.read_bytestring(byte_stream, 0)
 
-    def test_not_ok_response(self):
+    def test_not_ok_response(self) -> None:
         with self.assertRaises(SpinnmanUnexpectedResponseCodeException):
             scp = CheckOKResponse("Testing operation", "Testing command")
             result = SCPResult.RC_TIMEOUT.value

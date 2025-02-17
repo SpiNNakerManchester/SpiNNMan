@@ -20,10 +20,10 @@ from spinnman.messages.scp.enums import SCPCommand
 
 class TestSCPVersionRequest(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_new_version_request(self):
+    def test_new_version_request(self) -> None:
         ver_request = GetVersion(0, 1, 2)
         self.assertEqual(ver_request.scp_request_header.command,
                          SCPCommand.CMD_VER)
