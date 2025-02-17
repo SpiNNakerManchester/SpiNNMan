@@ -18,10 +18,10 @@ from spinnman.processes import MostDirectConnectionSelector
 
 class TestCpuInfos(unittest.TestCase):
 
-    def test_empty(self):
+    def test_empty(self) -> None:
         with self.assertRaises(StopIteration):
             MostDirectConnectionSelector([])
 
-    def test_one(self):
-        c = SCAMPConnection("127.0.0.0")
+    def test_one(self) -> None:
+        c = SCAMPConnection()
         MostDirectConnectionSelector([c])

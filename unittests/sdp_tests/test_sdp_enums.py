@@ -19,10 +19,10 @@ from spinnman.messages.sdp.sdp_flag import SDPFlag
 
 class TestSDPEnums(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_sdp_flag(self):
+    def test_sdp_flag(self) -> None:
         self.assertEqual(SDPFlag.REPLY_NOT_EXPECTED.value, 0x7)
         self.assertEqual(SDPFlag.REPLY_EXPECTED.value, 0x87)
 

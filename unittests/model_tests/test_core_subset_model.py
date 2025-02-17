@@ -19,10 +19,10 @@ from spinnman.config_setup import unittest_setup
 
 class TestCoreSubset(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_create_new_core_subset(self):
+    def test_create_new_core_subset(self) -> None:
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, proc_list)
         self.assertEqual(cs.x, 0)
@@ -31,11 +31,11 @@ class TestCoreSubset(unittest.TestCase):
             self.assertIn(proc, proc_list)
         self.assertEqual(len([x for x in cs.processor_ids]), len(proc_list))
 
-    def test_create_new_core_subset_duplicate_processors(self):
+    def test_create_new_core_subset_duplicate_processors(self) -> None:
         cs = CoreSubset(0, 0, [0, 1, 1, 2, 3, 5, 8, 13])
         self.assertIsNotNone(cs, "must make instance of CoreSubset")
 
-    def test_create_empty_core_subset_add_processor(self):
+    def test_create_empty_core_subset_add_processor(self) -> None:
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, [])
         self.assertEqual(cs.x, 0)

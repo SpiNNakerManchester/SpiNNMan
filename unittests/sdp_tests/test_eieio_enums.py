@@ -19,10 +19,10 @@ from spinnman.messages.eieio import EIEIOPrefix, EIEIOType
 
 class TestEIEIOEnums(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_eieio_prefix(self):
+    def test_eieio_prefix(self) -> None:
         self.assertEqual(EIEIOPrefix.LOWER_HALF_WORD.value, 0)
         self.assertEqual(EIEIOPrefix(0), EIEIOPrefix.LOWER_HALF_WORD)
 
@@ -31,7 +31,7 @@ class TestEIEIOEnums(unittest.TestCase):
 
         self.assertRaises(ValueError, lambda: EIEIOPrefix(2))
 
-    def test_eieio_type(self):
+    def test_eieio_type(self) -> None:
         self.assertEqual(EIEIOType.KEY_16_BIT.value, 0)
         self.assertEqual(EIEIOType.KEY_16_BIT.encoded_value, 0)
         self.assertEqual(EIEIOType.KEY_16_BIT.key_bytes, 2)

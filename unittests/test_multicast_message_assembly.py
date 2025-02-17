@@ -19,15 +19,15 @@ import spinnman.messages.multicast_message as multicast_msg
 
 class TestMulticastMessage(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_create_new_multicast_message_without_payload(self):
+    def test_create_new_multicast_message_without_payload(self) -> None:
         msg = multicast_msg.MulticastMessage(1)
         self.assertEqual(msg.key, 1)
         self.assertEqual(msg.payload, None)
 
-    def test_create_new_multicast_message_with_payload(self):
+    def test_create_new_multicast_message_with_payload(self) -> None:
         msg = multicast_msg.MulticastMessage(1, 100)
         self.assertEqual(msg.key, 1)
         self.assertEqual(msg.payload, 100)

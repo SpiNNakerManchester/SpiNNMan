@@ -21,30 +21,30 @@ from spinnman.messages.scp.impl import GetVersion, ReadLink, ReadMemory
 
 class TestSCPMessageAssembly(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_create_new_scp_header(self):
+    def test_create_new_scp_header(self) -> None:
         header = SCPRequestHeader(SCPCommand.CMD_VER)
 
         self.assertEqual(header.command, SCPCommand.CMD_VER)
         self.assertEqual(header.sequence, 0)
 
-    def test_create_new_ver_scp_pkt(self):
+    def test_create_new_ver_scp_pkt(self) -> None:
         scp = GetVersion(0, 0, 0)
         self.assertEqual(scp.argument_1, None)
         self.assertEqual(scp.argument_2, None)
         self.assertEqual(scp.argument_3, None)
         self.assertEqual(scp.data, None)
 
-    def test_create_new_link_scp_pkt(self):
+    def test_create_new_link_scp_pkt(self) -> None:
         scp = ReadLink((0, 0, 0), 0, 0, 256)
         self.assertEqual(scp.argument_1, 0)
         self.assertEqual(scp.argument_2, 256)
         self.assertEqual(scp.argument_3, 0)
         self.assertEqual(scp.data, None)
 
-    def test_create_new_memory_scp_pkt(self):
+    def test_create_new_memory_scp_pkt(self) -> None:
         scp = ReadMemory((0, 0, 0), 0, 256)
         self.assertEqual(scp.argument_1, 0)
         self.assertEqual(scp.argument_2, 256)

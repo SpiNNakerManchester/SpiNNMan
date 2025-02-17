@@ -19,10 +19,10 @@ from spinnman.config_setup import unittest_setup
 
 class TestingIOBuf(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_new_buf(self):
+    def test_new_buf(self) -> None:
         iobuf = IOBuffer(0, 1, 2, 'Everything failed on chip.')
         self.assertIsNotNone(iobuf)
         self.assertEqual(iobuf.x, 0)
