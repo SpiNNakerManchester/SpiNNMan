@@ -23,13 +23,13 @@ from spinnman.spalloc import SpallocClient, SpallocState
 
 class TestTransceiver(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
-        set_config("Machine", "version", FIVE)
+        set_config("Machine", "version", str(FIVE))
         self.spalloc_url = "https://spinnaker.cs.man.ac.uk/spalloc"
         self.spalloc_machine = "SpiNNaker1M"
 
-    def test_create_job(self):
+    def test_create_job(self) -> None:
         try:
             client = SpallocClient(self.spalloc_url)
         except ConnectionError as ex:
@@ -48,7 +48,7 @@ class TestTransceiver(unittest.TestCase):
 
             txrx = job.create_transceiver()
 
-            dims = txrx._get_machine_dimensions()
+            dims = txrx._get_machine_dimensions()  # type: ignore[attr-defined]
             # May be 12 as we only asked for 2 boards
             self.assertGreaterEqual(dims.height, 12)
             self.assertGreaterEqual(dims.width, 12)
