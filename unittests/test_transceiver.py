@@ -16,7 +16,6 @@ import unittest
 import struct
 
 from spinn_utilities.config_holder import set_config
-from spinn_utilities.overrides import overrides
 
 from spinn_machine.version.version_strings import VersionStrings
 
@@ -39,11 +38,6 @@ class MockExtendedTransceiver(MockableTransceiver, ExtendedTransceiver):
 
     def _where_is_xy(self, x: int, y: int) -> None:
         return None
-
-    #@property
-    #@overrides(MockableTransceiver.scamp_connection_selector)
-    #def scamp_connection_selector(self) -> ConnectionSelector:
-    #    raise NotImplementedError
 
 
 class TestTransceiver(unittest.TestCase):
@@ -75,10 +69,11 @@ class TestTransceiver(unittest.TestCase):
         trans = create_transceiver_from_hostname(self.board_config.remotehost)
         SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
         version = SpiNNManDataView.get_machine_version()
-        dims = trans._get_machine_dimensions() # type: ignore[attr-defined]
-        self.assertEqual(version.board_shape,            (dims.width, dims.height))
+        dims = trans._get_machine_dimensions()  # type: ignore[attr-defined]
+        self.assertEqual(version.board_shape,
+                         (dims.width, dims.height))
 
-        connections = trans._scamp_connections # type: ignore[attr-defined]
+        connections = trans._scamp_connections  # type: ignore[attr-defined]
         assert any(c.is_connected() for c in connections)
         print(trans._get_scamp_version())  # type: ignore[attr-defined]
         print(trans.get_cpu_infos())
