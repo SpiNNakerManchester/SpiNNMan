@@ -14,8 +14,12 @@
 
 import unittest
 import struct
+
 from spinn_utilities.config_holder import set_config
+from spinn_utilities.overrides import overrides
+
 from spinn_machine.version.version_strings import VersionStrings
+
 from spinnman.config_setup import unittest_setup
 from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
@@ -36,17 +40,19 @@ class MockExtendedTransceiver(MockableTransceiver, ExtendedTransceiver):
     def _where_is_xy(self, x: int, y: int) -> None:
         return None
 
-    def scamp_connection_selector(self):
-        raise NotImplementedError
+    #@property
+    #@overrides(MockableTransceiver.scamp_connection_selector)
+    #def scamp_connection_selector(self) -> ConnectionSelector:
+    #    raise NotImplementedError
 
 
 class TestTransceiver(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
         self.board_config = BoardTestConfiguration()
 
-    def test_create_new_transceiver_to_board(self):
+    def test_create_new_transceiver_to_board(self) -> None:
         self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
@@ -55,7 +61,7 @@ class TestTransceiver(unittest.TestCase):
         trans.get_connections() == connections
         trans.close()
 
-    def test_create_new_transceiver_one_connection(self):
+    def test_create_new_transceiver_one_connection(self) -> None:
         self.board_config.set_up_remote_board()
         connections = set()
         connections.add(SCAMPConnection(
@@ -64,26 +70,25 @@ class TestTransceiver(unittest.TestCase):
         self.assertSetEqual(connections, trans.get_connections())
         trans.close()
 
-    def test_retrieving_machine_details(self):
+    def test_retrieving_machine_details(self) -> None:
         self.board_config.set_up_remote_board()
         trans = create_transceiver_from_hostname(self.board_config.remotehost)
         SpiNNManDataWriter.mock().set_machine(trans.get_machine_details())
         version = SpiNNManDataView.get_machine_version()
-        self.assertEqual(
-            version.board_shape,
-            (trans._get_machine_dimensions().width,
-             trans._get_machine_dimensions().height))
+        dims = trans._get_machine_dimensions() # type: ignore[attr-defined]
+        self.assertEqual(version.board_shape,            (dims.width, dims.height))
 
-        assert any(c.is_connected() for c in trans._scamp_connections)
-        print(trans._get_scamp_version())
+        connections = trans._scamp_connections # type: ignore[attr-defined]
+        assert any(c.is_connected() for c in connections)
+        print(trans._get_scamp_version())  # type: ignore[attr-defined]
         print(trans.get_cpu_infos())
 
-    def test_boot_board(self):
+    def test_boot_board(self) -> None:
         self.board_config.set_up_remote_board()
         trans = create_transceiver_from_hostname(self.board_config.remotehost)
-        trans._boot_board()
+        trans._boot_board()  # type: ignore[attr-defined]
 
-    def test_set_watch_dog(self):
+    def test_set_watch_dog(self) -> None:
         set_config("Machine", "versions", VersionStrings.ANY.text)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))

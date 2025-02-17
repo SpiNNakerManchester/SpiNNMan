@@ -32,7 +32,7 @@ class TestData(unittest.TestCase):
         with self.assertRaises(DataNotYetAvialable):
             SpiNNManDataView.get_transceiver()
 
-    def test_transceiver(self):
+    def test_transceiver(self) -> None:
         writer = SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
             SpiNNManDataView.get_transceiver()
@@ -41,4 +41,4 @@ class TestData(unittest.TestCase):
         SpiNNManDataView.get_transceiver()
         self.assertTrue(SpiNNManDataView.has_transceiver())
         with self.assertRaises(TypeError):
-            writer.set_transceiver("bacon")
+            writer.set_transceiver("bacon")  # type: ignore[arg-type]
