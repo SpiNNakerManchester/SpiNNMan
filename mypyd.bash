@@ -22,4 +22,4 @@
 utils="../SpiNNUtils/spinn_utilities"
 machine="../SpiNNMachine/spinn_machine"
 
-mypy --python-version 3.8 --disallow-untyped-defs $utils $machine spinnman
+mypy --python-version 3.8 --disallow-untyped-defs $utils $machine spinnman unittests spinnman_integration_tests
