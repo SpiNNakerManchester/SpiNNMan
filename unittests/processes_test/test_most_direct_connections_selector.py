@@ -23,5 +23,5 @@ class TestCpuInfos(unittest.TestCase):
             MostDirectConnectionSelector([])
 
     def test_one(self) -> None:
-        c = SCAMPConnection(local_host="127.0.0.0")
+        c = SCAMPConnection()
         MostDirectConnectionSelector([c])
