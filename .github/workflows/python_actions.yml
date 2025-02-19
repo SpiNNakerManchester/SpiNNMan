@@ -23,7 +23,7 @@ jobs:
     with:
 
       dependencies: SpiNNUtils SpiNNMachine
-      test_directories: unittests spinnman_integration_tests
+      test-directories: unittests spinnman_integration_tests
       coverage-package: spinnman
       flake8-packages: spinnman unittests spinnman_integration_tests
       pylint-packages: spinnman
