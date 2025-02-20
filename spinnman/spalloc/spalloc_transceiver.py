@@ -14,12 +14,15 @@
 import io
 import os
 import struct
+import numpy
+from numpy import uint8, uint32
 from typing import List, Union, BinaryIO, Optional, Tuple, cast
 
 from spinn_utilities.overrides import overrides
 
 from spinnman.transceiver.base_transceiver import BaseTransceiver
 from spinnman.connections.abstract_classes.connection import Connection
+from spinnman.processes.write_memory_process import _UNSIGNED_WORD
 
 from .spalloc_job import SpallocJob
 
@@ -82,9 +85,9 @@ class SpallocTransceiver(BaseTransceiver):
         self.__job.write_data(x, y, base_address, data_array)
         chksum = 0
         if get_sum:
-            np_data = bytearray(data_array)
-            np_sum = sum(np_data)
-            chksum = (chksum + np_sum) & 0xFFFFFFFF
+            np_data = numpy.frombuffer(data_array, dtype=uint8)
+            np_sum = int(numpy.sum(np_data.view(uint32), dtype=uint32))
+            chksum = np_sum & _UNSIGNED_WORD
 
         return n_bytes, chksum
 
