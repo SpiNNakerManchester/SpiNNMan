@@ -23,17 +23,17 @@ from spinnman.messages.scp.enums.signal import SignalType
 
 class TestSCPEnums(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_iptag(self):
+    def test_iptag(self) -> None:
         self.assertEqual(IPTagCommand.NEW.value, 0)
         self.assertEqual(IPTagCommand.SET.value, 1)
         self.assertEqual(IPTagCommand.GET.value, 2)
         self.assertEqual(IPTagCommand.CLR.value, 3)
         self.assertEqual(IPTagCommand.TTO.value, 4)
 
-    def test_command(self):
+    def test_command(self) -> None:
         self.assertEqual(SCPCommand.CMD_VER.value, 0)
         self.assertEqual(SCPCommand.CMD_RUN.value, 1)
         self.assertEqual(SCPCommand.CMD_READ.value, 2)
@@ -67,7 +67,7 @@ class TestSCPEnums(unittest.TestCase):
         self.assertEqual(SCPCommand.CMD_BMP_POWER.value, 57)
         self.assertEqual(SCPCommand.CMD_TUBE.value, 64)
 
-    def test_result(self):
+    def test_result(self) -> None:
         self.assertEqual(SCPResult.RC_OK.value, 0x80)
         self.assertEqual(SCPResult.RC_LEN.value, 0x81)
         self.assertEqual(SCPResult.RC_SUM.value, 0x82)
@@ -88,7 +88,7 @@ class TestSCPEnums(unittest.TestCase):
 
         self.assertEqual(SCPResult.RC_PKT_TX.value, 0x8F)
 
-    def test_signal(self):
+    def test_signal(self) -> None:
         self.assertEqual(Signal.INITIALISE.value, 0)
         self.assertEqual(Signal.POWER_DOWN.value, 1)
         self.assertEqual(Signal.STOP.value, 2)

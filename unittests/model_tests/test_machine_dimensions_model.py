@@ -19,10 +19,10 @@ from spinnman.config_setup import unittest_setup
 
 class TestMachineDimensionsModel(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_new_iptag(self):
+    def test_new_iptag(self) -> None:
         x_max = 253
         y_max = 220
         machine_dim = MachineDimensions(x_max, y_max)

@@ -151,7 +151,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         "_udp_scamp_connections",
         "_width")
 
-    def __init__(self, connections: Optional[List[Connection]] = None,
+    def __init__(self, connections: Optional[Iterable[Connection]] = None,
                  power_cycle: bool = False):
         """
         :param list(Connection) connections:
@@ -178,7 +178,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         # A set of the original connections - used to determine what can
         # be closed
         if connections is None:
-            connections = list()
+            connections = set()
 
         # A set of all connection - used for closing
         self._all_connections = set(connections)

@@ -22,17 +22,17 @@ from spinnman.transceiver import MockableTransceiver
 
 class TestData(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_setup(self):
+    def test_setup(self) -> None:
         # What happens before setup depends on the previous test
         # Use manual_check to verify this without dependency
         SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
             SpiNNManDataView.get_transceiver()
 
-    def test_transceiver(self):
+    def test_transceiver(self) -> None:
         writer = SpiNNManDataWriter.setup()
         with self.assertRaises(DataNotYetAvialable):
             SpiNNManDataView.get_transceiver()
@@ -41,4 +41,4 @@ class TestData(unittest.TestCase):
         SpiNNManDataView.get_transceiver()
         self.assertTrue(SpiNNManDataView.has_transceiver())
         with self.assertRaises(TypeError):
-            writer.set_transceiver("bacon")
+            writer.set_transceiver("bacon")  # type: ignore[arg-type]

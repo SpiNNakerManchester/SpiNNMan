@@ -25,38 +25,38 @@ class Test(unittest.TestCase):
     """ Tests for the SCAMP version comparison
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_version_same(self):
+    def test_version_same(self) -> None:
         self.assertTrue(BaseTransceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2])))
 
-    def test_major_version_too_big(self):
+    def test_major_version_too_big(self) -> None:
         self.assertFalse(BaseTransceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0] + 1, 0, 0)))
 
-    def test_major_version_too_small(self):
+    def test_major_version_too_small(self) -> None:
         self.assertFalse(BaseTransceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0] - 1, 0, 0)))
 
-    def test_minor_version_bigger(self):
+    def test_minor_version_bigger(self) -> None:
         self.assertTrue(BaseTransceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1] + 1, _SCAMP_VERSION[2])))
 
-    def test_minor_version_smaller(self):
+    def test_minor_version_smaller(self) -> None:
         self.assertFalse(BaseTransceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1] - 1, _SCAMP_VERSION[2])))
 
-    def test_patch_version_bigger(self):
+    def test_patch_version_bigger(self) -> None:
         self.assertTrue(BaseTransceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2] + 1)))
 
-    def test_patch_version_smaller(self):
+    def test_patch_version_smaller(self) -> None:
         self.assertFalse(BaseTransceiver._is_scamp_version_compabible((
             _SCAMP_VERSION[0], _SCAMP_VERSION[1], _SCAMP_VERSION[2] - 1)))
 
-    def test_compare_versions(self):
+    def test_compare_versions(self) -> None:
         spinn_utilities_parts = spinn_utilities.__version__.split('.')
         spinn_machine_parts = spinn_machine.__version__.split('.')
         spinnman_parts = spinnman.__version__.split('.')

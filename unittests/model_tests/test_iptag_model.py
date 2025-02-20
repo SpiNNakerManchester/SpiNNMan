@@ -20,10 +20,10 @@ from spinnman.config_setup import unittest_setup
 
 class TestIptag(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_new_iptag(self):
+    def test_new_iptag(self) -> None:
         board_config = BoardTestConfiguration()
         board_config.set_up_remote_board(version=5)
         ip = "8.8.8.8"

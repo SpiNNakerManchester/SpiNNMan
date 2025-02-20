@@ -20,17 +20,17 @@ from spinnman.config_setup import unittest_setup
 
 class TestingEnums(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_mailbox_command_enum(self):
+    def test_mailbox_command_enum(self) -> None:
         self.assertEqual(MailboxCommand.SHM_IDLE.value, 0)
         self.assertEqual(MailboxCommand.SHM_MSG.value, 1)
         self.assertEqual(MailboxCommand.SHM_NOP.value, 2)
         self.assertEqual(MailboxCommand.SHM_SIGNAL.value, 3)
         self.assertEqual(MailboxCommand.SHM_CMD.value, 4)
 
-    def test_cpu_state_enum(self):
+    def test_cpu_state_enum(self) -> None:
         self.assertEqual(CPUState.DEAD.value, 0)
         self.assertEqual(CPUState.POWERED_DOWN.value, 1)
         self.assertEqual(CPUState.RUN_TIME_EXCEPTION.value, 2)
@@ -47,7 +47,7 @@ class TestingEnums(unittest.TestCase):
         self.assertEqual(CPUState.FINISHED.value, 11)
         self.assertEqual(CPUState.IDLE.value, 15)
 
-    def test_run_time_error_enum(self):
+    def test_run_time_error_enum(self) -> None:
         self.assertEqual(RunTimeError.NONE.value, 0)
         self.assertEqual(RunTimeError.RESET.value, 1)
         self.assertEqual(RunTimeError.UNDEF.value, 2)
@@ -66,7 +66,7 @@ class TestingEnums(unittest.TestCase):
         self.assertEqual(RunTimeError.SWERR.value, 13)
         self.assertEqual(RunTimeError.IOBUF.value, 14)
 
-    def test_router_diagnostics_enum(self):
+    def test_router_diagnostics_enum(self) -> None:
         self.assertEqual(ROUTER_REGISTER_REGISTERS.LOC_MC.value, 0)
         self.assertEqual(ROUTER_REGISTER_REGISTERS.EXT_MC.value, 1)
         self.assertEqual(ROUTER_REGISTER_REGISTERS.LOC_PP.value, 2)

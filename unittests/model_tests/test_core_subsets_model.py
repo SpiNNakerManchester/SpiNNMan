@@ -19,14 +19,14 @@ from spinnman.config_setup import unittest_setup
 
 class TestCoreSubsets(unittest.TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         unittest_setup()
 
-    def test_create_new_default_core_subsets(self):
+    def test_create_new_default_core_subsets(self) -> None:
         css = CoreSubsets()
         self.assertIsNotNone(css, "must make instance of CoreSubsets")
 
-    def test_create_new_core_subsets(self):
+    def test_create_new_core_subsets(self) -> None:
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, proc_list)
         css = CoreSubsets([cs])
@@ -34,25 +34,25 @@ class TestCoreSubsets(unittest.TestCase):
         for core_subset in css.core_subsets:
             self.assertIn(core_subset, [cs])
 
-    def test_add_processor_duplicate_processor(self):
+    def test_add_processor_duplicate_processor(self) -> None:
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, proc_list)
         css = CoreSubsets([cs])
         css.add_processor(0, 0, 0)
 
-    def test_add_processor_duplicate_processor_different_chip(self):
+    def test_add_processor_duplicate_processor_different_chip(self) -> None:
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, proc_list)
         css = CoreSubsets([cs])
         css.add_processor(0, 1, 0)
 
-    def test_add_core_subset_duplicate_core_subset(self):
+    def test_add_core_subset_duplicate_core_subset(self) -> None:
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, proc_list)
         css = CoreSubsets([cs])
         css.add_core_subset(cs)
 
-    def test_add_core_subset(self):
+    def test_add_core_subset(self) -> None:
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, proc_list)
         css = CoreSubsets()
@@ -61,7 +61,7 @@ class TestCoreSubsets(unittest.TestCase):
         for core_subset in css.core_subsets:
             self.assertIn(core_subset, [cs])
 
-    def test_add_processor(self):
+    def test_add_processor(self) -> None:
         proc_list = [0, 1, 2, 3, 5, 8, 13]
         cs = CoreSubset(0, 0, proc_list)
         css = CoreSubsets()
