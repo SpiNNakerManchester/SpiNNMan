@@ -511,7 +511,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
     __slots__ = ("__machine_url", "__chip_url",
-                 "__memory_url", "__router_url"
+                 "__memory_url", "__router_url",
                  "_keepalive_url", "__proxy_handle",
                  "__proxy_thread", "__proxy_ping")
 
