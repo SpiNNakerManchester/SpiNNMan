@@ -21,12 +21,12 @@ from spinn_utilities.abstract_base import abstractmethod
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections import UDPConnection
+from spinnman.model.diagnostic_filter import DiagnosticFilter
 from .spalloc_state import SpallocState
 from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
 from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_scp_connection import SpallocSCPConnection
-from spinnman.model.diagnostic_filter import DiagnosticFilter
 
 
 class SpallocJob(AbstractContextManager):

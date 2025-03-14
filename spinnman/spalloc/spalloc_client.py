@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from spinnman.model.diagnostic_filter import DiagnosticFilter
 """
 Implementation of the client for the Spalloc web service.
 """
@@ -44,6 +43,7 @@ from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpallocException
+from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.transceiver import Transceiver
 
 from .abstract_spalloc_client import AbstractSpallocClient
