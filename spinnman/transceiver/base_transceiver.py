@@ -1402,6 +1402,19 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 destination_chip_x=x, destination_chip_y=y),
             data=_ONE_WORD.pack(cmd.value)))
 
+    @overrides(Transceiver.prepare_routing_tables)
+    def prepare_routing_tables(
+            self, custom_filters: Optional[
+                Dict[int, DiagnosticFilter]] = None) -> None:
+        machine = SpiNNManDataView().get_machine()
+        for x, y in machine.chip_coordinates:
+            self.clear_multicast_routes(x, y)
+            self.clear_router_diagnostic_counters(x, y)
+            if custom_filters is not None:
+                for position, diagnostic_filter in custom_filters.items():
+                    self.set_router_diagnostic_filter(
+                        x, y, position, diagnostic_filter)
+
     def __str__(self) -> str:
         addr = self._scamp_connections[0].remote_ip_address
         n = len(self._all_connections)

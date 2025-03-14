@@ -16,13 +16,14 @@ import os
 import struct
 import numpy
 from numpy import uint8, uint32
-from typing import List, Union, BinaryIO, Optional, Tuple, cast
+from typing import List, Union, BinaryIO, Optional, Tuple, cast, Dict
 
 from spinn_utilities.overrides import overrides
 
 from spinnman.transceiver.base_transceiver import BaseTransceiver
 from spinnman.connections.abstract_classes.connection import Connection
 from spinnman.processes.write_memory_process import _UNSIGNED_WORD
+from spinnman.model.diagnostic_filter import DiagnosticFilter
 
 from .spalloc_job import SpallocJob
 
@@ -96,3 +97,9 @@ class SpallocTransceiver(BaseTransceiver):
             self, x: int, y: int, base_address: int, length: int,
             cpu: int = 0) -> bytearray:
         return bytearray(self.__job.read_data(x, y, base_address, length))
+
+    @overrides(BaseTransceiver.prepare_routing_tables)
+    def prepare_routing_tables(
+        self, custom_filters:Optional[
+            Dict[int, DiagnosticFilter]] = None) -> None:
+        self.__job.prepare_routers(custom_filters)

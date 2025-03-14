@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from spinnman.model.diagnostic_filter import DiagnosticFilter
 """
 Implementation of the client for the Spalloc web service.
 """
@@ -510,7 +511,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
     __slots__ = ("__machine_url", "__chip_url",
-                 "__memory_url",
+                 "__memory_url", "__router_url"
                  "_keepalive_url", "__proxy_handle",
                  "__proxy_thread", "__proxy_ping")
 
@@ -524,6 +525,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
         self.__memory_url = self._url + "memory"
+        self.__router_url = self._url + "router"
         self._keepalive_url: Optional[str] = self._url + "keepalive"
         self.__proxy_handle: Optional[WebSocket] = None
         self.__proxy_thread: Optional[_ProxyReceiver] = None
@@ -677,6 +679,17 @@ class _SpallocJob(SessionAware, SpallocJob):
         response = self._get(self.__memory_url, x=x, y=y, address=address,
                              size=size)
         return response.content
+
+    @overrides(SpallocJob.prepare_routers)
+    def prepare_routers(
+        self, diagnostic_filters: Optional[
+            Dict[int, DiagnosticFilter]] = None) -> None:
+        keys = dict()
+        if diagnostic_filters is not None:
+            keys = {str(i): f.filter_word
+                    for i, f in diagnostic_filters.items()}
+
+        self._delete(self.__router_url, **keys)
 
     def __keepalive(self) -> bool:
         """

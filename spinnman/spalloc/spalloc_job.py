@@ -26,6 +26,7 @@ from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
 from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_scp_connection import SpallocSCPConnection
+from spinnman.model.diagnostic_filter import DiagnosticFilter
 
 
 class SpallocJob(AbstractContextManager):
@@ -233,6 +234,17 @@ class SpallocJob(AbstractContextManager):
         :param int address: The address to write to
         :param int size: The number of bytes to read
         :return: The data read
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def prepare_routers(
+            self, diagnostic_filters: Optional[
+                Dict[int, DiagnosticFilter]] = None) -> None:
+        """
+        Clear the routes, reset diagnostic counters and optionally set filters.
+
+        :param filters: Optional map of router counter id to filter to set.
         """
         raise NotImplementedError()
 
