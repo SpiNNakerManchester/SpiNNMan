@@ -100,6 +100,6 @@ class SpallocTransceiver(BaseTransceiver):
 
     @overrides(BaseTransceiver.prepare_routing_tables)
     def prepare_routing_tables(
-        self, custom_filters:Optional[
+        self, custom_filters: Optional[
             Dict[int, DiagnosticFilter]] = None) -> None:
         self.__job.prepare_routers(custom_filters)
