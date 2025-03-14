@@ -14,9 +14,10 @@
 import io
 import os
 import struct
+from typing import List, Union, BinaryIO, Optional, Tuple, cast, Dict
+
 import numpy
 from numpy import uint8, uint32
-from typing import List, Union, BinaryIO, Optional, Tuple, cast, Dict
 
 from spinn_utilities.overrides import overrides
 
