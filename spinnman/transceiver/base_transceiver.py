@@ -1438,7 +1438,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             ROUTER_REGISTER_REGISTERS.USER_3.value: filter_3}
         self._do_reset_routing(default_filters)
 
-    def _do_reset_routing(self, custom_filters: Dict[int, DiagnosticFilter]):
+    def _do_reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
         machine = SpiNNManDataView().get_machine()
         for x, y in machine.chip_coordinates:
             self.clear_multicast_routes(x, y)
