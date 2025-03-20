@@ -21,7 +21,7 @@ from numpy import uint8, uint32
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.transceiver.base_transceiver import BaseTransceiver
+from spinnman.transceiver.version5transceiver import Version5Transceiver
 from spinnman.connections.abstract_classes.connection import Connection
 from spinnman.processes.write_memory_process import _UNSIGNED_WORD
 from spinnman.model.diagnostic_filter import DiagnosticFilter
@@ -31,7 +31,7 @@ from .spalloc_job import SpallocJob
 _ONE_WORD = struct.Struct("<I")
 
 
-class SpallocTransceiver(BaseTransceiver):
+class SpallocTransceiver(Version5Transceiver):
     """ A transceiver for a Spalloc job, where some functions use spalloc more
         directly to speed up operation.
     """
@@ -51,12 +51,7 @@ class SpallocTransceiver(BaseTransceiver):
 
         super(SpallocTransceiver, self).__init__(connections=proxies)
 
-    @property
-    @overrides(BaseTransceiver.boot_led_0_value)
-    def boot_led_0_value(self) -> int:
-        return 0x00000001
-
-    @overrides(BaseTransceiver.write_memory)
+    @overrides(Version5Transceiver.write_memory)
     def write_memory(
             self, x: int, y: int, base_address: int,
             data: Union[BinaryIO, bytes, int, str],
@@ -93,14 +88,13 @@ class SpallocTransceiver(BaseTransceiver):
 
         return n_bytes, chksum
 
-    @overrides(BaseTransceiver.read_memory)
+    @overrides(Version5Transceiver.read_memory)
     def read_memory(
             self, x: int, y: int, base_address: int, length: int,
             cpu: int = 0) -> bytearray:
         return bytearray(self.__job.read_data(x, y, base_address, length))
 
-    @overrides(BaseTransceiver.prepare_routing_tables)
-    def prepare_routing_tables(
-        self, custom_filters: Optional[
-            Dict[int, DiagnosticFilter]] = None) -> None:
-        self.__job.prepare_routers(custom_filters)
+    @overrides(Version5Transceiver._do_reset_routing)
+    def _do_reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+        self.__job.reset_routing(custom_filters)

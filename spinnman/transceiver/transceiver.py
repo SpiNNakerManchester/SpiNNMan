@@ -991,13 +991,9 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def prepare_routing_tables(
-            self, custom_filters: Optional[
-                Dict[int, DiagnosticFilter]] = None) -> None:
+    def reset_routing(self) -> None:
         """
-        Reset routing tables and potentially set some default diagnostics
+        Reset routing tables and set up some default diagnostics
 
-        :param custom_filters:
-            Optional map of position to filter to load
         """
         raise NotImplementedError("abstractmethod")

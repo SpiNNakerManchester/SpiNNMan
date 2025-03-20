@@ -680,15 +680,10 @@ class _SpallocJob(SessionAware, SpallocJob):
                              size=size)
         return response.content
 
-    @overrides(SpallocJob.prepare_routers)
-    def prepare_routers(
-        self, diagnostic_filters: Optional[
-            Dict[int, DiagnosticFilter]] = None) -> None:
-        keys = dict()
-        if diagnostic_filters is not None:
-            keys = {str(i): f.filter_word
-                    for i, f in diagnostic_filters.items()}
-
+    @overrides(SpallocJob.reset_routing)
+    def reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+        keys = {str(i): f.filter_word for i, f in custom_filters.items()}
         self._delete(self.__router_url, **keys)
 
     def __keepalive(self) -> bool:

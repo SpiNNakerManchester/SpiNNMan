@@ -45,7 +45,7 @@ from spinnman.constants import (
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
     ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS)
+    BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS, ROUTER_REGISTER_REGISTERS)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
@@ -56,7 +56,9 @@ from spinnman.model import (
     CPUInfo, CPUInfos, DiagnosticFilter, ChipSummaryInfo,
     IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
 from spinnman.model.enums import (
-    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
+    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister,
+    DiagnosticFilterDefaultRoutingStatus, DiagnosticFilterPacketType,
+    DiagnosticFilterSource)
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
@@ -1402,18 +1404,48 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 destination_chip_x=x, destination_chip_y=y),
             data=_ONE_WORD.pack(cmd.value)))
 
-    @overrides(Transceiver.prepare_routing_tables)
-    def prepare_routing_tables(
-            self, custom_filters: Optional[
-                Dict[int, DiagnosticFilter]] = None) -> None:
+    @overrides(Transceiver.reset_routing)
+    def reset_routing(self) -> None:
+
+        # Sets user 2 to count non-local default routed packets
+        filter_2 = DiagnosticFilter(
+            enable_interrupt_on_counter_event=False,
+            match_emergency_routing_status_to_incoming_packet=False,
+            destinations=[],
+            sources=[DiagnosticFilterSource.NON_LOCAL],
+            payload_statuses=[],
+            default_routing_statuses=[
+                DiagnosticFilterDefaultRoutingStatus.DEFAULT_ROUTED],
+            emergency_routing_statuses=[],
+            packet_types=[DiagnosticFilterPacketType.MULTICAST])
+
+        # Set the router diagnostic for user 3 to catch local default routed
+        # packets. This can only occur when the source router has no router
+        # entry, and therefore should be detected as a bad dropped packet.
+        filter_3 = DiagnosticFilter(
+            enable_interrupt_on_counter_event=False,
+            match_emergency_routing_status_to_incoming_packet=False,
+            destinations=[],
+            sources=[DiagnosticFilterSource.LOCAL],
+            payload_statuses=[],
+            default_routing_statuses=[
+                DiagnosticFilterDefaultRoutingStatus.DEFAULT_ROUTED],
+            emergency_routing_statuses=[],
+            packet_types=[DiagnosticFilterPacketType.MULTICAST])
+
+        default_filters = {
+            ROUTER_REGISTER_REGISTERS.USER_2.value: filter_2,
+            ROUTER_REGISTER_REGISTERS.USER_3.value: filter_3}
+        self._do_reset_routing(default_filters)
+
+    def _do_reset_routing(self, custom_filters: Dict[int, DiagnosticFilter]):
         machine = SpiNNManDataView().get_machine()
         for x, y in machine.chip_coordinates:
             self.clear_multicast_routes(x, y)
             self.clear_router_diagnostic_counters(x, y)
-            if custom_filters is not None:
-                for position, diagnostic_filter in custom_filters.items():
-                    self.set_router_diagnostic_filter(
-                        x, y, position, diagnostic_filter)
+            for position, diagnostic_filter in custom_filters.items():
+                self.set_router_diagnostic_filter(
+                    x, y, position, diagnostic_filter)
 
     def __str__(self) -> str:
         addr = self._scamp_connections[0].remote_ip_address

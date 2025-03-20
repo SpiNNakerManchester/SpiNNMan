@@ -238,13 +238,12 @@ class SpallocJob(AbstractContextManager):
         raise NotImplementedError()
 
     @abstractmethod
-    def prepare_routers(
-            self, diagnostic_filters: Optional[
-                Dict[int, DiagnosticFilter]] = None) -> None:
+    def reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
         """
         Clear the routes, reset diagnostic counters and optionally set filters.
 
-        :param filters: Optional map of router counter id to filter to set.
+        :param custom_filters: Map of router filter id to filter to set.
         """
         raise NotImplementedError()
 
