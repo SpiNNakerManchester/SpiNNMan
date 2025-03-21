@@ -994,7 +994,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def write_user_many(
             self, values: List[Tuple[int, int, int, UserRegister, int]],
             description: Optional[str] = None) -> None:
-        values_with_addr: Tuple[int, int, int, int] = [
+        values_with_addr: List[Tuple[int, int, int, int]] = [
             (x, y, self.__get_user_register_address_from_core(
                 p, user), value)
             for ((x, y, p, user, value)) in values]
