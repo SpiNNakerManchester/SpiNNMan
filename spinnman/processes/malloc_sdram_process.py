@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
 from typing import List, Tuple
 from spinnman.messages.scp.impl.sdram_alloc import SDRAMAlloc, _AllocResponse
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
     ConnectionSelector)
-import functools
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
     """
     A process for allocating a block of SDRAM on a SpiNNaker chip.
     """
-    __slots__ = ("__base_addresses")
+    __slots__ = ["__base_addresses",]
 
     def __init__(self, connection_selector: ConnectionSelector):
         """

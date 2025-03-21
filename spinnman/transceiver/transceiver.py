@@ -773,7 +773,8 @@ class Transceiver(object):
 
     @abstractmethod
     def malloc_sdram_multi(
-            self, allocations: List[Tuple[int, int, int, int, int]]) -> None:
+            self, allocations: List[Tuple[int, int, int, int, int]]
+            ) -> List[int]:
         """
         Allocate space in the SDRAM space for multiple chips
 

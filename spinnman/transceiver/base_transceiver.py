@@ -1271,7 +1271,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.malloc_sdram_multi)
     def malloc_sdram_multi(
-            self, allocations: List[Tuple[int, int, int, int, int]]) -> None:
+            self, allocations: List[Tuple[int, int, int, int, int]]
+            ) -> List[int]:
         process = MallocSDRAMProcess(self._scamp_connection_selector)
         process.malloc_sdram_multi(allocations)
         return process.base_addresses

@@ -14,11 +14,11 @@
 from typing import List
 
 from spinn_utilities.progress_bar import ProgressBar
+from spinn_utilities.typing.coords import XY
 
 from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess)
 from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
-from spinn_utilities.typing.coords import XY
 from spinnman.messages.scp.impl import RouterClear
 
 
