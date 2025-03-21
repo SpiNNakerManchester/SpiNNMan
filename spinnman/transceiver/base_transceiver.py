@@ -87,7 +87,7 @@ from spinnman.processes import (
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess,
-    GetNCoresInStateProcess)
+    GetNCoresInStateProcess, SetMemoryProcess, ClearRoutesProcess)
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 from spinnman.utilities.utility_functions import get_vcpu_address
@@ -113,6 +113,8 @@ _FOUR_BYTES = struct.Struct("<BBBB")
 _ONE_WORD = struct.Struct("<I")
 _ONE_LONG = struct.Struct("<Q")
 _EXECUTABLE_ADDRESS = 0x67800000
+_ROUTER_DIAGNOSTIC_FILTER_CLEAR_ADDRESS = 0xf100002c
+_ROUTER_DIAGNOSTIC_FILTER_CLEAR_VALUE = 0xFFFFFFFF
 
 _POWER_CYCLE_WARNING = (
     "When power-cycling a board, it is recommended that you wait for 30 "
@@ -988,6 +990,19 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         addr = self.__get_user_register_address_from_core(p, user)
         self.write_memory(x, y, addr, int(value))
 
+    @overrides(Transceiver.write_user_many)
+    def write_user_many(
+            self, values: List[Tuple[int, int, int, UserRegister, int]],
+            description: Optional[str] = None) -> None:
+        values_with_addr: Tuple[int, int, int, int] = [
+            (x, y, self.__get_user_register_address_from_core(
+                p, user), value)
+            for ((x, y, p, user, value)) in values]
+        process = SetMemoryProcess(self._scamp_connection_selector)
+        if description is None:
+            description = "Writing user register values"
+        process.set_values(values_with_addr, description)
+
     @overrides(Transceiver.read_memory)
     def read_memory(
             self, x: int, y: int, base_address: int, length: int,
@@ -1254,6 +1269,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             logger.info(self._where_is_xy(x, y))
             raise
 
+    @overrides(Transceiver.malloc_sdram_multi)
+    def malloc_sdram_multi(
+            self, allocations: List[Tuple[int, int, int, int, int]]) -> None:
+        process = MallocSDRAMProcess(self._scamp_connection_selector)
+        process.malloc_sdram_multi(allocations)
+        return process.base_addresses
+
     @overrides(Transceiver.load_multicast_routes)
     def load_multicast_routes(
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
@@ -1302,12 +1324,18 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             raise
 
     @overrides(Transceiver.clear_multicast_routes)
-    def clear_multicast_routes(self, x: int, y: int) -> None:
-        try:
-            self._call(RouterClear(x, y))
-        except Exception:
-            logger.info(self._where_is_xy(x, y))
-            raise
+    def clear_multicast_routes(self, xy: Optional[XY] = None) -> None:
+        if xy is None:
+            process = ClearRoutesProcess(self._scamp_connection_selector)
+            process.clear_routes(
+                list(SpiNNManDataView.get_machine().chip_coordinates))
+        else:
+            x, y = xy
+            try:
+                self._call(RouterClear(x, y))
+            except Exception:
+                logger.info(self._where_is_xy(x, y))
+                raise
 
     @overrides(Transceiver.get_router_diagnostics)
     def get_router_diagnostics(self, x: int, y: int) -> RouterDiagnostics:
@@ -1358,14 +1386,25 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             (x, y, 0), memory_position, _ONE_WORD.pack(data_to_send)))
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
-    def clear_router_diagnostic_counters(self, x: int, y: int) -> None:
-        try:
-            # Clear all
-            self._call(WriteMemory(
-                (x, y, 0), 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
-        except Exception:
-            logger.info(self._where_is_xy(x, y))
-            raise
+    def clear_router_diagnostic_counters(
+            self, xy: Optional[XY] = None) -> None:
+        if xy is None:
+            process = SetMemoryProcess(self.get_scamp_connection_selector())
+            process.set_values(
+                [(x, y, _ROUTER_DIAGNOSTIC_FILTER_CLEAR_ADDRESS,
+                  _ROUTER_DIAGNOSTIC_FILTER_CLEAR_VALUE)
+                 for x, y in SpiNNManDataView.get_machine().chip_coordinates],
+                "Clearing router diagnostic counters")
+        else:
+            try:
+                # Clear all
+                x, y = xy
+                self._call(WriteMemory(
+                    (x, y, 0), _ROUTER_DIAGNOSTIC_FILTER_CLEAR_ADDRESS,
+                    _ONE_WORD.pack(_ROUTER_DIAGNOSTIC_FILTER_CLEAR_VALUE)))
+            except Exception:
+                logger.info(self._where_is_xy(x, y))
+                raise
 
     @overrides(Transceiver.close)
     def close(self) -> None:
@@ -1441,9 +1480,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def _do_reset_routing(
             self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
         machine = SpiNNManDataView().get_machine()
+        self.clear_router_diagnostic_counters()
+        self.clear_multicast_routes()
         for x, y in machine.chip_coordinates:
-            self.clear_multicast_routes(x, y)
-            self.clear_router_diagnostic_counters(x, y)
             for position, diagnostic_filter in custom_filters.items():
                 self.set_router_diagnostic_filter(
                     x, y, position, diagnostic_filter)

@@ -19,7 +19,7 @@ from typing import (
     List, Optional, Set, Tuple, Union)
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.progress_bar import ProgressBar
-from spinn_utilities.typing.coords import XY
+from spinn_utilities.typing.coords import XY, XYP
 from spinn_machine import (
     CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
@@ -496,6 +496,26 @@ class Transceiver(object):
         """
         raise NotImplementedError("abstractmethod")
 
+    def write_user_many(
+            self, values: List[Tuple[int, int, int, UserRegister, int]],
+            description: Optional[str] = None) -> None:
+        """ Write to the user *N* "register" for each of the given processors
+
+        :param values:
+            List of (x, y, p, register, value) to write
+        :param description:
+            Optional description of what is being written for progress bar
+        :raise SpinnmanIOException:
+            If there is an error communicating with the board
+        :raise SpinnmanInvalidPacketException:
+            If a packet is received that is not in the valid format
+        :raise SpinnmanInvalidParameterException:
+            If x, y, p does not identify a valid processor
+        :raise SpinnmanUnexpectedResponseCodeException:
+            If a response indicates an error during the exchange
+        """
+        raise NotImplementedError("abstractmethod")
+
     @abstractmethod
     def read_memory(
             self, x: int, y: int, base_address: int, length: int,
@@ -752,6 +772,18 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
+    def malloc_sdram_multi(
+            self, allocations: List[Tuple[int, int, int, int, int]]) -> None:
+        """
+        Allocate space in the SDRAM space for multiple chips
+
+        :param allocations:
+            List of (x, y, size, app_id, tag)
+        :return: List of base addresses that match each of the requests
+        """
+        raise NotImplementedError("abstractmethod")
+
+    @abstractmethod
     def load_multicast_routes(
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
             app_id: int) -> None:
@@ -848,12 +880,13 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_multicast_routes(self, x: int, y: int) -> None:
+    def clear_multicast_routes(self, xy: Optional[XY] = None) -> None:
         """
         Remove all the multicast routes on a chip.
 
-        :param int x: The x-coordinate of the chip on which to clear the routes
-        :param int y: The y-coordinate of the chip on which to clear the routes
+        :param xy:
+            Optional chip to clear the multicast routes on. If not
+            specified, all chips will have their multicast routes cleared.
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -930,12 +963,14 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_router_diagnostic_counters(self, x: int, y: int) -> None:
+    def clear_router_diagnostic_counters(
+            self, xy: Optional[XY] = None) -> None:
         """
         Clear router diagnostic information on a chip.
 
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
+        :param xy:
+            The optional XY coordinate of the chip to clear the counters on.
+            If not specified, all chips will have their counters cleared.
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
