@@ -43,8 +43,8 @@ from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpallocException
-from spinnman.transceiver import (
-    Transceiver, create_transceiver_from_connections)
+from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.transceiver import Transceiver
 
 from .abstract_spalloc_client import AbstractSpallocClient
 from .proxy_protocol import ProxyProtocol
@@ -58,6 +58,7 @@ from .spalloc_proxied_connection import SpallocProxiedConnection
 from .spalloc_scp_connection import SpallocSCPConnection
 from .spalloc_state import SpallocState
 from .utils import parse_service_url, get_hostname
+from .spalloc_transceiver import SpallocTransceiver
 
 logger = FormatAdapter(getLogger(__name__))
 _open_req = struct.Struct("<IIIII")
@@ -510,6 +511,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
     __slots__ = ("__machine_url", "__chip_url",
+                 "__memory_url", "__router_url",
                  "_keepalive_url", "__proxy_handle",
                  "__proxy_thread", "__proxy_ping")
 
@@ -522,6 +524,8 @@ class _SpallocJob(SessionAware, SpallocJob):
         logger.info("established job at {}", job_handle)
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
+        self.__memory_url = self._url + "memory"
+        self.__router_url = self._url + "router"
         self._keepalive_url: Optional[str] = self._url + "keepalive"
         self.__proxy_handle: Optional[WebSocket] = None
         self.__proxy_thread: Optional[_ProxyReceiver] = None
@@ -666,6 +670,22 @@ class _SpallocJob(SessionAware, SpallocJob):
         self._delete(self._url, reason=str(reason))
         logger.info("deleted job at {}", self._url)
 
+    @overrides(SpallocJob.write_data)
+    def write_data(self, x: int, y: int, address: int, data: bytes) -> None:
+        self._post_raw(self.__memory_url, data=data, x=x, y=y, address=address)
+
+    @overrides(SpallocJob.read_data)
+    def read_data(self, x: int, y: int, address: int, size: int) -> bytes:
+        response = self._get(self.__memory_url, x=x, y=y, address=address,
+                             size=size)
+        return response.content
+
+    @overrides(SpallocJob.reset_routing)
+    def reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+        keys = {str(i): f.filter_word for i, f in custom_filters.items()}
+        self._delete(self.__router_url, **keys)
+
     def __keepalive(self) -> bool:
         """
         Signal spalloc that we want the job to stay alive for a while longer.
@@ -706,11 +726,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     def create_transceiver(self) -> Transceiver:
         if self.get_state() != SpallocState.READY:
             raise SpallocException("job not ready to execute scripts")
-        proxies: List[Connection] = [
-            self.connect_to_board(x, y) for (x, y) in self.get_connections()]
-        # Also need a boot connection
-        proxies.append(self.connect_for_booting())
-        return create_transceiver_from_connections(connections=proxies)
+        return SpallocTransceiver(self)
 
     def __repr__(self) -> str:
         return f"SpallocJob({self._url})"

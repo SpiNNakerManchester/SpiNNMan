@@ -21,6 +21,7 @@ from spinn_utilities.abstract_base import abstractmethod
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections import UDPConnection
+from spinnman.model.diagnostic_filter import DiagnosticFilter
 from .spalloc_state import SpallocState
 from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
@@ -208,6 +209,41 @@ class SpallocJob(AbstractContextManager):
         .. note::
             May assume that there is a ``proxy_configuration`` table with
             ``kind``, ``name`` and ``value`` columns.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_data(self, x: int, y: int, address: int, data: bytes) -> None:
+        """
+        Write data to a given address on a given chip of the job.
+
+        :param int x: The X coordinate of the chip
+        :param int y: The Y coordinate of the chip
+        :param int address: The address to write to
+        :param bytes data: The data to write
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def read_data(self, x: int, y: int, address: int, size: int) -> bytes:
+        """
+        Write data to a given address on a given chip of the job.
+
+        :param int x: The X coordinate of the chip
+        :param int y: The Y coordinate of the chip
+        :param int address: The address to write to
+        :param int size: The number of bytes to read
+        :return: The data read
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+        """
+        Clear the routes, reset diagnostic counters and optionally set filters.
+
+        :param custom_filters: Map of router filter id to filter to set.
         """
         raise NotImplementedError()
 

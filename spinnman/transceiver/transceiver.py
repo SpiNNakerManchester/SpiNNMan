@@ -989,3 +989,11 @@ class Transceiver(object):
         :param int p:
         """
         raise NotImplementedError("abstractmethod")
+
+    @abstractmethod
+    def reset_routing(self) -> None:
+        """
+        Reset routing tables and set up some default diagnostics
+
+        """
+        raise NotImplementedError("abstractmethod")

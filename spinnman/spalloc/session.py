@@ -173,6 +173,27 @@ class Session:
         return self.__handle_error_or_return(r)
 
     @_may_renew
+    def post_raw(self, url: str, data: bytes, timeout: int = 10,
+                 **kwargs: Any) -> Optional[requests.Response]:
+        """
+        Do an HTTP ``POST`` in the session. Posts raw data!
+
+        :param str url:
+        :param bytes data:
+        :param int timeout:
+        :rtype: ~requests.Response
+        :raise ValueError: If the server rejects a request
+        """
+        params = kwargs if kwargs else None
+        cookies, headers = self._credentials
+        headers["Content-Type"] = "application/octet-stream"
+        r = requests.post(url, params=params, data=data,
+                          cookies=cookies, headers=headers,
+                          allow_redirects=False, timeout=timeout)
+        logger.debug("POST {} returned {}", url, r.status_code)
+        return self.__handle_error_or_return(r)
+
+    @_may_renew
     def put(self, url: str, data: str, timeout: int = 10,
             **kwargs: Any) -> Optional[requests.Response]:
         """
@@ -378,6 +399,10 @@ class SessionAware:
     def _post(self, url: str, json_dict: dict,
               **kwargs: Any) -> requests.Response:
         return self.__session.post(url, json_dict, **kwargs)
+
+    def _post_raw(self, url: str, data: bytes,
+                  **kwargs: Any) -> requests.Response:
+        return self.__session.post_raw(url, data, **kwargs)
 
     def _put(self, url: str, data: str, **kwargs: Any) -> requests.Response:
         return self.__session.put(url, data, **kwargs)
