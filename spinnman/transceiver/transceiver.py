@@ -19,7 +19,7 @@ from typing import (
     List, Optional, Set, Tuple, Union)
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.progress_bar import ProgressBar
-from spinn_utilities.typing.coords import XY, XYP
+from spinn_utilities.typing.coords import XY
 from spinn_machine import (
     CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
