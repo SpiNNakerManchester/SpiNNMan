@@ -223,7 +223,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.clear_multicast_routes)
-    def clear_multicast_routes(self, x: int, y: int) -> None:
+    def clear_multicast_routes(self, xy: Optional[XY] = None) -> None:
         pass
 
     @overrides(Transceiver.get_router_diagnostics)
@@ -241,7 +241,8 @@ class MockableTransceiver(ExtendableTransceiver):
         pass
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
-    def clear_router_diagnostic_counters(self, x: int, y: int) -> None:
+    def clear_router_diagnostic_counters(
+            self, xy: Optional[XY] = None) -> None:
         pass
 
     @overrides(Transceiver.close)
