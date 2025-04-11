@@ -13,8 +13,12 @@
 # limitations under the License.
 
 import os
+from typing import Set
+
 from spinn_utilities.config_holder import (
-    add_default_cfg, clear_cfg_files)
+    add_default_cfg, clear_cfg_files, get_config_bool, get_config_str_or_none)
+from spinn_utilities.configs.camel_case_config_parser import optionxform
+
 from spinn_machine.config_setup import add_spinn_machine_cfg
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 
@@ -40,3 +44,14 @@ def add_spinnman_cfg() -> None:
     """
     add_spinn_machine_cfg()  # This add its dependencies too
     add_default_cfg(os.path.join(os.path.dirname(__file__), BASE_CONFIG_FILE))
+
+
+def man_cfg_paths_skipped() -> Set[str]:
+    skipped = set()
+    if get_config_bool("Machine", "virtual_board"):
+        skipped.add(optionxform("path_ignores_report"))
+    if (not get_config_str_or_none("Machine", "down_cores") and
+        not get_config_str_or_none("Machine", "down_chips") and
+        not get_config_str_or_none("Machine", "down_links")):
+        skipped.add(optionxform("path_ignores_report"))
+    return skipped
