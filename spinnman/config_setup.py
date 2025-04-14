@@ -51,7 +51,7 @@ def man_cfg_paths_skipped() -> Set[str]:
     if get_config_bool("Machine", "virtual_board"):
         skipped.add(optionxform("path_ignores_report"))
     if (not get_config_str_or_none("Machine", "down_cores") and
-        not get_config_str_or_none("Machine", "down_chips") and
-        not get_config_str_or_none("Machine", "down_links")):
+            not get_config_str_or_none("Machine", "down_chips") and
+            not get_config_str_or_none("Machine", "down_links")):
         skipped.add(optionxform("path_ignores_report"))
     return skipped
