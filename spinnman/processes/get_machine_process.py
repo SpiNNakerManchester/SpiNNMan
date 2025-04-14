@@ -16,7 +16,6 @@ from collections import defaultdict
 from contextlib import suppress
 import logging
 import functools
-from os.path import join
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
