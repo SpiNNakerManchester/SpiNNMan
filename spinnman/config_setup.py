@@ -47,6 +47,11 @@ def add_spinnman_cfg() -> None:
 
 
 def man_cfg_paths_skipped() -> Set[str]:
+    """
+    Set of cfg path that may not be found based on other cfg settings
+
+    Assuming mode = Debug
+    """
     skipped = set()
     if get_config_bool("Machine", "virtual_board"):
         skipped.add(optionxform("path_ignores_report"))
