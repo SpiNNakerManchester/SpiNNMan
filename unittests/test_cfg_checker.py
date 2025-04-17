@@ -14,7 +14,7 @@
 
 import os
 import unittest
-from spinn_utilities.config_holder import run_config_checks
+from spinn_utilities.configs.config_checker import ConfigChecker
 import spinnman
 from spinnman.config_setup import unittest_setup
 
@@ -27,4 +27,4 @@ class TestCfgChecker(unittest.TestCase):
     def test_config_checks(self) -> None:
         unittests = os.path.dirname(__file__)
         spinnman_dir = spinnman.__path__[0]
-        run_config_checks(directories=[spinnman_dir, unittests])
+        ConfigChecker([spinnman_dir, unittests]).check()
