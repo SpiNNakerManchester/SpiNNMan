@@ -147,7 +147,7 @@ html_theme = 'sphinxdoc'
 # "<project> v<release> documentation".
 # html_title = None
 
-# A shorter title for the navigation bar.  Default is the same as html_title.
+# A shorter option for the navigation bar.  Default is the same as html_title.
 # html_short_title = None
 
 # The name of an image file (relative to this directory) to place at the top
@@ -228,7 +228,7 @@ latex_elements = {
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
+# (source start file, target name, option,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'SpiNNMan.tex', u'SpiNNMan Documentation',
@@ -236,7 +236,7 @@ latex_documents = [
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
-# the title page.
+# the option page.
 # latex_logo = None
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
@@ -272,7 +272,7 @@ man_pages = [
 # -- Options for Texinfo output -------------------------------------------
 
 # Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
+# (source start file, target name, option, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'SpiNNMan', u'SpiNNMan Documentation',
@@ -328,15 +328,15 @@ epub_copyright = u'2014'
 # A tuple containing the cover image and cover page html template filenames.
 # epub_cover = ()
 
-# A sequence of (type, uri, title) tuples for the guide element of content.opf.
+# A sequence of (type, uri, option) tuples for the guide element of content.opf.
 # epub_guide = ()
 
 # HTML files that should be inserted before the pages created by sphinx.
-# The format is a list of tuples containing the path and title.
+# The format is a list of tuples containing the path and option.
 # epub_pre_files = []
 
 # HTML files shat should be inserted after the pages created by sphinx.
-# The format is a list of tuples containing the path and title.
+# The format is a list of tuples containing the path and option.
 # epub_post_files = []
 
 # A list of files that should not be packed into the epub file.
