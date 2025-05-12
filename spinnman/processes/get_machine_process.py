@@ -16,13 +16,12 @@ from collections import defaultdict
 from contextlib import suppress
 import logging
 import functools
-from os.path import join
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_int_or_none, get_config_str_or_none)
-from spinn_utilities.data import UtilsDataView
+    get_config_bool, get_config_int_or_none, get_config_str_or_none,
+    get_report_path)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
@@ -52,8 +51,6 @@ from .abstract_multi_connection_process_connection_selector import \
     ConnectionSelector
 
 logger = FormatAdapter(logging.getLogger(__name__))
-
-REPORT_FILE = "Ignores_report.rpt"
 
 P_TO_V = SystemVariableDefinition.physical_to_virtual_core_map
 V_TO_P = SystemVariableDefinition.virtual_to_physical_core_map
@@ -510,6 +507,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param str message:
         """
         full_message = message.format(*args) + "\n"
-        report_file = join(UtilsDataView.get_run_dir_path(), REPORT_FILE)
+        report_file = get_report_path("path_ignores_report")
         with open(report_file, "a", encoding="utf-8") as r_file:
             r_file.write(full_message)
