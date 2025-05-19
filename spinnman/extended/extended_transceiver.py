@@ -79,10 +79,10 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
     __slots__: List[str] = []
 
     # calls many methods only reachable do to require_subclass
-    # pylint: disable=no-member,assigning-non-slot
-    # pylint: disable=access-member-before-definition
-    # pylint: disable=attribute-defined-outside-init
-    # pylint: disable=protected-access
+    # ylint: disable=no-member,assigning-non-slot
+    # ylint: disable=access-member-before-definition
+    # ylint: disable=attribute-defined-outside-init
+    # ylint: disable=protected-access
 
     @abstractmethod
     def _where_is_xy(self, x: int, y: int) -> Optional[str]:
