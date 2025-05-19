@@ -48,7 +48,6 @@ class SpinnakerBootMessage(object):
         :raise SpinnmanInvalidParameterException:
             If the opcode is not a valid value
         """
-        # pylint: disable=too-many-arguments
         if data is not None and len(data) > (256 * 4):
             raise SpinnmanInvalidParameterException(
                 "len(data)", str(len(data)),

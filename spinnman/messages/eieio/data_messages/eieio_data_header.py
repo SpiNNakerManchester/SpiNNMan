@@ -64,7 +64,6 @@ class EIEIODataHeader(object):
             otherwise
         :param int count: Count of the number of items in the packet
         """
-        # pylint: disable=too-many-arguments
         self._eieio_type = eieio_type
         self._tag = tag
         self._prefix = prefix

@@ -337,7 +337,6 @@ class SystemVariableDefinition(Enum):
         :param array_size: The length of the array, or `None` if not an array
         :type array_size: int or None
         """
-        # pylint: disable=too-many-arguments
         self._data_type: _DataType = data_type
         self._offset: int = offset
         self._default: Union[int, bytes] = default

@@ -79,7 +79,7 @@ class ExecutableType(Enum):
     def __init__(self, value: int, start_state: Sequence[CPUState],
                  end_state: Sequence[CPUState],
                  supports_auto_pause_and_resume: bool, doc: str = ""):
-        # pylint: disable=too-many-arguments, unused-argument
+        # pylint: disable=unused-argument
         self.start_state: FrozenSet[CPUState] = frozenset(start_state)
         self.end_state: FrozenSet[CPUState] = frozenset(end_state)
         self.supports_auto_pause_and_resume = supports_auto_pause_and_resume

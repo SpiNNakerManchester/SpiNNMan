@@ -45,7 +45,6 @@ class RouterInit(AbstractSCPRequest[CheckOKResponse]):
             * If table_address is not positive
             * If base_address is not positive
         """
-        # pylint: disable=too-many-arguments
         if n_entries < 1:
             raise SpinnmanInvalidParameterException(
                 "n_entries", str(n_entries), "Must be more than 0")

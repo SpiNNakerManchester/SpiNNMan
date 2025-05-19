@@ -40,7 +40,6 @@ class ApplicationRun(AbstractSCPRequest[CheckOKResponse]):
         :param bool wait:
             True if the processors should enter a "wait" state on starting
         """
-        # pylint: disable=too-many-arguments
         processor_mask = 0
         if processors is not None:
             for processor in processors:

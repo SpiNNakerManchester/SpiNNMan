@@ -45,7 +45,6 @@ class AppCopyRun(AbstractSCPRequest[CheckOKResponse]):
         :param int checksum: The checksum of the data to copy
         :param bool wait: Whether to start in wait mode or not
         """
-        # pylint: disable=too-many-arguments
         if size % 4 != 0:
             raise SpinnmanInvalidParameterException(
                 "size", size, "The size must be a multiple of 4")

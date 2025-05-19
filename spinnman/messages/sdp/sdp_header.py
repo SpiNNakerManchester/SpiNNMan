@@ -76,7 +76,6 @@ class SDPHeader(object):
             The y-coordinate of the source chip between 0 and 255,
             or `None` if it is to be set later
         """
-        # pylint: disable=too-many-arguments
         self._flags = flags
         self._tag = tag
         self._destination_port = destination_port
