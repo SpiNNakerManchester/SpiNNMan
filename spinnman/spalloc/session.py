@@ -65,7 +65,6 @@ def _may_renew(method: Callable) -> Callable:
                 pp_req(r.request)
                 pp_resp(r)
             if _SESSION_COOKIE in r.cookies:
-                # pylint: disable=protected-access
                 self._session_id = r.cookies[_SESSION_COOKIE]
             if r.status_code != 401 or not renew_count:
                 return r
