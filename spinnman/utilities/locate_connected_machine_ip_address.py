@@ -50,7 +50,7 @@ if __name__ == "__main__":
         """
         :return: Never returns as it causes a sys.exit()
         """
-        _ = (signal, frame)
+        _ = (sig, frame)
         print("Exiting")
         sys.exit()
 
