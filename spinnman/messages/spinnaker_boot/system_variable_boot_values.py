@@ -35,7 +35,7 @@ class _DataType(Enum):
         return obj
 
     def __init__(self, value: int, struct_code: str):
-        # pylint: disable=unused-argument
+        _ = value
         self._struct_code = struct_code
 
     @property
