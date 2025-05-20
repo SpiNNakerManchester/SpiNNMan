@@ -87,8 +87,8 @@ class Session:
         This class does not present a stable API for public consumption.
     """
     __slots__ = (
-        "__login_form_url", "__login_submit_url", "__srv_base", "__service_url",
-        "__username", "__password", "__token",
+        "__login_form_url", "__login_submit_url", "__srv_base",
+        "__service_url", "__username", "__password", "__token",
         "_session_id", "__csrf", "__csrf_header")
 
     def __init__(
