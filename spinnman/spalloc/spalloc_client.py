@@ -298,9 +298,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         }, machine_name)
 
     def close(self) -> None:
-        # pylint: disable=protected-access
         if self.__session is not None:
-            self.__session._purge()
+            self.__session.purge()
         self.__session = None
 
 
@@ -537,7 +536,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     @overrides(SpallocJob.get_session_credentials_for_db)
     def get_session_credentials_for_db(self) -> Mapping[Tuple[str, str], str]:
         config = {}
-        config["SPALLOC", "service uri"] = self._service_url
+        config["SPALLOC", "service uri"] = self.__session.service_url
         config["SPALLOC", "job uri"] = self._url
         cookies, headers = self._session_credentials
         if "Authorization" in headers:
