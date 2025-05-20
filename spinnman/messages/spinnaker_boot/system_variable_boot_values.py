@@ -29,13 +29,12 @@ class _DataType(Enum):
     LONG = (8, "<Q")
     BYTE_ARRAY = (16, "s")
 
-    def __new__(cls, value: int, struct_code: str) -> "_DataType":
+    def __new__(cls, value: int, _: str) -> "_DataType":
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
 
-    def __init__(self, value: int, struct_code: str):
-        _ = value
+    def __init__(self, _: int, struct_code: str):
         self._struct_code = struct_code
 
     @property
