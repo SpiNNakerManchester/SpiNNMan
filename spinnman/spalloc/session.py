@@ -389,16 +389,6 @@ class SessionAware:
         """
         return self.__session.credentials
 
-    @property
-    def _service_url(self) -> str:
-        """
-        The main service URL.
-
-        :rtype: str
-        """
-        # pylint: disable=protected-access
-        return self.__session.service_url
-
     def _get(self, url: str, **kwargs: Any) -> requests.Response:
         return self.__session.get(url, **kwargs)
 
