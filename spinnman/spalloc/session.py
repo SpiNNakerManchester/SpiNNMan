@@ -41,9 +41,8 @@ def _may_renew(method: Callable) -> Callable:
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
         print(f"{request.method} {request.url}")
-        # pylint: disable=consider-using-f-string
-        print('\r\n'.join('{}: {}'.format(*kv)
-                          for kv in request.headers.items()))
+        print('\r\n'.join(f'{key}: {value}'
+                          for key, value in request.headers.items()))
         if request.body:
             print(request.body)
 
