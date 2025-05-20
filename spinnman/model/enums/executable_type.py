@@ -13,7 +13,7 @@
 # limitations under the License.
 from __future__ import annotations
 from enum import Enum
-from typing import Any, FrozenSet, Sequence
+from typing import FrozenSet, Sequence
 from spinnman.model.enums import CPUState
 
 
