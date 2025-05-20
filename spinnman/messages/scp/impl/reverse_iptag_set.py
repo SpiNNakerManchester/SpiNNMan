@@ -42,7 +42,6 @@ class ReverseIPTagSet(AbstractSCPRequest[CheckOKResponse]):
         :param int port: The port, between 0 and 65535
         :param int tag: The tag, between 0 and 7
         """
-        # pylint: disable=too-many-arguments
         strip_value = 1
         reverse_value = 1
 

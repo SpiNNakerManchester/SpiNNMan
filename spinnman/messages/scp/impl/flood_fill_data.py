@@ -45,7 +45,6 @@ class FloodFillData(AbstractSCPRequest[CheckOKResponse]):
             The data to load, between 4 and 256 bytes and the size must be
             divisible by 4
         """
-        # pylint: disable=too-many-arguments
         self._offset = offset
         self._data_to_write = data
         if length is None:

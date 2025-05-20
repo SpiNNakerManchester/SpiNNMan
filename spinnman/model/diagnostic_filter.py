@@ -115,7 +115,6 @@ class DiagnosticFilter(object):
             Increment the counter if one or more of the given packet types
             match (or `None` or empty list to match all)
         """
-        # pylint: disable=too-many-arguments
         self._enable_interrupt_on_counter_event = \
             enable_interrupt_on_counter_event
         self._match_emergency_routing_status_to_incoming_packet = \
