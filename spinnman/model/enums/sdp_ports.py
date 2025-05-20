@@ -15,7 +15,6 @@
 from enum import Enum
 
 
-# pylint: disable=invalid-name
 class SDP_PORTS(Enum):
     """
     SDP port handling output buffering data streaming.
