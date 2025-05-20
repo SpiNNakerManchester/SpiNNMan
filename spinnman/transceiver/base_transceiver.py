@@ -340,7 +340,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             try:
                 sender: SendSingleCommandProcess[GetChipInfoResponse] = \
                     SendSingleCommandProcess(connection_selector)
-                chip_info = sender.execute(  # pylint: disable=no-member
+                chip_info = sender.execute(
                     GetChipInfo(chip_x, chip_y)).chip_info
                 if not chip_info.is_ethernet_available:
                     time.sleep(0.1)
