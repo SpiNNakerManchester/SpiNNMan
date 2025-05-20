@@ -50,7 +50,7 @@ if __name__ == "__main__":
         """
         :return: Never returns as it causes a sys.exit()
         """
-        # pylint: disable=unused-argument
+        _ = (signal, frame)
         print("Exiting")
         sys.exit()
 
