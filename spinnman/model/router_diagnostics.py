@@ -53,13 +53,10 @@ class RouterDiagnostics(object):
 
         self._register_values = register_values
 
-    # pylint: disable=wrong-spelling-in-docstring
     @property
     def mon(self) -> int:
         """
-        The "mon" part of the control register.
-
-        :rtype: int
+        Part of the control register.
         """
         return self._mon
 
