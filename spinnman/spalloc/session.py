@@ -396,7 +396,6 @@ class SessionAware:
 
         :rtype: str
         """
-        # pylint: disable=protected-access
         return self.__session.service_url
 
     def _get(self, url: str, **kwargs: Any) -> requests.Response:
