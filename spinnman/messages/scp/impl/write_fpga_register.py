@@ -22,7 +22,6 @@ from spinnman.messages.scp.enums import SCPCommand
 _ONE_WORD = struct.Struct("<I")
 
 
-# pylint: disable=wrong-spelling-in-docstring
 class WriteFPGARegister(BMPRequest[BMPOKResponse]):
     """
     A request for writing a word to a FPGA (SPI) register.
