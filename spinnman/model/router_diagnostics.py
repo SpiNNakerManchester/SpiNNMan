@@ -56,7 +56,7 @@ class RouterDiagnostics(object):
     @property
     def mon(self) -> int:
         """
-        Part of the control register.
+        The Monitor part of the control register.
         """
         return self._mon
 
@@ -100,8 +100,6 @@ class RouterDiagnostics(object):
     def errors_set(self) -> Sequence[RouterError]:
         """
         A list of errors that have been detected.
-
-        :rtype: list(RouterError)
         """
         return [
             error for error in RouterError if error.value & self._error_status]
