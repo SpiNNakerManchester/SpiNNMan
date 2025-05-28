@@ -96,7 +96,6 @@ class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
             needs to be deallocated, or `None` if deallocating via app_id
         :type base_address: int or None
         """
-        # pylint: disable=unsupported-binary-operation
         if base_address is not None:
             assert app_id is None
             super().__init__(

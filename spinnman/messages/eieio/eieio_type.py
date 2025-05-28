@@ -29,8 +29,9 @@ class EIEIOType(Enum):
     #: Indicates that data is keys and payloads of 32 bits.
     KEY_PAYLOAD_32_BIT = (3, 4, 4)
 
-    def __new__(cls, encoded_value: int, key_bytes: int,
-                payload_bytes: int) -> 'EIEIOType':
+    def __new__(cls, encoded_value: int, key_bytes: int = 0,
+                payload_bytes: int = 0) -> 'EIEIOType':
+        # Default values just to make pylint SHUT UP!
         obj = object.__new__(cls)
         obj._value_ = encoded_value
         return obj

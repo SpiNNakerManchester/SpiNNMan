@@ -315,7 +315,6 @@ class SpinnmanGenericProcessException(SpinnmanException):
         :param int p:
         :param str phys_p:
         """
-        # pylint: disable=too-many-arguments
         super().__init__(
             f"   Received exception class: {exception.__class__.__name__} \n"
             f"      With message: {str(exception)} \n"

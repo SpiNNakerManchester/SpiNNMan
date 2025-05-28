@@ -41,7 +41,8 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
         self.__cpu_infos = CPUInfos()
 
     def _is_desired(self, cpu_info: CPUInfo) -> bool:
-        # pylint: disable=unused-argument
+        # cpu_info defined as used in subclasses
+        _ = cpu_info
         return True
 
     def __handle_response(

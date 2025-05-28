@@ -58,7 +58,6 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
     def _add_routing_entry(
             self, route_no: int, offset: int, app_id: int, route: int,
             key: int, mask: int) -> None:
-        # pylint: disable=too-many-arguments
         if route >= 0xFF000000:
             return
         if self._app_id is not None and self._app_id != app_id:

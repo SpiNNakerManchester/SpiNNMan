@@ -1038,13 +1038,12 @@ class _ProxiedEIEIOConnection(
     def _coords(self) -> XY:
         return self.__chip_x, self.__chip_y
 
-    def send_to(
-            self,
-            data: bytes, address: tuple   # pylint: disable=unused-argument
-            ) -> None:
+    @overrides(SpallocEIEIOConnection.send_to)
+    def send_to(self, data: bytes, address: tuple) -> None:
         """
         Direct ``send_to`` is unsupported.
         """
+        _ = (data, address)
         self._throw_if_closed()
         raise IOError("socket is not open for sending")
 

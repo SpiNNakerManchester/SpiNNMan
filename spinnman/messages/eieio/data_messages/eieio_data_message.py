@@ -82,7 +82,6 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :param int timestamp: The timestamp of the packet
         :param EIEIOPrefix prefix_type: The type of the key prefix if 16-bits
         """
-        # pylint: disable=too-many-arguments
         payload_base = payload_prefix
         if timestamp is not None:
             payload_base = timestamp
