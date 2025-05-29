@@ -36,9 +36,5 @@ class AbstractEIEIOMessage(object, metaclass=AbstractBase):
     @property
     @abstractmethod
     def bytestring(self) -> bytes:
-        """
-        The bytes of the message.
-
-        :rtype: bytes
-        """
+        """ The bytes of the message. """
         raise NotImplementedError

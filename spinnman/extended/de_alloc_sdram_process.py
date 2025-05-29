@@ -37,11 +37,10 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
     def de_alloc_all_app_sdram(self, x: int, y: int, app_id: int) -> None:
         """
-        :param int x:
-        :param int y:
-        :param int app_id:
+        :param x:
+        :param y:
+        :param app_id:
         :param base_address:
-        :type base_address: int or None
         """
         # deallocate space in the SDRAM
         with self._collect_responses():
@@ -64,7 +63,5 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
     @property
     def no_blocks_freed(self) -> Optional[int]:
-        """
-        :rtype: int
-        """
+        """ number of blocks freed """
         return self._no_blocks_freed

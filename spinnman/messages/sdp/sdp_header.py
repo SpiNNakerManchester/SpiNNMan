@@ -308,8 +308,7 @@ class SDPHeader(object):
         Read the header from a byte-string.
 
         :param data: The byte-string to read the header from
-        :type data: bytes or bytearray
-        :param int offset:
+        :param offset:
             The offset into the data from which to start reading
         """
         (flags, tag, dest_port_cpu, source_port_cpu,

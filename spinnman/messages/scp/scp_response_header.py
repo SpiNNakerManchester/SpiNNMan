@@ -28,28 +28,20 @@ class SCPResponseHeader(object):
 
     def __init__(self, result: SCPResult, sequence: int):
         """
-        :param SCPResult result:
-        :param int sequence:
+        :param result:
+        :param sequence:
         """
         self._result = result
         self._sequence = sequence
 
     @property
     def result(self) -> SCPResult:
-        """
-        The result of the SCP response.
-
-        :rtype: SCPResult
-        """
+        """ The result of the SCP response. """
         return self._result
 
     @property
     def sequence(self) -> int:
-        """
-        The sequence number of the SCP response, between 0 and 65535.
-
-        :rtype: int
-        """
+        """ The sequence number of the SCP response, between 0 and 65535. """
         return self._sequence
 
     @staticmethod
@@ -57,8 +49,8 @@ class SCPResponseHeader(object):
         """
         Read a header from a byte-string.
 
-        :param bytes data: The byte-string to read from
-        :param int offset:
+        :param data: The byte-string to read from
+        :param offset:
         """
         result, sequence = _TWO_SHORTS.unpack_from(data, offset)
         return SCPResponseHeader(SCPResult(result), sequence)

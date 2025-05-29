@@ -78,14 +78,10 @@ def _make_transceiver(host: Optional[str], version: Optional[int],
     """
     :param host:
         Host to use or `None` to use test configuration for all parameters
-    :type host: str or None
     :param version: Board version to use (`None` defaults to 5 unless host is
         192.168.240.253 (spin 3)
-    :type version: int or None
     :param bmp_names: names of BMP connection
         or `None` to auto detect (if applicable)
-    :type bmp_names: str or None
-    :rtype: Transceiver
     """
     if host is None:
         config = BoardTestConfiguration()

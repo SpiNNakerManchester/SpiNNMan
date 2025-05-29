@@ -47,17 +47,16 @@ class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
             argument_3: Optional[int] = None,
             data: Optional[bytes] = None):
         """
-        :param SDPHeader sdp_header: The SDP header of the request
-        :param SCPRequestHeader scp_request_header:
+        :param sdp_header: The SDP header of the request
+        :param scp_request_header:
             The SCP header of the request
-        :param int argument_1:
+        :param argument_1:
             The first argument, or `None` if no first argument
-        :param int argument_2:
+        :param argument_2:
             The second argument, or `None` if no second argument
-        :param int argument_3:
+        :param argument_3:
             The third argument, or `None` if no third argument
         :param data: The optional data, or `None` if no data
-        :type data: bytearray or bytes or None
         """
         # pylint: disable=too-many-arguments
         self._sdp_header = sdp_header
@@ -70,64 +69,37 @@ class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
     @property
     def sdp_header(self) -> SDPHeader:
         """
-        The SDP header of the message.
-
-        :rtype: SDPHeader
-        """
+        The SDP header of the message. """
         return self._sdp_header
 
     @property
     def scp_request_header(self) -> SCPRequestHeader:
-        """
-        The SCP request header of the message.
-
-        :rtype: SCPRequestHeader
-        """
+        """ The SCP request header of the message. """
         return self._scp_request_header
 
     @property
     def argument_1(self) -> Optional[int]:
-        """
-        The first argument, or `None` if no first argument.
-
-        :rtype: int
-        """
+        """ The first argument, or `None` if no first argument."""
         return self._argument_1
 
     @property
     def argument_2(self) -> Optional[int]:
-        """
-        The second argument, or `None` if no second argument.
-
-        :rtype: int
-        """
+        """ The second argument, or `None` if no second argument. """
         return self._argument_2
 
     @property
     def argument_3(self) -> Optional[int]:
-        """
-        The third argument, or `None` if no third argument.
-
-        :rtype: int
-        """
+        """ The third argument, or `None` if no third argument. """
         return self._argument_3
 
     @property
     def data(self) -> Optional[bytes]:
-        """
-        The data, or `None` if no data.
-
-        :rtype: bytearray
-        """
+        """ The data, or `None` if no data. """
         return self._data
 
     @property
     def bytestring(self) -> bytes:
-        """
-        The request as a byte-string.
-
-        :rtype: bytes
-        """
+        """ The request as a byte-string. """
         data = (self._sdp_header.bytestring +
                 self._scp_request_header.bytestring)
         data += _THREE_WORDS.pack(
@@ -152,6 +124,5 @@ class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
         received.
 
         :return: An SCP response, or `None` if no response is required
-        :rtype: AbstractSCPResponse
         """
         raise NotImplementedError

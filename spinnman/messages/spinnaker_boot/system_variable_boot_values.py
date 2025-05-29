@@ -329,13 +329,12 @@ class SystemVariableDefinition(Enum):
             self, data_type: _DataType, offset: int,
             default: Union[int, bytes], array_size: Optional[int], doc: str):
         """
-        :param _DataType data_type: The data type of the variable
-        :param int offset: The offset from the start of the system variable
+        :param data_type: The data type of the variable
+        :param offset: The offset from the start of the system variable
             structure where the variable is found
-        :param object default:
+        :param default:
             The default value assigned to the variable if not overridden
         :param array_size: The length of the array, or `None` if not an array
-        :type array_size: int or None
         """
         # pylint: disable=too-many-arguments
         self._data_type: _DataType = data_type
@@ -346,38 +345,22 @@ class SystemVariableDefinition(Enum):
 
     @property
     def data_type(self) -> _DataType:
-        """
-        Gets the data_type passed into the init.
-
-        :rtype: _DataType
-        """
+        """ Gets the data_type passed into the init. """
         return self._data_type
 
     @property
     def array_size(self) -> Optional[int]:
-        """
-        Gets the array size passed into the init (if applicable)
-
-        :rtype: int or None
-        """
+        """ Gets the array size passed into the init (if applicable) """
         return self._array_size
 
     @property
     def offset(self) -> int:
-        """
-        Gets the Offset passed into the init
-
-        :rtype: int
-        """
+        """ Gets the Offset passed into the init """
         return self._offset
 
     @property
     def default(self) -> Union[int, bytes]:
-        """
-        Gets the default Value passed into the init
-
-        :rtype: int or bytes
-        """
+        """ Gets the default Value passed into the init """
         return self._default
 
 
@@ -400,7 +383,6 @@ class SystemVariableBootValues(object):
         Save a value to the system_variable_definition Enum as the key
 
         :param system_variable_definition: Key to save value with
-        :type system_variable_definition: SystemVariableDefinition
         :param value:
         :return:
         """
@@ -408,11 +390,7 @@ class SystemVariableBootValues(object):
 
     @property
     def bytestring(self) -> bytes:
-        """
-        Gets all the SystemVariableDefinition as bytes
-
-        :rtype: bytes
-        """
+        """ Gets all the SystemVariableDefinition as bytes """
         data = b""
         for sys_var in SystemVariableDefinition:
             data += struct.pack(sys_var.data_type.struct_code,

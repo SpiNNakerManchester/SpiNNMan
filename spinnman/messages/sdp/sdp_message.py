@@ -27,9 +27,8 @@ class SDPMessage(object):
     def __init__(self, sdp_header: SDPHeader,
                  data: Optional[bytes] = None, offset: int = 0):
         """
-        :param SDPHeader sdp_header: The header of the message
+        :param sdp_header: The header of the message
         :param data: The data of the SDP packet, or `None` if no data
-        :type data: bytes or bytearray or None
         :param int offset: The offset where the valid data starts
         """
         self._sdp_header = sdp_header
@@ -38,11 +37,7 @@ class SDPMessage(object):
 
     @property
     def bytestring(self) -> bytes:
-        """
-        The byte-string of the message.
-
-        :rtype: bytes
-        """
+        """ The byte-string of the message. """
         if self._data is not None:
             return self._sdp_header.bytestring + self._data[self._offset:]
         return self._sdp_header.bytestring
@@ -50,36 +45,23 @@ class SDPMessage(object):
     @staticmethod
     def from_bytestring(data: bytes, offset: int) -> 'SDPMessage':
         """
-        :param bytes data:
-        :param int offset:
-        :rtype: SDPMessage
+        :param data:
+        :param offset:
         """
         sdp_header = SDPHeader.from_bytestring(data, offset)
         return SDPMessage(sdp_header, data, offset + 8)
 
     @property
     def sdp_header(self) -> SDPHeader:
-        """
-        The header of the packet.
-
-        :rtype: SDPHeader
-        """
+        """ The header of the packet. """
         return self._sdp_header
 
     @property
     def data(self) -> Optional[bytes]:
-        """
-        The data in the packet.
-
-        :rtype: bytes or bytearray or None
-        """
+        """ The data in the packet. """
         return self._data
 
     @property
     def offset(self) -> int:
-        """
-        The offset where the valid data starts.
-
-        :rtype: int
-        """
+        """ The offset where the valid data starts. """
         return self._offset

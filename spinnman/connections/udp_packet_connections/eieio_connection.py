@@ -41,11 +41,10 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
         Receives an EIEIO message from this connection.  Blocks until
         a message has been received, or a timeout occurs.
 
-        :param int timeout:
+        :param timeout:
             The time in seconds to wait for the message to arrive; if not
             specified, will wait forever, or until the connection is closed
         :return: an EIEIO message
-        :rtype: AbstractEIEIOMessage
         :raise SpinnmanIOException:
             If there is an error receiving the message.
         :raise SpinnmanTimeoutException:
@@ -65,7 +64,7 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
         """
         Sends an EIEIO message down this connection.
 
-        :param AbstractEIEIOMessage eieio_message:
+        :param eieio_message:
             The EIEIO message to be sent
         :raise SpinnmanIOException:
             If there is an error sending the message

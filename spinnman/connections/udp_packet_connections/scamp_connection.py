@@ -107,8 +107,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
                 SCPResult, int, bytes, int, str, int]:
         """
 
-        :param float timeout:
-        :rtype: tuple(SCPResult, int, bytes, int, str, int)
+        :param timeout:
         """
         data, (addr, port) = self.receive_with_address(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)

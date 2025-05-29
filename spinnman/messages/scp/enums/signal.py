@@ -50,8 +50,8 @@ class Signal(Enum):
 
     def __init__(self, value: int, signal_type: SignalType) -> None:
         """
-        :param int value: The value used for the signal
-        :param SignalType signal_type: The "type" of the signal
+        :param value: The value used for the signal
+        :param signal_type: The "type" of the signal
         """
         assert value >= 0
         self._signal_type = signal_type

@@ -41,11 +41,7 @@ class HostDataReadAck(EIEIOCommandMessage):
 
     @property
     def sequence_no(self) -> int:
-        """
-        Gets the sequence_no passed into the init.
-
-        :rtype: int
-        """
+        """ Gets the sequence_no passed into the init. """
         return self._sequence_no
 
     @staticmethod

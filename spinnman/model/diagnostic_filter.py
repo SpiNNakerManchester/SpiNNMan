@@ -86,32 +86,28 @@ class DiagnosticFilter(object):
                      DiagnosticFilterEmergencyRoutingStatus],
                  packet_types: List[DiagnosticFilterPacketType]):
         """
-        :param bool enable_interrupt_on_counter_event: Indicates whether
+        :param enable_interrupt_on_counter_event: Indicates whether
             an interrupt should be raised when this rule matches
-        :param bool match_emergency_routing_status_to_incoming_packet:
+        :param match_emergency_routing_status_to_incoming_packet:
             Indicates whether the emergency routing statuses should be matched
             against packets arriving at this router (if True), or if they
             should be matched against packets leaving this router (if False)
-        :param list(DiagnosticFilterDestination) destinations:
+        :param destinations:
             Increment the counter if one or more of the given destinations
             match
-        :param list(DiagnosticFilterSource) sources:
+        :param sources:
             Increment the counter if one or more of the given sources match
             (or `None` or empty list to match all)
-        :param list(DiagnosticFilterPayloadStatus) payload_statuses:
+        :param payload_statuses:
             Increment the counter if one or more of the given payload statuses
             match (or `None` or empty list to match all)
         :param default_routing_statuses:
             Increment the counter if one or more of the given default routing
             statuses match (or `None` or empty list to match all)
-        :type default_routing_statuses:
-            list(DiagnosticFilterDefaultRoutingStatus)
         :param emergency_routing_statuses:
             Increment the counter if one or more of the given emergency routing
             statuses match (or `None` or empty list to match all)
-        :type emergency_routing_statuses:
-            list(DiagnosticFilterEmergencyRoutingStatus)
-        :param list(DiagnosticFilterPacketType) packet_types:
+        :param packet_types:
             Increment the counter if one or more of the given packet types
             match (or `None` or empty list to match all)
         """
@@ -241,8 +237,7 @@ class DiagnosticFilter(object):
 
         Currently only called by unused Transceiver methods
 
-        :param int int_value:
-        :rtype: DiagnosticFilter
+        :param int_value:
         """
         enable_interrupt_on_counter_event = (
             (int_value >> _ENABLE_INTERRUPT_OFFSET) & 0x1) == 1

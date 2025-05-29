@@ -50,8 +50,6 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
     def boards(self) -> Sequence[int]:
         """
         The set of boards supported by the BMP.
-
-        :rtype: iterable(int)
         """
         return self._boards
 

@@ -52,7 +52,6 @@ class SpinnakerBootMessages(object):
             This should only be used for values which are not standard
             based on the board version.
             for example this may include an Led_0 value.
-        :type extra_boot_values: dict(SystemVariableDefinition, object)
         :raise SpinnmanInvalidParameterException:
             If the board version is not supported
         :raise SpinnmanIOException:
