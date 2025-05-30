@@ -49,11 +49,7 @@ class _FixedRouteResponse(AbstractSCPResponse):
 
     @property
     def route(self) -> RoutingEntry:
-        """
-        Converts this response into a Route
-
-        :rtype: RoutingEntry
-        """
+        """ Converts this response into a Route """
         processor_ids: List[int] = list()
         for processor_id in range(26):
             if self._route & (1 << (6 + processor_id)) != 0:

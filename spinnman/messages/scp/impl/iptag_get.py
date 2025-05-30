@@ -76,46 +76,28 @@ class IPTagGetResponse(AbstractSCPResponse):
 
     @property
     def ip_address(self) -> bytes:
-        """
-        The IP address of the tag, as a bytearray of 4 bytes.
-
-        :rtype: bytearray
-        """
+        """ The IP address of the tag, as a bytearray of 4 bytes. """
         return self._ip_address
 
     @property
     def mac_address(self) -> bytes:
-        """
-        The MAC address of the tag, as a bytearray of 6 bytes.
-
-        :rtype: bytearray
-        """
+        """ The MAC address of the tag, as a bytearray of 6 bytes. """
         return self._mac_address
 
     @property
     def port(self) -> int:
-        """
-        The port of the tag.
-
-        :rtype: int
-        """
+        """ The port of the tag. """
         return self._port
 
     @property
     def timeout(self) -> int:
-        """
-        The timeout of the tag.
-
-        :rtype: int
-        """
+        """ The timeout of the tag."""
         return self._timeout
 
     @property
     def flags(self) -> int:
         """
         The flags of the tag.
-
-        :rtype: int
         """
         return self._flags
 
@@ -123,8 +105,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def in_use(self) -> bool:
         """
         Whether the tag is marked as being in use.
-
-        :rtype: bool
         """
         return (self._flags & 0x8000) > 0
 
@@ -132,8 +112,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def is_temporary(self) -> bool:
         """
         Whether the tag is temporary.
-
-        :rtype: bool
         """
         return (self._flags & 0x4000) > 0
 
@@ -145,8 +123,6 @@ class IPTagGetResponse(AbstractSCPResponse):
 
         .. note::
             This is a transient state; it is unlikely to be observed.
-
-        :rtype: bool
         """
         return (self._flags & 0x2000) > 0
 
@@ -154,8 +130,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def is_reverse(self) -> bool:
         """
         Whether the tag is a reverse tag.
-
-        :rtype: bool
         """
         return (self._flags & 0x0200) > 0
 
@@ -163,8 +137,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def strip_sdp(self) -> bool:
         """
         Whether the tag is to strip the SDP header.
-
-        :rtype: bool
         """
         return (self._flags & 0x0100) > 0
 
@@ -172,8 +144,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def count(self) -> int:
         """
         The count of the number of packets that have been sent with the tag.
-
-        :rtype: int
         """
         return self._count
 
@@ -181,8 +151,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def rx_port(self) -> int:
         """
         The receive port of the tag.
-
-        :rtype: int
         """
         return self._rx_port
 
@@ -190,8 +158,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def spin_chip_x(self) -> int:
         """
         The X-coordinate of the chip on which the tag is defined.
-
-        :rtype: int
         """
         return self._spin_chip_x
 
@@ -199,8 +165,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def spin_chip_y(self) -> int:
         """
         The Y-coordinate of the chip on which the tag is defined.
-
-        :rtype: int
         """
         return self._spin_chip_y
 
@@ -208,8 +172,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def spin_port(self) -> int:
         """
         The spin-port of the IP tag.
-
-        :rtype: int
         """
         return self._spin_port
 
@@ -217,8 +179,6 @@ class IPTagGetResponse(AbstractSCPResponse):
     def spin_cpu(self) -> int:
         """
         The CPU ID of the IP tag.
-
-        :rtype: int
         """
         return self._spin_cpu
 

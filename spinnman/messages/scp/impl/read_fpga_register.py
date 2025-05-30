@@ -64,7 +64,5 @@ class _SCPReadFPGARegisterResponse(BMPResponse[int]):
     def fpga_register(self) -> int:
         """
         The register information received.
-
-        :rtype: int
         """
         return self._value
