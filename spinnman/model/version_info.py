@@ -38,9 +38,9 @@ class VersionInfo(object):
 
     def __init__(self, version_data: bytes, offset: int = 0):
         """
-        :param bytes version_data:
+        :param version_data:
             bytes from an SCP packet containing version information
-        :param int offset:
+        :param offset:
             the offset in the bytes from an SCP packet containing
             version information
         :raise SpinnmanInvalidParameterException:
@@ -77,8 +77,6 @@ class VersionInfo(object):
     def name(self) -> str:
         """
         The name of the software.
-
-        :rtype: str
         """
         return self._name
 
@@ -86,8 +84,6 @@ class VersionInfo(object):
     def version_number(self) -> _V:
         """
         The version number of the software.
-
-        :rtype: tuple(int, int, int)
         """
         return self._version_number
 
@@ -95,8 +91,6 @@ class VersionInfo(object):
     def hardware(self) -> str:
         """
         The hardware being run on.
-
-        :rtype: str
         """
         return self._hardware
 
@@ -104,8 +98,6 @@ class VersionInfo(object):
     def x(self) -> int:
         """
         The X-coordinate of the chip where the information was obtained.
-
-        :rtype: int
         """
         return self._x
 
@@ -113,8 +105,6 @@ class VersionInfo(object):
     def y(self) -> int:
         """
         The Y-coordinate of the chip where the information was obtained.
-
-        :rtype: int
         """
         return self._y
 
@@ -122,8 +112,6 @@ class VersionInfo(object):
     def p(self) -> int:
         """
         The processor ID of the processor where the information was obtained.
-
-        :rtype: int
         """
         return self._p
 
@@ -131,8 +119,6 @@ class VersionInfo(object):
     def build_date(self) -> int:
         """
         The build date of the software, in seconds since 1st January 1970.
-
-        :rtype: int
         """
         return self._build_date
 
@@ -140,8 +126,6 @@ class VersionInfo(object):
     def version_string(self) -> str:
         """
         The version information as text.
-
-        :rtype: str
         """
         return self._version_string
 

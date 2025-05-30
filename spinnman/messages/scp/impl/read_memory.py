@@ -59,8 +59,6 @@ class Response(AbstractSCPResponse):
 
         .. note::
             The data starts at offset.
-
-        :rtype: bytearray
         """
         return self._data
 
@@ -68,8 +66,6 @@ class Response(AbstractSCPResponse):
     def offset(self) -> int:
         """
         The offset where the valid data starts.
-
-        :rtype: int
         """
         return self._offset
 
@@ -77,8 +73,6 @@ class Response(AbstractSCPResponse):
     def length(self) -> int:
         """
         The length of the valid data.
-
-        :rtype: int
         """
         return self._length
 

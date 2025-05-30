@@ -146,7 +146,6 @@ class SpallocJob(AbstractContextManager):
 
             .. note::
                 If the machine gets destroyed, this will not wait for it.
-        :rtype: SpallocState
         """
         raise NotImplementedError()
 

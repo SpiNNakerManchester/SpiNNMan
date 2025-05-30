@@ -84,8 +84,6 @@ class ADCInfo(object):
     def voltage_1_2c(self) -> float:
         """
         Actual voltage of the 1.2V c supply rail.
-
-        :rtype: float
         """
         return self._voltage_1_2c
 
@@ -93,8 +91,6 @@ class ADCInfo(object):
     def voltage_1_2b(self) -> float:
         """
         Actual voltage of the 1.2V b supply rail.
-
-        :rtype: float
         """
         return self._voltage_1_2b
 
@@ -102,8 +98,6 @@ class ADCInfo(object):
     def voltage_1_2a(self) -> float:
         """
         Actual voltage of the 1.2V a supply rail.
-
-        :rtype: float
         """
         return self._voltage_1_2a
 
@@ -111,8 +105,6 @@ class ADCInfo(object):
     def voltage_1_8(self) -> float:
         """
         Actual voltage of the 1.8V supply rail.
-
-        :rtype: float
         """
         return self._voltage_1_8
 
@@ -120,8 +112,6 @@ class ADCInfo(object):
     def voltage_3_3(self) -> float:
         """
         Actual voltage of the 3.3V supply rail.
-
-        :rtype: float
         """
         return self._voltage_3_3
 
@@ -129,8 +119,6 @@ class ADCInfo(object):
     def voltage_supply(self) -> float:
         """
         Actual voltage of the main power supply (nominally 12V).
-
-        :rtype: float
         """
         return self._voltage_supply
 
@@ -138,8 +126,6 @@ class ADCInfo(object):
     def temp_top(self) -> float:
         """
         Temperature top.
-
-        :rtype: float
         """
         return self._temp_top
 
@@ -147,8 +133,6 @@ class ADCInfo(object):
     def temp_btm(self) -> float:
         """
         Temperature bottom.
-
-        :rtype: float
         """
         return self._temp_btm
 
@@ -156,8 +140,6 @@ class ADCInfo(object):
     def temp_ext_0(self) -> Optional[float]:
         """
         Temperature external 0.
-
-        :rtype: float or None
         """
         return self._temp_ext_0
 
@@ -165,8 +147,6 @@ class ADCInfo(object):
     def temp_ext_1(self) -> Optional[float]:
         """
         Temperature external 1.
-
-        :rtype: float or None
         """
         return self._temp_ext_1
 
@@ -174,8 +154,6 @@ class ADCInfo(object):
     def fan_0(self) -> Optional[float]:
         """
         Fan 0.
-
-        :rtype: float or None
         """
         return self._fan_0
 
@@ -183,7 +161,5 @@ class ADCInfo(object):
     def fan_1(self) -> Optional[float]:
         """
         Fan 1.
-
-        :rtype: float or None
         """
         return self._fan_1

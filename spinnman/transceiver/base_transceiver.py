@@ -158,10 +158,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def __init__(self, connections: Optional[Iterable[Connection]] = None,
                  power_cycle: bool = False):
         """
-        :param list(Connection) connections:
+        :param connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
-        :param bool power_cycle: If True will power cycle the machine:
+        :param power_cycle: If True will power cycle the machine:
         :raise SpinnmanIOException:
             If there is an error communicating with the board, or if no
             connections to the board can be found (if connections is ``None``)
@@ -328,12 +328,11 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Check that the given connection to the given chip works.
 
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
             the connection selector to use
-        :param int chip_x: the chip x coordinate to try to talk to
-        :param int chip_y: the chip y coordinate to try to talk to
+        :param chip_x: the chip x coordinate to try to talk to
+        :param chip_y: the chip y coordinate to try to talk to
         :return: True if a valid response is received, False otherwise
-        :rtype: ChipInfo or None
         """
         chip_x, chip_y = connection.chip_x, connection.chip_y
         connection_selector = FixedConnectionSelector(connection)
@@ -367,9 +366,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def _check_and_add_scamp_connections(
             self, x: int, y: int, ip_address: str) -> None:
         """
-        :param int x: X coordinate of target chip
-        :param int y: Y coordinate of target chip
-        :param str ip_address: IP address of target chip
+        :param x: X coordinate of target chip
+        :param y: Y coordinate of target chip
+        :param ip_address: IP address of target chip
 
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -434,7 +433,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         the chips in the machine.
 
         :return: The dimensions of the machine
-        :rtype: MachineDimensions
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -485,14 +483,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Get the version of SCAMP which is running on the board.
 
-        :param int chip_x: the chip's x coordinate to query for SCAMP version
-        :param int chip_y: the chip's y coordinate to query for SCAMP version
-        :param ConnectionSelector connection_selector:
+        :param chip_x: the chip's x coordinate to query for SCAMP version
+        :param chip_y: the chip's y coordinate to query for SCAMP version
+        :param connection_selector:
             the connection to send the SCAMP version
             or `None` (if `None` then a random SCAMP connection is used).
-        :param int n_retries:
+        :param n_retries:
         :return: The version identifier
-        :rtype: VersionInfo
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidParameterException:
@@ -511,8 +508,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def boot_led_0_value(self) -> int:
         """
         The Values to be set in SpinnakerBootMessages for led_0
-
-        :rtype int:
         """
         raise NotImplementedError
 
@@ -522,7 +517,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         Attempt to boot the board. No check is performed to see if the
         board is already booted.
 
-        :param dict(SystemVariableDefinition,object) extra_boot_values:
+        :param extra_boot_values:
             extra values to set during boot
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
@@ -561,8 +556,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Determine if the version of SCAMP is compatible with this transceiver.
 
-        :param tuple(int,int,int) version: The version to test
-        :rtype: bool
+        :param version: The version to test
         """
         # The major version must match exactly
         if version[0] != _SCAMP_VERSION[0]:
@@ -585,8 +579,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         transceiver. Boots the board if not already booted and verifies that
         the version of SCAMP running is compatible with this transceiver.
 
-        :param int n_retries: The number of times to retry booting
-        :param dict(SystemVariableDefinition,object) extra_boot_values:
+        :param n_retries: The number of times to retry booting
+        :param extra_boot_values:
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
             based on the board version.
@@ -656,13 +650,12 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Try to detect if SCAMP is running, and if not, boot the machine.
 
-        :param int tries_to_go: how many attempts should be supported
-        :param dict(SystemVariableDefinition,object) extra_boot_values:
+        :param tries_to_go: how many attempts should be supported
+        :param extra_boot_values:
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
             based on the board version.
         :return: version info
-        :rtype: VersionInfo
         :raise SpinnmanIOException:
             If there is a problem communicating with the machine
         """
@@ -743,9 +736,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self, x: int, y: int,
             data_item: SystemVariableDefinition) -> Union[int, bytes]:
         """
-        :param int x:
-        :param int y:
-        :param SystemVariableDefinition data_item:
+        :param x:
+        :param y:
+        :param data_item:
         """
         addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
         if data_item.data_type.is_byte_array:
@@ -766,10 +759,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             Conventionally, user_0 usually holds the address of the table of
             memory regions.
 
-        :param int p: The ID of the processor to get the user N address from
-        :param int user: The user "register" number to get the address for
+        :param p: The ID of the processor to get the user N address from
+        :param user: The user "register" number to get the address for
         :return: The address for user N register for this processor
-        :rtype: int
         """
         if user < 0 or user > CPU_MAX_USER:
             raise ValueError(
@@ -873,7 +865,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Power on the whole machine.
 
-        :rtype bool
         :return success of failure to power on machine
         """
         self._power(PowerCommand.POWER_ON)
@@ -884,7 +875,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Power off the whole machine.
 
-        :rtype bool
         :return success or failure to power off the machine
         """
         self._power(PowerCommand.POWER_OFF)
@@ -922,7 +912,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Send a power request to the machine.
 
-        :param PowerCommand power_command: The power command to send
+        :param power_command: The power command to send
         """
         if self._bmp_connection is None:
             raise NotImplementedError("can not power change without BMP")
@@ -1151,11 +1141,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Find a connection that matches the given board IP address.
 
-        :param str board_address:
+        :param board_address:
             The IP address of the Ethernet connection on the board
         :return: A connection for the given IP address, or `None` if no such
             connection exists
-        :rtype: SCAMPConnection
         """
         return self._udp_scamp_connections.get(board_address, None)
 
@@ -1192,13 +1181,12 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Get the connections for talking to a board.
 
-        :param SCAMPConnection connection:
+        :param connection:
             Optional param that directly gives the connection to use.
-        :param str board_address:
+        :param board_address:
             Optional param that gives the address of the board to talk to.
         :return: List of length 1 or 0 (the latter only if the search for
             the given board address fails).
-        :rtype: list(SCAMPConnection)
         """
         if connection is not None:
             return [connection]

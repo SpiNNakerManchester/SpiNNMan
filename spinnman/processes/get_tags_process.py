@@ -67,9 +67,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
 
     def get_tags(self, connection: SCAMPConnection) -> List[AbstractTag]:
         """
-        :param SCAMPConnection connection:
-        :rtype:
-            list(~spinn_machine.tags.IPTag or ~spinn_machine.tags.ReverseIPTag)
+        :param connection:
         """
         # Get the tag information, without which we cannot continue
         with self._collect_responses():

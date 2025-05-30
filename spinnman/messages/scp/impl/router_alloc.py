@@ -48,8 +48,6 @@ class RouterAllocResponse(AbstractSCPResponse):
     def base_address(self) -> int:
         """
         The base address allocated, or 0 if none.
-
-        :rtype: int
         """
         return self._base_address or 0
 

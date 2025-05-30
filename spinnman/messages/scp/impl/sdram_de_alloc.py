@@ -62,8 +62,6 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         """
         The number of allocated blocks that have been freed from the
         app_id given.
-
-        :rtype: int
         """
         return self._number_of_blocks_freed
 

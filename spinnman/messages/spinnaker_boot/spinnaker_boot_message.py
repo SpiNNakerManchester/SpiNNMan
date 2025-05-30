@@ -98,9 +98,8 @@ class SpinnakerBootMessage(object):
     @staticmethod
     def from_bytestring(data: bytes, offset: int) -> 'SpinnakerBootMessage':
         """
-        :param bytes data:
-        :param int offset:
-        :rtype: SpinnakerBootMessage
+        :param data:
+        :param offset:
         """
         (opcode_value, operand_1, operand_2, operand_3) = \
             _PATTERN_2xIIII.unpack_from(data, offset)

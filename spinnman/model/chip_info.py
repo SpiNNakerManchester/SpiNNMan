@@ -35,9 +35,9 @@ class ChipInfo(object):
 
     def __init__(self, system_data: bytes, offset: int):
         """
-        :param bytes system_data:
+        :param system_data:
             A byte-string retrieved from SDRAM on the board
-        :param int offset:
+        :param offset:
             The offset into the byte-string where the actual data starts
         :raise SpinnmanInvalidParameterException:
             If the data doesn't contain valid system data information
@@ -91,8 +91,6 @@ class ChipInfo(object):
     def x(self) -> int:
         """
         The X-coordinate of the chip.
-
-        :rtype: int
         """
         return self._read_int("x")
 
@@ -100,8 +98,6 @@ class ChipInfo(object):
     def y(self) -> int:
         """
         The Y-coordinate of the chip.
-
-        :rtype: int
         """
         return self._read_int("y")
 
@@ -109,8 +105,6 @@ class ChipInfo(object):
     def x_size(self) -> int:
         """
         The number of chips in the X-dimension.
-
-        :rtype: int
         """
         return self._read_int("x_size")
 
@@ -118,8 +112,6 @@ class ChipInfo(object):
     def y_size(self) -> int:
         """
         The number of chips in the Y-dimension.
-
-        :rtype: int
         """
         return self._read_int("y_size")
 
@@ -127,8 +119,6 @@ class ChipInfo(object):
     def nearest_ethernet_x(self) -> int:
         """
         The X-coordinate of the nearest chip with Ethernet.
-
-        :rtype: int
         """
         return self._read_int("nearest_ethernet_x")
 
@@ -136,8 +126,6 @@ class ChipInfo(object):
     def nearest_ethernet_y(self) -> int:
         """
         The Y-coordinate of the nearest chip with Ethernet.
-
-        :rtype: int
         """
         return self._read_int("nearest_ethernet_y")
 
@@ -145,8 +133,6 @@ class ChipInfo(object):
     def is_ethernet_available(self) -> bool:
         """
         Whether the Ethernet is running on this chip.
-
-        :rtype: bool
         """
         return self._read_int("is_ethernet_available") == 1
 
@@ -154,8 +140,6 @@ class ChipInfo(object):
     def links_available(self) -> Iterable[int]:
         """
         The links that are available on the chip.
-
-        :rtype: iterable(int)
         """
         return self._links_available
 
@@ -163,8 +147,6 @@ class ChipInfo(object):
     def cpu_clock_mhz(self) -> int:
         """
         The speed of the CPU clock in MHz.
-
-        :rtype: int
         """
         return self._read_int("cpu_clock_mhz")
 
@@ -173,8 +155,6 @@ class ChipInfo(object):
         """
         The physical core ID to virtual core ID map; entries with a value
         of 0xFF are non-operational cores.
-
-        :rtype: bytearray
         """
         return self._physical_to_virtual_core_map
 
@@ -183,8 +163,6 @@ class ChipInfo(object):
         """
         The virtual core ID to physical core ID map; entries with a value
         of 0xFF are non-operational cores.
-
-        :rtype: bytearray
         """
         return self._virtual_to_physical_core_map
 
@@ -192,8 +170,6 @@ class ChipInfo(object):
     def virtual_core_ids(self) -> Iterable[int]:
         """
         A list of available cores by virtual core ID (including the monitor).
-
-        :rtype: iterable(int)
         """
         return self._virtual_core_ids
 
@@ -210,8 +186,6 @@ class ChipInfo(object):
     def system_sdram_base_address(self) -> int:
         """
         The base address of the System SDRAM region on the chip.
-
-        :rtype: int
         """
         return self._read_int("system_sdram_base_address")
 
@@ -219,8 +193,6 @@ class ChipInfo(object):
     def cpu_information_base_address(self) -> int:
         """
         The base address of the CPU information structure.
-
-        :rtype: int
         """
         return self._read_int("cpu_information_base_address")
 
@@ -228,8 +200,6 @@ class ChipInfo(object):
     def first_free_router_entry(self) -> int:
         """
         The ID of the first free routing entry on the chip.
-
-        :rtype: int
         """
         return self._read_int("first_free_router_entry")
 
@@ -237,8 +207,6 @@ class ChipInfo(object):
     def ip_address(self) -> Optional[str]:
         """
         The IP address of the chip, or `None` if no Ethernet.
-
-        :rtype: str
         """
         return self._ip_address
 
@@ -246,16 +214,12 @@ class ChipInfo(object):
     def iobuf_size(self) -> int:
         """
         The size of the IOBUF buffers in bytes.
-
-        :rtype: int
         """
         return self._read_int("iobuf_size")
 
     def router_table_copy_address(self) -> int:
         """
         The address of the copy of the router table.
-
-        :rtype: int
         """
         return self._read_int("router_table_copy_address")
 
@@ -263,8 +227,6 @@ class ChipInfo(object):
     def system_ram_heap_address(self) -> int:
         """
         The address of the base of the heap in system RAM.
-
-        :rtype: int
         """
         return self._read_int("system_ram_heap_address")
 
@@ -272,7 +234,5 @@ class ChipInfo(object):
     def sdram_heap_address(self) -> int:
         """
         The address of the base of the heap in SDRAM.
-
-        :rtype: int
         """
         return self._read_int("sdram_heap_address")

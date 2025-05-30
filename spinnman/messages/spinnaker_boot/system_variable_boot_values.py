@@ -42,8 +42,6 @@ class _DataType(Enum):
     def struct_code(self) -> str:
         """
         Gets the struct_code value passed into the init
-
-        :rtype: str
         """
         return self._struct_code
 
@@ -51,8 +49,6 @@ class _DataType(Enum):
     def is_byte_array(self) -> bool:
         """
         Detects if enum is a BYTE_ARRAY without exposing the Class
-
-        :rtype: bool
         """
         # can't use BYTE_ARRAY.value directly here
         return self._value_ == 16

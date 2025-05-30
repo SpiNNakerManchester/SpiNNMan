@@ -30,7 +30,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector: ConnectionSelector) -> None:
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
         self._no_blocks_freed: Optional[int] = None
@@ -40,7 +40,6 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         :param x:
         :param y:
         :param app_id:
-        :param base_address:
         """
         # deallocate space in the SDRAM
         with self._collect_responses():
@@ -49,9 +48,9 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
     def de_alloc_sdram(self, x: int, y: int, base_address: int) -> None:
         """
-        :param int x:
-        :param int y:
-        :param int base_address:
+        :param x:
+        :param y:
+        :param base_address:
         """
         with self._collect_responses():
             self._send_request(SDRAMDeAlloc(x, y, base_address=base_address),

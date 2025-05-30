@@ -51,28 +51,28 @@ class SDPHeader(object):
                  source_chip_x: Optional[int] = None,
                  source_chip_y: Optional[int] = None):
         """
-        :param SDPFlag flags: Any flags for the packet
-        :param int tag:
+        :param flags: Any flags for the packet
+        :param tag:
             The IP tag of the packet between 0 and 255, or `None` if it
             is to be set later
-        :param int destination_port:
+        :param destination_port:
             The destination port of the packet between 0 and 7
-        :param int destination_cpu:
+        :param destination_cpu:
             The destination processor ID within the chip between 0 and 31
-        :param int destination_chip_x:
+        :param destination_chip_x:
             The x-coordinate of the destination chip between 0 and 255
-        :param int destination_chip_y:
+        :param destination_chip_y:
             The y-coordinate of the destination chip between 0 and 255
-        :param int source_port:
+        :param source_port:
             The source port of the packet between 0 and 7, or
             `None` if it is to be set later
-        :param int source_cpu:
+        :param source_cpu:
             The source processor ID within the chip between 0 and 31,
             or `None` if it is to be set later
-        :param int source_chip_x:
+        :param source_chip_x:
             The x-coordinate of the source chip between 0 and 255,
             or `None` if it is to be set later
-        :param int source_chip_y:
+        :param source_chip_y:
             The y-coordinate of the source chip between 0 and 255,
             or `None` if it is to be set later
         """
@@ -92,8 +92,6 @@ class SDPHeader(object):
     def flags(self) -> SDPFlag:
         """
         The flags of the packet (settable).
-
-        :rtype: SDPFlag
         """
         return self._flags
 
@@ -102,7 +100,7 @@ class SDPHeader(object):
         """
         Set the flags of the packet.
 
-        :param SDPFlag flags: The flags to set
+        :param flags: The flags to set
         """
         self._flags = flags
 
@@ -110,8 +108,6 @@ class SDPHeader(object):
     def tag(self) -> int:
         """
         The tag of the packet, between 0 and 255 (settable).
-
-        :rtype: int
         """
         assert self._tag is not None, "header not yet updated for send"
         return self._tag
@@ -121,7 +117,7 @@ class SDPHeader(object):
         """
         Set the tag of the packet.
 
-        :param int tag: The tag to set, between 0 and 255
+        :param tag: The tag to set, between 0 and 255
         """
         self._tag = tag
 
@@ -129,8 +125,6 @@ class SDPHeader(object):
     def destination_port(self) -> int:
         """
         The destination SDP port of the packet, between 0 and 7 (settable).
-
-        :rtype: int
         """
         return self._destination_port
 
@@ -139,7 +133,7 @@ class SDPHeader(object):
         """
         Set the destination port of the packet.
 
-        :param int destination_port:
+        :param destination_port:
             The destination port to set, between 0 and 7
         """
         self._destination_port = destination_port
@@ -148,8 +142,6 @@ class SDPHeader(object):
     def destination_cpu(self) -> int:
         """
         The core on the destination chip, between 0 and 31 (settable).
-
-        :rtype: int
         """
         return self._destination_cpu
 
@@ -158,7 +150,7 @@ class SDPHeader(object):
         """
         Set the ID of the destination processor of the packet.
 
-        :param int destination_cpu:
+        :param destination_cpu:
             The processor ID to set, between 0 and 31
         """
         self._destination_cpu = destination_cpu
@@ -168,8 +160,6 @@ class SDPHeader(object):
         """
         The x-coordinate of the destination chip of the packet, between
         0 and 255 (settable).
-
-        :rtype: int
         """
         return self._destination_chip_x
 
@@ -178,7 +168,7 @@ class SDPHeader(object):
         """
         Set the x-coordinate of the destination chip of the packet.
 
-        :param int destination_chip_x:
+        :param destination_chip_x:
             The x-coordinate to set, between 0 and 255
         """
         self._destination_chip_x = destination_chip_x
@@ -188,8 +178,6 @@ class SDPHeader(object):
         """
         The y-coordinate of the destination chip of the packet, between
         0 and 255 (settable).
-
-        :rtype: int
         """
         return self._destination_chip_y
 
@@ -198,7 +186,7 @@ class SDPHeader(object):
         """
         Set the y-coordinate of the destination chip of the packet.
 
-        :param int destination_chip_y:
+        :param destination_chip_y:
             The y-coordinate to set, between 0 and 255
         """
         self._destination_chip_y = destination_chip_y
@@ -207,8 +195,6 @@ class SDPHeader(object):
     def source_port(self) -> int:
         """
         The source SDP port of the packet, between 0 and 7 (settable).
-
-        :rtype: int
         """
         assert self._source_port is not None, "header not yet updated for send"
         return self._source_port
@@ -218,7 +204,7 @@ class SDPHeader(object):
         """
         Set the source port of the packet.
 
-        :param int source_port: The source port to set, between 0 and 7
+        :param source_port: The source port to set, between 0 and 7
         """
         self._source_port = source_port
 
@@ -226,8 +212,6 @@ class SDPHeader(object):
     def source_cpu(self) -> int:
         """
         The core on the source chip, between 0 and 31 (settable).
-
-        :rtype: int
         """
         assert self._source_cpu is not None, "header not yet updated for send"
         return self._source_cpu
@@ -237,7 +221,7 @@ class SDPHeader(object):
         """
         Set the ID of the source processor of the packet.
 
-        :param int source_cpu: The processor ID to set, between 0 and 31
+        :param source_cpu: The processor ID to set, between 0 and 31
         """
         self._source_cpu = source_cpu
 
@@ -246,8 +230,6 @@ class SDPHeader(object):
         """
         The x-coordinate of the source chip of the packet, between
         0 and 255 (settable).
-
-        :rtype: int
         """
         assert self._source_chip_x is not None, \
             "header not yet updated for send"
@@ -258,7 +240,7 @@ class SDPHeader(object):
         """
         Set the x-coordinate of the source chip of the packet.
 
-        :param int source_chip_x:
+        :param source_chip_x:
             The x-coordinate to set, between 0 and 255
         """
         self._source_chip_x = source_chip_x
@@ -268,8 +250,6 @@ class SDPHeader(object):
         """
         The y-coordinate of the source chip of the packet, between
         0 and 255 (settable).
-
-        :rtype: int
         """
         assert self._source_chip_y is not None, \
             "header not yet updated for send"
@@ -280,7 +260,7 @@ class SDPHeader(object):
         """
         Set the y-coordinate of the source chip of the packet.
 
-        :param int source_chip_y:
+        :param source_chip_y:
             The y-coordinate to set, between 0 and 255
         """
         self._source_chip_y = source_chip_y
@@ -289,8 +269,6 @@ class SDPHeader(object):
     def bytestring(self) -> bytes:
         """
         The header as a byte-string.
-
-        :rtype: bytes
         """
         dest_port_cpu = (((self._destination_port & 0x7) << 5) |
                          (self._destination_cpu & 0x1F))
@@ -326,8 +304,6 @@ class SDPHeader(object):
     def get_physical_cpu_id(self) -> str:
         """
         A String describing the physical core of the destination.
-
-        :rtype: str
         """
         return SpiNNManDataView.get_physical_string(
             (self._destination_chip_x, self._destination_chip_y),
@@ -337,9 +313,9 @@ class SDPHeader(object):
         """
         Apply defaults to the header for sending over UDP.
 
-        :param int source_x:
+        :param source_x:
             Where the packet is deemed to originate: X coordinate
-        :param int source_y:
+        :param source_y:
             Where the packet is deemed to originate: Y coordinate
         """
         self.tag = _SDP_TAG

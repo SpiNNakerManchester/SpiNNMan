@@ -68,10 +68,9 @@ class SpallocEIEIOListener(
         """
         Get the coordinates of a chip given its IP address.
 
-        :param str ip_address:
+        :param ip_address:
             The IP address of an Ethernet-enabled chip in the job.
         :return: Ethernet-enabled chip coordinates: X, Y
-        :rtype: tuple(int, int)
         """
         raise NotImplementedError
 
@@ -81,14 +80,14 @@ class SpallocEIEIOListener(
         """
         Send a message on an open socket to a particular board.
 
-        :param bytes message: The message to send.
-        :param int x:
+        :param message: The message to send.
+        :param x:
             The X coordinate of the Ethernet-enabled chip to send the message
             to.
-        :param int y:
+        :param y:
             The Y coordinate of the Ethernet-enabled chip to send the message
             to.
-        :param int port:
+        :param port:
             The UDP port on the Ethernet-enabled chip to send the message to.
             Defaults to the SCP port.
         """
@@ -98,8 +97,8 @@ class SpallocEIEIOListener(
         """
         Send a message on an open socket.
 
-        :param bytes message: The message to send.
-        :param tuple(str,int) address:
+        :param message: The message to send.
+        :param address:
             Where to send it to. Must be the address of an Ethernet-enabled
             chip on a board allocated to the job. Does not mean that SpiNNaker
             is listening on that port (but the SCP port is being listened to if
@@ -116,7 +115,6 @@ class SpallocEIEIOListener(
         The IP address on the server to which the connection is bound.
 
         :return: The IP address as a dotted string, e.g., 0.0.0.0
-        :rtype: str
         """
         raise NotImplementedError
 
@@ -127,7 +125,6 @@ class SpallocEIEIOListener(
         The port on the server to which the connection is bound.
 
         :return: The local port number
-        :rtype: int
         """
         raise NotImplementedError
 
@@ -137,15 +134,11 @@ class SpallocEIEIOListener(
         """
         Send an EIEIO message (one way) to a given core.
 
-        :param AbstractEIEIOMessage eieio_message:
-            The message to send.
-        :param int x:
-            The X coordinate of the core to send to.
-        :param int y:
-            The Y coordinate of the core to send to.
-        :param int p:
-            The ID of the core to send to.
-        :param str ip_address:
+        :param eieio_message: The message to send.
+        :param x: The X coordinate of the core to send to.
+        :param y: The Y coordinate of the core to send to.
+        :param p: The ID of the core to send to.
+        :param ip_address:
             The IP address of the Ethernet-enabled chip to route the message
             via.
         """
@@ -166,10 +159,10 @@ class SpallocEIEIOListener(
         Update the given tag on the given Ethernet-enabled chip to send
         messages to this connection.
 
-        :param int x: The Ethernet-enabled chip's X coordinate
-        :param int y: The Ethernet-enabled chip's Y coordinate
-        :param int tag: The tag ID to update
-        :param bool do_receive: Whether to receive the response or not
+        :param x: The Ethernet-enabled chip's X coordinate
+        :param y: The Ethernet-enabled chip's Y coordinate
+        :param tag: The tag ID to update
+        :param do_receive: Whether to receive the response or not
         :raises SpinnmanTimeoutException:
             If the message isn't handled within a reasonable timeout.
         :raises SpinnmanUnexpectedResponseCodeException:
@@ -197,8 +190,8 @@ class SpallocEIEIOListener(
         Update a tag on a board at a given IP address to send messages to this
         connection.
 
-        :param str ip_address: The address of the Ethernet-enabled chip
-        :param int tag: The ID of the tag
+        :param ip_address: The address of the Ethernet-enabled chip
+        :param tag: The ID of the tag
         """
         x, y = self._get_chip_coords(ip_address)
         self.update_tag(x, y, tag)

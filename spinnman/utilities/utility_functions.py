@@ -30,9 +30,8 @@ def work_out_bmp_from_machine_details(
     from the final part e.g. if the machine IP address is 192.168.0.5, the
     BMP IP address is assumed to be 192.168.0.4
 
-    :param str hostname: the SpiNNaker machine main hostname or IP address
+    :param hostname: the SpiNNaker machine main hostname or IP address
     :return: The BMP connection data
-    :rtype: BMPConnectionData
     """
     # take the IP address, split by dots, and subtract 1 off last bit
     ip_bits = socket.gethostbyname(hostname).split(".")
@@ -53,8 +52,7 @@ def get_vcpu_address(p: int) -> int:
     """
     Get the address of the vcpu_t structure for the given core.
 
-    :param int p: The core
-    :rtype: int
+    :param p: The core
     """
     return CPU_INFO_OFFSET + (CPU_INFO_BYTES * p)
 
@@ -65,9 +63,9 @@ def send_port_trigger_message(
     Sends a port trigger message using a connection to (hopefully) open a
     port in a NAT and/or firewall to allow incoming packets to be received.
 
-    :param UDPConnection connection:
+    :param connection:
         The UDP connection down which the trigger message should be sent
-    :param str board_address:
+    :param board_address:
         The IP address of the SpiNNaker board to which the message should be
         sent
     """

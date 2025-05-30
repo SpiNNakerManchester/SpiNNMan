@@ -39,13 +39,13 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
                  non_fail_retry_codes: Optional[Set[SCPResult]] = None):
         """
         :param ConnectionSelector connection_selector:
-        :param int n_retries:
+        :param n_retries:
             The number of retries of a message to use. Passed to
             :py:class:`SCPRequestPipeLine`
-        :param float timeout:
+        :param timeout:
             The timeout, in seconds. Passed to
             :py:class:`SCPRequestPipeLine`
-        :param Optional[Set[SCPResult]] non_fail_retry_codes:
+        :param non_fail_retry_codes:
             Optional set of responses that result in retry but after retrying
             don't then result in failure even if returned on the last call.
         """
@@ -59,8 +59,7 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
 
     def execute(self, request: AbstractSCPRequest[R]) -> R:
         """
-        :param AbstractSCPRequest request:
-        :rtype: AbstractSCPResponse
+        :param request:
         """
         with self._collect_responses():
             self._send_request(request, self.__handle_response)
