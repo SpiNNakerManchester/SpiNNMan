@@ -32,9 +32,9 @@ def generate_machine_report(
     """
     Generate report on the physical structure of the target SpiNNaker machine.
 
-    :param str report_directory: the directory to which reports are stored
-    :param ~spinn_machine.Machine machine: the machine python object
-    :param list(Connection) connections:
+    :param report_directory: the directory to which reports are stored
+    :param machine: the machine python object
+    :param connections:
         the list of connections to the machine
     :raise IOError: when a file cannot be opened for some reason
     """
@@ -56,9 +56,9 @@ def generate_machine_report(
 def _write_header(f: TextIOBase, timestamp: str, machine: Machine,
                   connections: List[Connection]) -> None:
     """
-    :param str timestamp:
-    :param ~spinn_machine.Machine machine:
-    :param list(Connection) connections:
+    :param timestamp:
+    :param machine:
+    :param connections:
     """
     f.write("\t\tTarget SpiNNaker Machine Structure\n")
     f.write("\t\t==================================\n")
@@ -71,7 +71,7 @@ def _write_header(f: TextIOBase, timestamp: str, machine: Machine,
 
 def _write_chip_router_report(f: TextIOBase, chip: Chip) -> None:
     """
-    :param ~spinn_machine.Chip chip:
+    :param chip:
     """
     f.write(f"\nInformation for chip {chip.x}:{chip.y}\n")
     f.write("Neighbouring chips\n"

@@ -241,10 +241,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         Attempts to get where_is_x_y info from the machine
 
         If no machine will do its best.
-
-        :param int x:
-        :param int y:
-        :rtype: str
         """
         try:
             if SpiNNManDataView.has_machine():
@@ -328,10 +324,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Check that the given connection to the given chip works.
 
-        :param connection_selector:
-            the connection selector to use
-        :param chip_x: the chip x coordinate to try to talk to
-        :param chip_y: the chip y coordinate to try to talk to
+        :param connection: the connection selector to use
         :return: True if a valid response is received, False otherwise
         """
         chip_x, chip_y = connection.chip_x, connection.chip_y

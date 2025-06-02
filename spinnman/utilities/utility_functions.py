@@ -87,9 +87,9 @@ def reprogram_tag(
     """
     Reprogram an IP Tag to send responses to a given SCAMPConnection.
 
-    :param SCAMPConnection connection: The connection to target the tag at
-    :param int tag: The id of the tag to set
-    :param bool strip:
+    :param connection: The connection to target the tag at
+    :param tag: The id of the tag to set
+    :param strip:
         True if the tag should strip SDP headers from outgoing messages
     :raises SpinnmanTimeoutException:
         If things time out several times
@@ -119,20 +119,20 @@ def reprogram_tag_to_listener(
     not connected to a specific board. Such connections are normally
     receive-only connections.
 
-    :param UDPConnection connection: The connection to target the tag at
-    :param int x:
+    :param connection: The connection to target the tag at
+    :param x:
         The X coordinate of the Ethernet-enabled chip that should send to the
         connection
-    :param int y:
+    :param y:
         The Y coordinate of the Ethernet-enabled chip that should send to the
         connection
-    :param str ip_address:
+    :param ip_address:
         The IP address of the Ethernet-enabled chip that should be given the
         message
-    :param int tag: The id of the tag to set
-    :param bool strip:
+    :param tag: The id of the tag to set
+    :param strip:
         True if the tag should strip SDP headers from outgoing messages
-    :param bool read_response:
+    :param read_response:
         True if the response to the reprogramming should be read
     :raises SpinnmanTimeoutException:
         If things time out several times

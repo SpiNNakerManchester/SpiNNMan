@@ -36,7 +36,7 @@ class BMPSetLed(BMPRequest):
         """
         :param led: Number of the LED or an iterable of LEDs to set the
             state of (0-7)
-        :param LEDAction action:
+        :param action:
             State to set the LED to, either on, off or toggle
         :param boards: Specifies the board to control the LEDs of. This may
             also be an iterable of multiple boards (in the same frame).

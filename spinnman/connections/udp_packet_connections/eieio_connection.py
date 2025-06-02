@@ -76,9 +76,9 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
             ip_address: str, port: int) -> None:
         """
 
-        :param AbstractEIEIOMessage eieio_message:
-        :param str ip_address:
-        :param int port:
+        :param eieio_message:
+        :param ip_address:
+        :param port:
         """
         self.send_to(eieio_message.bytestring, (ip_address, port))
 

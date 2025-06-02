@@ -29,7 +29,7 @@ class SDPMessage(object):
         """
         :param sdp_header: The header of the message
         :param data: The data of the SDP packet, or `None` if no data
-        :param int offset: The offset where the valid data starts
+        :param offset: The offset where the valid data starts
         """
         self._sdp_header = sdp_header
         self._data = data

@@ -644,7 +644,7 @@ class Transceiver(object):
             .. note::
                 `board_address` can be `None`, in which case, the tag will be
                 assigned to all boards.
-        :param bool use_sender:
+        :param use_sender:
             Optionally use the sender host and port instead of
             the given host and port in the tag
         :raise SpinnmanIOException:

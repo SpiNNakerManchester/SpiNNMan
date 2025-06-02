@@ -166,8 +166,8 @@ class _HostDataReadHeader(object):
     def __init__(self, n_requests: int, sequence_no: int):
         """
 
-        :param int n_requests:
-        :param int sequence_no:
+        :param n_requests:
+        :param sequence_no:
         """
         self._n_requests = n_requests
         self._sequence_no = sequence_no

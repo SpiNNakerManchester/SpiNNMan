@@ -38,7 +38,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
         self._tag_info: Optional[IPTagGetInfoResponse] = None

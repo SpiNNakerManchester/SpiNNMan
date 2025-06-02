@@ -138,7 +138,7 @@ class SpallocJob(AbstractContextManager):
         """
         Wait until the allocation is not in the given old state.
 
-        :param SpallocState old_state:
+        :param old_state:
             The state that we are looking to change out of.
         :param timeout:
             The time to wait, or None to wait forever

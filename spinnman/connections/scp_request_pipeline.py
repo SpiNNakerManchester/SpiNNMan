@@ -84,7 +84,7 @@ class SCPRequestPipeLine(Generic[R]):
                  packet_timeout: float = SCP_TIMEOUT,
                  non_fail_retry_codes: Optional[Set[SCPResult]] = None):
         """
-        :param SCAMPConnection connection:
+        :param connection:
             The connection over which the communication is to take place
         :param n_channels: The number of requests to send before checking
             for responses.  If `None`, this will be determined automatically

@@ -229,7 +229,7 @@ class UDPConnection(Connection, Listenable[bytes]):
         Send data down this connection.
 
         :param data: The data to be sent as a byte-string
-        :param tuple(str,int) address:
+        :param address:
             A tuple of (address, port) to send the data to
         :raise SpinnmanIOException: If there is an error sending the data
         """

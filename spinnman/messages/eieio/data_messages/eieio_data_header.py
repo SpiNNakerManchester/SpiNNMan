@@ -50,10 +50,10 @@ class EIEIODataHeader(object):
         """
         EIEIO header for data packets.
 
-        :param EIEIOType eieio_type: the type of message
-        :param int tag: the tag of the message (0 by default)
+        :param eieio_type: the type of message
+        :param tag: the tag of the message (0 by default)
         :param prefix: the key prefix of the message or `None` if not prefixed
-        :param EIEIOPrefix prefix_type:
+        :param prefix_type:
             the position of the prefix (upper or lower)
         :param payload_base:
             The base payload to be applied, or `None` if no base payload

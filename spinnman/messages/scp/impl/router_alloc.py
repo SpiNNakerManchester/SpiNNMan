@@ -60,12 +60,12 @@ class RouterAlloc(AbstractSCPRequest[RouterAllocResponse]):
 
     def __init__(self, x: int, y: int, app_id: int, n_entries: int):
         """
-        :param int x:
+        :param x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :param int y:
+        :param y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :param int app_id: The ID of the application, between 0 and 255
-        :param int n_entries: The number of entries to allocate
+        :param app_id: The ID of the application, between 0 and 255
+        :param n_entries: The number of entries to allocate
         """
         # pylint: disable=unsupported-binary-operation
         super().__init__(

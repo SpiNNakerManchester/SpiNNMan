@@ -38,7 +38,7 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
                  n_retries: int = 3, timeout: float = SCP_TIMEOUT,
                  non_fail_retry_codes: Optional[Set[SCPResult]] = None):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         :param n_retries:
             The number of retries of a message to use. Passed to
             :py:class:`SCPRequestPipeLine`

@@ -36,7 +36,7 @@ class ReadADC(BMPRequest['_SCPReadADCResponse']):
 
     def __init__(self, board: int):
         """
-        :param int board: which board to request the ADC data from
+        :param board: which board to request the ADC data from
         """
         super().__init__(
             board,

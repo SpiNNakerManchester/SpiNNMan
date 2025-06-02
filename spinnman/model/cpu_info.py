@@ -356,12 +356,6 @@ class CPUInfo(object):
                   state: CPUState) -> "CPUInfo":
         """
         Makes a CPU_info object for Testing purposes
-
-        :param x:
-        :param y:
-        :param p:
-        :param physical_cpu_id:
-        :param CPIstate:
         """
         registers = b'@\x00\x07\x08\xff\x00\x00\x00\x00\x00\x80\x00\xad\x00' \
                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \

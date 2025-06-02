@@ -33,7 +33,7 @@ class CPUInfos(object):
         """
         Add a info on using its core coordinates.
 
-        :param ~spinnman.model.CPUInfo cpu_info:
+        :param cpu_info:
         """
         self._cpu_infos[cpu_info.x, cpu_info.y, cpu_info.p] = cpu_info
 

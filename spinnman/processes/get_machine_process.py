@@ -80,7 +80,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
 

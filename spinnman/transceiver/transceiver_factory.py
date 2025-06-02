@@ -50,14 +50,12 @@ def create_transceiver_from_hostname(
 
     :param hostname: The hostname or IP address of the board or `None` if
         only the BMP connections are of interest
-    :param BMPConnectionData bmp_connection_data:
+    :param bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
     :param auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
         automatically determined from the board IP address
     :param power_cycle: If True will power cycle the machine
-    :param scamp_connections:
-        the list of connections used for SCAMP communications
     :param extended:
         If True will return an Extended version of the Transceiver
     :return: The created transceiver

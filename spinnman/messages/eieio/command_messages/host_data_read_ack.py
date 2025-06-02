@@ -33,7 +33,7 @@ class HostDataReadAck(EIEIOCommandMessage):
     def __init__(self, sequence_no: int):
         """
 
-        :param int sequence_no:
+        :param sequence_no:
         """
         super().__init__(
             EIEIOCommandHeader(EIEIO_COMMAND_IDS.HOST_DATA_READ_ACK))

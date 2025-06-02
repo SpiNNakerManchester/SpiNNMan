@@ -29,14 +29,14 @@ class FillRequest(AbstractSCPRequest[CheckOKResponse]):
     def __init__(
             self, x: int, y: int, base_address: int, data: int, size: int):
         """
-        :param int x:
+        :param x:
             The x-coordinate of the chip to read from, between 0 and 255
-        :param int y:
+        :param y:
             The y-coordinate of the chip to read from, between 0 and 255
-        :param int base_address:
+        :param base_address:
             The positive base address to start the fill from
-        :param int data: The data to fill in the space with
-        :param int size: The number of bytes to fill in
+        :param data: The data to fill in the space with
+        :param size: The number of bytes to fill in
         """
         # pylint: disable=too-many-arguments
         super().__init__(

@@ -97,7 +97,7 @@ class SpallocEIEIOListener(
         """
         Send a message on an open socket.
 
-        :param message: The message to send.
+        :param data: The message to send.
         :param address:
             Where to send it to. Must be the address of an Ethernet-enabled
             chip on a board allocated to the job. Does not mean that SpiNNaker

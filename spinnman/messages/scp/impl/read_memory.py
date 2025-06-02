@@ -85,12 +85,12 @@ class ReadMemory(AbstractSCPRequest[Response]):
 
     def __init__(self, coordinates: XYP, base_address: int, size: int):
         """
-        :param tuple coordinates:
+        :param coordinates:
             The X,Y,P coordinates of the chip to read from;
             X and Y between 0 and 255, P between 0 and 17
-        :param int base_address:
+        :param base_address:
             The positive base address to start the read from
-        :param int size: The number of bytes to read, between 1 and 256
+        :param size: The number of bytes to read, between 1 and 256
         :raise SpinnmanInvalidParameterException:
             * If the chip coordinates are out of range
             * If the base address is not a positive number

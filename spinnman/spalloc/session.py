@@ -37,7 +37,7 @@ _debug_pretty_print = False
 def _may_renew(method: Callable) -> Callable:
     def pp_req(request: requests.PreparedRequest) -> None:
         """
-        :param ~requests.PreparedRequest request:
+        :param request:
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
         print(f"{request.method} {request.url}")
@@ -49,7 +49,7 @@ def _may_renew(method: Callable) -> Callable:
 
     def pp_resp(response: requests.Response) -> None:
         """
-        :param ~requests.Response response:
+        :param response:
         """
         # pylint: disable=consider-using-f-string
         print('{}\n{}\r\n{}\r\n\r\n{}'.format(

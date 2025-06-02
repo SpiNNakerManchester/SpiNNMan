@@ -93,7 +93,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         """
         Determines if the board can be contacted via SCAMP
 
-        :param Connection connection:
+        :param connection:
             The connection which is to be tested.  If `None`,
             all Scamp connections will be tested,
             and the board will be considered
@@ -282,7 +282,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
 
         :param led:
             Number of the LED or an iterable of LEDs to set the state of (0-7)
-        :param LEDAction action:
+        :param action:
             State to set the LED to, either on, off or toggle
         :param board: Specifies the board to control the LEDs of. This may
             also be an iterable of multiple boards. The
@@ -663,7 +663,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
 
         :param x: The x-coordinate of the chip
         :param y: The y-coordinate of the chip
-        :param SystemVariableDefinition heap:
+        :param heap:
             The SystemVariableDefinition which is the heap to read
         """
         assert isinstance(self, Transceiver)

@@ -41,7 +41,7 @@ class BMPRequest(  # pylint: disable=abstract-method
                  data: Optional[bytes] = None):
         """
         :param boards: The board or boards to be addressed by this request
-        :param SCPRequestHeader scp_request_header: The SCP request header
+        :param scp_request_header: The SCP request header
         :param argument_1: The optional first argument
         :param argument_2: The optional second argument
         :param argument_3: The optional third argument
