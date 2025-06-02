@@ -55,11 +55,6 @@ def generate_machine_report(
 
 def _write_header(f: TextIOBase, timestamp: str, machine: Machine,
                   connections: List[Connection]) -> None:
-    """
-    :param timestamp:
-    :param machine:
-    :param connections:
-    """
     f.write("\t\tTarget SpiNNaker Machine Structure\n")
     f.write("\t\t==================================\n")
     f.write(f"\nGenerated: {timestamp} for target machine '{connections}'\n\n")
@@ -70,9 +65,6 @@ def _write_header(f: TextIOBase, timestamp: str, machine: Machine,
 
 
 def _write_chip_router_report(f: TextIOBase, chip: Chip) -> None:
-    """
-    :param chip:
-    """
     f.write(f"\nInformation for chip {chip.x}:{chip.y}\n")
     f.write("Neighbouring chips\n"
             f"{chip.router.get_neighbouring_chips_coords()}\n")

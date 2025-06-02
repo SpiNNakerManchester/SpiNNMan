@@ -153,10 +153,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _make_router(
             self, chip_info: ChipSummaryInfo, machine: Machine) -> Router:
-        """
-        :param chip_info:
-        :param machine:
-        """
         links = list()
         for link in chip_info.working_links:
             dest_xy = machine.xy_over_link(chip_info.x, chip_info.y, link)
@@ -175,18 +171,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def __receive_p2p_data(
             self, column: int, scp_read_response: Response) -> None:
-        """
-        :param column:
-        :param scp_read_response:
-        """
         self._p2p_column_data[column] = (
             scp_read_response.data, scp_read_response.offset)
 
     def _receive_chip_info(
             self, scp_read_chip_info_response: GetChipInfoResponse) -> None:
-        """
-        :param scp_read_chip_info_response:
-        """
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
         if self._progress is not None:
@@ -271,9 +260,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         return self._fill_machine(machine)
 
     def _fill_machine(self, machine: Machine) -> Machine:
-        """
-        :param machine:
-        """
         for chip_info in sorted(
                 self._chip_info.values(), key=lambda chip: (chip.x, chip.y)):
             if (chip_info.ethernet_ip_address is not None and
@@ -414,12 +400,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _ignores_local_to_global(
             self, local_x: int, local_y: int, ip_address: Optional[str],
             machine: Machine) -> Optional[XY]:
-        """
-        :param local_x:
-        :param local_y:
-        :param ip_address:
-        :param machine:
-        """
         if ip_address is None:
             global_xy = (local_x, local_y)
         else:
@@ -445,9 +425,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             return None
 
     def _ethernet_by_ipaddress(self, ip_address: str) -> Optional[XY]:
-        """
-        :param ip_address:
-        """
         if self._ethernets is None:
             self._ethernets = dict()
             for chip_info in self._chip_info.values():
@@ -457,10 +434,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         return self._ethernets.get(ip_address, None)
 
     def _get_virtual_p(self, xy: XY, p: int) -> Optional[int]:
-        """
-        :param xy:
-        :param p:
-        """
         if p > 0:
             self._report_ignore("On chip {} ignoring core {}", xy, p)
             return p

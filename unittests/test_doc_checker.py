@@ -32,6 +32,6 @@ class TestCfgChecker(unittest.TestCase):
         unittest_dir = os.path.dirname(abs_class_file)
         repo_dir = os.path.dirname(unittest_dir)
         checker = DocsChecker(
-            check_init=False, check_short=False, check_params=False)
+            check_init=False, check_short=True, check_params=False)
         checker.check_dir(repo_dir)
         checker.check_no_errors()

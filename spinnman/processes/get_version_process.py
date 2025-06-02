@@ -39,9 +39,6 @@ class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):
         self._version_info: Optional[VersionInfo] = None
 
     def _get_response(self, version_response: GetVersionResponse) -> None:
-        """
-        :param version_response:
-        """
         self._version_info = version_response.version_info
 
     def get_version(self, x: int, y: int, p: int) -> VersionInfo:
