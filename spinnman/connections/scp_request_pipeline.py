@@ -31,10 +31,10 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 R = TypeVar("R", bound=AbstractSCPResponse)
 #: Type of response-accepting callbacks.
 #: :meta private:
-CB: TypeAlias = Callable[[R], None]
+CB: TypeAlias = Callable[[R], None]  # pylint: disable=invalid-name
 #: Type of error-handling callbacks.
 #: :meta private:
-ECB: TypeAlias = Callable[
+ECB: TypeAlias = Callable[  # pylint: disable=invalid-name
     [AbstractSCPRequest[R], Exception, TracebackType, SCAMPConnection], None]
 
 MAX_SEQUENCE = 65536
