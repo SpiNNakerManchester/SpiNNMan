@@ -15,12 +15,12 @@
 import re
 import struct
 from time import localtime, asctime
-from typing import Tuple, cast
+from typing import cast, Final, Tuple
 from typing_extensions import TypeAlias
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
-_V: TypeAlias = Tuple[int, int, int]  # pylint: disable=invalid-name
+_V: Final['TypeAlias'] = Tuple[int, int, int]
 
 
 class VersionInfo(object):

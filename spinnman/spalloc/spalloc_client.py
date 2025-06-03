@@ -22,8 +22,8 @@ import queue
 import struct
 import threading
 from time import sleep
-from typing import (Any, Callable, Dict, FrozenSet, Iterable, List, Mapping,
-                    Optional, Tuple, cast)
+from typing import (Any, Callable, Dict, Final, FrozenSet, Iterable, List,
+                    Mapping, Optional, Tuple, cast)
 from urllib.parse import urlparse, urlunparse, ParseResult
 
 from packaging.version import Version
@@ -71,6 +71,8 @@ _msg = struct.Struct("<II")
 _msg_to = struct.Struct("<IIIII")
 
 KEEP_ALIVE_PERIOND = 120
+
+_WSCB: Final['TypeAlias'] = Callable[[Optional[bytes]], None]
 
 
 def fix_url(url: Any) -> str:
@@ -406,10 +408,6 @@ class _ProxyPing(threading.Thread):
         Mark as closed to avoid error messages.
         """
         self.__closed = True
-
-
-_WSCB: TypeAlias = Callable[  # pylint: disable=invalid-name
-    [Optional[bytes]], None]
 
 
 class _ProxyReceiver(threading.Thread):
