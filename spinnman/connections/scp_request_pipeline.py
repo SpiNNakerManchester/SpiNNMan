@@ -28,7 +28,7 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 
 #: Type of responses.
 #: :meta private:
-R = TypeVar("R", bound=AbstractSCPResponse)
+R: Final['TypeVar'] = TypeVar("R", bound=AbstractSCPResponse)
 #: Type of response-accepting callbacks.
 #: :meta private:
 CB: Final['TypeAlias'] = Callable[[R], None]
