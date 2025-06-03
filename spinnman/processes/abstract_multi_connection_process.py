@@ -16,8 +16,8 @@ import contextlib
 import logging
 import sys
 from types import TracebackType
-from typing import (
-    Callable, Dict, Generator, Generic, List, Optional, TypeVar, cast, Set)
+from typing import (Callable, Dict, Final, Generator, Generic, List,
+                    Optional, TypeVar, cast, Set)
 
 from typing_extensions import Self, TypeAlias
 
@@ -40,7 +40,7 @@ from .abstract_multi_connection_process_connection_selector import (
 R = TypeVar("R", bound=AbstractSCPResponse)
 #: Error handling callback.
 #: :meta private:
-ECB: TypeAlias = Callable[
+ECB: Final['TypeAlias'] = Callable[
     [AbstractSCPRequest[R], Exception, TracebackType, SCAMPConnection], None]
 
 logger = FormatAdapter(logging.getLogger(__name__))

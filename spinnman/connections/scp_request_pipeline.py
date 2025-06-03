@@ -16,8 +16,8 @@ import sys
 from threading import RLock
 import time
 from types import TracebackType
-from typing import (Callable, Dict, Generic, List, Optional, Set, TypeVar,
-                    cast)
+from typing import (Callable, cast, Dict, Final, Generic, List, Optional, Set,
+                    TypeVar)
 from typing_extensions import TypeAlias
 from spinnman.messages.scp.enums import SCPResult
 from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
@@ -31,10 +31,10 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 R = TypeVar("R", bound=AbstractSCPResponse)
 #: Type of response-accepting callbacks.
 #: :meta private:
-CB: TypeAlias = Callable[[R], None]
+CB: Final['TypeAlias'] = Callable[[R], None]
 #: Type of error-handling callbacks.
 #: :meta private:
-ECB: TypeAlias = Callable[
+ECB: Final['TypeAlias'] = Callable[
     [AbstractSCPRequest[R], Exception, TracebackType, SCAMPConnection], None]
 
 MAX_SEQUENCE = 65536
