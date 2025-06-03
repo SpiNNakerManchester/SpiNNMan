@@ -40,7 +40,7 @@ from .abstract_multi_connection_process_connection_selector import (
 R = TypeVar("R", bound=AbstractSCPResponse)
 #: Error handling callback.
 #: :meta private:
-ECB: TypeAlias = Callable[
+ECB: TypeAlias = Callable[  # pylint: disable=invalid-name
     [AbstractSCPRequest[R], Exception, TracebackType, SCAMPConnection], None]
 
 logger = FormatAdapter(logging.getLogger(__name__))
