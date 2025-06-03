@@ -25,7 +25,7 @@ STATE_FIELD_OFFSET = 48
 
 #: Corresponds to vcpu_t in sark.h
 _VCPU_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
-_vcpu_t: TypeAlias = Tuple[
+_vcpu_t: TypeAlias = Tuple[   # pylint: disable=invalid-name
     # pylint: disable=wrong-spelling-in-comment
     bytes,             # 32s - r0-r7
     int, int, int,     # 3I  - psr, sp, lr

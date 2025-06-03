@@ -408,7 +408,8 @@ class _ProxyPing(threading.Thread):
         self.__closed = True
 
 
-_WSCB: TypeAlias = Callable[[Optional[bytes]], None]
+_WSCB: TypeAlias = Callable[  # pylint: disable=invalid-name
+    [Optional[bytes]], None]
 
 
 class _ProxyReceiver(threading.Thread):

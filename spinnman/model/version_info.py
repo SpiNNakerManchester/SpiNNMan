@@ -20,7 +20,7 @@ from typing_extensions import TypeAlias
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
-_V: TypeAlias = Tuple[int, int, int]
+_V: TypeAlias = Tuple[int, int, int]  # pylint: disable=invalid-name
 
 
 class VersionInfo(object):
