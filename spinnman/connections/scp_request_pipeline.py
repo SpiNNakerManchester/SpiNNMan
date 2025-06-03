@@ -28,10 +28,10 @@ from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 
 #: Type of responses.
 #: :meta private:
-R = TypeVar("R", bound='AbstractSCPResponse')
+R = TypeVar("R", bound=AbstractSCPResponse)
 #: Type of response-accepting callbacks.
 #: :meta private:
-CB: Final['TypeAlias'] = Callable[[R], None]
+CB: TypeAlias = Callable[[R], None]  # pylint: disable=invalid-name
 #: Type of error-handling callbacks.
 #: :meta private:
 ECB: Final['TypeAlias'] = Callable[
