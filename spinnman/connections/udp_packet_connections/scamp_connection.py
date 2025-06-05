@@ -78,8 +78,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         self._chip_x = x
         self._chip_y = y
 
-    @overrides(AbstractSCPConnection.get_scp_data,
-               additional_arguments=['x', 'y'], extend_defaults=True)
+    @overrides(AbstractSCPConnection.get_scp_data)
     def get_scp_data(
             self, scp_request: AbstractSCPRequest,
             x: Optional[int] = None, y: Optional[int] = None) -> bytes:
