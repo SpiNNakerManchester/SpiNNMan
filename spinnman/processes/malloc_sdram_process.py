@@ -48,7 +48,6 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
         :param int app_id:
         :param int tag:
         """
-        # pylint: disable=too-many-arguments
         self.__base_addresses = [0]
         with self._collect_responses():
             self._send_request(
