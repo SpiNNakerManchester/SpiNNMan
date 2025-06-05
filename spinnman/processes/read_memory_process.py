@@ -35,7 +35,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
         self._view = memoryview(b'')
@@ -49,10 +49,9 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         """
         Read some memory from a core.
 
-        :param tuple(int,int,int) coordinates:
-        :param int base_address:
-        :param int length:
-        :rtype: bytearray
+        :param coordinates:
+        :param base_address:
+        :param length:
         """
         return self._read_memory(
             base_address, length,
@@ -63,11 +62,10 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         """
         Read some memory from the neighbour of a core.
 
-        :param tuple(int,int,int) coordinates:
-        :param int link:
-        :param int base_address:
-        :param int length:
-        :rtype: bytearray
+        :param coordinates:
+        :param link:
+        :param base_address:
+        :param length:
         """
         return self._read_memory(
             base_address, length,

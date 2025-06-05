@@ -34,16 +34,16 @@ class AppCopyRun(AbstractSCPRequest[CheckOKResponse]):
                  processors: Optional[Iterable[int]],
                  checksum: int, wait: bool = False):
         """
-        :param int x:
+        :param x:
             The x-coordinate of the chip to read from, between 0 and 255
-        :param int y:
+        :param y:
             The y-coordinate of the chip to read from, between 0 and 255
-        :param int link: The ID of the link from which to copy
-        :param int size: The number of bytes to read, must be divisible by 4
-        :param int app_id: The app to associate the copied binary with
-        :param list(int) processors: The processors to start on the chip
-        :param int checksum: The checksum of the data to copy
-        :param bool wait: Whether to start in wait mode or not
+        :param link: The ID of the link from which to copy
+        :param size: The number of bytes to read, must be divisible by 4
+        :param app_id: The app to associate the copied binary with
+        :param processors: The processors to start on the chip
+        :param checksum: The checksum of the data to copy
+        :param wait: Whether to start in wait mode or not
         """
         # pylint: disable=too-many-arguments
         if size % 4 != 0:

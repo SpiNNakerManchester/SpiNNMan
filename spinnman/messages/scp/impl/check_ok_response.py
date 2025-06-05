@@ -31,9 +31,8 @@ class CheckOKResponse(AbstractSCPResponse):
 
     def __init__(self, operation: str, command: Union[Enum, int, str]):
         """
-        :param str operation: The operation being performed
+        :param operation: The operation being performed
         :param command: The command that was sent
-        :type command: str or ~enum.Enum or int
         """
         super().__init__()
         self._operation = operation

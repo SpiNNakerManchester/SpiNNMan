@@ -33,11 +33,11 @@ class SetLED(AbstractSCPRequest[CheckOKResponse]):
     def __init__(
             self, x: int, y: int, cpu: int, led_states: Mapping[int, int]):
         """
-        :param int x: The x-coordinate of the chip, between 0 and 255
-        :param int y: The y-coordinate of the chip, between 0 and 255
-        :param int cpu:
+        :param x: The x-coordinate of the chip, between 0 and 255
+        :param y: The y-coordinate of the chip, between 0 and 255
+        :param cpu:
             The CPU-number to use to set the LED. Normally should be 0
-        :param dict(int,int) led_states:
+        :param led_states:
             A dictionary mapping LED index to state with
             0 being off, 1 on and 2 inverted.
         """

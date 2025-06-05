@@ -35,7 +35,7 @@ class ReadRouterDiagnosticsProcess(
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
         self._control_register = 0
@@ -57,9 +57,8 @@ class ReadRouterDiagnosticsProcess(
 
     def get_router_diagnostics(self, x: int, y: int) -> RouterDiagnostics:
         """
-        :param int x:
-        :param int y:
-        :rtype: RouterDiagnostics
+        :param x:
+        :param y:
         """
         with self._collect_responses():
             coords = x, y, 0

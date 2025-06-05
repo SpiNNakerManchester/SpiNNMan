@@ -23,8 +23,7 @@ def clean_url(url: str) -> str:
     """
     Add a ``/`` to the end of the path part of a URL if there isn't one.
 
-    :param str url:
-    :rtype: str
+    :param url:
     """
     r = urlparse(url)
     parts = list(r)
@@ -38,9 +37,8 @@ def parse_service_url(url: str) -> Tuple[str, Optional[str], Optional[str]]:
     """
     Parses a combined service reference. Must include a hostname.
 
-    :param str url:
+    :param url:
     :return: URL, username (may be `None`), password (may be `None`)
-    :rtype: tuple(str,str,str)
     """
     pieces = urlparse(url)
     user = pieces.username
@@ -71,11 +69,10 @@ def is_server_address(
     """
     Test if the given address is a likely Spalloc server URL.
 
-    :param str address: The address to check
-    :param ~collections.abc.Iterable(str) additional_schemes:
+    :param address: The address to check
+    :param additional_schemes:
         Any additional URL schemes that should be considered to be successes;
         typically ``{"spalloc"}`` when looser matching is required.
-    :rtype: bool
     """
     schemes = {"http", "https"}
     if additional_schemes:

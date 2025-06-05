@@ -38,12 +38,12 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
             space_available: int):
         """
 
-        :param int x:
-        :param int y:
-        :param int p:
-        :param int region_id:
-        :param int sequence_no:
-        :param int space_available:
+        :param x:
+        :param y:
+        :param p:
+        :param region_id:
+        :param sequence_no:
+        :param space_available:
         """
         # pylint: disable=too-many-arguments
         super().__init__(EIEIOCommandHeader(
@@ -57,56 +57,32 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
 
     @property
     def x(self) -> int:
-        """
-        Gets the x value passed into the init
-
-        :rtype: int
-        """
+        """ Gets the x value passed into the init """
         return self._x
 
     @property
     def y(self) -> int:
-        """
-        Gets the y value passed into the init
-
-        :rtype: int
-        """
+        """ Gets the y value passed into the init """
         return self._y
 
     @property
     def p(self) -> int:
-        """
-        Gets the p value passed into the init
-
-        :rtype: int
-        """
+        """ Gets the p value passed into the init """
         return self._p
 
     @property
     def region_id(self) -> int:
-        """
-        Gets the region_id value passed into the init
-
-        :rtype: int
-        """
+        """ Gets the region_id value passed into the init """
         return self._region_id
 
     @property
     def sequence_no(self) -> int:
-        """
-        Gets the sequence_no value passed into the init
-
-        :rtype: int
-        """
+        """ Gets the sequence_no value passed into the init """
         return self._sequence_no
 
     @property
     def space_available(self) -> int:
-        """
-        Gets the space_available value passed into the init
-
-        :rtype: int
-        """
+        """ Gets the space_available value passed into the init """
         return self._space_available
 
     @staticmethod

@@ -29,8 +29,8 @@ class CountState(AbstractSCPRequest[CountStateResponse]):
 
     def __init__(self, x: int, y: int, app_id: int, state: CPUState):
         """
-        :param int app_id: The ID of the application, between 0 and 255
-        :param CPUState state: The state to count
+        :param app_id: The ID of the application, between 0 and 255
+        :param state: The state to count
         """
         super().__init__(
             SDPHeader(

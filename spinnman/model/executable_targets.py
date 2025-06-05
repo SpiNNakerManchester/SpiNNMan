@@ -47,10 +47,10 @@ class ExecutableTargets(object):
         """
         Add core subsets to a binary.
 
-        :param str binary: the path to the binary needed to be executed
-        :param ~spinn_machine.CoreSubsets subsets:
+        :param binary: the path to the binary needed to be executed
+        :param subsets:
             the subset of cores that the binary needs to be loaded on
-        :param ~spinnman.model.enum.ExecutableType executable_type:
+        :param executable_type:
             The type of this executable.
             ``None`` means don't record it.
         """
@@ -70,14 +70,13 @@ class ExecutableTargets(object):
         """
         Add a processor to the executable targets
 
-        :param str binary: the binary path for executable
-        :param int chip_x:
+        :param binary: the binary path for executable
+        :param chip_x:
             the coordinate on the machine in terms of x for the chip
-        :param int chip_y:
+        :param chip_y:
             the coordinate on the machine in terms of y for the chip
-        :param int chip_p: the processor ID to place this executable on
-        :param ~spinnman.model.enum.ExecutableType executable_type:
-            the executable type for locating n cores of
+        :param chip_p: the processor ID to place this executable on
+        :param executable_type: the executable type for locating n cores of
         """
         if self.known(binary, chip_x, chip_y, chip_p):
             return
@@ -94,9 +93,8 @@ class ExecutableTargets(object):
         """
         Get the number of cores that the executable type is using.
 
-        :param ~spinnman.model.enum.ExecutableType executable_type:
+        :param executable_type:
         :return: the number of cores using this executable type
-        :rtype: int
         """
         return sum(
             len(self.get_cores_for_binary(aplx))
@@ -107,10 +105,8 @@ class ExecutableTargets(object):
         """
         Get the binaries of a given a executable type.
 
-        :param ~spinnman.model.enum.ExecutableType executable_type:
-            the executable type enum value
+        :param executable_type: the executable type enum value
         :return: iterable of binaries with that executable type
-        :rtype: iterable(str)
         """
         return self._binary_type_map[executable_type]
 
@@ -119,8 +115,6 @@ class ExecutableTargets(object):
         Get the executable types in the set of binaries.
 
         :return: iterable of the executable types in this binary set.
-        :rtype:
-            iterable(~spinnman.model.enum.ExecutableType)
         """
         return self._binary_type_map.keys()
 
@@ -128,8 +122,7 @@ class ExecutableTargets(object):
         """
         Get the cores that a binary is to run on.
 
-        :param str binary: The binary to find the cores for
-        :rtype: ~spinn_machine.CoreSubsets
+        :param binary: The binary to find the cores for
         """
         return self._targets.get(binary, self.__EMPTY_SUBSET)
 
@@ -137,8 +130,6 @@ class ExecutableTargets(object):
     def binaries(self) -> Collection[str]:
         """
         The binaries of the executables.
-
-        :rtype: iterable(str)
         """
         return self._targets.keys()
 
@@ -146,8 +137,6 @@ class ExecutableTargets(object):
     def total_processors(self) -> int:
         """
         The total number of cores to be loaded.
-
-        :rtype: int
         """
         return self._total_processors
 
@@ -155,19 +144,16 @@ class ExecutableTargets(object):
     def all_core_subsets(self) -> CoreSubsets:
         """
         All the core subsets for all the binaries.
-
-        :rtype: ~spinn_machine.CoreSubsets
         """
         return self._all_core_subsets
 
     def known(
             self, binary: str, chip_x: int, chip_y: int, chip_p: int) -> bool:
         """
-        :param str binary:
-        :param int chip_x:
-        :param int chip_y:
-        :param int chip_p:
-        :rtype: bool
+        :param binary:
+        :param chip_x:
+        :param chip_y:
+        :param chip_p:
         """
         if not self._all_core_subsets.is_core(chip_x, chip_y, chip_p):
             return False

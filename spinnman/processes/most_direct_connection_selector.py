@@ -31,8 +31,7 @@ class MostDirectConnectionSelector(ConnectionSelector):
 
     def __init__(self, connections: List[SCAMPConnection]):
         """
-        :param list(SCAMPConnection) connections:
-            The connections to be used
+        :param connections: The connections to be used
         """
         self._connections: Dict[XY, SCAMPConnection] = dict()
         lead_connection = None

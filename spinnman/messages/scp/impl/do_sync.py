@@ -28,7 +28,7 @@ class DoSync(AbstractSCPRequest[CheckOKResponse]):
 
     def __init__(self, do_sync: bool):
         """
-        :param bool do_sync: Whether to synchronise or not
+        :param do_sync: Whether to synchronise or not
         """
         super().__init__(
             SDPHeader(

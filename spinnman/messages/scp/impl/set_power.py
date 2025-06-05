@@ -39,13 +39,12 @@ class SetPower(BMPRequest[BMPOKResponse]):
             respond to power commands not sent to BMP 0. Thus changing the
             board_to_send_to parameter is not recommended!
 
-        :param PowerCommand power_command: The power command being sent
+        :param power_command: The power command being sent
         :param boards: The boards on the same backplane to power on or off
-        :type boards: int or list(int)
-        :param float delay:
+        :param delay:
             Number of seconds delay between power state changes of
             the different boards.
-        :param int board_to_send_to:
+        :param board_to_send_to:
             The optional board to send the command to if this is to be sent
             to a frame of boards.
 

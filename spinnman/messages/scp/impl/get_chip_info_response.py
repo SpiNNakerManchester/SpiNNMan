@@ -41,10 +41,6 @@ class GetChipInfoResponse(AbstractSCPResponse):
 
     @property
     def chip_info(self) -> ChipSummaryInfo:
-        """
-        The chip information received.
-
-        :rtype: ChipSummaryInfo
-        """
+        """ The chip information received. """
         assert self._chip_info is not None
         return self._chip_info

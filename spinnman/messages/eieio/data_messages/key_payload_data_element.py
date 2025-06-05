@@ -39,29 +39,17 @@ class KeyPayloadDataElement(AbstractDataElement):
 
     @property
     def key(self) -> int:
-        """
-        The key value passed into the init.
-
-        :rtype: int
-        """
+        """ The key value passed into the init. """
         return self._key
 
     @property
     def payload(self) -> int:
-        """
-        Gets the payload value passed into the init.
-
-        :rtype: int
-        """
+        """ Gets the payload value passed into the init. """
         return self._payload
 
     @property
     def payload_is_timestamp(self) -> bool:
-        """
-        Gets the payload_is_timestamp passed into the init.
-
-        :rtype: int
-        """
+        """ Gets the payload_is_timestamp passed into the init. """
         return self._payload_is_timestamp
 
     @overrides(AbstractDataElement.get_bytestring)

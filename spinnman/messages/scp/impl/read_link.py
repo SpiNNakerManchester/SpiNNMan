@@ -30,14 +30,14 @@ class ReadLink(AbstractSCPRequest[Response]):
     def __init__(
             self, coordinates: XYP, link: int, base_address: int, size: int):
         """
-        :param tuple(int,int,int) coordinates:
+        :param coordinates:
             The coordinates of the core of the chip whose neighbour will be
             read from; X and Y between 0 and 255,
             CPU core normally 0 (or if a BMP then the board slot number)
-        :param int link: The ID of the link down which to send the query
-        :param int base_address:
+        :param link: The ID of the link down which to send the query
+        :param base_address:
             The positive base address to start the read from
-        :param int size: The number of bytes to read, between 1 and 256
+        :param size: The number of bytes to read, between 1 and 256
         """
         # pylint: disable=too-many-arguments
         x, y, cpu = coordinates

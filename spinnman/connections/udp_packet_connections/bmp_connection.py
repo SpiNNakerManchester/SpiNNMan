@@ -37,7 +37,7 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
 
     def __init__(self, connection_data: BMPConnectionData):
         """
-        :param BMPConnectionData connection_data:
+        :param connection_data:
             The description of what to connect to.
         """
         port = SCP_SCAMP_PORT if connection_data.port_num is None\
@@ -50,8 +50,6 @@ class BMPConnection(UDPConnection, AbstractSCPConnection):
     def boards(self) -> Sequence[int]:
         """
         The set of boards supported by the BMP.
-
-        :rtype: iterable(int)
         """
         return self._boards
 

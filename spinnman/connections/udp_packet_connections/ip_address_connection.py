@@ -35,8 +35,6 @@ class IPAddressesConnection(UDPConnection):
         """
 
         :param timeout:
-        :type timeout: float or None
-        :rtype: str or None
         """
         with suppress(Exception):
             (_, (ip_address, port)) = self.receive_with_address(timeout)

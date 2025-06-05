@@ -69,20 +69,20 @@ class AbstractMultiConnectionProcess(Generic[R]):
                  n_channels: int = 8, intermediate_channel_waits: int = 7,
                  non_fail_retry_codes: Optional[Set[SCPResult]] = None):
         """
-        :param ConnectionSelector next_connection_selector:
+        :paramnext_connection_selector:
             How to choose the connection.
-        :param int n_retries:
+        :param n_retries:
             The number of retries of a message to use. Passed to
             :py:class:`SCPRequestPipeLine`
-        :param float timeout:
+        :param timeout:
             The timeout, in seconds. Passed to :py:class:`SCPRequestPipeLine`
-        :param int n_channels:
+        :param n_channels:
             The maximum number of channels to use when talking to a particular
             SCAMP instance. Passed to :py:class:`SCPRequestPipeLine`
-        :param int intermediate_channel_waits:
+        :param intermediate_channel_waits:
             The maximum number of outstanding message/reply pairs to have on a
             particular connection. Passed to :py:class:`SCPRequestPipeLine`
-        :param Optional[Set[SCPResult]] non_fail_retry_codes:
+        :param non_fail_retry_codes:
             Optional set of responses that result in retry but after retrying
             don't then result in failure even if returned on the last call.
         """
@@ -126,8 +126,6 @@ class AbstractMultiConnectionProcess(Generic[R]):
     def is_error(self) -> bool:
         """
         Checks if any errors have been cached.
-
-        :rtype: bool
         """
         return bool(self._exceptions)
 
@@ -151,9 +149,9 @@ class AbstractMultiConnectionProcess(Generic[R]):
             self._finish()
             self.check_for_error()
 
-        :param bool print_exception:
+        :param print_exception:
             Whether to log errors as well as raising
-        :param bool check_error:
+        :param check_error:
             Whether to check for errors; if not, caller must handle
         """
         yield self
@@ -166,8 +164,6 @@ class AbstractMultiConnectionProcess(Generic[R]):
     def connection_selector(self) -> ConnectionSelector:
         """
         The connection selector of the process.
-
-        :rtype: ConnectionSelector
         """
         return self._conn_selector
 
@@ -177,7 +173,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
 
         if print_exception it also logs the error.
 
-        :param bool print_exception:
+        :param print_exception:
         :raises SpinnmanGenericProcessException: If any was found
         """
         if len(self._exceptions) == 1:

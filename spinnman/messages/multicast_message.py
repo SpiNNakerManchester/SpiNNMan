@@ -34,11 +34,7 @@ class MulticastMessage(object):
 
     @property
     def key(self) -> int:
-        """
-        The key of the packet.
-
-        :rtype: int
-        """
+        """ The key of the packet. """
         return self._key
 
     @property
@@ -46,7 +42,5 @@ class MulticastMessage(object):
         """
         The payload of the packet if there is one, or `None` if there is no
         payload.
-
-        :rtype: int or None
         """
         return self._payload

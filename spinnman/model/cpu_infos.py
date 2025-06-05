@@ -33,7 +33,7 @@ class CPUInfos(object):
         """
         Add a info on using its core coordinates.
 
-        :param ~spinnman.model.CPUInfo cpu_info:
+        :param cpu_info:
         """
         self._cpu_infos[cpu_info.x, cpu_info.y, cpu_info.p] = cpu_info
 
@@ -44,9 +44,8 @@ class CPUInfos(object):
 
         mainly a support method for Transceiver.add_cpu_information_from_core
 
-        :param CPUInfos other: Another Infos object to merge in
-        :param list(CPUState) states:
-            Only add if the Info has this state
+        :param other: Another Infos object to merge in
+        :param states: Only add if the Info has this state
         """
         # pylint: disable=protected-access
         assert isinstance(other, CPUInfos)
@@ -72,8 +71,6 @@ class CPUInfos(object):
     def get_cpu_info(self, x: int, y: int, p: int) -> CPUInfo:
         """
         Get the information for the given core on the given core
-
-        :rtype: CpuInfo
         """
         return self._cpu_infos[x, y, p]
 
@@ -81,9 +78,8 @@ class CPUInfos(object):
         """
         Creates a new CpuInfos object with Just the Infos that match the state.
 
-        :param ~spinnman.model.enums.CPUState state:
+        :param state:
         :return: New Infos object with the filtered infos if any
-        :rtype: CPUInfos
         """
         for_state = CPUInfos()
         for info in self._cpu_infos.values():
@@ -95,9 +91,8 @@ class CPUInfos(object):
         """
         Creates a new CpuInfos object with Just the Infos that match the state.
 
-        :param iterable(~spinnman.model.enums.CPUState) states:
+        :param states:
         :return: New Infos object with the filtered infos if any
-        :rtype: CPUInfos
         """
         for_state = CPUInfos()
         for info in self._cpu_infos.values():
@@ -108,8 +103,6 @@ class CPUInfos(object):
     def get_status_string(self) -> str:
         """
         Get a string indicating the status of the given cores.
-
-        :rtype: str
         """
         break_down = ""
         for core_info in self._cpu_infos.values():

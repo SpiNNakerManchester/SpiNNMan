@@ -42,10 +42,10 @@ class ConnectionListener(Thread, Generic[T]):
     def __init__(self, connection: Listenable[T],
                  n_processes: int = _POOL_SIZE, timeout: float = _TIMEOUT):
         """
-        :param Listenable connection: A connection to listen to
-        :param int n_processes:
+        :param connection: A connection to listen to
+        :param n_processes:
             The number of threads to use when calling callbacks
-        :param float timeout:
+        :param timeout:
             How long to wait for messages before checking to see if the
             connection is to be terminated.
         """
@@ -60,7 +60,7 @@ class ConnectionListener(Thread, Generic[T]):
 
     def __run_step(self, handler: Callable[[], T]) -> None:
         """
-        :param ~collections.abc.Callable handler:
+        :param handler:
         """
         if self.__connection.is_ready_to_receive(timeout=self.__timeout):
             message = handler()
@@ -70,9 +70,6 @@ class ConnectionListener(Thread, Generic[T]):
                 future.add_done_callback(self.__done_callback)
 
     def __done_callback(self, future: Future[None]) -> None:
-        """
-        :param ~concurrent.futures.Future future:
-        """
         try:
             future.result()
         except Exception:  # pylint: disable=broad-except
@@ -98,7 +95,7 @@ class ConnectionListener(Thread, Generic[T]):
         """
         Add a callback to be called when a message is received.
 
-        :param ~collections.abc.Callable callback:
+        :param callback:
             A callable which takes a single parameter, which is the message
             received; the result of the callback will be ignored.
         """

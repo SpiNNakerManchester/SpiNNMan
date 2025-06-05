@@ -28,8 +28,7 @@ class RoundRobinConnectionSelector(ConnectionSelector):
 
     def __init__(self, connections: List[SCAMPConnection]):
         """
-        :param list(SCAMPConnection) connections:
-            The connections to be used
+        :param connections: The connections to be used
         """
         self._connections = connections
         self._next_connection_index = 0

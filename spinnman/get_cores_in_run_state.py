@@ -35,9 +35,9 @@ IGNORED_IDS = {SCAMP_ID, 16}  # WHY 16?
 def get_cores_in_run_state(
         txrx: Transceiver, app_id: int, print_all_chips: bool) -> None:
     """
-    :param Transceiver txrx:
-    :param int app_id:
-    :param bool print_all_chips:
+    :param txrx:
+    :param app_id:
+    :param print_all_chips:
     """
     count_finished = txrx.get_core_state_count(app_id, CPUState.FINISHED)
     count_run = txrx.get_core_state_count(app_id, CPUState.RUNNING)
@@ -78,14 +78,10 @@ def _make_transceiver(host: Optional[str], version: Optional[int],
     """
     :param host:
         Host to use or `None` to use test configuration for all parameters
-    :type host: str or None
     :param version: Board version to use (`None` defaults to 5 unless host is
         192.168.240.253 (spin 3)
-    :type version: int or None
     :param bmp_names: names of BMP connection
         or `None` to auto detect (if applicable)
-    :type bmp_names: str or None
-    :rtype: Transceiver
     """
     if host is None:
         config = BoardTestConfiguration()

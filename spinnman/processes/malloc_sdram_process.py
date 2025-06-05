@@ -28,7 +28,7 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
         self.__base_addresses: List[int] = []
@@ -42,11 +42,11 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
         """
         Allocate space in the SDRAM space.
 
-        :param int x:
-        :param int y:
-        :param int size:
-        :param int app_id:
-        :param int tag:
+        :param x:
+        :param y:
+        :param size:
+        :param app_id:
+        :param tag:
         """
         # pylint: disable=too-many-arguments
         self.__base_addresses = [0]
@@ -76,8 +76,6 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
     def base_address(self) -> int:
         """
         The address of the allocated memory block.
-
-        :rtype: int
         """
         return self.__base_addresses[0]
 

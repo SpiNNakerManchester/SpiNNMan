@@ -27,9 +27,9 @@ class ApplicationRunProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         Runs the application.
 
-        :param int app_id:
-        :param CoreSubsets core_subsets:
-        :param bool wait:
+        :param app_id:
+        :param core_subsets:
+        :param wait:
 `        """
         with self._collect_responses():
             for core_subset in core_subsets:

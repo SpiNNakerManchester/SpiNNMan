@@ -40,7 +40,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
         self._base_address = 0
@@ -53,10 +53,10 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
             app_id: int) -> None:
         """
-        :param int x:
-        :param int y:
-        :param list(~spinn_machine.MulticastRoutingEntry) routes:
-        :param int app_id:
+        :param x:
+        :param y:
+        :param routes:
+        :param app_id:
         """
         # Create the routing data - 16 bytes per entry plus one for the end
         # entry

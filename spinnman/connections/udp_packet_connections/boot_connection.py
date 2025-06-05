@@ -34,7 +34,7 @@ class BootConnection(UDPConnection):
 
     def __init__(self, remote_host: Optional[str] = None):
         """
-        :param str remote_host:
+        :param remote_host:
             The remote host name or IP address to send packets to.  If not
             specified, the socket will be available for listening only, and
             will throw and exception if used for sending
@@ -48,7 +48,7 @@ class BootConnection(UDPConnection):
         """
         Sends a SpiNNaker boot message using this connection.
 
-        :param SpinnakerBootMessage boot_message: The message to be sent
+        :param boot_message: The message to be sent
         :raise SpinnmanIOException:
             If there is an error sending the message
         """
@@ -63,11 +63,10 @@ class BootConnection(UDPConnection):
         Receives a boot message from this connection.  Blocks until a
         message has been received, or a timeout occurs.
 
-        :param float timeout:
+        :param timeout:
             The time in seconds to wait for the message to arrive; if not
             specified, will wait forever, or until the connection is closed.
         :return: a boot message
-        :rtype: SpinnakerBootMessage
         :raise SpinnmanIOException:
             If there is an error receiving the message
         :raise SpinnmanTimeoutException:

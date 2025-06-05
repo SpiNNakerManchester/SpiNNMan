@@ -37,13 +37,12 @@ def _get_next_chips(
     haven't yet been loaded.  Also returned are the links for each chip,
     which gives the link which should be read from to get the data.
 
-    :param dict((int,int),list(int,int)) chips_done:
+    :param chips_done:
         The coordinates of chips that have already been done by Ethernet
-    :param dict((int, int),~spinn_machine.Chip) parent_chips:
+    :param parent_chips:
         A dictionary of chip coordinates to chips that use that chip as a
         parent
     :return: A list of next chips to use
-    :rtype: list(chip)
     """
     next_chips: List[Chip] = list()
     for eth_chip in chips_done:
@@ -71,8 +70,7 @@ def _compute_parent_chips(
     Compute a dictionary of chip coordinates to list of chips who use that chip
     as a parent in the tree.
 
-    :param ~spinn_machine.Machine machine: The machine to compute the map for
-    :rtype: dict((int, int), ~spinn_machine.Chip)
+    :param machine: The machine to compute the map for
     """
     chip_links: Mapping[Tuple[int, int], List[Chip]] = defaultdict(list)
     for chip in machine.chips:
@@ -108,11 +106,11 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         """
         Run the process.
 
-        :param int size: The size of the binary to copy
-        :param int app_id: The application id to assign to the running binary
-        :param CoreSubsets core_subsets: The cores to load the binary on to
-        :param int checksum: The checksum of the data to test against
-        :param bool wait:
+        :param size: The size of the binary to copy
+        :param app_id: The application id to assign to the running binary
+        :param core_subsets: The cores to load the binary on to
+        :param checksum: The checksum of the data to test against
+        :param wait:
             Whether to put the binary in "wait" mode or run it straight away
         """
         machine = SpiNNManDataView.get_machine()

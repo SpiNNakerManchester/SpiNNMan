@@ -38,17 +38,17 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
             remote_host: Optional[str] = None,
             remote_port: Optional[int] = None):
         """
-        :param int chip_x:
+        :param chip_x:
             The x-coordinate of the chip on the board with this remote_host
-        :param int chip_y:
+        :param chip_y:
             The y-coordinate of the chip on the board with this remote_host
-        :param str local_host: The optional IP address or host name of the
+        :param local_host: The optional IP address or host name of the
             local interface to listen on
-        :param int local_port: The optional local port to listen on
-        :param str remote_host: The optional remote host name or IP address to
+        :param local_port: The optional local port to listen on
+        :param remote_host: The optional remote host name or IP address to
             send messages to.  If not specified, sending will not be possible
             using this connection
-        :param int remote_port: The optional remote port number to send
+        :param remote_port: The optional remote port number to send
             messages to. If not specified, sending will not be possible using
             this connection
         """
@@ -72,8 +72,8 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         """
         Sets the coordinates without checking they are valid.
 
-        :param int x:
-        :param int y:
+        :param x:
+        :param y:
         """
         self._chip_x = x
         self._chip_y = y
@@ -83,8 +83,8 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
             self, scp_request: AbstractSCPRequest,
             x: Optional[int] = None, y: Optional[int] = None) -> bytes:
         """
-        :param int x: Optional: x-coordinate of where to send to
-        :param int y: Optional: y-coordinate of where to send to
+        :param x: Optional: x-coordinate of where to send to
+        :param y: Optional: y-coordinate of where to send to
         """
         # pylint: disable=arguments-differ
         if x is None:
@@ -106,8 +106,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
                 SCPResult, int, bytes, int, str, int]:
         """
 
-        :param float timeout:
-        :rtype: tuple(SCPResult, int, bytes, int, str, int)
+        :param timeout:
         """
         data, (addr, port) = self.receive_with_address(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)

@@ -107,11 +107,7 @@ class SpiNNManDataView(MachineDataView):
 
     @classmethod
     def has_transceiver(cls) -> bool:
-        """
-        Reports if a transceiver is currently set.
-
-        :rtype: bool
-        """
+        """ Reports if a transceiver is currently set. """
         return cls.__data._transceiver is not None
 
     @classmethod
@@ -119,7 +115,6 @@ class SpiNNManDataView(MachineDataView):
         """
         The transceiver description.
 
-        :rtype: ~spinnman.transceiver.Transceiver
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """
@@ -136,18 +131,17 @@ class SpiNNManDataView(MachineDataView):
 
         Syntactic sugar for `get_transceiver().read_memory()`.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip where the memory is to be read from
-        :param int y:
+        :param y:
             The y-coordinate of the chip where the memory is to be read from
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory to be read starts
-        :param int length: The length of the data to be read in bytes
-        :param int cpu:
+        :param length: The length of the data to be read in bytes
+        :param cpu:
             the core ID used to read the memory of; should usually be 0 when
             reading from SDRAM, but may be other values when reading from DTCM.
         :return: A bytearray of data read
-        :rtype: bytes
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         :raise SpinnmanIOException:
@@ -177,11 +171,11 @@ class SpiNNManDataView(MachineDataView):
 
         Syntactic sugar for `get_transceiver().write_memory()`.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip where the memory is to be written to
-        :param int y:
+        :param y:
             The y-coordinate of the chip where the memory is to be written to
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
 
@@ -189,9 +183,7 @@ class SpiNNManDataView(MachineDataView):
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
             * A filename of a data file
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int or str
-        :param int n_bytes:
+        :param n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
@@ -199,8 +191,8 @@ class SpiNNManDataView(MachineDataView):
               the byte string will be used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the length of the file will be used
-        :param int offset: The offset from which the valid data begins
-        :param int cpu: The optional CPU to write to
+        :param offset: The offset from which the valid data begins
+        :param cpu: The optional CPU to write to
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         :raise SpinnmanIOException:
@@ -230,8 +222,6 @@ class SpiNNManDataView(MachineDataView):
         Gets the main app_id used by the transceiver.
 
         This method will create a new app_id if one has not yet been created.
-
-        :rtype: int
         """
         if cls.__data._app_id is None:
             cls.__data._app_id = cls.get_new_id()
@@ -243,8 +233,6 @@ class SpiNNManDataView(MachineDataView):
         Gets a new id from the current `app_id_tracker`
 
         previously `get_transceiver().app_id_tracker().get_new_id()`
-
-        :rtype: AppIdTracker
         """
         if cls.__data._app_id_tracker is None:
             cls.__data._app_id_tracker = AppIdTracker()
@@ -257,7 +245,7 @@ class SpiNNManDataView(MachineDataView):
 
         previously `get_transceiver().app_id_tracker().free_id(app_id)`
 
-        :param int app_id:
+        :param app_id:
         """
         if cls.__data._app_id_tracker:
             cls.__data._app_id_tracker.free_id(app_id)
@@ -269,7 +257,6 @@ class SpiNNManDataView(MachineDataView):
 
         Syntactic sugar for `get_transceiver().get_scamp_connection_selector()`
 
-        :rtype: MostDirectConnectionSelector
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """

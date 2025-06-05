@@ -44,10 +44,10 @@ class ChipSummaryInfo(object):
 
     def __init__(self, chip_summary_data: bytes, offset: int, x: int, y: int):
         """
-        :param bytes chip_summary_data: The data from the SCP response
-        :param int offset: The offset into the data where the data starts
-        :param int x: The x-coordinate of the chip that this data is from
-        :param int y: The y-coordinate of the chip that this data is from
+        :param chip_summary_data: The data from the SCP response
+        :param offset: The offset into the data where the data starts
+        :param x: The x-coordinate of the chip that this data is from
+        :param y: The y-coordinate of the chip that this data is from
         """
         (chip_summary_flags, self._largest_free_sdram_block,
             self._largest_free_sram_block) = _THREE_WORDS.unpack_from(
@@ -97,8 +97,6 @@ class ChipSummaryInfo(object):
     def x(self) -> int:
         """
         The X-coordinate of the chip that this data is from.
-
-        :rtype: int
         """
         return self._x
 
@@ -106,8 +104,6 @@ class ChipSummaryInfo(object):
     def y(self) -> int:
         """
         The Y-coordinate of the chip that this data is from.
-
-        :rtype: int
         """
         return self._y
 
@@ -115,8 +111,6 @@ class ChipSummaryInfo(object):
     def n_cores(self) -> int:
         """
         The number of cores working on the chip (including monitors).
-
-        :rtype: int
         """
         return self._n_cores
 
@@ -124,8 +118,6 @@ class ChipSummaryInfo(object):
     def core_states(self) -> List[CPUState]:
         """
         The state of the cores on the chip (list of one per core).
-
-        :rtype: list(CPUState)
         """
         return self._core_states
 
@@ -133,8 +125,6 @@ class ChipSummaryInfo(object):
     def working_links(self) -> List[int]:
         """
         The IDs of the working links outgoing from this chip.
-
-        :rtype: list(int)
         """
         return self._working_links
 
@@ -142,8 +132,6 @@ class ChipSummaryInfo(object):
     def is_ethernet_available(self) -> bool:
         """
         Whether the Ethernet connection is available on this chip.
-
-        :rtype: bool
         """
         return self._is_ethernet_available
 
@@ -151,8 +139,6 @@ class ChipSummaryInfo(object):
     def n_free_multicast_routing_entries(self) -> int:
         """
         The number of multicast routing entries free on this chip.
-
-        :rtype: int
         """
         return self._n_free_multicast_routing_entries
 
@@ -160,8 +146,6 @@ class ChipSummaryInfo(object):
     def largest_free_sdram_block(self) -> int:
         """
         The size of the largest block of free SDRAM in bytes.
-
-        :rtype: int
         """
         return self._largest_free_sdram_block
 
@@ -169,26 +153,20 @@ class ChipSummaryInfo(object):
     def largest_free_sram_block(self) -> int:
         """
         The size of the largest block of free SRAM in bytes.
-
-        :rtype: int
-        """
+       """
         return self._largest_free_sram_block
 
     @property
     def nearest_ethernet_x(self) -> int:
         """
         The X-coordinate of the nearest Ethernet chip.
-
-        :rtype: int
-        """
+       """
         return self._nearest_ethernet_x
 
     @property
     def nearest_ethernet_y(self) -> int:
         """
         The Y-coordinate of the nearest Ethernet chip.
-
-        :rtype: int
         """
         return self._nearest_ethernet_y
 
@@ -196,8 +174,6 @@ class ChipSummaryInfo(object):
     def ethernet_ip_address(self) -> Optional[str]:
         """
         The IP address of the Ethernet if up, or `None` if not.
-
-        :rtype: str
         """
         return self._ethernet_ip_address
 
@@ -211,8 +187,6 @@ class ChipSummaryInfo(object):
     def parent_link(self) -> Optional[int]:
         """
         The link to the parent of the chip in the tree of chips from root.
-
-        :rtype: int
         """
         return self._parent_link
 

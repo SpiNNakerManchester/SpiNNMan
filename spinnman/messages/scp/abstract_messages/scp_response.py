@@ -41,8 +41,8 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         """
         Reads a packet from a byte-string of data.
 
-        :param bytes data: The byte-string to be read
-        :param int offset:
+        :param data: The byte-string to be read
+        :param offset:
             The offset in the data from which the response should be read
         """
         self._sdp_header = SDPHeader.from_bytestring(data, offset)
@@ -55,27 +55,19 @@ class AbstractSCPResponse(object, metaclass=AbstractBase):
         """
         Reads the remainder of the data following the header.
 
-        :param bytes data: The byte-string to read from
-        :param int offset: The offset into the data after the headers
+        :param data: The byte-string to read from
+        :param offset: The offset into the data after the headers
         """
         raise NotImplementedError
 
     @property
     def sdp_header(self) -> SDPHeader:
-        """
-        The SDP header from the response.
-
-        :rtype: SDPHeader
-        """
+        """ The SDP header from the response. """
         assert self._sdp_header is not None, "no response read"
         return self._sdp_header
 
     @property
     def scp_response_header(self) -> SCPResponseHeader:
-        """
-        The SCP header from the response.
-
-        :rtype: SCPResponseHeader
-        """
+        """ The SCP header from the response. """
         assert self._scp_response_header is not None, "no response read"
         return self._scp_response_header

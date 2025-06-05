@@ -30,12 +30,12 @@ class RouterInit(AbstractSCPRequest[CheckOKResponse]):
     def __init__(self, x: int, y: int, n_entries: int, table_address: int,
                  base_address: int, app_id: int):
         """
-        :param int x: The x-coordinate of the chip, between 0 and 255
-        :param int y: The y-coordinate of the chip, between 0 and 255
-        :param int n_entries: The number of entries in the table, more than 0
-        :param int table_address: The allocated table address
-        :param int base_address: The base_address containing the entries
-        :param int app_id:
+        :param x: The x-coordinate of the chip, between 0 and 255
+        :param y: The y-coordinate of the chip, between 0 and 255
+        :param n_entries: The number of entries in the table, more than 0
+        :param table_address: The allocated table address
+        :param base_address: The base_address containing the entries
+        :param app_id:
             The ID of the application with which to associate the
             routes.  If not specified, defaults to 0.
         :raise SpinnmanInvalidParameterException:

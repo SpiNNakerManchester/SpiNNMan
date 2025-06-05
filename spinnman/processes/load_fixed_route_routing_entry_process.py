@@ -27,13 +27,12 @@ class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
             self, x: int, y: int, fixed_route: RoutingEntry,
             app_id: int = 0) -> None:
         """
-        :param int x: The x-coordinate of the chip, between 0 and 255;
+        :param x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions.
-        :param int y: The y-coordinate of the chip, between 0 and 255;
+        :param y: The y-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions.
-        :param ~spinn_machine.RoutingEntry fixed_route:
-            the fixed route entry
-        :param int app_id: The ID of the application with which to associate
+        :param fixed_route: the fixed route entry
+        :param app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
         """
         route_entry = Router.convert_routing_table_entry_to_spinnaker_route(

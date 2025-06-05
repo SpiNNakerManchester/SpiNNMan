@@ -40,19 +40,19 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
             remote_host: Optional[str] = None,
             remote_port: Optional[int] = None):
         """
-        :param int chip_x: The optional x-coordinate of the chip at the remote
+        :param chip_x: The optional x-coordinate of the chip at the remote
             end of the connection. If not specified, it will not be possible
             to send SDP messages that require a response with this connection.
-        :param int chip_y: The optional y-coordinate of the chip at the remote
+        :param chip_y: The optional y-coordinate of the chip at the remote
             end of the connection. If not specified, it will not be possible
             to send SDP messages that require a response with this connection.
-        :param str local_host: The optional IP address or host name of the
+        :param local_host: The optional IP address or host name of the
             local interface to listen on
-        :param int local_port: The optional local port to listen on
-        :param str remote_host: The optional remote host name or IP address to
+        :param local_port: The optional local port to listen on
+        :param remote_host: The optional remote host name or IP address to
             send messages to. If not specified, sending will not be possible
             using this connection
-        :param int remote_port: The optional remote port number to send
+        :param remote_port: The optional remote port number to send
             messages to. If not specified, sending will not be possible using
             this connection
         """
@@ -67,11 +67,10 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
         Receives an SDP message from this connection.  Blocks until the
         message has been received, or a timeout occurs.
 
-        :param int timeout:
+        :param timeout:
             The time in seconds to wait for the message to arrive; if not
             specified, will wait forever, or until the connection is closed.
         :return: The received SDP message
-        :rtype: SDPMessage
         :raise SpinnmanIOException:
             If there is an error receiving the message
         :raise SpinnmanTimeoutException:
@@ -88,7 +87,7 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
         """
         Sends an SDP message down this connection.
 
-        :param SDPMessage sdp_message: The SDP message to be sent
+        :param sdp_message: The SDP message to be sent
         :raise SpinnmanIOException:
             If there is an error sending the message.
         """

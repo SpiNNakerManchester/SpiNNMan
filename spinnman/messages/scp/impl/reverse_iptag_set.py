@@ -31,16 +31,16 @@ class ReverseIPTagSet(AbstractSCPRequest[CheckOKResponse]):
     def __init__(self, x: int, y: int, destination_x: int, destination_y: int,
                  destination_p: int, port: int, tag: int, sdp_port: int):
         """
-        :param int x: The x-coordinate of a chip, between 0 and 255
-        :param int y: The y-coordinate of a chip, between 0 and 255
-        :param int destination_x:
+        :param x: The x-coordinate of a chip, between 0 and 255
+        :param y: The y-coordinate of a chip, between 0 and 255
+        :param destination_x:
             The x-coordinate of the destination chip, between 0 and 255
-        :param int destination_y:
+        :param destination_y:
             The y-coordinate of the destination chip, between 0 and 255
-        :param int destination_p:
+        :param destination_p:
             The ID of the destination processor, between 0 and 17
-        :param int port: The port, between 0 and 65535
-        :param int tag: The tag, between 0 and 7
+        :param port: The port, between 0 and 65535
+        :param tag: The tag, between 0 and 7
         """
         # pylint: disable=too-many-arguments
         strip_value = 1

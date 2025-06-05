@@ -41,7 +41,6 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
         :return:
             Mapping from machine names to handles for working with a machine.
-        :rtype: dict(str,SpallocMachine)
         """
         raise NotImplementedError
 
@@ -50,9 +49,8 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         """
         Get the jobs known to the server.
 
-        :param bool deleted: Whether to include deleted jobs.
+        :param deleted: Whether to include deleted jobs.
         :return: The jobs known to the server.
-        :rtype: ~typing.Iterable(SpallocJob)
         """
         raise NotImplementedError
 
@@ -63,16 +61,15 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         """
         Create a job with a specified number of boards.
 
-        :param int num_boards:
+        :param num_boards:
             How many boards to ask for (defaults to 1)
-        :param str machine_name:
+        :param machine_name:
             Which machine to run on? If omitted, the service's machine tagged
             with ``default`` will be used.
-        :param int keepalive:
+        :param keepalive:
             After how many seconds of no activity should a job become eligible
             for automatic pruning?
         :return: A handle for monitoring and interacting with the job.
-        :rtype: SpallocJob
         """
         raise NotImplementedError
 
@@ -83,18 +80,17 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         """
         Create a job with a rectangle of boards.
 
-        :param int width:
+        :param width:
             The width of rectangle to request
-        :param int height:
+        :param height:
             The height of rectangle to request
-        :param str machine_name:
+        :param machine_name:
             Which machine to run on? If omitted, the service's machine tagged
             with ``default`` will be used.
-        :param int keepalive:
+        :param keepalive:
             After how many seconds of no activity should a job become eligible
             for automatic pruning?
         :return: A handle for monitoring and interacting with the job.
-        :rtype: SpallocJob
         """
         raise NotImplementedError
 
@@ -109,20 +105,19 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         Create a job with a specific board. At least one of ``triad``,
         ``physical`` and ``ip_address`` must be not ``None``.
 
-        :param tuple(int,int,int) triad:
+        :param triad:
             The logical coordinate of the board to request
-        :param tuple(int,int,int) physical:
+        :param physical:
             The physical coordinate of the board to request
-        :param str ip_address:
+        :param ip_address:
             The IP address of the board to request
-        :param str machine_name:
+        :param machine_name:
             Which machine to run on? If omitted, the service's machine tagged
             with ``default`` will be used.
-        :param int keepalive:
+        :param keepalive:
             After how many seconds of no activity should a job become eligible
             for automatic pruning?
         :return: A handle for monitoring and interacting with the job.
-        :rtype: SpallocJob
         """
         raise NotImplementedError
 
@@ -139,25 +134,24 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         At least one of ``triad``, ``physical`` and ``ip_address`` must be not
         ``None``.
 
-        :param int width:
+        :param width:
             The width of rectangle to request
-        :param int height:
+        :param height:
             The height of rectangle to request
-        :param tuple(int,int,int) triad:
+        :param triad:
             The logical coordinate of the board to request
-        :param tuple(int,int,int) physical:
+        :param physical:
             The physical coordinate of the board to request
-        :param str ip_address:
+        :param ip_address:
             The IP address of the board to request
-        :param str machine_name:
+        :param machine_name:
             Which machine to run on? If omitted, the service's machine tagged
             with ``default`` will be used.
-        :param int keepalive:
+        :param keepalive:
             After how many seconds of no activity should a job become eligible
             for automatic pruning?
-        :param int max_dead_boards:
+        :param max_dead_boards:
             How many dead boards can be included.
         :return: A handle for monitoring and interacting with the job.
-        :rtype: SpallocJob
         """
         raise NotImplementedError

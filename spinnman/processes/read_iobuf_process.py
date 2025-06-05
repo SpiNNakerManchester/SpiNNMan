@@ -49,8 +49,7 @@ class _NextRegion:
     def next_at(self, address: int) -> '_NextRegion':
         """
 
-        :param int address:
-        :rtype: _NextRegion
+        :param address:
         """
         return _NextRegion(
             self.scamp_coords, self.core_coords, self.n + 1, address,
@@ -59,10 +58,9 @@ class _NextRegion:
     def tail(self, address: int, size: int, offset: int) -> _RegionTail:
         """
 
-        :param int address:
-        :param int size:
-        :param int offset:
-        :rtype: _RegionTail
+        :param address:
+        :param size:
+        :param offset:
         """
         return _RegionTail(
             self.scamp_coords, self.core_coords, self.n, address, size, offset)
@@ -87,7 +85,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
 
     def __init__(self, connection_selector: ConnectionSelector) -> None:
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
 
@@ -189,9 +187,8 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
             self, iobuf_size: int,
             core_subsets: CoreSubsets) -> Iterable[IOBuffer]:
         """
-        :param int iobuf_size:
-        :param ~spinn_machine.CoreSubsets core_subsets:
-        :rtype: iterable(IOBuffer)
+        :param iobuf_size:
+        :param core_subsets:
         """
         # Get the iobuf address for each core
         with self._collect_responses():

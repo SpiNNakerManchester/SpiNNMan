@@ -98,7 +98,6 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         """
         Sets the transceiver object.
 
-        :param Transceiver transceiver:
         :raises TypeError: If the transceiver is not a Transceiver subclass
         """
         if not isinstance(transceiver, Transceiver):

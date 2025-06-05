@@ -47,10 +47,9 @@ class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
     def get_n_cores_in_state(self, xys: Iterable[Tuple[int, int]],
                              app_id: int, state: CPUState) -> int:
         """
-        :param list(int,int) xys:
-        :param int app_id:
-        :param int state:
-        :rtype: int
+        :param xys:
+        :param app_id:
+        :param state:
         """
         for c_x, c_y in xys:
             self._send_request(
