@@ -43,7 +43,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
 
@@ -77,9 +77,8 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
                  pointer: SystemVariableDefinition = HEAP_ADDRESS
                  ) -> Sequence[HeapElement]:
         """
-        :param tuple(int,int) chip_coords: x, y
-        :param SystemVariableDefinition pointer:
-        :rtype: list(HeapElement)
+        :param chip_coords: x, y
+        :param pointer:
         """
         x, y = chip_coords
         core_coords = (x, y, 0)

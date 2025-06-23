@@ -50,8 +50,6 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
     def transient_timeout(self) -> int:
         """
         The timeout for transient IP tags (i.e. responses to SCP commands).
-
-        :rtype: int
         """
         return self._tto
 
@@ -59,8 +57,6 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
     def pool_size(self) -> int:
         """
         The count of the IP tag pool size.
-
-        :rtype: int
         """
         return self._pool_size
 
@@ -68,7 +64,5 @@ class IPTagGetInfoResponse(AbstractSCPResponse):
     def fixed_size(self) -> int:
         """
         The count of the number of fixed IP tag entries.
-
-        :rtype: int
         """
         return self._fixed_size

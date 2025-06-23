@@ -29,7 +29,6 @@ class Connection(AbstractContextManager, metaclass=AbstractBase):
         Determines if the medium is connected at this point in time.
 
         :return: True if the medium is connected, False otherwise
-        :rtype: bool
         :raise SpinnmanIOException:
             If there is an error when determining the connectivity of the
             medium.

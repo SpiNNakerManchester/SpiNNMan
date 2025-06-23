@@ -50,19 +50,17 @@ class EIEIODataHeader(object):
         """
         EIEIO header for data packets.
 
-        :param EIEIOType eieio_type: the type of message
-        :param int tag: the tag of the message (0 by default)
+        :param eieio_type: the type of message
+        :param tag: the tag of the message (0 by default)
         :param prefix: the key prefix of the message or `None` if not prefixed
-        :type prefix: int or None
-        :param EIEIOPrefix prefix_type:
+        :param prefix_type:
             the position of the prefix (upper or lower)
         :param payload_base:
             The base payload to be applied, or `None` if no base payload
-        :type payload_base: int or None
-        :param bool is_time:
+        :param is_time:
             True if the payloads should be taken to be timestamps, or False
             otherwise
-        :param int count: Count of the number of items in the packet
+        :param count: Count of the number of items in the packet
         """
         # pylint: disable=too-many-arguments
         self._eieio_type = eieio_type
@@ -76,64 +74,43 @@ class EIEIODataHeader(object):
     @property
     def eieio_type(self) -> EIEIOType:
         """
-        Gets the eieio_type passed into the init.
-
-        :rtype: EIEIOType
-        """
+        Gets the eieio_type passed into the init."""
         return self._eieio_type
 
     @property
     def tag(self) -> int:
         """
-        Gets the tag value passed into the init.
-
-        :rtype: int
-        """
+        Gets the tag value passed into the init. """
         return self._tag
 
     @property
     def prefix(self) -> Optional[int]:
         """
-        Gets prefix passed into the init (if applicable).
-
-        :rtype: int or None
-        """
+        Gets prefix passed into the init (if applicable). """
         return self._prefix
 
     @property
     def prefix_type(self) -> EIEIOPrefix:
         """
-        Gets the prefix_type passed into the init.
-
-        :rtype: EIEIOPrefix
-        """
+        Gets the prefix_type passed into the init. """
         return self._prefix_type
 
     @property
     def payload_base(self) -> Optional[int]:
         """
-        Gets the payload_base value passed into the init (if applicable).
-
-        :rtype: int or None
-        """
+        Gets the payload_base value passed into the init (if applicable). """
         return self._payload_base
 
     @property
     def is_time(self) -> bool:
         """
-        Gets the is_time value passed into the init.
-
-        :rtype: bool
-        """
+        Gets the is_time value passed into the init. """
         return self._is_time
 
     @property
     def count(self) -> int:
         """
-        Count of the number of items in the packet
-
-        :rtype: int
-        """
+        Count of the number of items in the packet """
         return self._count
 
     @count.setter
@@ -141,17 +118,14 @@ class EIEIODataHeader(object):
         """
         Sets the Count of the number of items in the packet
 
-        :param int count: the new value
+        :param count: the new value
         """
         self._count = count
 
     @property
     def size(self) -> int:
         """
-        Get the size of a header with the given parameters.
-
-        :rtype: int
-        """
+        Get the size of a header with the given parameters. """
         return EIEIODataHeader.get_header_size(
             self._eieio_type, self._prefix is not None,
             self._payload_base is not None)
@@ -162,12 +136,11 @@ class EIEIODataHeader(object):
         """
         Get the size of a header with the given parameters.
 
-        :param EIEIOType eieio_type: the type of message
-        :param bool is_prefix: True if there is a prefix, False otherwise
-        :param bool is_payload_base:
+        :param eieio_type: the type of message
+        :param is_prefix: True if there is a prefix, False otherwise
+        :param is_payload_base:
             True if there is a payload base, False otherwise
         :return: The size of the header in bytes
-        :rtype: int
         """
         size = 2
         if is_prefix:
@@ -191,10 +164,7 @@ class EIEIODataHeader(object):
     @property
     def bytestring(self) -> bytes:
         """
-        The byte-string of the header.
-
-        :rtype: bytes
-        """
+        The byte-string of the header. """
         # Convert the flags to an int
         data = 0
 
@@ -244,10 +214,9 @@ class EIEIODataHeader(object):
         """
         Read an EIEIO data header from a byte-string.
 
-        :param bytes data: The byte-string to be read
-        :param int offset: The offset at which the data starts
+        :param data: The byte-string to be read
+        :param offset: The offset at which the data starts
         :return: an EIEIO header
-        :rtype: EIEIODataHeader
         """
         (count, header_data) = _PATTERN_BB.unpack_from(data, offset)
 

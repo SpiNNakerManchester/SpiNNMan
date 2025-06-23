@@ -62,16 +62,16 @@ class UDPConnection(Connection, Listenable[bytes]):
             remote_host: Optional[str] = None,
             remote_port: Optional[int] = None):
         """
-        :param str local_host: The local host name or IP address to bind to.
+        :param local_host: The local host name or IP address to bind to.
             If not specified defaults to bind to all interfaces, unless
             remote_host is specified, in which case binding is done to the
             IP address that will be used to send packets
-        :param int local_port: The local port to bind to, between 1025 and
+        :param local_port: The local port to bind to, between 1025 and
             65535. If not specified, defaults to a random unused local port
-        :param str remote_host: The remote host name or IP address to send
+        :param remote_host: The remote host name or IP address to send
             packets to. If not specified, the socket will be available for
             listening only, and will throw and exception if used for sending
-        :param int remote_port: The remote port to send packets to.  If
+        :param remote_port: The remote port to send packets to.  If
             remote_host is None, this is ignored.  If remote_host is specified
             specified, this must also be specified for the connection to allow
             sending
@@ -120,8 +120,6 @@ class UDPConnection(Connection, Listenable[bytes]):
             to be able to successfully write to it or read from it; some
             failures are only detected on use. But closed sockets definitely
             behave in certain ways!
-
-        :rtype: bool
         """
         # Reach into Python'#s guts
         # pylint: disable=protected-access
@@ -152,8 +150,6 @@ class UDPConnection(Connection, Listenable[bytes]):
         """
         The local IP address to which the connection is bound,
         as a dotted string, e.g., `0.0.0.0`.
-
-        :rtype: str
         """
         return self._local_ip_address
 
@@ -161,8 +157,6 @@ class UDPConnection(Connection, Listenable[bytes]):
     def local_port(self) -> int:
         """
         The number of the local port to which the connection is bound.
-
-        :rtype: int
         """
         return self._local_port
 
@@ -171,8 +165,6 @@ class UDPConnection(Connection, Listenable[bytes]):
         """
         The remote IP address to which the connection is connected,
         or `None` if not connected remotely.
-
-        :rtype: str
         """
         return self._remote_ip_address
 
@@ -181,8 +173,6 @@ class UDPConnection(Connection, Listenable[bytes]):
         """
         The remote port number to which the connection is connected,
         or `None` if not connected remotely.
-
-        :rtype: int
         """
         return self._remote_port
 
@@ -190,9 +180,8 @@ class UDPConnection(Connection, Listenable[bytes]):
         """
         Receive data from the connection.
 
-        :param float timeout: The timeout in seconds, or `None` to wait forever
+        :param timeout: The timeout in seconds, or `None` to wait forever
         :return: The data received as a byte-string
-        :rtype: bytes
         :raise SpinnmanTimeoutException:
             If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
@@ -207,10 +196,9 @@ class UDPConnection(Connection, Listenable[bytes]):
         Receive data from the connection along with the address where the
         data was received from.
 
-        :param float timeout: The timeout, or `None` to wait forever
+        :param timeout: The timeout, or `None` to wait forever
         :return: A tuple of the data received and a tuple of the
             (address, port) received from
-        :rtype: tuple(bytes, tuple(str, int))
         :raise SpinnmanTimeoutException:
             If a timeout occurs before any data is received
         :raise SpinnmanIOException: If an error occurs receiving the data
@@ -224,7 +212,6 @@ class UDPConnection(Connection, Listenable[bytes]):
         Send data down this connection.
 
         :param data: The data to be sent
-        :type data: bytes or bytearray
         :raise SpinnmanIOException: If there is an error sending the data
         """
         if self.__is_closed:
@@ -242,8 +229,7 @@ class UDPConnection(Connection, Listenable[bytes]):
         Send data down this connection.
 
         :param data: The data to be sent as a byte-string
-        :type data: bytes or bytearray
-        :param tuple(str,int) address:
+        :param address:
             A tuple of (address, port) to send the data to
         :raise SpinnmanIOException: If there is an error sending the data
         """

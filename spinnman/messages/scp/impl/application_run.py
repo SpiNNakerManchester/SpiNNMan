@@ -31,13 +31,13 @@ class ApplicationRun(AbstractSCPRequest[CheckOKResponse]):
     def __init__(self, app_id: int, x: int, y: int,
                  processors: Optional[Iterable[int]], wait: bool = False):
         """
-        :param int app_id: The ID of the application to run, between 16 and 255
-        :param int x: The x-coordinate of the chip to run on, between 0 and 255
-        :param int y: The y-coordinate of the chip to run on, between 0 and 255
-        :param list(int) processors:
+        :param app_id: The ID of the application to run, between 16 and 255
+        :param x: The x-coordinate of the chip to run on, between 0 and 255
+        :param y: The y-coordinate of the chip to run on, between 0 and 255
+        :param processors:
             The processors on the chip where the executable should be
             started, between 1 and 17
-        :param bool wait:
+        :param wait:
             True if the processors should enter a "wait" state on starting
         """
         # pylint: disable=too-many-arguments

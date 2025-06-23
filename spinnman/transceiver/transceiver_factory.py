@@ -50,20 +50,15 @@ def create_transceiver_from_hostname(
 
     :param hostname: The hostname or IP address of the board or `None` if
         only the BMP connections are of interest
-    :type hostname: str or None
-    :type number_of_boards: int or None
-    :param BMPConnectionData bmp_connection_data:
+    :param bmp_connection_data:
         the details of the BMP connections used to boot multi-board systems
-    :param bool auto_detect_bmp:
+    :param auto_detect_bmp:
         ``True`` if the BMP of version 4 or 5 boards should be
         automatically determined from the board IP address
-    :param bool power_cycle: If True will power cycle the machine
-    :param scamp_connections:
-        the list of connections used for SCAMP communications
-    :param bool extended:
+    :param power_cycle: If True will power cycle the machine
+    :param extended:
         If True will return an Extended version of the Transceiver
     :return: The created transceiver
-    :rtype: spinnman.transceiver.Transceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
     :raise SpinnmanInvalidPacketException:
@@ -115,14 +110,13 @@ def create_transceiver_from_connections(
     """
     Create a Transceiver with these connections
 
-    :param list(Connection) connections:
+    :param connections:
         An iterable of connections to the board.  If not specified, no
         communication will be possible until connections are found.
-    :param bool virtual: If True will return a virtual Transceiver
-    :param bool power_cycle: If True will power cycle the machine
-    :param bool extended:
+    :param virtual: If True will return a virtual Transceiver
+    :param power_cycle: If True will power cycle the machine
+    :param extended:
     :return: The created transceiver
-    :rtype: spinnman.transceiver.Transceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
     :raise SpinnmanInvalidPacketException:

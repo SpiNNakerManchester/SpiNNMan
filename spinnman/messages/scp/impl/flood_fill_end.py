@@ -35,14 +35,14 @@ class FloodFillEnd(AbstractSCPRequest[CheckOKResponse]):
             processors: Optional[Iterable[int]] = None, wait: bool = False):
         """
 
-        :param int nearest_neighbour_id:
+        :param nearest_neighbour_id:
             The ID of the packet, between 0 and 127
-        :param int app_id: The application ID to start using the data, between
+        :param app_id: The application ID to start using the data, between
             16 and 255.  If not specified, no application is started
-        :param list(int) processors:
+        :param processors:
             A list of processors on which to start the application, each
             between 1 and 17. If not specified, no application is started.
-        :param bool wait:
+        :param wait:
             True if the binary should go into a "wait" state before executing
         """
         processor_mask = 0
