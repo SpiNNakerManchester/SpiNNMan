@@ -297,9 +297,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         }, machine_name)
 
     def close(self) -> None:
-        # pylint: disable=protected-access
         if self.__session is not None:
-            self.__session._purge()
+            self.__session.purge()
         self.__session = None
 
 

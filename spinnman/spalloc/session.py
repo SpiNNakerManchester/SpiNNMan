@@ -83,8 +83,8 @@ class Session:
         This class does not present a stable API for public consumption.
     """
     __slots__ = (
-        "__login_form_url", "__login_submit_url", "__srv_base", "_service_url",
-        "__username", "__password", "__token",
+        "__login_form_url", "__login_submit_url", "__srv_base",
+        "__service_url", "__username", "__password", "__token",
         "_session_id", "__csrf", "__csrf_header")
 
     def __init__(
@@ -103,7 +103,7 @@ class Session:
         url = clean_url(service_url)
         self.__login_form_url = url + "system/login.html"
         self.__login_submit_url = url + "system/perform_login"
-        self._service_url = url
+        self.__service_url = url
         self.__srv_base = url + "srv/spalloc/"
         self.__username = username
         self.__password = password
@@ -159,7 +159,7 @@ class Session:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
-        cookies, headers = self._credentials
+        cookies, headers = self.credentials
         r = requests.post(url, params=params, json=json_dict,
                           cookies=cookies, headers=headers,
                           allow_redirects=False, timeout=timeout)
@@ -178,7 +178,7 @@ class Session:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
-        cookies, headers = self._credentials
+        cookies, headers = self.credentials
         headers["Content-Type"] = "application/octet-stream"
         r = requests.post(url, params=params, data=data,
                           cookies=cookies, headers=headers,
@@ -198,7 +198,7 @@ class Session:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
-        cookies, headers = self._credentials
+        cookies, headers = self.credentials
         if isinstance(data, str):
             headers["Content-Type"] = "text/plain; charset=UTF-8"
         r = requests.put(url, params=params, data=data,
@@ -217,7 +217,7 @@ class Session:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
-        cookies, headers = self._credentials
+        cookies, headers = self.credentials
         r = requests.delete(url, params=params, cookies=cookies,
                             headers=headers, allow_redirects=False,
                             timeout=timeout)
@@ -253,7 +253,7 @@ class Session:
             m = csrf_matcher.search(r.text)
             if not m:
                 msg = ("Could not establish temporary session to "
-                       f"{self._service_url} for user {self.__username} ")
+                       f"{self.__service_url} for user {self.__username} ")
                 if self.__password is None:
                     msg += "with a no password"
                 else:
@@ -298,7 +298,7 @@ class Session:
         return obj
 
     @property
-    def _credentials(self) -> Tuple[Dict[str, str], Dict[str, str]]:
+    def credentials(self) -> Tuple[Dict[str, str], Dict[str, str]]:
         """
         The credentials for requests. *Serializable.*
         """
@@ -337,7 +337,7 @@ class Session:
         return websocket.create_connection(
             url, header=header, cookie=cookie, **kwargs)
 
-    def _purge(self) -> None:
+    def purge(self) -> None:
         """
         Clears out all credentials from this session, rendering the session
         completely inoperable henceforth.
@@ -346,6 +346,13 @@ class Session:
         self.__password = None
         self._session_id = None
         self.__csrf = None
+
+    @property
+    def service_url(self) -> str:
+        """
+        Get the service URL for this session.
+        """
+        return self.__service_url
 
 
 class SessionAware:
@@ -367,16 +374,14 @@ class SessionAware:
         The current session credentials.
         Only supposed to be called by subclasses.
         """
-        # pylint: disable=protected-access
-        return self.__session._credentials
+        return self.__session.credentials
 
     @property
     def _service_url(self) -> str:
         """
         The main service URL.
         """
-        # pylint: disable=protected-access
-        return self.__session._service_url
+        return self.__session.service_url
 
     def _get(self, url: str, **kwargs: Any) -> requests.Response:
         return self.__session.get(url, **kwargs)
