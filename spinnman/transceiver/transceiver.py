@@ -59,8 +59,8 @@ class Transceiver(object):
         """
         Sends an SDP message using one of the connections.
 
-        :param SDPMessage message: The message to send
-        :param SDPConnection connection: An optional connection to use
+        :param message: The message to send
+        :param connection: An optional connection to use
         """
         # https://github.com/SpiNNakerManchester/SpiNNMan/issues/369
         raise NotImplementedError("abstractmethod")
@@ -97,7 +97,7 @@ class Transceiver(object):
             An exception will be thrown if no initial connections can be
             found to the board.
 
-        :param dict((int,int),str) connections:
+        :param connections:
             Dict of (`x`,`y`) to IP address
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -119,7 +119,6 @@ class Transceiver(object):
         calls to discover_connections.  No further discovery is done here.
 
         :return: An iterable of connections known to the transceiver
-        :rtype: set(Connection)
         """
         # used in unittest only
         raise NotImplementedError("abstractmethod")
@@ -131,7 +130,6 @@ class Transceiver(object):
         they are connected to each other.
 
         :return: A machine description
-        :rtype: ~spinn_machine.Machine
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -152,19 +150,17 @@ class Transceiver(object):
         """
         Get information about the processors on the board.
 
-        :param ~spinn_machine.CoreSubsets core_subsets:
+        :param core_subsets:
             A set of chips and cores from which to get the
             information. If not specified, the information from all of the
             cores on all of the chips on the board are obtained.
         :param states: The state or states to filter on (if any)
-        :type states: None, CPUState or iterable(CPUState)
-        :param bool include:
+        :param include:
             If `True` includes only infos in the requested state(s).
             If `False` includes only infos *not* in the requested state(s).
             Ignored if states is `None`.
         :return: The CPU information for the selected cores and States, or
             all cores/states  if core_subsets/states is not specified
-        :rtype: ~spinnman.model.CPUInfos
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -186,8 +182,8 @@ class Transceiver(object):
         """
         Get the clock drift.
 
-        :param int x: The x-coordinate of the chip to get drift for
-        :param int y: The y-coordinate of the chip to get drift for
+        :param x: The x-coordinate of the chip to get drift for
+        :param y: The y-coordinate of the chip to get drift for
         """
         # used by drift_report
         raise NotImplementedError("abstractmethod")
@@ -201,11 +197,10 @@ class Transceiver(object):
             Conventionally, user_0 usually holds the address of the table of
             memory regions.
 
-        :param int x: X coordinate of the chip
-        :param int y: Y coordinate of the chip
-        :param int p: Virtual processor identifier on the chip
-        :param int user: The user number to read data for
-        :rtype: int
+        :param x: X coordinate of the chip
+        :param y: Y coordinate of the chip
+        :param p: Virtual processor identifier on the chip
+        :param user: The user number to read data for
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -230,13 +225,12 @@ class Transceiver(object):
         """
         Adds information about a specific processor on the board to the info
 
-        :param CPUInfos cpu_infos: Info to add data for this core to
-        :param int x: The x-coordinate of the chip containing the processor
-        :param int y: The y-coordinate of the chip containing the processor
-        :param int p: The ID of the processor to get the information about
+        :param cpu_infos: Info to add data for this core to
+        :param x: The x-coordinate of the chip containing the processor
+        :param y: The y-coordinate of the chip containing the processor
+        :param p: The ID of the processor to get the information about
         :param states:
             If provided will only add the info if in one of the states
-        :type states: list(CPUState)
         :return: The CPU information for the selected core
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -256,11 +250,10 @@ class Transceiver(object):
         """
         Gets the base address of the Region Table
 
-        :param int x: The x-coordinate of the chip containing the processor
-        :param int y: The y-coordinate of the chip containing the processor
-        :param int p: The ID of the processor to get the address
+        :param x: The x-coordinate of the chip containing the processor
+        :param y: The y-coordinate of the chip containing the processor
+        :param p: The ID of the processor to get the address
         :return: The address of the Region table for the selected core
-        :rtype: int
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -279,13 +272,12 @@ class Transceiver(object):
         """
         Get the contents of the IOBUF buffer for a number of processors.
 
-        :param ~spinn_machine.CoreSubsets core_subsets:
+        :param core_subsets:
             A set of chips and cores from which to get the buffers. If not
             specified, the buffers from all of the cores on all of the chips
             on the board are obtained.
         :return: An iterable of the buffers, which may not be in the order
             of core_subsets
-        :rtype: iterable(IOBuffer)
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -306,12 +298,11 @@ class Transceiver(object):
         """
         Get a count of the number of cores which have a given state.
 
-        :param int app_id:
+        :param app_id:
             The ID of the application from which to get the count.
-        :param CPUState state: The state count to get
-        :param list(int,int) xys: The chips to query, or None for all
+        :param state: The state count to get
+        :param xys: The chips to query, or None for all
         :return: A count of the cores with the given status
-        :rtype: int
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -335,25 +326,23 @@ class Transceiver(object):
         will be optimised based on the selected cores, but it may still
         require a number of communications with the board to execute.
 
-        :param ~spinn_machine.CoreSubsets core_subsets:
+        :param core_subsets:
             Which cores on which chips to start the executable
         :param executable:
             The data that is to be executed. Should be one of the following:
             * An instance of RawIOBase
             * A bytearray
             * A filename of an executable
-        :type executable:
-            ~io.RawIOBase or bytes or bytearray or str
-        :param int app_id:
+        :param app_id:
             The ID of the application with which to associate the executable
-        :param int n_bytes:
+        :param n_bytes:
             The size of the executable data in bytes. If not specified:
 
             * If `executable` is an RawIOBase, an error is raised
             * If `executable` is a bytearray, the length of the bytearray will
               be used
             * If `executable` is a str, the length of the file will be used
-        :param bool wait:
+        :param wait:
             True if the processors should enter a "wait" state on loading
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
@@ -381,13 +370,12 @@ class Transceiver(object):
         Read a register on a FPGA of a board. The meaning of the
         register's contents will depend on the FPGA's configuration.
 
-        :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
-        :param int register:
+        :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
+        :param register:
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
-        :param int board: which board to request the FPGA register from
+        :param board: which board to request the FPGA register from
         :return: the register data
-        :rtype: int
         """
         raise NotImplementedError("abstractmethod")
 
@@ -398,12 +386,12 @@ class Transceiver(object):
         Write a register on a FPGA of a board. The meaning of setting the
         register's contents will depend on the FPGA's configuration.
 
-        :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
-        :param int register:
+        :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
+        :param register:
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
-        :param int value: the value to write into the FPGA register
-        :param int board: which board to write the FPGA register to
+        :param value: the value to write into the FPGA register
+        :param board: which board to write the FPGA register to
         """
         raise NotImplementedError("abstractmethod")
 
@@ -412,7 +400,7 @@ class Transceiver(object):
         """
         Read the BMP version.
 
-        :param int board: which board to request the data from
+        :param board: which board to request the data from
         :return: the version_info from the BMP
         """
         raise NotImplementedError("abstractmethod")
@@ -426,11 +414,11 @@ class Transceiver(object):
         """
         Write to the SDRAM on the board.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip where the memory is to be written to
-        :param int y:
+        :param y:
             The y-coordinate of the chip where the memory is to be written to
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
 
@@ -438,9 +426,7 @@ class Transceiver(object):
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
             * A string - the filename of a data file
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int or str
-        :param int n_bytes:
+        :param n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
@@ -448,11 +434,10 @@ class Transceiver(object):
               used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the length of the file will be used
-        :param int offset: The offset from which the valid data begins
-        :param int cpu: The optional CPU to write to
-        :param bool get_sum: whether to return a checksum or 0
+        :param offset: The offset from which the valid data begins
+        :param cpu: The optional CPU to write to
+        :param get_sum: whether to return a checksum or 0
         :return: The number of bytes written, the checksum (0 if get_sum=False)
-        :rtype: int, int
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -480,11 +465,11 @@ class Transceiver(object):
             Conventionally, user_0 usually holds the address of the table of
             memory regions.
 
-        :param int x: X coordinate of the chip
-        :param int y: Y coordinate of the chip
-        :param int p: Virtual processor identifier on the chip
-        :param int user: The user "register" number of write data for
-        :param int value: The value to write
+        :param x: X coordinate of the chip
+        :param y: Y coordinate of the chip
+        :param p: Virtual processor identifier on the chip
+        :param user: The user "register" number of write data for
+        :param value: The value to write
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -523,18 +508,17 @@ class Transceiver(object):
         """
         Read some areas of memory (usually SDRAM) from the board.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip where the memory is to be read from
-        :param int y:
+        :param y:
             The y-coordinate of the chip where the memory is to be read from
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory to be read starts
-        :param int length: The length of the data to be read in bytes
-        :param int cpu:
+        :param length: The length of the data to be read in bytes
+        :param cpu:
             the core ID used to read the memory of; should usually be 0 when
             reading from SDRAM, but may be other values when reading from DTCM.
         :return: A bytearray of data read
-        :rtype: bytes
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -553,17 +537,16 @@ class Transceiver(object):
         """
         Read a word (usually of SDRAM) from the board.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip where the word is to be read from
-        :param int y:
+        :param y:
             The y-coordinate of the chip where the word is to be read from
-        :param int base_address:
+        :param base_address:
             The address (usually in SDRAM) where the word to be read starts
-        :param int cpu:
+        :param cpu:
             the core ID used to read the word; should usually be 0 when reading
             from SDRAM, but may be other values when reading from DTCM.
         :return: The unsigned integer value at ``base_address``
-        :rtype: int
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -581,7 +564,7 @@ class Transceiver(object):
         """
         Sends a stop request for an app_id.
 
-        :param int app_id: The ID of the application to send to
+        :param app_id: The ID of the application to send to
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -608,25 +591,23 @@ class Transceiver(object):
         Waits for the specified cores running the given application to be
         in some target state or states. Handles failures.
 
-        :param ~spinn_machine.CoreSubsets all_core_subsets:
+        :param all_core_subsets:
             the cores to check are in a given sync state
-        :param int app_id: the application ID that being used by the simulation
+        :param app_id: the application ID that being used by the simulation
         :param cpu_states:
             The expected states once the applications are ready; success is
             when each application is in one of these states
-        :type cpu_states: CPUState or iterable(CPUState)
-        :param float timeout:
+        :param timeout:
             The amount of time to wait in seconds for the cores to reach one
             of the states
-        :param float time_between_polls: Time between checking the state
-        :param set(CPUState) error_states:
+        :param time_between_polls: Time between checking the state
+        :param error_states:
             Set of states that the application can be in that indicate an
             error, and so should raise an exception
-        :param int counts_between_full_check:
+        :param counts_between_full_check:
             The number of times to use the count signal before instead using
             the full CPU state check
         :param progress_bar: Possible progress bar to update.
-        :type progress_bar: ~spinn_utilities.progress_bar.ProgressBar or None
         :raise SpinnmanTimeoutException:
             If a timeout is specified and exceeded.
         """
@@ -637,8 +618,8 @@ class Transceiver(object):
         """
         Send a signal to an application.
 
-        :param int app_id: The ID of the application to send to
-        :param ~spinnman.messages.scp.enums.Signal signal: The signal to send
+        :param app_id: The ID of the application to send to
+        :param signal: The signal to send
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -658,13 +639,12 @@ class Transceiver(object):
         """
         Set up an IP tag.
 
-        :param ~spinn_machine.tags.IPTag ip_tag:
-            The tag to set up.
+        :param ip_tag: The tag to set up.
 
             .. note::
                 `board_address` can be `None`, in which case, the tag will be
                 assigned to all boards.
-        :param bool use_sender:
+        :param use_sender:
             Optionally use the sender host and port instead of
             the given host and port in the tag
         :raise SpinnmanIOException:
@@ -684,7 +664,7 @@ class Transceiver(object):
         """
         Set up a reverse IP tag.
 
-        :param ~spinn_machine.tags.ReverseIPTag reverse_ip_tag:
+        :param reverse_ip_tag:
             The reverse tag to set up.
 
             .. note::
@@ -710,8 +690,8 @@ class Transceiver(object):
         """
         Clear the setting of an IP tag.
 
-        :param int tag: The tag ID
-        :param str board_address:
+        :param tag: The tag ID
+        :param board_address:
             Board address where the tag should be cleared.
             If not specified, all AbstractSCPConnection connections will send
             the message to clear the tag
@@ -734,12 +714,11 @@ class Transceiver(object):
         """
         Get the current set of tags that have been set on the board.
 
-        :param AbstractSCPConnection connection:
+        :param connection:
             Connection from which the tags should be received.
             If not specified, all AbstractSCPConnection connections will be
             queried and the response will be combined.
         :return: An iterable of tags
-        :rtype: iterable(~spinn_machine.tags.AbstractTag)
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -758,16 +737,15 @@ class Transceiver(object):
         """
         Allocates a chunk of SDRAM on a chip on the machine.
 
-        :param int x: The x-coordinate of the chip onto which to ask for memory
-        :param int y: The y-coordinate of the chip onto which to ask for memory
-        :param int size: the amount of memory to allocate in bytes
-        :param int app_id: The ID of the application with which to associate
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :param size: the amount of memory to allocate in bytes
+        :param app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
-        :param int tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can
+        :param tag: the tag for the SDRAM, a 8-bit (chip-wide) tag that can
             be looked up by a SpiNNaker application to discover the address of
             the allocated block. If `0` then no tag is applied.
         :return: the base address of the allocated memory
-        :rtype: int
         """
         raise NotImplementedError("abstractmethod")
 
@@ -791,13 +769,13 @@ class Transceiver(object):
         """
         Load a set of multicast routes on to a chip.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip onto which to load the routes
-        :param int y:
+        :param y:
             The y-coordinate of the chip onto which to load the routes
-        :param iterable(~spinn_machine.MulticastRoutingEntry) routes:
+        :param routes:
             An iterable of multicast routes to load
-        :param int app_id: The ID of the application with which to associate
+        :param app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -817,13 +795,13 @@ class Transceiver(object):
         """
         Loads a fixed route routing table entry onto a chip's router.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip onto which to load the routes
-        :param int y:
+        :param y:
             The y-coordinate of the chip onto which to load the routes
-        :param ~spinn_machine.RoutingEntry fixed_route:
+        :param fixed_route:
             the route for the fixed route entry on this chip
-        :param int app_id: The ID of the application with which to associate
+        :param app_id: The ID of the application with which to associate
             the routes.  If not specified, defaults to 0.
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -842,11 +820,11 @@ class Transceiver(object):
         """
         Reads a fixed route routing table entry from a chip's router.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip onto which to load the routes
-        :param int y:
+        :param y:
             The y-coordinate of the chip onto which to load the routes
-        :param int app_id:
+        :param app_id:
             The ID of the application with which to associate the
             routes.  If not specified, defaults to 0.
         :return: the route as a fixed route entry
@@ -860,15 +838,14 @@ class Transceiver(object):
         """
         Get the current multicast routes set up on a chip.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip from which to get the routes
-        :param int y:
+        :param y:
             The y-coordinate of the chip from which to get the routes
-        :param int app_id:
+        :param app_id:
             The ID of the application to filter the routes for. If
             not specified, will return all routes
         :return: An iterable of multicast routes
-        :rtype: list(~spinn_machine.MulticastRoutingEntry)
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -904,12 +881,11 @@ class Transceiver(object):
         """
         Get router diagnostic information from a chip.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip from which to get the information
-        :param int y:
+        :param y:
             The y-coordinate of the chip from which to get the information
         :return: The router diagnostic information
-        :rtype: RouterDiagnostics
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -923,11 +899,7 @@ class Transceiver(object):
 
     @abstractmethod
     def get_scamp_connection_selector(self) -> MostDirectConnectionSelector:
-        """
-        Returns the most direct scamp connections
-
-        :rtype: MostDirectConnectionSelecto
-        """
+        """ Returns the most direct scamp connections """
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
@@ -937,14 +909,14 @@ class Transceiver(object):
         """
         Sets a router diagnostic filter in a router.
 
-        :param int x:
+        :param x:
             The X address of the router in which this filter is being set.
-        :param int y:
+        :param y:
             The Y address of the router in which this filter is being set.
-        :param int position:
+        :param position:
             The position in the list of filters where this filter is to be
             added.
-        :param ~spinnman.model.DiagnosticFilter diagnostic_filter:
+        :param diagnostic_filter:
             The diagnostic filter being set in the placed, between 0 and 15.
 
             .. note::
@@ -986,9 +958,7 @@ class Transceiver(object):
 
     @abstractmethod
     def close(self) -> None:
-        """
-        Close the transceiver and any threads that are running.
-        """
+        """ Close the transceiver and any threads that are running. """
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
@@ -996,7 +966,7 @@ class Transceiver(object):
         """
         Control the synchronisation of the chips.
 
-        :param bool do_sync: Whether to synchronise or not
+        :param do_sync: Whether to synchronise or not
         """
         raise NotImplementedError("abstractmethod")
 
@@ -1005,12 +975,9 @@ class Transceiver(object):
         """
         Sends a command to update provenance and exit
 
-        :param int x:
-            The x-coordinate of the core
-        :param int y:
-            The y-coordinate of the core
-        :param int p:
-            The processor on the core
+        :param x: The x-coordinate of the core
+        :param y: The y-coordinate of the core
+        :param p: The processor on the core
         """
         raise NotImplementedError("abstractmethod")
 
@@ -1020,9 +987,9 @@ class Transceiver(object):
         """
         Sends a signal to update the provenance and exit
 
-        :param int x:
-        :param int y:
-        :param int p:
+        :param x:
+        :param y:
+        :param p:
         """
         raise NotImplementedError("abstractmethod")
 

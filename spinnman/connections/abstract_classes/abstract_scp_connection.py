@@ -30,10 +30,9 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         """
         Determines if there is an SCP packet to be read without blocking.
 
-        :param int timeout:
+        :param timeout:
             The time to wait before returning if the connection is not ready
         :return: True if there is an SCP packet to be read
-        :rtype: bool
         """
         raise NotImplementedError
 
@@ -44,13 +43,12 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         Receives an SCP response from this connection.  Blocks
         until a message has been received, or a timeout occurs.
 
-        :param int timeout:
+        :param timeout:
             The time in seconds to wait for the message to arrive; if `None`,
             will wait forever, or until the connection is closed
         :return: The SCP result, the sequence number, the data of the response
             and the offset at which the data starts (i.e., where the SDP
             header starts).
-        :rtype: tuple(SCPResult, int, bytes, int)
         :raise SpinnmanIOException:
             If there is an error receiving the message
         :raise SpinnmanTimeoutException:
@@ -72,8 +70,6 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         """
         The X-coordinate of the chip at which messages sent down this
         connection will arrive at first.
-
-        :rtype: int
         """
         raise NotImplementedError
 
@@ -83,7 +79,5 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         """
         The Y-coordinate of the chip at which messages sent down this
         connection will arrive at first.
-
-        :rtype: int
         """
         raise NotImplementedError

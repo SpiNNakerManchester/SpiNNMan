@@ -30,16 +30,15 @@ class WriteMemory(AbstractSCPRequest[CheckOKResponse]):
 
     def __init__(self, coordinates: XYP, base_address: int, data: bytes):
         """
-        :param tuple(int,int,int) coordinates:
+        :param coordinates:
             The coordinates of the chip, X and Y between 0 and 255, and P
             between 0 and 17 (normally 0 when writing to SDRAM; may be other
             values when writing to ITCM or DTCM);
             these are not checked due to speed restrictions
-        :param int base_address: The base_address to start writing to
+        :param base_address: The base_address to start writing to
             the base address is not checked to see if its not valid
         :param data: between 1 and 256 bytes of data to write;
             this is not checked due to speed restrictions
-        :type data: bytearray or bytes
         """
         size = len(data)
         x, y, cpu = coordinates

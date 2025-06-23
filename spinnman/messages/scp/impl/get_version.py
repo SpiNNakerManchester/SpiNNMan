@@ -28,11 +28,11 @@ class GetVersion(AbstractSCPRequest[GetVersionResponse]):
 
     def __init__(self, x: int, y: int, p: int):
         """
-        :param int x:
+        :param x:
             The x-coordinate of the chip to read from, between 0 and 255
-        :param int y:
+        :param y:
             The y-coordinate of the chip to read from, between 0 and 255
-        :param int p: The ID of the processor to read the version from,
+        :param p: The ID of the processor to read the version from,
             between 0 and 31
         :raise SpinnmanInvalidParameterException:
             * If the chip coordinates are out of range

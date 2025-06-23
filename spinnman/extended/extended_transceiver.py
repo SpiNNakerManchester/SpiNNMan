@@ -93,13 +93,12 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         """
         Determines if the board can be contacted via SCAMP
 
-        :param Connection connection:
+        :param connection:
             The connection which is to be tested.  If `None`,
             all Scamp connections will be tested,
             and the board will be considered
             to be connected if any one connection works.
         :return: True if the board can be contacted, False otherwise
-        :rtype: bool
         """
         if connection is not None:
             return connection.is_connected()
@@ -114,11 +113,10 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         .. warning::
             This method is currently deprecated and likely to be removed.
 
-        :param int x: The x-coordinate of the chip containing the processor
-        :param int y: The y-coordinate of the chip containing the processor
-        :param int p: The ID of the processor to get the IOBUF for
+        :param x: The x-coordinate of the chip containing the processor
+        :param y: The y-coordinate of the chip containing the processor
+        :param p: The ID of the processor to get the IOBUF for
         :return: An IOBUF buffer
-        :rtype: IOBuffer
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -149,8 +147,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             This method is currently deprecated and untested as there is no
             known use except for execute, which is itself deprecated.
 
-        :param int x:
-        :param int y:
+        :param x:
+        :param y:
         """
         assert isinstance(self, BaseTransceiver)
         # Check if there is a lock for the given chip
@@ -182,11 +180,11 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         .. warning::
             This method is currently deprecated and likely to be removed.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip on which to run the executable
-        :param int y:
+        :param y:
             The y-coordinate of the chip on which to run the executable
-        :param list(int) processors:
+        :param processors:
             The cores on the chip on which to run the application
         :param executable:
             The data that is to be executed. Should be one of the following:
@@ -195,11 +193,9 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             * A bytearray/bytes
             * A filename of a file containing the executable (in which case
               `is_filename` must be set to True)
-        :type executable:
-            ~io.RawIOBase or bytes or bytearray or str
-        :param int app_id:
-            The ID of the application with which to associate the executable
-        :param int n_bytes:
+        :param app_id:
+            The the application with which to associate the executable
+        :param n_bytes:
             The size of the executable data in bytes. If not specified:
 
             * If executable is an RawIOBase, an error is raised
@@ -207,7 +203,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
               be used
             * If executable is an int, 4 will be used
             * If executable is a str, the length of the file will be used
-        :param bool wait:
+        :param wait:
             True if the binary should enter a "wait" state on loading
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
@@ -246,9 +242,9 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             This will get the binaries into c_main but will not signal the
             barrier.
 
-        :param ExecutableTargets executable_targets:
+        :param executable_targets:
             The binaries to be executed and the cores to execute them on
-        :param int app_id: The app_id to give this application
+        :param app_id: The app_id to give this application
         """
         assert isinstance(self, Transceiver)
         # Execute each of the binaries and get them in to a "wait" state
@@ -286,13 +282,11 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
 
         :param led:
             Number of the LED or an iterable of LEDs to set the state of (0-7)
-        :type led: int or iterable(int)
-        :param LEDAction action:
+        :param action:
             State to set the LED to, either on, off or toggle
         :param board: Specifies the board to control the LEDs of. This may
             also be an iterable of multiple boards. The
             command will actually be sent to the first board in the iterable.
-        :type board: int or iterable(int)
         """
         warn_once(logger, "The set_led method is deprecated and "
                   "untested due to no known use.")
@@ -311,9 +305,8 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             known use. Same functionality provided by ybug and bmpc.
             Retained in case needed for hardware debugging.
 
-        :param int board: which board to request the ADC data from
+        :param board: which board to request the ADC data from
         :return: the FPGA's ADC data object
-        :rtype: ADCInfo
         """
         warn_once(logger, "The read_adc_data method is deprecated and "
                   "untested due to no known use.")
@@ -337,32 +330,30 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         .. warning::
             This method is deprecated and untested due to no known use.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip whose neighbour is to be written to
-        :param int y:
+        :param y:
             The y-coordinate of the chip whose neighbour is to be written to
-        :param int link:
+        :param link:
             The link index to send the request to (or if BMP, the FPGA number)
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
 
             * An instance of RawIOBase
             * A bytearray/bytes
             * A single integer; will be written in little-endian byte order
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int
-        :param int n_bytes:
+        :param n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
             * If `data` is a bytearray, the length of the bytearray will be
               used
             * If `data` is an int, 4 will be used
-        :param int offset:
+        :param offset:
             The offset where the valid data starts (if `data` is
             an int then offset will be ignored and used 0)
-        :param int cpu:
+        :param cpu:
             The CPU to use, typically 0 (or if a BMP, the slot number)
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
@@ -411,19 +402,18 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             known use. Same functionality provided by ybug and bmpc.
             Retained in case needed for hardware debugging.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip whose neighbour is to be read from
-        :param int y:
+        :param y:
             The y-coordinate of the chip whose neighbour is to be read from
-        :param int cpu:
+        :param cpu:
             The CPU to use, typically 0 (or if a BMP, the slot number)
-        :param int link:
+        :param link:
             The link index to send the request to (or if BMP, the FPGA number)
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory to be read starts
-        :param int length: The length of the data to be read in bytes
+        :param length: The length of the data to be read in bytes
         :return: An iterable of chunks of data read in order
-        :rtype: bytes
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -460,7 +450,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         """
         Write to the SDRAM of all chips.
 
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory is to be written
         :param data:
             The data that is to be written.  Should be one of the following:
@@ -470,9 +460,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             * A single integer
             * A file name of a file to read (in which case `is_filename`
               should be set to True)
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int or str
-        :param int n_bytes:
+        :param n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
@@ -480,10 +468,10 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
               will be used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the size of the file will be used
-        :param int offset:
+        :param offset:
             The offset where the valid data starts; if `data` is
             an int, then the offset will be ignored and 0 is used.
-        :param bool is_filename:
+        :param is_filename:
             True if `data` should be interpreted as a file name
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
@@ -533,10 +521,10 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         .. warning::
             The set_leds is deprecated and untested due to no known use.
 
-        :param int x: The x-coordinate of the chip on which to set the LEDs
-        :param int y: The x-coordinate of the chip on which to set the LEDs
-        :param int cpu: The CPU of the chip on which to set the LEDs
-        :param dict(int,int) led_states:
+        :param x: The x-coordinate of the chip on which to set the LEDs
+        :param y: The x-coordinate of the chip on which to set the LEDs
+        :param cpu: The CPU of the chip on which to set the LEDs
+        :param led_states:
             A dictionary mapping SetLED index to state with
             0 being off, 1 on and 2 inverted.
         :raise SpinnmanIOException:
@@ -566,9 +554,9 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         .. warning::
             This method is currently deprecated and likely to be removed.
 
-        :param int x: The x-coordinate of the chip onto which to ask for memory
-        :param int y: The y-coordinate of the chip onto which to ask for memory
-        :param int base_address: The base address of the allocated memory
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :param base_address: The base address of the allocated memory
         """
         assert isinstance(self, Transceiver)
         try:
@@ -590,11 +578,10 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             known use. Same functionality provided by ybug and bmpc.
             Retained in case needed for hardware debugging.
 
-        :param int x: The x-coordinate of the chip onto which to ask for memory
-        :param int y: The y-coordinate of the chip onto which to ask for memory
-        :param int app_id: The app ID of the allocated memory
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :param app_id: The app ID of the allocated memory
         :return: The number of blocks freed
-        :rtype: int
         """
         assert isinstance(self, Transceiver)
         try:
@@ -612,16 +599,15 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         """
         Gets a router diagnostic filter from a router.
 
-        :param int x:
+        :param x:
             the X address of the router from which this filter is being
             retrieved
-        :param int y:
+        :param y:
             the Y address of the router from which this filter is being
             retrieved
-        :param int position:
+        :param position:
             the position in the list of filters to read the information from
         :return: The diagnostic filter read
-        :rtype: DiagnosticFilter
         :raise SpinnmanIOException:
             * If there is an error communicating with the board
             * If there is an error reading the data
@@ -658,8 +644,6 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
 
         .. warning::
             This property is currently deprecated and likely to be removed.
-
-        :rtype: int
         """
         warn_once(logger, "The number_of_boards_located method is deprecated "
                           "and likely to be removed.")
@@ -677,9 +661,9 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         """
         Get the contents of the given heap on a given chip.
 
-        :param int x: The x-coordinate of the chip
-        :param int y: The y-coordinate of the chip
-        :param SystemVariableDefinition heap:
+        :param x: The x-coordinate of the chip
+        :param y: The y-coordinate of the chip
+        :param heap:
             The SystemVariableDefinition which is the heap to read
         """
         assert isinstance(self, Transceiver)
@@ -702,13 +686,12 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             known use. Same functionality provided by ybug and bmpc.
             Retained in case needed for hardware debugging.
 
-        :param int x: chip X coordinate to write new watchdog parameter to
-        :param int y: chip Y coordinate to write new watchdog parameter to
+        :param x: chip X coordinate to write new watchdog parameter to
+        :param y: chip Y coordinate to write new watchdog parameter to
         :param watch_dog:
             Either a Boolean indicating whether to enable (True) or
             disable (False) the watchdog timer, or an int value to set the
             timer count to
-        :type watch_dog: bool or int
         """
         # build what we expect it to be
         warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
@@ -739,7 +722,6 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
             Either a Boolean indicating whether to enable (True) or
             disable (False) the watch dog timer, or an int value to set the
             timer count to.
-        :type watch_dog: bool or int
         """
         warn_once(logger, "The set_watch_dog method is deprecated and "
                           "untested due to no known use.")

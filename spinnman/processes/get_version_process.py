@@ -33,23 +33,19 @@ class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):
     def __init__(self, connection_selector: ConnectionSelector,
                  n_retries: int = N_RETRIES):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector, n_retries)
         self._version_info: Optional[VersionInfo] = None
 
     def _get_response(self, version_response: GetVersionResponse) -> None:
-        """
-        :param GetVersionResponse version_response:
-        """
         self._version_info = version_response.version_info
 
     def get_version(self, x: int, y: int, p: int) -> VersionInfo:
         """
-        :param int x:
-        :param int y:
-        :param int p:
-        :rtype: VersionInfo
+        :param x:
+        :param y:
+        :param p:
         """
         with self._collect_responses():
             self._send_request(GetVersion(x=x, y=y, p=p), self._get_response)

@@ -41,9 +41,9 @@ class HostSendSequencedData(EIEIOCommandMessage):
                  eieio_data_message: AbstractEIEIOMessage):
         """
 
-        :param int region_id:
-        :param int sequence_no:
-        :param AbstractEIEIOMessage eieio_data_message:
+        :param region_id:
+        :param sequence_no:
+        :param eieio_data_message:
         """
         super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.HOST_SEND_SEQUENCED_DATA))
@@ -53,29 +53,17 @@ class HostSendSequencedData(EIEIOCommandMessage):
 
     @property
     def region_id(self) -> int:
-        """
-        The region_id passed into the init.
-
-        :rtype: int
-        """
+        """ The region_id passed into the init. """
         return self._region_id
 
     @property
     def sequence_no(self) -> int:
-        """
-        The sequence_no passed into the init.
-
-        :rtype: int
-        """
+        """ The sequence_no passed into the init. """
         return self._sequence_no
 
     @property
     def eieio_data_message(self) -> AbstractEIEIOMessage:
-        """
-        The eieio_data_message passed into the init.
-
-        :return: AbstractEIEIOMessage
-        """
+        """ The eieio_data_message passed into the init. """
         return self._eieio_data_message
 
     @staticmethod

@@ -44,14 +44,11 @@ class HostDataRead(EIEIOCommandMessage):
             space_read: Union[List[int], int]):
         """
 
-        :param int n_requests:
-        :param int sequence_no:
+        :param n_requests:
+        :param sequence_no:
         :param channel:
-        :type channel: list(int) or int
         :param region_id:
-        :type region_id: list(int) or int
         :param space_read:
-        :type space_read: list(int) or int
         """
         # pylint: disable=too-many-arguments
         if not isinstance(channel, list):
@@ -79,27 +76,20 @@ class HostDataRead(EIEIOCommandMessage):
     @property
     def n_requests(self) -> int:
         """
-        Gets the n_requests passed into the init.
-
-        :rtype: int
-        """
+        Gets the n_requests passed into the init. """
         return self._header.n_requests
 
     @property
     def sequence_no(self) -> int:
         """
-        Gets the sequence_no passed into the init.
-
-        :rtype: int
-        """
+        Gets the sequence_no passed into the init. """
         return self._header.sequence_no
 
     def channel(self, ack_id: int) -> int:
         """
         Gets the channel value for this ack_id.
 
-        :param int ack_id:
-        :rtype: int
+        :param ack_id:
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -109,8 +99,7 @@ class HostDataRead(EIEIOCommandMessage):
         """
         Gets the region_id value for this ack_id.
 
-        :param int ack_id:
-        :rtype: int
+        :param ack_id:
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -120,8 +109,7 @@ class HostDataRead(EIEIOCommandMessage):
         """
         Gets the space_read value for this ack_id.
 
-        :param int ack_id:
-        :rtype: int
+        :param ack_id:
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -178,28 +166,20 @@ class _HostDataReadHeader(object):
     def __init__(self, n_requests: int, sequence_no: int):
         """
 
-        :param int n_requests:
-        :param int sequence_no:
+        :param n_requests:
+        :param sequence_no:
         """
         self._n_requests = n_requests
         self._sequence_no = sequence_no
 
     @property
     def sequence_no(self) -> int:
-        """
-        Gets the sequence_no passed into the init.
-
-        :rtype: int
-        """
+        """ Gets the sequence_no passed into the init."""
         return self._sequence_no
 
     @property
     def n_requests(self) -> int:
-        """
-        Gets the n_requests passed into the init.
-
-        :rtype: int
-        """
+        """ Gets the n_requests passed into the init. """
         return self._n_requests
 
 
@@ -218,11 +198,8 @@ class _HostDataReadAck(object):
         """
 
         :param channel:
-        :type channel: list(int) or int
         :param region_id:
-        :type region_id: list(int) or int
         :param space_read:
-        :type space_read: list(int) or int
         """
         if not isinstance(channel, list):
             self._channel = [channel]
@@ -243,8 +220,7 @@ class _HostDataReadAck(object):
         """
         Gets the channel value for this ack_id.
 
-        :param int ack_id:
-        :rtype: int
+        :param ack_id:
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -259,8 +235,7 @@ class _HostDataReadAck(object):
         """
         Gets the region_id value for this ack_id.
 
-        :param int ack_id:
-        :rtype: int
+        :param ack_id:
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -275,8 +250,7 @@ class _HostDataReadAck(object):
         """
         Gets the space_read value for this ack_id.
 
-        :param int ack_id:
-        :rtype: int
+        :param ack_id:
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """

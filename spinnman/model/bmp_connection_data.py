@@ -33,8 +33,6 @@ class BMPConnectionData(object):
     def ip_address(self) -> str:
         """
         The IP address of the BMP.
-
-        :rtype: str
         """
         return self._ip_address
 
@@ -42,8 +40,6 @@ class BMPConnectionData(object):
     def boards(self) -> Sequence[int]:
         """
         The boards to be addressed.
-
-        :rtype: iterable(int)
         """
         return self._boards
 
@@ -51,8 +47,6 @@ class BMPConnectionData(object):
     def port_num(self) -> Optional[int]:
         """
         The port number associated with this BMP connection.
-
-        :return: The port number
         """
         return self._port_num
 
