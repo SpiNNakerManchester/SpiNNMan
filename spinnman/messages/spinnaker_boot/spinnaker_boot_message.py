@@ -38,13 +38,12 @@ class SpinnakerBootMessage(object):
                  operand_1: int, operand_2: int, operand_3: int,
                  data: Optional[bytes] = None, offset: int = 0):
         """
-        :param SpinnakerBootOpCode opcode: The operation of this packet
-        :param int operand_1: The first operand
-        :param int operand_2: The second operand
-        :param int operand_3: The third operand
+        :param opcode: The operation of this packet
+        :param operand_1: The first operand
+        :param operand_2: The second operand
+        :param operand_3: The third operand
         :param data: The optional data, up to 256 words
-        :type data: bytes or bytearray
-        :param int offset: The offset of the valid data
+        :param offset: The offset of the valid data
         :raise SpinnmanInvalidParameterException:
             If the opcode is not a valid value
         """
@@ -62,56 +61,32 @@ class SpinnakerBootMessage(object):
 
     @property
     def opcode(self) -> SpinnakerBootOpCode:
-        """
-        The operation of this packet.
-
-        :rtype: SpinnakerBootOpCode
-        """
+        """ The operation of this packet. """
         return self._opcode
 
     @property
     def operand_1(self) -> int:
-        """
-        The first operand.
-
-        :rtype: int
-        """
+        """ The first operand. """
         return self._operand_1
 
     @property
     def operand_2(self) -> int:
-        """
-        The second operand.
-
-        :rtype: int
-        """
+        """ The second operand. """
         return self._operand_2
 
     @property
     def operand_3(self) -> int:
-        """
-        The third operand.
-
-        :rtype: int
-        """
+        """ The third operand. """
         return self._operand_3
 
     @property
     def data(self) -> Optional[bytes]:
-        """
-        The data, or `None` if no data.
-
-        :rtype: bytes or bytearray
-        """
+        """ The data, or `None` if no data. """
         return self._data
 
     @property
     def bytestring(self) -> bytes:
-        """
-        The message as a byte-string.
-
-        :rtype: bytes
-        """
+        """ The message as a byte-string. """
         data = b""
         if self._data is not None:
             data = self._data[self._offset:]
@@ -122,9 +97,8 @@ class SpinnakerBootMessage(object):
     @staticmethod
     def from_bytestring(data: bytes, offset: int) -> 'SpinnakerBootMessage':
         """
-        :param bytes data:
-        :param int offset:
-        :rtype: SpinnakerBootMessage
+        :param data:
+        :param offset:
         """
         (opcode_value, operand_1, operand_2, operand_3) = \
             _PATTERN_2xIIII.unpack_from(data, offset)

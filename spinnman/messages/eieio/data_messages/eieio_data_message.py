@@ -45,9 +45,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     def __init__(self, eieio_header: EIEIODataHeader,
                  data: Optional[bytes] = None, offset: int = 0):
         """
-        :param EIEIODataHeader eieio_header: The header of the message
-        :param bytes data: Optional data contained within the packet
-        :param int offset: Optional offset where the valid data starts
+        :param eieio_header: The header of the message
+        :param data: Optional data contained within the packet
+        :param offset: Optional offset where the valid data starts
         """
         # The header
         self._header = eieio_header
@@ -72,15 +72,15 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         Create a data message.
 
-        :param EIEIOType eieio_type: The type of the message
-        :param int count: The number of items in the message
-        :param bytes data: The data in the message
-        :param int offset:
+        :param eieio_type: The type of the message
+        :param count: The number of items in the message
+        :param data: The data in the message
+        :param offset:
             The offset in the data where the actual data starts
-        :param int key_prefix: The prefix of the keys
-        :param int payload_prefix: The prefix of the payload
-        :param int timestamp: The timestamp of the packet
-        :param EIEIOPrefix prefix_type: The type of the key prefix if 16-bits
+        :param key_prefix: The prefix of the keys
+        :param payload_prefix: The prefix of the payload
+        :param timestamp: The timestamp of the packet
+        :param prefix_type: The type of the key prefix if 16-bits
         """
         payload_base = payload_prefix
         if timestamp is not None:
@@ -95,9 +95,6 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     @property
     @overrides(AbstractEIEIOMessage.eieio_header)
     def eieio_header(self) -> EIEIODataHeader:
-        """
-        :rtype: EIEIODataHeader
-        """
         return self._header
 
     @staticmethod
@@ -107,25 +104,20 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         The minimum length of a message with the given header, in bytes.
 
-        :param EIEIOType eieio_type: the type of message
-        :param bool is_prefix: True if there is a prefix, False otherwise
-        :param bool is_payload_base:
+        :param eieio_type: the type of message
+        :param is_prefix: True if there is a prefix, False otherwise
+        :param is_payload_base:
             True if there is a payload base, False otherwise
-        :param bool is_timestamp:
+        :param is_timestamp:
             True if there is a timestamp, False otherwise
         :return: The minimum size of the packet in bytes
-        :rtype: int
         """
         header_size = EIEIODataHeader.get_header_size(
             eieio_type, is_prefix, is_payload_base | is_timestamp)
         return header_size + eieio_type.payload_bytes
 
     def get_min_packet_length(self) -> int:
-        """
-        Get the minimum length of a message instance in bytes.
-
-        :rtype: int
-        """
+        """ Get the minimum length of a message instance in bytes. """
         return self.min_packet_length(
             eieio_type=self._header.eieio_type,
             is_prefix=self._header.prefix is not None,
@@ -133,31 +125,19 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def max_n_elements(self) -> int:
-        """
-        The maximum number of elements that can fit in the packet.
-
-        :rtype: int
-        """
+        """ The maximum number of elements that can fit in the packet. """
         ty = self._header.eieio_type
         return (UDP_MESSAGE_MAX_SIZE - self._header.size) // (
             ty.key_bytes + ty.payload_bytes)
 
     @property
     def n_elements(self) -> int:
-        """
-        The number of elements in the packet.
-
-        :rtype: int
-        """
+        """ The number of elements in the packet. """
         return self._header.count
 
     @property
     def size(self) -> int:
-        """
-        The size of the packet with the current contents.
-
-        :rtype: int
-        """
+        """ The size of the packet with the current contents. """
         ty = self._header.eieio_type
         return (self._header.size +
                 (ty.key_bytes + ty.payload_bytes) * self._header.count)
@@ -166,8 +146,8 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         Adds a key and payload to the packet.
 
-        :param int key: The key to add
-        :param int payload: The payload to add
+        :param key: The key to add
+        :param payload: The payload to add
         :raise SpinnmanInvalidParameterException:
             If the key or payload is too big for the format, or the format
             doesn't expect a payload
@@ -188,7 +168,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         Add a key to the packet.
 
-        :param int key: The key to add
+        :param key: The key to add
         :raise SpinnmanInvalidParameterException:
             If the key is too big for the format, or the format expects a
             payload
@@ -204,7 +184,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         Add an element to the message.  The correct type of element must
         be added, depending on the header values.
 
-        :param AbstractDataElement element: The element to be added
+        :param element: The element to be added
         :raise SpinnmanInvalidParameterException:
             If the element is not compatible with the header
         :raise SpinnmanInvalidPacketException:
@@ -219,11 +199,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
 
     @property
     def is_next_element(self) -> bool:
-        """
-        Whether there is another element to be read.
-
-        :rtype: bool
-        """
+        """ Whether there is another element to be read. """
         return (self._data is not None and
                 self._elements_read < self._header.count)
 
@@ -232,8 +208,6 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         """
         The next element to be read, or `None` if no more elements.
         The exact type of element returned depends on the packet type.
-
-        :rtype: AbstractDataElement
         """
         if not self.is_next_element:
             return None

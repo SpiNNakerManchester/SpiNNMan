@@ -47,8 +47,6 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
         Gets the database path passed into the init.
 
         The path is encoded by the init and decode back to a str here.
-
-        :rtype: str
         """
         if self._database_path is not None:
             return self._database_path.decode()

@@ -35,7 +35,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
         self.__cpu_infos = CPUInfos()
@@ -55,8 +55,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
 
     def get_cpu_info(self, core_subsets: CoreSubsets) -> CPUInfos:
         """
-        :param ~spinn_machine.CoreSubsets core_subsets:
-        :rtype: CPUInfos
+        :param core_subsets:
         """
         with self._collect_responses():
             for core_subset in core_subsets:

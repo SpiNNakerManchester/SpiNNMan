@@ -30,10 +30,10 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
     def __init__(self, eieio_command_header: EIEIOCommandHeader,
                  data: Optional[bytes] = None, offset: int = 0):
         """
-        :param EIEIOCommandHeader eieio_command_header:
+        :param eieio_command_header:
             The header of the message
-        :param bytes data: Optional incoming data
-        :param int offset: Offset into the data where valid data begins
+        :param data: Optional incoming data
+        :param offset: Offset into the data where valid data begins
         """
         # The header
         self._eieio_command_header = eieio_command_header
@@ -45,29 +45,17 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
     @property
     @overrides(AbstractEIEIOMessage.eieio_header)
     def eieio_header(self) -> EIEIOCommandHeader:
-        """
-        Gets the eieio_header passed into the init.
-
-        :rtype: EIEIOCommandHeader
-        """
+        """ Gets the eieio_header passed into the init. """
         return self._eieio_command_header
 
     @property
     def data(self) -> Optional[bytes]:
-        """
-        Gets the data passed into the init (if applicable).
-
-        :rtype: bytes or None
-        """
+        """ Gets the data passed into the init (if applicable). """
         return self._data
 
     @property
     def offset(self) -> int:
-        """
-        Gets the offset passed into the init
-
-        :rtype: int
-        """
+        """ Gets the offset passed into the init """
         return self._offset
 
     @staticmethod
@@ -76,10 +64,9 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         """
         Creates an EIEIOCommandMessage based on the supplied information.
 
-        :param EIEIOCommandHeader command_header:
-        :param bytes data:
-        :param int offset:
-        :rtype: EIEIOCommandMessage
+        :param command_header:
+        :param data:
+        :param offset:
         """
         return EIEIOCommandMessage(command_header, data, offset)
 
@@ -87,18 +74,12 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
     def bytestring(self) -> bytes:
         """
         The eieio_command_header passed into the init as a byte string.
-
-        :rtype: bytes
         """
         return self._eieio_command_header.bytestring
 
     @staticmethod
     def get_min_packet_length() -> int:
-        """
-        Gets the min packet length for this type.
-
-        :rtype: int
-        """
+        """ Gets the min packet length for this type.  """
         return 2
 
     def __str__(self) -> str:

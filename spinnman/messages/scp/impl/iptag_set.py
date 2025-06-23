@@ -34,14 +34,13 @@ class IPTagSet(AbstractSCPRequest[CheckOKResponse]):
                  port: int, tag: int, *,
                  strip: bool = False, use_sender: bool = False):
         """
-        :param int x: The x-coordinate of a chip, between 0 and 255
-        :param int y: The y-coordinate of a chip, between 0 and 255
+        :param x: The x-coordinate of a chip, between 0 and 255
+        :param y: The y-coordinate of a chip, between 0 and 255
         :param host: The host address, as an array of 4 bytes
-        :type host: bytearray or list(int)
-        :param int port: The port, between 0 and 65535
-        :param int tag: The tag, between 0 and 7
-        :param bool strip: if the SDP header should be striped from the packet
-        :param bool use_sender:
+        :param port: The port, between 0 and 65535
+        :param tag: The tag, between 0 and 7
+        :param strip: if the SDP header should be striped from the packet
+        :param use_sender:
             if the sender IP address and port should be used
         """
         strip_value = int(bool(strip))

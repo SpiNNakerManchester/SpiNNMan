@@ -21,11 +21,10 @@ def read_eieio_data_message(data: bytes, offset: int) -> EIEIODataMessage:
     Reads the content of an EIEIO data message and returns an object
     identifying the data which was contained in the packet.
 
-    :param bytes data: data received from the network as a byte-string
-    :param int offset: offset at which the parsing operation should start
+    :param data: data received from the network as a byte-string
+    :param offset: offset at which the parsing operation should start
     :return: an object which inherits from EIEIODataMessage which contains
         parsed data received from the network
-    :rtype: EIEIODataMessage
     """
     eieio_header = EIEIODataHeader.from_bytestring(data, offset)
     offset += eieio_header.size

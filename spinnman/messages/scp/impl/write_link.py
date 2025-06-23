@@ -30,14 +30,14 @@ class WriteLink(AbstractSCPRequest[CheckOKResponse]):
     def __init__(
             self, coordinates: XYP, link: int, base_address: int, data: bytes):
         """
-        :param tuple(int,int,int) coordinates:
+        :param coordinates:
             The coordinates of the core of the chip whose neighbour will be
             written to; X and Y between 0 and 255,
             CPU core normally 0 (or if a BMP then the board slot number)
-        :param int link: The link number to write to between 0 and 5
+        :param link: The link number to write to between 0 and 5
             (or if a BMP, the FPGA between 0 and 2)
-        :param int base_address: The base_address to start writing to
-        :param bytes data: Up to 256 bytes of data to write
+        :param base_address: The base_address to start writing to
+        :param data: Up to 256 bytes of data to write
         """
         x, y, cpu = coordinates
         super().__init__(

@@ -37,7 +37,7 @@ _debug_pretty_print = False
 def _may_renew(method: Callable) -> Callable:
     def pp_req(request: requests.PreparedRequest) -> None:
         """
-        :param ~requests.PreparedRequest request:
+        :param request:
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
         print(f"{request.method} {request.url}")
@@ -48,7 +48,7 @@ def _may_renew(method: Callable) -> Callable:
 
     def pp_resp(response: requests.Response) -> None:
         """
-        :param ~requests.Response response:
+        :param response:
         """
         print("<<<<<<<<<<<START<<<<<<<<<<<")
         print(f"{response.status_code} {response.reason}")
@@ -94,11 +94,11 @@ class Session:
             session_credentials: Optional[
                 Tuple[Dict[str, str], Dict[str, str]]] = None):
         """
-        :param str service_url: The reference to the service.
+        :param service_url: The reference to the service.
             *Should not* include a username or password in it.
-        :param str username: The user name to use
-        :param str password: The password to use
-        :param str token: The bearer token to use
+        :param username: The user name to use
+        :param password: The password to use
+        :param token: The bearer token to use
         """
         url = clean_url(service_url)
         self.__login_form_url = url + "system/login.html"
@@ -135,9 +135,8 @@ class Session:
         """
         Do an HTTP ``GET`` in the session.
 
-        :param str url:
-        :param int timeout:
-        :rtype: ~requests.Response
+        :param url:
+        :param timeout:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -154,10 +153,9 @@ class Session:
         """
         Do an HTTP ``POST`` in the session.
 
-        :param str url:
-        :param int timeout:
-        :param dict json_dict:
-        :rtype: ~requests.Response
+        :param url:
+        :param timeout:
+        :param json_dict:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -174,10 +172,9 @@ class Session:
         """
         Do an HTTP ``POST`` in the session. Posts raw data!
 
-        :param str url:
-        :param bytes data:
-        :param int timeout:
-        :rtype: ~requests.Response
+        :param url:
+        :param data:
+        :param timeout:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -195,10 +192,9 @@ class Session:
         """
         Do an HTTP ``PUT`` in the session. Puts plain text *OR* JSON!
 
-        :param str url:
-        :param str data:
-        :param int timeout:
-        :rtype: ~requests.Response
+        :param url:
+        :param data:
+        :param timeout:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -217,8 +213,7 @@ class Session:
         """
         Do an HTTP ``DELETE`` in the session.
 
-        :param str url:
-        :rtype: ~requests.Response
+        :param url:
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -235,7 +230,6 @@ class Session:
         operations can be performed.
 
         :returns: Description of the root of the service, without CSRF data
-        :rtype: dict
         :raises SpallocException:
             If the session cannot be renewed.
         """
@@ -325,12 +319,11 @@ class Session:
         Create a websocket that uses the session credentials to establish
         itself.
 
-        :param str url: Actual location to open websocket at
-        :param dict(str,str) header: Optional HTTP headers
-        :param str cookie:
+        :param url: Actual location to open websocket at
+        :param header: Optional HTTP headers
+        :param cookie:
             Optional cookies (composed as semicolon-separated string)
         :param kwargs: Other options to :py:func:`~websocket.create_connection`
-        :rtype: ~websocket.WebSocket
         """
         # Note: *NOT* a renewable action!
         if header is None:
@@ -373,8 +366,6 @@ class SessionAware:
         """
         The current session credentials.
         Only supposed to be called by subclasses.
-
-        :rtype: tuple(dict(str,str),dict(str,str))
         """
         # pylint: disable=protected-access
         return self.__session._credentials
@@ -383,8 +374,6 @@ class SessionAware:
     def _service_url(self) -> str:
         """
         The main service URL.
-
-        :rtype: str
         """
         # pylint: disable=protected-access
         return self.__session._service_url
@@ -411,7 +400,6 @@ class SessionAware:
         Create a websocket that uses the session credentials to establish
         itself.
 
-        :param str url: Actual location to open websocket at
-        :rtype: ~websocket.WebSocket
+        :param url: Actual location to open websocket at
         """
         return self.__session.websocket(url, **kwargs)

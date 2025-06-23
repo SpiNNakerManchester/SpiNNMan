@@ -47,8 +47,8 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
     def __init__(self, connection_selector: ConnectionSelector,
                  app_id: Optional[int] = None):
         """
-        :param ConnectionSelector connection_selector:
-        :param int app_id:
+        :param connection_selector:
+        :param app_id:
         """
         super().__init__(connection_selector)
         self._entries: List[Optional[MulticastRoutingEntry]] = \
@@ -76,10 +76,9 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
     def get_routes(self, x: int, y: int,
                    base_address: int) -> List[MulticastRoutingEntry]:
         """
-        :param int x:
-        :param int y:
-        :param int base_address:
-        :rtype: list(~spinn_machine.MulticastRoutingEntry)
+        :param x:
+        :param y:
+        :param base_address:
         """
         # Create the read requests
         offset = 0

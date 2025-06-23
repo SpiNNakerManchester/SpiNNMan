@@ -37,7 +37,6 @@ class ConnectionSelector(Generic[Conn], metaclass=AbstractBase):
         Get the index of the  next connection for the process from a list
         of connections.
 
-        :param AbstractSCPRequest message: The SCP message to be sent
-        :rtype: SCAMPConnection
+        :param message: The SCP message to be sent
         """
         raise NotImplementedError

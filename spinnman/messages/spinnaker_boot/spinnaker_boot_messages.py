@@ -52,7 +52,6 @@ class SpinnakerBootMessages(object):
             This should only be used for values which are not standard
             based on the board version.
             for example this may include an Led_0 value.
-        :type extra_boot_values: dict(SystemVariableDefinition, object)
         :raise SpinnmanInvalidParameterException:
             If the board version is not supported
         :raise SpinnmanIOException:
@@ -108,7 +107,7 @@ class SpinnakerBootMessages(object):
     @staticmethod
     def _get_boot_image_file() -> Tuple[str, int]:
         """
-        :rtype: tuple(str,int)
+        The name and size of the boot file
         """
         this_dir, _ = os.path.split(__file__)
         file_name = os.path.join(this_dir, "boot_data", _BOOT_DATA_FILE_NAME)
@@ -127,8 +126,7 @@ class SpinnakerBootMessages(object):
         """
         Read a packet of data.
 
-        :param int block_id:
-        :rtype: bytes
+        :param block_id:
         """
         offset = block_id * _BOOT_MESSAGE_DATA_BYTES
         n_bytes = min(self._n_bytes_to_read - offset, _BOOT_MESSAGE_DATA_BYTES)
@@ -138,8 +136,6 @@ class SpinnakerBootMessages(object):
     def messages(self) -> Iterable[SpinnakerBootMessage]:
         """
         An iterable of message to be sent.
-
-        :rtype: iterable(SpinnakerBootMessage)
         """
         # Construct and yield the start packet
         yield SpinnakerBootMessage(

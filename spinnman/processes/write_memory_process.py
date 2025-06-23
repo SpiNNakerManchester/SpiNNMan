@@ -38,16 +38,14 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         Writes memory onto a SpiNNaker chip from a bytearray.
 
-        :param tuple(int,int,int) coordinates:
+        :param coordinates:
             The X,Y,P coordinates of the core that will write to memory.
-        :param int base_address: the address in SDRAM to start writing
+        :param base_address: the address in SDRAM to start writing
         :param data: the data to write
-        :type data: bytearray or bytes
-        :param int offset: where in the data to start writing from
-        :param int n_bytes: how much data to write
-        :param bool get_sum: whether to return a checksum or 0
+        :param offset: where in the data to start writing from
+        :param n_bytes: how much data to write
+        :param get_sum: whether to return a checksum or 0
         :return: the data checksum or 0 if get_sum is False
-        :rtype: int
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
@@ -59,19 +57,17 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         Writes memory onto a neighbour of a SpiNNaker chip from a bytearray.
 
-        :param tuple(int,int,int) coordinates:
+        :param coordinates:
             The X,Y,P coordinates of the core that will write to its
             neighbour's memory.
-        :param int link:
+        :param link:
             Along which link is the neighbour.
-        :param int base_address: the address in SDRAM to start writing
+        :param base_address: the address in SDRAM to start writing
         :param data: the data to write
-        :type data: bytearray or bytes
-        :param int offset: where in the data to start writing from
-        :param int n_bytes: how much data to write
-        :param bool get_sum: whether to return a checksum or 0
+        :param offset: where in the data to start writing from
+        :param n_bytes: how much data to write
+        :param get_sum: whether to return a checksum or 0
         :return: the data checksum or 0 if get_sum is False
-        :rtype: int
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
@@ -83,15 +79,13 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         Writes memory onto a SpiNNaker chip from a reader.
 
-        :param tuple(int,int,int) coordinates:
+        :param coordinates:
             The X,Y,P coordinates of the core that will write to memory.
-        :param int base_address: the address in SDRAM to start writing
+        :param base_address: the address in SDRAM to start writing
         :param reader: the readable object containing the data to write
-        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
-        :param int n_bytes: how much data to write
-        :param bool get_sum: whether to return a checksum or 0
+        :param n_bytes: how much data to write
+        :param get_sum: whether to return a checksum or 0
         :return: the data checksum or 0 if get_sum is False
-        :rtype: int
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,
@@ -103,19 +97,17 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         Writes memory onto a neighbour of a SpiNNaker chip from a reader.
 
-        :param tuple(int,int,int) coordinates:
+        :param coordinates:
             The X,Y,P coordinates of the core that will write to its
             neighbour's memory. The P coordinate is normally 0; no reason to
             not use SCAMP for this.
-        :param int link:
+        :param link:
             Along which link is the neighbour.
-        :param int base_address: the address in SDRAM to start writing
+        :param base_address: the address in SDRAM to start writing
         :param reader: the readable object containing the data to write
-        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
-        :param int n_bytes: how much data to write
-        :param bool get_sum: whether to return a checksum or 0
+        :param n_bytes: how much data to write
+        :param get_sum: whether to return a checksum or 0
         :return: the data checksum or 0 if get_sum is False
-        :rtype: int
         """
         return self._write_memory_from_reader(
             base_address, reader, n_bytes,

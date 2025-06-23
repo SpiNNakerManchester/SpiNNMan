@@ -53,27 +53,17 @@ class EIEIOType(Enum):
 
     @property
     def key_bytes(self) -> int:
-        """
-        The number of bytes used by each key element.
-
-        :rtype: int
-        """
+        """ The number of bytes used by each key element. """
         return self._key_bytes
 
     @property
     def payload_bytes(self) -> int:
-        """
-        The number of bytes used by each payload element.
-
-        :rtype: int
-        """
+        """ The number of bytes used by each payload element. """
         return self._payload_bytes
 
     @property
     def max_value(self) -> int:
         """
         The maximum value of the key or payload (if there is a payload).
-
-        :rtype: int
         """
         return (1 << (self._key_bytes * 8)) - 1

@@ -40,9 +40,8 @@ class Listenable(Generic[T], metaclass=AbstractBase):
         """
         Determines if there is an SCP packet to be read without blocking.
 
-        :param int timeout:
+        :param timeout:
             The time to wait before returning if the connection is not ready
         :return: True if there is an SCP packet to be read
-        :rtype: bool
         """
         raise NotImplementedError
