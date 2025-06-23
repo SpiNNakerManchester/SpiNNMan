@@ -28,9 +28,8 @@ class AbstractDataElement(object, metaclass=AbstractBase):
         """
         Get a byte-string for the given type
 
-        :param EIEIOType eieio_type: The type of the message being written
+        :param eieio_type: The type of the message being written
         :return: A byte-string for the element
-        :rtype: bytes
         :raise SpinnmanInvalidParameterException:
             If the type is incompatible with the element
         """

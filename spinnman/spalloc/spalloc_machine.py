@@ -79,7 +79,6 @@ class SpallocMachine(object, metaclass=AbstractBase):
         Area of machine, in boards.
 
         :return: width, height
-        :rtype: tuple(int,int)
         """
         raise NotImplementedError
 

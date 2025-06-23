@@ -30,9 +30,8 @@ def work_out_bmp_from_machine_details(
     from the final part e.g. if the machine IP address is 192.168.0.5, the
     BMP IP address is assumed to be 192.168.0.4
 
-    :param str hostname: the SpiNNaker machine main hostname or IP address
+    :param hostname: the SpiNNaker machine main hostname or IP address
     :return: The BMP connection data
-    :rtype: BMPConnectionData
     """
     # take the IP address, split by dots, and subtract 1 off last bit
     ip_bits = socket.gethostbyname(hostname).split(".")
@@ -53,8 +52,7 @@ def get_vcpu_address(p: int) -> int:
     """
     Get the address of the vcpu_t structure for the given core.
 
-    :param int p: The core
-    :rtype: int
+    :param p: The core
     """
     return CPU_INFO_OFFSET + (CPU_INFO_BYTES * p)
 
@@ -65,9 +63,9 @@ def send_port_trigger_message(
     Sends a port trigger message using a connection to (hopefully) open a
     port in a NAT and/or firewall to allow incoming packets to be received.
 
-    :param UDPConnection connection:
+    :param connection:
         The UDP connection down which the trigger message should be sent
-    :param str board_address:
+    :param board_address:
         The IP address of the SpiNNaker board to which the message should be
         sent
     """
@@ -89,9 +87,9 @@ def reprogram_tag(
     """
     Reprogram an IP Tag to send responses to a given SCAMPConnection.
 
-    :param SCAMPConnection connection: The connection to target the tag at
-    :param int tag: The id of the tag to set
-    :param bool strip:
+    :param connection: The connection to target the tag at
+    :param tag: The id of the tag to set
+    :param strip:
         True if the tag should strip SDP headers from outgoing messages
     :raises SpinnmanTimeoutException:
         If things time out several times
@@ -121,20 +119,20 @@ def reprogram_tag_to_listener(
     not connected to a specific board. Such connections are normally
     receive-only connections.
 
-    :param UDPConnection connection: The connection to target the tag at
-    :param int x:
+    :param connection: The connection to target the tag at
+    :param x:
         The X coordinate of the Ethernet-enabled chip that should send to the
         connection
-    :param int y:
+    :param y:
         The Y coordinate of the Ethernet-enabled chip that should send to the
         connection
-    :param str ip_address:
+    :param ip_address:
         The IP address of the Ethernet-enabled chip that should be given the
         message
-    :param int tag: The id of the tag to set
-    :param bool strip:
+    :param tag: The id of the tag to set
+    :param strip:
         True if the tag should strip SDP headers from outgoing messages
-    :param bool read_response:
+    :param read_response:
         True if the response to the reprogramming should be read
     :raises SpinnmanTimeoutException:
         If things time out several times

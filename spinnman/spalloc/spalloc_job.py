@@ -42,9 +42,7 @@ class SpallocJob(AbstractContextManager):
         """
         Get the current state of the machine.
 
-        :param bool wait_for_change: Whether to wait for a change in state
-
-        :rtype: SpallocState
+        :param wait_for_change: Whether to wait for a change in state
         """
         raise NotImplementedError()
 
@@ -54,7 +52,6 @@ class SpallocJob(AbstractContextManager):
         Get the IP address for talking to the machine.
 
         :return: The IP address, or ``None`` if not allocated.
-        :rtype: str or None
         """
         raise NotImplementedError()
 
@@ -64,7 +61,6 @@ class SpallocJob(AbstractContextManager):
         Get the mapping from board coordinates to IP addresses.
 
         :return: (x,y)->IP mapping, or ``None`` if not allocated
-        :rtype: dict(tuple(int,int), str) or None
         """
         raise NotImplementedError()
 
@@ -75,11 +71,10 @@ class SpallocJob(AbstractContextManager):
         """
         Open a connection to a particular board in the job.
 
-        :param int x: X coordinate of the board's Ethernet-enabled chip
-        :param int y: Y coordinate of the board's Ethernet-enabled chip
-        :param int port: UDP port to talk to; defaults to the SCP port
+        :param x: X coordinate of the board's Ethernet-enabled chip
+        :param y: Y coordinate of the board's Ethernet-enabled chip
+        :param port: UDP port to talk to; defaults to the SCP port
         :return: A connection that talks to the board.
-        :rtype: SpallocProxiedConnection
         """
         raise NotImplementedError()
 
@@ -89,7 +84,6 @@ class SpallocJob(AbstractContextManager):
         Open a connection to a job's allocation so it can be booted.
 
         :return: a boot connection
-        :rtype: SpallocBootConnection
         """
         raise NotImplementedError()
 
@@ -98,12 +92,11 @@ class SpallocJob(AbstractContextManager):
         """
         Open an EIEIO connection to a specific board in a job.
 
-        :param int x:
+        :param x:
             The X coordinate of the Ethernet-enabled chip to connect to
-        :param int y:
+        :param y:
             The Y coordinate of the Ethernet-enabled chip to connect to
         :return: an EIEIO connection with a board address bound
-        :rtype: SpallocEIEIOConnection
         """
         raise NotImplementedError()
 
@@ -116,7 +109,6 @@ class SpallocJob(AbstractContextManager):
         side connection information so you can program that into a tag.
 
         :return: an EIEIO connection with no board address bound
-        :rtype: SpallocEIEIOListener
         """
         raise NotImplementedError()
 
@@ -129,7 +121,6 @@ class SpallocJob(AbstractContextManager):
         side connection information so you can program that into a tag.
 
         :return: a UDP connection with no board address bound
-        :rtype: UDPConnection
         """
         raise NotImplementedError()
 
@@ -138,8 +129,6 @@ class SpallocJob(AbstractContextManager):
         """
         Create a transceiver that will talk to this job. The transceiver will
         only be configured to talk to the SCP ports of the boards of the job.
-
-        :rtype: Transceiver
         """
         raise NotImplementedError()
 
@@ -149,16 +138,14 @@ class SpallocJob(AbstractContextManager):
         """
         Wait until the allocation is not in the given old state.
 
-        :param SpallocState old_state:
+        :param old_state:
             The state that we are looking to change out of.
         :param timeout:
             The time to wait, or None to wait forever
-        :type timeout: int or None
         :return: The state that the allocation is now in.
 
             .. note::
                 If the machine gets destroyed, this will not wait for it.
-        :rtype: SpallocState
         """
         raise NotImplementedError()
 
@@ -169,10 +156,8 @@ class SpallocJob(AbstractContextManager):
         Wait until the allocation is in the ``READY`` state.
 
         :param timeout: The timeout or None to wait forever
-        :type timeout: int or None
         :param n_retries:
             The number of times to retry, or None to retry forever
-        :type n_retries: int or None
         :raises Exception: If the allocation is destroyed
         """
         raise NotImplementedError()
@@ -182,7 +167,7 @@ class SpallocJob(AbstractContextManager):
         """
         Destroy the job.
 
-        :param str reason: Why the job is being destroyed.
+        :param reason: Why the job is being destroyed.
         """
         raise NotImplementedError()
 
@@ -192,12 +177,11 @@ class SpallocJob(AbstractContextManager):
         """
         Get the *physical* coordinates of the board hosting the given chip.
 
-        :param int x: Chip X coordinate
-        :param int y: Chip Y coordinate
+        :param x: Chip X coordinate
+        :param y: Chip Y coordinate
         :return: physical board coordinates (cabinet, frame, board), or
             ``None`` if there are no boards currently allocated to the job or
             the chip lies outside the allocation.
-        :rtype: tuple(int,int,int) or None
         """
         raise NotImplementedError()
 
@@ -217,10 +201,10 @@ class SpallocJob(AbstractContextManager):
         """
         Write data to a given address on a given chip of the job.
 
-        :param int x: The X coordinate of the chip
-        :param int y: The Y coordinate of the chip
-        :param int address: The address to write to
-        :param bytes data: The data to write
+        :param x: The X coordinate of the chip
+        :param y: The Y coordinate of the chip
+        :param address: The address to write to
+        :param data: The data to write
         """
         raise NotImplementedError()
 
@@ -229,10 +213,10 @@ class SpallocJob(AbstractContextManager):
         """
         Write data to a given address on a given chip of the job.
 
-        :param int x: The X coordinate of the chip
-        :param int y: The Y coordinate of the chip
-        :param int address: The address to write to
-        :param int size: The number of bytes to read
+        :param x: The X coordinate of the chip
+        :param y: The Y coordinate of the chip
+        :param address: The address to write to
+        :param size: The number of bytes to read
         :return: The data read
         """
         raise NotImplementedError()

@@ -39,9 +39,5 @@ class GetVersionResponse(AbstractSCPResponse):
 
     @property
     def version_info(self) -> Optional[VersionInfo]:
-        """
-        The version information received.
-
-        :rtype: VersionInfo
-        """
+        """ The version information received. """
         return self._version_info

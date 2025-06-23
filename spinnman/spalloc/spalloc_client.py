@@ -79,8 +79,7 @@ def fix_url(url: Any) -> str:
     """
     Makes sure the url is the correct format.
 
-    :param str url: original url
-    :rtype: str
+    :param url: original url
     """
     parts = urlparse(url)
     if parts.scheme != 'https':
@@ -107,18 +106,18 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             group: Optional[str] = None, collab: Optional[str] = None,
             nmpi_job: Optional[int] = None, nmpi_user: Optional[str] = None):
         """
-        :param str service_url: The reference to the service.
+        :param service_url: The reference to the service.
             May have username and password supplied as part of the network
             location; if so, the ``username`` and ``password`` arguments
             *must* be ``None``. If ``username`` and ``password`` are not given,
             not even within the URL, the ``bearer_token`` must be not ``None``.
-        :param str username:
+        :param username:
             The user name to use. If not provided nor in service_url
             environment variable SPALLOC_USER will be used.
-        :param str password:
+        :param password:
             The password to use. If not provided nor in service_url
             environment variable SPALLOC_PASSWORD will be used.
-        :param str bearer_token: The bearer token to use
+        :param bearer_token: The bearer token to use
         """
         if username is None and password is None:
             service_url, username, password = parse_service_url(service_url)
@@ -145,8 +144,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         """
         Get a job by its job id.
 
-        :param str job_id: The job id.
-        :rtype: SpallocJob
+        :param job_id: The job id.
         """
         assert self.__session
         return _SpallocJob(
@@ -167,15 +165,14 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             credentials may have expired; if so, the job will be unable to
             regenerate them.
 
-        :param str service_url:
-        :param str job_url:
-        :param dict(str, str) cookies:
-        :param dict(str, str) headers:
+        :param service_url:
+        :param job_url:
+        :param cookies:
+        :param headers:
 
         :return:
             The job handle, or ``None`` if the records in the database are
             absent or incomplete.
-        :rtype: SpallocJob
         """
         session = Session(service_url, session_credentials=(cookies, headers))
         return _SpallocJob(session, job_url)
@@ -322,8 +319,8 @@ class _SpallocMachine(SessionAware, SpallocMachine):
 
     def __init__(self, session: Session, machine_data: JsonObject):
         """
-        :param _Session session:
-        :param dict machine_data:
+        :param session:
+        :param machine_data:
         """
         super().__init__(session, cast(str, machine_data["uri"]))
         self.__name = cast(str, machine_data["name"])
@@ -515,8 +512,8 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     def __init__(self, session: Session, job_handle: str):
         """
-        :param _Session session:
-        :param str job_handle:
+        :param session:
+        :param job_handle:
         """
         super().__init__(session, job_handle)
         logger.info("established job at {}", job_handle)
@@ -689,7 +686,6 @@ class _SpallocJob(SessionAware, SpallocJob):
         Signal spalloc that we want the job to stay alive for a while longer.
 
         :return: False if the job has not been destroyed
-        :rtype: bool
         """
         if self._keepalive_url is None:
             return False
@@ -900,7 +896,6 @@ class _ProxiedBidirectionalConnection(
         Determines if the medium is connected at this point in time.
 
         :return: True if the medium is connected, False otherwise
-        :rtype: bool
         """
         return self._connected
 
@@ -964,7 +959,6 @@ class _ProxiedUnboundConnection(
         Determines if the medium is connected at this point in time.
 
         :return: True if the medium is connected, False otherwise
-        :rtype: bool
         """
         return self._connected
 

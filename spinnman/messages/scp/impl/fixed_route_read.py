@@ -49,11 +49,7 @@ class _FixedRouteResponse(AbstractSCPResponse):
 
     @property
     def route(self) -> RoutingEntry:
-        """
-        Converts this response into a Route
-
-        :rtype: RoutingEntry
-        """
+        """ Converts this response into a Route """
         processor_ids: List[int] = list()
         for processor_id in range(26):
             if self._route & (1 << (6 + processor_id)) != 0:
@@ -73,11 +69,11 @@ class FixedRouteRead(AbstractSCPRequest[_FixedRouteResponse]):
 
     def __init__(self, x: int, y: int, app_id: int):
         """
-        :param int x: The x-coordinate of the chip, between 0 and 255,
+        :param x: The x-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
-        :param int y: The y-coordinate of the chip, between 0 and 255,
+        :param y: The y-coordinate of the chip, between 0 and 255,
             this is not checked due to speed restrictions
-        :param int app_id:
+        :param app_id:
             The ID of the application with which to associate the routes.
             If not specified, defaults to 0.
         :raise SpinnmanInvalidParameterException:

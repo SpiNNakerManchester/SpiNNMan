@@ -62,8 +62,6 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         """
         The number of allocated blocks that have been freed from the
         app_id given.
-
-        :rtype: int
         """
         return self._number_of_blocks_freed
 
@@ -87,14 +85,13 @@ class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
     def __init__(self, x: int, y: int, *, app_id: Optional[int] = None,
                  base_address: Optional[int] = None):
         """
-        :param int x:
+        :param x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :param int y:
+        :param y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :param int app_id: The ID of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         :param base_address: The start address in SDRAM to which the block
             needs to be deallocated, or `None` if deallocating via app_id
-        :type base_address: int or None
         """
         # pylint: disable=unsupported-binary-operation
         if base_address is not None:

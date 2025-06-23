@@ -60,8 +60,6 @@ class _AllocResponse(AbstractSCPResponse):
     def base_address(self) -> int:
         """
         The base address allocated, or 0 if none.
-
-        :rtype: int
         """
         return self._base_address or 0
 
@@ -75,17 +73,17 @@ class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
     def __init__(self, x: int, y: int, app_id: int, size: int,
                  tag: Optional[int] = None, retry_tag: bool = True):
         """
-        :param int x:
+        :param x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :param int y:
+        :param y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :param int app_id: The ID of the application, between 0 and 255
-        :param int size: The size in bytes of memory to be allocated
-        :param int tag:
+        :param app_id: The ID of the application, between 0 and 255
+        :param size: The size in bytes of memory to be allocated
+        :param tag:
             The tag for the SDRAM, a 8-bit (chip-wide) tag that can be
             looked up by a SpiNNaker application to discover the address of
             the allocated block. If `0` then no tag is applied.
-        :param bool retry_tag:
+        :param retry_tag:
             If a tag is used, add a safety check to retry the tag.  This can
             avoid issues with re-allocating memory on a retry message.
         """

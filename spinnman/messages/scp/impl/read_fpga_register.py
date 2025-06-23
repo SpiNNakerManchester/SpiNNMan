@@ -32,11 +32,11 @@ class ReadFPGARegister(BMPRequest['_SCPReadFPGARegisterResponse']):
         """
         Sets up a read FPGA register request.
 
-        :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
-        :param int register:
+        :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
+        :param register:
             Register address to read to (will be rounded down to
             the nearest 32-bit word boundary).
-        :param int board: which board to request the FPGA register from
+        :param board: which board to request the FPGA register from
         """
         # check to stop people asking for non-word aligned memory addresses
         # inverses all bits of a value, so is basically a inverse mask for the
@@ -64,7 +64,5 @@ class _SCPReadFPGARegisterResponse(BMPResponse[int]):
     def fpga_register(self) -> int:
         """
         The register information received.
-
-        :rtype: int
         """
         return self._value
