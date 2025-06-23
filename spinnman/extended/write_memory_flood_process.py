@@ -54,7 +54,6 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
         :param offset:
         :param n_bytes:
         """
-        # pylint: disable=too-many-arguments
         if n_bytes is None:
             n_bytes = len(data)
         self._start_flood_fill(n_bytes, nearest_neighbour_id)

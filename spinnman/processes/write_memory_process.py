@@ -31,7 +31,6 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     A process for writing memory on a SpiNNaker chip.
     """
     __slots__ = ()
-    # pylint: disable=too-many-arguments
 
     def write_memory_from_bytearray(
             self, coordinates: XYP, base_address: int, data: bytes,

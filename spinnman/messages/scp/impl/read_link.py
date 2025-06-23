@@ -39,7 +39,6 @@ class ReadLink(AbstractSCPRequest[Response]):
             The positive base address to start the read from
         :param size: The number of bytes to read, between 1 and 256
         """
-        # pylint: disable=too-many-arguments
         x, y, cpu = coordinates
         super().__init__(
             SDPHeader(

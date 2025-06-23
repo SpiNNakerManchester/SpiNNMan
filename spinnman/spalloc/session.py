@@ -41,9 +41,8 @@ def _may_renew(method: Callable) -> Callable:
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
         print(f"{request.method} {request.url}")
-        # pylint: disable=consider-using-f-string
-        print('\r\n'.join('{}: {}'.format(*kv)
-                          for kv in request.headers.items()))
+        print('\r\n'.join(f'{key}: {value}'
+                          for key, value in request.headers.items()))
         if request.body:
             print(request.body)
 
@@ -51,14 +50,11 @@ def _may_renew(method: Callable) -> Callable:
         """
         :param response:
         """
-        # pylint: disable=consider-using-f-string
-        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
-            '<<<<<<<<<<<START<<<<<<<<<<<',
-            str(response.status_code) + " " + response.reason,
-            '\r\n'.join('{}: {}'.format(*kv)
-                        for kv in response.headers.items()),
-            # Assume we only get textual responses
-            str(response.content, "UTF-8") if response.content else ""))
+        print("<<<<<<<<<<<START<<<<<<<<<<<")
+        print(f"{response.status_code} {response.reason}")
+        print('\r\n'.join(f'{key}: {value}'
+                          for key, value in response.headers.items()))
+        print(str(response.content, "UTF-8") if response.content else "")
 
     @wraps(method)
     def call(self: 'Session', *args: Any, **kwargs: Any) -> None:

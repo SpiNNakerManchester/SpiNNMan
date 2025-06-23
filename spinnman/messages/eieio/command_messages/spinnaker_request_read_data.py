@@ -57,7 +57,6 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         :param start_address:
         :param space_to_be_read:
         """
-        # pylint: disable=too-many-arguments
         if not isinstance(channel, list):
             channel = [channel]
 
@@ -235,7 +234,6 @@ class _SpinnakerRequestReadDataHeader(object):
         :param n_requests:
         :param sequence_no:
         """
-        # pylint: disable=too-many-arguments
         self._x = x
         self._y = y
         self._p = p

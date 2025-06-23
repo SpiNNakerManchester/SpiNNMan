@@ -29,13 +29,12 @@ class _DataType(Enum):
     LONG = (8, "<Q")
     BYTE_ARRAY = (16, "s")
 
-    def __new__(cls, value: int, struct_code: str) -> "_DataType":
+    def __new__(cls, value: int, _: str) -> "_DataType":
         obj = object.__new__(cls)
         obj._value_ = value
         return obj
 
-    def __init__(self, value: int, struct_code: str):
-        # pylint: disable=unused-argument
+    def __init__(self, _: int, struct_code: str):
         self._struct_code = struct_code
 
     @property
@@ -332,7 +331,6 @@ class SystemVariableDefinition(Enum):
             The default value assigned to the variable if not overridden
         :param array_size: The length of the array, or `None` if not an array
         """
-        # pylint: disable=too-many-arguments
         self._data_type: _DataType = data_type
         self._offset: int = offset
         self._default: Union[int, bytes] = default

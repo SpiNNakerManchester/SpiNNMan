@@ -39,7 +39,6 @@ class WriteLink(AbstractSCPRequest[CheckOKResponse]):
         :param base_address: The base_address to start writing to
         :param data: Up to 256 bytes of data to write
         """
-        # pylint: disable=too-many-arguments
         x, y, cpu = coordinates
         super().__init__(
             SDPHeader(

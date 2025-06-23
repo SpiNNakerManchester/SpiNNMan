@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=too-many-arguments
-
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable,
     List, Optional, Set, Tuple, Union)

@@ -58,7 +58,6 @@ class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
             The third argument, or `None` if no third argument
         :param data: The optional data, or `None` if no data
         """
-        # pylint: disable=too-many-arguments
         self._sdp_header = sdp_header
         self._scp_request_header = scp_request_header
         self._argument_1 = argument_1

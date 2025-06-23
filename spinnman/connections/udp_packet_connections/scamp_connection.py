@@ -52,7 +52,6 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
             messages to. If not specified, sending will not be possible using
             this connection
         """
-        # pylint: disable=too-many-arguments
         if remote_port is None:
             remote_port = SCP_SCAMP_PORT
         super().__init__(
@@ -86,7 +85,6 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         :param x: Optional: x-coordinate of where to send to
         :param y: Optional: y-coordinate of where to send to
         """
-        # pylint: disable=arguments-differ
         if x is None:
             x = self.chip_x
         if y is None:
