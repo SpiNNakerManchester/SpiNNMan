@@ -177,8 +177,6 @@ class ChipInfo(object):
     def sdram_base_address(self) -> int:
         """
         The base address of the user region of SDRAM on the chip.
-
-        :rtype: int
         """
         return self._read_int("sdram_base_address")
 
