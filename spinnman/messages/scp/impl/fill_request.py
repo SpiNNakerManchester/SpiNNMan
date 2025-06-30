@@ -38,7 +38,6 @@ class FillRequest(AbstractSCPRequest[CheckOKResponse]):
         :param data: The data to fill in the space with
         :param size: The number of bytes to fill in
         """
-        # pylint: disable=too-many-arguments
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

@@ -87,7 +87,6 @@ class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
             If a tag is used, add a safety check to retry the tag.  This can
             avoid issues with re-allocating memory on a retry message.
         """
-        # pylint: disable=too-many-arguments
         extra_flag = 0
         if retry_tag and tag is not None:
             extra_flag = FLAG_RETRY_TAG
@@ -100,7 +99,6 @@ class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
                 "The tag param needs to be between 0 and 255, or None (in "
                 "which case 0 will be used by default)", str(tag))
 
-        # pylint: disable=unsupported-binary-operation
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

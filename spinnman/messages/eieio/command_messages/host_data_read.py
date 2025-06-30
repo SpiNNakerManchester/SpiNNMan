@@ -50,7 +50,6 @@ class HostDataRead(EIEIOCommandMessage):
         :param region_id:
         :param space_read:
         """
-        # pylint: disable=too-many-arguments
         if not isinstance(channel, list):
             channel = [channel]
 

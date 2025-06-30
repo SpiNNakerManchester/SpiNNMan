@@ -93,7 +93,6 @@ class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
         :param base_address: The start address in SDRAM to which the block
             needs to be deallocated, or `None` if deallocating via app_id
         """
-        # pylint: disable=unsupported-binary-operation
         if base_address is not None:
             assert app_id is None
             super().__init__(

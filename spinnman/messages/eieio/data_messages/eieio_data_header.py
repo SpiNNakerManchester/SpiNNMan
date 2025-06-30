@@ -62,7 +62,6 @@ class EIEIODataHeader(object):
             otherwise
         :param count: Count of the number of items in the packet
         """
-        # pylint: disable=too-many-arguments
         self._eieio_type = eieio_type
         self._tag = tag
         self._prefix = prefix
@@ -235,7 +234,6 @@ class EIEIODataHeader(object):
                 "The header indicates that this is a command header")
 
         # Convert the flags into types
-        # pylint: disable=no-value-for-parameter
         eieio_type = EIEIOType(message_type)
         prefix_type = EIEIOPrefix(format_flag)
 

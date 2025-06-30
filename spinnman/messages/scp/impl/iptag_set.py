@@ -43,7 +43,6 @@ class IPTagSet(AbstractSCPRequest[CheckOKResponse]):
         :param use_sender:
             if the sender IP address and port should be used
         """
-        # pylint: disable=too-many-arguments
         strip_value = int(bool(strip))
         sender_value = int(bool(use_sender))
         super().__init__(

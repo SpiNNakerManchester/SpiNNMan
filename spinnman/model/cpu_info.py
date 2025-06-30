@@ -79,7 +79,6 @@ class CPUInfo(object):
         :param p: The ID of a core on the chip
         :param cpu_data: A byte-string received from SDRAM on the board
         """
-        # pylint: disable=too-many-arguments
         self.__x, self.__y, self.__p = x, y, p
 
         (registers,  # 32s 0

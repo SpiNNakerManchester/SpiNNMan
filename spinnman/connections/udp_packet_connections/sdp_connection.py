@@ -56,7 +56,6 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
             messages to. If not specified, sending will not be possible using
             this connection
         """
-        # pylint: disable=too-many-arguments
         super().__init__(local_host, local_port, remote_host, remote_port)
         self._chip_x = chip_x
         self._chip_y = chip_y

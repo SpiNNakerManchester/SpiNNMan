@@ -45,7 +45,6 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
         :param sequence_no:
         :param space_available:
         """
-        # pylint: disable=too-many-arguments
         super().__init__(EIEIOCommandHeader(
             EIEIO_COMMAND_IDS.SPINNAKER_REQUEST_BUFFERS))
         self._x = x
