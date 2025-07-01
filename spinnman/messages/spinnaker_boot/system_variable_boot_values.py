@@ -378,7 +378,6 @@ class SystemVariableBootValues(object):
 
         :param system_variable_definition: Key to save value with
         :param value:
-        :return:
         """
         self._values[system_variable_definition] = value
 
