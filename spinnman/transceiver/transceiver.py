@@ -229,7 +229,6 @@ class Transceiver(object):
         :param p: The ID of the processor to get the information about
         :param states:
             If provided will only add the info if in one of the states
-        :return: The CPU information for the selected core
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:

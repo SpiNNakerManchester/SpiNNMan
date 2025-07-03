@@ -61,7 +61,6 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
 
         :param allocations:
             List of (x, y, size, app_id, tag)
-        :return: List of base addresses that match each of the requests
         """
         self.__base_addresses = [0] * len(allocations)
         with self._collect_responses():
