@@ -236,6 +236,15 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     def __init__(self, error_requests: List[AbstractSCPRequest],
                  exceptions: List[Exception], tracebacks: List[TracebackType],
                  connections: List[SCAMPConnection]):
+        """
+        :param error_requests: List of the requests that cause the error.
+        :param exceptions: List of the exceptions caught.
+           In the same order as the requests that caused the exception.
+        :param tracebacks: List of the tracebacks cause
+           In the same order as the requests that caused the exception.
+        :param connections:List of connections used.
+           In the same order as the requests that caused the exception.
+        """
         problem = "Exceptions found were:\n"
         for error_request, exception, trace_back, connection in zip(
                 error_requests, exceptions, tracebacks, connections):

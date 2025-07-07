@@ -365,6 +365,10 @@ class SessionAware:
     __slots__ = ("__session", "_url")
 
     def __init__(self, session: Session, url: str):
+        """
+        :param session: The session created when starting the spalloc client
+        :param url: job_url
+        """
         self.__session = session
         self._url = clean_url(url)
 

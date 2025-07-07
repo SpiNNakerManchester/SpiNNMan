@@ -28,6 +28,11 @@ class IPAddressesConnection(UDPConnection):
 
     def __init__(self, local_host: Optional[str] = None,
                  local_port: int = UDP_BOOT_CONNECTION_DEFAULT_PORT):
+        """
+
+        :param local_host:
+        :param local_port:
+        """
         super().__init__(local_host=local_host, local_port=local_port)
 
     def receive_ip_address(self, timeout:  Optional[float] = None

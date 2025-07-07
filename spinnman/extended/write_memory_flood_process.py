@@ -28,6 +28,10 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
     __slots__ = ()
 
     def __init__(self, next_connection_selector: ConnectionSelector):
+        """
+        :param next_connection_selector:
+            How to choose the connection.
+        """
         AbstractMultiConnectionProcess.__init__(
             self, next_connection_selector, n_channels=3,
             intermediate_channel_waits=2)
