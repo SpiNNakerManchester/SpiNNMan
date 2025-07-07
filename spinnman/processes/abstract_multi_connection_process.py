@@ -69,7 +69,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
                  n_channels: int = 8, intermediate_channel_waits: int = 7,
                  non_fail_retry_codes: Optional[Set[SCPResult]] = None):
         """
-        :paramnext_connection_selector:
+        :param next_connection_selector:
             How to choose the connection.
         :param n_retries:
             The number of retries of a message to use. Passed to
