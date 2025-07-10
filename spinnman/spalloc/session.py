@@ -37,6 +37,8 @@ _debug_pretty_print = False
 def _may_renew(method: Callable) -> Callable:
     def pp_req(request: requests.PreparedRequest) -> None:
         """
+        Prints the request to the console.
+
         :param request:
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
@@ -48,6 +50,8 @@ def _may_renew(method: Callable) -> Callable:
 
     def pp_resp(response: requests.Response) -> None:
         """
+        Prints the response to the console.
+
         :param response:
         """
         print("<<<<<<<<<<<START<<<<<<<<<<<")
