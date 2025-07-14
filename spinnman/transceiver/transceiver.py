@@ -896,7 +896,9 @@ class Transceiver(object):
 
     @abstractmethod
     def get_scamp_connection_selector(self) -> MostDirectConnectionSelector:
-        """ Returns the most direct scamp connections """
+        """
+        :returns: the most direct scamp connections
+         """
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod

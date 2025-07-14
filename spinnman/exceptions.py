@@ -362,7 +362,9 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         self._failed_core_states = failed_core_states
 
     def failed_core_states(self) -> CPUInfos:
-        """ The unexpected actual state """
+        """
+        :returns: The unexpected actual state
+         """
         return self._failed_core_states
 
 

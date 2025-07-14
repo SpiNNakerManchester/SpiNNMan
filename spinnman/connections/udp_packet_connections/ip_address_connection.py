@@ -38,8 +38,9 @@ class IPAddressesConnection(UDPConnection):
     def receive_ip_address(self, timeout:  Optional[float] = None
                            ) -> Optional[str]:
         """
-
-        :param timeout:
+        :param timeout: The timeout, or `None` to wait forever
+        :returns: Ihe IP address of this connection
+          if it works and uses the SPINN_PORT otherwise None
         """
         with suppress(Exception):
             (_, (ip_address, port)) = self.receive_with_address(timeout)

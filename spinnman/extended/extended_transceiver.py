@@ -664,6 +664,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
         :param y: The y-coordinate of the chip
         :param heap:
             The SystemVariableDefinition which is the heap to read
+        :returns: List of HeapElements
         """
         assert isinstance(self, Transceiver)
         try:

@@ -40,8 +40,7 @@ class TokenBucket(object):
 
     def consume(self, tokens: int, block: bool = True) -> bool:
         """
-        Consume tokens from the bucket. Returns True if there were
-        sufficient tokens.
+        Consume tokens from the bucket.
 
         If there are not enough tokens and block is True, sleeps until the
         bucket is replenished enough to satisfy the deficiency.
@@ -52,6 +51,7 @@ class TokenBucket(object):
 
         :param tokens:
         :param block:
+        :returns: True if there were sufficient tokens.
         """
         while block and tokens > self.tokens:
             deficit = tokens - self._tokens
