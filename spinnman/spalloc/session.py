@@ -143,7 +143,8 @@ class Session:
         Do an HTTP ``GET`` in the session.
 
         :param url:
-        :param timeout:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
         :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
@@ -162,8 +163,9 @@ class Session:
         Do an HTTP ``POST`` in the session.
 
         :param url:
-        :param timeout:
         :param json_dict:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
         :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
@@ -183,7 +185,8 @@ class Session:
 
         :param url:
         :param data:
-        :param timeout:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
         :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
@@ -204,7 +207,8 @@ class Session:
 
         :param url:
         :param data:
-        :param timeout:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
         :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
@@ -225,6 +229,8 @@ class Session:
         Do an HTTP ``DELETE`` in the session.
 
         :param url:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
         :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
 
