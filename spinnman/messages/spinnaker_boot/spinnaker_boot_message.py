@@ -99,6 +99,7 @@ class SpinnakerBootMessage(object):
         """
         :param data:
         :param offset:
+        :returns: The message from the byte-string.
         """
         (opcode_value, operand_1, operand_2, operand_3) = \
             _PATTERN_2xIIII.unpack_from(data, offset)

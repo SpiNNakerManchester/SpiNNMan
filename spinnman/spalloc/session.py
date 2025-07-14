@@ -126,6 +126,9 @@ class Session:
 
     def __handle_error_or_return(self, response: requests.Response
                                  ) -> Optional[requests.Response]:
+        """
+        :returns: The response verified that it is not an error
+        """
         code = response.status_code
         if code >= 200 and code < 400:
             return response
@@ -141,6 +144,7 @@ class Session:
 
         :param url:
         :param timeout:
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -160,6 +164,7 @@ class Session:
         :param url:
         :param timeout:
         :param json_dict:
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -179,6 +184,7 @@ class Session:
         :param url:
         :param data:
         :param timeout:
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -199,6 +205,7 @@ class Session:
         :param url:
         :param data:
         :param timeout:
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -218,7 +225,9 @@ class Session:
         Do an HTTP ``DELETE`` in the session.
 
         :param url:
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
+
         """
         params = kwargs if kwargs else None
         cookies, headers = self.credentials
@@ -328,6 +337,7 @@ class Session:
         :param cookie:
             Optional cookies (composed as semicolon-separated string)
         :param kwargs: Other options to :py:func:`~websocket.create_connection`
+        :returns: Socket based on these credentials
         """
         # Note: *NOT* a renewable action!
         if header is None:

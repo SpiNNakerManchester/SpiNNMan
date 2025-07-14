@@ -46,6 +46,7 @@ class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):
         :param x:
         :param y:
         :param p:
+        :returns: SC&MP/SARK version information
         """
         with self._collect_responses():
             self._send_request(GetVersion(x=x, y=y, p=p), self._get_response)

@@ -178,10 +178,9 @@ class Transceiver(object):
     @abstractmethod
     def get_clock_drift(self, x: int, y: int) -> float:
         """
-        Get the clock drift.
-
         :param x: The x-coordinate of the chip to get drift for
         :param y: The y-coordinate of the chip to get drift for
+        :returns: The current clock drift for this chip
         """
         # used by drift_report
         raise NotImplementedError("abstractmethod")
@@ -199,6 +198,7 @@ class Transceiver(object):
         :param y: Y coordinate of the chip
         :param p: Virtual processor identifier on the chip
         :param user: The user number to read data for
+        :returns: Current value on the Machine for this x, y, p, user
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:

@@ -34,9 +34,7 @@ class ConnectionSelector(Generic[Conn], metaclass=AbstractBase):
     def get_next_connection(
             self, message: AbstractSCPRequest) -> Conn:
         """
-        Get the index of the  next connection for the process from a list
-        of connections.
-
         :param message: The SCP message to be sent
+        :returns: The (next) available Connection
         """
         raise NotImplementedError

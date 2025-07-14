@@ -283,7 +283,7 @@ class CPUInfo(object):
 
     def get_status_string(self) -> str:
         """
-        Get a string indicating the status of the given core.
+        :returns: A string indicating the status of the given core.
         """
         if self.state == CPUState.RUN_TIME_EXCEPTION:
             rte_string = f"{self.run_time_error.name}"
@@ -309,6 +309,8 @@ class CPUInfo(object):
                   state: CPUState) -> "CPUInfo":
         """
         Makes a CPU_info object for Testing purposes
+
+        :returns: A fake
         """
         registers = b'@\x00\x07\x08\xff\x00\x00\x00\x00\x00\x80\x00\xad\x00' \
                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \

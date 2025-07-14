@@ -64,13 +64,13 @@ class CPUInfos(object):
 
     def is_core(self, x: int, y: int, p: int) -> bool:
         """
-        Determine if there is a CPU Info for x, y, p.
+        :returns: If there is a CPU Info for x, y, p.
         """
         return (x, y, p) in self._cpu_infos
 
     def get_cpu_info(self, x: int, y: int, p: int) -> CPUInfo:
         """
-        Get the information for the given core on the given core
+        :returns: The information for the given core on the given core
         """
         return self._cpu_infos[x, y, p]
 
@@ -102,7 +102,7 @@ class CPUInfos(object):
 
     def get_status_string(self) -> str:
         """
-        Get a string indicating the status of the given cores.
+        :returns: A string indicating the status of the given cores.
         """
         break_down = ""
         for core_info in self._cpu_infos.values():

@@ -125,7 +125,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
 
     def is_error(self) -> bool:
         """
-        Checks if any errors have been cached.
+        :returns: If any errors have been cached.
         """
         return bool(self._exceptions)
 

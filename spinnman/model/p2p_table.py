@@ -53,19 +53,17 @@ class P2PTable(object):
     @staticmethod
     def get_n_column_bytes(height: int) -> int:
         """
-        Get the number of bytes to be read for each column of the table.
-
         :param height: The height of the machine
+        :returns: The number of bytes to be read for each column of the table.
         """
         return ((height + 7) // 8) * 4
 
     @staticmethod
     def get_column_offset(column: int) -> int:
         """
-        Get the offset of the next column in the table from the P2P base
-        address.
-
         :param column: The column to be read
+        :returns: the offset of the next column in the table
+           from the P2P base address.
         """
         return (((256 * column) // 8) * 4)
 
@@ -85,16 +83,15 @@ class P2PTable(object):
 
     def iterchips(self) -> Iterable[Tuple[int, int]]:
         """
-        Get an iterator of tuples of (x, y) coordinates in the table.
+        :returns: An iterator of tuples of (x, y) coordinates in the table.
         """
         return iter(self._routes.keys())
 
     def is_route(self, x: int, y: int) -> bool:
         """
-        Determines if there is a route in the P2P table to the given chip.
-
         :param x: The x-coordinate of the chip to look up
         :param y: The y-coordinate of the chip to look up
+        :returns: True if there is a route in the P2P table to the given chip.
         """
         return (
             (x, y) in self._routes and
@@ -102,10 +99,9 @@ class P2PTable(object):
 
     def get_route(self, x: int, y: int) -> P2PTableRoute:
         """
-        Get the route to follow from this chip to the given chip.
-
         :param x: The x-coordinate of the chip to find the route to
         :param y: The y-coordinate of the chip to find the route to
+        :returns: The route to follow from this chip to the given chip.
         """
         return self._routes.get((x, y), P2PTableRoute.NONE)
 

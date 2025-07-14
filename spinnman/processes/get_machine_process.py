@@ -214,6 +214,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         :param boot_y:
         :param width:
         :param height:
+        :returns: The Machine read from the boot Chip
         """
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)

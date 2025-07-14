@@ -56,6 +56,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
     def get_cpu_info(self, core_subsets: CoreSubsets) -> CPUInfos:
         """
         :param core_subsets:
+        :returns: The CpuInfos for the requested cores.
         """
         with self._collect_responses():
             for core_subset in core_subsets:

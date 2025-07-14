@@ -80,6 +80,7 @@ def fix_url(url: Any) -> str:
     Makes sure the url is the correct format.
 
     :param url: original url
+    :returns: cleaned url
     """
     parts = urlparse(url)
     if parts.scheme != 'https':
@@ -145,6 +146,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         Get a job by its job id.
 
         :param job_id: The job id.
+        :returns: Job object for this ID
         """
         assert self.__session
         return _SpallocJob(

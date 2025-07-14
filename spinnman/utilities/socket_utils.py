@@ -28,6 +28,8 @@ logger = FormatAdapter(logging.getLogger(__name__))
 def get_udp_socket() -> socket.socket:
     """
     Wrapper round socket() system call to produce UDP/IPv4 sockets.
+
+    :returns: A socket using the default values for UDP/IPv4 sockets.
     """
     try:
         # Create a UDP Socket
@@ -43,6 +45,8 @@ def get_tcp_socket() -> socket.socket:
 
     .. note::
         TCP sockets cannot be used to talk to a SpiNNaker board.
+
+    :returns: A Socket using the default values for TCP/IPv4 sockets
     """
     try:
         # Create a UDP Socket
@@ -81,6 +85,8 @@ def bind_socket(sock: socket.socket, host: str, port: int) -> None:
 def resolve_host(host: str) -> str:
     """
     Wrapper round gethostbyname() system call.
+
+    :returns: host name in IPv4 address format
     """
     try:
         return socket.gethostbyname(host)
@@ -104,6 +110,8 @@ def connect_socket(
 def get_socket_address(sock: socket.socket) -> Tuple[str, int]:
     """
     Wrapper round getsockname() system call.
+
+    :returns: The urls and port
     """
     try:
         addr, port = sock.getsockname()
@@ -120,6 +128,8 @@ def receive_message(
         sock: socket.socket, timeout: Optional[float], size: int) -> bytes:
     """
     Wrapper round recv() system call.
+
+    :returns: A bytes object representing the data received.
     """
     try:
         sock.settimeout(timeout)
@@ -135,6 +145,8 @@ def receive_message_and_address(
             bytes, Tuple[str, int]]:
     """
     Wrapper round recvfrom() system call.
+
+    :returns: the number of bytes sent
     """
     try:
         sock.settimeout(timeout)
@@ -148,6 +160,8 @@ def receive_message_and_address(
 def send_message(sock: socket.socket, data: bytes) -> int:
     """
     Wrapper round send() system call.
+
+    :returns: Result of the socket call
     """
     try:
         return sock.send(data)
@@ -159,6 +173,8 @@ def send_message_to_address(
         sock: socket.socket, data: bytes, address: Tuple[str, int]) -> int:
     """
     Wrapper round sendto() system call.
+
+    :returns: Result of the socket call
     """
     try:
         return sock.sendto(data, address)
