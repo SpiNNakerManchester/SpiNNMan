@@ -233,13 +233,14 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             self, width: int, height: int,
             machine_name: Optional[str] = None,
             keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
-        return self._create({
+        create: JsonValue = {
             "dimensions": {
                 "width": int(width),
                 "height": int(height)
             },
             "keepalive-interval": f"PT{int(keepalive)}S"
-        }, machine_name)
+        }
+        return self._create(create, machine_name)
 
     @overrides(AbstractSpallocClient.create_job_board)
     def create_job_board(
@@ -288,8 +289,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                            "must be given")
         create: Dict[str, JsonValue] = dict()
         create["dimensions"] =  {"width": int(width), "height": int(height)}
-        _board: JsonValue = board
-        create["board"] = _board
+        create["board"] = board
         create["keepalive-interval"] =  f"PT{int(keepalive)}S"
         create["max-dead-boards"] = int(max_dead_boards)
         return self._create(create, machine_name)
