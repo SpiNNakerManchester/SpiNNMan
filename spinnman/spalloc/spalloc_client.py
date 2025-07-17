@@ -288,8 +288,9 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                            "must be given")
         create: Dict[str, JsonValue] = dict()
         create["dimensions"] =  {"width": int(width), "height": int(height)}
-        create["board"] = board,
-        create["keepalive-interval"] =  f"PT{int(keepalive)}S",
+        _board: JsonValue = board
+        create["board"] = _board
+        create["keepalive-interval"] =  f"PT{int(keepalive)}S"
         create["max-dead-boards"] = int(max_dead_boards)
         return self._create(create, machine_name)
 
