@@ -47,6 +47,7 @@ from spinnman.constants import (
     BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS, ROUTER_REGISTER_REGISTERS)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
+    SpinnmanBootException,
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
     SpinnmanUnexpectedResponseCodeException,
@@ -601,6 +602,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             # retry to get a SCAMP version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
                 n_retries, extra_boot_values)
+            if version_info is None:
+                raise SpinnmanBootException()
 
         # verify that the version is the expected one for this transceiver
         if version_info is None:
@@ -651,6 +654,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         :raise SpinnmanIOException:
             If there is a problem communicating with the machine
         """
+        return None
         version_info = None
         current_tries_to_go = tries_to_go
         while version_info is None and current_tries_to_go > 0:

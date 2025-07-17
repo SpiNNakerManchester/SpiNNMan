@@ -147,6 +147,14 @@ class SpinnmanIOException(SpinnmanException):
         return self._problem
 
 
+class SpinnmanBootException(SpinnmanIOException):
+    """
+    An exception that something went wrong with find scamp and boot.
+    """
+    def __init__(self) -> None:
+        super().__init__("Scamp boot failed")
+
+
 class SpinnmanEOFException(SpinnmanIOException):
     """
     An exception that we're trying to do I/O on a closed socket.
