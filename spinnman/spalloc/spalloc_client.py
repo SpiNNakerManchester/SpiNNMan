@@ -235,13 +235,14 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             self, width: int, height: int,
             machine_name: Optional[str] = None,
             keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
-        return self._create({
+        create: Mapping[str, JsonValue] = {
             "dimensions": {
                 "width": int(width),
                 "height": int(height)
             },
             "keepalive-interval": f"PT{int(keepalive)}S"
-        }, machine_name)
+        }
+        return self._create(create, machine_name)
 
     @overrides(AbstractSpallocClient.create_job_board)
     def create_job_board(
@@ -288,7 +289,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         else:
             raise KeyError("at least one of triad, physical and ip_address "
                            "must be given")
-        return self._create({
+        create: Mapping[str, JsonValue] = {
             "dimensions": {
                 "width": int(width),
                 "height": int(height)
@@ -296,7 +297,8 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             "board": board,
             "keepalive-interval": f"PT{int(keepalive)}S",
             "max-dead-boards": int(max_dead_boards)
-        }, machine_name)
+        }
+        return self._create(create, machine_name)
 
     def close(self) -> None:
         if self.__session is not None:
