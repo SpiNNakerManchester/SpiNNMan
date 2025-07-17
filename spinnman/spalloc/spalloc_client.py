@@ -286,7 +286,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         else:
             raise KeyError("at least one of triad, physical and ip_address "
                            "must be given")
-        create: Mapping[str, JsonValue] = dict()
+        create: Dict[str, JsonValue] = dict()
         create["dimensions"] =  {"width": int(width), "height": int(height)}
         create["board"] = board,
         create["keepalive-interval"] =  f"PT{int(keepalive)}S",
