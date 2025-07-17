@@ -286,15 +286,12 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         else:
             raise KeyError("at least one of triad, physical and ip_address "
                            "must be given")
-        return self._create({
-            "dimensions": {
-                "width": int(width),
-                "height": int(height)
-            },
-            "board": board,
-            "keepalive-interval": f"PT{int(keepalive)}S",
-            "max-dead-boards": int(max_dead_boards)
-        }, machine_name)
+        create: Mapping[str, JsonValue] = dict()
+        create["dimensions"] =  {"width": int(width), "height": int(height)}
+        create["board"] = board,
+        create["keepalive-interval"] =  f"PT{int(keepalive)}S",
+        create["max-dead-boards"] = int(max_dead_boards)
+        return self._create(create, machine_name)
 
     def close(self) -> None:
         if self.__session is not None:
