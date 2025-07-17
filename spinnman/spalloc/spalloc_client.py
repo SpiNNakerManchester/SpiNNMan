@@ -233,7 +233,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             self, width: int, height: int,
             machine_name: Optional[str] = None,
             keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
-        create: JsonValue = {
+        create: Mapping[str, JsonValue] = {
             "dimensions": {
                 "width": int(width),
                 "height": int(height)
