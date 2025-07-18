@@ -653,10 +653,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         :raise SpinnmanIOException:
             If there is a problem communicating with the machine
         """
-        # HACK 50% error to test recovery
-        import random
-        if random.random() > 0.5:
-            return None
         version_info = None
         current_tries_to_go = tries_to_go
         while version_info is None and current_tries_to_go > 0:
