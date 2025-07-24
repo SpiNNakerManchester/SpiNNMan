@@ -602,12 +602,11 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             # retry to get a SCAMP version, this time trying multiple times
             version_info = self._try_to_find_scamp_and_boot(
                 n_retries, extra_boot_values)
-            if version_info is None:
-                raise SpinnmanBootException()
+
+        if version_info is None:
+            raise SpinnmanBootException()
 
         # verify that the version is the expected one for this transceiver
-        if version_info is None:
-            raise SpinnmanIOException("Failed to communicate with the machine")
         if (version_info.name != _SCAMP_NAME or
                 not self._is_scamp_version_compabible(
                     version_info.version_number)):
