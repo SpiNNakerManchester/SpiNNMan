@@ -20,7 +20,6 @@ on: [push]
 jobs:
   call:
     uses: SpiNNakerManchester/SupportScripts/.github/workflows/python_checks.yml@mini_doc_fixes
-
     with:
 
       dependencies: SpiNNUtils SpiNNMachine
