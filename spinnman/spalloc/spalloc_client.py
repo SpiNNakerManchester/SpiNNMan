@@ -1043,7 +1043,8 @@ class _ProxiedBootConnection(
         :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver created when starting the Client
         """
-        super().__init__(websocket, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)
+        super().__init__(
+            websocket, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
     def __str__(self) -> str:
         return "BootConnection[proxied]()"
@@ -1096,7 +1097,8 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
         """
         :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver created when starting the Client
-        :param connections:  Get the mapping from board coordinates to IP addresses.
+        :param connections:
+           Get the mapping from board coordinates to IP addresses.
         """
         super().__init__(websocket, receiver)
         # Invert the map
@@ -1135,7 +1137,8 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
         """
         :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver created when starting the Client
-        :param connections:  Get the mapping from board coordinates to IP addresses.
+        :param connections:
+           Get the mapping from board coordinates to IP addresses.
         """
         super().__init__(websocket, receiver)
         # Invert the map
