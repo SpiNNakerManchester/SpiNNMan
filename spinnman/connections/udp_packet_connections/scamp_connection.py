@@ -109,7 +109,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         :param timeout: The timeout, or `None` to wait forever
 
         :returns:   A tuple of SCPResult, sequence number, the data received
-            the number2, ip address  and port used.
+            the number2, IP address  and port used.
         """
         data, (addr, port) = self.receive_with_address(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)

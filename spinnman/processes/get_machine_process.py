@@ -268,7 +268,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                      or chip_info.y != chip_info.nearest_ethernet_y)):
                 if get_config_bool("Machine", "ignore_bad_ethernets"):
                     logger.warning(
-                        "Chip {}:{} claimed it has ip address: {}. "
+                        "Chip {}:{} claimed it has IP address: {}. "
                         "This ip will not be used.",
                         chip_info.x, chip_info.y,
                         chip_info.ethernet_ip_address)
@@ -276,7 +276,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 else:
                     logger.warning(
                         "Not using chip {}:{} as it has an unexpected "
-                        "ip address: {}", chip_info.x, chip_info.y,
+                        "IP address: {}", chip_info.x, chip_info.y,
                         chip_info.ethernet_ip_address)
                     continue
 
