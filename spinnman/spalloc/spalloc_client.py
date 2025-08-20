@@ -380,13 +380,13 @@ class _ProxyPing(threading.Thread):
     Sends ping messages to an open websocket
     """
 
-    def __init__(self, ws: WebSocket, sleep_time: int = 30):
+    def __init__(self, websocket: WebSocket, sleep_time: int = 30):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param sleep_time: Time to wait between each ping ssnt
         """
         super().__init__(daemon=True)
-        self.__ws = ws
+        self.__ws = websocket
         self.__sleep_time = sleep_time
         self.__closed = False
         self.start()
@@ -422,7 +422,7 @@ class _ProxyReceiver(threading.Thread):
 
     def __init__(self, ws: WebSocket):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         """
         super().__init__(daemon=True)
         self.__ws = ws
@@ -748,7 +748,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver cretaed when starting the Client
         """
         self.__ws: Optional[WebSocket] = ws
@@ -896,7 +896,7 @@ class _ProxiedBidirectionalConnection(
             self, ws: WebSocket, receiver: _ProxyReceiver,
             x: int, y: int, port: int):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver cretaed when starting the Client
         :param x: X coordinate of the board's Ethernet-enabled chip
         :param y: Y coordinate of the board's Ethernet-enabled chip
@@ -956,7 +956,7 @@ class _ProxiedUnboundConnection(
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver cretaed when starting the Client
         """
         super().__init__(ws, receiver)
@@ -1021,7 +1021,7 @@ class _ProxiedSCAMPConnection(
             self, ws: WebSocket, receiver: _ProxyReceiver,
             x: int, y: int, port: int):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver cretaed when starting the Client
         :param x: X coordinate of the board's Ethernet-enabled chip
         :param y: Y coordinate of the board's Ethernet-enabled chip
@@ -1040,7 +1040,7 @@ class _ProxiedBootConnection(
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver cretaed when starting the Client
         """
         super().__init__(ws, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)
@@ -1059,7 +1059,7 @@ class _ProxiedEIEIOConnection(
             self, ws: WebSocket, receiver: _ProxyReceiver,
             x: int, y: int, port: int):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver cretaed when starting the Client
         :param x: X coordinate of the board's Ethernet-enabled chip
         :param y: Y coordinate of the board's Ethernet-enabled chip
@@ -1094,7 +1094,7 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
                  conns: Dict[XY, str]):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver cretaed when starting the Client
         :param conns:  Get the mapping from board coordinates to IP addresses.
         """
@@ -1133,7 +1133,7 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
                  conns: Dict[XY, str]):
         """
-        :param ws: WebSocket obtained when starting the client
+        :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver cretaed when starting the Client
         :param conns:  Get the mapping from board coordinates to IP addresses.
         """
