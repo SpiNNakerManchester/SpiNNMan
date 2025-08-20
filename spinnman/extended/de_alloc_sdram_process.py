@@ -37,7 +37,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
     def de_alloc_all_app_sdram(self, x: int, y: int, app_id: int) -> None:
         """
-        Currenntly not used!
+        Currently not used!
 
         :param x:
         :param y:
@@ -50,7 +50,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
 
     def de_alloc_sdram(self, x: int, y: int, base_address: int) -> None:
         """
-        Currenntly not used!
+        Currently not used!
 
         :param x:
         :param y:

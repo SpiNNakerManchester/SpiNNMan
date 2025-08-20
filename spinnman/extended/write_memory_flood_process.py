@@ -52,7 +52,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             self, nearest_neighbour_id: int, base_address: int,
             data: bytes, offset: int, n_bytes: Optional[int] = None) -> None:
         """
-        Currenntly not used!
+        Currently not used!
 
         :param nearest_neighbour_id:
         :param base_address:
@@ -86,7 +86,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             self, nearest_neighbour_id: int, base_address: int,
             reader: BinaryIO, n_bytes: int) -> None:
         """
-        Currenntly not used!
+        Currently not used!
 
         :param nearest_neighbour_id:
         :param base_address:

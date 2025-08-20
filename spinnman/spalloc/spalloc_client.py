@@ -383,7 +383,7 @@ class _ProxyPing(threading.Thread):
     def __init__(self, websocket: WebSocket, sleep_time: int = 30):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param sleep_time: Time to wait between each ping ssnt
+        :param sleep_time: Time to wait between each ping sent
         """
         super().__init__(daemon=True)
         self.__ws = websocket
@@ -749,7 +749,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param receiver: Receiver cretaed when starting the Client
+        :param receiver: Receiver created when starting the Client
         """
         self.__ws: Optional[WebSocket] = ws
         self.__receiver: Optional[_ProxyReceiver] = receiver
@@ -897,7 +897,7 @@ class _ProxiedBidirectionalConnection(
             x: int, y: int, port: int):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param receiver: Receiver cretaed when starting the Client
+        :param receiver: Receiver created when starting the Client
         :param x: X coordinate of the board's Ethernet-enabled chip
         :param y: Y coordinate of the board's Ethernet-enabled chip
         :param port: UDP port to talk to; defaults to the SCP port
@@ -957,7 +957,7 @@ class _ProxiedUnboundConnection(
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param receiver: Receiver cretaed when starting the Client
+        :param receiver: Receiver created when starting the Client
         """
         super().__init__(ws, receiver)
         self.__addr: Optional[str] = None
@@ -1022,7 +1022,7 @@ class _ProxiedSCAMPConnection(
             x: int, y: int, port: int):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param receiver: Receiver cretaed when starting the Client
+        :param receiver: Receiver created when starting the Client
         :param x: X coordinate of the board's Ethernet-enabled chip
         :param y: Y coordinate of the board's Ethernet-enabled chip
         :param port: UDP port to talk to; defaults to the SCP port
@@ -1041,7 +1041,7 @@ class _ProxiedBootConnection(
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param receiver: Receiver cretaed when starting the Client
+        :param receiver: Receiver created when starting the Client
         """
         super().__init__(ws, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)
 
@@ -1060,7 +1060,7 @@ class _ProxiedEIEIOConnection(
             x: int, y: int, port: int):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param receiver: Receiver cretaed when starting the Client
+        :param receiver: Receiver created when starting the Client
         :param x: X coordinate of the board's Ethernet-enabled chip
         :param y: Y coordinate of the board's Ethernet-enabled chip
         :param port: UDP port to talk to; defaults to the SCP port
@@ -1092,15 +1092,15 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
     __slots__ = ("__conns", )
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
-                 conns: Dict[XY, str]):
+                 connections: Dict[XY, str]):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param receiver: Receiver cretaed when starting the Client
-        :param conns:  Get the mapping from board coordinates to IP addresses.
+        :param receiver: Receiver created when starting the Client
+        :param connections:  Get the mapping from board coordinates to IP addresses.
         """
         super().__init__(ws, receiver)
         # Invert the map
-        self.__conns = {ip: xy for (xy, ip) in conns.items()}
+        self.__conns = {ip: xy for (xy, ip) in connections.items()}
 
     @overrides(SpallocEIEIOListener.send_to_chip)
     def send_to_chip(self, message: bytes, x: int, y: int,
@@ -1131,15 +1131,15 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
     __slots__ = ("__conns", )
 
     def __init__(self, ws: WebSocket, receiver: _ProxyReceiver,
-                 conns: Dict[XY, str]):
+                 connections: Dict[XY, str]):
         """
         :param websocket: WebSocket obtained when starting the client
-        :param receiver: Receiver cretaed when starting the Client
-        :param conns:  Get the mapping from board coordinates to IP addresses.
+        :param receiver: Receiver created when starting the Client
+        :param connections:  Get the mapping from board coordinates to IP addresses.
         """
         super().__init__(ws, receiver)
         # Invert the map
-        self.__conns = {ip: xy for (xy, ip) in conns.items()}
+        self.__conns = {ip: xy for (xy, ip) in connections.items()}
 
     @overrides(UDPConnection.send_to)
     def send_to(self, data: bytes, address: Tuple[str, int]) -> None:

@@ -248,7 +248,7 @@ class SpinnmanGroupedProcessException(SpinnmanException):
         :param error_requests: List of the requests that cause the error.
         :param exceptions: List of the exceptions caught.
            In the same order as the requests that caused the exception.
-        :param trace_backs: List of the tracebacks cause
+        :param trace_backs: List of the trace backs cause
            In the same order as the requests that caused the exception.
         :param connections:List of connections used.
            In the same order as the requests that caused the exception.

@@ -85,7 +85,7 @@ class ExecutableType(Enum):
         :param end_state: The state(s) this type will be in at the end
         :param supports_auto_pause_and_resume: Flag to say this type can run
            when the run is split into smaller blocks
-        :param doc: Desctiption of the type
+        :param doc: Description of the type
         """
         _ = (value, doc)
         self.start_state: FrozenSet[CPUState] = frozenset(start_state)

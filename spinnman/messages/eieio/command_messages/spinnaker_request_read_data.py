@@ -355,7 +355,7 @@ class _SpinnakerRequestReadDataRequest(object):
         """
         Checks if there is enough space to request this id
 
-        :returns: The space ot read for this ID
+        :returns: The space to read for this ID
         :raises SpinnmanInvalidParameterTypeException:
             if the request_id os too high
         """
