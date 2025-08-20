@@ -39,7 +39,7 @@ class IPAddressesConnection(UDPConnection):
                            ) -> Optional[str]:
         """
         :param timeout: The timeout, or `None` to wait forever
-        :returns: Ihe IP address of this connection
+        :returns: The IP address of this connection
           if it works and uses the SPINN_PORT otherwise None
         """
         with suppress(Exception):

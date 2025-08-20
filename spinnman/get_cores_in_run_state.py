@@ -37,9 +37,9 @@ def get_cores_in_run_state(
     """
     Prints the state of all cores with this app id
 
-    :param txrx:Trasnceiver to ask the state from
+    :param txrx: Transceiver to ask the state from
     :param app_id: ID to affect the count but not the detail print out
-    :param print_all_chips: Flag to say all Chips shpuld be listed
+    :param print_all_chips: Flag to say all Chips should be listed
        before the states printout
     """
     count_finished = txrx.get_core_state_count(app_id, CPUState.FINISHED)
