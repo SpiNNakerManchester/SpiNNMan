@@ -986,9 +986,9 @@ class Transceiver(object):
         """
         Sends a signal to update the provenance and exit
 
-        :param x:
-        :param y:
-        :param p:
+        :param x: X coordinate of the Chip
+        :param y: Y coordinate of the Chip
+        :param p: core number on the Chip
         """
         raise NotImplementedError("abstractmethod")
 
