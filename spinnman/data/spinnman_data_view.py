@@ -233,7 +233,7 @@ class SpiNNManDataView(MachineDataView):
             Only returns IDs obtained via this method not by direct calls to
             get_new_id
 
-        :returns: The last ID provided (new ino no previous id)
+        :returns: The last ID provided (or a new ID if no previous id)
         """
         if cls.__data._app_id is None:
             cls.__data._app_id = cls.get_new_id()
