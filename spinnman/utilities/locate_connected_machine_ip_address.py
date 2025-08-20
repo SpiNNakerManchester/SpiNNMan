@@ -48,7 +48,7 @@ def locate_connected_machine(handler: Callable[[str, float], bool]) -> None:
 if __name__ == "__main__":
     def _ctrlc_handler(sig: int, frame: Optional[FrameType]) -> Never:
         """
-        :return: Never returns as it causes a sys.exit()
+        Never returns as it causes a sys.exit()
         """
         _ = (sig, frame)
         print("Exiting")
