@@ -19,7 +19,7 @@ name: Python Actions
 on: [push]
 jobs:
   call:
-    uses: SpiNNakerManchester/SupportScripts/.github/workflows/python_checks.yml@mini_doc_fixes
+    uses: SpiNNakerManchester/SupportScripts/.github/workflows/python_checks.yml@python_cap
     with:
       dependencies: SpiNNUtils SpiNNMachine
       test-directories: unittests spinnman_integration_tests
