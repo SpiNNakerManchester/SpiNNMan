@@ -13,8 +13,8 @@
 # limitations under the License.
 
 from typing import Optional, Type
-
 from spinn_utilities.config_holder import load_config
+from spinn_machine.virtual_machine import virtual_machine_generator
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 
 
@@ -37,3 +37,11 @@ class SpiNNManSimulation(object):
         else:
             self._data_writer = SpiNNManDataWriter.setup()
 
+    def _execute_get_virtual_machine(self) -> None:
+        """
+        Runs VirtualMachineGenerator
+
+        Will set then "machine" and ipaddress values.
+        """
+        self._data_writer.set_machine(virtual_machine_generator())
+        self._data_writer.set_ipaddress("virtual")
