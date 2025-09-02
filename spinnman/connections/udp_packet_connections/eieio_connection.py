@@ -75,7 +75,7 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
             self, eieio_message: AbstractEIEIOMessage,
             ip_address: str, port: int) -> None:
         """
-        Sends an EIEIO message suing this port
+        Sends an EIEIO message using this port
 
         :param eieio_message: The EIEIO message to be sent
         :param ip_address:
