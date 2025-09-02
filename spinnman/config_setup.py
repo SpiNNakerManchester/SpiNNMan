@@ -48,7 +48,7 @@ def add_spinnman_cfg() -> None:
 
 def man_cfg_paths_skipped() -> Set[str]:
     """
-    cfg report options that point to paths that may not exists.
+    cfg report options that point to paths that may not exist.
 
     Assuming mode = Debug
 
