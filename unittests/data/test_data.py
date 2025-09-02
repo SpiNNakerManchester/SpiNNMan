@@ -42,3 +42,21 @@ class TestData(unittest.TestCase):
         self.assertTrue(SpiNNManDataView.has_transceiver())
         with self.assertRaises(TypeError):
             writer.set_transceiver("bacon")  # type: ignore[arg-type]
+
+    def test_ipaddress(self) -> None:
+        writer = SpiNNManDataWriter.setup()
+        self.assertFalse(SpiNNManDataView.has_ipaddress())
+        with self.assertRaises(DataNotYetAvialable):
+            SpiNNManDataView.get_ipaddress()
+        writer.set_ipaddress("127.0.0.0")
+        self.assertEqual("127.0.0.0", SpiNNManDataView.get_ipaddress())
+        self.assertTrue(SpiNNManDataView.has_ipaddress())
+        writer.start_run()
+        writer.finish_run()
+        writer.hard_reset()
+        self.assertFalse(SpiNNManDataView.has_ipaddress())
+        with self.assertRaises(DataNotYetAvialable):
+            SpiNNManDataView.get_ipaddress()
+        with self.assertRaises(TypeError):
+            writer.set_ipaddress(127)  # type: ignore[arg-type]
+

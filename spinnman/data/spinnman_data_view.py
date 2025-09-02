@@ -46,6 +46,7 @@ class _SpiNNManDataModel(object):
         # Data values cached
         "_app_id",
         "_app_id_tracker",
+        "_ipaddress",
         "_scamp_connection_selector",
         "_transceiver",
     ]
@@ -71,6 +72,7 @@ class _SpiNNManDataModel(object):
         """
         self._app_id: Optional[int] = None
         self._app_id_tracker: Optional[AppIdTracker] = None
+        self._ipaddress: Optional[str] = None
         self._soft_reset()
         self._scamp_connection_selector: Optional[
             MostDirectConnectionSelector] = None
@@ -264,3 +266,26 @@ class SpiNNManDataView(MachineDataView):
             cls.__data._scamp_connection_selector =\
                 cls. get_transceiver().get_scamp_connection_selector()
         return cls.__data._scamp_connection_selector
+
+    # IP address
+
+    @classmethod
+    def has_ipaddress(cls) -> bool:
+        """
+        Detects if the IP address of the board with chip 0,0 is known.
+        """
+        return cls.__data._ipaddress is not None
+
+    @classmethod
+    def get_ipaddress(cls) -> str:
+        """
+        Gets the IP address of the board with chip 0,0 if it has been set.
+
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the IP address is currently unavailable
+        """
+        if cls.__data._ipaddress is None:
+            if cls._is_mocked():
+                return "127.0.0.1"
+            raise cls._exception("ipaddress")
+        return cls.__data._ipaddress
