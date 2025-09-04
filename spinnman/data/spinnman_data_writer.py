@@ -109,6 +109,8 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
 
     def set_ipaddress(self, ip_address: str) -> None:
         """
+        Sets the IP address
+
         :param ip_address:
         """
         if not isinstance(ip_address, str):

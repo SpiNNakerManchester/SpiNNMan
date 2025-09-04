@@ -290,15 +290,15 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def has_ipaddress(cls) -> bool:
         """
-        Detects if the IP address of the board with chip 0,0 is known.
+        :returns: True if the IP address of the board with chip 0,0 is known.
         """
         return cls.__data._ipaddress is not None
 
     @classmethod
     def get_ipaddress(cls) -> str:
         """
-        Gets the IP address of the board with chip 0,0 if it has been set.
-
+        :returns:
+            The IP address of the board with chip 0,0 if it has been set.
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the IP address is currently unavailable
         """

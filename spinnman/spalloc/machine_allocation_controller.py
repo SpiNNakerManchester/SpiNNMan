@@ -112,7 +112,9 @@ class MachineAllocationController(object, metaclass=AbstractBase):
         Create a transceiver for talking to the allocated machine, and
         make sure everything is ready for use (i.e. boot and discover
         connections if needed).
-        """
+
+        :returns: Transceiver created using the hostname passed into the init
+         """
         if not self.__hostname:
             raise NotImplementedError("Needs a hostname")
         txrx = create_transceiver_from_hostname(self.__hostname)
@@ -122,6 +124,10 @@ class MachineAllocationController(object, metaclass=AbstractBase):
     def can_create_transceiver(self) -> bool:
         """
         Detects if a call to create_transceiver could work.
+
+        Does not check if create transceiver will work over the known host.
+
+        :returns: True if there is known hostname
         """
         return self.__hostname is not None
 
@@ -145,6 +151,8 @@ class MachineAllocationController(object, metaclass=AbstractBase):
         :param udp_port:
             the UDP port on the chip to connect to; connecting to a non-SCP
             port will result in a connection that can't easily be configured.
+        :returns:
+           Connection to the Chip with a know host over this port or None
         """
         host = self.__host(chip_x, chip_y)
         if not host:
@@ -168,7 +176,11 @@ class MachineAllocationController(object, metaclass=AbstractBase):
         """
         Open an unbound EIEIO connection. This may be used to communicate with
         any board of the job.
-        """
+
+        :param chip_x: X of Chip to get connection to
+        :param chip_y: Y of Chip to get connection to
+        :return: Connection to the Chip with a known host or None
+         """
         return EIEIOConnection()
 
     @property

@@ -53,6 +53,11 @@ class SpallocJobController(MachineAllocationController):
 
     def __init__(
             self, client: SpallocClient, job: SpallocJob, use_proxy: bool):
+        """
+        :param client:
+        :param job:
+        :param use_proxy:
+        """
         if job is None:
             raise TypeError("must have a real job")
         self.__client = client
@@ -217,6 +222,10 @@ def spalloc_allocate_job(
     :param collab: The collab to associate with or None for no collab
     :param nmpi_job: The NMPI Job to associate with or None for no job
     :param nmpi_user: The NMPI username to associate with or None for no user
+    :return:
+        host, board version, BMP details, reset on startup flag,
+        auto-detect BMP flag, board address map, allocation controller
+
     """
     spalloc_server = get_config_str("Machine", "spalloc_server")
     n_boards = get_n_boards()
