@@ -177,7 +177,13 @@ class SpallocJobController(MachineAllocationController):
 
 
 def get_n_boards() -> int:
-    # Work out how many boards are needed
+    """
+    Works out how many boards are needed.
+
+    :return: Number of boards needed with a safety factor
+    :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+        If data needed is not available
+    """
     if SpiNNManDataView.has_n_boards_required():
         return SpiNNManDataView.get_n_boards_required()
     else:
