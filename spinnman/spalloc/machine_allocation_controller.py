@@ -166,6 +166,10 @@ class MachineAllocationController(object, metaclass=AbstractBase):
         """
         Open an unbound EIEIO connection. This may be used to communicate with
         any board of the job.
+
+        :param chip_x: X of Chip to get connection to
+        :param chip_y: Y of Chip to get connection to
+        :return: Connection to the Chip with a known host or None
         """
         host = self.__host(chip_x, chip_y)
         if not host:
@@ -177,10 +181,8 @@ class MachineAllocationController(object, metaclass=AbstractBase):
         Open an unbound EIEIO connection. This may be used to communicate with
         any board of the job.
 
-        :param chip_x: X of Chip to get connection to
-        :param chip_y: Y of Chip to get connection to
-        :return: Connection to the Chip with a known host or None
-         """
+        :returns: The new EIEIO connection
+        """
         return EIEIOConnection()
 
     @property
