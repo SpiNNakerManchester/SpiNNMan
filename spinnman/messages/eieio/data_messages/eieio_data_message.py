@@ -81,6 +81,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         :param payload_prefix: The prefix of the payload
         :param timestamp: The timestamp of the packet
         :param prefix_type: The type of the key prefix if 16-bits
+        :returns: The message created
         """
         payload_base = payload_prefix
         if timestamp is not None:
@@ -117,7 +118,9 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         return header_size + eieio_type.payload_bytes
 
     def get_min_packet_length(self) -> int:
-        """ Get the minimum length of a message instance in bytes. """
+        """
+        :returns: the minimum length of a message instance in bytes.
+        """
         return self.min_packet_length(
             eieio_type=self._header.eieio_type,
             is_prefix=self._header.prefix is not None,

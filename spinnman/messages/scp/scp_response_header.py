@@ -51,6 +51,7 @@ class SCPResponseHeader(object):
 
         :param data: The byte-string to read from
         :param offset:
+        :returns: Response header read from the byte String
         """
         result, sequence = _TWO_SHORTS.unpack_from(data, offset)
         return SCPResponseHeader(SCPResult(result), sequence)

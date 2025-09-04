@@ -31,7 +31,7 @@ class Listenable(Generic[T], metaclass=AbstractBase):
     @abstractmethod
     def get_receive_method(self) -> Callable[[], T]:
         """
-        Get the method that receives for this connection.
+        :returns: The method that receives this connection.
         """
         raise NotImplementedError
 

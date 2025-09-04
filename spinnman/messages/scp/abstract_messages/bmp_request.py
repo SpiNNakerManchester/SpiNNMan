@@ -58,7 +58,8 @@ class BMPRequest(  # pylint: disable=abstract-method
     @staticmethod
     def get_first_board(boards: Boards) -> int:
         """
-        Get the first board ID given a board ID or collection of board IDs.
+        :returns:
+           The first board ID given a board ID or collection of board IDs.
         """
         if isinstance(boards, int):
             return boards
@@ -68,6 +69,12 @@ class BMPRequest(  # pylint: disable=abstract-method
     def get_board_mask(boards: Boards) -> int:
         """
         Get the board mask given a board ID or collection of board IDs.
+
+        ..note:: This methods is only called by deprecated functions.
+           Unsure if it will produce the correct result for multiple boards
+
+        :returns: The board ID as a bit mask,
+           or a sum of bitmaps for multiple boards
         """
         if isinstance(boards, int):
             return 1 << boards

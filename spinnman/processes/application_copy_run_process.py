@@ -98,6 +98,12 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, next_connection_selector: ConnectionSelector,
                  timeout: float = APP_COPY_RUN_TIMEOUT):
+        """
+        :param next_connection_selector:
+           Method to find the next connection to use
+        :param timeout:
+           How long to wait for a response before raising an Exception
+        """
         AbstractMultiConnectionProcess.__init__(
             self, next_connection_selector, timeout=timeout)
 

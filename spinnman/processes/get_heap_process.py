@@ -79,6 +79,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
         """
         :param chip_coords: x, y
         :param pointer:
+        :returns: List of HeapElements
         """
         x, y = chip_coords
         core_coords = (x, y, 0)

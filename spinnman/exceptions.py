@@ -242,11 +242,20 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     collection of cores/chips.
     """
     def __init__(self, error_requests: List[AbstractSCPRequest],
-                 exceptions: List[Exception], tracebacks: List[TracebackType],
+                 exceptions: List[Exception], trace_backs: List[TracebackType],
                  connections: List[SCAMPConnection]):
+        """
+        :param error_requests: List of the requests that cause the error.
+        :param exceptions: List of the exceptions caught.
+           In the same order as the requests that caused the exception.
+        :param trace_backs: List of the trace backs cause
+           In the same order as the requests that caused the exception.
+        :param connections:List of connections used.
+           In the same order as the requests that caused the exception.
+        """
         problem = "Exceptions found were:\n"
         for error_request, exception, trace_back, connection in zip(
-                error_requests, exceptions, tracebacks, connections):
+                error_requests, exceptions, trace_backs, connections):
             sdp_header = error_request.sdp_header
             phys_p = sdp_header.get_physical_cpu_id()
             location = f"board {connection.remote_ip_address} with ethernet " \
@@ -361,7 +370,9 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
         self._failed_core_states = failed_core_states
 
     def failed_core_states(self) -> CPUInfos:
-        """ The unexpected actual state """
+        """
+        :returns: The unexpected actual state
+         """
         return self._failed_core_states
 
 

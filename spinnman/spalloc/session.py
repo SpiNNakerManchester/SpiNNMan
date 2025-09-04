@@ -37,6 +37,8 @@ _debug_pretty_print = False
 def _may_renew(method: Callable) -> Callable:
     def pp_req(request: requests.PreparedRequest) -> None:
         """
+        Prints the request to the console.
+
         :param request:
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
@@ -48,6 +50,8 @@ def _may_renew(method: Callable) -> Callable:
 
     def pp_resp(response: requests.Response) -> None:
         """
+        Prints the response to the console.
+
         :param response:
         """
         print("<<<<<<<<<<<START<<<<<<<<<<<")
@@ -122,6 +126,9 @@ class Session:
 
     def __handle_error_or_return(self, response: requests.Response
                                  ) -> Optional[requests.Response]:
+        """
+        :returns: The response verified that it is not an error
+        """
         code = response.status_code
         if code >= 200 and code < 400:
             return response
@@ -136,7 +143,9 @@ class Session:
         Do an HTTP ``GET`` in the session.
 
         :param url:
-        :param timeout:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -154,8 +163,10 @@ class Session:
         Do an HTTP ``POST`` in the session.
 
         :param url:
-        :param timeout:
         :param json_dict:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -174,7 +185,9 @@ class Session:
 
         :param url:
         :param data:
-        :param timeout:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -194,7 +207,9 @@ class Session:
 
         :param url:
         :param data:
-        :param timeout:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -214,7 +229,11 @@ class Session:
         Do an HTTP ``DELETE`` in the session.
 
         :param url:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
+
         """
         params = kwargs if kwargs else None
         cookies, headers = self.credentials
@@ -324,6 +343,7 @@ class Session:
         :param cookie:
             Optional cookies (composed as semicolon-separated string)
         :param kwargs: Other options to :py:func:`~websocket.create_connection`
+        :returns: Socket based on these credentials
         """
         # Note: *NOT* a renewable action!
         if header is None:
@@ -365,6 +385,10 @@ class SessionAware:
     __slots__ = ("__session", "_url")
 
     def __init__(self, session: Session, url: str):
+        """
+        :param session: The session created when starting the spalloc client
+        :param url: job_url
+        """
         self.__session = session
         self._url = clean_url(url)
 

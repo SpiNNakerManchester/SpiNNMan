@@ -53,6 +53,9 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
             app_id: int) -> None:
         """
+        Converts the routing entries to Machine format
+        and loads then onto the Chip.
+
         :param x:
         :param y:
         :param routes:

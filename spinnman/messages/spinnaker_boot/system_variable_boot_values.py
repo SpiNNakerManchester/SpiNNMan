@@ -34,13 +34,18 @@ class _DataType(Enum):
         obj._value_ = value
         return obj
 
-    def __init__(self, _: int, struct_code: str):
+    def __init__(self, value: int, struct_code: str):
+        """
+        :param value: ID for this enum
+        :param struct_code: The format string to pass to struct.pack
+        """
+        _ = value
         self._struct_code = struct_code
 
     @property
     def struct_code(self) -> str:
         """
-        Gets the struct_code value passed into the init
+        The format string to pass to struct.pack
         """
         return self._struct_code
 

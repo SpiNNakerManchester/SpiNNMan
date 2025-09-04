@@ -47,6 +47,7 @@ class SDPMessage(object):
         """
         :param data:
         :param offset:
+        :returns: The message from the byte-string.
         """
         sdp_header = SDPHeader.from_bytestring(data, offset)
         return SDPMessage(sdp_header, data, offset + 8)

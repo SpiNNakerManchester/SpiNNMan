@@ -217,7 +217,7 @@ class ChipInfo(object):
 
     def router_table_copy_address(self) -> int:
         """
-        The address of the copy of the router table.
+        :returns: The address of the copy of the router table.
         """
         return self._read_int("router_table_copy_address")
 

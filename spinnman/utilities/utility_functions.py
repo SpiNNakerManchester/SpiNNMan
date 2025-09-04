@@ -50,9 +50,8 @@ def work_out_bmp_from_machine_details(
 
 def get_vcpu_address(p: int) -> int:
     """
-    Get the address of the vcpu_t structure for the given core.
-
     :param p: The core
+    :returns: The address of the vcpu_t structure for the given core.
     """
     return CPU_INFO_OFFSET + (CPU_INFO_BYTES * p)
 

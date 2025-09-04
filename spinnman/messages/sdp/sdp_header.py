@@ -282,11 +282,10 @@ class SDPHeader(object):
     @staticmethod
     def from_bytestring(data: bytes, offset: int) -> "SDPHeader":
         """
-        Read the header from a byte-string.
-
         :param data: The byte-string to read the header from
         :param offset:
             The offset into the data from which to start reading
+        :returns: The header from the byte-string.
         """
         (flags, tag, dest_port_cpu, source_port_cpu,
          destination_chip_y, destination_chip_x,
@@ -303,6 +302,8 @@ class SDPHeader(object):
     def get_physical_cpu_id(self) -> str:
         """
         A String describing the physical core of the destination.
+
+        :return: A report / debug representation of the destination
         """
         return SpiNNManDataView.get_physical_string(
             (self._destination_chip_x, self._destination_chip_y),

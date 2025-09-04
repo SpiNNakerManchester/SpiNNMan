@@ -107,7 +107,11 @@ class SpiNNManDataView(MachineDataView):
 
     @classmethod
     def has_transceiver(cls) -> bool:
-        """ Reports if a transceiver is currently set. """
+        """
+        Reports if a transceiver is currently set.
+
+        :returns: True if a transceiver is available.
+        """
         return cls.__data._transceiver is not None
 
     @classmethod
@@ -115,6 +119,7 @@ class SpiNNManDataView(MachineDataView):
         """
         The transceiver description.
 
+        :returns: A previously created transceiver.
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """
@@ -193,6 +198,7 @@ class SpiNNManDataView(MachineDataView):
             * If `data` is a str, the length of the file will be used
         :param offset: The offset from which the valid data begins
         :param cpu: The optional CPU to write to
+        :return: The number of bytes written, the checksum (0 if get_sum=False)
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         :raise SpinnmanIOException:
@@ -222,6 +228,12 @@ class SpiNNManDataView(MachineDataView):
         Gets the main app_id used by the transceiver.
 
         This method will create a new app_id if one has not yet been created.
+
+         .. note::
+            Only returns IDs obtained via this method not by direct calls to
+            get_new_id
+
+        :returns: The last ID provided (or a new ID if no previous id)
         """
         if cls.__data._app_id is None:
             cls.__data._app_id = cls.get_new_id()
@@ -232,7 +244,12 @@ class SpiNNManDataView(MachineDataView):
         """
         Gets a new id from the current `app_id_tracker`
 
-        previously `get_transceiver().app_id_tracker().get_new_id()`
+        previously `get_transceiver().app_id_tracker().get_new_id()
+
+        .. note::
+            Ids obtained this way are not cached so not returned by get_app_id
+
+        :returns: A new unallocated ID
         """
         if cls.__data._app_id_tracker is None:
             cls.__data._app_id_tracker = AppIdTracker()
@@ -257,6 +274,7 @@ class SpiNNManDataView(MachineDataView):
 
         Syntactic sugar for `get_transceiver().get_scamp_connection_selector()`
 
+        :returns: the most direct scamp connections
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """

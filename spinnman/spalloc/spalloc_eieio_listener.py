@@ -113,8 +113,6 @@ class SpallocEIEIOListener(
     def local_ip_address(self) -> str:  # type: ignore[override]
         """
         The IP address on the server to which the connection is bound.
-
-        :return: The IP address as a dotted string, e.g., 0.0.0.0
         """
         raise NotImplementedError
 
@@ -123,8 +121,6 @@ class SpallocEIEIOListener(
     def local_port(self) -> int:  # type: ignore[override]
         """
         The port on the server to which the connection is bound.
-
-        :return: The local port number
         """
         raise NotImplementedError
 

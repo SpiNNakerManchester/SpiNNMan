@@ -48,9 +48,14 @@ def add_spinnman_cfg() -> None:
 
 def man_cfg_paths_skipped() -> Set[str]:
     """
-    Set of cfg path that may not be found based on other cfg settings
+    cfg report options that point to paths that may not exist.
 
     Assuming mode = Debug
+
+    Used in function that check reports exists at the end of a debug node run.
+
+    :returns:
+       Set of cfg path that may not be found based on other cfg settings
     """
     skipped = set()
     if get_config_bool("Machine", "virtual_board"):

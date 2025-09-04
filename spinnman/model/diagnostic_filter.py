@@ -232,11 +232,12 @@ class DiagnosticFilter(object):
     @staticmethod
     def read_from_int(int_value: int) -> DiagnosticFilter:
         """
-        Claims to returns a filter that reads an int
+        Claims to return a filter that reads an int
 
         Currently only called by unused Transceiver methods
 
         :param int_value:
+        :returns: Untested filter
         """
         enable_interrupt_on_counter_event = (
             (int_value >> _ENABLE_INTERRUPT_OFFSET) & 0x1) == 1

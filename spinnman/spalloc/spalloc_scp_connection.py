@@ -37,6 +37,12 @@ class SpallocSCPConnection(
     __slots__ = ()
 
     def __init__(self, x: int, y: int) -> None:
+        """
+        :param x:
+            The x-coordinate of the chip on the board with this remote_host
+        :param y:
+            The y-coordinate of the chip on the board with this remote_host
+        """
         super(SpallocSCPConnection, self).__init__(x, y)
 
     @overrides(SCAMPConnection.receive_sdp_message)

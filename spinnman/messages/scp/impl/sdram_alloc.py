@@ -37,6 +37,9 @@ class _AllocResponse(AbstractSCPResponse):
         "_size")
 
     def __init__(self, size: int):
+        """
+        :param size: The size in bytes of memory to be allocated
+        """
         super().__init__()
         self._size = size
         self._base_address: Optional[int] = None

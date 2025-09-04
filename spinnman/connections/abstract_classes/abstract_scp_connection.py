@@ -59,8 +59,8 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
     @abstractmethod
     def get_scp_data(self, scp_request: AbstractSCPRequest) -> bytes:
         """
-        Returns the data of an SCP request as it would be sent down this
-        connection.
+        :returns: the data of an SCP request as it would be sent down this
+           connection.
         """
         raise NotImplementedError
 

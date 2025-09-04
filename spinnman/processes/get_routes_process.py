@@ -79,6 +79,7 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
         :param x:
         :param y:
         :param base_address:
+        :returns: The Routes read from the scamp chip
         """
         # Create the read requests
         offset = 0

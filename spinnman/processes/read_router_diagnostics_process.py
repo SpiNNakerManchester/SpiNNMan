@@ -59,6 +59,7 @@ class ReadRouterDiagnosticsProcess(
         """
         :param x:
         :param y:
+        :returns: Router status for this Chip
         """
         with self._collect_responses():
             coords = x, y, 0

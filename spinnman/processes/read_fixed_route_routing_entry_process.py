@@ -55,6 +55,7 @@ class ReadFixedRouteRoutingEntryProcess(
         :param app_id:
             The ID of the application with which to associate the
             routes.  If not specified, defaults to 0.
+        :returns: The fixed route entry installed the chip's router.
         """
         with self._collect_responses():
             self._send_request(FixedRouteRead(x, y, app_id),

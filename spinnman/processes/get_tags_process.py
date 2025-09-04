@@ -68,6 +68,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
     def get_tags(self, connection: SCAMPConnection) -> List[AbstractTag]:
         """
         :param connection:
+        :returns: The tags read from the connection.
         """
         # Get the tag information, without which we cannot continue
         with self._collect_responses():

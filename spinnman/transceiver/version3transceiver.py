@@ -29,6 +29,12 @@ class Version3Transceiver(BaseTransceiver):
     @overrides(BaseTransceiver.__init__)
     def __init__(self, connections: Optional[Iterable[Connection]] = None,
                  power_cycle: bool = False):
+        """
+        :param connections:
+            An iterable of connections to the board.  If not specified, no
+            communication will be possible until connections are found.
+        :param power_cycle: If True will power cycle the machine:
+        """
         super().__init__(connections, power_cycle=power_cycle)
         assert SpiNNManDataView.get_machine_version().number == 3
 

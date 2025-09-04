@@ -28,6 +28,10 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
     __slots__ = ()
 
     def __init__(self, next_connection_selector: ConnectionSelector):
+        """
+        :param next_connection_selector:
+            How to choose the connection.
+        """
         AbstractMultiConnectionProcess.__init__(
             self, next_connection_selector, n_channels=3,
             intermediate_channel_waits=2)
@@ -48,6 +52,8 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             self, nearest_neighbour_id: int, base_address: int,
             data: bytes, offset: int, n_bytes: Optional[int] = None) -> None:
         """
+        Currently not used!
+
         :param nearest_neighbour_id:
         :param base_address:
         :param data:
@@ -80,6 +86,8 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             self, nearest_neighbour_id: int, base_address: int,
             reader: BinaryIO, n_bytes: int) -> None:
         """
+        Currently not used!
+
         :param nearest_neighbour_id:
         :param base_address:
         :param reader:

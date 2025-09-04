@@ -35,6 +35,10 @@ class Response(AbstractSCPResponse):
         "__cmd")
 
     def __init__(self, operation: str, command: str) -> None:
+        """
+        :param operation: Operation name
+        :param command: Command used for which this is the response
+        """
         super().__init__()
         self._data = b''
         self._length = 0

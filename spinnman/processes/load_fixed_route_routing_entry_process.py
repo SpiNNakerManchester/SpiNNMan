@@ -27,6 +27,8 @@ class LoadFixedRouteRoutingEntryProcess(AbstractMultiConnectionProcess):
             self, x: int, y: int, fixed_route: RoutingEntry,
             app_id: int = 0) -> None:
         """
+        Sends a fixed route to the Chip
+
         :param x: The x-coordinate of the chip, between 0 and 255;
             this is not checked due to speed restrictions.
         :param y: The y-coordinate of the chip, between 0 and 255;
