@@ -24,6 +24,7 @@ from spinn_utilities.typing.coords import XY
 from spinn_machine.virtual_machine import virtual_machine_generator
 
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
+from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.spalloc import (
     is_server_address, MachineAllocationController)
 from spinnman.spalloc.spalloc_allocator import spalloc_allocate_job
@@ -99,10 +100,11 @@ class SpiNNManSimulation(object):
     def _execute_spalloc_allocate_job_old(self) -> Tuple[
             str, int, Optional[str], bool, bool, Dict[XY, str],
             MachineAllocationController]:
-        raise NotImplementedError()
+        raise SpinnmanUnsupportedOperationException(
+            "spalloc_allocate_job_old")
 
     def _execute_hbp_allocator(
             self, total_run_time:  Optional[float]) -> Tuple[
             str, int, Optional[str], bool, bool, None,
             MachineAllocationController]:
-        raise NotImplementedError()
+        raise SpinnmanUnsupportedOperationException("hbp_allocator")
