@@ -178,8 +178,3 @@ class MachineAllocationController(object, metaclass=AbstractBase):
         """
         return False
 
-    def add_report(self) -> None:
-        """
-        Asks the controller to add a report of details of allocations.
-        By default, this does nothing.
-        """

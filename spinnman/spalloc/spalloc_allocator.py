@@ -173,12 +173,8 @@ class SpallocJobController(MachineAllocationController):
     def proxying(self) -> bool:
         return self.__use_proxy
 
-    @overrides(MachineAllocationController.add_report)
-    def add_report(self) -> None:
-        # as controlled by write_board_chip_report just append there
-        filename = get_report_path("path_board_chip_report")
-        with open(filename, "a", encoding="utf-8") as report:
-            report.write(f"\n\nJob: {self._job}")
+    def __str__(self) -> str:
+        return f"SpallocJobController over {self._job}"
 
 
 def get_n_boards() -> int:
