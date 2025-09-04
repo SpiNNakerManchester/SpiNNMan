@@ -177,4 +177,3 @@ class MachineAllocationController(object, metaclass=AbstractBase):
         Whether this is a proxying connection. False unless overridden.
         """
         return False
-
