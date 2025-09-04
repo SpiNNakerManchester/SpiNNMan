@@ -62,7 +62,7 @@ class SpiNNManSimulation(object):
         """
         Runs VirtualMachineGenerator
 
-        Will set then "machine" and ipaddress values.
+        Will set then "machine" and IP address values.
         """
         self._data_writer.set_machine(virtual_machine_generator())
         self._data_writer.set_ipaddress("virtual")

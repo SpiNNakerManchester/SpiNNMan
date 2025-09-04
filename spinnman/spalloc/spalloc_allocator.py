@@ -241,5 +241,5 @@ def spalloc_allocate_job(
         # the allocation controller now owns them.
         stack.pop_all()
     assert root is not None, "no root of ready board"
-    _MACHINE_VERSION = 5
-    return (root, _MACHINE_VERSION, connections, allocation_controller)
+    version = 5
+    return (root, version, connections, allocation_controller)
