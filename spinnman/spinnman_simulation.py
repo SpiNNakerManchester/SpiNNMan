@@ -46,7 +46,7 @@ class SpiNNManSimulation(object):
 
     __slots__ = (
         # The writer and therefore view of the global data
-        "_data_writer", )
+        "__data_writer", )
 
 
     def __init__(
@@ -54,9 +54,13 @@ class SpiNNManSimulation(object):
         load_config()
 
         if data_writer_cls:
-            self._data_writer = data_writer_cls.setup()
+            self.__data_writer = data_writer_cls.setup()
         else:
-            self._data_writer = SpiNNManDataWriter.setup()
+            self.__data_writer = SpiNNManDataWriter.setup()
+
+    @property
+    def _data_writer(self) -> SpiNNManDataWriter:
+        return self.__data_writer
 
     def _execute_get_virtual_machine(self) -> None:
         """
@@ -89,18 +93,18 @@ class SpiNNManSimulation(object):
         return None
 
     def _execute_spalloc_allocate_job(self) ->  Tuple[
-            str, int, Optional[str], bool, bool, None,
+            str, int, Optional[str], bool, bool, Dict[XY, str],
             MachineAllocationController]:
         host, version, connections, mac = spalloc_allocate_job()
         return (
             host, version, None, False, False, connections, mac)
 
     def _execute_spalloc_allocate_job_old(self) ->  Tuple[
-            str, int, Optional[str], bool, bool, None,
+            str, int, Optional[str], bool, bool, Dict[XY, str],
             MachineAllocationController]:
         raise NotImplementedError()
 
-    def _execute_hbp_allocator(total_run_time:  int) -> Tuple[
+    def _execute_hbp_allocator(self, total_run_time:  Optional[float]) -> Tuple[
             str, int, Optional[str], bool, bool, None,
             MachineAllocationController]:
         raise NotImplementedError()
