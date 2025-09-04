@@ -59,4 +59,3 @@ class TestData(unittest.TestCase):
             SpiNNManDataView.get_ipaddress()
         with self.assertRaises(TypeError):
             writer.set_ipaddress(127)  # type: ignore[arg-type]
-

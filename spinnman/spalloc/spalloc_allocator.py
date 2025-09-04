@@ -18,8 +18,7 @@ import math
 from typing import ContextManager, Dict, Tuple, Optional, cast
 
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_str_or_none,
-    get_report_path)
+    get_config_bool, get_config_str_or_none)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
@@ -196,6 +195,7 @@ def get_n_boards() -> int:
         if n_boards - n_boards_float < 0.5:
             n_boards += 1
         return n_boards
+
 
 def spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,

@@ -14,10 +14,7 @@
 
 import logging
 import re
-import os
 from typing import Dict, Optional, Tuple, Type
-
-import requests
 
 from spinn_utilities.config_holder import (
     is_config_none, load_config, get_config_str_or_none)
@@ -48,7 +45,6 @@ class SpiNNManSimulation(object):
         # The writer and therefore view of the global data
         "__data_writer", )
 
-
     def __init__(
             self, data_writer_cls: Optional[Type[SpiNNManDataWriter]] = None):
         load_config()
@@ -71,7 +67,8 @@ class SpiNNManSimulation(object):
         self._data_writer.set_machine(virtual_machine_generator())
         self._data_writer.set_ipaddress("virtual")
 
-    def _do_get_allocator_data(self, total_run_time: Optional[float]) -> Optional[
+    def _do_get_allocator_data(
+            self, total_run_time: Optional[float]) -> Optional[
             Tuple[str, int, Optional[str], bool, bool, Optional[Dict[XY, str]],
                   MachineAllocationController]]:
         """
@@ -92,19 +89,20 @@ class SpiNNManSimulation(object):
             return self._execute_hbp_allocator(total_run_time)
         return None
 
-    def _execute_spalloc_allocate_job(self) ->  Tuple[
+    def _execute_spalloc_allocate_job(self) -> Tuple[
             str, int, Optional[str], bool, bool, Dict[XY, str],
             MachineAllocationController]:
         host, version, connections, mac = spalloc_allocate_job()
         return (
             host, version, None, False, False, connections, mac)
 
-    def _execute_spalloc_allocate_job_old(self) ->  Tuple[
+    def _execute_spalloc_allocate_job_old(self) -> Tuple[
             str, int, Optional[str], bool, bool, Dict[XY, str],
             MachineAllocationController]:
         raise NotImplementedError()
 
-    def _execute_hbp_allocator(self, total_run_time:  Optional[float]) -> Tuple[
+    def _execute_hbp_allocator(
+            self, total_run_time:  Optional[float]) -> Tuple[
             str, int, Optional[str], bool, bool, None,
             MachineAllocationController]:
         raise NotImplementedError()
