@@ -15,7 +15,7 @@
 from contextlib import ExitStack
 import logging
 import math
-from typing import ContextManager, Dict, Tuple, Optional, cast
+from typing import cast, ContextManager, Dict, Tuple, Optional, Union
 
 from spinn_utilities.config_holder import (
     get_config_bool, get_config_str_or_none)
@@ -199,7 +199,7 @@ def get_n_boards() -> int:
 
 def spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,
-        collab: Optional[str] = None, nmpi_job: Optional[int] = None,
+        collab: Optional[str] = None, nmpi_job: Union[int, str, None]  = None,
         nmpi_user: Optional[str] = None) -> Tuple[
             str, int, Dict[XY, str], MachineAllocationController]:
     """
@@ -218,9 +218,13 @@ def spalloc_allocate_job(
     with ExitStack() as stack:
         spalloc_machine = get_config_str_or_none("Machine", "spalloc_machine")
         use_proxy = get_config_bool("Machine", "spalloc_use_proxy")
+        if nmpi_job is None:
+            _nmpi_job: Optional[int] = None
+        else:
+            _nmpi_job = int(nmpi_job)
         client = SpallocClient(
             spalloc_server, bearer_token=bearer_token, group=group,
-            collab=collab, nmpi_job=nmpi_job, nmpi_user=nmpi_user)
+            collab=collab, nmpi_job=_nmpi_job, nmpi_user=nmpi_user)
         stack.enter_context(cast(ContextManager[SpallocClient], client))
         job = client.create_job(n_boards, spalloc_machine)
         stack.enter_context(job)
