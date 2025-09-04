@@ -205,7 +205,7 @@ def spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,
         collab: Optional[str] = None, nmpi_job: Optional[int] = None,
         nmpi_user: Optional[str] = None) -> Tuple[
-            str, Dict[XY, str], MachineAllocationController]:
+            str, int, Dict[XY, str], MachineAllocationController]:
     """
     Request a machine from an new-style spalloc server that will fit the
     given number of boards.
@@ -241,4 +241,5 @@ def spalloc_allocate_job(
         # the allocation controller now owns them.
         stack.pop_all()
     assert root is not None, "no root of ready board"
-    return (root, connections, allocation_controller)
+    _MACHINE_VERSION = 5
+    return (root, _MACHINE_VERSION, connections, allocation_controller)
