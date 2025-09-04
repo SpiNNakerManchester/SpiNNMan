@@ -199,7 +199,7 @@ def get_n_boards() -> int:
 
 def spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,
-        collab: Optional[str] = None, nmpi_job: Union[int, str, None]  = None,
+        collab: Optional[str] = None, nmpi_job: Union[int, str, None] = None,
         nmpi_user: Optional[str] = None) -> Tuple[
             str, int, Dict[XY, str], MachineAllocationController]:
     """
