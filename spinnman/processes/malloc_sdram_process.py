@@ -81,7 +81,5 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
     def base_addresses(self) -> List[int]:
         """
         The addresses of the allocated memory blocks.
-
-        :return: A list of base addresses in the order requested
         """
         return self.__base_addresses

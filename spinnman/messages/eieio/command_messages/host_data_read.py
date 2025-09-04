@@ -86,9 +86,8 @@ class HostDataRead(EIEIOCommandMessage):
 
     def channel(self, ack_id: int) -> int:
         """
-        Gets the channel value for this ack_id.
-
         :param ack_id:
+        :returns: The channel value for this ack_id.
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -96,9 +95,8 @@ class HostDataRead(EIEIOCommandMessage):
 
     def region_id(self, ack_id: int) -> int:
         """
-        Gets the region_id value for this ack_id.
-
         :param ack_id:
+        :returns: The region_id value for this ack_id.
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -106,9 +104,8 @@ class HostDataRead(EIEIOCommandMessage):
 
     def space_read(self, ack_id: int) -> int:
         """
-        Gets the space_read value for this ack_id.
-
         :param ack_id:
+        :returns: The space_read value for this ack_id.
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -217,9 +214,8 @@ class _HostDataReadAck(object):
 
     def channel(self, ack_id: int) -> int:
         """
-        Gets the channel value for this ack_id.
-
         :param ack_id:
+        :returns: The channel value for this ack_id.
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -232,9 +228,8 @@ class _HostDataReadAck(object):
 
     def region_id(self, ack_id: int) -> int:
         """
-        Gets the region_id value for this ack_id.
-
         :param ack_id:
+        :returns: The region_id value for this ack_id.
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """
@@ -247,9 +242,8 @@ class _HostDataReadAck(object):
 
     def space_read(self, ack_id: int) -> int:
         """
-        Gets the space_read value for this ack_id.
-
         :param ack_id:
+        :returns: the space_read value for this ack_id.
         :raises SpinnmanInvalidParameterTypeException:
             If the ack_id is invalid
         """

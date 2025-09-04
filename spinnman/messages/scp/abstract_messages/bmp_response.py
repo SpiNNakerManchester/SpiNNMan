@@ -33,6 +33,10 @@ class BMPResponse(AbstractSCPResponse, Generic[T]):
     __slots__ = ("__operation", "__command", "__value")
 
     def __init__(self, operation: str, command: SCPCommand):
+        """
+        :param operation: Operation name
+        :param command: Command used for which this is the response
+        """
         super().__init__()
         self.__operation = operation
         self.__command = command

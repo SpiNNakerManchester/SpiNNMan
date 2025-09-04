@@ -40,6 +40,12 @@ class EIEIOType(Enum):
                  # Default values just to make mypy SHUT UP!
                  # https://github.com/python/mypy/issues/10573
                  key_bytes: int = 0, payload_bytes: int = 0):
+        """
+        :param encoded_value: The encoded value representing the type.
+        :param key_bytes: The number of bytes used by each key element.
+        :param payload_bytes:
+            The number of bytes used by each payload element.
+        """
         self._encoded_value = encoded_value
         self._key_bytes = key_bytes
         self._payload_bytes = payload_bytes

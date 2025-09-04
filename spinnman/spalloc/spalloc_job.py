@@ -43,6 +43,7 @@ class SpallocJob(AbstractContextManager):
         Get the current state of the machine.
 
         :param wait_for_change: Whether to wait for a change in state
+        :returns: The current or new state
         """
         raise NotImplementedError()
 
@@ -129,6 +130,8 @@ class SpallocJob(AbstractContextManager):
         """
         Create a transceiver that will talk to this job. The transceiver will
         only be configured to talk to the SCP ports of the boards of the job.
+
+        :returns: Transceiver that uses this job.
         """
         raise NotImplementedError()
 
@@ -190,9 +193,13 @@ class SpallocJob(AbstractContextManager):
         """
         Get the session credentials for the job to be written into a database
 
+        These are the "COOKIE" "HEADER" items,
         .. note::
             May assume that there is a ``proxy_configuration`` table with
             ``kind``, ``name`` and ``value`` columns.
+
+        :returns: Mapping of Tuple["COOKIE" or "HEADER", and the key]
+            to the value for that key
         """
         raise NotImplementedError()
 

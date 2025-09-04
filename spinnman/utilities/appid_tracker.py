@@ -45,7 +45,9 @@ class AppIdTracker(object):
         self._max_app_id = max_app_id
 
     def get_new_id(self) -> int:
-        """ Get a new unallocated ID """
+        """
+        :returns: A new unallocated ID
+        """
         return self._free_ids.pop()
 
     def allocate_id(self, allocated_id: int) -> None:

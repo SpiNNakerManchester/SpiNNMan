@@ -50,6 +50,7 @@ class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
         :param xys:
         :param app_id:
         :param state:
+        :returns: The number of the listed Chips and IP
         """
         for c_x, c_y in xys:
             self._send_request(

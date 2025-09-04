@@ -24,6 +24,7 @@ def clean_url(url: str) -> str:
     Add a ``/`` to the end of the path part of a URL if there isn't one.
 
     :param url:
+    :returns: url with `/` if needed.
     """
     r = urlparse(url)
     parts = list(r)
@@ -57,6 +58,8 @@ def get_hostname(url: str) -> str:
     """
     Parses a URL and extracts the hostname part.
     A hostname must be present.
+
+    :returns: the hostname part of the URL
     """
     netloc = urlsplit(url).hostname
     if netloc is None:
@@ -73,6 +76,7 @@ def is_server_address(
     :param additional_schemes:
         Any additional URL schemes that should be considered to be successes;
         typically ``{"spalloc"}`` when looser matching is required.
+    :returns: True if the address matches a pattern that could be a server..
     """
     schemes = {"http", "https"}
     if additional_schemes:

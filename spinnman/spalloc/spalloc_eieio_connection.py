@@ -52,11 +52,12 @@ class SpallocEIEIOConnection(
     def send_eieio_message_to_core(self, eieio_message: AbstractEIEIOMessage,
                                    x: int, y: int, p: int) -> None:
         """
+        Sends the message including a header
 
-        :param eieio_message:
-        :param x:
-        :param y:
-        :param p:
+        :param eieio_message: Message to send
+        :param x: destination chip x
+        :param y: destination chip y
+        :param p: destination_cpu
         """
         sdp_message = SDPMessage(
             SDPHeader(

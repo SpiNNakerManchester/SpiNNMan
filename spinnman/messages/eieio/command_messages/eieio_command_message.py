@@ -67,6 +67,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         :param command_header:
         :param data:
         :param offset:
+        :returns: The created EIEIOCommandMessage
         """
         return EIEIOCommandMessage(command_header, data, offset)
 
@@ -79,7 +80,9 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
 
     @staticmethod
     def get_min_packet_length() -> int:
-        """ Gets the min packet length for this type.  """
+        """
+        :returns: the min packet length for this type.
+        """
         return 2
 
     def __str__(self) -> str:

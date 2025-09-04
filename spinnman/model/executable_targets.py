@@ -123,6 +123,7 @@ class ExecutableTargets(object):
         Get the cores that a binary is to run on.
 
         :param binary: The binary to find the cores for
+        :returns: A possibly empty CoreSubsets for this binary
         """
         return self._targets.get(binary, self.__EMPTY_SUBSET)
 
@@ -154,6 +155,7 @@ class ExecutableTargets(object):
         :param chip_x:
         :param chip_y:
         :param chip_p:
+        :returns: True if and only if this chip has this binary
         """
         if not self._all_core_subsets.is_core(chip_x, chip_y, chip_p):
             return False

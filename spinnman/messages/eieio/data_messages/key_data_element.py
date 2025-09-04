@@ -29,6 +29,9 @@ class KeyDataElement(AbstractDataElement):
     __slots__ = "_key",
 
     def __init__(self, key: int):
+        """
+        :param key: The key to use
+        """
         self._key = key
 
     @property

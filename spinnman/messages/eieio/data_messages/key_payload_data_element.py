@@ -33,6 +33,12 @@ class KeyPayloadDataElement(AbstractDataElement):
 
     def __init__(
             self, key: int, payload: int, payload_is_timestamp: bool = False):
+        """
+
+        :param key: The ID for this message
+        :param payload: The data sent
+        :param payload_is_timestamp: Flag to identify if data is a timestamp
+        """
         self._key = key
         self._payload = payload
         self._payload_is_timestamp = payload_is_timestamp

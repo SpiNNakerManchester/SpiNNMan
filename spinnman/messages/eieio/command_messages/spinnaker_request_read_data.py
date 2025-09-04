@@ -121,36 +121,32 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
 
     def channel(self, request_id: int) -> int:
         """
-        The channel for this request_id.
-
         :param request_id:
+        :returns: The channel for this request_id.
         :raises IndexError: If the request_id is invalid
         """
         return self._requests.channel(request_id)
 
     def region_id(self, request_id: int) -> int:
         """
-        The region_id for this request_id.
-
         :param request_id:
+        :returns: The region_id for this request_id.
         :raises IndexError: If the request_id is invalid
         """
         return self._requests.region_id(request_id)
 
     def start_address(self, request_id: int) -> int:
         """
-        The start_address for this request_id.
-
         :param request_id:
+        :returns: The start_address value for this request_id.
         :raises IndexError: If the request_id is invalid
         """
         return self._requests.start_address(request_id)
 
     def space_to_be_read(self, request_id: int) -> int:
         """
-        The space_to_be_read for this request_id.
-
         :param request_id:
+        :returns: The space_to_be_read for this request_id.
         :raises IndexError: If the request_id is invalid
         """
         return self._requests.space_to_be_read(request_id)
@@ -314,9 +310,8 @@ class _SpinnakerRequestReadDataRequest(object):
 
     def channel(self, request_id: int) -> int:
         """
-        Gets the channel for this request_id
-
         :param request_id:
+        :returns: The channel for this request_id
         :raises SpinnmanInvalidParameterTypeException:
             if the request_id os too high
         """
@@ -330,9 +325,8 @@ class _SpinnakerRequestReadDataRequest(object):
 
     def region_id(self, request_id: int) -> int:
         """
-        Gets the region_id for this request_id
-
         :param request_id:
+        :returns: The region_id for this request_id
         :raises SpinnmanInvalidParameterTypeException:
             if the request_id os too high
         """
@@ -345,9 +339,8 @@ class _SpinnakerRequestReadDataRequest(object):
 
     def start_address(self, request_id: int) -> int:
         """
-        Gets the start address for this request_id
-
         :param request_id:
+        :returns: The start address for this request_id
         :raises SpinnmanInvalidParameterTypeException:
             if the request_id os too high
         """
@@ -362,6 +355,7 @@ class _SpinnakerRequestReadDataRequest(object):
         """
         Checks if there is enough space to request this id
 
+        :returns: The space to read for this ID
         :raises SpinnmanInvalidParameterTypeException:
             if the request_id os too high
         """

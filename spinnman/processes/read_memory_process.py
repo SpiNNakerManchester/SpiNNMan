@@ -52,6 +52,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         :param coordinates:
         :param base_address:
         :param length:
+        :returns: Data read from the core
         """
         return self._read_memory(
             base_address, length,
@@ -66,6 +67,7 @@ class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):
         :param link:
         :param base_address:
         :param length:
+        :return: Data read over the link
         """
         return self._read_memory(
             base_address, length,

@@ -60,6 +60,7 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
     def execute(self, request: AbstractSCPRequest[R]) -> R:
         """
         :param request:
+        :returns: The response from this request.
         """
         with self._collect_responses():
             self._send_request(request, self.__handle_response)

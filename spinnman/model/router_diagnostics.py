@@ -212,8 +212,6 @@ class RouterDiagnostics(object):
     def user_registers(self) -> Sequence[int]:
         """
         The values in the user control registers.
-
-        :return: An array of 4 values
         """
         return self._register_values[
             ROUTER_REGISTER_REGISTERS.USER_0.value:
@@ -224,7 +222,5 @@ class RouterDiagnostics(object):
         """
         The values in all of the registers.  Can be used to directly access
         the registers if they have been programmed to give different values.
-
-        :return: An array of 16 values
         """
         return self._register_values

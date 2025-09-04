@@ -48,8 +48,8 @@ class _NextRegion:
 
     def next_at(self, address: int) -> '_NextRegion':
         """
-
         :param address:
+        :returns: The next region. (ID one greater than this region)
         """
         return _NextRegion(
             self.scamp_coords, self.core_coords, self.n + 1, address,
@@ -61,6 +61,7 @@ class _NextRegion:
         :param address:
         :param size:
         :param offset:
+        :returns: The tail of the this region.
         """
         return _RegionTail(
             self.scamp_coords, self.core_coords, self.n, address, size, offset)
@@ -189,6 +190,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         """
         :param iobuf_size:
         :param core_subsets:
+        :returns: IOBuffer for each core in order
         """
         # Get the iobuf address for each core
         with self._collect_responses():
