@@ -17,7 +17,7 @@ import re
 from typing import Dict, Optional, Tuple, Type
 
 from spinn_utilities.config_holder import (
-    is_config_none, load_config, get_config_str_or_none)
+    load_config, get_config_str)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
@@ -74,9 +74,9 @@ class SpiNNManSimulation(object):
         self._data_writer.set_ipaddress("virtual")
 
     def _do_get_allocator_data(
-            self, total_run_time: Optional[float]) -> Optional[
-            Tuple[str, int, Optional[str], bool, bool, Optional[Dict[XY, str]],
-                  MachineAllocationController]]:
+            self, total_run_time: Optional[float]) -> Tuple[
+            str, int, Optional[str], bool, bool, Optional[Dict[XY, str]],
+            MachineAllocationController]:
         """
         Runs, times and logs the SpallocAllocator or HBPAllocator if required.
 
@@ -85,31 +85,12 @@ class SpiNNManSimulation(object):
             reset on startup flag, auto-detect BMP, SCAMP connection details,
             boot port, allocation controller
         """
-        spalloc_server = get_config_str_or_none("Machine", "spalloc_server")
-        if spalloc_server:
-            if is_server_address(spalloc_server):
-                return self._execute_spalloc_allocate_job()
-            else:
-                return self._execute_spalloc_allocate_job_old()
-        if not is_config_none("Machine", "remote_spinnaker_url"):
-            return self._execute_hbp_allocator(total_run_time)
-        return None
+        spalloc_server = get_config_str("Machine", "spalloc_server")
+        if is_server_address(spalloc_server):
+            host, version, connections, mac = spalloc_allocate_job()
+            return (
+                host, version, None, False, False, connections, mac)
 
-    def _execute_spalloc_allocate_job(self) -> Tuple[
-            str, int, Optional[str], bool, bool, Dict[XY, str],
-            MachineAllocationController]:
-        host, version, connections, mac = spalloc_allocate_job()
-        return (
-            host, version, None, False, False, connections, mac)
-
-    def _execute_spalloc_allocate_job_old(self) -> Tuple[
-            str, int, Optional[str], bool, bool, Dict[XY, str],
-            MachineAllocationController]:
-        raise SpinnmanUnsupportedOperationException(
-            "spalloc_allocate_job_old")
-
-    def _execute_hbp_allocator(
-            self, total_run_time:  Optional[float]) -> Tuple[
-            str, int, Optional[str], bool, bool, None,
-            MachineAllocationController]:
-        raise SpinnmanUnsupportedOperationException("hbp_allocator")
+        else:
+            raise SpinnmanUnsupportedOperationException(
+                "Only new spalloc support at the SpiNNMan level")
