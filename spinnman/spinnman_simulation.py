@@ -85,7 +85,7 @@ class SpiNNManSimulation(object):
             reset on startup flag, auto-detect BMP, SCAMP connection details,
             boot port, allocation controller
         """
-        # use arguement
+        # use argument
         _ = total_run_time
         spalloc_server = get_config_str("Machine", "spalloc_server")
         if is_server_address(spalloc_server):
