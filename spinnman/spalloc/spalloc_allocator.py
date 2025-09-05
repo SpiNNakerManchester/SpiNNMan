@@ -223,8 +223,7 @@ def spalloc_allocate_job(
     :param nmpi_job: The NMPI Job to associate with or None for no job
     :param nmpi_user: The NMPI username to associate with or None for no user
     :return:
-        host, board version, BMP details, reset on startup flag,
-        auto-detect BMP flag, board address map, allocation controller
+        host, board version, board address map, allocation controller
 
     """
     spalloc_server = get_config_str("Machine", "spalloc_server")
