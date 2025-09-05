@@ -44,7 +44,8 @@ class SpiNNManSimulation(object):
 
     __slots__ = (
         # The writer and therefore view of the global data
-        "__data_writer", )
+        # access this via the property _data_writer to get the type correct
+        "_untyped_data_writer", )
 
     def __init__(
             self, data_writer_cls: Optional[Type[SpiNNManDataWriter]] = None):
@@ -55,13 +56,13 @@ class SpiNNManSimulation(object):
         load_config()
 
         if data_writer_cls:
-            self.__data_writer = data_writer_cls.setup()
+            self._untyped_data_writer = data_writer_cls.setup()
         else:
-            self.__data_writer = SpiNNManDataWriter.setup()
+            self._untyped_data_writer = SpiNNManDataWriter.setup()
 
     @property
     def _data_writer(self) -> SpiNNManDataWriter:
-        return self.__data_writer
+        return self._untyped_data_writer
 
     def _execute_get_virtual_machine(self) -> None:
         """
