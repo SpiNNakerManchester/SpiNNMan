@@ -85,12 +85,13 @@ class SpiNNManSimulation(object):
             reset on startup flag, auto-detect BMP, SCAMP connection details,
             boot port, allocation controller
         """
+        # use arguement
+        _ = total_run_time
         spalloc_server = get_config_str("Machine", "spalloc_server")
         if is_server_address(spalloc_server):
             host, version, connections, mac = spalloc_allocate_job()
             return (
                 host, version, None, False, False, connections, mac)
-
         else:
             raise SpinnmanUnsupportedOperationException(
                 "Only new spalloc support at the SpiNNMan level")
