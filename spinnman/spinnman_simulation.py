@@ -23,6 +23,7 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
 from spinn_machine import Machine
+from spinnman.transceiver import Transceiver
 from spinnman.transceiver_generator import transciever_generator
 from spinn_machine.virtual_machine import virtual_machine_generator
 
@@ -75,6 +76,22 @@ class SpiNNManSimulation(object):
         """
         return self._get_known_machine()
 
+    def _get_transceiver(
+            self, total_run_time: Optional[float] = 0.0, ) -> Transceiver:
+        """
+        Creates a Transceiver
+
+        :param total_run_time: The total run time to request
+        :return: The Transceiver
+        """
+        if self._data_writer.has_transceiver():
+            transceiver = self._data_writer.get_transceiver()
+        elif not is_config_none("Machine", "machine_name"):
+            transceiver = self._execute_tranceiver_by_name()
+        else:
+            transceiver = self._do_allocate_transceiver(total_run_time)
+        return transceiver
+
     def _get_known_machine(
             self, total_run_time: Optional[float] = 0.0) -> Machine:
         """
@@ -89,10 +106,10 @@ class SpiNNManSimulation(object):
         if get_config_bool("Machine", "virtual_board"):
             return self._execute_get_virtual_machine()
 
-        if not is_config_none("Machine", "machine_name"):
-            return self._execute_machine_by_name()
-
-        return self._do_allocate_machine(total_run_time)
+        transceiver = self._get_transceiver()
+        machine = transceiver.get_machine_details()
+        self._data_writer.set_machine(machine)
+        return machine
 
     def _execute_get_virtual_machine(self) -> Machine:
         """
@@ -128,13 +145,13 @@ class SpiNNManSimulation(object):
             raise SpinnmanUnsupportedOperationException(
                 "Only new spalloc support at the SpiNNMan level")
 
-    def _execute_machine_by_name(self) -> Machine:
+    def _execute_tranceiver_by_name(self) -> Transceiver:
         """
-        Runs getting the machine using machine_name.
+        Runs getting the Transceiver using machine_name.
 
-        Will create abd set "transceiver" and "machine" to the View
+        Will create and set "transceiver" to the View
 
-        :returns: The machine
+        :returns: The Tranceiver
         :raises ConfigException: if machine_name is not set in the cfg
         """
         machine_name = get_config_str("Machine", "machine_name")
@@ -148,13 +165,11 @@ class SpiNNManSimulation(object):
         transceiver = transciever_generator(
             bmp_details, auto_detect_bmp or False, scamp_connection_data,
             reset_machine or False)
-        machine = transceiver.get_machine_details()
         self._data_writer.set_transceiver(transceiver)
-        self._data_writer.set_machine(machine)
-        return machine
+        return transceiver
 
-    def _do_allocate_machine(
-            self, total_run_time: Optional[float], retry: int = 0) -> Machine:
+    def _do_allocate_transceiver(self, total_run_time: Optional[float],
+                                 retry: int = 0) -> Transceiver:
         """
         Combines execute allocator and execute machine generator
 
@@ -163,14 +178,16 @@ class SpiNNManSimulation(object):
         :param total_run_time: The total run time to request
         :returns: Machine created
         """
+        # Used variable only needed by super class
+        _ = retry
         allocator_data = self._do_get_allocator_data(total_run_time)
         return self._execute_machine_generator(allocator_data)
 
-    def _execute_machine_generator(self, allocator_data: Tuple[
+    def _execute_transceiver_generator(self, allocator_data: Tuple[
             str, Optional[str], bool, bool, Optional[Dict[XY, str]],
-            MachineAllocationController]) -> Machine:
+            MachineAllocationController]) -> Transceiver:
         """
-        Runs the MachineGenerator based on allocator data.
+        Runs the TranceiverGenerator based on allocator data.
 
         May set the "machine" value if not already set
 
@@ -178,7 +195,7 @@ class SpiNNManSimulation(object):
             (machine name, machine version, BMP details (if any),
             reset on startup flag, auto-detect BMP, SCAMP connection details,
             boot port, allocation controller)
-        :returns: Machine created
+        :returns: Tranceiver created
         """
         (ipaddress, bmp_details, reset_machine, auto_detect_bmp,
             scamp_connection_data, machine_allocation_controller
@@ -191,7 +208,5 @@ class SpiNNManSimulation(object):
             bmp_details, auto_detect_bmp or False, scamp_connection_data,
             reset_machine or False)
         self._data_writer.set_transceiver(transceiver)
-        machine = transceiver.get_machine_details()
-        self._data_writer.set_machine(machine)
-        return machine
+        return transceiver
 
