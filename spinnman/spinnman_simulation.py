@@ -158,13 +158,11 @@ class SpiNNManSimulation(object):
         self._data_writer.set_ipaddress(machine_name)
         bmp_details = get_config_str_or_none("Machine", "bmp_names")
         auto_detect_bmp = get_config_bool("Machine", "auto_detect_bmp")
-        scamp_connection_data = None
         reset_machine = get_config_bool(
             "Machine", "reset_machine_on_startup")
 
         transceiver = transciever_generator(
-            bmp_details, auto_detect_bmp or False, scamp_connection_data,
-            reset_machine or False)
+            bmp_details, auto_detect_bmp, None, reset_machine)
         self._data_writer.set_transceiver(transceiver)
         return transceiver
 
