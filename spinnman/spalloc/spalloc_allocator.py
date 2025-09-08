@@ -212,7 +212,7 @@ def spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,
         collab: Optional[str] = None, nmpi_job: Union[int, str, None] = None,
         nmpi_user: Optional[str] = None) -> Tuple[
-            str, int, Dict[XY, str], MachineAllocationController]:
+            str, Dict[XY, str], MachineAllocationController]:
     """
     Request a machine from an new-style spalloc server that will fit the
     given number of boards.
@@ -222,8 +222,7 @@ def spalloc_allocate_job(
     :param collab: The collab to associate with or None for no collab
     :param nmpi_job: The NMPI Job to associate with or None for no job
     :param nmpi_user: The NMPI username to associate with or None for no user
-    :return:
-        host, board version, board address map, allocation controller
+    :return: host, board address map, allocation controller
 
     """
     spalloc_server = get_config_str("Machine", "spalloc_server")
@@ -255,5 +254,4 @@ def spalloc_allocate_job(
         # the allocation controller now owns them.
         stack.pop_all()
     assert root is not None, "no root of ready board"
-    version = 5
-    return (root, version, connections, allocation_controller)
+    return (root, connections, allocation_controller)

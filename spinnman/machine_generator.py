@@ -26,7 +26,7 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def machine_generator(
-        bmp_details: Optional[str], board_version: Optional[int],
+        bmp_details: Optional[str],
         auto_detect_bmp: bool, scamp_connection_data: Optional[Dict[XY, str]],
         reset_machine_on_start_up: bool) -> Tuple[Machine, Transceiver]:
     """

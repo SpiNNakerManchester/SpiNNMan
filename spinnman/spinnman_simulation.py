@@ -108,13 +108,13 @@ class SpiNNManSimulation(object):
 
     def _do_get_allocator_data(
             self, total_run_time: Optional[float]) -> Tuple[
-            str, int, Optional[str], bool, bool, Optional[Dict[XY, str]],
+            str, Optional[str], bool, bool, Optional[Dict[XY, str]],
             MachineAllocationController]:
         """
         Runs, times and logs the SpallocAllocator or HBPAllocator if required.
 
         :param total_run_time: The total run time to request
-        :return: machine name, machine version, BMP details (if any),
+        :return: machine name, BMP details (if any),
             reset on startup flag, auto-detect BMP, SCAMP connection details,
             boot port, allocation controller
         """
@@ -122,9 +122,9 @@ class SpiNNManSimulation(object):
         _ = total_run_time
         spalloc_server = get_config_str("Machine", "spalloc_server")
         if is_server_address(spalloc_server):
-            host, version, connections, mac = spalloc_allocate_job()
+            host, connections, mac = spalloc_allocate_job()
             return (
-                host, version, None, False, False, connections, mac)
+                host, None, False, False, connections, mac)
         else:
             raise SpinnmanUnsupportedOperationException(
                 "Only new spalloc support at the SpiNNMan level")
@@ -145,18 +145,29 @@ class SpiNNManSimulation(object):
         scamp_connection_data = None
         reset_machine = get_config_bool(
             "Machine", "reset_machine_on_startup")
-        board_version = SpiNNManDataView.get_machine_version().number
 
         machine, transceiver = machine_generator(
-            bmp_details, board_version,
-            auto_detect_bmp or False, scamp_connection_data,
+            bmp_details, auto_detect_bmp or False, scamp_connection_data,
             reset_machine or False)
         self._data_writer.set_transceiver(transceiver)
         self._data_writer.set_machine(machine)
         return machine
 
+    def _do_allocate_machine(
+            self, total_run_time: Optional[float], retry: int = 0) -> Machine:
+        """
+        Combines execute allocator and execute machine generator
+
+        This allows allocator to be run again if it is useful to do so
+
+        :param total_run_time: The total run time to request
+        :returns: Machine created
+        """
+        allocator_data = self._do_get_allocator_data(total_run_time)
+        return self._execute_machine_generator(allocator_data)
+
     def _execute_machine_generator(self, allocator_data: Tuple[
-            str, int, Optional[str], bool, bool, Optional[Dict[XY, str]],
+            str, Optional[str], bool, bool, Optional[Dict[XY, str]],
             MachineAllocationController]) -> Machine:
         """
         Runs the MachineGenerator based on allocator data.
@@ -169,16 +180,15 @@ class SpiNNManSimulation(object):
             boot port, allocation controller)
         :returns: Machine created
         """
-        (ipaddress, board_version, bmp_details,
-            reset_machine, auto_detect_bmp, scamp_connection_data,
-            machine_allocation_controller) = allocator_data
+        (ipaddress, bmp_details, reset_machine, auto_detect_bmp,
+            scamp_connection_data, machine_allocation_controller
+            ) = allocator_data
         self._data_writer.set_ipaddress(ipaddress)
         self._data_writer.set_allocation_controller(
             machine_allocation_controller)
 
         machine, transceiver = machine_generator(
-            bmp_details, board_version,
-            auto_detect_bmp or False, scamp_connection_data,
+            bmp_details, auto_detect_bmp or False, scamp_connection_data,
             reset_machine or False)
         self._data_writer.set_transceiver(transceiver)
         self._data_writer.set_machine(machine)
