@@ -23,10 +23,9 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
 from spinn_machine import Machine
-from spinnman.machine_generator import machine_generator
+from spinnman.transceiver_generator import transciever_generator
 from spinn_machine.virtual_machine import virtual_machine_generator
 
-from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.spalloc import (
@@ -146,9 +145,10 @@ class SpiNNManSimulation(object):
         reset_machine = get_config_bool(
             "Machine", "reset_machine_on_startup")
 
-        machine, transceiver = machine_generator(
+        transceiver = transciever_generator(
             bmp_details, auto_detect_bmp or False, scamp_connection_data,
             reset_machine or False)
+        machine = transceiver.get_machine_details()
         self._data_writer.set_transceiver(transceiver)
         self._data_writer.set_machine(machine)
         return machine
@@ -187,10 +187,11 @@ class SpiNNManSimulation(object):
         self._data_writer.set_allocation_controller(
             machine_allocation_controller)
 
-        machine, transceiver = machine_generator(
+        transceiver = transciever_generator(
             bmp_details, auto_detect_bmp or False, scamp_connection_data,
             reset_machine or False)
         self._data_writer.set_transceiver(transceiver)
+        machine = transceiver.get_machine_details()
         self._data_writer.set_machine(machine)
         return machine
 

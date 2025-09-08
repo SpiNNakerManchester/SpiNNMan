@@ -24,13 +24,15 @@ from spinnman.data import SpiNNManDataView
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
+def machine_generator():
+    pass
 
-def machine_generator(
+def transciever_generator(
         bmp_details: Optional[str],
         auto_detect_bmp: bool, scamp_connection_data: Optional[Dict[XY, str]],
-        reset_machine_on_start_up: bool) -> Tuple[Machine, Transceiver]:
+        reset_machine_on_start_up: bool) -> Transceiver:
     """
-    Makes a transceiver and a machine object.
+    Makes a transceiver.
 
     :param bmp_details: the details of the BMP connections
     :param board_version:
@@ -48,8 +50,7 @@ def machine_generator(
         # transceiver for us, we let it do so; transceivers obtained that way
         # are already fully configured
         if SpiNNManDataView.get_allocation_controller().can_create_transceiver():
-            txrx = SpiNNManDataView.get_allocation_controller().create_transceiver()
-            return txrx.get_machine_details(), txrx
+            return SpiNNManDataView.get_allocation_controller().create_transceiver()
 
     txrx = create_transceiver_from_hostname(
         hostname=SpiNNManDataView.get_ipaddress(),
@@ -62,7 +63,7 @@ def machine_generator(
         txrx.add_scamp_connections(scamp_connection_data)
     else:
         txrx.discover_scamp_connections()
-    return txrx.get_machine_details(), txrx
+    return txrx
 
 
 def _parse_bmp_cabinet_and_frame(bmp_str: str) -> Tuple[str, Optional[str]]:
