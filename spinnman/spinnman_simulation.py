@@ -21,6 +21,7 @@ from spinn_utilities.config_holder import (
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
+from spinn_machine import Machine
 from spinn_machine.virtual_machine import virtual_machine_generator
 
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
@@ -64,14 +65,16 @@ class SpiNNManSimulation(object):
     def _data_writer(self) -> SpiNNManDataWriter:
         return self._untyped_data_writer
 
-    def _execute_get_virtual_machine(self) -> None:
+    def _execute_get_virtual_machine(self) -> Machine:
         """
         Runs VirtualMachineGenerator
 
         Will set then "machine" and IP address values.
         """
-        self._data_writer.set_machine(virtual_machine_generator())
+        machine = virtual_machine_generator()
+        self._data_writer.set_machine(machine)
         self._data_writer.set_ipaddress("virtual")
+        return machine
 
     def _do_get_allocator_data(
             self, total_run_time: Optional[float]) -> Tuple[
