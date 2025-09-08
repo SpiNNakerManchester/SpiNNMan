@@ -17,7 +17,6 @@ import re
 from typing import Dict, List, Optional, Tuple
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
-from spinn_machine import Machine
 from spinnman.transceiver import create_transceiver_from_hostname, Transceiver
 from spinnman.model import BMPConnectionData
 from spinnman.data import SpiNNManDataView
