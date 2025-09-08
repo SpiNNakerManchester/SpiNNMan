@@ -17,13 +17,16 @@ import re
 from typing import Dict, Optional, Tuple, Type
 
 from spinn_utilities.config_holder import (
-    load_config, get_config_str)
+    load_config, get_config_bool, get_config_str, get_config_str_or_none,
+    is_config_none)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
 from spinn_machine import Machine
+from spinnman.machine_generator import machine_generator
 from spinn_machine.virtual_machine import virtual_machine_generator
 
+from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.spalloc import (
@@ -65,6 +68,33 @@ class SpiNNManSimulation(object):
     def _data_writer(self) -> SpiNNManDataWriter:
         return self._untyped_data_writer
 
+    def get_machine(self) -> Machine:
+        """
+        Get the Machine. Creating it if necessary.
+
+        :returns: The Machine now stored in the DataView
+        """
+        return self._get_known_machine()
+
+    def _get_known_machine(
+            self, total_run_time: Optional[float] = 0.0) -> Machine:
+        """
+        Gets and if needed creates a Machine
+
+        :param total_run_time: The total run time to request
+        :returns: The Machine
+        """
+        if self._data_writer.has_machine():
+            return self._data_writer.get_machine()
+
+        if get_config_bool("Machine", "virtual_board"):
+            return self._execute_get_virtual_machine()
+
+        if not is_config_none("Machine", "machine_name"):
+            return self._execute_machine_by_name()
+
+        return self._do_allocate_machine(total_run_time)
+
     def _execute_get_virtual_machine(self) -> Machine:
         """
         Runs VirtualMachineGenerator
@@ -98,3 +128,59 @@ class SpiNNManSimulation(object):
         else:
             raise SpinnmanUnsupportedOperationException(
                 "Only new spalloc support at the SpiNNMan level")
+
+    def _execute_machine_by_name(self) -> Machine:
+        """
+        Runs getting the machine using machine_name.
+
+        Will create abd set "transceiver" and "machine" to the View
+
+        :returns: The machine
+        :raises ConfigException: if machine_name is not set in the cfg
+        """
+        machine_name = get_config_str("Machine", "machine_name")
+        self._data_writer.set_ipaddress(machine_name)
+        bmp_details = get_config_str_or_none("Machine", "bmp_names")
+        auto_detect_bmp = get_config_bool("Machine", "auto_detect_bmp")
+        scamp_connection_data = None
+        reset_machine = get_config_bool(
+            "Machine", "reset_machine_on_startup")
+        board_version = SpiNNManDataView.get_machine_version().number
+
+        machine, transceiver = machine_generator(
+            bmp_details, board_version,
+            auto_detect_bmp or False, scamp_connection_data,
+            reset_machine or False)
+        self._data_writer.set_transceiver(transceiver)
+        self._data_writer.set_machine(machine)
+        return machine
+
+    def _execute_machine_generator(self, allocator_data: Tuple[
+            str, int, Optional[str], bool, bool, Optional[Dict[XY, str]],
+            MachineAllocationController]) -> Machine:
+        """
+        Runs the MachineGenerator based on allocator data.
+
+        May set the "machine" value if not already set
+
+        :param allocator_data:
+            (machine name, machine version, BMP details (if any),
+            reset on startup flag, auto-detect BMP, SCAMP connection details,
+            boot port, allocation controller)
+        :returns: Machine created
+        """
+        (ipaddress, board_version, bmp_details,
+            reset_machine, auto_detect_bmp, scamp_connection_data,
+            machine_allocation_controller) = allocator_data
+        self._data_writer.set_ipaddress(ipaddress)
+        self._data_writer.set_allocation_controller(
+            machine_allocation_controller)
+
+        machine, transceiver = machine_generator(
+            bmp_details, board_version,
+            auto_detect_bmp or False, scamp_connection_data,
+            reset_machine or False)
+        self._data_writer.set_transceiver(transceiver)
+        self._data_writer.set_machine(machine)
+        return machine
+
