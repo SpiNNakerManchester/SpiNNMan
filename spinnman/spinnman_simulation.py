@@ -147,44 +147,26 @@ class SpiNNManSimulation(object):
         _ = total_run_time
         spalloc_server = get_config_str("Machine", "spalloc_server")
         if is_server_address(spalloc_server):
-            return self._execute_spalloc_transceiver()
+            transceiver, _ = self._execute_spalloc_transceiver()
+            return transceiver
         else:
             raise SpinnmanUnsupportedOperationException(
                 "Only new spalloc support at the SpiNNMan level")
 
-    def _execute_transceiver_by_spalloc(self):
+    def _execute_transceiver_by_spalloc(
+            self) -> Tuple[Transceiver, Dict[XY, str]]:
+        """
+        :return: Transceiver and connections (to write to provance)r
+        """
         ipaddress, connections, controller = spalloc_allocate_job()
         self._data_writer.set_ipaddress(ipaddress)
         self._data_writer.set_allocation_controller(controller)
-        transceiver = transciever_generator(
-            bmp_details=None, scamp_connection_data=connections)
+        if controller.can_create_transceiver():
+            transceiver = controller.create_transceiver()
+        else:
+            transceiver = transciever_generator(
+                bmp_details=None, auto_detect_bmp=False,
+                scamp_connection_data=connections,
+                reset_machine_on_start_up=False)
         self._data_writer.set_transceiver(transceiver)
-        return transceiver
-
-    def _execute_transceiver_generator(self, allocator_data: Tuple[
-            str, Optional[str], bool, bool, Optional[Dict[XY, str]],
-            MachineAllocationController]) -> Transceiver:
-        """
-        Runs the TranceiverGenerator based on allocator data.
-
-        May set the "machine" value if not already set
-
-        :param allocator_data:
-            (machine name, machine version, BMP details (if any),
-            reset on startup flag, auto-detect BMP, SCAMP connection details,
-            boot port, allocation controller)
-        :returns: Tranceiver created
-        """
-        (ipaddress, bmp_details, reset_machine, auto_detect_bmp,
-            scamp_connection_data, machine_allocation_controller
-            ) = allocator_data
-        self._data_writer.set_ipaddress(ipaddress)
-        self._data_writer.set_allocation_controller(
-            machine_allocation_controller)
-
-        transceiver = transciever_generator(
-            bmp_details, auto_detect_bmp or False, scamp_connection_data,
-            reset_machine or False)
-        self._data_writer.set_transceiver(transceiver)
-        return transceiver
-
+        return (transceiver, connections)

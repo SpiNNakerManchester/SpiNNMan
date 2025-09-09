@@ -212,7 +212,7 @@ def spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,
         collab: Optional[str] = None, nmpi_job: Union[int, str, None] = None,
         nmpi_user: Optional[str] = None) -> Tuple[
-            str, Dict[XY, str], MachineAllocationController]:
+            str, Dict[XY, str], SpallocJobController]:
     """
     Request a machine from an new-style spalloc server that will fit the
     given number of boards.

@@ -27,17 +27,19 @@ def machine_generator():
     pass
 
 def transciever_generator(
-        bmp_details: Optional[str],
-        scamp_connection_data: Optional[Dict[XY, str]]) -> Transceiver:
+        bmp_details: Optional[str], auto_detect_bmp: bool,
+        scamp_connection_data: Optional[Dict[XY, str]],
+        reset_machine_on_start_up: bool) -> Transceiver:
     """
     Makes a transceiver.
 
     :param bmp_details: the details of the BMP connections
-    :param board_version:
-        the version of the boards being used within the machine
-        (1, 2, 3, 4 or 5)
+    :param auto_detect_bmp:
+        Whether the BMP should be automatically determined
     :param scamp_connection_data:
         Job.connection dict, a String SC&MP connection data or `None`
+    :param reset_machine_on_start_up:
+        Whether the machine should be reset on startup
     :return: Transceiver, and description of machine it is connected to
     """
     txrx = create_transceiver_from_hostname(
