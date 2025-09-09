@@ -113,8 +113,6 @@ class SpallocJobController(MachineAllocationController):
             self.__stop()
         super()._teardown()
 
-    @overrides(MachineAllocationController.create_transceiver,
-               extend_doc=True)
     def create_transceiver(self) -> Transceiver:
         """
         .. note::
@@ -122,16 +120,14 @@ class SpallocJobController(MachineAllocationController):
             via Spalloc. This allows it to work even outside the UNIMAN
             firewall.
         """
-        if not self.__use_proxy:
-            return super().create_transceiver()
-        txrx = self._job.create_transceiver()
-        return txrx
+        if self.__use_proxy:
+            txrx = self._job.create_transceiver()
+            return txrx
+        raise NotImplementedError(
+            "create transceiver only supported if using proxy")
 
-    @overrides(MachineAllocationController.can_create_transceiver)
     def can_create_transceiver(self) -> bool:
-        if not self.__use_proxy:
-            return super().can_create_transceiver()
-        return True
+        return self.__use_proxy
 
     @overrides(MachineAllocationController.open_sdp_connection,
                extend_doc=True)

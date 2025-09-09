@@ -34,8 +34,6 @@ class MachineAllocationController(object, metaclass=AbstractBase):
     __slots__ = (
         #: Boolean flag for telling this thread when the system has ended
         "_exited",
-        #: the address of the root board of the allocation
-        "__hostname",
         "__connection_data")
 
     def __init__(self, thread_name: str, hostname: Optional[str] = None,
@@ -46,7 +44,6 @@ class MachineAllocationController(object, metaclass=AbstractBase):
         thread = Thread(name=thread_name, target=self.__manage_allocation)
         thread.daemon = True
         self._exited = False
-        self.__hostname = hostname
         self.__connection_data = connection_data
         thread.start()
 
@@ -106,30 +103,6 @@ class MachineAllocationController(object, metaclass=AbstractBase):
                 "The allocated machine has been released before the end of"
                 " the script; this script will now exit")
             sys.exit(1)
-
-    def create_transceiver(self) -> Transceiver:
-        """
-        Create a transceiver for talking to the allocated machine, and
-        make sure everything is ready for use (i.e. boot and discover
-        connections if needed).
-
-        :returns: Transceiver created using the hostname passed into the init
-         """
-        if not self.__hostname:
-            raise NotImplementedError("Needs a hostname")
-        txrx = create_transceiver_from_hostname(self.__hostname)
-        txrx.discover_scamp_connections()
-        return txrx
-
-    def can_create_transceiver(self) -> bool:
-        """
-        Detects if a call to create_transceiver could work.
-
-        Does not check if create transceiver will work over the known host.
-
-        :returns: True if there is known hostname
-        """
-        return self.__hostname is not None
 
     def __host(self, chip_x: int, chip_y: int) -> Optional[str]:
         if not self.__connection_data:
