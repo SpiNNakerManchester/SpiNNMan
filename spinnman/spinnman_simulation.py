@@ -147,7 +147,7 @@ class SpiNNManSimulation(object):
         _ = total_run_time
         spalloc_server = get_config_str("Machine", "spalloc_server")
         if is_server_address(spalloc_server):
-            transceiver, _ = self._execute_spalloc_transceiver()
+            transceiver, _ = self._execute_transceiver_by_spalloc()
             return transceiver
         else:
             raise SpinnmanUnsupportedOperationException(
