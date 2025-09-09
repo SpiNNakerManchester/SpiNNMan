@@ -28,8 +28,7 @@ def machine_generator():
 
 def transciever_generator(
         bmp_details: Optional[str],
-        auto_detect_bmp: bool, scamp_connection_data: Optional[Dict[XY, str]],
-        reset_machine_on_start_up: bool) -> Transceiver:
+        scamp_connection_data: Optional[Dict[XY, str]]) -> Transceiver:
     """
     Makes a transceiver.
 
@@ -37,25 +36,15 @@ def transciever_generator(
     :param board_version:
         the version of the boards being used within the machine
         (1, 2, 3, 4 or 5)
-    :param auto_detect_bmp:
-        Whether the BMP should be automatically determined
     :param scamp_connection_data:
         Job.connection dict, a String SC&MP connection data or `None`
-    :param reset_machine_on_start_up:
     :return: Transceiver, and description of machine it is connected to
     """
-    if SpiNNManDataView.has_allocation_controller():
-        # If there is an allocation controller and it wants to make a
-        # transceiver for us, we let it do so; transceivers obtained that way
-        # are already fully configured
-        if SpiNNManDataView.get_allocation_controller().can_create_transceiver():
-            return SpiNNManDataView.get_allocation_controller().create_transceiver()
-
     txrx = create_transceiver_from_hostname(
         hostname=SpiNNManDataView.get_ipaddress(),
         bmp_connection_data=_parse_bmp_details(bmp_details),
-        auto_detect_bmp=auto_detect_bmp,
-        power_cycle=reset_machine_on_start_up)
+        auto_detect_bmp=False,
+        power_cycle=False)
 
     # do auto boot if possible
     if scamp_connection_data:

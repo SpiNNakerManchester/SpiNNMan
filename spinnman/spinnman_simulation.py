@@ -89,7 +89,7 @@ class SpiNNManSimulation(object):
         elif not is_config_none("Machine", "machine_name"):
             transceiver = self._execute_tranceiver_by_name()
         else:
-            transceiver = self._do_allocate_transceiver(total_run_time)
+            transceiver = self._do_transceiver_by_remote(total_run_time)
         return transceiver
 
     def _get_known_machine(
@@ -122,29 +122,6 @@ class SpiNNManSimulation(object):
         self._data_writer.set_ipaddress("virtual")
         return machine
 
-    def _do_get_allocator_data(
-            self, total_run_time: Optional[float]) -> Tuple[
-            str, Optional[str], bool, bool, Optional[Dict[XY, str]],
-            MachineAllocationController]:
-        """
-        Runs, times and logs the SpallocAllocator or HBPAllocator if required.
-
-        :param total_run_time: The total run time to request
-        :return: machine name, BMP details (if any),
-            reset on startup flag, auto-detect BMP, SCAMP connection details,
-            boot port, allocation controller
-        """
-        # use argument
-        _ = total_run_time
-        spalloc_server = get_config_str("Machine", "spalloc_server")
-        if is_server_address(spalloc_server):
-            host, connections, mac = spalloc_allocate_job()
-            return (
-                host, None, False, False, connections, mac)
-        else:
-            raise SpinnmanUnsupportedOperationException(
-                "Only new spalloc support at the SpiNNMan level")
-
     def _execute_tranceiver_by_name(self) -> Transceiver:
         """
         Runs getting the Transceiver using machine_name.
@@ -166,20 +143,23 @@ class SpiNNManSimulation(object):
         self._data_writer.set_transceiver(transceiver)
         return transceiver
 
-    def _do_allocate_transceiver(self, total_run_time: Optional[float],
-                                 retry: int = 0) -> Transceiver:
-        """
-        Combines execute allocator and execute machine generator
+    def _do_transceiver_by_remote(self, total_run_time: Optional[float]):
+        _ = total_run_time
+        spalloc_server = get_config_str("Machine", "spalloc_server")
+        if is_server_address(spalloc_server):
+            return self._execute_spalloc_transceiver()
+        else:
+            raise SpinnmanUnsupportedOperationException(
+                "Only new spalloc support at the SpiNNMan level")
 
-        This allows allocator to be run again if it is useful to do so
-
-        :param total_run_time: The total run time to request
-        :returns: Machine created
-        """
-        # Used variable only needed by super class
-        _ = retry
-        allocator_data = self._do_get_allocator_data(total_run_time)
-        return self._execute_machine_generator(allocator_data)
+    def _execute_transceiver_by_spalloc(self):
+        ipaddress, connections, controller = spalloc_allocate_job()
+        self._data_writer.set_ipaddress(ipaddress)
+        self._data_writer.set_allocation_controller(controller)
+        transceiver = transciever_generator(
+            bmp_details=None, scamp_connection_data=connections)
+        self._data_writer.set_transceiver(transceiver)
+        return transceiver
 
     def _execute_transceiver_generator(self, allocator_data: Tuple[
             str, Optional[str], bool, bool, Optional[Dict[XY, str]],
