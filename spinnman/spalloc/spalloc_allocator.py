@@ -115,18 +115,24 @@ class SpallocJobController(MachineAllocationController):
 
     def create_transceiver(self) -> Transceiver:
         """
+        Create a Transceiver using proxy
+
         .. note::
             This allocation controller proxies the transceiver's connections
             via Spalloc. This allows it to work even outside the UNIMAN
             firewall.
+
+        :returns: A proxied Transceiver
         """
         if self.__use_proxy:
-            txrx = self._job.create_transceiver()
-            return txrx
+            return self._job.create_transceiver()
         raise NotImplementedError(
             "create transceiver only supported if using proxy")
 
     def can_create_transceiver(self) -> bool:
+        """
+        :returns: True if create_transceiver would work
+        """
         return self.__use_proxy
 
     @overrides(MachineAllocationController.open_sdp_connection,
