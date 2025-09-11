@@ -24,13 +24,13 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
 from spinn_machine import Machine
-from spinnman.transceiver import Transceiver, transceiver_generator
 from spinn_machine.virtual_machine import virtual_machine_generator
 
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
 from spinnman.spalloc import is_server_address
 from spinnman.spalloc.spalloc_allocator import spalloc_allocate_job
+from spinnman.transceiver import Transceiver, transceiver_generator
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
@@ -163,7 +163,7 @@ class SpiNNManSimulation(object):
 
         Will create and set "transceiver" to the View
 
-        :returns: The Tranceiver
+        :returns: The Transceiver
         :raises ConfigException: if machine_name is not set in the cfg
         """
         machine_name = get_config_str("Machine", "machine_name")
@@ -192,7 +192,7 @@ class SpiNNManSimulation(object):
     def _execute_transceiver_by_spalloc(
             self) -> Tuple[Transceiver, Dict[XY, str]]:
         """
-        :return: Transceiver and connections (to write to provance)r
+        :return: Transceiver and connections (to write to provenance)
         """
         ipaddress, connections, controller = spalloc_allocate_job()
         self._data_writer.set_ipaddress(ipaddress)
