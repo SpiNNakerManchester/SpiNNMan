@@ -101,4 +101,3 @@ class SpallocTransceiver(Version5Transceiver):
 
     def __str__(self) -> str:
         return f"Spalloc Transceiver over {self.__job}"
-

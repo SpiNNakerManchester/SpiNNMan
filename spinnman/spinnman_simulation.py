@@ -29,8 +29,7 @@ from spinn_machine.virtual_machine import virtual_machine_generator
 
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
-from spinnman.spalloc import (
-    is_server_address, MachineAllocationController)
+from spinnman.spalloc import is_server_address
 from spinnman.spalloc.spalloc_allocator import spalloc_allocate_job
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -109,7 +108,8 @@ class SpiNNManSimulation(object):
         return self._do_machine_by_transciever(total_run_time)
 
     def _do_machine_by_transciever(
-            self, total_run_time: Optional[float] = 0.0, retry: int = 0) -> Machine:
+            self, total_run_time: Optional[float] = 0.0,
+            retry: int = 0) -> Machine:
         """
         Gets and if needed creates a Transceiver and then Machine
 

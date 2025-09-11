@@ -21,7 +21,6 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.typing.coords import XY
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.transceiver import create_transceiver_from_hostname, Transceiver
 from spinnman.connections.udp_packet_connections import EIEIOConnection
 logger = FormatAdapter(logging.getLogger(__name__))
 
