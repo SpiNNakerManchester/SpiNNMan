@@ -13,7 +13,8 @@
 # limitations under the License.
 
 import logging
-from typing import (Dict, Iterable, List, Optional)
+import re
+from typing import (Dict, Iterable, List, Optional, Tuple)
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
@@ -150,7 +151,7 @@ def create_transceiver_from_connections(
     raise NotImplementedError(f"No Transceiver for {version=}")
 
 
-def transceiever_generator(
+def transceiver_generator(
         bmp_details: Optional[str], auto_detect_bmp: bool,
         scamp_connection_data: Optional[Dict[XY, str]],
         reset_machine_on_start_up: bool) -> Transceiver:
