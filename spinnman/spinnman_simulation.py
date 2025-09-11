@@ -76,11 +76,14 @@ class SpiNNManSimulation(object):
         return self._get_known_machine()
 
     def _get_transceiver(
-            self, total_run_time: Optional[float] = 0.0, ) -> Transceiver:
+            self, total_run_time: Optional[float] = 0.0,
+            ensure_board_is_ready: bool = True) -> Transceiver:
         """
         Creates a Transceiver
 
         :param total_run_time: The total run time to request
+        :param ensure_board_is_ready:
+            Make sure the Transceiver is ready to provide Machine details
         :return: The Transceiver
         """
         if self._data_writer.has_transceiver():
@@ -89,6 +92,8 @@ class SpiNNManSimulation(object):
             transceiver = self._execute_tranceiver_by_name()
         else:
             transceiver = self._do_transceiver_by_remote(total_run_time)
+        if ensure_board_is_ready:
+            transceiver.ensure_board_is_ready()
         return transceiver
 
     def _get_known_machine(
@@ -119,7 +124,7 @@ class SpiNNManSimulation(object):
         """
         got_transciever = False
         try:
-            transceiver = self._get_transceiver()
+            transceiver = self._get_transceiver(total_run_time)
             logger.exception(type(transceiver))
             got_transciever = True
             machine = transceiver.get_machine_details()

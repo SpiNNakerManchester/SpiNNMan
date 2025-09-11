@@ -224,7 +224,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         self._machine_off = False
         if power_cycle:
             self._power_off_machine()
-        self._ensure_board_is_ready()
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)
@@ -564,24 +563,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         # version is irrelevant
         return version[1] > _SCAMP_VERSION[1]
 
-    def _ensure_board_is_ready(
+    @overrides(Transceiver.ensure_board_is_ready)
+    def ensure_board_is_ready(
             self, n_retries: int = 5, extra_boot_values: Optional[Dict[
             SystemVariableDefinition, object]] = None) -> None:
-        """
-        Ensure that the board is ready to interact with this version of the
-        transceiver. Boots the board if not already booted and verifies that
-        the version of SCAMP running is compatible with this transceiver.
-
-        :param n_retries: The number of times to retry booting
-        :param extra_boot_values:
-            Any additional or overwrite values to set during boot.
-            This should only be used for values which are not standard
-            based on the board version.
-        :raise SpinnmanIOException:
-            * If there is a problem booting the board
-            * If the version of software on the board is not compatible with
-              this transceiver
-        """
         logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None

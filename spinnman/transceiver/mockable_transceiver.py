@@ -269,3 +269,7 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(ExtendableTransceiver.scamp_connection_selector)
     def scamp_connection_selector(self) -> ConnectionSelector:
         raise NotImplementedError("Needs to be mocked")
+
+    @overrides(ExtendableTransceiver.ensure_board_is_ready)
+    def ensure_board_is_ready(self) -> None:
+        pass
