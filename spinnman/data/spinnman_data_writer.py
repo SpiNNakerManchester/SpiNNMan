@@ -131,6 +131,12 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
                 "Over writing and existing transceiver not supported")
         self.__data._transceiver = transceiver
 
+    @overrides(MachineDataWriter.clear_machine)
+    def clear_machine(self) -> None:
+        self.__data._transceiver = None
+        self.__data._allocation_controller = None
+        super().clear_machine()
+
     def set_ipaddress(self, ip_address: str) -> None:
         """
         Sets the IP address

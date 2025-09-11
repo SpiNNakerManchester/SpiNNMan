@@ -14,11 +14,12 @@
 
 import logging
 import re
+import traceback
 from typing import Dict, Optional, Tuple, Type
 
 from spinn_utilities.config_holder import (
-    load_config, get_config_bool, get_config_str, get_config_str_or_none,
-    is_config_none)
+    load_config, get_config_bool, get_config_int, get_config_str,
+    get_config_str_or_none, is_config_none)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
@@ -106,10 +107,45 @@ class SpiNNManSimulation(object):
         if get_config_bool("Machine", "virtual_board"):
             return self._execute_get_virtual_machine()
 
-        transceiver = self._get_transceiver()
-        machine = transceiver.get_machine_details()
-        self._data_writer.set_machine(machine)
-        return machine
+        return self._do_machine_by_transciever(total_run_time)
+
+    def _do_machine_by_transciever(
+            self, total_run_time: Optional[float] = 0.0, retry: int = 0) -> Machine:
+        """
+        Gets and if needed creates a Transceiver and then Machine
+
+        :param total_run_time: The total run time to request
+        :param retry: The number of retries attempted
+        :returns: The Machine
+        """
+        got_transciever = False
+        try:
+            transceiver = self._get_transceiver()
+            logger.exception(type(transceiver))
+            got_transciever = True
+            machine = transceiver.get_machine_details()
+            self._data_writer.set_machine(machine)
+            return machine
+        except Exception as ex:  # pylint: disable=broad-except
+            max_retry = get_config_int("Machine", "spalloc_retry")
+            if retry >= max_retry:
+                logger.exception(
+                    "\n*****************************************************")
+            logger.exception(f"Error on machine_generation {retry=}")
+            logger.exception(ex)
+            path = self._data_writer.get_error_file()
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(f"Error on machine_generation {retry=}\n")
+                f.write(traceback.format_exc())
+                if got_transciever:
+                    logger.exception(f"{transceiver=}")
+                    f.write(f"{transceiver=}")
+            max_retry = get_config_int("Machine", "spalloc_retry")
+            if retry >= max_retry:
+                raise
+        logger.info(f"Retrying machine_by_transciever  {retry=}")
+        self._data_writer.clear_machine()
+        return self._do_machine_by_transciever(total_run_time, retry=retry + 1)
 
     def _execute_get_virtual_machine(self) -> Machine:
         """
