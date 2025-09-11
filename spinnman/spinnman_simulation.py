@@ -24,8 +24,7 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
 from spinn_machine import Machine
-from spinnman.transceiver import Transceiver
-from spinnman.transceiver_generator import transciever_generator
+from spinnman.transceiver import Transceiver, transceiver_generator
 from spinn_machine.virtual_machine import virtual_machine_generator
 
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
@@ -174,12 +173,13 @@ class SpiNNManSimulation(object):
         reset_machine = get_config_bool(
             "Machine", "reset_machine_on_startup")
 
-        transceiver = transciever_generator(
+        transceiver = transceiver_generator(
             bmp_details, auto_detect_bmp, None, reset_machine)
         self._data_writer.set_transceiver(transceiver)
         return transceiver
 
-    def _do_transceiver_by_remote(self, total_run_time: Optional[float]):
+    def _do_transceiver_by_remote(
+            self, total_run_time: Optional[float]) -> Transceiver:
         _ = total_run_time
         spalloc_server = get_config_str("Machine", "spalloc_server")
         if is_server_address(spalloc_server):
@@ -200,7 +200,7 @@ class SpiNNManSimulation(object):
         if controller.can_create_transceiver():
             transceiver = controller.create_transceiver()
         else:
-            transceiver = transciever_generator(
+            transceiver = transceiver_generator(
                 bmp_details=None, auto_detect_bmp=False,
                 scamp_connection_data=connections,
                 reset_machine_on_start_up=False)
