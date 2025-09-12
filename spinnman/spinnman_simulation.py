@@ -125,7 +125,6 @@ class SpiNNManSimulation(object):
         got_transciever = False
         try:
             transceiver = self._get_transceiver(total_run_time)
-            logger.exception(type(transceiver))
             got_transciever = True
             machine = transceiver.get_machine_details()
             self._data_writer.set_machine(machine)
