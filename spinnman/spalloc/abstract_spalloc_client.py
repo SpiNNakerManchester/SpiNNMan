@@ -56,16 +56,10 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
 
     @abstractmethod
     def create_job(
-            self, num_boards: int = 1, machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
+            self, keepalive: int = 45) -> SpallocJob:
         """
         Create a job with a specified number of boards.
 
-        :param num_boards:
-            How many boards to ask for (defaults to 1)
-        :param machine_name:
-            Which machine to run on? If omitted, the service's machine tagged
-            with ``default`` will be used.
         :param keepalive:
             After how many seconds of no activity should a job become eligible
             for automatic pruning?

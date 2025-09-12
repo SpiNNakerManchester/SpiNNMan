@@ -14,7 +14,8 @@
 
 import spinnman.spinnman_script as sim
 
-sim.setup(n_boards_required=2)
+#sim.setup(n_boards_required=2)
+sim.setup()
 print(sim.get_transceiver(ensure_board_is_ready=False))
 machine = sim.get_machine()
 print(machine)

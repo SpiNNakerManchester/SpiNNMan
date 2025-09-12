@@ -33,6 +33,8 @@ from websocket import WebSocket  # type: ignore
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
+from spinn_utilities.config_holder import (
+    get_config_str, get_config_str_or_none)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
@@ -41,6 +43,7 @@ from spinn_utilities.overrides import overrides
 from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
+from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import SpallocException
 from spinnman.model.diagnostic_filter import DiagnosticFilter
@@ -90,6 +93,32 @@ def fix_url(url: Any) -> str:
         parts = ParseResult(parts.scheme, parts.netloc, parts.path + "/",
                             parts.params, parts.query, parts.fragment)
     return urlunparse(parts)
+
+def get_n_boards() -> int:
+    """
+    Works out how many boards are needed.
+
+    :return: Number of boards needed with a safety factor
+    :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+        If data needed is not available
+    """
+    if SpiNNManDataView.has_n_boards_required():
+        return SpiNNManDataView.get_n_boards_required()
+    else:
+        n_chips = SpiNNManDataView.get_n_chips_needed()
+        # reduce max chips by 2 in case you get a bad board(s)
+        chips_div = (
+                SpiNNManDataView.get_machine_version().n_chips_per_board - 2)
+        n_boards_float = float(n_chips) / chips_div
+        logger.info("{:.2f} Boards Required for {} chips",
+                    n_boards_float, n_chips)
+        # If the number of boards rounded up is less than 50% of a board
+        # bigger than the actual number of boards,
+        # add another board just in case.
+        n_boards = int(math.ceil(n_boards_float))
+        if n_boards - n_boards_float < 0.5:
+            n_boards += 1
+        return n_boards
 
 
 class SpallocClient(AbstractContextManager, AbstractSpallocClient):
@@ -221,12 +250,28 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         return _SpallocJob(self.__session, fix_url(url))
 
     @overrides(AbstractSpallocClient.create_job)
-    def create_job(
-            self, num_boards: int = 1,
-            machine_name: Optional[str] = None,
-            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
+    def create_job(self, keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
+        machine_name = get_config_str_or_none("Machine", "spalloc_machine")
+        height = get_config_str_or_none("Machine", "spalloc_height")
+        triad_st = get_config_str_or_none("Machine", "spalloc_triad")
+        physical_st = get_config_str_or_none("Machine", "spalloc_physical")
+        if height is not None:
+            width = get_config_str("Machine", "spalloc_width")
+            return self.create_job_rect(height, width, machine_name, keepalive)
+        if triad_st is not None:
+            triad = map(int,triad_st.split(","))
+            return self.create_job_board(
+                triad=triad, machine_name=machine_name, keepalive=keepalive)
+        if physical_st is not None:
+            physical = map(int,physical_st.split(","))
+            return self.create_job_board(
+                physical=physical, machine_name=machine_name, keepalive=keepalive)
+
+
+        n_boards = get_n_boards()
+        logger.info(f"Requesting job with {n_boards} boards")
         return self._create({
-            "num-boards": int(num_boards),
+            "num-boards": n_boards,
             "keepalive-interval": f"PT{int(keepalive)}S"
         }, machine_name)
 

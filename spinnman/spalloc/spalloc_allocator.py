@@ -167,33 +167,6 @@ class SpallocJobController(MachineAllocationController):
         return f"SpallocJobController over {self._job}"
 
 
-def get_n_boards() -> int:
-    """
-    Works out how many boards are needed.
-
-    :return: Number of boards needed with a safety factor
-    :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
-        If data needed is not available
-    """
-    if SpiNNManDataView.has_n_boards_required():
-        return SpiNNManDataView.get_n_boards_required()
-    else:
-        n_chips = SpiNNManDataView.get_n_chips_needed()
-        # reduce max chips by 2 in case you get a bad board(s)
-        chips_div = (
-                SpiNNManDataView.get_machine_version().n_chips_per_board - 2)
-        n_boards_float = float(n_chips) / chips_div
-        logger.info("{:.2f} Boards Required for {} chips",
-                    n_boards_float, n_chips)
-        # If the number of boards rounded up is less than 50% of a board
-        # bigger than the actual number of boards,
-        # add another board just in case.
-        n_boards = int(math.ceil(n_boards_float))
-        if n_boards - n_boards_float < 0.5:
-            n_boards += 1
-        return n_boards
-
-
 def spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,
         collab: Optional[str] = None, nmpi_job: Union[int, str, None] = None,
@@ -212,10 +185,7 @@ def spalloc_allocate_job(
 
     """
     spalloc_server = get_config_str("Machine", "spalloc_server")
-    n_boards = get_n_boards()
-    logger.info(f"Requesting job with {n_boards} boards")
     with ExitStack() as stack:
-        spalloc_machine = get_config_str_or_none("Machine", "spalloc_machine")
         use_proxy = get_config_bool("Machine", "spalloc_use_proxy")
         if nmpi_job is None:
             _nmpi_job: Optional[int] = None
@@ -225,7 +195,7 @@ def spalloc_allocate_job(
             spalloc_server, bearer_token=bearer_token, group=group,
             collab=collab, nmpi_job=_nmpi_job, nmpi_user=nmpi_user)
         stack.enter_context(cast(ContextManager[SpallocClient], client))
-        job = client.create_job(n_boards, spalloc_machine)
+        job = client.create_job()
         stack.enter_context(job)
         job.wait_until_ready()
         connections = job.get_connections()
