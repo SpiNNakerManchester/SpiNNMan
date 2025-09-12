@@ -15,13 +15,9 @@
 import logging
 import sys
 from threading import Thread
-from typing import Dict, Optional, Tuple
+from typing import Tuple
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinn_utilities.typing.coords import XY
-from spinnman.constants import SCP_SCAMP_PORT
-from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.connections.udp_packet_connections import EIEIOConnection
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
@@ -32,18 +28,15 @@ class MachineAllocationController(object, metaclass=AbstractBase):
     """
     __slots__ = (
         #: Boolean flag for telling this thread when the system has ended
-        "_exited",
-        "__connection_data")
+        "_exited",)
 
-    def __init__(self, thread_name: str, hostname: Optional[str] = None,
-                 connection_data: Optional[Dict[XY, str]] = None):
+    def __init__(self, thread_name: str):
         """
         :param thread_name:
         """
         thread = Thread(name=thread_name, target=self.__manage_allocation)
         thread.daemon = True
         self._exited = False
-        self.__connection_data = connection_data
         thread.start()
 
     @abstractmethod
@@ -102,60 +95,6 @@ class MachineAllocationController(object, metaclass=AbstractBase):
                 "The allocated machine has been released before the end of"
                 " the script; this script will now exit")
             sys.exit(1)
-
-    def __host(self, chip_x: int, chip_y: int) -> Optional[str]:
-        if not self.__connection_data:
-            return None
-        return self.__connection_data.get((chip_x, chip_y))
-
-    def open_sdp_connection(
-            self, chip_x: int, chip_y: int,
-            udp_port: int = SCP_SCAMP_PORT) -> Optional[SCAMPConnection]:
-        """
-        Open a connection to a specific Ethernet-enabled SpiNNaker chip.
-        Caller will have to arrange for SpiNNaker to pay attention to the
-        connection.
-
-        The coordinates will be job-relative.
-
-        :param chip_x: Ethernet-enabled chip X coordinate
-        :param chip_y: Ethernet-enabled chip Y coordinate
-        :param udp_port:
-            the UDP port on the chip to connect to; connecting to a non-SCP
-            port will result in a connection that can't easily be configured.
-        :returns:
-           Connection to the Chip with a know host over this port or None
-        """
-        host = self.__host(chip_x, chip_y)
-        if not host:
-            return None
-        return SCAMPConnection(
-            chip_x=chip_x, chip_y=chip_y,
-            remote_host=host, remote_port=udp_port)
-
-    def open_eieio_connection(
-            self, chip_x: int, chip_y: int) -> Optional[EIEIOConnection]:
-        """
-        Open an unbound EIEIO connection. This may be used to communicate with
-        any board of the job.
-
-        :param chip_x: X of Chip to get connection to
-        :param chip_y: Y of Chip to get connection to
-        :return: Connection to the Chip with a known host or None
-        """
-        host = self.__host(chip_x, chip_y)
-        if not host:
-            return None
-        return EIEIOConnection(remote_host=host, remote_port=SCP_SCAMP_PORT)
-
-    def open_eieio_listener(self) -> EIEIOConnection:
-        """
-        Open an unbound EIEIO connection. This may be used to communicate with
-        any board of the job.
-
-        :returns: The new EIEIO connection
-        """
-        return EIEIOConnection()
 
     @property
     def proxying(self) -> bool:
