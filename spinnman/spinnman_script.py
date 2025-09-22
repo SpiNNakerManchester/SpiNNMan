@@ -44,8 +44,18 @@ def setup(n_chips_required: Optional[int] = None,
 
 
 def get_machine() -> Machine:
+    assert __simulator is not None
     return __simulator.get_machine()
 
+
 def get_transceiver(ensure_board_is_ready: bool = True) -> Transceiver:
+    assert __simulator is not None
     return __simulator._get_transceiver(
         ensure_board_is_ready=ensure_board_is_ready)
+
+
+def end() -> None:
+    global __simulator
+    if __simulator is not None:
+        __simulator._shutdown()
+        __simulator = None

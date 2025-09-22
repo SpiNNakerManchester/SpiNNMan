@@ -210,3 +210,18 @@ class SpiNNManSimulation(object):
                 reset_machine_on_start_up=False)
         self._data_writer.set_transceiver(transceiver)
         return (transceiver, connections)
+
+    def __close_allocation_controller(self) -> None:
+        if self._data_writer.has_allocation_controller():
+            self._data_writer.get_allocation_controller().close()
+            self._data_writer.set_allocation_controller(None)
+
+    def _shutdown(self) -> None:
+        # stop the transceiver and allocation controller
+        if self._data_writer.has_transceiver():
+            transceiver = self._data_writer.get_transceiver()
+            transceiver.stop_application(self._data_writer.get_app_id())
+
+        self.__close_allocation_controller()
+        self._data_writer.shut_down()
+
