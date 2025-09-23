@@ -16,8 +16,10 @@ API of the client for the Spalloc web service.
 """
 
 import struct
+from typing import Never
 from typing import Dict, Iterable, Tuple, Optional
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from spinnman.exceptions import SpallocException
 from .spalloc_machine import SpallocMachine
 from .spalloc_job import SpallocJob
 
@@ -55,46 +57,44 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         raise NotImplementedError
 
     @abstractmethod
-    def create_job(
-            self, keepalive: int = 45) -> SpallocJob:
+    def create_job(self) -> SpallocJob:
         """
         Create a job with a specified number of boards.
 
-        :param keepalive:
-            After how many seconds of no activity should a job become eligible
-            for automatic pruning?
         :return: A handle for monitoring and interacting with the job.
         """
         raise NotImplementedError
 
-    @abstractmethod
     def create_job_rect(
             self, width: int, height: int, machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
+            keepalive: int = 45) -> Never:
         """
-        Create a job with a rectangle of boards.
+        No longer supported use create_job with cfg settings instead
 
         :param width:
-            The width of rectangle to request
+            Use cfg "Machine", "spalloc_width" instead
         :param height:
-            The height of rectangle to request
+            Use cfg "Machine", "spalloc_height" instead
         :param machine_name:
-            Which machine to run on? If omitted, the service's machine tagged
-            with ``default`` will be used.
+            Use cfg "Machine", "spalloc_machine" instead
         :param keepalive:
-            After how many seconds of no activity should a job become eligible
-            for automatic pruning?
-        :return: A handle for monitoring and interacting with the job.
+            No longer supported
+        :raise: SpallocException
         """
-        raise NotImplementedError
+        _ = (width, height, keepalive)
+        error_st = ('create_job_rect is no longer supported. '
+                    'Use create_job with cfg ("Machine") settings '
+                    'spalloc_width and spalloc_height')
+        if machine_name is None:
+            error_st += " as well as spalloc_machine"
+        raise SpallocException(error_st)
 
-    @abstractmethod
     def create_job_board(
             self, triad: Optional[Tuple[int, int, int]] = None,
             physical: Optional[Tuple[int, int, int]] = None,
             ip_address: Optional[str] = None,
             machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
+            keepalive: int = 45) -> Never:
         """
         Create a job with a specific board. At least one of ``triad``,
         ``physical`` and ``ip_address`` must be not ``None``.
@@ -111,11 +111,10 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         :param keepalive:
             After how many seconds of no activity should a job become eligible
             for automatic pruning?
-        :return: A handle for monitoring and interacting with the job.
+        :raise: SpallocException
         """
         raise NotImplementedError
 
-    @abstractmethod
     def create_job_rect_at_board(
             self, width: int, height: int,
             triad: Optional[Tuple[int, int, int]] = None,

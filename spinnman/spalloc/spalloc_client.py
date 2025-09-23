@@ -14,6 +14,7 @@
 """
 Implementation of the client for the Spalloc web service.
 """
+import math
 import os
 import time
 from logging import getLogger
@@ -34,7 +35,7 @@ from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.config_holder import (
-    get_config_str, get_config_str_or_none)
+    get_config_int, get_config_str, get_config_str_or_none)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
@@ -228,14 +229,48 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                 break
             obj = self.__session.get(obj["next"]).json()
 
-    def _create(self, create: Mapping[str, JsonValue],
-                machine_name: Optional[str]) -> SpallocJob:
-        assert self.__session
+    def _create(self, create: Mapping[str, JsonValue]) -> SpallocJob:
         operation = dict(create)
+
+    @overrides(AbstractSpallocClient.create_job)
+    def create_job(self) -> SpallocJob:
+        assert self.__session
+
+        height = get_config_str_or_none("Machine", "spalloc_height")
+        operation: Mapping[str, JsonValue] = {}
+        if height is not None:
+            width = get_config_str("Machine", "spalloc_width")
+            operation["dimensions"] = {
+                "width": int(width),
+                "height": int(height)
+            }
+
+        triad_st = get_config_str_or_none("Machine", "spalloc_triad")
+        physical_st = get_config_str_or_none("Machine", "spalloc_physical")
+        ip_address = get_config_str_or_none("Machine", "spalloc_ip_address")
+        if triad_st is not None:
+            triad = map(int,triad_st.split(","))
+            x, y, z = triad
+            operation["board"] = {"x": int(x), "y": int(y), "z": int(z)}
+        elif physical_st is not None:
+            physical = map(int, physical_st.split(","))
+            c, f, b = physical
+            operation["board"] = {
+                "cabinet": int(c), "frame": int(f), "board": int(b)}
+        elif ip_address is not None:
+            operation["board"] = {"address": str(ip_address)}
+
+        if not operation:
+            n_boards = get_n_boards()
+            logger.info(f"Requesting job with {n_boards} boards")
+            operation["num-boards"] = n_boards
+
+        machine_name = get_config_str_or_none("Machine", "spalloc_machine")
         if machine_name:
             operation["machine-name"] = machine_name
         else:
             operation["tags"] = ["default"]
+
         if self.__group is not None:
             operation["group"] = self.__group
         if self.__collab is not None:
@@ -244,106 +279,13 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             operation["nmpi-job-id"] = self.__nmpi_job
             if self.__nmpi_user is not None:
                 operation["owner"] = self.__nmpi_user
+
+        operation["keepalive-interval"] = f"PT{int(KEEP_ALIVE_PERIOND)}S"
+
         logger.info("Posting {} to {}", operation, self.__jobs_url)
         r = self.__session.post(self.__jobs_url, operation, timeout=30)
         url = r.headers["Location"]
         return _SpallocJob(self.__session, fix_url(url))
-
-    @overrides(AbstractSpallocClient.create_job)
-    def create_job(self, keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
-        machine_name = get_config_str_or_none("Machine", "spalloc_machine")
-        height = get_config_str_or_none("Machine", "spalloc_height")
-        triad_st = get_config_str_or_none("Machine", "spalloc_triad")
-        physical_st = get_config_str_or_none("Machine", "spalloc_physical")
-        if height is not None:
-            width = get_config_str("Machine", "spalloc_width")
-            return self.create_job_rect(height, width, machine_name, keepalive)
-        if triad_st is not None:
-            triad = map(int,triad_st.split(","))
-            return self.create_job_board(
-                triad=triad, machine_name=machine_name, keepalive=keepalive)
-        if physical_st is not None:
-            physical = map(int,physical_st.split(","))
-            return self.create_job_board(
-                physical=physical, machine_name=machine_name, keepalive=keepalive)
-
-
-        n_boards = get_n_boards()
-        logger.info(f"Requesting job with {n_boards} boards")
-        return self._create({
-            "num-boards": n_boards,
-            "keepalive-interval": f"PT{int(keepalive)}S"
-        }, machine_name)
-
-    @overrides(AbstractSpallocClient.create_job_rect)
-    def create_job_rect(
-            self, width: int, height: int,
-            machine_name: Optional[str] = None,
-            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
-        create: Mapping[str, JsonValue] = {
-            "dimensions": {
-                "width": int(width),
-                "height": int(height)
-            },
-            "keepalive-interval": f"PT{int(keepalive)}S"
-        }
-        return self._create(create, machine_name)
-
-    @overrides(AbstractSpallocClient.create_job_board)
-    def create_job_board(
-            self, triad: Optional[Tuple[int, int, int]] = None,
-            physical: Optional[Tuple[int, int, int]] = None,
-            ip_address: Optional[str] = None,
-            machine_name: Optional[str] = None,
-            keepalive: int = KEEP_ALIVE_PERIOND) -> SpallocJob:
-        board: JsonObject
-        if triad:
-            x, y, z = triad
-            board = {"x": int(x), "y": int(y), "z": int(z)}
-        elif physical:
-            c, f, b = physical
-            board = {"cabinet": int(c), "frame": int(f), "board": int(b)}
-        elif ip_address:
-            board = {"address": str(ip_address)}
-        else:
-            raise KeyError("at least one of triad, physical and ip_address "
-                           "must be given")
-        return self._create({
-            "board": board,
-            "keepalive-interval": f"PT{int(keepalive)}S"
-        }, machine_name)
-
-    @overrides(AbstractSpallocClient.create_job_rect_at_board)
-    def create_job_rect_at_board(
-            self, width: int, height: int,
-            triad: Optional[Tuple[int, int, int]] = None,
-            physical: Optional[Tuple[int, int, int]] = None,
-            ip_address: Optional[str] = None,
-            machine_name: Optional[str] = None,
-            keepalive: int = KEEP_ALIVE_PERIOND,
-            max_dead_boards: int = 0) -> SpallocJob:
-        board: JsonObject
-        if triad:
-            x, y, z = triad
-            board = {"x": int(x), "y": int(y), "z": int(z)}
-        elif physical:
-            c, f, b = physical
-            board = {"cabinet": int(c), "frame": int(f), "board": int(b)}
-        elif ip_address:
-            board = {"address": str(ip_address)}
-        else:
-            raise KeyError("at least one of triad, physical and ip_address "
-                           "must be given")
-        create: Mapping[str, JsonValue] = {
-            "dimensions": {
-                "width": int(width),
-                "height": int(height)
-            },
-            "board": board,
-            "keepalive-interval": f"PT{int(keepalive)}S",
-            "max-dead-boards": int(max_dead_boards)
-        }
-        return self._create(create, machine_name)
 
     def close(self) -> None:
         if self.__session is not None:
