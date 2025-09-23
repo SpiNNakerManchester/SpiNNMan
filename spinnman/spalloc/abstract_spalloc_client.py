@@ -16,10 +16,8 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Never
-from typing import Dict, Iterable, Tuple, Optional
+from typing import Dict, Iterable
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinnman.exceptions import SpallocException
 from .spalloc_machine import SpallocMachine
 from .spalloc_job import SpallocJob
 
@@ -61,90 +59,6 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         """
         Create a job with a specified number of boards.
 
-        :return: A handle for monitoring and interacting with the job.
-        """
-        raise NotImplementedError
-
-    def create_job_rect(
-            self, width: int, height: int, machine_name: Optional[str] = None,
-            keepalive: int = 45) -> Never:
-        """
-        No longer supported use create_job with cfg settings instead
-
-        :param width:
-            Use cfg "Machine", "spalloc_width" instead
-        :param height:
-            Use cfg "Machine", "spalloc_height" instead
-        :param machine_name:
-            Use cfg "Machine", "spalloc_machine" instead
-        :param keepalive:
-            No longer supported
-        :raise: SpallocException
-        """
-        _ = (width, height, keepalive)
-        error_st = ('create_job_rect is no longer supported. '
-                    'Use create_job with cfg ("Machine") settings '
-                    'spalloc_width and spalloc_height')
-        if machine_name is None:
-            error_st += " as well as spalloc_machine"
-        raise SpallocException(error_st)
-
-    def create_job_board(
-            self, triad: Optional[Tuple[int, int, int]] = None,
-            physical: Optional[Tuple[int, int, int]] = None,
-            ip_address: Optional[str] = None,
-            machine_name: Optional[str] = None,
-            keepalive: int = 45) -> Never:
-        """
-        Create a job with a specific board. At least one of ``triad``,
-        ``physical`` and ``ip_address`` must be not ``None``.
-
-        :param triad:
-            The logical coordinate of the board to request
-        :param physical:
-            The physical coordinate of the board to request
-        :param ip_address:
-            The IP address of the board to request
-        :param machine_name:
-            Which machine to run on? If omitted, the service's machine tagged
-            with ``default`` will be used.
-        :param keepalive:
-            After how many seconds of no activity should a job become eligible
-            for automatic pruning?
-        :raise: SpallocException
-        """
-        raise NotImplementedError
-
-    def create_job_rect_at_board(
-            self, width: int, height: int,
-            triad: Optional[Tuple[int, int, int]] = None,
-            physical: Optional[Tuple[int, int, int]] = None,
-            ip_address: Optional[str] = None,
-            machine_name: Optional[str] = None, keepalive: int = 45,
-            max_dead_boards: int = 0) -> SpallocJob:
-        """
-        Create a job with a rectangle of boards starting at a specific board.
-        At least one of ``triad``, ``physical`` and ``ip_address`` must be not
-        ``None``.
-
-        :param width:
-            The width of rectangle to request
-        :param height:
-            The height of rectangle to request
-        :param triad:
-            The logical coordinate of the board to request
-        :param physical:
-            The physical coordinate of the board to request
-        :param ip_address:
-            The IP address of the board to request
-        :param machine_name:
-            Which machine to run on? If omitted, the service's machine tagged
-            with ``default`` will be used.
-        :param keepalive:
-            After how many seconds of no activity should a job become eligible
-            for automatic pruning?
-        :param max_dead_boards:
-            How many dead boards can be included.
         :return: A handle for monitoring and interacting with the job.
         """
         raise NotImplementedError
