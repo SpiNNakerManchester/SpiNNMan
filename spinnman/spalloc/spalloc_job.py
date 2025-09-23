@@ -153,15 +153,13 @@ class SpallocJob(AbstractContextManager):
         raise NotImplementedError()
 
     @abstractmethod
-    def wait_until_ready(self, timeout: Optional[int] = None,
-                         n_retries: Optional[int] = None) -> None:
+    def wait_until_ready(self) -> None:
         """
         Wait until the allocation is in the ``READY`` state.
 
-        :param timeout: The timeout or None to wait forever
-        :param n_retries:
-            The number of times to retry, or None to retry forever
-        :raises Exception: If the allocation is destroyed
+        :raises SpallocException: If the allocation is destroyed
+        :raises SSpallocBoardUnavailableException:
+            If a job for specific boards are disabled, in use or just wrong
         """
         raise NotImplementedError()
 

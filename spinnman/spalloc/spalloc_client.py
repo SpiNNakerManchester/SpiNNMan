@@ -46,7 +46,8 @@ from spinnman.connections.abstract_classes import Connection, Listenable
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanTimeoutException
-from spinnman.exceptions import SpallocException
+from spinnman.exceptions import (
+    SpallocBoardUnavailableException, SpallocException)
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.transceiver import Transceiver
 
@@ -248,16 +249,20 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         triad_st = get_config_str_or_none("Machine", "spalloc_triad")
         physical_st = get_config_str_or_none("Machine", "spalloc_physical")
         ip_address = get_config_str_or_none("Machine", "spalloc_ip_address")
+        board_st = None
         if triad_st is not None:
+            board_st = "triad_st:" + triad_st
             triad = map(int,triad_st.split(","))
             x, y, z = triad
             operation["board"] = {"x": int(x), "y": int(y), "z": int(z)}
         elif physical_st is not None:
+            board_st = "physical_st:" + physical_st
             physical = map(int, physical_st.split(","))
             c, f, b = physical
             operation["board"] = {
                 "cabinet": int(c), "frame": int(f), "board": int(b)}
         elif ip_address is not None:
+            board_st = "ip_address:" + ip_address
             operation["board"] = {"address": str(ip_address)}
 
         if not operation:
@@ -283,9 +288,15 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         operation["keepalive-interval"] = f"PT{int(KEEP_ALIVE_PERIOND)}S"
 
         logger.info("Posting {} to {}", operation, self.__jobs_url)
-        r = self.__session.post(self.__jobs_url, operation, timeout=30)
+        try:
+            r = self.__session.post(self.__jobs_url, operation, timeout=30)
+        except ValueError:
+            if board_st is not None:
+                raise SpallocBoardUnavailableException(
+                    f"Unable to allocated job with {board_st}")
+            raise
         url = r.headers["Location"]
-        return _SpallocJob(self.__session, fix_url(url))
+        return _SpallocJob(self.__session, fix_url(url), board_st)
 
     def close(self) -> None:
         if self.__session is not None:
@@ -503,18 +514,21 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
-    __slots__ = ("__machine_url", "__chip_url",
+    __slots__ = ("__board_st", "__machine_url", "__chip_url",
                  "__memory_url", "__router_url",
                  "_keepalive_url", "__proxy_handle",
                  "__proxy_thread", "__proxy_ping")
 
-    def __init__(self, session: Session, job_handle: str):
+    def __init__(
+            self, session: Session, job_handle: str, board_st: Optional[str]):
         """
         :param session: The session created when starting the spalloc client
         :param job_handle: url
+        :param board_st: Name and Value of cfg setting for specifc board
         """
         super().__init__(session, job_handle)
         logger.info("established job at {}", job_handle)
+        self.__board_st = board_st
         self.__machine_url = self._url + "machine"
         self.__chip_url = self._url + "chip"
         self.__memory_url = self._url + "memory"
@@ -640,16 +654,29 @@ class _SpallocJob(SessionAware, SpallocJob):
         return old_state
 
     @overrides(SpallocJob.wait_until_ready)
-    def wait_until_ready(self, timeout: Optional[int] = None,
-                         n_retries: Optional[int] = None) -> None:
+    def wait_until_ready(self) -> None:
+        n_retries = 3
         state = self.get_state()
         retries = 0
-        while (state != SpallocState.READY and
-               (n_retries is None or retries < n_retries)):
+
+        while state == SpallocState.QUEUED:
+            logger.info(f"Waiting as job is QUEUED {retries=}")
+            if self.__board_st is not None:
+                if retries >= n_retries:
+                    raise SpallocBoardUnavailableException(
+                        f"Boards described as { self.__board_st} are not available")
+            time.sleep(5)
             retries += 1
-            state = self.wait_for_state_change(state, timeout=timeout)
-            if state == SpallocState.DESTROYED:
-                raise SpallocException("job was unexpectedly destroyed")
+            state = self.get_state()
+
+        while state == SpallocState.POWER:
+            logger.info(f"Waiting as job is powering up {retries=}")
+            time.sleep(5)
+            retries += 1
+            state = self.get_state()
+
+        if state != SpallocState.READY:
+            raise SpallocException(f"job was unexpectedly {state=}")
 
     @overrides(SpallocJob.destroy)
     def destroy(self, reason: str = "finished") -> None:
