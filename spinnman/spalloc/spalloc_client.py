@@ -230,15 +230,12 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                 break
             obj = self.__session.get(obj["next"]).json()
 
-    def _create(self, create: Mapping[str, JsonValue]) -> SpallocJob:
-        operation = dict(create)
-
     @overrides(AbstractSpallocClient.create_job)
     def create_job(self) -> SpallocJob:
         assert self.__session
 
         height = get_config_str_or_none("Machine", "spalloc_height")
-        operation: Mapping[str, JsonValue] = {}
+        operation: Dict[str, JsonValue] = {}
         if height is not None:
             width = get_config_str("Machine", "spalloc_width")
             operation["dimensions"] = {
@@ -519,8 +516,8 @@ class _SpallocJob(SessionAware, SpallocJob):
                  "_keepalive_url", "__proxy_handle",
                  "__proxy_thread", "__proxy_ping")
 
-    def __init__(
-            self, session: Session, job_handle: str, board_st: Optional[str]):
+    def __init__(self, session: Session, job_handle: str,
+                 board_st: Optional[str]=None):
         """
         :param session: The session created when starting the spalloc client
         :param job_handle: url
