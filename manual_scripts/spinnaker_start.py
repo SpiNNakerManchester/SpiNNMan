@@ -30,6 +30,9 @@ import logging
 import pickle
 import traceback
 
+from spinn_utilities.config_holder import set_config
+from spinn_utilities.overrides import overrides
+
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS,\
     SYSTEM_VARIABLE_BASE_ADDRESS, address_length_dtype
 from spinnman.processes import AbstractMultiConnectionProcess
@@ -49,11 +52,8 @@ from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
 
-from spinn_utilities.overrides import overrides
-
 from spinnman.config_setup import unittest_setup
 from spinnman.spalloc import SpallocClient, SpallocState
-from spinn_utilities.config_holder import set_config
 
 from spinn_machine.machine import Machine
 

@@ -13,33 +13,28 @@
 # limitations under the License.
 
 from spinn_utilities.config_holder import set_config
+
+from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.spalloc import SpallocClient
 from spinnman.config_setup import unittest_setup
 
 
 SPALLOC_URL = "https://spinnaker.cs.man.ac.uk/spalloc"
-SPALLOC_USERNAME = ""
-SPALLOC_PASSWORD = ""
+# If nNone these are read from environment variables
+SPALLOC_USERNAME = None
+SPALLOC_PASSWORD = None
 
 SPALLOC_MACHINE = "SpiNNaker1M"
 
-x = 0
-y = 3
-b = 0 # Must be 0 if requesting a rect
-RECT = True
-WIDTH = 1  # In triads!
-HEIGHT = 1 # In triads!
-
 unittest_setup()
 set_config("Machine", "version",5)
+# See spinnman/spinnman.cfg for options to get specific boards
+
+writer = SpiNNManDataWriter.mock()
+writer.set_n_required(n_boards_required=1, n_chips_required=None)
+
 client = SpallocClient(SPALLOC_URL, SPALLOC_USERNAME, SPALLOC_PASSWORD)
-if RECT:
-    job = client.create_job_rect_at_board(
-        WIDTH, HEIGHT, triad=(x, y, b), machine_name=SPALLOC_MACHINE,
-        max_dead_boards=1)
-else:
-    job = client.create_job_board(
-        triad=(x, y, b), machine_name=SPALLOC_MACHINE)
+job = client.create_job()
 print(job)
 print("Waiting until ready...")
 with job:

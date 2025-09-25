@@ -18,7 +18,7 @@ from spinnman.data import SpiNNManDataView
 # Scripts that the spinnman level use .spinnman.cfg
 import spinnman.spinnman_script as sim
 
-sim.setup(n_boards_required=400)
+sim.setup(n_boards_required=2)
 # sim.setup()
 
 machine1 = sim.get_machine()
