@@ -156,12 +156,15 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         "_width")
 
     def __init__(self, connections: Optional[Iterable[Connection]] = None,
-                 power_cycle: bool = False):
+                 power_cycle: bool = False,
+                 ensure_board_is_ready: bool = True):
         """
         :param connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
         :param power_cycle: If True will power cycle the machine:
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
         :raise SpinnmanIOException:
             If there is an error communicating with the board, or if no
             connections to the board can be found (if connections is ``None``)
@@ -224,6 +227,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         self._machine_off = False
         if power_cycle:
             self._power_off_machine()
+        if ensure_board_is_ready:
+            self.ensure_board_is_ready()
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)

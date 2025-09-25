@@ -112,7 +112,7 @@ class SpallocJobController(MachineAllocationController):
             self.__stop()
         super()._teardown()
 
-    def create_transceiver(self) -> Transceiver:
+    def create_transceiver(self, ensure_board_is_ready: bool) -> Transceiver:
         """
         Create a Transceiver using proxy
 
@@ -121,10 +121,12 @@ class SpallocJobController(MachineAllocationController):
             via Spalloc. This allows it to work even outside the UNIMAN
             firewall.
 
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
         :returns: A proxied Transceiver
         """
         if self.__use_proxy:
-            return self._job.create_transceiver()
+            return self._job.create_transceiver(ensure_board_is_ready)
         raise NotImplementedError(
             "create transceiver only supported if using proxy")
 

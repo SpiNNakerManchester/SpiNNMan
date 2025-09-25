@@ -38,10 +38,12 @@ class SpallocTransceiver(Version5Transceiver):
 
     __slots__ = ["__job"]
 
-    def __init__(self, job: SpallocJob):
+    def __init__(self, job: SpallocJob, ensure_board_is_ready: bool = False):
         """ Create a Spalloc Transceiver.
 
         :param job: The job to use to communicate with the machine via Spalloc
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
         """
         self.__job: SpallocJob = job
         proxies: List[Connection] = [
@@ -49,7 +51,8 @@ class SpallocTransceiver(Version5Transceiver):
         # Also need a boot connection
         proxies.append(job.connect_for_booting())
 
-        super(SpallocTransceiver, self).__init__(connections=proxies)
+        super(SpallocTransceiver, self).__init__(
+            connections=proxies, ensure_board_is_ready=ensure_board_is_ready)
 
     @overrides(Version5Transceiver.write_memory)
     def write_memory(

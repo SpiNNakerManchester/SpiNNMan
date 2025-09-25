@@ -88,12 +88,13 @@ class SpiNNManSimulation(object):
         """
         if self._data_writer.has_transceiver():
             transceiver = self._data_writer.get_transceiver()
-        elif not is_config_none("Machine", "machine_name"):
-            transceiver = self._execute_tranceiver_by_name()
-        else:
-            transceiver = self._do_transceiver_by_remote(total_run_time)
-        if ensure_board_is_ready:
             transceiver.ensure_board_is_ready()
+        elif not is_config_none("Machine", "machine_name"):
+            transceiver = self._execute_tranceiver_by_name(
+                ensure_board_is_ready)
+        else:
+            transceiver = self._do_transceiver_by_remote(
+                total_run_time, ensure_board_is_ready=ensure_board_is_ready)
         return transceiver
 
     def _get_known_machine(
@@ -161,12 +162,15 @@ class SpiNNManSimulation(object):
         self._data_writer.set_ipaddress("virtual")
         return machine
 
-    def _execute_tranceiver_by_name(self) -> Transceiver:
+    def _execute_tranceiver_by_name(
+            self, ensure_board_is_ready: bool = True) -> Transceiver:
         """
         Runs getting the Transceiver using machine_name.
 
         Will create and set "transceiver" to the View
 
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
         :returns: The Transceiver
         :raises ConfigException: if machine_name is not set in the cfg
         """
@@ -178,23 +182,27 @@ class SpiNNManSimulation(object):
             "Machine", "reset_machine_on_startup")
 
         transceiver = transceiver_generator(
-            bmp_details, auto_detect_bmp, None, reset_machine)
+            bmp_details, auto_detect_bmp, None, reset_machine,
+            ensure_board_is_ready=ensure_board_is_ready)
         self._data_writer.set_transceiver(transceiver)
         return transceiver
 
     def _do_transceiver_by_remote(
-            self, total_run_time: Optional[float]) -> Transceiver:
+            self, total_run_time: Optional[float],
+            ensure_board_is_ready: bool) -> Transceiver:
         _ = total_run_time
         spalloc_server = get_config_str("Machine", "spalloc_server")
         if is_server_address(spalloc_server):
-            transceiver, _ = self._execute_transceiver_by_spalloc()
+            transceiver, _ = self._execute_transceiver_by_spalloc(
+                ensure_board_is_ready)
             return transceiver
         else:
             raise SpinnmanUnsupportedOperationException(
                 "Only new spalloc support at the SpiNNMan level")
 
     def _execute_transceiver_by_spalloc(
-            self) -> Tuple[Transceiver, Dict[XY, str]]:
+            self, ensure_board_is_ready:bool
+            ) -> Tuple[Transceiver, Dict[XY, str]]:
         """
         :return: Transceiver and connections (to write to provenance)
         """
@@ -202,12 +210,13 @@ class SpiNNManSimulation(object):
         self._data_writer.set_ipaddress(ipaddress)
         self._data_writer.set_allocation_controller(controller)
         if controller.can_create_transceiver():
-            transceiver = controller.create_transceiver()
+            transceiver = controller.create_transceiver(ensure_board_is_ready)
         else:
             transceiver = transceiver_generator(
                 bmp_details=None, auto_detect_bmp=False,
                 scamp_connection_data=connections,
-                reset_machine_on_start_up=False)
+                reset_machine_on_start_up=False,
+                ensure_board_is_ready=ensure_board_is_ready)
         self._data_writer.set_transceiver(transceiver)
         return (transceiver, connections)
 

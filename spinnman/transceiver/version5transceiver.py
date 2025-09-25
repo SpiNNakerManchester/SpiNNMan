@@ -28,14 +28,17 @@ class Version5Transceiver(BaseTransceiver):
 
     @overrides(BaseTransceiver.__init__)
     def __init__(self, connections: Optional[Iterable[Connection]] = None,
-                 power_cycle: bool = False):
+                 power_cycle: bool = False,
+                 ensure_board_is_ready: bool = False):
         """
-        :param connections:
+       :param connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
         :param power_cycle: If True will power cycle the machine:
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
         """
-        super().__init__(connections, power_cycle)
+        super().__init__(connections, power_cycle, ensure_board_is_ready)
         assert SpiNNManDataView.get_machine_version().number == 5
 
     @property

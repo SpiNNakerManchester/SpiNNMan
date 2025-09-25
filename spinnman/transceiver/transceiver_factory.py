@@ -43,7 +43,8 @@ def create_transceiver_from_hostname(
         hostname: Optional[str], *,
         bmp_connection_data: Optional[BMPConnectionData] = None,
         auto_detect_bmp: bool = False, power_cycle: bool = False,
-        extended: bool = False) -> Transceiver:
+        extended: bool = False,
+        ensure_board_is_ready: bool = True) -> Transceiver:
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -62,6 +63,9 @@ def create_transceiver_from_hostname(
     :param power_cycle: If True will power cycle the machine
     :param extended:
         If True will return an Extended version of the Transceiver
+    :param ensure_board_is_ready:
+        Flag to say if ensure_board_is_ready should be run
+
     :return: The created transceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
@@ -101,16 +105,18 @@ def create_transceiver_from_hostname(
 
     if hostname == LOCAL_HOST:
         return create_transceiver_from_connections(
-            connections=connections, virtual=True, extended=extended)
+            connections=connections, virtual=True, extended=extended,
+            ensure_board_is_ready=ensure_board_is_ready)
     else:
         return create_transceiver_from_connections(
             connections=connections, virtual=False, power_cycle=power_cycle,
-            extended=extended)
+            extended=extended, ensure_board_is_ready=ensure_board_is_ready)
 
 
-def create_transceiver_from_connections(
-        connections: Iterable[Connection], virtual: bool = False,
-        power_cycle: bool = False, extended: bool = False) -> Transceiver:
+def create_transceiver_from_connections(connections: Iterable[Connection],
+        virtual: bool = False, power_cycle: bool = False,
+        extended: bool = False,
+        ensure_board_is_ready: bool = False) -> Transceiver:
     """
     Create a Transceiver with these connections
 
@@ -120,6 +126,8 @@ def create_transceiver_from_connections(
     :param virtual: If True will return a virtual Transceiver
     :param power_cycle: If True will power cycle the machine
     :param extended:
+    :param ensure_board_is_ready:
+        Flag to say if ensure_board_is_ready should be run
     :return: The created transceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
@@ -136,25 +144,31 @@ def create_transceiver_from_connections(
             raise NotImplementedError(f"No Virtual Transceiver for {version=}")
         if extended:
             return ExtendedVersion3Transceiver(
-                connections=connections, power_cycle=power_cycle)
+                connections=connections, power_cycle=power_cycle,
+                ensure_board_is_ready = ensure_board_is_ready)
         return Version3Transceiver(
-            connections=connections, power_cycle=power_cycle)
+            connections=connections, power_cycle=power_cycle,
+            ensure_board_is_ready=ensure_board_is_ready)
     if isinstance(version, Version5):
         if virtual:
             return Virtual5Transceiver(
-                connections=connections, power_cycle=power_cycle)
+                connections=connections, power_cycle=power_cycle,
+                ensure_board_is_ready = ensure_board_is_ready)
         if extended:
             return ExtendedVersion5Transceiver(
-                connections=connections, power_cycle=power_cycle)
+                connections=connections, power_cycle=power_cycle,
+                ensure_board_is_ready = ensure_board_is_ready)
         return Version5Transceiver(
-            connections=connections, power_cycle=power_cycle)
+            connections=connections, power_cycle=power_cycle,
+            ensure_board_is_ready=ensure_board_is_ready)
     raise NotImplementedError(f"No Transceiver for {version=}")
 
 
 def transceiver_generator(
         bmp_details: Optional[str], auto_detect_bmp: bool,
         scamp_connection_data: Optional[Dict[XY, str]],
-        reset_machine_on_start_up: bool) -> Transceiver:
+        reset_machine_on_start_up: bool,
+        ensure_board_is_ready:bool = True) -> Transceiver:
     """
     Makes a transceiver.
 
@@ -165,13 +179,16 @@ def transceiver_generator(
         Job.connection dict, a String SC&MP connection data or `None`
     :param reset_machine_on_start_up:
         Whether the machine should be reset on startup
+    :param ensure_board_is_ready:
+        Flag to say if ensure_board_is_ready should be run
     :return: Transceiver, and description of machine it is connected to
     """
     txrx = create_transceiver_from_hostname(
         hostname=SpiNNManDataView.get_ipaddress(),
         bmp_connection_data=_parse_bmp_details(bmp_details),
         auto_detect_bmp=auto_detect_bmp,
-        power_cycle=reset_machine_on_start_up)
+        power_cycle=reset_machine_on_start_up,
+        ensure_board_is_ready=ensure_board_is_ready)
 
     # do auto boot if possible
     if scamp_connection_data:

@@ -126,11 +126,13 @@ class SpallocJob(AbstractContextManager):
         raise NotImplementedError()
 
     @abstractmethod
-    def create_transceiver(self) -> Transceiver:
+    def create_transceiver(self, ensure_board_is_ready) -> Transceiver:
         """
         Create a transceiver that will talk to this job. The transceiver will
         only be configured to talk to the SCP ports of the boards of the job.
 
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
         :returns: Transceiver that uses this job.
         """
         raise NotImplementedError()
