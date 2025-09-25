@@ -35,7 +35,7 @@ from websocket import WebSocket  # type: ignore
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.config_holder import (
-    get_config_int, get_config_str, get_config_str_or_none)
+    get_config_int, get_config_int_or_none, get_config_str_or_none)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
@@ -257,12 +257,11 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
             board_st = f"{spalloc_ip_address=}"
             operation["board"] = {"address": str(spalloc_ip_address)}
 
-        spalloc_height = get_config_str_or_none("Machine", "spalloc_height")
+        spalloc_height = get_config_int_or_none("Machine", "spalloc_height")
         if spalloc_height is not None:
-            spalloc_width = get_config_str("Machine", "spalloc_width")
+            spalloc_width = get_config_int("Machine", "spalloc_width")
             operation["dimensions"] = {
-                "width": int(spalloc_width),
-                "height": int(spalloc_height)
+                "width": spalloc_width, "height": spalloc_height
             }
             if board_st is None:
                 board_st = ""
@@ -286,6 +285,17 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         else:
             operation["tags"] = ["default"]
 
+        spalloc_max_dead_boards = get_config_int_or_none(
+            "Machine", "spalloc_max_dead_boards")
+        if spalloc_max_dead_boards is not None:
+            operation["max-dead-boards"] = spalloc_max_dead_boards
+            if board_st is not None:
+                board_st += f" {spalloc_max_dead_boards=}"
+            else:
+                logger.warning(
+                    f"{spalloc_max_dead_boards=} so spalloc may return a job "
+                    "with less boards reachable than needed.")
+
         if self.__group is not None:
             operation["group"] = self.__group
         if self.__collab is not None:
@@ -297,7 +307,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
 
         operation["keepalive-interval"] = f"PT{int(KEEP_ALIVE_PERIOND)}S"
 
-        logger.info("Posting {} to {}", operation, self.__jobs_url)
+        logger.info("requesting job with {}", operation)
         try:
             r = self.__session.post(self.__jobs_url, operation, timeout=30)
         except ValueError:
