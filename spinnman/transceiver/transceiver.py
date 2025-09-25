@@ -1007,11 +1007,6 @@ class Transceiver(object):
         transceiver. Boots the board if not already booted and verifies that
         the version of SCAMP running is compatible with this transceiver.
 
-        :param n_retries: The number of times to retry booting
-        :param extra_boot_values:
-            Any additional or overwrite values to set during boot.
-            This should only be used for values which are not standard
-            based on the board version.
         :raise SpinnmanIOException:
             * If there is a problem booting the board
             * If the version of software on the board is not compatible with

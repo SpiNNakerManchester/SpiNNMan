@@ -147,6 +147,7 @@ class SpallocJobController(MachineAllocationController):
         .. note::
             This allocation controller proxies connections via Spalloc. This
             allows it to work even outside the UNIMAN firewall.
+
         :param chip_x: Ethernet-enabled chip X coordinate
         :param chip_y: Ethernet-enabled chip Y coordinate
         :param udp_port:
