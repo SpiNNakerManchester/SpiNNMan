@@ -762,7 +762,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             r.json()["physical-board-coordinates"]))
 
     @overrides(SpallocJob.create_transceiver)
-    def create_transceiver(self, ensure_board_is_ready) -> Transceiver:
+    def create_transceiver(self, ensure_board_is_ready: bool) -> Transceiver:
         if self.get_state() != SpallocState.READY:
             raise SpallocException("job not ready to execute scripts")
         return SpallocTransceiver(

@@ -126,7 +126,7 @@ class SpallocJob(AbstractContextManager):
         raise NotImplementedError()
 
     @abstractmethod
-    def create_transceiver(self, ensure_board_is_ready) -> Transceiver:
+    def create_transceiver(self, ensure_board_is_ready:bool) -> Transceiver:
         """
         Create a transceiver that will talk to this job. The transceiver will
         only be configured to talk to the SCP ports of the boards of the job.
