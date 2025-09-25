@@ -229,6 +229,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self._power_off_machine()
         if ensure_board_is_ready:
             self.ensure_board_is_ready()
+        else:
+            logger.warning("Transceiver / board not ready")
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)

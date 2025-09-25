@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from requests.exceptions import ReadTimeout
 from spinn_utilities.exceptions import DataNotYetAvialable
 from spinnman.data import SpiNNManDataView
 # Scripts that the spinnman level use .spinnman.cfg
 import spinnman.spinnman_script as sim
 
-# sim.setup(n_boards_required=2)
-sim.setup()
+sim.setup(n_boards_required=2)
+# sim.setup()
 
 assert SpiNNManDataView.has_transceiver() == False
 try:
@@ -35,6 +36,14 @@ assert SpiNNManDataView.has_transceiver() == True
 transceiver2 = SpiNNManDataView.get_transceiver()
 assert id(transceiver2) == id(transceiver1)
 
+# The transceiver/board is not ready
+try:
+    transceiver1.get_machine_details()
+    raise AssertionError("transceiver1.get_machine_details() worked??")
+except ReadTimeout:
+    pass
+
+# View only returns a created Machine (unless in unittest mode)
 try:
     SpiNNManDataView.get_machine()
     raise AssertionError("SpiNNManDataView.get_machine() worked??")

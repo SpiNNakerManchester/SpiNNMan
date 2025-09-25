@@ -234,33 +234,46 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
     def create_job(self) -> SpallocJob:
         assert self.__session
 
-        height = get_config_str_or_none("Machine", "spalloc_height")
         operation: Dict[str, JsonValue] = {}
-        if height is not None:
-            width = get_config_str("Machine", "spalloc_width")
-            operation["dimensions"] = {
-                "width": int(width),
-                "height": int(height)
-            }
 
-        triad_st = get_config_str_or_none("Machine", "spalloc_triad")
-        physical_st = get_config_str_or_none("Machine", "spalloc_physical")
-        ip_address = get_config_str_or_none("Machine", "spalloc_ip_address")
-        board_st = None
-        if triad_st is not None:
-            board_st = "triad_st:" + triad_st
-            triad = map(int,triad_st.split(","))
+        spalloc_triad = get_config_str_or_none("Machine", "spalloc_triad")
+        spalloc_physical = get_config_str_or_none(
+            "Machine", "spalloc_physical")
+        spalloc_ip_address = get_config_str_or_none(
+            "Machine", "spalloc_ip_address")
+        board_st: Optional[str] = None
+        if spalloc_triad is not None:
+            board_st = f"{spalloc_triad=}"
+            triad = map(int,spalloc_triad.split(","))
             x, y, z = triad
             operation["board"] = {"x": int(x), "y": int(y), "z": int(z)}
-        elif physical_st is not None:
-            board_st = "physical_st:" + physical_st
-            physical = map(int, physical_st.split(","))
+        elif spalloc_physical is not None:
+            board_st = f"{spalloc_physical=}"
+            physical = map(int, spalloc_physical.split(","))
             c, f, b = physical
             operation["board"] = {
                 "cabinet": int(c), "frame": int(f), "board": int(b)}
-        elif ip_address is not None:
-            board_st = "ip_address:" + ip_address
-            operation["board"] = {"address": str(ip_address)}
+        elif spalloc_ip_address is not None:
+            board_st = f"{spalloc_ip_address=}"
+            operation["board"] = {"address": str(spalloc_ip_address)}
+
+        spalloc_height = get_config_str_or_none("Machine", "spalloc_height")
+        if spalloc_height is not None:
+            spalloc_width = get_config_str("Machine", "spalloc_width")
+            operation["dimensions"] = {
+                "width": int(spalloc_width),
+                "height": int(spalloc_height)
+            }
+            if board_st is None:
+                board_st = ""
+            else:
+                board_st += " "
+            board_st += f"{spalloc_height=} {spalloc_width=}"
+            logger.warning(f"Spalloc will return a fixed number of boards "
+                           f"due to {board_st}")
+        elif board_st is not None:
+            logger.warning(f"Spalloc will return 1 board due to {board_st} "
+                           f"and no spalloc_height and spalloc_width set")
 
         if not operation:
             n_boards = get_n_boards()
