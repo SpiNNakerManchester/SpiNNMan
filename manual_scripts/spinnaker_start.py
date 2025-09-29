@@ -26,12 +26,12 @@ import operator
 import struct
 import six
 import sys
-import logging
 import pickle
 import traceback
 
-from spinn_utilities.config_holder import set_config
 from spinn_utilities.overrides import overrides
+
+from spinn_machine.machine import Machine
 
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS,\
     SYSTEM_VARIABLE_BASE_ADDRESS, address_length_dtype
@@ -52,10 +52,9 @@ from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
 
-from spinnman.config_setup import unittest_setup
-from spinnman.spalloc import SpallocClient, SpallocState
+from spinnman.spalloc import SpallocClient
+import spinnman.spinnman_script as sim
 
-from spinn_machine.machine import Machine
 
 print_lock = RLock()
 
@@ -722,11 +721,9 @@ class MockJob(object):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    unittest_setup()
-    set_config("Machine", "version", "5")
+    sim.setup(n_boards_required=1)
 
-    save = False
+    save = True
     load = False
     if len(sys.argv) > 1:
         if sys.argv[1] == "--save":
@@ -746,8 +743,7 @@ if __name__ == "__main__":
         close_file(load_file)
     else:
         client = SpallocClient("https://spinnaker.cs.man.ac.uk/spalloc")
-        job = client.create_job(
-            num_boards=2, machine_name="SpiNNaker1M")
+        job = client.create_job()
     try:
         job.wait_until_ready()
         txrx = job.create_transceiver()

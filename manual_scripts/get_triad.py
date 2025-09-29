@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinn_utilities.config_holder import set_config
 
-from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.spalloc import SpallocClient
-from spinnman.config_setup import unittest_setup
+import spinnman.spinnman_script as sim
 
 
 SPALLOC_URL = "https://spinnaker.cs.man.ac.uk/spalloc"
@@ -26,12 +24,7 @@ SPALLOC_PASSWORD = None
 
 SPALLOC_MACHINE = "SpiNNaker1M"
 
-unittest_setup()
-set_config("Machine", "version",5)
-# See spinnman/spinnman.cfg for options to get specific boards
-
-writer = SpiNNManDataWriter.mock()
-writer.set_n_required(n_boards_required=1, n_chips_required=None)
+sim.setup(n_boards_required=1)
 
 client = SpallocClient(SPALLOC_URL, SPALLOC_USERNAME, SPALLOC_PASSWORD)
 job = client.create_job()
