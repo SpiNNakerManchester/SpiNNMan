@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from requests.exceptions import ReadTimeout
-from spinn_utilities.exceptions import DataNotYetAvialable
-from spinnman.data import SpiNNManDataView
 # Scripts that the spinnman level use .spinnman.cfg
 import spinnman.spinnman_script as sim
 
