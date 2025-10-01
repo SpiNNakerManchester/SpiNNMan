@@ -545,7 +545,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         """
         :param session: The session created when starting the spalloc client
         :param job_handle: url
-        :param board_st: Name and Value of cfg setting for specifc board
+        :param board_st: Name and Value of cfg setting for specific board
         """
         super().__init__(session, job_handle)
         logger.info("established job at {}", job_handle)

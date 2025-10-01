@@ -386,6 +386,6 @@ class SpallocBoardUnavailableException(SpallocException):
     """
     Raised when a job created with specific board requests remains QUEUED
 
-    The cfg "Machine" setttings "spalloc_triad", "spalloc_physical" or
+    The cfg "Machine" settings "spalloc_triad", "spalloc_physical" or
     "spalloc_ip_address" cause spalloc to require specific boards.
     """
