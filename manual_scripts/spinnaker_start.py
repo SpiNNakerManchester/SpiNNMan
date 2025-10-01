@@ -14,7 +14,6 @@
 
 
 from __future__ import print_function
-from six import iteritems
 from threading import Thread, RLock, Condition
 from matplotlib import pyplot, animation
 from numpy.random.mtrand import shuffle
@@ -24,7 +23,6 @@ import matplotlib
 import time
 import operator
 import struct
-import six
 import sys
 import pickle
 import traceback
@@ -580,7 +578,7 @@ class MainThread(object):
 
     def run(self, core_counter, job, save, load):
         job_connections = list()
-        for (x, y), ip_address in iteritems(job.get_connections()):
+        for (x, y), ip_address in job.get_connections():
             job_connections.append((x, y, ip_address))
         job_connections.sort(key=operator.itemgetter(0, 1))
         with job:
@@ -753,7 +751,7 @@ if __name__ == "__main__":
             save_file = open_file("record/job.dat", "wb")
             save_file.write(struct.pack(
                 "<III", dims.width, dims.height, len(job.connections)))
-            for (x, y), _ in iteritems(job.connections):
+            for (x, y), _ in job.connections:
                 save_file.write(struct.pack("<II", x, y))
             close_file(save_file)
 
