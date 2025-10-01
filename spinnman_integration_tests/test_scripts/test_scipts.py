@@ -27,6 +27,7 @@ class TestScripts(unittest.TestCase):
         :param script: scrit to import/ run
         """
         this_dir = os.path.dirname(os.path.abspath(__file__))
+        os.chdir(this_dir)
         parent = os.path.dirname(this_dir)
         spinnman = os.path.dirname(parent)
         get_machine = os.path.join(spinnman, "manual_scripts", script)
