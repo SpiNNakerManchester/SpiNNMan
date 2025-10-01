@@ -685,7 +685,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             if self.__board_st is not None:
                 if retries >= n_retries:
                     raise SpallocBoardUnavailableException(
-                        f"Boards described as { self.__board_st} "
+                        f"Boards described as {self.__board_st} "
                         f"are not available")
             time.sleep(5)
             retries += 1
