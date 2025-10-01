@@ -18,6 +18,7 @@ from spinnman.data import SpiNNManDataView
 # Scripts that the spinnman level use .spinnman.cfg
 import spinnman.spinnman_script as sim
 
+# Scripts that the spinnman level use .spinnman.cfg
 sim.setup(n_boards_required=2)
 # sim.setup()
 

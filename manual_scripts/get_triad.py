@@ -24,12 +24,13 @@ SPALLOC_PASSWORD = None
 
 SPALLOC_MACHINE = "SpiNNaker1M"
 
+# Scripts that the spinnman level use .spinnman.cfg
 sim.setup(n_boards_required=1)
 
 client = SpallocClient(SPALLOC_URL, SPALLOC_USERNAME, SPALLOC_PASSWORD)
 job = client.create_job()
 print(job)
-print("Waiting until ready...")
+# print("Waiting until ready...")
 with job:
     job.wait_until_ready()
     print(job.get_connections())
@@ -42,5 +43,5 @@ with job:
     machine = txrx.get_machine_details()
     print(machine)
 
-    input("Press Enter to release...")
+    # input("Press Enter to release...")
 client.close()#print(2)#print(2^(1/(2^1)))

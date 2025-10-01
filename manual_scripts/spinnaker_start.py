@@ -721,6 +721,7 @@ class MockJob(object):
 
 
 if __name__ == "__main__":
+    # Scripts that the spinnman level use .spinnman.cfg
     sim.setup(n_boards_required=1)
 
     save = True
