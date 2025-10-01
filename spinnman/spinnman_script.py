@@ -44,6 +44,7 @@ def setup(n_chips_required: Optional[int] = None,
         boards you need so that the spalloc system can allocate you a machine
         big enough for your needs.
     """
+    # pylint: disable=global-statement
     global __simulator
     if __simulator is not None:
         raise RuntimeError("Setup can only be called once")
@@ -54,6 +55,7 @@ def setup(n_chips_required: Optional[int] = None,
         default=os.path.join(os.path.dirname(__file__), CONFIG_FILE_NAME))
     __simulator = SpiNNManSimulation()
     # At the moment this is done by sPyNNaker and Graph Front end
+    # pylint: disable=protected-access
     __simulator._data_writer.set_n_required(
         n_boards_required, n_chips_required)
 
@@ -76,11 +78,16 @@ def get_transceiver(ensure_board_is_ready: bool = True) -> Transceiver:
     :return:
     """
     assert __simulator is not None
+    # pylint: disable=protected-access
     return __simulator._get_transceiver(
         ensure_board_is_ready=ensure_board_is_ready)
 
 
 def end() -> None:
+    """
+    Cleans up the machine transciever ect
+    """
+    # pylint: disable=global-statement,protected-access
     global __simulator
     if __simulator is not None:
         __simulator._shutdown()
