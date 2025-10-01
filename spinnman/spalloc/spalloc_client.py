@@ -311,10 +311,10 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         logger.info("requesting job with {}", operation)
         try:
             r = self.__session.post(self.__jobs_url, operation, timeout=30)
-        except ValueError:
+        except ValueError as exc:
             if board_st is not None:
                 raise SpallocBoardUnavailableException(
-                    f"Unable to allocated job with {board_st}")
+                    f"Unable to allocated job with {board_st}") from exc
             raise
         url = r.headers["Location"]
         return _SpallocJob(self.__session, fix_url(url), board_st)
