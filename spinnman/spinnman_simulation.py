@@ -84,7 +84,7 @@ class SpiNNManSimulation(object):
         :param total_run_time: The total run time to request
         :param ensure_board_is_ready:
             Make sure the Transceiver is ready to provide Machine details
-        :return: The Transceiver
+        :return: The Transceiver now stored in the DataView
         """
         if self._data_writer.has_transceiver():
             transceiver = self._data_writer.get_transceiver()

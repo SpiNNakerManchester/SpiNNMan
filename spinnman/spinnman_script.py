@@ -30,6 +30,20 @@ __simulator: Optional[SpiNNManSimulation] = None
 
 def setup(n_chips_required: Optional[int] = None,
           n_boards_required: Optional[int] = None) -> None:
+    """
+    The main method similar to PyNN setup.
+
+    Needs to be called before any other function
+
+    :param n_chips_required:
+        Deprecated! Use n_boards_required instead.
+        Must be `None` if n_boards_required specified.
+    :param n_boards_required:
+        if you need to be allocated a machine (for spalloc) before building
+        your graph, then fill this in with a general idea of the number of
+        boards you need so that the spalloc system can allocate you a machine
+        big enough for your needs.
+    """
     global __simulator
     if __simulator is not None:
         raise RuntimeError("Setup can only be called once")
@@ -45,11 +59,22 @@ def setup(n_chips_required: Optional[int] = None,
 
 
 def get_machine() -> Machine:
+    """
+    Gets the Machine creating it if needed
+
+    Will call get_transceiver(ensure_board_is_ready = True)
+    """
     assert __simulator is not None
     return __simulator.get_machine()
 
 
 def get_transceiver(ensure_board_is_ready: bool = True) -> Transceiver:
+    """
+    Gets the Transceiver creating it if needed
+
+    :param ensure_board_is_ready:
+    :return:
+    """
     assert __simulator is not None
     return __simulator._get_transceiver(
         ensure_board_is_ready=ensure_board_is_ready)
