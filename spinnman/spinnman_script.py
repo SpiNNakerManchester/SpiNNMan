@@ -65,6 +65,8 @@ def get_machine() -> Machine:
     Gets the Machine creating it if needed
 
     Will call get_transceiver(ensure_board_is_ready = True)
+
+    :returns: Machine object
     """
     assert __simulator is not None
     return __simulator.get_machine()
