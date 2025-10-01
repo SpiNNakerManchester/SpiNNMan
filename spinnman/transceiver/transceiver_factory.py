@@ -113,9 +113,9 @@ def create_transceiver_from_hostname(
             extended=extended, ensure_board_is_ready=ensure_board_is_ready)
 
 
-def create_transceiver_from_connections(connections: Iterable[Connection],
-        virtual: bool = False, power_cycle: bool = False,
-        extended: bool = False,
+def create_transceiver_from_connections(
+        connections: Iterable[Connection], virtual: bool = False,
+        power_cycle: bool = False, extended: bool = False,
         ensure_board_is_ready: bool = False) -> Transceiver:
     """
     Create a Transceiver with these connections
@@ -145,7 +145,7 @@ def create_transceiver_from_connections(connections: Iterable[Connection],
         if extended:
             return ExtendedVersion3Transceiver(
                 connections=connections, power_cycle=power_cycle,
-                ensure_board_is_ready = ensure_board_is_ready)
+                ensure_board_is_ready=ensure_board_is_ready)
         return Version3Transceiver(
             connections=connections, power_cycle=power_cycle,
             ensure_board_is_ready=ensure_board_is_ready)
@@ -153,11 +153,11 @@ def create_transceiver_from_connections(connections: Iterable[Connection],
         if virtual:
             return Virtual5Transceiver(
                 connections=connections, power_cycle=power_cycle,
-                ensure_board_is_ready = ensure_board_is_ready)
+                ensure_board_is_ready=ensure_board_is_ready)
         if extended:
             return ExtendedVersion5Transceiver(
                 connections=connections, power_cycle=power_cycle,
-                ensure_board_is_ready = ensure_board_is_ready)
+                ensure_board_is_ready=ensure_board_is_ready)
         return Version5Transceiver(
             connections=connections, power_cycle=power_cycle,
             ensure_board_is_ready=ensure_board_is_ready)
@@ -168,7 +168,7 @@ def transceiver_generator(
         bmp_details: Optional[str], auto_detect_bmp: bool,
         scamp_connection_data: Optional[Dict[XY, str]],
         reset_machine_on_start_up: bool,
-        ensure_board_is_ready:bool = True) -> Transceiver:
+        ensure_board_is_ready: bool = True) -> Transceiver:
     """
     Makes a transceiver.
 

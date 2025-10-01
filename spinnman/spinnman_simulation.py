@@ -201,7 +201,7 @@ class SpiNNManSimulation(object):
                 "Only new spalloc support at the SpiNNMan level")
 
     def _execute_transceiver_by_spalloc(
-            self, ensure_board_is_ready:bool
+            self, ensure_board_is_ready: bool
             ) -> Tuple[Transceiver, Dict[XY, str]]:
         """
         :return: Transceiver and connections (to write to provenance)
@@ -233,4 +233,3 @@ class SpiNNManSimulation(object):
 
         self.__close_allocation_controller()
         self._data_writer.shut_down()
-

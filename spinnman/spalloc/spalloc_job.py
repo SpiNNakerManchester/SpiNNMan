@@ -127,7 +127,7 @@ class SpallocJob(AbstractContextManager):
 
     @abstractmethod
     def create_transceiver(
-            self, ensure_board_is_ready:bool = True) -> Transceiver:
+            self, ensure_board_is_ready: bool = True) -> Transceiver:
         """
         Create a transceiver that will talk to this job. The transceiver will
         only be configured to talk to the SCP ports of the boards of the job.

@@ -27,6 +27,7 @@ CONFIG_FILE_NAME = "spinnman.cfg"
 
 __simulator: Optional[SpiNNManSimulation] = None
 
+
 def setup(n_chips_required: Optional[int] = None,
           n_boards_required: Optional[int] = None) -> None:
     global __simulator

@@ -96,6 +96,7 @@ def fix_url(url: Any) -> str:
                             parts.params, parts.query, parts.fragment)
     return urlunparse(parts)
 
+
 def get_n_boards() -> int:
     """
     Works out how many boards are needed.
@@ -244,7 +245,7 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         board_st: Optional[str] = None
         if spalloc_triad is not None:
             board_st = f"{spalloc_triad=}"
-            triad = map(int,spalloc_triad.split(","))
+            triad = map(int, spalloc_triad.split(","))
             x, y, z = triad
             operation["board"] = {"x": int(x), "y": int(y), "z": int(z)}
         elif spalloc_physical is not None:
@@ -540,7 +541,7 @@ class _SpallocJob(SessionAware, SpallocJob):
                  "__proxy_thread", "__proxy_ping")
 
     def __init__(self, session: Session, job_handle: str,
-                 board_st: Optional[str]=None):
+                 board_st: Optional[str] = None):
         """
         :param session: The session created when starting the spalloc client
         :param job_handle: url
@@ -684,7 +685,8 @@ class _SpallocJob(SessionAware, SpallocJob):
             if self.__board_st is not None:
                 if retries >= n_retries:
                     raise SpallocBoardUnavailableException(
-                        f"Boards described as { self.__board_st} are not available")
+                        f"Boards described as { self.__board_st} "
+                        f"are not available")
             time.sleep(5)
             retries += 1
             state = self.get_state()

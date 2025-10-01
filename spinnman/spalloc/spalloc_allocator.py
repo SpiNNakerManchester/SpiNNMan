@@ -14,11 +14,9 @@
 
 from contextlib import ExitStack
 import logging
-import math
 from typing import cast, ContextManager, Dict, Tuple, Optional, Union
 
-from spinn_utilities.config_holder import (
-    get_config_bool, get_config_str_or_none)
+from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
@@ -26,7 +24,6 @@ from spinn_utilities.config_holder import get_config_str
 
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import SCP_SCAMP_PORT
-from spinnman.data import SpiNNManDataView
 from spinnman.spalloc import (
     MachineAllocationController,
     SpallocClient, SpallocJob, SpallocState)

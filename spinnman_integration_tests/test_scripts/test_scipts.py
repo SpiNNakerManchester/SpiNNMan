@@ -16,6 +16,7 @@ import os
 import runpy
 import unittest
 
+
 class TestScripts(unittest.TestCase):
 
     def _run_script(self, script: str) -> None:
