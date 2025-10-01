@@ -85,7 +85,7 @@ def get_transceiver(ensure_board_is_ready: bool = True) -> Transceiver:
 
 def end() -> None:
     """
-    Cleans up the machine, transceiver ect
+    Cleans up the machine, transceiver ECT
     """
     # pylint: disable=global-statement,protected-access
     global __simulator
