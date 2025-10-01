@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import pytest
 import runpy
 import unittest
 
@@ -31,14 +32,18 @@ class TestScripts(unittest.TestCase):
         get_machine = os.path.join(spinnman, "manual_scripts", script)
         runpy.run_path(get_machine)
 
+    @pytest.mark.xdist_group(name="spinnman_script")
     def test_get_machine(self) -> None:
         self._run_script("get_machine.py")
 
+    @pytest.mark.xdist_group(name="spinnman_script")
     def test_get_machine_full(self) -> None:
         self._run_script("get_machine_full.py")
 
+    @pytest.mark.xdist_group(name="spinnman_script")
     def test_get_triad(self) -> None:
         self._run_script("get_triad.py")
 
+    @pytest.mark.xdist_group(name="spinnman_script")
     def test_spinnaker_start(self) -> None:
         self._run_script("spinnaker_start.py")

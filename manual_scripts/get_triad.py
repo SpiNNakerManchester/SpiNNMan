@@ -45,3 +45,4 @@ with job:
 
     # input("Press Enter to release...")
 client.close()#print(2)#print(2^(1/(2^1)))
+sim.end()
