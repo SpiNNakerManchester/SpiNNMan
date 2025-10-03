@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import importlib
 import os
 import pytest
 import runpy
+import sys
 import unittest
-
 
 class TestScripts(unittest.TestCase):
 
-    def _run_script(self, script: str) -> None:
+    def _get_script(self, script: str) -> str:
         """
         Imports/ runs a script from manual_scripts
 
@@ -30,8 +31,19 @@ class TestScripts(unittest.TestCase):
         os.chdir(this_dir)
         parent = os.path.dirname(this_dir)
         spinnman = os.path.dirname(parent)
-        get_machine = os.path.join(spinnman, "manual_scripts", script)
-        runpy.run_path(get_machine)
+        return os.path.join(spinnman, "manual_scripts", script)
+
+    def _run_script(self, script: str) -> None:
+        script_path = self._get_script(script)
+        runpy.run_path(script_path)
+
+    def import_from_path(self, module_name, script: str):
+        script_path = self._get_script(script)
+        spec = importlib.util.spec_from_file_location(module_name, script_path)
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
 
     @pytest.mark.xdist_group(name="spinnman_script")
     def test_get_machine(self) -> None:
@@ -47,4 +59,6 @@ class TestScripts(unittest.TestCase):
 
     @pytest.mark.xdist_group(name="spinnman_script")
     def test_spinnaker_start(self) -> None:
-        self._run_script("spinnaker_start.py")
+        spinnman_script = self.import_from_path("spinnman_script", "spinnaker_start.py")
+        spinnman_script.run_script(save=True)
+        spinnman_script.run_script(load=True)
