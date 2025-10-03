@@ -665,11 +665,10 @@ class MainThread(object):
             # Read the P2P table to know which chips should exist
             if boot_done:
                 warn("Reading P2P Table")
-                txrx = job.create_transceiver()
-                dims = txrx._get_machine_dimensions()
+                width, height = _estimate_width_and_heigth(job)
                 p2p_process = GetP2PTableProcess(
                     RoundRobinConnectionSelector(
-                        [root_connection]), dims.width, dims.height, save, load)
+                        [root_connection]), width, height, save, load)
                 p2p_table = p2p_process.get_p2p_table()
 
                 # Create a reader thread for each connection,
@@ -792,6 +791,17 @@ class MockJob(SpallocJob):
             self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
         pass
 
+def _estimate_width_and_heigth(job: SpallocJob) -> Tuple[int, int]:
+    max_x = 0
+    max_y = 0
+    for (x, y) in job.get_connections():
+        if x > max_x:
+            max_x = x
+        if y > max_y:
+            max_y = y
+    return max_x + 8, max_y + 8
+
+
 def run_script(save: bool = False, load: bool = False) -> None:
     """
     Runs the script with sys.arvg values
@@ -816,21 +826,19 @@ def run_script(save: bool = False, load: bool = False) -> None:
         job = client.create_job()
     try:
         job.wait_until_ready()
-        txrx = job.create_transceiver(ensure_board_is_ready=False)
-        #txrx.ensure_board_is_ready()
-        #dims = txrx._get_machine_dimensions()
-        dims = MachineDimensions(8,8)
+        connections = job.get_connections()
+        width, height = _estimate_width_and_heigth(job)
         if save:
             os.makedirs("record", exist_ok=True)
             save_file = open_file("record/meta.dat", "wb")
             save_file.write(struct.pack(
-                "<III", dims.width, dims.height, len(job.get_connections())))
+                "<III", width, height, len(job.get_connections())))
             for (x, y) in job.get_connections().keys():
                 save_file.write(struct.pack("<II", x, y))
             close_file(save_file)
 
         # Create GUI
-        core_counter = CoreCounter(dims.width, dims.height)
+        core_counter = CoreCounter(width, height)
 
         # Run task in thread
         main_thread = MainThread(core_counter, job, save, load)
