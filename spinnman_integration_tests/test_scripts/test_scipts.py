@@ -17,6 +17,7 @@ import os
 import pytest
 import runpy
 import sys
+from types import ModuleType
 import unittest
 
 class TestScripts(unittest.TestCase):
@@ -37,11 +38,13 @@ class TestScripts(unittest.TestCase):
         script_path = self._get_script(script)
         runpy.run_path(script_path)
 
-    def import_from_path(self, module_name, script: str):
+    def _import_from_path(self, module_name: str, script: str) -> ModuleType:
         script_path = self._get_script(script)
         spec = importlib.util.spec_from_file_location(module_name, script_path)
+        assert spec is not None
         module = importlib.util.module_from_spec(spec)
         sys.modules[module_name] = module
+        assert spec.loader is not None
         spec.loader.exec_module(module)
         return module
 
@@ -59,6 +62,6 @@ class TestScripts(unittest.TestCase):
 
     @pytest.mark.xdist_group(name="spinnman_script")
     def test_spinnaker_start(self) -> None:
-        spinnman_script = self.import_from_path("spinnman_script", "spinnaker_start.py")
+        spinnman_script = self._import_from_path("spinnman_script", "spinnaker_start.py")
         spinnman_script.run_script(save=True)
         spinnman_script.run_script(load=True)
