@@ -459,7 +459,7 @@ class ReadBoardProcess(AbstractMultiConnectionProcess):
 
 class CoreCounter(object):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, gui: bool = False):
         """
         :param width: Width of the whole Machine
         :param height: Height of the whole Machine
@@ -467,10 +467,12 @@ class CoreCounter(object):
         self._total_cores = 0
         self._update_lock = RLock()
         self._ready = False
+        self._closed = False
         self._notify_lock = Condition()
 
         self._width = width
         self._height = height
+        self._gui = gui
         self._image_data = numpy.zeros((height, width, 3), dtype="uint8")
         self._ax = None
         self._text = None
@@ -478,6 +480,11 @@ class CoreCounter(object):
         self._max_value = [175, 150, 125, 100]
 
     def run(self):
+        if not self._gui:
+            while not self._closed:
+                warn(f"sleep {self._closed}")
+                time.sleep(10)
+            return
         matplotlib.rcParams['toolbar'] = 'None'
         self._fig, self._ax = pyplot.subplots()
         self._fig.canvas.manager.set_window_title("SpiNNaker")
@@ -495,9 +502,12 @@ class CoreCounter(object):
         pyplot.show()
 
     def _close(self, _event):
+        print("Close")
         with self._notify_lock:
             self._ready = True
+            self._closed = True
             self._notify_lock.notify_all()
+        print("Closed")
 
     def _key_press(self, _event):
         with self._notify_lock:
@@ -505,11 +515,16 @@ class CoreCounter(object):
             self._notify_lock.notify_all()
 
     def wait_until_ready(self):
+        if not self._gui:
+            return
+        warn("Waiting for user to start process")
         with self._notify_lock:
             while not self._ready:
                 self._notify_lock.wait()
+        warn("Process starting")
 
     def _update(self, _frame):
+        assert self._gui
         self._image.set_array(self._image_data)
         bbox = self._ax.get_window_extent().transformed(
             self._fig.dpi_scale_trans.inverted())
@@ -530,34 +545,51 @@ class CoreCounter(object):
         return self._max_value[index]
 
     def add_ethernet(self, x, y):
-        colour = self._get_max_value(x, y)
-        self._image_data[y, x] = [colour, 0, 0]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            self._image_data[y, x] = [colour, 0, 0]
+        else:
+            print(f"add_ethernet {x=} {y=}")
 
     def set_ethernet_responding(self, x, y):
-        colour = self._get_max_value(x, y)
-        self._image_data[y, x] = [colour, colour, 0]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            self._image_data[y, x] = [colour, colour, 0]
+        else:
+            print(f"set_ethernet_responding {x=} {y=}")
 
     def set_ethernet_booted(self, x, y):
-        colour = self._get_max_value(x, y)
-        self._image_data[y, x] = [colour, colour, 0]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            self._image_data[y, x] = [colour, colour, 0]
+        else:
+            print(f"set_ethernet_booted {x=} {y=}")
 
     def set_ethernet_netinit_phase(self, x, y, phase):
-        colour = self._get_max_value(x, y)
-        self._image_data[y, x] = [colour, colour, phase]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            self._image_data[y, x] = [colour, colour, phase]
+        else:
+            print(f"set_ethernet_netinit_phase {x=} {y=}")
 
     def set_ethernet_n_routes(self, x, y, n_routes):
-        colour = self._get_max_value(x, y)
-        max_n_routes = self._width * self._height
-        value = int(round((float(colour) / max_n_routes) * n_routes))
-        self._image_data[y, x] = [255 - value, 0, 255 - value]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            max_n_routes = self._width * self._height
+            value = int(round((float(colour) / max_n_routes) * n_routes))
+            self._image_data[y, x] = [255 - value, 0, 255 - value]
+        else:
+            print(f"set_ethernet_n_routes {x=} {y=}")
 
     def add_cores(self, eth_x, eth_y, x, y, n_cores):
-        colour = self._get_max_value(eth_x, eth_y)
-        with self._update_lock:
-            self._total_cores += n_cores
-            value = int(round((float(colour) / 18.0) * n_cores))
-            self._image_data[y, x] = [0, value, 0]
-
+        if self._gui:
+            colour = self._get_max_value(eth_x, eth_y)
+            with self._update_lock:
+                self._total_cores += n_cores
+                value = int(round((float(colour) / 18.0) * n_cores))
+                self._image_data[y, x] = [0, value, 0]
+        else:
+            print(f"add_cores {eth_x=} {eth_y=} {x=} {y=}")
 
 class MainThread(object):
     def __init__(self, core_counter, job, save, load):
@@ -592,9 +624,7 @@ class MainThread(object):
             job_connections.append((x, y, ip_address))
         job_connections.sort(key=operator.itemgetter(0, 1))
         with job:
-            warn("Waiting for user to start process")
-            # core_counter.wait_until_ready()
-            warn("Process starting")
+            core_counter.wait_until_ready()
 
             # Get a list of connections to the machine and start a thread for
             # each listening for the boot to be done
@@ -602,9 +632,10 @@ class MainThread(object):
             root_connection = None
             boot_connection = None
             with self._close_lock:
-                if not self._done:
+                if self._done:
+                    warn("Process ended")
+                else:
                     for x, y, ip_address in job_connections:
-                        connection = None
                         connection = SCAMPConnection(
                             x, y, remote_host=ip_address)
                         connections.append(connection)
@@ -653,10 +684,12 @@ class MainThread(object):
                         except Exception:
                             if not version_read_ok:
                                raise
-                except Exception:
+                except Exception as ex:
+                    print(ex)
                     warn("Boot failed, retrying")
                     tries -= 1
             if not boot_done and not self._done:
+                core_counter._close("Boot not done")
                 raise Exception("Could not boot machine")
 
             for thread in self._boot_threads:
@@ -826,7 +859,6 @@ def run_script(save: bool = False, load: bool = False) -> None:
         job = client.create_job()
     try:
         job.wait_until_ready()
-        connections = job.get_connections()
         width, height = _estimate_width_and_heigth(job)
         if save:
             os.makedirs("record", exist_ok=True)
