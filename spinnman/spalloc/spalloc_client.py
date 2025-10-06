@@ -1081,8 +1081,9 @@ class _ProxiedBootConnection(
         :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver created when starting the Client
         """
-        super().__init__(
-            websocket, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)
+        _ProxiedBidirectionalConnection.__init__(
+            self, websocket, receiver, 0, 0, UDP_BOOT_CONNECTION_DEFAULT_PORT)
+        SpallocBootConnection.__init__(self)
 
     def __str__(self) -> str:
         return "BootConnection[proxied]()"
