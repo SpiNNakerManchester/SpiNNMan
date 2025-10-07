@@ -20,6 +20,7 @@ import sys
 from types import ModuleType
 import unittest
 
+
 class TestScripts(unittest.TestCase):
 
     def _get_script(self, script: str) -> str:
