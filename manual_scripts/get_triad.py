@@ -18,7 +18,7 @@ import spinnman.spinnman_script as sim
 
 
 SPALLOC_URL = "https://spinnaker.cs.man.ac.uk/spalloc"
-# If nNone these are read from environment variables
+# If None these are read from environment variables
 SPALLOC_USERNAME = None
 SPALLOC_PASSWORD = None
 
