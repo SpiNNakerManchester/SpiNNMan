@@ -838,9 +838,9 @@ def _estimate_width_and_heigth(job: SpallocJob) -> Tuple[int, int]:
 def run_script(save: bool = False, load: bool = False) -> None:
     """
     Runs the script with sys.arvg values
-    :param save:
-    :param load:
-    :return:
+
+    :param save: Flag to save results
+    :param load: Flag to load a save rather than use a real machine
     """
     original = ("https://github.com/SpiNNakerManchester/PyNNExamples/blob"
                 "/master/spiNNaker_start/spinnaker_start.py")
