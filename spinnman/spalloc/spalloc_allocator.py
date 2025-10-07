@@ -14,9 +14,15 @@
 
 from contextlib import ExitStack
 import logging
+import os
+import re
+import requests
 from typing import cast, ContextManager, Dict, Tuple, Optional, Union
 
-from spinn_utilities.config_holder import get_config_bool
+import ebrains_drive  # type: ignore[import]
+
+from spinn_utilities.config_holder import (
+    get_config_bool, get_config_str_or_none)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
@@ -31,6 +37,11 @@ from spinnman.transceiver import Transceiver
 
 
 logger = FormatAdapter(logging.getLogger(__name__))
+
+SHARED_PATH = re.compile(r".*\/shared\/([^\/]+)")
+SHARED_GROUP = 1
+SHARED_WITH_PATH = re.compile(r".*\/Shared with (all|groups|me)\/([^\/]+)")
+SHARED_WITH_GROUP = 2
 
 
 class SpallocJobController(MachineAllocationController):
@@ -167,7 +178,101 @@ class SpallocJobController(MachineAllocationController):
         return f"SpallocJobController over {self._job}"
 
 
-def spalloc_allocate_job(
+def __bearer_token() -> Optional[str]:
+    """
+    :return: The OIDC bearer token
+    """
+    # Try using Jupyter if we have the right variables
+    jupyter_token = os.getenv("JUPYTERHUB_API_TOKEN")
+    jupyter_ip = os.getenv("JUPYTERHUB_SERVICE_HOST")
+    jupyter_port = os.getenv("JUPYTERHUB_SERVICE_PORT")
+    if (jupyter_token is not None and jupyter_ip is not None and
+            jupyter_port is not None):
+        jupyter_url = (f"http://{jupyter_ip}:{jupyter_port}/services/"
+                       "access-token-service/access-token")
+        headers = {"Authorization": f"Token {jupyter_token}"}
+        response = requests.get(jupyter_url, headers=headers, timeout=10)
+        return response.json().get('access_token')
+
+    # Try a simple environment variable, or None if that doesn't exist
+    return os.getenv("OIDC_BEARER_TOKEN")
+
+
+def __get_collab_id_from_folder(folder: str) -> Optional[Dict[str, str]]:
+    """
+    Currently hacky way to get the EBRAINS collab id from the
+    drive folder, replicated from the NMPI collab template.
+    """
+    token = __bearer_token
+    if token is None:
+        return None
+    ebrains_drive_client = ebrains_drive.connect(token=token)
+    repo_by_title = ebrains_drive_client.repos.get_repos_by_name(folder)
+    if len(repo_by_title) != 1:
+        logger.warning(f"The repository for collab {folder} could not be"
+                       " found; continuing as if not in a collaboratory")
+        return {}
+    # Owner is formatted as collab-<collab_id>-<permission>, and we want
+    # to extract the <collab-id>
+    owner = repo_by_title[0].owner
+    collab_id = owner[:owner.rindex("-")]
+    collab_id = collab_id[collab_id.find("-") + 1:]
+    logger.info(f"Requesting job in collaboratory {collab_id}")
+    return {"collab": collab_id}
+
+
+def __group_collab_or_job() -> Dict[str, str]:
+    """
+    :return: The group, collab, or NMPI Job ID to associate with jobs
+    """
+    # Try to get a NMPI Job
+    nmpi_job = os.getenv("NMPI_JOB_ID")
+    if nmpi_job is not None and nmpi_job != "":
+        nmpi_user = os.getenv("NMPI_USER")
+        if nmpi_user is not None and nmpi_user != "":
+            logger.info("Requesting job for NMPI job {}, user {}",
+                        nmpi_job, nmpi_user)
+            return {"nmpi_job": nmpi_job, "nmpi_user": nmpi_user}
+        logger.info("Requesting spalloc job for NMPI job {}", nmpi_job)
+        return {"nmpi_job": nmpi_job}
+
+    # Try to get the collab from the path
+    cwd = os.getcwd()
+    match_obj = SHARED_PATH.match(cwd)
+    if match_obj:
+        collab = __get_collab_id_from_folder(
+            match_obj.group(SHARED_GROUP))
+        if collab is not None:
+            return collab
+    match_obj = SHARED_WITH_PATH.match(cwd)
+    if match_obj:
+        collab = __get_collab_id_from_folder(
+            match_obj.group(SHARED_WITH_GROUP))
+        if collab is not None:
+            return collab
+
+    # Try to use the config to get a group
+    group = get_config_str_or_none("Machine", "spalloc_group")
+    if group is not None:
+        return {"group": group}
+
+    # Nothing ventured, nothing gained
+    return {}
+
+
+def spalloc_allocate_job() -> Tuple[
+            str, Dict[XY, str], SpallocJobController]:
+    """
+    Request a machine from an new-style spalloc server that will fit the
+    given number of boards.
+
+    :return: host, board address map, allocation controller
+    """
+    return __spalloc_allocate_job(
+        __bearer_token(), **__group_collab_or_job())
+
+
+def __spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,
         collab: Optional[str] = None, nmpi_job: Union[int, str, None] = None,
         nmpi_user: Optional[str] = None) -> Tuple[
