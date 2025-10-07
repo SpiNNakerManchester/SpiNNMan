@@ -15,10 +15,13 @@
 import importlib
 import os
 import pytest
+from requests.exceptions import ConnectionError
 import runpy
 import sys
 from types import ModuleType
 import unittest
+
+import spinnman.spinnman_script as sim
 
 
 class TestScripts(unittest.TestCase):
@@ -37,7 +40,12 @@ class TestScripts(unittest.TestCase):
 
     def _run_script(self, script: str) -> None:
         script_path = self._get_script(script)
-        runpy.run_path(script_path)
+        try:
+            runpy.run_path(script_path)
+        except ConnectionError as ex:
+            raise unittest.SkipTest(str(ex))
+        finally:
+            sim.end()
 
     def _import_from_path(self, module_name: str, script: str) -> ModuleType:
         script_path = self._get_script(script)
