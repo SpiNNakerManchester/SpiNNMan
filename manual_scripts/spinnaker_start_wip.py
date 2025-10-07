@@ -842,6 +842,10 @@ def run_script(save: bool = False, load: bool = False) -> None:
     :param load:
     :return:
     """
+    original = ("https://github.com/SpiNNakerManchester/PyNNExamples/blob"
+                "/master/spiNNaker_start/spinnaker_start.py")
+    print("This is work in progress currently not working")
+    print(original)
     sim.setup(n_boards_required=1)
 
     job = None
@@ -887,6 +891,9 @@ def run_script(save: bool = False, load: bool = False) -> None:
         job.destroy()
     finally:
         sim.end()
+        print("This is work in progress currently not working")
+        print(original)
+
 
 if __name__ == "__main__":
     save = True
