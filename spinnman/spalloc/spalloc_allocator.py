@@ -16,10 +16,10 @@ from contextlib import ExitStack
 import logging
 import os
 import re
-import requests
 from typing import cast, ContextManager, Dict, Tuple, Optional, Union
 
 import ebrains_drive  # type: ignore[import]
+import requests
 
 from spinn_utilities.config_holder import (
     get_config_bool, get_config_str_or_none)
