@@ -1091,7 +1091,7 @@ class _ProxiedBootConnection(
 
 class _ProxiedEIEIOConnection(
         _ProxiedBidirectionalConnection,
-        SpallocEIEIOConnection, SpallocProxiedConnection):
+        SpallocEIEIOConnection):
     # Special: This is a unidirectional receive-only connection
     __slots__ = ("__addr", "__port", "__chip_x", "__chip_y")
 
@@ -1105,7 +1105,9 @@ class _ProxiedEIEIOConnection(
         :param y: Y coordinate of the board's Ethernet-enabled chip
         :param port: UDP port to talk to; defaults to the SCP port
         """
-        super().__init__(websocket, receiver, x, y, port)
+        _ProxiedBidirectionalConnection.__init__(
+            self, websocket, receiver, x, y, port)
+        SpallocEIEIOConnection.__init__(self)
         self.__chip_x = x
         self.__chip_y = y
 
@@ -1139,7 +1141,8 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
         :param connections:
            Get the mapping from board coordinates to IP addresses.
         """
-        super().__init__(websocket, receiver)
+        _ProxiedUnboundConnection.__init__(self, websocket, receiver)
+        SpallocEIEIOListener.__init__(self)
         # Invert the map
         self.__conns = {ip: xy for (xy, ip) in connections.items()}
 
@@ -1179,7 +1182,8 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
         :param connections:
            Get the mapping from board coordinates to IP addresses.
         """
-        super().__init__(websocket, receiver)
+        _ProxiedUnboundConnection.__init__(self, websocket, receiver)
+        UDPConnection.__init__(self)
         # Invert the map
         self.__conns = {ip: xy for (xy, ip) in connections.items()}
 
