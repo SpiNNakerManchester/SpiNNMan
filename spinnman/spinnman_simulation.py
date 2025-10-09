@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-import re
 import traceback
 from typing import Dict, Optional, Tuple, Type
 
@@ -33,11 +32,6 @@ from spinnman.spalloc.spalloc_allocator import spalloc_allocate_job
 from spinnman.transceiver import Transceiver, transceiver_generator
 
 logger = FormatAdapter(logging.getLogger(__name__))
-
-SHARED_PATH = re.compile(r".*\/shared\/([^\/]+)")
-SHARED_GROUP = 1
-SHARED_WITH_PATH = re.compile(r".*\/Shared with (all|groups|me)\/([^\/]+)")
-SHARED_WITH_GROUP = 2
 
 
 class SpiNNManSimulation(object):
