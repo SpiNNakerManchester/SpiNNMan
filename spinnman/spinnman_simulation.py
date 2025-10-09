@@ -89,6 +89,9 @@ class SpiNNManSimulation(object):
         if self._data_writer.has_transceiver():
             transceiver = self._data_writer.get_transceiver()
             transceiver.ensure_board_is_ready()
+        elif get_config_bool("Machine", "virtual_board"):
+            raise SpinnmanUnsupportedOperationException(
+                "get_transceiver with cfg virtual_board")
         elif not is_config_none("Machine", "machine_name"):
             transceiver = self._execute_tranceiver_by_name(
                 ensure_board_is_ready)
