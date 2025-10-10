@@ -380,3 +380,12 @@ class SpallocException(SpinnmanException):
     """
     Raised when there is a problem with the Spalloc session or job.
     """
+
+
+class SpallocBoardUnavailableException(SpallocException):
+    """
+    Raised when a job created with specific board requests remains QUEUED
+
+    The cfg "Machine" settings "spalloc_triad", "spalloc_physical" or
+    "spalloc_ip_address" cause spalloc to require specific boards.
+    """

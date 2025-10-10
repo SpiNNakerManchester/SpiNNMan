@@ -12,36 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinn_utilities.config_holder import set_config
+
 from spinnman.spalloc import SpallocClient
-from spinnman.config_setup import unittest_setup
+import spinnman.spinnman_script as sim
 
 
 SPALLOC_URL = "https://spinnaker.cs.man.ac.uk/spalloc"
-SPALLOC_USERNAME = ""
-SPALLOC_PASSWORD = ""
+# If None these are read from environment variables
+SPALLOC_USERNAME = None
+SPALLOC_PASSWORD = None
 
 SPALLOC_MACHINE = "SpiNNaker1M"
 
-x = 0
-y = 3
-b = 0 # Must be 0 if requesting a rect
-RECT = True
-WIDTH = 1  # In triads!
-HEIGHT = 1 # In triads!
+# Scripts that the spinnman level use .spinnman.cfg
+sim.setup(n_boards_required=1)
 
-unittest_setup()
-set_config("Machine", "version",5)
 client = SpallocClient(SPALLOC_URL, SPALLOC_USERNAME, SPALLOC_PASSWORD)
-if RECT:
-    job = client.create_job_rect_at_board(
-        WIDTH, HEIGHT, triad=(x, y, b), machine_name=SPALLOC_MACHINE,
-        max_dead_boards=1)
-else:
-    job = client.create_job_board(
-        triad=(x, y, b), machine_name=SPALLOC_MACHINE)
+job = client.create_job()
 print(job)
-print("Waiting until ready...")
+# print("Waiting until ready...")
 with job:
     job.wait_until_ready()
     print(job.get_connections())
@@ -54,5 +43,6 @@ with job:
     machine = txrx.get_machine_details()
     print(machine)
 
-    input("Press Enter to release...")
+    # input("Press Enter to release...")
 client.close()#print(2)#print(2^(1/(2^1)))
+sim.end()

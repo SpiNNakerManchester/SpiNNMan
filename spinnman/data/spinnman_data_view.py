@@ -14,11 +14,15 @@
 from __future__ import annotations
 import logging
 from typing import BinaryIO, Optional, Tuple, Union, TYPE_CHECKING
+
 from spinn_utilities.log import FormatAdapter
 from spinn_machine.data import MachineDataView
+
 from spinnman.utilities.appid_tracker import AppIdTracker
+
 if TYPE_CHECKING:
     from spinnman.processes import MostDirectConnectionSelector
+    from spinnman.spalloc import (MachineAllocationController, SpallocJob)
     from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -44,9 +48,12 @@ class _SpiNNManDataModel(object):
 
     __slots__ = [
         # Data values cached
+        "_allocation_controller",
         "_app_id",
         "_app_id_tracker",
+        "_ipaddress",
         "_scamp_connection_selector",
+        "_spalloc_job",
         "_transceiver",
     ]
 
@@ -69,11 +76,15 @@ class _SpiNNManDataModel(object):
         """
         Clears out all data that should change after a reset and graph change.
         """
+        self._allocation_controller: Optional[
+            MachineAllocationController] = None
         self._app_id: Optional[int] = None
         self._app_id_tracker: Optional[AppIdTracker] = None
+        self._ipaddress: Optional[str] = None
         self._soft_reset()
         self._scamp_connection_selector: Optional[
             MostDirectConnectionSelector] = None
+        self._spalloc_job: Optional[SpallocJob] = None
         if self._transceiver:
             try:
                 self._transceiver.close()
@@ -102,6 +113,36 @@ class SpiNNManDataView(MachineDataView):
 
     __data = _SpiNNManDataModel()
     __slots__ = ()
+
+    # _allocation_controller
+    @classmethod
+    def has_allocation_controller(cls) -> bool:
+        """
+        Reports if an AllocationController object has already been set.
+
+        :return: True if and only if an AllocationController has been added and
+            not reset.
+        """
+        return cls.__data._allocation_controller is not None
+
+    @classmethod
+    def get_allocation_controller(cls) -> MachineAllocationController:
+        """
+        :returns: The allocation controller if known.
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the buffer manager unavailable
+        """
+        if cls.__data._allocation_controller is None:
+            raise cls._exception("allocation_controller")
+
+        return cls.__data._allocation_controller
+
+    @classmethod
+    def get_spalloc_job(cls) -> Optional[SpallocJob]:
+        """
+        :returns: The Spalloc job, if there is one.
+        """
+        return cls.__data._spalloc_job
 
     # transceiver methods
 
@@ -282,3 +323,26 @@ class SpiNNManDataView(MachineDataView):
             cls.__data._scamp_connection_selector =\
                 cls. get_transceiver().get_scamp_connection_selector()
         return cls.__data._scamp_connection_selector
+
+    # IP address
+
+    @classmethod
+    def has_ipaddress(cls) -> bool:
+        """
+        :returns: True if the IP address of the board with chip 0,0 is known.
+        """
+        return cls.__data._ipaddress is not None
+
+    @classmethod
+    def get_ipaddress(cls) -> str:
+        """
+        :returns:
+            The IP address of the board with chip 0,0 if it has been set.
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the IP address is currently unavailable
+        """
+        if cls.__data._ipaddress is None:
+            if cls._is_mocked():
+                return "127.0.0.1"
+            raise cls._exception("ipaddress")
+        return cls.__data._ipaddress

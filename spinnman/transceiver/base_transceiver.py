@@ -156,12 +156,15 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         "_width")
 
     def __init__(self, connections: Optional[Iterable[Connection]] = None,
-                 power_cycle: bool = False):
+                 power_cycle: bool = False,
+                 ensure_board_is_ready: bool = True):
         """
         :param connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
         :param power_cycle: If True will power cycle the machine:
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
         :raise SpinnmanIOException:
             If there is an error communicating with the board, or if no
             connections to the board can be found (if connections is ``None``)
@@ -224,7 +227,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         self._machine_off = False
         if power_cycle:
             self._power_off_machine()
-        self._ensure_board_is_ready()
+        if ensure_board_is_ready:
+            self.ensure_board_is_ready()
+        else:
+            logger.warning("Transceiver / board not ready")
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)
@@ -564,24 +570,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         # version is irrelevant
         return version[1] > _SCAMP_VERSION[1]
 
-    def _ensure_board_is_ready(
+    @overrides(Transceiver.ensure_board_is_ready)
+    def ensure_board_is_ready(
             self, n_retries: int = 5, extra_boot_values: Optional[Dict[
             SystemVariableDefinition, object]] = None) -> None:
-        """
-        Ensure that the board is ready to interact with this version of the
-        transceiver. Boots the board if not already booted and verifies that
-        the version of SCAMP running is compatible with this transceiver.
-
-        :param n_retries: The number of times to retry booting
-        :param extra_boot_values:
-            Any additional or overwrite values to set during boot.
-            This should only be used for values which are not standard
-            based on the board version.
-        :raise SpinnmanIOException:
-            * If there is a problem booting the board
-            * If the version of software on the board is not compatible with
-              this transceiver
-        """
         logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None
