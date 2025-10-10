@@ -16,7 +16,7 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Dict, Iterable, Tuple, Optional
+from typing import Dict, Iterable
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from .spalloc_machine import SpallocMachine
 from .spalloc_job import SpallocJob
@@ -55,103 +55,10 @@ class AbstractSpallocClient(object, metaclass=AbstractBase):
         raise NotImplementedError
 
     @abstractmethod
-    def create_job(
-            self, num_boards: int = 1, machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
+    def create_job(self) -> SpallocJob:
         """
         Create a job with a specified number of boards.
 
-        :param num_boards:
-            How many boards to ask for (defaults to 1)
-        :param machine_name:
-            Which machine to run on? If omitted, the service's machine tagged
-            with ``default`` will be used.
-        :param keepalive:
-            After how many seconds of no activity should a job become eligible
-            for automatic pruning?
-        :return: A handle for monitoring and interacting with the job.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def create_job_rect(
-            self, width: int, height: int, machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
-        """
-        Create a job with a rectangle of boards.
-
-        :param width:
-            The width of rectangle to request
-        :param height:
-            The height of rectangle to request
-        :param machine_name:
-            Which machine to run on? If omitted, the service's machine tagged
-            with ``default`` will be used.
-        :param keepalive:
-            After how many seconds of no activity should a job become eligible
-            for automatic pruning?
-        :return: A handle for monitoring and interacting with the job.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def create_job_board(
-            self, triad: Optional[Tuple[int, int, int]] = None,
-            physical: Optional[Tuple[int, int, int]] = None,
-            ip_address: Optional[str] = None,
-            machine_name: Optional[str] = None,
-            keepalive: int = 45) -> SpallocJob:
-        """
-        Create a job with a specific board. At least one of ``triad``,
-        ``physical`` and ``ip_address`` must be not ``None``.
-
-        :param triad:
-            The logical coordinate of the board to request
-        :param physical:
-            The physical coordinate of the board to request
-        :param ip_address:
-            The IP address of the board to request
-        :param machine_name:
-            Which machine to run on? If omitted, the service's machine tagged
-            with ``default`` will be used.
-        :param keepalive:
-            After how many seconds of no activity should a job become eligible
-            for automatic pruning?
-        :return: A handle for monitoring and interacting with the job.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def create_job_rect_at_board(
-            self, width: int, height: int,
-            triad: Optional[Tuple[int, int, int]] = None,
-            physical: Optional[Tuple[int, int, int]] = None,
-            ip_address: Optional[str] = None,
-            machine_name: Optional[str] = None, keepalive: int = 45,
-            max_dead_boards: int = 0) -> SpallocJob:
-        """
-        Create a job with a rectangle of boards starting at a specific board.
-        At least one of ``triad``, ``physical`` and ``ip_address`` must be not
-        ``None``.
-
-        :param width:
-            The width of rectangle to request
-        :param height:
-            The height of rectangle to request
-        :param triad:
-            The logical coordinate of the board to request
-        :param physical:
-            The physical coordinate of the board to request
-        :param ip_address:
-            The IP address of the board to request
-        :param machine_name:
-            Which machine to run on? If omitted, the service's machine tagged
-            with ``default`` will be used.
-        :param keepalive:
-            After how many seconds of no activity should a job become eligible
-            for automatic pruning?
-        :param max_dead_boards:
-            How many dead boards can be included.
         :return: A handle for monitoring and interacting with the job.
         """
         raise NotImplementedError

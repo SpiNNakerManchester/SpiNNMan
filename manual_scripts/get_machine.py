@@ -1,4 +1,4 @@
-# Copyright (c) 2021 The University of Manchester
+# Copyright (c) 2025 The University of Manchester
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .transceiver import Transceiver
-from .mockable_transceiver import MockableTransceiver
-from .transceiver_factory import (
-    create_transceiver_from_connections, create_transceiver_from_hostname,
-    transceiver_generator)
+# Scripts that the spinnman level use .spinnman.cfg
+import spinnman.spinnman_script as sim
 
-__all__ = ["create_transceiver_from_connections",
-           "create_transceiver_from_hostname", "MockableTransceiver",
-           "Transceiver", "transceiver_generator"]
+sim.setup(n_boards_required=2)
+# sim.setup()
+
+machine1 = sim.get_machine()
+print(machine1)
+sim.end()

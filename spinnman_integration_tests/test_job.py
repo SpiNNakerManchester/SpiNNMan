@@ -17,28 +17,27 @@ from requests.exceptions import ConnectionError
 from spinn_utilities.config_holder import set_config
 
 from spinn_machine.version import FIVE
+
 from spinnman.config_setup import unittest_setup
+from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.spalloc import SpallocClient, SpallocState
 
 
 class TestTransceiver(unittest.TestCase):
 
-    def setUp(self) -> None:
+    def test_create_job(self) -> None:
         unittest_setup()
         set_config("Machine", "version", str(FIVE))
         self.spalloc_url = "https://spinnaker.cs.man.ac.uk/spalloc"
         self.spalloc_machine = "SpiNNaker1M"
+        writer = SpiNNManDataWriter.mock()
+        writer.set_n_required(n_boards_required=2, n_chips_required=None)
 
-    def test_create_job(self) -> None:
         try:
             client = SpallocClient(self.spalloc_url)
         except ConnectionError as ex:
             raise unittest.SkipTest(str(ex))
-        # job = client.create_job_rect_at_board(
-        #    WIDTH, HEIGHT, triad=(x, y, b), machine_name=SPALLOC_MACHINE,
-        #    max_dead_boards=1)
-        job = client.create_job(
-            num_boards=2, machine_name=self.spalloc_machine)
+        job = client.create_job()
         with job:
             job.wait_until_ready()
 
@@ -46,7 +45,7 @@ class TestTransceiver(unittest.TestCase):
             self.assertGreaterEqual(len(connections), 2)
             self.assertIn((0, 0), connections)
 
-            txrx = job.create_transceiver()
+            txrx = job.create_transceiver(ensure_board_is_ready=True)
 
             dims = txrx._get_machine_dimensions()  # type: ignore[attr-defined]
             # May be 12 as we only asked for 2 boards

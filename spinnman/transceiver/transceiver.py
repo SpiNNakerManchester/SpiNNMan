@@ -999,3 +999,17 @@ class Transceiver(object):
 
         """
         raise NotImplementedError("abstractmethod")
+
+    @abstractmethod
+    def ensure_board_is_ready(self) -> None:
+        """
+        Ensure that the board is ready to interact with this version of the
+        transceiver. Boots the board if not already booted and verifies that
+        the version of SCAMP running is compatible with this transceiver.
+
+        :raise SpinnmanIOException:
+            * If there is a problem booting the board
+            * If the version of software on the board is not compatible with
+              this transceiver
+        """
+        raise NotImplementedError("abstractmethod")

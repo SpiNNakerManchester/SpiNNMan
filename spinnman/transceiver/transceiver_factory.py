@@ -13,8 +13,12 @@
 # limitations under the License.
 
 import logging
-from typing import (Iterable, List, Optional)
+import re
+from typing import (Dict, Iterable, List, Optional, Tuple)
+
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.typing.coords import XY
+
 from spinn_machine.version.version_3 import Version3
 from spinn_machine.version.version_5 import Version5
 from spinnman.connections.abstract_classes import Connection
@@ -39,7 +43,8 @@ def create_transceiver_from_hostname(
         hostname: Optional[str], *,
         bmp_connection_data: Optional[BMPConnectionData] = None,
         auto_detect_bmp: bool = False, power_cycle: bool = False,
-        extended: bool = False) -> Transceiver:
+        extended: bool = False,
+        ensure_board_is_ready: bool = True) -> Transceiver:
     """
     Create a Transceiver by creating a :py:class:`~.UDPConnection` to the
     given hostname on port 17893 (the default SCAMP port), and a
@@ -58,6 +63,9 @@ def create_transceiver_from_hostname(
     :param power_cycle: If True will power cycle the machine
     :param extended:
         If True will return an Extended version of the Transceiver
+    :param ensure_board_is_ready:
+        Flag to say if ensure_board_is_ready should be run
+
     :return: The created transceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
@@ -97,16 +105,18 @@ def create_transceiver_from_hostname(
 
     if hostname == LOCAL_HOST:
         return create_transceiver_from_connections(
-            connections=connections, virtual=True, extended=extended)
+            connections=connections, virtual=True, extended=extended,
+            ensure_board_is_ready=ensure_board_is_ready)
     else:
         return create_transceiver_from_connections(
             connections=connections, virtual=False, power_cycle=power_cycle,
-            extended=extended)
+            extended=extended, ensure_board_is_ready=ensure_board_is_ready)
 
 
 def create_transceiver_from_connections(
         connections: Iterable[Connection], virtual: bool = False,
-        power_cycle: bool = False, extended: bool = False) -> Transceiver:
+        power_cycle: bool = False, extended: bool = False,
+        ensure_board_is_ready: bool = False) -> Transceiver:
     """
     Create a Transceiver with these connections
 
@@ -116,6 +126,8 @@ def create_transceiver_from_connections(
     :param virtual: If True will return a virtual Transceiver
     :param power_cycle: If True will power cycle the machine
     :param extended:
+    :param ensure_board_is_ready:
+        Flag to say if ensure_board_is_ready should be run
     :return: The created transceiver
     :raise SpinnmanIOException:
         If there is an error communicating with the board
@@ -132,16 +144,109 @@ def create_transceiver_from_connections(
             raise NotImplementedError(f"No Virtual Transceiver for {version=}")
         if extended:
             return ExtendedVersion3Transceiver(
-                connections=connections, power_cycle=power_cycle)
+                connections=connections, power_cycle=power_cycle,
+                ensure_board_is_ready=ensure_board_is_ready)
         return Version3Transceiver(
-            connections=connections, power_cycle=power_cycle)
+            connections=connections, power_cycle=power_cycle,
+            ensure_board_is_ready=ensure_board_is_ready)
     if isinstance(version, Version5):
         if virtual:
             return Virtual5Transceiver(
-                connections=connections, power_cycle=power_cycle)
+                connections=connections, power_cycle=power_cycle,
+                ensure_board_is_ready=ensure_board_is_ready)
         if extended:
             return ExtendedVersion5Transceiver(
-                connections=connections, power_cycle=power_cycle)
+                connections=connections, power_cycle=power_cycle,
+                ensure_board_is_ready=ensure_board_is_ready)
         return Version5Transceiver(
-            connections=connections, power_cycle=power_cycle)
+            connections=connections, power_cycle=power_cycle,
+            ensure_board_is_ready=ensure_board_is_ready)
     raise NotImplementedError(f"No Transceiver for {version=}")
+
+
+def transceiver_generator(
+        bmp_details: Optional[str], auto_detect_bmp: bool,
+        scamp_connection_data: Optional[Dict[XY, str]],
+        reset_machine_on_start_up: bool,
+        ensure_board_is_ready: bool = True) -> Transceiver:
+    """
+    Makes a transceiver.
+
+    :param bmp_details: the details of the BMP connections
+    :param auto_detect_bmp:
+        Whether the BMP should be automatically determined
+    :param scamp_connection_data:
+        Job.connection dict, a String SC&MP connection data or `None`
+    :param reset_machine_on_start_up:
+        Whether the machine should be reset on startup
+    :param ensure_board_is_ready:
+        Flag to say if ensure_board_is_ready should be run
+    :return: Transceiver, and description of machine it is connected to
+    """
+    txrx = create_transceiver_from_hostname(
+        hostname=SpiNNManDataView.get_ipaddress(),
+        bmp_connection_data=_parse_bmp_details(bmp_details),
+        auto_detect_bmp=auto_detect_bmp,
+        power_cycle=reset_machine_on_start_up,
+        ensure_board_is_ready=ensure_board_is_ready)
+
+    # do auto boot if possible
+    if scamp_connection_data:
+        txrx.add_scamp_connections(scamp_connection_data)
+    else:
+        txrx.discover_scamp_connections()
+    return txrx
+
+
+def _parse_bmp_cabinet_and_frame(bmp_str: str) -> Tuple[str, Optional[str]]:
+    if ";" in bmp_str:
+        raise NotImplementedError(
+            "cfg bmp_names no longer supports cabinet and frame")
+    host = bmp_str.split(",")
+    if len(host) == 1:
+        return bmp_str, None
+    return host[0], host[1]
+
+
+def _parse_bmp_boards(bmp_boards: str) -> List[int]:
+    # If the string is a range of boards, get the range
+    range_match = re.match(r"(\d+)-(\d+)", bmp_boards)
+    if range_match is not None:
+        return list(range(int(range_match.group(1)),
+                          int(range_match.group(2)) + 1))
+
+    # Otherwise, assume a list of boards
+    return [int(board) for board in bmp_boards.split(",")]
+
+
+def _parse_bmp_connection(bmp_detail: str) -> BMPConnectionData:
+    """
+    Parses one item of BMP connection data. Maximal format:
+    `cabinet;frame;host,port/boards`
+
+    All parts except host can be omitted. Boards can be a
+    hyphen-separated range or a comma-separated list.
+    """
+    pieces = bmp_detail.split("/")
+    (hostname, port_num) = _parse_bmp_cabinet_and_frame(pieces[0])
+    # if there is no split, then assume its one board, located at 0
+    boards = [0] if len(pieces) == 1 else _parse_bmp_boards(pieces[1])
+    port = None if port_num is None else int(port_num)
+    return BMPConnectionData(hostname, boards, port)
+
+
+def _parse_bmp_details(
+        bmp_string: Optional[str]) -> Optional[BMPConnectionData]:
+    """
+    Take a BMP line (a colon-separated list) and split it into the
+    BMP connection data.
+
+    :param bmp_string: the BMP string to be converted
+    :return: the BMP connection data
+    """
+    if bmp_string is None or bmp_string == "None":
+        return None
+    if ":" in bmp_string:
+        raise NotImplementedError(
+            "bmp_names can no longer contain multiple bmps")
+    return _parse_bmp_connection(bmp_string)
