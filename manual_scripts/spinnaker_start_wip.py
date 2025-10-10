@@ -14,7 +14,6 @@
 
 
 from __future__ import print_function
-from six import iteritems
 from threading import Thread, RLock, Condition
 from matplotlib import pyplot, animation
 from numpy.random.mtrand import shuffle
@@ -23,18 +22,23 @@ import numpy
 import matplotlib
 import time
 import operator
+import os
 import struct
-import six
 import sys
-import logging
 import pickle
 import traceback
+from typing import Dict, Optional, Tuple
 
+from spinn_utilities.overrides import overrides
+
+from spinn_machine.machine import Machine
+
+from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS,\
     SYSTEM_VARIABLE_BASE_ADDRESS, address_length_dtype
 from spinnman.processes import AbstractMultiConnectionProcess
 from spinnman.messages.scp.impl import ReadMemory, GetChipInfo
-from spinnman.model import P2PTable
+from spinnman.model import P2PTable, MachineDimensions
 from spinnman.processes.get_version_process import GetVersionProcess
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.scp.impl.read_memory import Response
@@ -48,14 +52,17 @@ from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
+from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.spalloc import SpallocClient, SpallocJob, SpallocState
+from spinnman.spalloc.spalloc_boot_connection import SpallocBootConnection
+from spinnman.spalloc.spalloc_eieio_connection import SpallocEIEIOConnection
+from spinnman.spalloc.spalloc_eieio_listener import SpallocEIEIOListener
+from spinnman.spalloc.spalloc_scp_connection import SpallocSCPConnection
+from spinnman.transceiver.mockable_transceiver import MockableTransceiver
+from spinnman.transceiver.transceiver import Transceiver
 
-from spinn_utilities.overrides import overrides
+import spinnman.spinnman_script as sim
 
-from spinnman.config_setup import unittest_setup
-from spinnman.spalloc import SpallocClient, SpallocState
-from spinn_utilities.config_holder import set_config
-
-from spinn_machine.machine import Machine
 
 print_lock = RLock()
 
@@ -452,7 +459,7 @@ class ReadBoardProcess(AbstractMultiConnectionProcess):
 
 class CoreCounter(object):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, gui: bool = False):
         """
         :param width: Width of the whole Machine
         :param height: Height of the whole Machine
@@ -460,10 +467,12 @@ class CoreCounter(object):
         self._total_cores = 0
         self._update_lock = RLock()
         self._ready = False
+        self._closed = False
         self._notify_lock = Condition()
 
         self._width = width
         self._height = height
+        self._gui = gui
         self._image_data = numpy.zeros((height, width, 3), dtype="uint8")
         self._ax = None
         self._text = None
@@ -471,6 +480,11 @@ class CoreCounter(object):
         self._max_value = [175, 150, 125, 100]
 
     def run(self):
+        if not self._gui:
+            while not self._closed:
+                warn(f"sleep {self._closed}")
+                time.sleep(10)
+            return
         matplotlib.rcParams['toolbar'] = 'None'
         self._fig, self._ax = pyplot.subplots()
         self._fig.canvas.manager.set_window_title("SpiNNaker")
@@ -488,9 +502,12 @@ class CoreCounter(object):
         pyplot.show()
 
     def _close(self, _event):
+        print("Close")
         with self._notify_lock:
             self._ready = True
+            self._closed = True
             self._notify_lock.notify_all()
+        print("Closed")
 
     def _key_press(self, _event):
         with self._notify_lock:
@@ -498,11 +515,16 @@ class CoreCounter(object):
             self._notify_lock.notify_all()
 
     def wait_until_ready(self):
+        if not self._gui:
+            return
+        warn("Waiting for user to start process")
         with self._notify_lock:
             while not self._ready:
                 self._notify_lock.wait()
+        warn("Process starting")
 
     def _update(self, _frame):
+        assert self._gui
         self._image.set_array(self._image_data)
         bbox = self._ax.get_window_extent().transformed(
             self._fig.dpi_scale_trans.inverted())
@@ -523,34 +545,51 @@ class CoreCounter(object):
         return self._max_value[index]
 
     def add_ethernet(self, x, y):
-        colour = self._get_max_value(x, y)
-        self._image_data[y, x] = [colour, 0, 0]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            self._image_data[y, x] = [colour, 0, 0]
+        else:
+            print(f"add_ethernet {x=} {y=}")
 
     def set_ethernet_responding(self, x, y):
-        colour = self._get_max_value(x, y)
-        self._image_data[y, x] = [colour, colour, 0]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            self._image_data[y, x] = [colour, colour, 0]
+        else:
+            print(f"set_ethernet_responding {x=} {y=}")
 
     def set_ethernet_booted(self, x, y):
-        colour = self._get_max_value(x, y)
-        self._image_data[y, x] = [colour, colour, 0]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            self._image_data[y, x] = [colour, colour, 0]
+        else:
+            print(f"set_ethernet_booted {x=} {y=}")
 
     def set_ethernet_netinit_phase(self, x, y, phase):
-        colour = self._get_max_value(x, y)
-        self._image_data[y, x] = [colour, colour, phase]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            self._image_data[y, x] = [colour, colour, phase]
+        else:
+            print(f"set_ethernet_netinit_phase {x=} {y=}")
 
     def set_ethernet_n_routes(self, x, y, n_routes):
-        colour = self._get_max_value(x, y)
-        max_n_routes = self._width * self._height
-        value = int(round((float(colour) / max_n_routes) * n_routes))
-        self._image_data[y, x] = [255 - value, 0, 255 - value]
+        if self._gui:
+            colour = self._get_max_value(x, y)
+            max_n_routes = self._width * self._height
+            value = int(round((float(colour) / max_n_routes) * n_routes))
+            self._image_data[y, x] = [255 - value, 0, 255 - value]
+        else:
+            print(f"set_ethernet_n_routes {x=} {y=}")
 
     def add_cores(self, eth_x, eth_y, x, y, n_cores):
-        colour = self._get_max_value(eth_x, eth_y)
-        with self._update_lock:
-            self._total_cores += n_cores
-            value = int(round((float(colour) / 18.0) * n_cores))
-            self._image_data[y, x] = [0, value, 0]
-
+        if self._gui:
+            colour = self._get_max_value(eth_x, eth_y)
+            with self._update_lock:
+                self._total_cores += n_cores
+                value = int(round((float(colour) / 18.0) * n_cores))
+                self._image_data[y, x] = [0, value, 0]
+        else:
+            print(f"add_cores {eth_x=} {eth_y=} {x=} {y=}")
 
 class MainThread(object):
     def __init__(self, core_counter, job, save, load):
@@ -581,13 +620,11 @@ class MainThread(object):
 
     def run(self, core_counter, job, save, load):
         job_connections = list()
-        for (x, y), ip_address in iteritems(job.get_connections()):
+        for (x, y), ip_address in job.get_connections().items():
             job_connections.append((x, y, ip_address))
         job_connections.sort(key=operator.itemgetter(0, 1))
         with job:
-            warn("Waiting for user to start process")
-            #core_counter.wait_until_ready()
-            warn("Process starting")
+            core_counter.wait_until_ready()
 
             # Get a list of connections to the machine and start a thread for
             # each listening for the boot to be done
@@ -595,9 +632,10 @@ class MainThread(object):
             root_connection = None
             boot_connection = None
             with self._close_lock:
-                if not self._done:
+                if self._done:
+                    warn("Process ended")
+                else:
                     for x, y, ip_address in job_connections:
-                        connection = None
                         connection = SCAMPConnection(
                             x, y, remote_host=ip_address)
                         connections.append(connection)
@@ -645,11 +683,13 @@ class MainThread(object):
                                 time.sleep(1.0)
                         except Exception:
                             if not version_read_ok:
-                                six.reraise(*sys.exc_info())
-                except Exception:
+                               raise
+                except Exception as ex:
+                    print(ex)
                     warn("Boot failed, retrying")
                     tries -= 1
             if not boot_done and not self._done:
+                core_counter._close("Boot not done")
                 raise Exception("Could not boot machine")
 
             for thread in self._boot_threads:
@@ -658,9 +698,10 @@ class MainThread(object):
             # Read the P2P table to know which chips should exist
             if boot_done:
                 warn("Reading P2P Table")
+                width, height = _estimate_width_and_heigth(job)
                 p2p_process = GetP2PTableProcess(
                     RoundRobinConnectionSelector(
-                        [root_connection]), job.width, job.height, save, load)
+                        [root_connection]), width, height, save, load)
                 p2p_table = p2p_process.get_p2p_table()
 
                 # Create a reader thread for each connection,
@@ -678,8 +719,21 @@ class MainThread(object):
                 for process in self._processes:
                     process.join()
 
+class MockTransceiver(MockableTransceiver):
 
-class MockJob(object):
+    def __init__(self, width, height):
+        """
+        :param width: Width of the whole Machine
+        :param height: Height of the whole Machine
+        """
+        self._height = height
+        self._width = width
+
+    def _get_machine_dimensions(self) -> MachineDimensions:
+        return MachineDimensions(self._width, self._height)
+
+class MockJob(SpallocJob):
+
     def __init__(self, width, height):
         """
         :param width: Width of the whole Machine
@@ -692,76 +746,135 @@ class MockJob(object):
     def add_board(self, x, y):
         self._boards.append((x, y))
 
+    @overrides(SpallocJob.get_state)
+    def get_state(self, wait_for_change: bool = False) -> SpallocState:
+        return SpallocState.READY
+
+    @overrides(SpallocJob.get_root_host)
+    def get_root_host(self) -> str:
+        return "127.0.0.1"
+
     def __enter__(self):
         return self
 
     def __exit__(self, _type, _value, _traceback):
         return False
 
-    @property
-    def n_boards(self):
-        return len(self._boards)
-
-    @property
-    def width(self):
-        return self._width
-
-    @property
-    def height(self):
-        return self._height
-
-    @property
-    def connections(self):
+    @overrides(SpallocJob.get_connections)
+    def get_connections(self) -> Dict[Tuple[int, int], str]:
         return {(x, y): "127.0.0.1" for (x, y) in self._boards}
 
-    def destroy(self):
+    @overrides(SpallocJob.connect_to_board)
+    def connect_to_board(self, x: int, y: int, port: int = 0) -> SpallocSCPConnection:
+        return SpallocSCPConnection(x, y)
+
+    @overrides(SpallocJob.connect_for_booting)
+    def connect_for_booting(self) -> SpallocBootConnection:
+        return SpallocBootConnection()
+
+    @overrides(SpallocJob.open_eieio_connection)
+    def open_eieio_connection(self, x: int, y: int) -> SpallocEIEIOConnection:
+        return SpallocEIEIOConnection()
+
+    @overrides(SpallocJob.open_eieio_listener_connection)
+    def open_eieio_listener_connection(self) -> SpallocEIEIOListener:
+        return SpallocEIEIOListener()
+
+    @overrides(SpallocJob.open_udp_listener_connection)
+    def open_udp_listener_connection(self) -> UDPConnection:
+        return UDPConnection()
+
+    @overrides(SpallocJob.create_transceiver)
+    def create_transceiver(
+            self, ensure_board_is_ready: bool = True) -> Transceiver:
+        return MockTransceiver(self._width, self._height)
+
+    @overrides(SpallocJob.wait_for_state_change)
+    def wait_for_state_change(self, old_state: SpallocState,
+                              timeout: Optional[int] = None) -> SpallocState:
+        return SpallocState.READY
+
+    @overrides(SpallocJob.wait_until_ready)
+    def wait_until_ready(self) -> None:
         pass
 
-    def wait_for_state_change(self, state):
+    @overrides(SpallocJob.destroy)
+    def destroy(self, reason: str = "finished") -> None:
         pass
 
+    @overrides(SpallocJob.where_is_machine)
+    def where_is_machine(self, x: int, y: int) -> Optional[
+        Tuple[int, int, int]]:
+        return None
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    unittest_setup()
-    set_config("Machine", "version", "5")
+    @overrides(SpallocJob.get_session_credentials_for_db)
+    def get_session_credentials_for_db(self) -> Dict[Tuple[str, str], str]:
+        return {}
 
-    save = False
-    load = False
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "--save":
-            save = True
-        elif sys.argv[1] == "--load":
-            load = True
+    @overrides(SpallocJob.write_data)
+    def write_data(self, x: int, y: int, address: int, data: bytes) -> None:
+        pass
+
+    @overrides(SpallocJob.read_data)
+    def read_data(self, x: int, y: int, address: int, size: int) -> bytes:
+        return bytes()
+
+    @overrides(SpallocJob.reset_routing)
+    def reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+        pass
+
+def _estimate_width_and_heigth(job: SpallocJob) -> Tuple[int, int]:
+    max_x = 0
+    max_y = 0
+    for (x, y) in job.get_connections():
+        if x > max_x:
+            max_x = x
+        if y > max_y:
+            max_y = y
+    return max_x + 8, max_y + 8
+
+
+def run_script(save: bool = False, load: bool = False) -> None:
+    """
+    Runs the script with sys.arvg values
+
+    :param save: Flag to save results
+    :param load: Flag to load a save rather than use a real machine
+    """
+    original = ("https://github.com/SpiNNakerManchester/PyNNExamples/blob"
+                "/master/spiNNaker_start/spinnaker_start.py")
+    print("This is work in progress currently not working")
+    print(original)
+    sim.setup(n_boards_required=1)
 
     job = None
     if load:
-        load_file = open_file("record/job.dat", "rb")
+        load_file = open_file("record/meta.dat", "rb")
         width, height, n_boards = struct.unpack("<III", load_file.read(12))
         job = MockJob(width, height)
         for _ in range(n_boards):
             x, y = struct.unpack("<II", load_file.read(8))
             job.add_board(x, y)
-        print(job.width, job.height)
+        print(width, height)
         close_file(load_file)
     else:
         client = SpallocClient("https://spinnaker.cs.man.ac.uk/spalloc")
-        job = client.create_job(
-            num_boards=2, machine_name="SpiNNaker1M")
+        job = client.create_job()
     try:
         job.wait_until_ready()
-        txrx = job.create_transceiver()
-        dims = txrx._get_machine_dimensions()
+        width, height = _estimate_width_and_heigth(job)
         if save:
-            save_file = open_file("record/job.dat", "wb")
+            os.makedirs("record", exist_ok=True)
+            save_file = open_file("record/meta.dat", "wb")
             save_file.write(struct.pack(
-                "<III", dims.width, dims.height, len(job.connections)))
-            for (x, y), _ in iteritems(job.connections):
+                "<III", width, height, len(job.get_connections())))
+            for (x, y) in job.get_connections().keys():
                 save_file.write(struct.pack("<II", x, y))
             close_file(save_file)
 
         # Create GUI
-        core_counter = CoreCounter(dims.width, dims.height)
+        core_counter = CoreCounter(width, height)
 
         # Run task in thread
         main_thread = MainThread(core_counter, job, save, load)
@@ -776,3 +889,18 @@ if __name__ == "__main__":
     except Exception:
         traceback.print_exc()
         job.destroy()
+    finally:
+        sim.end()
+        print("This is work in progress currently not working")
+        print(original)
+
+
+if __name__ == "__main__":
+    save = True
+    load = False
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--save":
+            save = True
+        elif sys.argv[1] == "--load":
+            load = True
+    run_script(save, load)

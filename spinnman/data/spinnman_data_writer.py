@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import logging
+from typing import Optional
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_machine.data.machine_data_writer import MachineDataWriter
+from spinnman.spalloc import MachineAllocationController
+from spinnman.spalloc.spalloc_allocator import SpallocJobController
 from spinnman.transceiver import Transceiver
 from .spinnman_data_view import _SpiNNManDataModel, SpiNNManDataView
 
@@ -94,6 +97,27 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         MachineDataWriter._soft_reset(self)
         self._local_soft_reset()
 
+    def set_allocation_controller(self, allocation_controller: Optional[
+            MachineAllocationController]) -> None:
+        """
+        Sets the allocation controller variable.
+
+        :param allocation_controller:
+        """
+        if allocation_controller and not isinstance(
+                allocation_controller, MachineAllocationController):
+            raise TypeError(
+                "allocation_controller must be a MachineAllocationController")
+        self.__data._spalloc_job = None
+        self.__data._allocation_controller = allocation_controller
+        if allocation_controller is None:
+            return
+        if allocation_controller.proxying:
+            if not isinstance(allocation_controller, SpallocJobController):
+                raise NotImplementedError(
+                    "Expecting only the SpallocJobController to be proxying")
+            self.__data._spalloc_job = allocation_controller.job
+
     def set_transceiver(self, transceiver: Transceiver) -> None:
         """
         Sets the transceiver object.
@@ -106,3 +130,19 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
             raise NotImplementedError(
                 "Over writing and existing transceiver not supported")
         self.__data._transceiver = transceiver
+
+    @overrides(MachineDataWriter.clear_machine)
+    def clear_machine(self) -> None:
+        self.__data._transceiver = None
+        self.__data._allocation_controller = None
+        super().clear_machine()
+
+    def set_ipaddress(self, ip_address: str) -> None:
+        """
+        Sets the IP address
+
+        :param ip_address:
+        """
+        if not isinstance(ip_address, str):
+            raise TypeError("ipaddress must be a str")
+        self.__data._ipaddress = ip_address
