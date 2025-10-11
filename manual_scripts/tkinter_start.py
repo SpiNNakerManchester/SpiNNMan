@@ -14,6 +14,7 @@ class CoreCounter(object):
         self._boot_tries = 0
 
         self._root = tk.Tk()
+        self._root.grid_columnconfigure(1, minsize=700)
         self._root.title("Core states")
         self._status_label = tk.Label(self._root, text="Starting script")
         self._status_label.grid(column=0, row=0)
@@ -105,15 +106,19 @@ class CoreCounter(object):
             self._root.after(0, self.do_scamp_version)
 
     def do_scamp_version(self ) -> None:
-        self.set_status("Check scamp version")
+        self._boot_tries += 100
+        self.set_status(f"Check scamp version {self._boot_tries}")
         version_info = self._transceiver._get_scamp_version()
+        print(f"{version_info=}")
         if version_info is None:
+            print("version info is None")
             self._root.after(0, self.do_boot_board)
         else:
+            print("version info not None")
             self._root_after(0, self.done)
 
     def do_boot_board(self) -> None:
-        self.set_status("Booting board")
+        self.set_status(f"Booting board {self._boot_tries}")
         self._boot_tries += 1
         try:
             self._transceiver._boot_board()
