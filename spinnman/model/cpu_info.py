@@ -25,7 +25,7 @@ STATE_FIELD_OFFSET = 48
 
 #: Corresponds to vcpu_t in sark.h
 _VCPU_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
-Vcpu_T: Final['TypeAlias'] = Tuple[
+VcpuT: Final['TypeAlias'] = Tuple[
     # pylint: disable=wrong-spelling-in-comment
     bytes,             # 32s - r0-r7
     int, int, int,     # 3I  - psr, sp, lr
@@ -72,7 +72,7 @@ class CPUInfo(object):
         "__user",
         "__x", "__y", "__p"]
 
-    def __init__(self, x: int, y: int, p: int, cpu_data: Vcpu_T):
+    def __init__(self, x: int, y: int, p: int, cpu_data: VcpuT):
         """
         :param x: The x-coordinate of a chip
         :param y: The y-coordinate of a chip
