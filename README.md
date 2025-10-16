@@ -1,6 +1,6 @@
 [![PyPi version](https://img.shields.io/pypi/v/SpiNNMan.svg?style=flat)](https://pypi.org/project/SpiNNMan/)
 [![Build Status](https://github.com/SpiNNakerManchester/SpiNNMan/workflows/Python%20Actions/badge.svg?branch=master)](https://github.com/SpiNNakerManchester/SpiNNMan/actions?query=workflow%3A%22Python+Actions%22+branch%3Amaster)
-[![Documentation Status](https://readthedocs.org/projects/spinnman/badge/?version=latest)](https://spinnman.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/spinnman/badge/?version=7.4.1)](https://spinnman.readthedocs.io/en/7.4.1)
 [![Coverage Status](https://coveralls.io/repos/github/SpiNNakerManchester/SpiNNMan/badge.svg?branch=master)](https://coveralls.io/github/SpiNNakerManchester/SpiNNMan?branch=master)
 
 
@@ -61,6 +61,6 @@ To be able to run the unitests add [Test] to the pip installs above
 
 Documentation
 =============
-[SpiNNMan Python documentation](http://spinnman.readthedocs.io)
+[SpiNNMan Python documentation](http://spinnman.readthedocs.io/en/7.4.1)
 
-[Combined python documentation](http://spinnakermanchester.readthedocs.io)
+[Combined python documentation](http://spinnakermanchester.readthedocs.io/en/7.4.1)
