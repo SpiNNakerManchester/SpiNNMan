@@ -16,7 +16,7 @@ import functools
 from typing import cast
 from spinn_machine import CoreSubsets
 from spinnman.model import CPUInfos
-from spinnman.model.cpu_info import CPUInfo, vcpu_t, _VCPU_PATTERN
+from spinnman.model.cpu_info import CPUInfo, Vcpu_t, _VCPU_PATTERN
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
@@ -47,7 +47,7 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
 
     def __handle_response(
             self, x: int, y: int, p: int, response: Response) -> None:
-        cpu_data = cast(vcpu_t, _VCPU_PATTERN.unpack_from(
+        cpu_data = cast(Vcpu_t, _VCPU_PATTERN.unpack_from(
             response.data, response.offset))
         cpu_info = CPUInfo(x, y, p, cpu_data)
         if self._is_desired(cpu_info):
