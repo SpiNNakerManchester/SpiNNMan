@@ -5,7 +5,9 @@ from spinn_utilities.config_holder import get_config_str_or_none
 from spinnman.connections.udp_packet_connections import (
     BootConnection, SCAMPConnection)
 from spinnman.data import SpiNNManDataView
-from spinnman.spalloc import SpallocClient, SpallocJob
+from spinnman.processes import (
+    GetMachineProcess, MostDirectConnectionSelector)
+from spinnman.spalloc import SpallocClient
 from spinnman.transceiver import create_transceiver_from_hostname
 
 import spinnman.spinnman_script as sim
@@ -31,14 +33,22 @@ class CoreCounter(object):
         self._root = tk.Tk()
         self._root.grid_columnconfigure(1, minsize=700)
         self._root.title("Core states")
+
         self._status_label = tk.Label(self._root, text="Starting script")
         self._status_label.grid(column=0, row=0)
+
+        self._width_label = tk.Label(self._root, text="Width = ?")
+        self._width_label.grid(column=0, row=1)
+        self._height_label = tk.Label(self._root, text="Height = ?")
+        self._height_label.grid(column=1, row=1)
+        self._size_label = tk.Label(self._root, text="Unknown")
+        self._size_label.grid(column=2, row=1)
+
         self._core_frame = tk.Frame(self._root)
-        self._core_frame.grid(column=0, row=1)
-        #button = tk.Button(self._root, text='Run', command=self.do_run)
-        #button.grid(column=0, row=2)
+        self._core_frame.grid(column=0, row=2)
+
         button = tk.Button(self._root, text='Stop', command=self.close)
-        button.grid(column=0, row=2)
+        button.grid(column=0, row=3)
         t = Thread(target=self.do_setup)
         t.start()
         self._root.mainloop()
@@ -103,13 +113,17 @@ class CoreCounter(object):
         width += w
         height += h
 
+        self._width_label['text'] = f"{width=}"
+        self._height_label['text'] = f"{height=}"
+        self._size_label['text'] = f"Estimated"
         # create_grid
         for i in range(width):
             x = i
             for j in range(height):
                 y = height - j - 1
-                self._labels[(x, y)] = tk.Label(self._core_frame, text=f"{x}{y}",
-                                                bg="White")
+                self._labels[(x, y)] = tk.Label(
+                    #self._core_frame, text=f"{x}{y}", bg="White")
+                    self._core_frame, text = f" ", bg = "White")
                 self._labels[(x, y)].grid(column=i, row=j)
 
         t = Thread(target=self.do_tranceiver)
@@ -138,7 +152,7 @@ class CoreCounter(object):
                     self._root_connection = conn
                     self._labels[(conn.chip_x, conn.chip_y)]['text'] = "R"
                 elif conn.chip_x == 255 and conn.chip_y == 255:
-                    pass
+                    self._root_connection = conn
                 else:
                     self._labels[(conn.chip_x, conn.chip_y)]['text'] = "E"
             else:
@@ -157,7 +171,7 @@ class CoreCounter(object):
             t.start()
         else:
             print("version info not None")
-            t = Thread(target=self.done)
+            t = Thread(target=self.do_get_chip_info)
             t.start()
 
     def do_boot_board(self) -> None:
@@ -168,6 +182,44 @@ class CoreCounter(object):
         except Exception as ex:
             print(type(ex))
         t = Thread(target=self.do_scamp_version)
+        t.start()
+
+    def do_get_chip_info(self):
+        self.set_status("Getting chip info")
+        for scamp_connection in self._scamp_connections:
+            self._transceiver._change_default_scp_timeout(scamp_connection)
+            chip_info = self._transceiver._check_connection(scamp_connection)
+            if chip_info is None:
+                print(f"No Chip_info for {scamp_connection}")
+            else:
+                self._labels[(chip_info.x, chip_info._y)]['text'] = "I"
+        t = Thread(target=self.do_get_machine_dimensions)
+        t.start()
+
+    def do_get_machine_dimensions(self):
+        self.set_status("Getting machine dimensions")
+        self._dimensions = self._transceiver._get_machine_dimensions()
+        self._width_label['text'] = f"width={self._dimensions.width}"
+        self._height_label['text'] = f"height={self._dimensions.height}"
+        self._size_label['text'] = f"Read"
+        t = Thread(target=self.do_get_scamp_version)
+        t.start()
+
+    def do_get_scamp_version(self):
+        self.set_status("Getting scamp version")
+        self._version_info = self._transceiver._get_scamp_version()
+        t = Thread(target=self.do_get_machine_process)
+        t.start()
+
+    def do_get_machine_process(self):
+        self.set_status("Getting machine process")
+        connection_selector = MostDirectConnectionSelector(
+            self._scamp_connections)
+        get_machine_process = GetMachineProcess(connection_selector)
+        machine = get_machine_process.get_machine_details(
+            self._version_info.x, self._version_info.y,
+            self._dimensions.width, self._dimensions.height)
+        t = Thread(target=self.done)
         t.start()
 
     def done(self) -> None:

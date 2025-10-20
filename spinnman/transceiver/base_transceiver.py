@@ -610,13 +610,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         logger.info("Machine communication successful")
 
-        # Change the default SCP timeout on the machine, keeping the old one to
-        # revert at close
         for scamp_connection in self._scamp_connections:
-            self._call(IPTagSetTTO(
-                scamp_connection.chip_x, scamp_connection.chip_y,
-                IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
-
+            self._change_default_scp_timeout(scamp_connection)
             chip_info = self._check_connection(scamp_connection)
             if chip_info is not None and chip_info.ethernet_ip_address:
                 self._udp_scamp_connections[chip_info.ethernet_ip_address] = \
@@ -625,6 +620,17 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         # Update the connection selector so that it can ask for processor ids
         self._scamp_connection_selector = MostDirectConnectionSelector(
             self._scamp_connections)
+
+    def _change_default_scp_timeout(self, scamp_connection: SCAMPConnection) -> None:
+        """
+        Change the default SCP timeout on the machine
+
+        :param scamp_connections:
+        :return:
+        """
+        self._call(IPTagSetTTO(
+            scamp_connection.chip_x, scamp_connection.chip_y,
+            IPTAG_TIME_OUT_WAIT_TIMES.TIMEOUT_2560_ms))
 
     def __is_default_destination(self, version_info: VersionInfo) -> bool:
         return (version_info.x == AbstractSCPRequest.DEFAULT_DEST_X_COORD
