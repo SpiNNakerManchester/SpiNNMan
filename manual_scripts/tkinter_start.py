@@ -1,11 +1,25 @@
+from threading import Thread
 import tkinter as tk
-from typing import Tuple
 
+from spinn_utilities.config_holder import get_config_str_or_none
 from spinnman.connections.udp_packet_connections import (
     BootConnection, SCAMPConnection)
 from spinnman.spalloc import SpallocClient, SpallocJob
+from spinnman.transceiver import create_transceiver_from_hostname
+
 import spinnman.spinnman_script as sim
 
+class NoJob(object):
+    def __init__(self, hostname: str) -> None:
+        self._hostname = hostname
+
+    def get_connections(self):
+        return {(0, 0): self._hostname}
+
+    def create_transceiver(self, ensure_board_is_ready: bool):
+        return create_transceiver_from_hostname(
+            hostname = self._hostname,
+            ensure_board_is_ready=ensure_board_is_ready)
 
 class CoreCounter(object):
 
@@ -39,7 +53,17 @@ class CoreCounter(object):
     def do_setup(self) -> None:
         self.set_status("Setting up")
         sim.setup(n_boards_required=1)
-        self._root.after(0, self.do_client)
+        self._root.after(0, self.check_cfg)
+
+    def check_cfg(self) -> None:
+        self.set_status("Checking configuration")
+        server = get_config_str_or_none("Machine", "spalloc_server")
+        if server is not None:
+            self._root.after(0, self.do_client)
+        machine_name = get_config_str_or_none("Machine", "machine_name")
+        if machine_name is not None:
+            self._job = NoJob(machine_name)
+            self._root.after(0, self.do_grid)
 
     def do_client(self) -> None:
         self.set_status("Getting Spalloc Client")
@@ -93,12 +117,15 @@ class CoreCounter(object):
             print (conn)
             if isinstance(conn, BootConnection):
                 self._boot_send_connection = conn
+                self._labels[(0, 0)]['text'] = "B"
             # Locate any connections that talk to a BMP
             elif isinstance(conn, SCAMPConnection):
                 self._scamp_connections.append(conn)
                 if conn.chip_x == 0 and conn.chip_y == 0:
                     self._root_connection = conn
                     self._labels[(conn.chip_x, conn.chip_y)]['text'] = "R"
+                elif conn.chip_x == 255 and conn.chip_y == 255:
+                    pass
                 else:
                     self._labels[(conn.chip_x, conn.chip_y)]['text'] = "E"
             else:
@@ -115,7 +142,7 @@ class CoreCounter(object):
             self._root.after(0, self.do_boot_board)
         else:
             print("version info not None")
-            self._root_after(0, self.done)
+            self._root.after(0, self.done)
 
     def do_boot_board(self) -> None:
         self.set_status(f"Booting board {self._boot_tries}")
