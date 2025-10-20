@@ -169,7 +169,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             n_available_multicast_entries=(
                 chip_info.n_free_multicast_routing_entries))
 
-    def __receive_p2p_data(
+    def _receive_p2p_data(
             self, column: int, scp_read_response: Response) -> None:
         self._p2p_column_data[column] = (
             scp_read_response.data, scp_read_response.offset)
