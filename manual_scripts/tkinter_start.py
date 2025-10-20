@@ -4,6 +4,7 @@ import tkinter as tk
 from spinn_utilities.config_holder import get_config_str_or_none
 from spinnman.connections.udp_packet_connections import (
     BootConnection, SCAMPConnection)
+from spinnman.data import SpiNNManDataView
 from spinnman.spalloc import SpallocClient, SpallocJob
 from spinnman.transceiver import create_transceiver_from_hostname
 
@@ -38,7 +39,8 @@ class CoreCounter(object):
         #button.grid(column=0, row=2)
         button = tk.Button(self._root, text='Stop', command=self.close)
         button.grid(column=0, row=2)
-        self._root.after(0, self.do_setup)
+        t = Thread(target=self.do_setup)
+        t.start()
         self._root.mainloop()
 
     def close(self) -> None:
@@ -46,39 +48,45 @@ class CoreCounter(object):
         sim.end()
 
     def set_status(self, status: str) -> None:
-        print(status)
+        print(f"{status=}")
         self._status_label.configure(text=status)
         self._root.update_idletasks()
 
     def do_setup(self) -> None:
         self.set_status("Setting up")
         sim.setup(n_boards_required=1)
-        self._root.after(0, self.check_cfg)
+        t = Thread(target=self.check_cfg)
+        t.start()
 
     def check_cfg(self) -> None:
         self.set_status("Checking configuration")
         server = get_config_str_or_none("Machine", "spalloc_server")
         if server is not None:
-            self._root.after(0, self.do_client)
+            t = Thread(target=self.do_client)
+            t.start()
         machine_name = get_config_str_or_none("Machine", "machine_name")
         if machine_name is not None:
             self._job = NoJob(machine_name)
-            self._root.after(0, self.do_grid)
+            t = Thread(target=self.do_grid)
+            t.start()
 
     def do_client(self) -> None:
         self.set_status("Getting Spalloc Client")
         self._client = SpallocClient("https://spinnaker.cs.man.ac.uk/spalloc")
-        self._root.after(0, self.do_job)
+        t = Thread(target=self.do_job)
+        t.start()
 
     def do_job(self) -> None:
         self.set_status("Getting job")
         self._job = self._client.create_job()
-        self._root.after(0, self.do_job_ready)
+        t = Thread(target=self.do_job_ready)
+        t.start()
 
     def do_job_ready(self) -> None:
         self.set_status("Waiting for job to be ready")
         self._job.wait_until_ready()
-        self._root.after(0, self.do_grid)
+        t = Thread(target=self.do_grid)
+        t.start()
 
     def do_grid(self) -> None:
         self.set_status("Estimating Machine size")
@@ -89,8 +97,11 @@ class CoreCounter(object):
                 width = x
             if y > height :
                 max_y = y
-        width += 8
-        height += 8
+
+        version = SpiNNManDataView.get_machine_version()
+        w, h = version.board_shape
+        width += w
+        height += h
 
         # create_grid
         for i in range(width):
@@ -101,13 +112,15 @@ class CoreCounter(object):
                                                 bg="White")
                 self._labels[(x, y)].grid(column=i, row=j)
 
-        self._root.after(0, self.do_tranceiver)
+        t = Thread(target=self.do_tranceiver)
+        t.start()
 
     def do_tranceiver(self) -> None:
         self.set_status("Create Transceiver")
         self._transceiver = self._job.create_transceiver(
             ensure_board_is_ready=False)
-        self._root.after(0, self.do_connections)
+        t = Thread(target=self.do_connections)
+        t.start()
 
     def do_connections(self) -> None:
         self.set_status("Getting connections")
@@ -130,7 +143,8 @@ class CoreCounter(object):
                     self._labels[(conn.chip_x, conn.chip_y)]['text'] = "E"
             else:
                 print(type(conn))
-            self._root.after(0, self.do_scamp_version)
+        t = Thread(target=self.do_scamp_version)
+        t.start()
 
     def do_scamp_version(self ) -> None:
         self._boot_tries += 100
@@ -139,10 +153,12 @@ class CoreCounter(object):
         print(f"{version_info=}")
         if version_info is None:
             print("version info is None")
-            self._root.after(0, self.do_boot_board)
+            t = Thread(target=self.do_boot_board)
+            t.start()
         else:
             print("version info not None")
-            self._root.after(0, self.done)
+            t = Thread(target=self.done)
+            t.start()
 
     def do_boot_board(self) -> None:
         self.set_status(f"Booting board {self._boot_tries}")
@@ -151,7 +167,8 @@ class CoreCounter(object):
             self._transceiver._boot_board()
         except Exception as ex:
             print(type(ex))
-        self._root.after(0, self.do_scamp_version)
+        t = Thread(target=self.do_scamp_version)
+        t.start()
 
     def done(self) -> None:
         self.set_status("Finished")
