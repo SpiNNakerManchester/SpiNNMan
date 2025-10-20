@@ -228,7 +228,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                         coordinates=(boot_x, boot_y, 0),
                         base_address=(ROUTER_REGISTER_P2P_ADDRESS + offset),
                         size=p2p_column_bytes),
-                    functools.partial(self.__receive_p2p_data, column))
+                    functools.partial(self._receive_p2p_data, column))
         p2p_table = P2PTable(width, height, self._p2p_column_data)
 
         # Get the chip information for each chip
