@@ -17,8 +17,8 @@ import traceback
 from typing import Dict, Optional, Tuple, Type
 
 from spinn_utilities.config_holder import (
-    load_config, get_config_bool, get_config_int, get_config_str,
-    get_config_str_or_none, is_config_none)
+    get_config_bool, get_config_int, get_config_str, get_config_str_or_none,
+    is_config_none)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
@@ -50,8 +50,6 @@ class SpiNNManSimulation(object):
         :param data_writer_cls:
             Class of the DataWriter used to store the global data
         """
-        load_config()
-
         if data_writer_cls:
             self._untyped_data_writer = data_writer_cls.setup()
         else:
