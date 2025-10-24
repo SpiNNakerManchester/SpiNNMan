@@ -44,9 +44,14 @@ class SpiNNManSimulation(object):
         # access this via the property _data_writer to get the type correct
         "_untyped_data_writer", )
 
-    def __init__(
-            self, data_writer_cls: Optional[Type[SpiNNManDataWriter]] = None):
+    def __init__(self, n_boards_required: Optional[int],
+                 n_chips_required: Optional[int],
+                 data_writer_cls: Optional[Type[SpiNNManDataWriter]] = None):
         """
+        :param n_boards_required:
+            `None` or the number of boards requested by the user
+        :param n_chips_required:
+            `None` or the number of chips requested by the user
         :param data_writer_cls:
             Class of the DataWriter used to store the global data
         """
@@ -56,6 +61,9 @@ class SpiNNManSimulation(object):
             self._untyped_data_writer = data_writer_cls.setup()
         else:
             self._untyped_data_writer = SpiNNManDataWriter.setup()
+
+        self._data_writer.set_n_required(
+                n_boards_required, n_chips_required)
 
     @property
     def _data_writer(self) -> SpiNNManDataWriter:

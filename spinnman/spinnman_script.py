@@ -28,8 +28,8 @@ CONFIG_FILE_NAME = "spinnman.cfg"
 __simulator: Optional[SpiNNManSimulation] = None
 
 
-def setup(n_chips_required: Optional[int] = None,
-          n_boards_required: Optional[int] = None) -> None:
+def setup(n_boards_required: Optional[int] = None,
+          n_chips_required: Optional[int] = None) -> None:
     """
     The main method similar to PyNN setup.
 
@@ -53,11 +53,7 @@ def setup(n_chips_required: Optional[int] = None,
     set_cfg_files(
         config_file=CONFIG_FILE_NAME,
         default=os.path.join(os.path.dirname(__file__), CONFIG_FILE_NAME))
-    __simulator = SpiNNManSimulation()
-    # At the moment this is done by sPyNNaker and Graph Front end
-    # pylint: disable=protected-access
-    __simulator._data_writer.set_n_required(
-        n_boards_required, n_chips_required)
+    __simulator = SpiNNManSimulation(n_boards_required, n_chips_required)
 
 
 def get_machine() -> Machine:
