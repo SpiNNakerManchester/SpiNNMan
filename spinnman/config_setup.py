@@ -48,6 +48,9 @@ def add_spinnman_cfg() -> None:
 
 
 def setup_configs() -> None:
+    """
+    Clears configs, sets default paths and file names and loads them
+    """
     clear_cfg_files(False)
     add_spinnman_cfg()
     load_config(BASE_CONFIG_FILE)
