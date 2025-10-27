@@ -20,7 +20,7 @@ from spinn_utilities.overrides import overrides
 
 from spinnman.config_setup import add_spinnman_cfg, SPINNMAN_CFG
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
-from.abstract_spinnman_simulation import AbstractSpiNNManSimulation
+from .abstract_spinnman_simulation import AbstractSpiNNManSimulation
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
