@@ -16,11 +16,9 @@ from typing import Optional
 
 from spinn_machine import Machine
 
-from spinnman.config_setup import setup_configs
 from spinnman.transceiver import Transceiver
 from spinnman.spinnman_simulation import SpiNNManSimulation
 
-CONFIG_FILE_NAME = "spinnman.cfg"
 
 __simulator: Optional[SpiNNManSimulation] = None
 
@@ -45,7 +43,6 @@ def setup(n_chips_required: Optional[int] = None,
     global __simulator
     if __simulator is not None:
         raise RuntimeError("Setup can only be called once")
-    setup_configs()
     __simulator = SpiNNManSimulation()
     # At the moment this is done by sPyNNaker and Graph Front end
     # pylint: disable=protected-access

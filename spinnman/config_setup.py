@@ -47,15 +47,6 @@ def add_spinnman_cfg() -> None:
     add_default_cfg(os.path.join(os.path.dirname(__file__), BASE_CONFIG_FILE))
 
 
-def setup_configs() -> None:
-    """
-    Clears configs, sets default paths and file names and loads them
-    """
-    clear_cfg_files(False)
-    add_spinnman_cfg()
-    load_config(BASE_CONFIG_FILE)
-
-
 def man_cfg_paths_skipped() -> Set[str]:
     """
     cfg report options that point to paths that may not exist.
