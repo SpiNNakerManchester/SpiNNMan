@@ -73,6 +73,7 @@ class AbstractSpiNNManSimulation(object):
 
         :return: Name of the file without dot or path
         """
+        raise NotImplementedError("user_cfg_file not implemented")
 
     @property
     @abstractmethod
@@ -82,6 +83,7 @@ class AbstractSpiNNManSimulation(object):
 
         Must be SpiNNManDataWriter or a sub class of that
         """
+        raise NotImplementedError("data_writer_cls is not implemented")
 
     def get_machine(self) -> Machine:
         """
