@@ -68,10 +68,8 @@ class AbstractSpiNNManSimulation(object):
         """
         Name of the user cfg.
 
-        Includes the one in hiome which starts with a dot
+        Includes the one in home which starts with a dot
         as well as the one in the current directory.
-
-        :return: Name of the file without dot or path
         """
         raise NotImplementedError("user_cfg_file not implemented")
 
