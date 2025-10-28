@@ -22,7 +22,7 @@ from spinn_utilities.configs.camel_case_config_parser import optionxform
 from spinn_machine.config_setup import add_spinn_machine_cfg
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 
-BASE_CONFIG_FILE = "spinnman.cfg"
+SPINNMAN_CFG = "spinnman.cfg"
 
 
 def unittest_setup() -> None:
@@ -43,7 +43,7 @@ def add_spinnman_cfg() -> None:
     Add the local configuration and all dependent configuration files.
     """
     add_spinn_machine_cfg()  # This add its dependencies too
-    add_default_cfg(os.path.join(os.path.dirname(__file__), BASE_CONFIG_FILE))
+    add_default_cfg(os.path.join(os.path.dirname(__file__), SPINNMAN_CFG))
 
 
 def man_cfg_paths_skipped() -> Set[str]:

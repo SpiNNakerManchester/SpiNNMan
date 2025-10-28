@@ -12,18 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from typing import Optional
-
-from spinn_utilities.config_holder import set_cfg_files
 
 from spinn_machine import Machine
 
 from spinnman.transceiver import Transceiver
 from spinnman.spinnman_simulation import SpiNNManSimulation
-from spinnman.config_setup import clear_cfg_files, add_spinnman_cfg
 
-CONFIG_FILE_NAME = "spinnman.cfg"
 
 __simulator: Optional[SpiNNManSimulation] = None
 
@@ -48,11 +43,6 @@ def setup(n_boards_required: Optional[int] = None,
     global __simulator
     if __simulator is not None:
         raise RuntimeError("Setup can only be called once")
-    clear_cfg_files(False)
-    add_spinnman_cfg()  # This add its dependencies too
-    set_cfg_files(
-        config_file=CONFIG_FILE_NAME,
-        default=os.path.join(os.path.dirname(__file__), CONFIG_FILE_NAME))
     __simulator = SpiNNManSimulation(n_boards_required, n_chips_required)
 
 
