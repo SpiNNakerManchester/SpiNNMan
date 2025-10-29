@@ -13,8 +13,7 @@
 # limitations under the License.
 
 import logging
-import traceback
-from typing import Dict, Optional, Tuple, Type
+from typing import Type
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
