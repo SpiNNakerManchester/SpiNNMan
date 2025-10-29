@@ -46,11 +46,20 @@ class AbstractSpiNNManSimulation(object):
         # access this via the property _data_writer to get the type correct
         "_untyped_data_writer", )
 
-    def __init__(self) -> None:
+    def __init__(self, n_boards_required: Optional[int] = None,
+                 n_chips_required: Optional[int] = None) -> None:
+        """
+        :param n_boards_required:
+            `None` or the number of boards requested by the user
+        :param n_chips_required:
+            `None` or the number of chips requested by the user
+        """
         clear_cfg_files(False)
         self.add_default_cfg()
         load_config(self.user_cfg_file)
         self._untyped_data_writer = self.data_writer_cls.setup()
+        self._data_writer.set_n_required(
+                n_boards_required, n_chips_required)
 
     @property
     def _data_writer(self) -> SpiNNManDataWriter:

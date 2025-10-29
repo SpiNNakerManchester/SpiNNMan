@@ -37,9 +37,6 @@ class SpiNNManSimulation(AbstractSpiNNManSimulation):
     def add_default_cfg(self) -> None:
         add_spinnman_cfg()
 
-        self._data_writer.set_n_required(
-                n_boards_required, n_chips_required)
-
     @property
     @overrides(AbstractSpiNNManSimulation.user_cfg_file)
     def user_cfg_file(self) -> str:
