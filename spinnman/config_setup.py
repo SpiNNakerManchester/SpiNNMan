@@ -16,13 +16,15 @@ import os
 from typing import Set
 
 from spinn_utilities.config_holder import (
-    add_default_cfg, clear_cfg_files, get_config_bool, get_config_str_or_none)
+    add_default_cfg, add_template, clear_cfg_files, get_config_bool,
+    get_config_str_or_none)
 from spinn_utilities.configs.camel_case_config_parser import optionxform
 
 from spinn_machine.config_setup import add_spinn_machine_cfg
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 
 SPINNMAN_CFG = "spinnman.cfg"
+TEMPLATE_FILE = "spinnman.cfg.template"
 
 
 def unittest_setup() -> None:
@@ -44,6 +46,13 @@ def add_spinnman_cfg() -> None:
     """
     add_spinn_machine_cfg()  # This add its dependencies too
     add_default_cfg(os.path.join(os.path.dirname(__file__), SPINNMAN_CFG))
+
+
+def add_spinnman_template() -> None:
+    """
+    Add the template for uses cfg files
+    """
+    add_template(os.path.join(os.path.dirname(__file__), TEMPLATE_FILE))
 
 
 def man_cfg_paths_skipped() -> Set[str]:

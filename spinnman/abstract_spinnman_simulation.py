@@ -19,8 +19,9 @@ from typing import Dict, Optional, Tuple, Type
 
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.config_holder import (
-    clear_cfg_files, get_config_bool, get_config_int, get_config_str,
-    get_config_str_or_none, is_config_none, load_config)
+    check_user_cfg, clear_cfg_files, get_config_bool, get_config_int,
+    get_config_str, get_config_str_or_none, is_config_none, load_config)
+from spinn_utilities.exceptions import ConfigException
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
@@ -48,7 +49,7 @@ class AbstractSpiNNManSimulation(object):
 
     def __init__(self) -> None:
         clear_cfg_files(False)
-        self.add_default_cfg()
+        self.add_cfg_defaults_and_template()
         load_config(self.user_cfg_file)
         self._untyped_data_writer = self.data_writer_cls.setup()
 
@@ -57,9 +58,12 @@ class AbstractSpiNNManSimulation(object):
         return self._untyped_data_writer
 
     @abstractmethod
-    def add_default_cfg(self) -> None:
+    def add_cfg_defaults_and_template(self) -> None:
         """
-        Adds all the default cfg file but not the user cfg
+        Adds all the default cfg file and a template for the user one.
+
+        Should not add the user one named in user_cfg_file.
+        Should add a default named the same as user_cfg_file is applicable.
         """
 
     @property
@@ -210,7 +214,10 @@ class AbstractSpiNNManSimulation(object):
             self, total_run_time: Optional[float],
             ensure_board_is_ready: bool) -> Transceiver:
         _ = total_run_time
-        spalloc_server = get_config_str("Machine", "spalloc_server")
+        spalloc_server = get_config_str_or_none("Machine", "spalloc_server")
+        if spalloc_server is None:
+            check_user_cfg()
+            raise ConfigException("cfg missing Machine values")
         if is_server_address(spalloc_server):
             transceiver, _ = self._execute_transceiver_by_spalloc(
                 ensure_board_is_ready)
