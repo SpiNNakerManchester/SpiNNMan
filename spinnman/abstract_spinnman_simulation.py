@@ -19,8 +19,11 @@ from typing import Dict, Optional, Tuple, Type
 
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.config_holder import (
-    clear_cfg_files, get_config_bool, get_config_int, get_config_str,
-    get_config_str_or_none, is_config_none, load_config)
+    check_user_cfg, clear_cfg_files, get_config_bool, get_config_int,
+    get_config_str, get_config_str_or_none, is_config_none, load_config)
+from spinn_utilities.configs.no_config_found_exception import (
+    NoConfigFoundException)
+from spinn_utilities.exceptions import ConfigException
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
@@ -28,7 +31,8 @@ from spinn_machine import Machine
 from spinn_machine.virtual_machine import virtual_machine_generator
 
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
-from spinnman.exceptions import SpinnmanUnsupportedOperationException
+from spinnman.exceptions import (
+    SpallocBoardUnavailableException, SpinnmanUnsupportedOperationException)
 from spinnman.spalloc import is_server_address
 from spinnman.spalloc.spalloc_allocator import spalloc_allocate_job
 from spinnman.transceiver import Transceiver, transceiver_generator
@@ -55,9 +59,9 @@ class AbstractSpiNNManSimulation(object):
             `None` or the number of chips requested by the user
         """
         clear_cfg_files(False)
-        self.add_default_cfg()
-        load_config(self.user_cfg_file)
-        self._untyped_data_writer = self.data_writer_cls.setup()
+        self._add_cfg_defaults_and_template()
+        load_config(self._user_cfg_file)
+        self._untyped_data_writer = self._data_writer_cls.setup()
         self._data_writer.set_n_required(
                 n_boards_required, n_chips_required)
 
@@ -66,14 +70,17 @@ class AbstractSpiNNManSimulation(object):
         return self._untyped_data_writer
 
     @abstractmethod
-    def add_default_cfg(self) -> None:
+    def _add_cfg_defaults_and_template(self) -> None:
         """
-        Adds all the default cfg file but not the user cfg
+        Adds all the default cfg file and a template for the user one.
+
+        Should not add the user one named in user_cfg_file.
+        Should add a default named the same as user_cfg_file is applicable.
         """
 
     @property
     @abstractmethod
-    def user_cfg_file(self) -> str:
+    def _user_cfg_file(self) -> str:
         """
         Name of the user cfg.
 
@@ -84,7 +91,7 @@ class AbstractSpiNNManSimulation(object):
 
     @property
     @abstractmethod
-    def data_writer_cls(self) -> Type[SpiNNManDataWriter]:
+    def _data_writer_cls(self) -> Type[SpiNNManDataWriter]:
         """
         Type to use for the data writer.
 
@@ -158,7 +165,14 @@ class AbstractSpiNNManSimulation(object):
             machine = transceiver.get_machine_details()
             self._data_writer.set_machine(machine)
             return machine
+        except NoConfigFoundException:
+            # No need to retry here
+            raise
         except Exception as ex:  # pylint: disable=broad-except
+            if "Failed to resolve" in str(ex):
+                # Likely a github actions DNS server error
+                raise SpallocBoardUnavailableException(
+                    "Suspected DNS error") from ex
             max_retry = get_config_int("Machine", "spalloc_retry")
             if retry >= max_retry:
                 logger.exception(
@@ -219,7 +233,10 @@ class AbstractSpiNNManSimulation(object):
             self, total_run_time: Optional[float],
             ensure_board_is_ready: bool) -> Transceiver:
         _ = total_run_time
-        spalloc_server = get_config_str("Machine", "spalloc_server")
+        spalloc_server = get_config_str_or_none("Machine", "spalloc_server")
+        if spalloc_server is None:
+            check_user_cfg()
+            raise ConfigException("cfg missing Machine values")
         if is_server_address(spalloc_server):
             transceiver, _ = self._execute_transceiver_by_spalloc(
                 ensure_board_is_ready)
