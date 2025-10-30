@@ -164,8 +164,6 @@ class AbstractSpiNNManSimulation(object):
                 # Likely a github actions DNS server error
                 raise SpallocBoardUnavailableException(
                     "Suspected DNS error") from ex
-            else:
-                raise
             max_retry = get_config_int("Machine", "spalloc_retry")
             if retry >= max_retry:
                 logger.exception(
@@ -244,11 +242,7 @@ class AbstractSpiNNManSimulation(object):
         """
         :return: Transceiver and connections (to write to provenance)
         """
-        try:
-            ipaddress, connections, controller = spalloc_allocate_job()
-        except ConnectionError as ex:
-            if "Failed to resolve" in str(ex):
-                raise SpallocBoardUnavailableException()
+        ipaddress, connections, controller = spalloc_allocate_job()
         self._data_writer.set_ipaddress(ipaddress)
         self._data_writer.set_allocation_controller(controller)
         if controller.can_create_transceiver():
