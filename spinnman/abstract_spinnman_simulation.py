@@ -23,6 +23,7 @@ from spinn_utilities.config_holder import (
     get_config_str, get_config_str_or_none, is_config_none, load_config)
 from spinn_utilities.configs.no_config_found_exception import (
     NoConfigFoundException)
+from spinn_utilities.exceptions import ConfigException
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
