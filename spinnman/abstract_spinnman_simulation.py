@@ -31,7 +31,8 @@ from spinn_machine import Machine
 from spinn_machine.virtual_machine import virtual_machine_generator
 
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
-from spinnman.exceptions import SpinnmanUnsupportedOperationException
+from spinnman.exceptions import (
+    SpallocBoardUnavailableException, SpinnmanUnsupportedOperationException)
 from spinnman.spalloc import is_server_address
 from spinnman.spalloc.spalloc_allocator import spalloc_allocate_job
 from spinnman.transceiver import Transceiver, transceiver_generator
@@ -159,6 +160,12 @@ class AbstractSpiNNManSimulation(object):
             # No need to retry here
             raise
         except Exception as ex:  # pylint: disable=broad-except
+            if "Failed to resolve" in str(ex):
+                # Likely a github actions DNS server error
+                raise SpallocBoardUnavailableException(
+                    "Suspected DNS error") from ex
+            else:
+                raise
             max_retry = get_config_int("Machine", "spalloc_retry")
             if retry >= max_retry:
                 logger.exception(
@@ -237,7 +244,11 @@ class AbstractSpiNNManSimulation(object):
         """
         :return: Transceiver and connections (to write to provenance)
         """
-        ipaddress, connections, controller = spalloc_allocate_job()
+        try:
+            ipaddress, connections, controller = spalloc_allocate_job()
+        except ConnectionError as ex:
+            if "Failed to resolve" in str(ex):
+                raise SpallocBoardUnavailableException()
         self._data_writer.set_ipaddress(ipaddress)
         self._data_writer.set_allocation_controller(controller)
         if controller.can_create_transceiver():
