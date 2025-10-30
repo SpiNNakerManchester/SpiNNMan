@@ -21,7 +21,8 @@ from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.config_holder import (
     check_user_cfg, clear_cfg_files, get_config_bool, get_config_int,
     get_config_str, get_config_str_or_none, is_config_none, load_config)
-from spinn_utilities.exceptions import ConfigException
+from spinn_utilities.configs.no_config_found_exception import (
+    NoConfigFoundException)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
@@ -153,6 +154,9 @@ class AbstractSpiNNManSimulation(object):
             machine = transceiver.get_machine_details()
             self._data_writer.set_machine(machine)
             return machine
+        except NoConfigFoundException:
+            # No need to retry here
+            raise
         except Exception as ex:  # pylint: disable=broad-except
             max_retry = get_config_int("Machine", "spalloc_retry")
             if retry >= max_retry:
