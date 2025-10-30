@@ -51,16 +51,16 @@ class AbstractSpiNNManSimulation(object):
 
     def __init__(self) -> None:
         clear_cfg_files(False)
-        self.add_cfg_defaults_and_template()
-        load_config(self.user_cfg_file)
-        self._untyped_data_writer = self.data_writer_cls.setup()
+        self._add_cfg_defaults_and_template()
+        load_config(self._user_cfg_file)
+        self._untyped_data_writer = self._data_writer_cls.setup()
 
     @property
     def _data_writer(self) -> SpiNNManDataWriter:
         return self._untyped_data_writer
 
     @abstractmethod
-    def add_cfg_defaults_and_template(self) -> None:
+    def _add_cfg_defaults_and_template(self) -> None:
         """
         Adds all the default cfg file and a template for the user one.
 
@@ -70,7 +70,7 @@ class AbstractSpiNNManSimulation(object):
 
     @property
     @abstractmethod
-    def user_cfg_file(self) -> str:
+    def _user_cfg_file(self) -> str:
         """
         Name of the user cfg.
 
@@ -81,7 +81,7 @@ class AbstractSpiNNManSimulation(object):
 
     @property
     @abstractmethod
-    def data_writer_cls(self) -> Type[SpiNNManDataWriter]:
+    def _data_writer_cls(self) -> Type[SpiNNManDataWriter]:
         """
         Type to use for the data writer.
 

@@ -33,17 +33,17 @@ class SpiNNManSimulation(AbstractSpiNNManSimulation):
 
     __slots__ = ()
 
-    @overrides(AbstractSpiNNManSimulation.add_cfg_defaults_and_template)
-    def add_cfg_defaults_and_template(self) -> None:
+    @overrides(AbstractSpiNNManSimulation._add_cfg_defaults_and_template)
+    def _add_cfg_defaults_and_template(self) -> None:
         add_spinnman_cfg()
         add_spinnman_template()
 
     @property
-    @overrides(AbstractSpiNNManSimulation.user_cfg_file)
-    def user_cfg_file(self) -> str:
+    @overrides(AbstractSpiNNManSimulation._user_cfg_file)
+    def _user_cfg_file(self) -> str:
         return SPINNMAN_CFG
 
     @property
-    @overrides(AbstractSpiNNManSimulation.data_writer_cls)
-    def data_writer_cls(self) -> Type[SpiNNManDataWriter]:
+    @overrides(AbstractSpiNNManSimulation._data_writer_cls)
+    def _data_writer_cls(self) -> Type[SpiNNManDataWriter]:
         return SpiNNManDataWriter
