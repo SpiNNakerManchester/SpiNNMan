@@ -14,6 +14,8 @@
 """
 Implementation of the client for the Spalloc web service.
 """
+import sys
+
 import math
 import os
 import time
@@ -676,14 +678,26 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.wait_until_ready)
     def wait_until_ready(self) -> None:
-        n_retries = 3
         state = self.get_state()
         retries = 0
 
+        if self.__board_st is None:
+            queue_time = get_config_int_or_none(
+                "Machine", "spalloc_queue_time")
+            if queue_time is None:
+                n_retries = sys.maxsize
+            else:
+                n_retries = queue_time / 5
+        else:
+            n_retries = 3
+
         while state == SpallocState.QUEUED:
             logger.info(f"Waiting as job is QUEUED {retries=}")
-            if self.__board_st is not None:
-                if retries >= n_retries:
+            if retries >= n_retries:
+                if self.__board_st is None:
+                    raise SpallocBoardUnavailableException(
+                        f"{self._url} killed "
+                        f"as it remained QUEUED for {queue_time} seconds")
                     raise SpallocBoardUnavailableException(
                         f"Boards described as {self.__board_st} "
                         f"are not available")
