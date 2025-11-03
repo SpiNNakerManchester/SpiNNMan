@@ -692,12 +692,13 @@ class _SpallocJob(SessionAware, SpallocJob):
             n_retries = 3
 
         while state == SpallocState.QUEUED:
-            logger.info(f"Waiting as job is QUEUED {retries=}")
+            logger.info(f"Waiting as job is QUEUED {retries=} of {n_retries}")
             if retries >= n_retries:
                 if self.__board_st is None:
                     raise SpallocBoardUnavailableException(
                         f"{self._url} killed "
                         f"as it remained QUEUED for {queue_time} seconds")
+                else:
                     raise SpallocBoardUnavailableException(
                         f"Boards described as {self.__board_st} "
                         f"are not available")
