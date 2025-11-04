@@ -713,7 +713,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     @overrides(SpallocJob.destroy)
     def destroy(self, reason: str = "finished") -> None:
         if self._keepalive_url is None:
-            return  # Already destoyed
+            return  # Already destroyed
         self._keepalive_url = None
         if self.__proxy_handle is not None:
             if self.__proxy_thread:
