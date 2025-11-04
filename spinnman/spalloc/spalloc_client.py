@@ -14,6 +14,8 @@
 """
 Implementation of the client for the Spalloc web service.
 """
+import sys
+
 import math
 import os
 import time
@@ -610,24 +612,19 @@ class _SpallocJob(SessionAware, SpallocJob):
         }
 
     @property
-    def __proxy_url(self) -> Optional[str]:
+    def __proxy_url(self) -> str:
         """
         The URL for talking to the proxy connection system.
         """
         r = self._get(self._url)
         if r.status_code == 204:
-            return None
-        try:
-            url = r.json()["proxy-ref"]
-            logger.info("Connecting to proxy on {}", url)
-            return url
-        except KeyError:
-            return None
+            raise ValueError("No proxy available")
+        url = r.json()["proxy-ref"]
+        logger.info("Connecting to proxy on {}", url)
+        return url
 
     def __init_proxy(self) -> Tuple[_ProxyReceiver, WebSocket]:
         if self.__proxy_handle is None or not self.__proxy_handle.connected:
-            if self.__proxy_url is None:
-                raise ValueError("no proxy available")
             self.__proxy_handle = self._websocket(
                 self.__proxy_url, origin=get_hostname(self._url))
             self.__proxy_thread = _ProxyReceiver(self.__proxy_handle)
@@ -676,14 +673,27 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.wait_until_ready)
     def wait_until_ready(self) -> None:
-        n_retries = 3
         state = self.get_state()
         retries = 0
 
+        if self.__board_st is None:
+            queue_time = get_config_int_or_none(
+                "Machine", "spalloc_queue_time")
+            if queue_time is None:
+                n_retries = sys.maxsize
+            else:
+                n_retries = queue_time // 5
+        else:
+            n_retries = 3
+
         while state == SpallocState.QUEUED:
-            logger.info(f"Waiting as job is QUEUED {retries=}")
-            if self.__board_st is not None:
-                if retries >= n_retries:
+            logger.info(f"Waiting as job is QUEUED {retries=} of {n_retries}")
+            if retries >= n_retries:
+                if self.__board_st is None:
+                    raise SpallocBoardUnavailableException(
+                        f"{self._url} killed "
+                        f"as it remained QUEUED for {queue_time} seconds")
+                else:
                     raise SpallocBoardUnavailableException(
                         f"Boards described as {self.__board_st} "
                         f"are not available")
@@ -702,6 +712,8 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.destroy)
     def destroy(self, reason: str = "finished") -> None:
+        if self._keepalive_url is None:
+            return  # Already destroyed
         self._keepalive_url = None
         if self.__proxy_handle is not None:
             if self.__proxy_thread:

@@ -21,6 +21,7 @@ import sys
 from types import ModuleType
 import unittest
 
+from spinnman.exceptions import SpallocBoardUnavailableException
 import spinnman.spinnman_script as sim
 
 
@@ -42,7 +43,7 @@ class TestScripts(unittest.TestCase):
         script_path = self._get_script(script)
         try:
             runpy.run_path(script_path)
-        except ConnectionError as ex:
+        except (ConnectionError, SpallocBoardUnavailableException) as ex:
             raise unittest.SkipTest(str(ex))
         finally:
             sim.end()

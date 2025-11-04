@@ -275,6 +275,7 @@ class AbstractSpiNNManSimulation(object):
         if self._data_writer.has_transceiver():
             transceiver = self._data_writer.get_transceiver()
             transceiver.stop_application(self._data_writer.get_app_id())
+            transceiver.close()
 
         self._close_allocation_controller()
         self._data_writer.shut_down()
