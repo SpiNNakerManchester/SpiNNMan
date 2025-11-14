@@ -102,5 +102,10 @@ class SpallocTransceiver(Version5Transceiver):
             self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
         self.__job.reset_routing(custom_filters)
 
+    @overrides(Version5Transceiver.close)
+    def close(self) -> None:
+        super().close()
+        self.__job.destroy()
+
     def __str__(self) -> str:
         return f"Spalloc Transceiver over {self.__job}"
