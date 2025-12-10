@@ -16,7 +16,6 @@ import logging
 from threading import Thread
 from queue import Queue
 from typing import Callable, Generic, List, TypeVar, Tuple, Optional
-from concurrent.futures import ThreadPoolExecutor, Future
 from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import SpinnmanEOFException
 from spinnman.connections.abstract_classes import Listenable
@@ -99,7 +98,7 @@ class ConnectionListener(Thread, Generic[T]):
             except Exception:  # pylint: disable=broad-except
                 if not self.__done:
                     logger.warning("problem when dispatching message",
-                                    exc_info=True)
+                                   exc_info=True)
         for process_thread in self.__process_threads:
             process_thread.stop()
             process_thread.join()
@@ -129,6 +128,7 @@ class ConnectionListener(Thread, Generic[T]):
         """
         self.__done = True
         self.join()
+
 
 class _ProcessThread(Thread, Generic[T]):
     """
