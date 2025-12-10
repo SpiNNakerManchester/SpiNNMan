@@ -136,7 +136,8 @@ class _ProcessThread(Thread, Generic[T]):
     """
     __slots__ = ("__process_queue")
 
-    def __init__(self, process_queue: Queue[Tuple[Callable, T]]) -> None:
+    def __init__(
+            self, process_queue: Queue[Tuple[Callable, Optional[T]]]) -> None:
         """
         :param process_queue:
             The queue to get things to do from
