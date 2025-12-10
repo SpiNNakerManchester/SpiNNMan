@@ -15,7 +15,7 @@ from __future__ import annotations
 import logging
 from threading import Thread
 from queue import Queue
-from typing import Callable, Generic, List, TypeVar, Tuple
+from typing import Callable, Generic, List, TypeVar, Tuple, Optional
 from concurrent.futures import ThreadPoolExecutor, Future
 from spinn_utilities.log import FormatAdapter
 from spinnman.exceptions import SpinnmanEOFException
@@ -63,7 +63,7 @@ class ConnectionListener(Thread, Generic[T]):
         self.__timeout = timeout
         self.__done = False
         self.__callbacks: List[Callable[[T], None]] = []
-        self.__process_queue: Queue[Tuple[Callable, T]] = Queue(
+        self.__process_queue: Queue[Tuple[Callable, Optional[T]]] = Queue(
             maxsize=max_queue_size)
         self.__process_threads: List[_ProcessThread[T]] = [
             _ProcessThread(self.__process_queue)
