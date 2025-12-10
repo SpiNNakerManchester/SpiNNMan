@@ -134,7 +134,7 @@ class _ProcessThread(Thread, Generic[T]):
     """
     A thread that processes messages from a queue.
     """
-    __slots__ = ("__process_queue")
+    __slots__ = ("__process_queue", )
 
     def __init__(
             self, process_queue: Queue[Tuple[Callable, Optional[T]]]) -> None:
