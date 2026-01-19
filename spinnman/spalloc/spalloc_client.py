@@ -611,8 +611,8 @@ class _SpallocJob(SessionAware, SpallocJob):
             (int(x), int(y)): str(host)
             for ((x, y), host) in r.json()["connections"]
         }
-        if (0,0) in unproxied:
-            self.__root = unproxied[(0,0)]
+        if (0, 0) in unproxied:
+            self.__root = unproxied[(0, 0)]
         else:
             self.__root = "No 0,0"
         return unproxied
@@ -790,8 +790,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             return SpallocTransceiver(
                 self, ensure_board_is_ready=ensure_board_is_ready)
         except SpinnmanException as ex:
-            raise SpinnmanException (f"Error on {self}") from ex
-
+            raise SpinnmanException(f"Error on {self}") from ex
 
     def __repr__(self) -> str:
         if self.__root:

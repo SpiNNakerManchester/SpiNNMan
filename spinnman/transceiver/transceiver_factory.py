@@ -83,10 +83,10 @@ def create_transceiver_from_hostname(
             auto_detect_bmp=auto_detect_bmp, power_cycle=power_cycle,
             extended=extended, ensure_board_is_ready=ensure_board_is_ready)
     except SpinnmanException as ex:
-       raise SpinnmanException(
-           f"Transceiver error with {hostname=}, {bmp_connection_data=}, "
-           f"{auto_detect_bmp=}, {power_cycle=}, "
-           f"{extended=}, {ensure_board_is_ready=}") from ex
+        raise SpinnmanException(
+            f"Transceiver error with {hostname=}, {bmp_connection_data=}, "
+            f"{auto_detect_bmp=}, {power_cycle=}, "
+            f"{extended=}, {ensure_board_is_ready=}") from ex
 
 
 def __create_transceiver_from_hostname(
@@ -159,7 +159,7 @@ def create_transceiver_from_connections(
     """
     try:
         return __create_transceiver_from_connections(
-            connections =connections, virtual = virtual,
+            connections=connections, virtual=virtual,
             power_cycle=power_cycle, extended=extended,
             ensure_board_is_ready=ensure_board_is_ready)
     except SpinnmanException as ex:
