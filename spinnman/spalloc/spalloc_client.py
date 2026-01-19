@@ -49,7 +49,7 @@ from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import (
-    SpallocBoardUnavailableException, SpallocException)
+    SpinnmanException, SpallocBoardUnavailableException, SpallocException)
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.transceiver import Transceiver
 
@@ -540,7 +540,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     __slots__ = ("__board_st", "__machine_url", "__chip_url",
                  "__memory_url", "__router_url",
                  "_keepalive_url", "__proxy_handle",
-                 "__proxy_thread", "__proxy_ping")
+                 "__proxy_thread", "__proxy_ping", "__root")
 
     def __init__(self, session: Session, job_handle: str,
                  board_st: Optional[str] = None):
@@ -560,6 +560,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__proxy_handle: Optional[WebSocket] = None
         self.__proxy_thread: Optional[_ProxyReceiver] = None
         self.__proxy_ping: Optional[_ProxyPing] = None
+        self.__root: Optional[str] = None
         keep_alive = threading.Thread(
             target=self.__start_keepalive, daemon=True)
         keep_alive.start()
@@ -606,10 +607,15 @@ class _SpallocJob(SessionAware, SpallocJob):
         r = self._get(self.__machine_url)
         if r.status_code == 204:
             return {}
-        return {
+        unproxied = {
             (int(x), int(y)): str(host)
             for ((x, y), host) in r.json()["connections"]
         }
+        if (0,0) in unproxied:
+            self.__root = unproxied[(0,0)]
+        else:
+            self.__root = "No 0,0"
+        return unproxied
 
     @property
     def __proxy_url(self) -> str:
@@ -780,11 +786,18 @@ class _SpallocJob(SessionAware, SpallocJob):
             self, ensure_board_is_ready: bool = True) -> Transceiver:
         if self.get_state() != SpallocState.READY:
             raise SpallocException("job not ready to execute scripts")
-        return SpallocTransceiver(
-            self, ensure_board_is_ready=ensure_board_is_ready)
+        try:
+            return SpallocTransceiver(
+                self, ensure_board_is_ready=ensure_board_is_ready)
+        except SpinnmanException as ex:
+            raise SpinnmanException (f"Error on {self}") from ex
+
 
     def __repr__(self) -> str:
-        return f"SpallocJob({self._url})"
+        if self.__root:
+            return f"SpallocJob({self._url} on {self.__root})"
+        else:
+            return f"SpallocJob({self._url})"
 
 
 class _ProxiedConnection(metaclass=AbstractBase):
