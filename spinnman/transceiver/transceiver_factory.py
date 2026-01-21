@@ -23,6 +23,7 @@ from spinn_machine.version.version_3 import Version3
 from spinn_machine.version.version_5 import Version5
 from spinnman.connections.abstract_classes import Connection
 from spinnman.data import SpiNNManDataView
+from spinnman.exceptions import SpinnmanException
 from spinnman.extended.version3transceiver import ExtendedVersion3Transceiver
 from spinnman.extended.version5transceiver import ExtendedVersion5Transceiver
 from spinnman.model.bmp_connection_data import BMPConnectionData
@@ -76,6 +77,24 @@ def create_transceiver_from_hostname(
     :raise SpinnmanUnexpectedResponseCodeException:
         If a response indicates an error during the exchange
     """
+    try:
+        return __create_transceiver_from_hostname(
+            hostname=hostname, bmp_connection_data=bmp_connection_data,
+            auto_detect_bmp=auto_detect_bmp, power_cycle=power_cycle,
+            extended=extended, ensure_board_is_ready=ensure_board_is_ready)
+    except SpinnmanException as ex:
+        raise SpinnmanException(
+            f"Transceiver error with {hostname=}, {bmp_connection_data=}, "
+            f"{auto_detect_bmp=}, {power_cycle=}, "
+            f"{extended=}, {ensure_board_is_ready=}") from ex
+
+
+def __create_transceiver_from_hostname(
+        hostname: Optional[str], *,
+        bmp_connection_data: Optional[BMPConnectionData] = None,
+        auto_detect_bmp: bool = False, power_cycle: bool = False,
+        extended: bool = False,
+        ensure_board_is_ready: bool = True) -> Transceiver:
     if hostname is not None:
         logger.info("Creating transceiver for {}", hostname)
     connections: List[Connection] = list()
@@ -138,6 +157,22 @@ def create_transceiver_from_connections(
     :raise SpinnmanUnexpectedResponseCodeException:
         If a response indicates an error during the exchange
     """
+    try:
+        return __create_transceiver_from_connections(
+            connections=connections, virtual=virtual,
+            power_cycle=power_cycle, extended=extended,
+            ensure_board_is_ready=ensure_board_is_ready)
+    except SpinnmanException as ex:
+        raise SpinnmanException(
+            f"Transceiver error with {connections=}, {virtual=}, "
+            f"{power_cycle=}, {extended=}, "
+            f"{ensure_board_is_ready=}") from ex
+
+
+def __create_transceiver_from_connections(
+        connections: Iterable[Connection], virtual: bool = False,
+        power_cycle: bool = False, extended: bool = False,
+        ensure_board_is_ready: bool = False) -> Transceiver:
     version = SpiNNManDataView.get_machine_version()
     if isinstance(version, Version3):
         if virtual:
