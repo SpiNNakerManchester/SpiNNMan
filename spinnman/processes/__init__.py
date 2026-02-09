@@ -43,6 +43,7 @@ from .send_single_command_process import SendSingleCommandProcess
 from .write_memory_process import WriteMemoryProcess
 from .set_memory_process import SetMemoryProcess
 from .clear_routes_process import ClearRoutesProcess
+from .malloc_sysram_process import MallocSysRAMProcess
 
 # Old name
 AbstractMultiConnectionProcessConnectionSelector = ConnectionSelector
@@ -63,4 +64,5 @@ __all__ = ["AbstractMultiConnectionProcessConnectionSelector",
            "ReadFixedRouteRoutingEntryProcess", "ReadIOBufProcess",
            "ReadMemoryProcess", "ReadRouterDiagnosticsProcess",
            "SendSingleCommandProcess", "WriteMemoryProcess",
-           "SetMemoryProcess", "ClearRoutesProcess"]
+           "SetMemoryProcess", "ClearRoutesProcess",
+           "MallocSysRAMProcess"]

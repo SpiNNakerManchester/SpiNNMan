@@ -39,6 +39,8 @@ from .router_clear import RouterClear
 from .router_init import RouterInit
 from .sdram_alloc import SDRAMAlloc
 from .sdram_de_alloc import SDRAMDeAlloc
+from .sysram_alloc import SysRAMAlloc
+from .sysram_de_alloc import SysRAMDeAlloc
 from .send_signal import SendSignal
 from .set_power import SetPower
 from .write_fpga_register import WriteFPGARegister
@@ -60,4 +62,5 @@ __all__ = ["AppStop", "ApplicationRun", "AppCopyRun",
            "RouterInit", "SDRAMAlloc",
            "SDRAMDeAlloc", "SendSignal",
            "GetVersion", "WriteFPGARegister", "FixedRouteRead",
-           "WriteLink", "WriteMemory", "FixedRouteInit"]
+           "WriteLink", "WriteMemory", "FixedRouteInit",
+           "SysRAMAlloc", "SysRAMDeAlloc"]

@@ -760,6 +760,37 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
+    def malloc_sysram(
+            self, x: int, y: int, size: int, app_id: int, tag: int = 0) -> int:
+        """
+        Allocates a chunk of System RAM on a chip on the machine.
+
+        :param x: The x-coordinate of the chip onto which to ask for memory
+        :param y: The y-coordinate of the chip onto which to ask for memory
+        :param size: the amount of memory to allocate in bytes
+        :param app_id: The ID of the application with which to associate
+            the routes.  If not specified, defaults to 0.
+        :param tag: the tag for the SysRAM, a 8-bit (chip-wide) tag that can
+            be looked up by a SpiNNaker application to discover the address of
+            the allocated block. If `0` then no tag is applied.
+        :return: the base address of the allocated memory
+        """
+        raise NotImplementedError("abstractmethod")
+
+    @abstractmethod
+    def malloc_sysram_multi(
+            self, allocations: List[Tuple[int, int, int, int, int]]
+            ) -> List[int]:
+        """
+        Allocate space in the System RAM space for multiple chips
+
+        :param allocations:
+            List of (x, y, size, app_id, tag)
+        :return: List of base addresses that match each of the requests
+        """
+        raise NotImplementedError("abstractmethod")
+
+    @abstractmethod
     def load_multicast_routes(
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
             app_id: int) -> None:

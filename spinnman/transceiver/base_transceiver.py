@@ -78,7 +78,7 @@ from spinnman.processes import ConnectionSelector
 from spinnman.connections.udp_packet_connections import (
     BMPConnection, BootConnection, SCAMPConnection)
 from spinnman.processes import (
-    GetMachineProcess, GetVersionProcess,
+    GetMachineProcess, GetVersionProcess, MallocSysRAMProcess,
     MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
     GetCPUInfoProcess, GetExcludeCPUInfoProcess, GetIncludeCPUInfoProcess,
     ReadIOBufProcess, ApplicationRunProcess,
@@ -1244,6 +1244,25 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             ) -> List[int]:
         process = MallocSDRAMProcess(self._scamp_connection_selector)
         process.malloc_sdram_multi(allocations)
+        return process.base_addresses
+
+    @overrides(Transceiver.malloc_sysram)
+    def malloc_sysram(
+            self, x: int, y: int, size: int, app_id: int, tag: int = 0) -> int:
+        try:
+            process = MallocSysRAMProcess(self._scamp_connection_selector)
+            process.malloc_sysram(x, y, size, app_id, tag)
+            return process.base_address
+        except Exception:
+            logger.info(self._where_is_xy(x, y))
+            raise
+
+    @overrides(Transceiver.malloc_sysram_multi)
+    def malloc_sysram_multi(
+            self, allocations: List[Tuple[int, int, int, int, int]]
+            ) -> List[int]:
+        process = MallocSysRAMProcess(self._scamp_connection_selector)
+        process.malloc_sysram_multi(allocations)
         return process.base_addresses
 
     @overrides(Transceiver.load_multicast_routes)

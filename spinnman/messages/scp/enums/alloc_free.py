@@ -23,7 +23,7 @@ class AllocFree(Enum):
     ALLOC_SDRAM = 0
     #: Free SDRAM using a Pointer.
     FREE_SDRAM_BY_POINTER = 1
-    #: Free SDRAM using am APP ID.
+    #: Free SDRAM by APP ID.
     FREE_SDRAM_BY_APP_ID = 2
     #: Allocate Routing Entries.
     ALLOC_ROUTING = 3
@@ -31,3 +31,13 @@ class AllocFree(Enum):
     FREE_ROUTING_BY_POINTER = 4
     #: Free Routing Entries by APP ID.
     FREE_ROUTING_BY_APP_ID = 5
+    #: Get the size of free SDRAM.
+    GET_FREE_SDRAM = 6
+    #: Get the a tag pointer from the SDRAM Heap.
+    HEAP_TAG_POINTER = 7
+    #: Allocate System RAM
+    ALLOC_SYSRAM = 8
+    #: Free System RAM by Pointer
+    FREE_SYSRAM_BY_POINTER = 9
+    #: Free System RAM by APP ID
+    FREE_SYSRAM_BY_APP_ID = 10
