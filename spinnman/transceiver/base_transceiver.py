@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=too-many-arguments
 from collections import defaultdict
 import io
 import os
@@ -45,9 +44,10 @@ from spinnman.constants import (
     UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
     ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
     ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS)
+    BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS, ROUTER_REGISTER_REGISTERS)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
+    SpinnmanBootException,
     SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
     SpinnmanTimeoutException, SpinnmanGenericProcessException,
     SpinnmanUnexpectedResponseCodeException,
@@ -56,7 +56,9 @@ from spinnman.model import (
     CPUInfo, CPUInfos, DiagnosticFilter, ChipSummaryInfo,
     IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
 from spinnman.model.enums import (
-    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister)
+    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister,
+    DiagnosticFilterDefaultRoutingStatus, DiagnosticFilterPacketType,
+    DiagnosticFilterSource)
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
@@ -85,7 +87,7 @@ from spinnman.processes import (
     LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
     SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
     MostDirectConnectionSelector, ApplicationCopyRunProcess,
-    GetNCoresInStateProcess)
+    GetNCoresInStateProcess, SetMemoryProcess, ClearRoutesProcess)
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 from spinnman.utilities.utility_functions import get_vcpu_address
@@ -111,6 +113,8 @@ _FOUR_BYTES = struct.Struct("<BBBB")
 _ONE_WORD = struct.Struct("<I")
 _ONE_LONG = struct.Struct("<Q")
 _EXECUTABLE_ADDRESS = 0x67800000
+_ROUTER_DIAGNOSTIC_FILTER_CLEAR_ADDRESS = 0xf100002c
+_ROUTER_DIAGNOSTIC_FILTER_CLEAR_VALUE = 0xFFFFFFFF
 
 _POWER_CYCLE_WARNING = (
     "When power-cycling a board, it is recommended that you wait for 30 "
@@ -152,12 +156,15 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         "_width")
 
     def __init__(self, connections: Optional[Iterable[Connection]] = None,
-                 power_cycle: bool = False):
+                 power_cycle: bool = False,
+                 ensure_board_is_ready: bool = True):
         """
-        :param list(Connection) connections:
+        :param connections:
             An iterable of connections to the board.  If not specified, no
             communication will be possible until connections are found.
-        :param bool power_cycle: If True will power cycle the machine:
+        :param power_cycle: If True will power cycle the machine:
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
         :raise SpinnmanIOException:
             If there is an error communicating with the board, or if no
             connections to the board can be found (if connections is ``None``)
@@ -220,7 +227,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         self._machine_off = False
         if power_cycle:
             self._power_off_machine()
-        self._ensure_board_is_ready()
+        if ensure_board_is_ready:
+            self.ensure_board_is_ready()
+        else:
+            logger.warning("Transceiver / board not ready")
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)
@@ -237,10 +247,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         Attempts to get where_is_x_y info from the machine
 
         If no machine will do its best.
-
-        :param int x:
-        :param int y:
-        :rtype: str
         """
         try:
             if SpiNNManDataView.has_machine():
@@ -324,12 +330,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Check that the given connection to the given chip works.
 
-        :param ConnectionSelector connection_selector:
-            the connection selector to use
-        :param int chip_x: the chip x coordinate to try to talk to
-        :param int chip_y: the chip y coordinate to try to talk to
+        :param connection: the connection selector to use
         :return: True if a valid response is received, False otherwise
-        :rtype: ChipInfo or None
         """
         chip_x, chip_y = connection.chip_x, connection.chip_y
         connection_selector = FixedConnectionSelector(connection)
@@ -337,7 +339,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             try:
                 sender: SendSingleCommandProcess[GetChipInfoResponse] = \
                     SendSingleCommandProcess(connection_selector)
-                chip_info = sender.execute(  # pylint: disable=no-member
+                chip_info = sender.execute(
                     GetChipInfo(chip_x, chip_y)).chip_info
                 if not chip_info.is_ethernet_available:
                     time.sleep(0.1)
@@ -363,9 +365,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def _check_and_add_scamp_connections(
             self, x: int, y: int, ip_address: str) -> None:
         """
-        :param int x: X coordinate of target chip
-        :param int y: Y coordinate of target chip
-        :param str ip_address: IP address of target chip
+        :param x: X coordinate of target chip
+        :param y: Y coordinate of target chip
+        :param ip_address: IP address of target chip
 
         :raise SpinnmanIOException:
             If there is an error communicating with the board
@@ -430,7 +432,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         the chips in the machine.
 
         :return: The dimensions of the machine
-        :rtype: MachineDimensions
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidPacketException:
@@ -481,14 +482,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Get the version of SCAMP which is running on the board.
 
-        :param int chip_x: the chip's x coordinate to query for SCAMP version
-        :param int chip_y: the chip's y coordinate to query for SCAMP version
-        :param ConnectionSelector connection_selector:
+        :param chip_x: the chip's x coordinate to query for SCAMP version
+        :param chip_y: the chip's y coordinate to query for SCAMP version
+        :param connection_selector:
             the connection to send the SCAMP version
             or `None` (if `None` then a random SCAMP connection is used).
-        :param int n_retries:
+        :param n_retries:
         :return: The version identifier
-        :rtype: VersionInfo
         :raise SpinnmanIOException:
             If there is an error communicating with the board
         :raise SpinnmanInvalidParameterException:
@@ -507,8 +507,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def boot_led_0_value(self) -> int:
         """
         The Values to be set in SpinnakerBootMessages for led_0
-
-        :rtype int:
         """
         raise NotImplementedError
 
@@ -518,7 +516,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         Attempt to boot the board. No check is performed to see if the
         board is already booted.
 
-        :param dict(SystemVariableDefinition,object) extra_boot_values:
+        :param extra_boot_values:
             extra values to set during boot
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
@@ -557,8 +555,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Determine if the version of SCAMP is compatible with this transceiver.
 
-        :param tuple(int,int,int) version: The version to test
-        :rtype: bool
+        :param version: The version to test
         """
         # The major version must match exactly
         if version[0] != _SCAMP_VERSION[0]:
@@ -573,24 +570,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         # version is irrelevant
         return version[1] > _SCAMP_VERSION[1]
 
-    def _ensure_board_is_ready(
+    @overrides(Transceiver.ensure_board_is_ready)
+    def ensure_board_is_ready(
             self, n_retries: int = 5, extra_boot_values: Optional[Dict[
             SystemVariableDefinition, object]] = None) -> None:
-        """
-        Ensure that the board is ready to interact with this version of the
-        transceiver. Boots the board if not already booted and verifies that
-        the version of SCAMP running is compatible with this transceiver.
-
-        :param int n_retries: The number of times to retry booting
-        :param dict(SystemVariableDefinition,object) extra_boot_values:
-            Any additional or overwrite values to set during boot.
-            This should only be used for values which are not standard
-            based on the board version.
-        :raise SpinnmanIOException:
-            * If there is a problem booting the board
-            * If the version of software on the board is not compatible with
-              this transceiver
-        """
         logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None
@@ -612,9 +595,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             version_info = self._try_to_find_scamp_and_boot(
                 n_retries, extra_boot_values)
 
-        # verify that the version is the expected one for this transceiver
         if version_info is None:
-            raise SpinnmanIOException("Failed to communicate with the machine")
+            raise SpinnmanBootException()
+
+        # verify that the version is the expected one for this transceiver
         if (version_info.name != _SCAMP_NAME or
                 not self._is_scamp_version_compabible(
                     version_info.version_number)):
@@ -652,13 +636,12 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Try to detect if SCAMP is running, and if not, boot the machine.
 
-        :param int tries_to_go: how many attempts should be supported
-        :param dict(SystemVariableDefinition,object) extra_boot_values:
+        :param tries_to_go: how many attempts should be supported
+        :param extra_boot_values:
             Any additional or overwrite values to set during boot.
             This should only be used for values which are not standard
             based on the board version.
         :return: version info
-        :rtype: VersionInfo
         :raise SpinnmanIOException:
             If there is a problem communicating with the machine
         """
@@ -738,11 +721,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def _get_sv_data(
             self, x: int, y: int,
             data_item: SystemVariableDefinition) -> Union[int, bytes]:
-        """
-        :param int x:
-        :param int y:
-        :param SystemVariableDefinition data_item:
-        """
         addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
         if data_item.data_type.is_byte_array:
             size = cast(int, data_item.array_size)
@@ -762,10 +740,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             Conventionally, user_0 usually holds the address of the table of
             memory regions.
 
-        :param int p: The ID of the processor to get the user N address from
-        :param int user: The user "register" number to get the address for
+        :param p: The ID of the processor to get the user N address from
+        :param user: The user "register" number to get the address for
         :return: The address for user N register for this processor
-        :rtype: int
         """
         if user < 0 or user > CPU_MAX_USER:
             raise ValueError(
@@ -869,7 +846,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Power on the whole machine.
 
-        :rtype bool
         :return success of failure to power on machine
         """
         self._power(PowerCommand.POWER_ON)
@@ -880,7 +856,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Power off the whole machine.
 
-        :rtype bool
         :return success or failure to power off the machine
         """
         self._power(PowerCommand.POWER_OFF)
@@ -918,7 +893,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Send a power request to the machine.
 
-        :param PowerCommand power_command: The power command to send
+        :param power_command: The power command to send
         """
         if self._bmp_connection is None:
             raise NotImplementedError("can not power change without BMP")
@@ -985,6 +960,19 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                    user: UserRegister, value: int) -> None:
         addr = self.__get_user_register_address_from_core(p, user)
         self.write_memory(x, y, addr, int(value))
+
+    @overrides(Transceiver.write_user_many)
+    def write_user_many(
+            self, values: List[Tuple[int, int, int, UserRegister, int]],
+            description: Optional[str] = None) -> None:
+        values_with_addr: List[Tuple[int, int, int, int]] = [
+            (x, y, self.__get_user_register_address_from_core(
+                p, user), value)
+            for ((x, y, p, user, value)) in values]
+        process = SetMemoryProcess(self._scamp_connection_selector)
+        if description is None:
+            description = "Writing user register values"
+        process.set_values(values_with_addr, description)
 
     @overrides(Transceiver.read_memory)
     def read_memory(
@@ -1134,11 +1122,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Find a connection that matches the given board IP address.
 
-        :param str board_address:
+        :param board_address:
             The IP address of the Ethernet connection on the board
         :return: A connection for the given IP address, or `None` if no such
             connection exists
-        :rtype: SCAMPConnection
         """
         return self._udp_scamp_connections.get(board_address, None)
 
@@ -1175,13 +1162,12 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         Get the connections for talking to a board.
 
-        :param SCAMPConnection connection:
+        :param connection:
             Optional param that directly gives the connection to use.
-        :param str board_address:
+        :param board_address:
             Optional param that gives the address of the board to talk to.
         :return: List of length 1 or 0 (the latter only if the search for
             the given board address fails).
-        :rtype: list(SCAMPConnection)
         """
         if connection is not None:
             return [connection]
@@ -1252,6 +1238,14 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             logger.info(self._where_is_xy(x, y))
             raise
 
+    @overrides(Transceiver.malloc_sdram_multi)
+    def malloc_sdram_multi(
+            self, allocations: List[Tuple[int, int, int, int, int]]
+            ) -> List[int]:
+        process = MallocSDRAMProcess(self._scamp_connection_selector)
+        process.malloc_sdram_multi(allocations)
+        return process.base_addresses
+
     @overrides(Transceiver.load_multicast_routes)
     def load_multicast_routes(
             self, x: int, y: int, routes: Collection[MulticastRoutingEntry],
@@ -1300,12 +1294,18 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             raise
 
     @overrides(Transceiver.clear_multicast_routes)
-    def clear_multicast_routes(self, x: int, y: int) -> None:
-        try:
-            self._call(RouterClear(x, y))
-        except Exception:
-            logger.info(self._where_is_xy(x, y))
-            raise
+    def clear_multicast_routes(self, xy: Optional[XY] = None) -> None:
+        if xy is None:
+            process = ClearRoutesProcess(self._scamp_connection_selector)
+            process.clear_routes(
+                list(SpiNNManDataView.get_machine().chip_coordinates))
+        else:
+            x, y = xy
+            try:
+                self._call(RouterClear(x, y))
+            except Exception:
+                logger.info(self._where_is_xy(x, y))
+                raise
 
     @overrides(Transceiver.get_router_diagnostics)
     def get_router_diagnostics(self, x: int, y: int) -> RouterDiagnostics:
@@ -1356,14 +1356,25 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             (x, y, 0), memory_position, _ONE_WORD.pack(data_to_send)))
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
-    def clear_router_diagnostic_counters(self, x: int, y: int) -> None:
-        try:
-            # Clear all
-            self._call(WriteMemory(
-                (x, y, 0), 0xf100002c, _ONE_WORD.pack(0xFFFFFFFF)))
-        except Exception:
-            logger.info(self._where_is_xy(x, y))
-            raise
+    def clear_router_diagnostic_counters(
+            self, xy: Optional[XY] = None) -> None:
+        if xy is None:
+            process = SetMemoryProcess(self.get_scamp_connection_selector())
+            process.set_values(
+                [(x, y, _ROUTER_DIAGNOSTIC_FILTER_CLEAR_ADDRESS,
+                  _ROUTER_DIAGNOSTIC_FILTER_CLEAR_VALUE)
+                 for x, y in SpiNNManDataView.get_machine().chip_coordinates],
+                "Clearing router diagnostic counters")
+        else:
+            try:
+                # Clear all
+                x, y = xy
+                self._call(WriteMemory(
+                    (x, y, 0), _ROUTER_DIAGNOSTIC_FILTER_CLEAR_ADDRESS,
+                    _ONE_WORD.pack(_ROUTER_DIAGNOSTIC_FILTER_CLEAR_VALUE)))
+            except Exception:
+                logger.info(self._where_is_xy(x, y))
+                raise
 
     @overrides(Transceiver.close)
     def close(self) -> None:
@@ -1401,6 +1412,50 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 destination_port=port.value, destination_cpu=p,
                 destination_chip_x=x, destination_chip_y=y),
             data=_ONE_WORD.pack(cmd.value)))
+
+    @overrides(Transceiver.reset_routing)
+    def reset_routing(self) -> None:
+
+        # Sets user 2 to count non-local default routed packets
+        filter_2 = DiagnosticFilter(
+            enable_interrupt_on_counter_event=False,
+            match_emergency_routing_status_to_incoming_packet=False,
+            destinations=[],
+            sources=[DiagnosticFilterSource.NON_LOCAL],
+            payload_statuses=[],
+            default_routing_statuses=[
+                DiagnosticFilterDefaultRoutingStatus.DEFAULT_ROUTED],
+            emergency_routing_statuses=[],
+            packet_types=[DiagnosticFilterPacketType.MULTICAST])
+
+        # Set the router diagnostic for user 3 to catch local default routed
+        # packets. This can only occur when the source router has no router
+        # entry, and therefore should be detected as a bad dropped packet.
+        filter_3 = DiagnosticFilter(
+            enable_interrupt_on_counter_event=False,
+            match_emergency_routing_status_to_incoming_packet=False,
+            destinations=[],
+            sources=[DiagnosticFilterSource.LOCAL],
+            payload_statuses=[],
+            default_routing_statuses=[
+                DiagnosticFilterDefaultRoutingStatus.DEFAULT_ROUTED],
+            emergency_routing_statuses=[],
+            packet_types=[DiagnosticFilterPacketType.MULTICAST])
+
+        default_filters = {
+            ROUTER_REGISTER_REGISTERS.USER_2.value: filter_2,
+            ROUTER_REGISTER_REGISTERS.USER_3.value: filter_3}
+        self._do_reset_routing(default_filters)
+
+    def _do_reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+        machine = SpiNNManDataView().get_machine()
+        self.clear_router_diagnostic_counters()
+        self.clear_multicast_routes()
+        for x, y in machine.chip_coordinates:
+            for position, diagnostic_filter in custom_filters.items():
+                self.set_router_diagnostic_filter(
+                    x, y, position, diagnostic_filter)
 
     def __str__(self) -> str:
         addr = self._scamp_connections[0].remote_ip_address

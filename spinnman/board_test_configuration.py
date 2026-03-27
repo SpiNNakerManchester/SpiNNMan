@@ -43,7 +43,6 @@ class BoardTestConfiguration(object):
         Sets the version field in the configs.
 
         :param version: Version for a virtual if no physical board found
-        :type version: into or None
         :raises unittest.SkipTest:
             If no physical machine found and no version provided
         """

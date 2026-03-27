@@ -36,7 +36,7 @@ class AppStop(AbstractSCPRequest[CheckOKResponse]):
 
     def __init__(self, app_id: int):
         """
-        :param int app_id: The ID of the application, between 0 and 255
+        :param app_id: The ID of the application, between 0 and 255
         """
         super().__init__(
             SDPHeader(

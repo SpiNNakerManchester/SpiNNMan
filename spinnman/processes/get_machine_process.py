@@ -16,13 +16,12 @@ from collections import defaultdict
 from contextlib import suppress
 import logging
 import functools
-from os.path import join
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_int_or_none, get_config_str_or_none)
-from spinn_utilities.data import UtilsDataView
+    get_config_bool, get_config_int_or_none, get_config_str_or_none,
+    get_report_path)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
@@ -53,8 +52,6 @@ from .abstract_multi_connection_process_connection_selector import \
 
 logger = FormatAdapter(logging.getLogger(__name__))
 
-REPORT_FILE = "Ignores_report.rpt"
-
 P_TO_V = SystemVariableDefinition.physical_to_virtual_core_map
 V_TO_P = SystemVariableDefinition.virtual_to_physical_core_map
 P_TO_V_ADDR = SYSTEM_VARIABLE_BASE_ADDRESS + P_TO_V.offset
@@ -83,7 +80,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
 
@@ -106,10 +103,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         Creates a chip from a ChipSummaryInfo structure.
 
-        :param ChipSummaryInfo chip_info:
+        :param chip_info:
             The ChipSummaryInfo structure to create the chip from
         :return: The created chip
-        :rtype: ~spinn_machine.Chip
         """
         # Keep track of progress
         self._progress = None
@@ -157,11 +153,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _make_router(
             self, chip_info: ChipSummaryInfo, machine: Machine) -> Router:
-        """
-        :param ChipSummaryInfo chip_info:
-        :param ~spinn_machine.Machine machine:
-        :rtype: ~spinn_machine.Router
-        """
         links = list()
         for link in chip_info.working_links:
             dest_xy = machine.xy_over_link(chip_info.x, chip_info.y, link)
@@ -180,18 +171,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def __receive_p2p_data(
             self, column: int, scp_read_response: Response) -> None:
-        """
-        :param int column:
-        :param Response scp_read_response:
-        """
         self._p2p_column_data[column] = (
             scp_read_response.data, scp_read_response.offset)
 
     def _receive_chip_info(
             self, scp_read_chip_info_response: GetChipInfoResponse) -> None:
-        """
-        :param GetChipInfoResponse scp_read_chip_info_response:
-        """
         chip_info = scp_read_chip_info_response.chip_info
         self._chip_info[chip_info.x, chip_info.y] = chip_info
         if self._progress is not None:
@@ -202,7 +186,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         Receive the physical-to-virtual and virtual-to-physical maps.
 
-        :param Response scp_read_response:
+        :param scp_read_response:
         """
         data = scp_read_response.data
         off = scp_read_response.offset
@@ -214,10 +198,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _receive_error(
             self, request: AbstractSCPRequest, exception: Exception,
             tb: TracebackType, connection: SCAMPConnection) -> None:
-        """
-        :param AbstractSCPRequest request:
-        :param Exception exception:
-        """
         # If we get an ReadLink with a
         # SpinnmanUnexpectedResponseCodeException, this is a failed link
         # and so can be ignored
@@ -230,11 +210,11 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             self, boot_x: int, boot_y: int,
             width: int, height: int) -> Machine:
         """
-        :param int boot_x:
-        :param int boot_y:
-        :param int width:
-        :param int height:
-        :rtype: ~spinn_machine.Machine
+        :param boot_x:
+        :param boot_y:
+        :param width:
+        :param height:
+        :returns: The Machine read from the boot Chip
         """
         # Get the P2P table - 8 entries are packed into each 32-bit word
         p2p_column_bytes = P2PTable.get_n_column_bytes(height)
@@ -281,10 +261,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         return self._fill_machine(machine)
 
     def _fill_machine(self, machine: Machine) -> Machine:
-        """
-        :param ~spinn_machine.Machine machine:
-        :rtype: ~spinn_machine.Machine
-        """
         for chip_info in sorted(
                 self._chip_info.values(), key=lambda chip: (chip.x, chip.y)):
             if (chip_info.ethernet_ip_address is not None and
@@ -292,7 +268,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                      or chip_info.y != chip_info.nearest_ethernet_y)):
                 if get_config_bool("Machine", "ignore_bad_ethernets"):
                     logger.warning(
-                        "Chip {}:{} claimed it has ip address: {}. "
+                        "Chip {}:{} claimed it has IP address: {}. "
                         "This ip will not be used.",
                         chip_info.x, chip_info.y,
                         chip_info.ethernet_ip_address)
@@ -300,7 +276,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 else:
                     logger.warning(
                         "Not using chip {}:{} as it has an unexpected "
-                        "ip address: {}", chip_info.x, chip_info.y,
+                        "IP address: {}", chip_info.x, chip_info.y,
                         chip_info.ethernet_ip_address)
                     continue
 
@@ -325,8 +301,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         Logs all actions except for ignores with unused IP addresses
 
-        :param ~spinn_machine.Machine machine:
-            An empty machine to handle wrap-arounds
+        :param machine: An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreLink.parse_string(
                 get_config_str_or_none("Machine", "down_links")):
@@ -373,8 +348,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         Converts any physical  cores to virtual ones.
         Core numbers <= 0 are assumed to be 0 - physical_id
 
-        :param ~spinn_machine.Machine machine:
-            An empty machine to handle wrap-arounds
+        :param machine: An empty machine to handle wrap-arounds
         """
         # Convert by IP to global
         for ignore in IgnoreCore.parse_string(
@@ -398,8 +372,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         Logs all actions except for ignores with unused IP addresses
 
-        :param ~spinn_machine.Machine machine:
-            An empty machine to handle wrap-arounds
+        :param machine: An empty machine to handle wrap-arounds
         """
         for ignore in IgnoreChip.parse_string(
                 get_config_str_or_none("Machine", "down_chips")):
@@ -428,13 +401,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
     def _ignores_local_to_global(
             self, local_x: int, local_y: int, ip_address: Optional[str],
             machine: Machine) -> Optional[XY]:
-        """
-        :param int local_x:
-        :param int local_y:
-        :param str ip_address:
-        :param ~spinn_machine.Machine machine:
-        :rtype: tuple(int,int)
-        """
         if ip_address is None:
             global_xy = (local_x, local_y)
         else:
@@ -460,10 +426,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             return None
 
     def _ethernet_by_ipaddress(self, ip_address: str) -> Optional[XY]:
-        """
-        :param str ip_address:
-        :rtype: tuple(int,int)
-        """
         if self._ethernets is None:
             self._ethernets = dict()
             for chip_info in self._chip_info.values():
@@ -473,11 +435,6 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         return self._ethernets.get(ip_address, None)
 
     def _get_virtual_p(self, xy: XY, p: int) -> Optional[int]:
-        """
-        :param tuple(int,int) xy:
-        :param int p:
-        :rtype: int
-        """
         if p > 0:
             self._report_ignore("On chip {} ignoring core {}", xy, p)
             return p
@@ -507,9 +464,9 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         fastest but is the cleanest and safest for code that in default
         conditions is never run.
 
-        :param str message:
+        :param message:
         """
         full_message = message.format(*args) + "\n"
-        report_file = join(UtilsDataView.get_run_dir_path(), REPORT_FILE)
+        report_file = get_report_path("path_ignores_report")
         with open(report_file, "a", encoding="utf-8") as r_file:
             r_file.write(full_message)

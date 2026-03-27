@@ -76,10 +76,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
     @abstractmethod
     def area(self) -> Tuple[int, int]:
         """
-        Area of machine, in boards.
-
-        :return: width, height
-        :rtype: tuple(int,int)
+        The width and height of machine
         """
         raise NotImplementedError
 

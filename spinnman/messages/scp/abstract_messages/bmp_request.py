@@ -41,14 +41,12 @@ class BMPRequest(  # pylint: disable=abstract-method
                  data: Optional[bytes] = None):
         """
         :param boards: The board or boards to be addressed by this request
-        :type boards: int or list(int) or tuple(int)
-        :param SCPRequestHeader scp_request_header: The SCP request header
-        :param int argument_1: The optional first argument
-        :param int argument_2: The optional second argument
-        :param int argument_3: The optional third argument
-        :param bytes data: The optional data to be sent
+        :param scp_request_header: The SCP request header
+        :param argument_1: The optional first argument
+        :param argument_2: The optional second argument
+        :param argument_3: The optional third argument
+        :param data: The optional data to be sent
         """
-        # pylint: disable=too-many-arguments
         sdp_header = SDPHeader(
             flags=SDPFlag.REPLY_EXPECTED, destination_port=0,
             destination_cpu=BMPRequest.get_first_board(boards),
@@ -60,7 +58,8 @@ class BMPRequest(  # pylint: disable=abstract-method
     @staticmethod
     def get_first_board(boards: Boards) -> int:
         """
-        Get the first board ID given a board ID or collection of board IDs.
+        :returns:
+           The first board ID given a board ID or collection of board IDs.
         """
         if isinstance(boards, int):
             return boards
@@ -70,6 +69,12 @@ class BMPRequest(  # pylint: disable=abstract-method
     def get_board_mask(boards: Boards) -> int:
         """
         Get the board mask given a board ID or collection of board IDs.
+
+        ..note:: This methods is only called by deprecated functions.
+           Unsure if it will produce the correct result for multiple boards
+
+        :returns: The board ID as a bit mask,
+           or a sum of bitmaps for multiple boards
         """
         if isinstance(boards, int):
             return 1 << boards

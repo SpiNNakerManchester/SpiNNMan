@@ -31,7 +31,7 @@ class Listenable(Generic[T], metaclass=AbstractBase):
     @abstractmethod
     def get_receive_method(self) -> Callable[[], T]:
         """
-        Get the method that receives for this connection.
+        :returns: The method that receives this connection.
         """
         raise NotImplementedError
 
@@ -40,9 +40,8 @@ class Listenable(Generic[T], metaclass=AbstractBase):
         """
         Determines if there is an SCP packet to be read without blocking.
 
-        :param int timeout:
+        :param timeout:
             The time to wait before returning if the connection is not ready
         :return: True if there is an SCP packet to be read
-        :rtype: bool
         """
         raise NotImplementedError

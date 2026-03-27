@@ -25,6 +25,12 @@ class BMPConnectionData(object):
 
     def __init__(self, ip_address: str, boards: Sequence[int],
                  port_num: Optional[int]):
+        """
+
+        :param ip_address: The IP address of the BMP.
+        :param boards: The boards to be addressed.
+        :param port_num: The port number associated with this BMP connection.
+        """
         self._ip_address = ip_address
         self._boards = tuple(boards)
         self._port_num = port_num
@@ -33,8 +39,6 @@ class BMPConnectionData(object):
     def ip_address(self) -> str:
         """
         The IP address of the BMP.
-
-        :rtype: str
         """
         return self._ip_address
 
@@ -42,8 +46,6 @@ class BMPConnectionData(object):
     def boards(self) -> Sequence[int]:
         """
         The boards to be addressed.
-
-        :rtype: iterable(int)
         """
         return self._boards
 
@@ -51,8 +53,6 @@ class BMPConnectionData(object):
     def port_num(self) -> Optional[int]:
         """
         The port number associated with this BMP connection.
-
-        :return: The port number
         """
         return self._port_num
 

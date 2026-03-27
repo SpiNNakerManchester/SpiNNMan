@@ -28,7 +28,7 @@ class BMPGetVersion(BMPRequest['_BMPVersion']):
 
     def __init__(self, board: int):
         """
-        :param int board: The board to get the version from
+        :param board: The board to get the version from
         :raise SpinnmanInvalidParameterException:
             * If the chip coordinates are out of range
             * If the processor is out of range
@@ -47,9 +47,5 @@ class _BMPVersion(BMPResponse[VersionInfo]):
 
     @property
     def version_info(self) -> VersionInfo:
-        """
-        The version information received.
-
-        :rtype: VersionInfo
-        """
+        """ The version information received. """
         return self._value

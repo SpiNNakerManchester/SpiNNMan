@@ -36,16 +36,15 @@ class FloodFillData(AbstractSCPRequest[CheckOKResponse]):
             self, nearest_neighbour_id: int, block_no: int, base_address: int,
             data: bytes, offset: int = 0, length: Optional[int] = None):
         """
-        :param int nearest_neighbour_id:
+        :param nearest_neighbour_id:
             The ID of the packet, between 0 and 127
-        :param int block_no: Which block this block is, between 0 and 255
-        :param int base_address:
+        :param block_no: Which block this block is, between 0 and 255
+        :param base_address:
             The base address where the data is to be loaded
-        :param bytes data:
+        :param data:
             The data to load, between 4 and 256 bytes and the size must be
             divisible by 4
         """
-        # pylint: disable=too-many-arguments
         self._offset = offset
         self._data_to_write = data
         if length is None:

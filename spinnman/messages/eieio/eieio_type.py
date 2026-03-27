@@ -29,8 +29,9 @@ class EIEIOType(Enum):
     #: Indicates that data is keys and payloads of 32 bits.
     KEY_PAYLOAD_32_BIT = (3, 4, 4)
 
-    def __new__(cls, encoded_value: int, key_bytes: int,
-                payload_bytes: int) -> 'EIEIOType':
+    def __new__(cls, encoded_value: int, key_bytes: int = 0,
+                payload_bytes: int = 0) -> 'EIEIOType':
+        # Default values just to make pylint SHUT UP!
         obj = object.__new__(cls)
         obj._value_ = encoded_value
         return obj
@@ -39,6 +40,12 @@ class EIEIOType(Enum):
                  # Default values just to make mypy SHUT UP!
                  # https://github.com/python/mypy/issues/10573
                  key_bytes: int = 0, payload_bytes: int = 0):
+        """
+        :param encoded_value: The encoded value representing the type.
+        :param key_bytes: The number of bytes used by each key element.
+        :param payload_bytes:
+            The number of bytes used by each payload element.
+        """
         self._encoded_value = encoded_value
         self._key_bytes = key_bytes
         self._payload_bytes = payload_bytes
@@ -52,27 +59,17 @@ class EIEIOType(Enum):
 
     @property
     def key_bytes(self) -> int:
-        """
-        The number of bytes used by each key element.
-
-        :rtype: int
-        """
+        """ The number of bytes used by each key element. """
         return self._key_bytes
 
     @property
     def payload_bytes(self) -> int:
-        """
-        The number of bytes used by each payload element.
-
-        :rtype: int
-        """
+        """ The number of bytes used by each payload element. """
         return self._payload_bytes
 
     @property
     def max_value(self) -> int:
         """
         The maximum value of the key or payload (if there is a payload).
-
-        :rtype: int
         """
         return (1 << (self._key_bytes * 8)) - 1

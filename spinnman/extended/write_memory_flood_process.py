@@ -28,6 +28,10 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
     __slots__ = ()
 
     def __init__(self, next_connection_selector: ConnectionSelector):
+        """
+        :param next_connection_selector:
+            How to choose the connection.
+        """
         AbstractMultiConnectionProcess.__init__(
             self, next_connection_selector, n_channels=3,
             intermediate_channel_waits=2)
@@ -48,14 +52,14 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             self, nearest_neighbour_id: int, base_address: int,
             data: bytes, offset: int, n_bytes: Optional[int] = None) -> None:
         """
-        :param int nearest_neighbour_id:
-        :param int base_address:
+        Currently not used!
+
+        :param nearest_neighbour_id:
+        :param base_address:
         :param data:
-        :type data: bytes or bytearray
-        :param int offset:
-        :param int n_bytes:
+        :param offset:
+        :param n_bytes:
         """
-        # pylint: disable=too-many-arguments
         if n_bytes is None:
             n_bytes = len(data)
         self._start_flood_fill(n_bytes, nearest_neighbour_id)
@@ -82,11 +86,12 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
             self, nearest_neighbour_id: int, base_address: int,
             reader: BinaryIO, n_bytes: int) -> None:
         """
-        :param int nearest_neighbour_id:
-        :param int base_address:
+        Currently not used!
+
+        :param nearest_neighbour_id:
+        :param base_address:
         :param reader:
-        :type reader: ~io.RawIOBase or ~io.BufferedIOBase
-        :param int n_bytes:
+        :param n_bytes:
         """
         self._start_flood_fill(n_bytes, nearest_neighbour_id)
 

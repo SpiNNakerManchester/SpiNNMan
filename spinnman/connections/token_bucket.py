@@ -29,8 +29,8 @@ class TokenBucket(object):
 
     def __init__(self, tokens: int, fill_rate: float):
         """
-        :param int tokens: the total tokens in the bucket
-        :param float fill_rate:
+        :param tokens: the total tokens in the bucket
+        :param fill_rate:
             the rate in tokens/second that the bucket will be refilled.
         """
         self._capacity = float(tokens)
@@ -40,8 +40,7 @@ class TokenBucket(object):
 
     def consume(self, tokens: int, block: bool = True) -> bool:
         """
-        Consume tokens from the bucket. Returns True if there were
-        sufficient tokens.
+        Consume tokens from the bucket.
 
         If there are not enough tokens and block is True, sleeps until the
         bucket is replenished enough to satisfy the deficiency.
@@ -50,9 +49,9 @@ class TokenBucket(object):
 
         It is an error to consume more tokens than the bucket capacity.
 
-        :param int tokens:
-        :param bool block:
-        :rtype: bool
+        :param tokens:
+        :param block:
+        :returns: True if there were sufficient tokens.
         """
         while block and tokens > self.tokens:
             deficit = tokens - self._tokens

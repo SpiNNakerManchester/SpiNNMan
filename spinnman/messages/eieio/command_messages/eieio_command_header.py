@@ -30,7 +30,6 @@ class EIEIOCommandHeader(object):
         """
 
         :param command:
-        :type command: int or Enum
         """
         if isinstance(command, Enum):
             command_value = command.value
@@ -45,10 +44,7 @@ class EIEIOCommandHeader(object):
     @property
     def command(self) -> int:
         """
-        The command/ value of the command passed into the init.
-
-        :rtype: int
-        """
+        The command/ value of the command passed into the init. """
         return self._command
 
     @staticmethod
@@ -57,10 +53,8 @@ class EIEIOCommandHeader(object):
         Read an EIEIO command header from a byte-string.
 
         :param data: The byte-string to read the data from
-        :type data: bytes or bytearray
-        :param int offset: The offset where the valid data starts
+        :param offset: The offset where the valid data starts
         :return: an EIEIO command header
-        :rtype: EIEIOCommandHeader
         :raise SpinnmanIOException:
             If there is an error reading from the reader
         :raise SpinnmanInvalidParameterException:
@@ -73,9 +67,5 @@ class EIEIOCommandHeader(object):
 
     @property
     def bytestring(self) -> bytes:
-        """
-        The byte-string of the header.
-
-        :rtype: bytes
-        """
+        """ The byte-string of the header. """
         return _ONE_SHORT.pack(0 << 15 | 1 << 14 | self._command)

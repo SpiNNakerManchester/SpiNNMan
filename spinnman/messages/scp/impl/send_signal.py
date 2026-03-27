@@ -38,8 +38,8 @@ class SendSignal(AbstractSCPRequest[CheckOKResponse]):
 
     def __init__(self, app_id: int, signal: Signal):
         """
-        :param int app_id: The ID of the application, between 0 and 255
-        :param Signal signal: The signal to send
+        :param app_id: The ID of the application, between 0 and 255
+        :param signal: The signal to send
         :raise SpinnmanInvalidParameterException: If app_id is out of range
         """
 

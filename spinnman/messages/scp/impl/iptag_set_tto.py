@@ -32,9 +32,9 @@ class IPTagSetTTO(AbstractSCPRequest[IPTagGetInfoResponse]):
     def __init__(self, x: int, y: int,
                  tag_timeout: IPTAG_TIME_OUT_WAIT_TIMES):
         """
-        :param int x: The x-coordinate of the chip to run on, between 0 and 255
-        :param int y: The y-coordinate of the chip to run on, between 0 and 255
-        :param IPTAG_TIME_OUT_WAIT_TIMES tag_timeout: The timeout value
+        :param x: The x-coordinate of the chip to run on, between 0 and 255
+        :param y: The y-coordinate of the chip to run on, between 0 and 255
+        :param tag_timeout: The timeout value
         """
         super().__init__(
             SDPHeader(flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

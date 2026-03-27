@@ -29,14 +29,15 @@ class KeyDataElement(AbstractDataElement):
     __slots__ = "_key",
 
     def __init__(self, key: int):
+        """
+        :param key: The key to use
+        """
         self._key = key
 
     @property
     def key(self) -> int:
         """
         The key value passed into the init.
-
-        :rtype: int
         """
         return self._key
 

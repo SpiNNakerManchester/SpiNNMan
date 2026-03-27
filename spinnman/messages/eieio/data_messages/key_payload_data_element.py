@@ -33,35 +33,29 @@ class KeyPayloadDataElement(AbstractDataElement):
 
     def __init__(
             self, key: int, payload: int, payload_is_timestamp: bool = False):
+        """
+
+        :param key: The ID for this message
+        :param payload: The data sent
+        :param payload_is_timestamp: Flag to identify if data is a timestamp
+        """
         self._key = key
         self._payload = payload
         self._payload_is_timestamp = payload_is_timestamp
 
     @property
     def key(self) -> int:
-        """
-        The key value passed into the init.
-
-        :rtype: int
-        """
+        """ The key value passed into the init. """
         return self._key
 
     @property
     def payload(self) -> int:
-        """
-        Gets the payload value passed into the init.
-
-        :rtype: int
-        """
+        """ Gets the payload value passed into the init. """
         return self._payload
 
     @property
     def payload_is_timestamp(self) -> bool:
-        """
-        Gets the payload_is_timestamp passed into the init.
-
-        :rtype: int
-        """
+        """ Gets the payload_is_timestamp passed into the init. """
         return self._payload_is_timestamp
 
     @overrides(AbstractDataElement.get_bytestring)

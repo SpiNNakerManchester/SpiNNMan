@@ -16,7 +16,7 @@ import functools
 from typing import cast
 from spinn_machine import CoreSubsets
 from spinnman.model import CPUInfos
-from spinnman.model.cpu_info import CPUInfo, _vcpu_t, _VCPU_PATTERN
+from spinnman.model.cpu_info import CPUInfo, VcpuT, _VCPU_PATTERN
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.utilities.utility_functions import get_vcpu_address
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
@@ -35,18 +35,19 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
 
     def __init__(self, connection_selector: ConnectionSelector):
         """
-        :param ConnectionSelector connection_selector:
+        :param connection_selector:
         """
         super().__init__(connection_selector)
         self.__cpu_infos = CPUInfos()
 
     def _is_desired(self, cpu_info: CPUInfo) -> bool:
-        # pylint: disable=unused-argument
+        # cpu_info defined as used in subclasses
+        _ = cpu_info
         return True
 
     def __handle_response(
             self, x: int, y: int, p: int, response: Response) -> None:
-        cpu_data = cast(_vcpu_t, _VCPU_PATTERN.unpack_from(
+        cpu_data = cast(VcpuT, _VCPU_PATTERN.unpack_from(
             response.data, response.offset))
         cpu_info = CPUInfo(x, y, p, cpu_data)
         if self._is_desired(cpu_info):
@@ -54,8 +55,8 @@ class GetCPUInfoProcess(AbstractMultiConnectionProcess[Response]):
 
     def get_cpu_info(self, core_subsets: CoreSubsets) -> CPUInfos:
         """
-        :param ~spinn_machine.CoreSubsets core_subsets:
-        :rtype: CPUInfos
+        :param core_subsets:
+        :returns: The CpuInfos for the requested cores.
         """
         with self._collect_responses():
             for core_subset in core_subsets:

@@ -14,11 +14,15 @@
 from __future__ import annotations
 import logging
 from typing import BinaryIO, Optional, Tuple, Union, TYPE_CHECKING
+
 from spinn_utilities.log import FormatAdapter
 from spinn_machine.data import MachineDataView
+
 from spinnman.utilities.appid_tracker import AppIdTracker
+
 if TYPE_CHECKING:
     from spinnman.processes import MostDirectConnectionSelector
+    from spinnman.spalloc import (MachineAllocationController, SpallocJob)
     from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
@@ -44,9 +48,12 @@ class _SpiNNManDataModel(object):
 
     __slots__ = [
         # Data values cached
+        "_allocation_controller",
         "_app_id",
         "_app_id_tracker",
+        "_ipaddress",
         "_scamp_connection_selector",
+        "_spalloc_job",
         "_transceiver",
     ]
 
@@ -69,11 +76,15 @@ class _SpiNNManDataModel(object):
         """
         Clears out all data that should change after a reset and graph change.
         """
+        self._allocation_controller: Optional[
+            MachineAllocationController] = None
         self._app_id: Optional[int] = None
         self._app_id_tracker: Optional[AppIdTracker] = None
+        self._ipaddress: Optional[str] = None
         self._soft_reset()
         self._scamp_connection_selector: Optional[
             MostDirectConnectionSelector] = None
+        self._spalloc_job: Optional[SpallocJob] = None
         if self._transceiver:
             try:
                 self._transceiver.close()
@@ -103,6 +114,36 @@ class SpiNNManDataView(MachineDataView):
     __data = _SpiNNManDataModel()
     __slots__ = ()
 
+    # _allocation_controller
+    @classmethod
+    def has_allocation_controller(cls) -> bool:
+        """
+        Reports if an AllocationController object has already been set.
+
+        :return: True if and only if an AllocationController has been added and
+            not reset.
+        """
+        return cls.__data._allocation_controller is not None
+
+    @classmethod
+    def get_allocation_controller(cls) -> MachineAllocationController:
+        """
+        :returns: The allocation controller if known.
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the buffer manager unavailable
+        """
+        if cls.__data._allocation_controller is None:
+            raise cls._exception("allocation_controller")
+
+        return cls.__data._allocation_controller
+
+    @classmethod
+    def get_spalloc_job(cls) -> Optional[SpallocJob]:
+        """
+        :returns: The Spalloc job, if there is one.
+        """
+        return cls.__data._spalloc_job
+
     # transceiver methods
 
     @classmethod
@@ -110,7 +151,7 @@ class SpiNNManDataView(MachineDataView):
         """
         Reports if a transceiver is currently set.
 
-        :rtype: bool
+        :returns: True if a transceiver is available.
         """
         return cls.__data._transceiver is not None
 
@@ -119,7 +160,7 @@ class SpiNNManDataView(MachineDataView):
         """
         The transceiver description.
 
-        :rtype: ~spinnman.transceiver.Transceiver
+        :returns: A previously created transceiver.
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """
@@ -136,18 +177,17 @@ class SpiNNManDataView(MachineDataView):
 
         Syntactic sugar for `get_transceiver().read_memory()`.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip where the memory is to be read from
-        :param int y:
+        :param y:
             The y-coordinate of the chip where the memory is to be read from
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory to be read starts
-        :param int length: The length of the data to be read in bytes
-        :param int cpu:
+        :param length: The length of the data to be read in bytes
+        :param cpu:
             the core ID used to read the memory of; should usually be 0 when
             reading from SDRAM, but may be other values when reading from DTCM.
         :return: A bytearray of data read
-        :rtype: bytes
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         :raise SpinnmanIOException:
@@ -177,11 +217,11 @@ class SpiNNManDataView(MachineDataView):
 
         Syntactic sugar for `get_transceiver().write_memory()`.
 
-        :param int x:
+        :param x:
             The x-coordinate of the chip where the memory is to be written to
-        :param int y:
+        :param y:
             The y-coordinate of the chip where the memory is to be written to
-        :param int base_address:
+        :param base_address:
             The address in SDRAM where the region of memory is to be written
         :param data: The data to write.  Should be one of the following:
 
@@ -189,9 +229,7 @@ class SpiNNManDataView(MachineDataView):
             * A bytearray/bytes
             * A single integer - will be written in little-endian byte order
             * A filename of a data file
-        :type data:
-            ~io.RawIOBase or bytes or bytearray or int or str
-        :param int n_bytes:
+        :param n_bytes:
             The amount of data to be written in bytes.  If not specified:
 
             * If `data` is an RawIOBase, an error is raised
@@ -199,8 +237,9 @@ class SpiNNManDataView(MachineDataView):
               the byte string will be used
             * If `data` is an int, 4 will be used
             * If `data` is a str, the length of the file will be used
-        :param int offset: The offset from which the valid data begins
-        :param int cpu: The optional CPU to write to
+        :param offset: The offset from which the valid data begins
+        :param cpu: The optional CPU to write to
+        :return: The number of bytes written, the checksum (0 if get_sum=False)
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         :raise SpinnmanIOException:
@@ -231,7 +270,11 @@ class SpiNNManDataView(MachineDataView):
 
         This method will create a new app_id if one has not yet been created.
 
-        :rtype: int
+         .. note::
+            Only returns IDs obtained via this method not by direct calls to
+            get_new_id
+
+        :returns: The last ID provided (or a new ID if no previous id)
         """
         if cls.__data._app_id is None:
             cls.__data._app_id = cls.get_new_id()
@@ -242,9 +285,12 @@ class SpiNNManDataView(MachineDataView):
         """
         Gets a new id from the current `app_id_tracker`
 
-        previously `get_transceiver().app_id_tracker().get_new_id()`
+        previously `get_transceiver().app_id_tracker().get_new_id()
 
-        :rtype: AppIdTracker
+        .. note::
+            Ids obtained this way are not cached so not returned by get_app_id
+
+        :returns: A new unallocated ID
         """
         if cls.__data._app_id_tracker is None:
             cls.__data._app_id_tracker = AppIdTracker()
@@ -257,7 +303,7 @@ class SpiNNManDataView(MachineDataView):
 
         previously `get_transceiver().app_id_tracker().free_id(app_id)`
 
-        :param int app_id:
+        :param app_id:
         """
         if cls.__data._app_id_tracker:
             cls.__data._app_id_tracker.free_id(app_id)
@@ -269,7 +315,7 @@ class SpiNNManDataView(MachineDataView):
 
         Syntactic sugar for `get_transceiver().get_scamp_connection_selector()`
 
-        :rtype: MostDirectConnectionSelector
+        :returns: the most direct scamp connections
         :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
             If the transceiver is currently unavailable
         """
@@ -277,3 +323,26 @@ class SpiNNManDataView(MachineDataView):
             cls.__data._scamp_connection_selector =\
                 cls. get_transceiver().get_scamp_connection_selector()
         return cls.__data._scamp_connection_selector
+
+    # IP address
+
+    @classmethod
+    def has_ipaddress(cls) -> bool:
+        """
+        :returns: True if the IP address of the board with chip 0,0 is known.
+        """
+        return cls.__data._ipaddress is not None
+
+    @classmethod
+    def get_ipaddress(cls) -> str:
+        """
+        :returns:
+            The IP address of the board with chip 0,0 if it has been set.
+        :raises ~spinn_utilities.exceptions.SpiNNUtilsException:
+            If the IP address is currently unavailable
+        """
+        if cls.__data._ipaddress is None:
+            if cls._is_mocked():
+                return "127.0.0.1"
+            raise cls._exception("ipaddress")
+        return cls.__data._ipaddress

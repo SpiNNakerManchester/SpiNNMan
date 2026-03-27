@@ -22,13 +22,12 @@ from spinnman.messages.scp.enums import SCPCommand
 _ONE_WORD = struct.Struct("<I")
 
 
-# pylint: disable=wrong-spelling-in-docstring
 class WriteFPGARegister(BMPRequest[BMPOKResponse]):
     """
     A request for writing a word to a FPGA (SPI) register.
 
-    See the SpI/O project's spinnaker_fpga design's `README`_ for a listing
-    of FPGA registers. The SpI/O project can be found on GitHub at:
+    See the SPI/O project's spinnaker_fpga design's `README`_ for a listing
+    of FPGA registers. The SPI/O project can be found on GitHub at:
     https://github.com/SpiNNakerManchester/spio/
 
     .. _README: https://github.com/SpiNNakerManchester/spio/\
@@ -38,10 +37,10 @@ class WriteFPGARegister(BMPRequest[BMPOKResponse]):
 
     def __init__(self, fpga_num: int, address: int, value: int, board: int):
         """
-        :param int fpga_num: FPGA number (0, 1 or 2) to communicate with.
-        :param int address: Register address to read or write to
+        :param fpga_num: FPGA number (0, 1 or 2) to communicate with.
+        :param address: Register address to read or write to
             (will be rounded down to the nearest 32-bit word boundary).
-        :param int value: A 32-bit int value to write to the register
+        :param value: A 32-bit int value to write to the register
         """
         super().__init__(
             board,

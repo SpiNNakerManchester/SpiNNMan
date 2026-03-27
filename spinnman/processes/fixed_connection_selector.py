@@ -32,8 +32,7 @@ class FixedConnectionSelector(ConnectionSelector[Conn], Generic[Conn]):
 
     def __init__(self, connection: Conn):
         """
-        :param SCAMPConnection connection:
-            The connection to be used
+        :param connection: The connection to be used
         """
         self.__connection: Conn = connection
 

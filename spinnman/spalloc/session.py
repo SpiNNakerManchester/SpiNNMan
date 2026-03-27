@@ -37,28 +37,28 @@ _debug_pretty_print = False
 def _may_renew(method: Callable) -> Callable:
     def pp_req(request: requests.PreparedRequest) -> None:
         """
-        :param ~requests.PreparedRequest request:
+        Prints the request to the console.
+
+        :param request:
         """
         print(">>>>>>>>>>>START>>>>>>>>>>>\n")
         print(f"{request.method} {request.url}")
-        # pylint: disable=consider-using-f-string
-        print('\r\n'.join('{}: {}'.format(*kv)
-                          for kv in request.headers.items()))
+        print('\r\n'.join(f'{key}: {value}'
+                          for key, value in request.headers.items()))
         if request.body:
             print(request.body)
 
     def pp_resp(response: requests.Response) -> None:
         """
-        :param ~requests.Response response:
+        Prints the response to the console.
+
+        :param response:
         """
-        # pylint: disable=consider-using-f-string
-        print('{}\n{}\r\n{}\r\n\r\n{}'.format(
-            '<<<<<<<<<<<START<<<<<<<<<<<',
-            str(response.status_code) + " " + response.reason,
-            '\r\n'.join('{}: {}'.format(*kv)
-                        for kv in response.headers.items()),
-            # Assume we only get textual responses
-            str(response.content, "UTF-8") if response.content else ""))
+        print("<<<<<<<<<<<START<<<<<<<<<<<")
+        print(f"{response.status_code} {response.reason}")
+        print('\r\n'.join(f'{key}: {value}'
+                          for key, value in response.headers.items()))
+        print(str(response.content, "UTF-8") if response.content else "")
 
     @wraps(method)
     def call(self: 'Session', *args: Any, **kwargs: Any) -> None:
@@ -87,8 +87,8 @@ class Session:
         This class does not present a stable API for public consumption.
     """
     __slots__ = (
-        "__login_form_url", "__login_submit_url", "__srv_base", "_service_url",
-        "__username", "__password", "__token",
+        "__login_form_url", "__login_submit_url", "__srv_base",
+        "__service_url", "__username", "__password", "__token",
         "_session_id", "__csrf", "__csrf_header")
 
     def __init__(
@@ -98,16 +98,16 @@ class Session:
             session_credentials: Optional[
                 Tuple[Dict[str, str], Dict[str, str]]] = None):
         """
-        :param str service_url: The reference to the service.
+        :param service_url: The reference to the service.
             *Should not* include a username or password in it.
-        :param str username: The user name to use
-        :param str password: The password to use
-        :param str token: The bearer token to use
+        :param username: The user name to use
+        :param password: The password to use
+        :param token: The bearer token to use
         """
         url = clean_url(service_url)
         self.__login_form_url = url + "system/login.html"
         self.__login_submit_url = url + "system/perform_login"
-        self._service_url = url
+        self.__service_url = url
         self.__srv_base = url + "srv/spalloc/"
         self.__username = username
         self.__password = password
@@ -126,6 +126,9 @@ class Session:
 
     def __handle_error_or_return(self, response: requests.Response
                                  ) -> Optional[requests.Response]:
+        """
+        :returns: The response verified that it is not an error
+        """
         code = response.status_code
         if code >= 200 and code < 400:
             return response
@@ -139,9 +142,10 @@ class Session:
         """
         Do an HTTP ``GET`` in the session.
 
-        :param str url:
-        :param int timeout:
-        :rtype: ~requests.Response
+        :param url:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
@@ -158,15 +162,38 @@ class Session:
         """
         Do an HTTP ``POST`` in the session.
 
-        :param str url:
-        :param int timeout:
-        :param dict json_dict:
-        :rtype: ~requests.Response
+        :param url:
+        :param json_dict:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
-        cookies, headers = self._credentials
+        cookies, headers = self.credentials
         r = requests.post(url, params=params, json=json_dict,
+                          cookies=cookies, headers=headers,
+                          allow_redirects=False, timeout=timeout)
+        logger.debug("POST {} returned {}", url, r.status_code)
+        return self.__handle_error_or_return(r)
+
+    @_may_renew
+    def post_raw(self, url: str, data: bytes, timeout: int = 10,
+                 **kwargs: Any) -> Optional[requests.Response]:
+        """
+        Do an HTTP ``POST`` in the session. Posts raw data!
+
+        :param url:
+        :param data:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
+        :raise ValueError: If the server rejects a request
+        """
+        params = kwargs if kwargs else None
+        cookies, headers = self.credentials
+        headers["Content-Type"] = "application/octet-stream"
+        r = requests.post(url, params=params, data=data,
                           cookies=cookies, headers=headers,
                           allow_redirects=False, timeout=timeout)
         logger.debug("POST {} returned {}", url, r.status_code)
@@ -178,14 +205,15 @@ class Session:
         """
         Do an HTTP ``PUT`` in the session. Puts plain text *OR* JSON!
 
-        :param str url:
-        :param str data:
-        :param int timeout:
-        :rtype: ~requests.Response
+        :param url:
+        :param data:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
         """
         params = kwargs if kwargs else None
-        cookies, headers = self._credentials
+        cookies, headers = self.credentials
         if isinstance(data, str):
             headers["Content-Type"] = "text/plain; charset=UTF-8"
         r = requests.put(url, params=params, data=data,
@@ -200,12 +228,15 @@ class Session:
         """
         Do an HTTP ``DELETE`` in the session.
 
-        :param str url:
-        :rtype: ~requests.Response
+        :param url:
+        :param timeout:  Time to wait for the call to return
+        :param kwargs: Optional extra parameters to send with the request
+        :returns: The response verified that it is not an error
         :raise ValueError: If the server rejects a request
+
         """
         params = kwargs if kwargs else None
-        cookies, headers = self._credentials
+        cookies, headers = self.credentials
         r = requests.delete(url, params=params, cookies=cookies,
                             headers=headers, allow_redirects=False,
                             timeout=timeout)
@@ -218,7 +249,6 @@ class Session:
         operations can be performed.
 
         :returns: Description of the root of the service, without CSRF data
-        :rtype: dict
         :raises SpallocException:
             If the session cannot be renewed.
         """
@@ -242,7 +272,7 @@ class Session:
             m = csrf_matcher.search(r.text)
             if not m:
                 msg = ("Could not establish temporary session to "
-                       f"{self._service_url} for user {self.__username} ")
+                       f"{self.__service_url} for user {self.__username} ")
                 if self.__password is None:
                     msg += "with a no password"
                 else:
@@ -287,7 +317,7 @@ class Session:
         return obj
 
     @property
-    def _credentials(self) -> Tuple[Dict[str, str], Dict[str, str]]:
+    def credentials(self) -> Tuple[Dict[str, str], Dict[str, str]]:
         """
         The credentials for requests. *Serializable.*
         """
@@ -308,12 +338,12 @@ class Session:
         Create a websocket that uses the session credentials to establish
         itself.
 
-        :param str url: Actual location to open websocket at
-        :param dict(str,str) header: Optional HTTP headers
-        :param str cookie:
+        :param url: Actual location to open websocket at
+        :param header: Optional HTTP headers
+        :param cookie:
             Optional cookies (composed as semicolon-separated string)
         :param kwargs: Other options to :py:func:`~websocket.create_connection`
-        :rtype: ~websocket.WebSocket
+        :returns: Socket based on these credentials
         """
         # Note: *NOT* a renewable action!
         if header is None:
@@ -327,7 +357,7 @@ class Session:
         return websocket.create_connection(
             url, header=header, cookie=cookie, **kwargs)
 
-    def _purge(self) -> None:
+    def purge(self) -> None:
         """
         Clears out all credentials from this session, rendering the session
         completely inoperable henceforth.
@@ -336,6 +366,13 @@ class Session:
         self.__password = None
         self._session_id = None
         self.__csrf = None
+
+    @property
+    def service_url(self) -> str:
+        """
+        Get the service URL for this session.
+        """
+        return self.__service_url
 
 
 class SessionAware:
@@ -348,6 +385,10 @@ class SessionAware:
     __slots__ = ("__session", "_url")
 
     def __init__(self, session: Session, url: str):
+        """
+        :param session: The session created when starting the spalloc client
+        :param url: job_url
+        """
         self.__session = session
         self._url = clean_url(url)
 
@@ -356,21 +397,15 @@ class SessionAware:
         """
         The current session credentials.
         Only supposed to be called by subclasses.
-
-        :rtype: tuple(dict(str,str),dict(str,str))
         """
-        # pylint: disable=protected-access
-        return self.__session._credentials
+        return self.__session.credentials
 
     @property
     def _service_url(self) -> str:
         """
         The main service URL.
-
-        :rtype: str
         """
-        # pylint: disable=protected-access
-        return self.__session._service_url
+        return self.__session.service_url
 
     def _get(self, url: str, **kwargs: Any) -> requests.Response:
         return self.__session.get(url, **kwargs)
@@ -378,6 +413,10 @@ class SessionAware:
     def _post(self, url: str, json_dict: dict,
               **kwargs: Any) -> requests.Response:
         return self.__session.post(url, json_dict, **kwargs)
+
+    def _post_raw(self, url: str, data: bytes,
+                  **kwargs: Any) -> requests.Response:
+        return self.__session.post_raw(url, data, **kwargs)
 
     def _put(self, url: str, data: str, **kwargs: Any) -> requests.Response:
         return self.__session.put(url, data, **kwargs)
@@ -390,7 +429,6 @@ class SessionAware:
         Create a websocket that uses the session credentials to establish
         itself.
 
-        :param str url: Actual location to open websocket at
-        :rtype: ~websocket.WebSocket
+        :param url: Actual location to open websocket at
         """
         return self.__session.websocket(url, **kwargs)

@@ -31,9 +31,9 @@ class P2PTable(object):
     def __init__(self, width: int, height: int,
                  column_data: List[Tuple[bytes, int]]):
         """
-        :param int width:
-        :param int height:
-        :param list(tuple(bytes,int)) column_data:
+        :param width:
+        :param height:
+        :param column_data:
         """
         self._routes: Dict[Tuple[int, int], P2PTableRoute] = dict()
         self._width = width
@@ -53,19 +53,17 @@ class P2PTable(object):
     @staticmethod
     def get_n_column_bytes(height: int) -> int:
         """
-        Get the number of bytes to be read for each column of the table.
-
-        :param int height: The height of the machine
+        :param height: The height of the machine
+        :returns: The number of bytes to be read for each column of the table.
         """
         return ((height + 7) // 8) * 4
 
     @staticmethod
     def get_column_offset(column: int) -> int:
         """
-        Get the offset of the next column in the table from the P2P base
-        address.
-
-        :param int column: The column to be read
+        :param column: The column to be read
+        :returns: the offset of the next column in the table
+           from the P2P base address.
         """
         return (((256 * column) // 8) * 4)
 
@@ -73,8 +71,6 @@ class P2PTable(object):
     def width(self) -> int:
         """
         The width of the machine that this table represents.
-
-        :rtype: int
         """
         return self._width
 
@@ -82,26 +78,20 @@ class P2PTable(object):
     def height(self) -> int:
         """
         The height of the machine that this table represents.
-
-        :rtype: int
         """
         return self._height
 
     def iterchips(self) -> Iterable[Tuple[int, int]]:
         """
-        Get an iterator of tuples of (x, y) coordinates in the table.
-
-        :rtype: iterable(tuple(int,int))
+        :returns: An iterator of tuples of (x, y) coordinates in the table.
         """
         return iter(self._routes.keys())
 
     def is_route(self, x: int, y: int) -> bool:
         """
-        Determines if there is a route in the P2P table to the given chip.
-
-        :param int x: The x-coordinate of the chip to look up
-        :param int y: The y-coordinate of the chip to look up
-        :rtype: bool
+        :param x: The x-coordinate of the chip to look up
+        :param y: The y-coordinate of the chip to look up
+        :returns: True if there is a route in the P2P table to the given chip.
         """
         return (
             (x, y) in self._routes and
@@ -109,18 +99,14 @@ class P2PTable(object):
 
     def get_route(self, x: int, y: int) -> P2PTableRoute:
         """
-        Get the route to follow from this chip to the given chip.
-
-        :param int x: The x-coordinate of the chip to find the route to
-        :param int y: The y-coordinate of the chip to find the route to
-        :rtype: P2PTableRoute
+        :param x: The x-coordinate of the chip to find the route to
+        :param y: The y-coordinate of the chip to find the route to
+        :returns: The route to follow from this chip to the given chip.
         """
         return self._routes.get((x, y), P2PTableRoute.NONE)
 
     @property
     def n_routes(self) -> int:
         """ The number of routes in the table
-
-        :rtype: int
         """
         return len(self._routes)

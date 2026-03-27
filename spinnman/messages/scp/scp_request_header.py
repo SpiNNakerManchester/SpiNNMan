@@ -32,8 +32,8 @@ class SCPRequestHeader(object):
 
     def __init__(self, command: _Command, sequence: int = 0):
         """
-        :param SCPCommand command: The SCP command
-        :param int sequence:
+        :param command: The SCP command
+        :param sequence:
             The number of the SCP packet in order of all packets
             sent or received, between 0 and 65535
         """
@@ -42,20 +42,12 @@ class SCPRequestHeader(object):
 
     @property
     def command(self) -> _Command:
-        """
-        The command of the SCP packet.
-
-        :rtype: SCPCommand
-        """
+        """ The command of the SCP packet. """
         return self._command
 
     @property
     def sequence(self) -> int:
-        """
-        The sequence number of the SCP packet, between 0 and 65535.
-
-        :rtype: int
-        """
+        """ The sequence number of the SCP packet, between 0 and 65535. """
         return self._sequence
 
     @sequence.setter
@@ -63,15 +55,11 @@ class SCPRequestHeader(object):
         """
         Set the sequence number of the SCP packet.
 
-        :param int sequence: The sequence number to set, between 0 and 65535
+        :param sequence: The sequence number to set, between 0 and 65535
         """
         self._sequence = sequence
 
     @property
     def bytestring(self) -> bytes:
-        """
-        The header as a byte-string.
-
-        :rtype: bytes
-        """
+        """ The header as a byte-string. """
         return _TWO_SHORTS.pack(self._command.value, self._sequence)

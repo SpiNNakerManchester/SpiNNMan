@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Sequence, Tuple
+from typing import Final, Sequence, Tuple
 from typing_extensions import TypeAlias
 from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
 
@@ -25,7 +25,7 @@ STATE_FIELD_OFFSET = 48
 
 #: Corresponds to vcpu_t in sark.h
 _VCPU_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
-_vcpu_t: TypeAlias = Tuple[
+VcpuT: Final['TypeAlias'] = Tuple[
     # pylint: disable=wrong-spelling-in-comment
     bytes,             # 32s - r0-r7
     int, int, int,     # 3I  - psr, sp, lr
@@ -72,14 +72,13 @@ class CPUInfo(object):
         "__user",
         "__x", "__y", "__p"]
 
-    def __init__(self, x: int, y: int, p: int, cpu_data: _vcpu_t):
+    def __init__(self, x: int, y: int, p: int, cpu_data: VcpuT):
         """
-        :param int x: The x-coordinate of a chip
-        :param int y: The y-coordinate of a chip
-        :param int p: The ID of a core on the chip
-        :param tuple cpu_data: A byte-string received from SDRAM on the board
+        :param x: The x-coordinate of a chip
+        :param y: The y-coordinate of a chip
+        :param p: The ID of a core on the chip
+        :param cpu_data: A byte-string received from SDRAM on the board
         """
-        # pylint: disable=too-many-arguments
         self.__x, self.__y, self.__p = x, y, p
 
         (registers,  # 32s 0
@@ -118,9 +117,6 @@ class CPUInfo(object):
     def x(self) -> int:
         """
         The X-coordinate of the chip containing the core.
-
-        :return: The x-coordinate of the chip
-        :rtype: int
         """
         return self.__x
 
@@ -128,9 +124,6 @@ class CPUInfo(object):
     def y(self) -> int:
         """
         The y-coordinate of the chip containing the core.
-
-        :return: The y-coordinate of the chip
-        :rtype: int
         """
         return self.__y
 
@@ -138,9 +131,6 @@ class CPUInfo(object):
     def p(self) -> int:
         """
         The ID of the core on the chip.
-
-        :return: The ID of the core
-        :rtype: int
         """
         return self.__p
 
@@ -148,9 +138,6 @@ class CPUInfo(object):
     def state(self) -> CPUState:
         """
         The current state of the core.
-
-        :return: The state of the core
-        :rtype: CPUState
         """
         return self.__state
 
@@ -158,9 +145,6 @@ class CPUInfo(object):
     def physical_cpu_id(self) -> int:
         """
         The physical ID of this processor.
-
-        :return: The physical ID of the processor
-        :rtype: int
         """
         return self.__physical_cpu_id
 
@@ -168,9 +152,6 @@ class CPUInfo(object):
     def application_name(self) -> str:
         """
         The name of the application running on the core.
-
-        :return: The name of the application
-        :rtype: str
         """
         return self.__application_name
 
@@ -178,9 +159,6 @@ class CPUInfo(object):
     def application_id(self) -> int:
         """
         The ID of the application running on the core.
-
-        :return: The ID of the application
-        :rtype: int
         """
         return self.__application_id
 
@@ -188,9 +166,6 @@ class CPUInfo(object):
     def time(self) -> int:
         """
         The time at which the application started.
-
-        :return: The time in seconds since 00:00:00 on the 1st January 1970
-        :rtype: int
         """
         return self.__time
 
@@ -198,9 +173,6 @@ class CPUInfo(object):
     def run_time_error(self) -> RunTimeError:
         """
         The reason for a run time error.
-
-        :return: The run time error
-        :rtype: RunTimeError
         """
         return self.__run_time_error
 
@@ -209,9 +181,6 @@ class CPUInfo(object):
         """
         The command currently in the mailbox being sent from the monitor
         processor to the application.
-
-        :return: The command
-        :rtype: MailboxCommand
         """
         return self.__application_mailbox_command
 
@@ -219,9 +188,6 @@ class CPUInfo(object):
     def application_mailbox_data_address(self) -> int:
         """
         The address of the data in SDRAM for the application mailbox.
-
-        :return: The address of the data
-        :rtype: int
         """
         return self.__app_mailbox
 
@@ -230,9 +196,6 @@ class CPUInfo(object):
         """
         The command currently in the mailbox being sent from the
         application to the monitor processor.
-
-        :return: The command
-        :rtype: MailboxCommand
         """
         return self.__monitor_mailbox_command
 
@@ -240,9 +203,6 @@ class CPUInfo(object):
     def monitor_mailbox_data_address(self) -> int:
         """
         The address of the data in SDRAM of the monitor mailbox.
-
-        :return: The address of the data
-        :rtype: int
         """
         return self.__monitor_mailbox
 
@@ -250,9 +210,6 @@ class CPUInfo(object):
     def software_error_count(self) -> int:
         """
         The number of software errors counted. Saturating.
-
-        :return: The number of software errors
-        :rtype: int
         """
         return self.__software_error_count
 
@@ -260,9 +217,6 @@ class CPUInfo(object):
     def software_source_filename_address(self) -> int:
         """
         The address of the filename of the software source.
-
-        :return: The filename address
-        :rtype: int
         """
         return self.__filename_address
 
@@ -270,9 +224,6 @@ class CPUInfo(object):
     def software_source_line_number(self) -> int:
         """
         The line number of the software source.
-
-        :return: The line number
-        :rtype: int
         """
         return self.__line_number
 
@@ -280,9 +231,6 @@ class CPUInfo(object):
     def processor_state_register(self) -> int:
         """
         The value in the processor state register.
-
-        :return: The processor state register value
-        :rtype: int
         """
         return self.__processor_state_register
 
@@ -290,9 +238,6 @@ class CPUInfo(object):
     def stack_pointer(self) -> int:
         """
         The current stack pointer value.
-
-        :return: The stack pointer value
-        :rtype: int
         """
         return self.__stack_pointer
 
@@ -300,9 +245,6 @@ class CPUInfo(object):
     def link_register(self) -> int:
         """
         The current link register value.
-
-        :return: The link register value
-        :rtype: int
         """
         return self.__link_register
 
@@ -310,9 +252,6 @@ class CPUInfo(object):
     def registers(self) -> Sequence[int]:
         """
         The current register values (r0 - r7).
-
-        :return: An array of 8 values, one for each register
-        :rtype: list(int)
         """
         return self.__registers
 
@@ -320,9 +259,6 @@ class CPUInfo(object):
     def user(self) -> Sequence[int]:
         """
         The current user values (user0 - user3).
-
-        :return: An array of 4 values, one for each user value
-        :rtype: list(int)
         """
         return self.__user
 
@@ -330,9 +266,6 @@ class CPUInfo(object):
     def iobuf_address(self) -> int:
         """
         The address of the IOBUF buffer in SDRAM.
-
-        :return: The address
-        :rtype: int
         """
         return self.__iobuf_address
 
@@ -340,9 +273,6 @@ class CPUInfo(object):
     def software_version(self) -> int:
         """
         The software version.
-
-        :return: The software version
-        :rtype: int
         """
         return self.__software_version
 
@@ -353,9 +283,7 @@ class CPUInfo(object):
 
     def get_status_string(self) -> str:
         """
-        Get a string indicating the status of the given core.
-
-        :rtype: str
+        :returns: A string indicating the status of the given core.
         """
         if self.state == CPUState.RUN_TIME_EXCEPTION:
             rte_string = f"{self.run_time_error.name}"
@@ -382,11 +310,7 @@ class CPUInfo(object):
         """
         Makes a CPU_info object for Testing purposes
 
-        :param int x:
-        :param int y:
-        :param int p:
-        :param int physical_cpu_id:
-        :param CPUState CPIstate:
+        :returns: A fake
         """
         registers = b'@\x00\x07\x08\xff\x00\x00\x00\x00\x00\x80\x00\xad\x00' \
                     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' \

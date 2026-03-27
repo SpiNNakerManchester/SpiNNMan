@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=too-many-arguments
-
 from typing import (
     BinaryIO, Collection, Dict, FrozenSet, Iterable,
     List, Optional, Set, Tuple, Union)
@@ -223,7 +221,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.clear_multicast_routes)
-    def clear_multicast_routes(self, x: int, y: int) -> None:
+    def clear_multicast_routes(self, xy: Optional[XY] = None) -> None:
         pass
 
     @overrides(Transceiver.get_router_diagnostics)
@@ -241,7 +239,8 @@ class MockableTransceiver(ExtendableTransceiver):
         pass
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
-    def clear_router_diagnostic_counters(self, x: int, y: int) -> None:
+    def clear_router_diagnostic_counters(
+            self, xy: Optional[XY] = None) -> None:
         pass
 
     @overrides(Transceiver.close)
@@ -270,3 +269,7 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(ExtendableTransceiver.scamp_connection_selector)
     def scamp_connection_selector(self) -> ConnectionSelector:
         raise NotImplementedError("Needs to be mocked")
+
+    @overrides(ExtendableTransceiver.ensure_board_is_ready)
+    def ensure_board_is_ready(self) -> None:
+        pass

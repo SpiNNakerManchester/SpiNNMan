@@ -32,13 +32,13 @@ class FloodFillStart(AbstractSCPRequest[CheckOKResponse]):
     def __init__(self, nearest_neighbour_id: int, n_blocks: int,
                  x: Optional[int] = None, y: Optional[int] = None):
         """
-        :param int nearest_neighbour_id:
+        :param nearest_neighbour_id:
             The ID of the packet, between 0 and 127
-        :param int n_blocks:
+        :param n_blocks:
             The number of blocks of data that will be sent, between 0 and 255
-        :param int x: The x-coordinate of the chip to load the data on to. If
+        :param x: The x-coordinate of the chip to load the data on to. If
             not specified, the data will be loaded on to all chips
-        :param int y: The y-coordinate of the chip to load the data on to. If
+        :param y: The y-coordinate of the chip to load the data on to. If
             not specified, the data will be loaded on to all chips
         """
         key = ((_NNP_FLOOD_FILL_START << 24) | (nearest_neighbour_id << 16) |

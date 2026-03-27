@@ -37,6 +37,9 @@ class _AllocResponse(AbstractSCPResponse):
         "_size")
 
     def __init__(self, size: int):
+        """
+        :param size: The size in bytes of memory to be allocated
+        """
         super().__init__()
         self._size = size
         self._base_address: Optional[int] = None
@@ -60,8 +63,6 @@ class _AllocResponse(AbstractSCPResponse):
     def base_address(self) -> int:
         """
         The base address allocated, or 0 if none.
-
-        :rtype: int
         """
         return self._base_address or 0
 
@@ -75,21 +76,20 @@ class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
     def __init__(self, x: int, y: int, app_id: int, size: int,
                  tag: Optional[int] = None, retry_tag: bool = True):
         """
-        :param int x:
+        :param x:
             The x-coordinate of the chip to allocate on, between 0 and 255
-        :param int y:
+        :param y:
             The y-coordinate of the chip to allocate on, between 0 and 255
-        :param int app_id: The ID of the application, between 0 and 255
-        :param int size: The size in bytes of memory to be allocated
-        :param int tag:
+        :param app_id: The ID of the application, between 0 and 255
+        :param size: The size in bytes of memory to be allocated
+        :param tag:
             The tag for the SDRAM, a 8-bit (chip-wide) tag that can be
             looked up by a SpiNNaker application to discover the address of
             the allocated block. If `0` then no tag is applied.
-        :param bool retry_tag:
+        :param retry_tag:
             If a tag is used, add a safety check to retry the tag.  This can
             avoid issues with re-allocating memory on a retry message.
         """
-        # pylint: disable=too-many-arguments
         extra_flag = 0
         if retry_tag and tag is not None:
             extra_flag = FLAG_RETRY_TAG
@@ -102,7 +102,6 @@ class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
                 "The tag param needs to be between 0 and 255, or None (in "
                 "which case 0 will be used by default)", str(tag))
 
-        # pylint: disable=unsupported-binary-operation
         super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED, destination_port=0,

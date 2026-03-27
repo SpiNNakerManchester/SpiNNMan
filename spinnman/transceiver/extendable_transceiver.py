@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# pylint: disable=too-many-arguments
 import logging
 from typing import Optional
 from threading import Condition, RLock
@@ -54,8 +53,6 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
     def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
         """
         Returns the BMP selector
-
-        :rtype: AbstractMultiConnectionProcessConnectionSelector
         """
         raise NotImplementedError("This method is abstract")
 
@@ -64,7 +61,5 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
     def scamp_connection_selector(self) -> ConnectionSelector:
         """
         Returns the scamp selector
-
-        :rtype: AbstractMultiConnectionProcessConnectionSelector
         """
         raise NotImplementedError("This method is abstract")

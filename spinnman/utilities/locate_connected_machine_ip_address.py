@@ -28,7 +28,7 @@ def locate_connected_machine(handler: Callable[[str, float], bool]) -> None:
     Locates any SpiNNaker machines IP addresses from the auto-transmitted
     packets from non-booted SpiNNaker machines.
 
-    :param ~collections.abc.Callable handler:
+    :param handler:
         A callback that decides whether to stop searching. The callback is
         given two arguments: the IP address found and the current time. It
         should return True if the search should cease.
@@ -48,9 +48,9 @@ def locate_connected_machine(handler: Callable[[str, float], bool]) -> None:
 if __name__ == "__main__":
     def _ctrlc_handler(sig: int, frame: Optional[FrameType]) -> Never:
         """
-        :return: Never returns as it causes a sys.exit()
+        Never returns as it causes a sys.exit()
         """
-        # pylint: disable=unused-argument
+        _ = (sig, frame)
         print("Exiting")
         sys.exit()
 

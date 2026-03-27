@@ -21,6 +21,7 @@ from spinn_utilities.abstract_base import abstractmethod
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.transceiver.transceiver import Transceiver
 from spinnman.connections.udp_packet_connections import UDPConnection
+from spinnman.model.diagnostic_filter import DiagnosticFilter
 from .spalloc_state import SpallocState
 from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
@@ -41,9 +42,8 @@ class SpallocJob(AbstractContextManager):
         """
         Get the current state of the machine.
 
-        :param bool wait_for_change: Whether to wait for a change in state
-
-        :rtype: SpallocState
+        :param wait_for_change: Whether to wait for a change in state
+        :returns: The current or new state
         """
         raise NotImplementedError()
 
@@ -53,7 +53,6 @@ class SpallocJob(AbstractContextManager):
         Get the IP address for talking to the machine.
 
         :return: The IP address, or ``None`` if not allocated.
-        :rtype: str or None
         """
         raise NotImplementedError()
 
@@ -63,7 +62,6 @@ class SpallocJob(AbstractContextManager):
         Get the mapping from board coordinates to IP addresses.
 
         :return: (x,y)->IP mapping, or ``None`` if not allocated
-        :rtype: dict(tuple(int,int), str) or None
         """
         raise NotImplementedError()
 
@@ -74,11 +72,10 @@ class SpallocJob(AbstractContextManager):
         """
         Open a connection to a particular board in the job.
 
-        :param int x: X coordinate of the board's Ethernet-enabled chip
-        :param int y: Y coordinate of the board's Ethernet-enabled chip
-        :param int port: UDP port to talk to; defaults to the SCP port
+        :param x: X coordinate of the board's Ethernet-enabled chip
+        :param y: Y coordinate of the board's Ethernet-enabled chip
+        :param port: UDP port to talk to; defaults to the SCP port
         :return: A connection that talks to the board.
-        :rtype: SpallocProxiedConnection
         """
         raise NotImplementedError()
 
@@ -88,7 +85,6 @@ class SpallocJob(AbstractContextManager):
         Open a connection to a job's allocation so it can be booted.
 
         :return: a boot connection
-        :rtype: SpallocBootConnection
         """
         raise NotImplementedError()
 
@@ -97,12 +93,11 @@ class SpallocJob(AbstractContextManager):
         """
         Open an EIEIO connection to a specific board in a job.
 
-        :param int x:
+        :param x:
             The X coordinate of the Ethernet-enabled chip to connect to
-        :param int y:
+        :param y:
             The Y coordinate of the Ethernet-enabled chip to connect to
         :return: an EIEIO connection with a board address bound
-        :rtype: SpallocEIEIOConnection
         """
         raise NotImplementedError()
 
@@ -115,7 +110,6 @@ class SpallocJob(AbstractContextManager):
         side connection information so you can program that into a tag.
 
         :return: an EIEIO connection with no board address bound
-        :rtype: SpallocEIEIOListener
         """
         raise NotImplementedError()
 
@@ -128,17 +122,19 @@ class SpallocJob(AbstractContextManager):
         side connection information so you can program that into a tag.
 
         :return: a UDP connection with no board address bound
-        :rtype: UDPConnection
         """
         raise NotImplementedError()
 
     @abstractmethod
-    def create_transceiver(self) -> Transceiver:
+    def create_transceiver(
+            self, ensure_board_is_ready: bool = True) -> Transceiver:
         """
         Create a transceiver that will talk to this job. The transceiver will
         only be configured to talk to the SCP ports of the boards of the job.
 
-        :rtype: Transceiver
+        :param ensure_board_is_ready:
+            Flag to say if ensure_board_is_ready should be run
+        :returns: Transceiver that uses this job.
         """
         raise NotImplementedError()
 
@@ -148,31 +144,25 @@ class SpallocJob(AbstractContextManager):
         """
         Wait until the allocation is not in the given old state.
 
-        :param SpallocState old_state:
+        :param old_state:
             The state that we are looking to change out of.
         :param timeout:
             The time to wait, or None to wait forever
-        :type timeout: int or None
         :return: The state that the allocation is now in.
 
             .. note::
                 If the machine gets destroyed, this will not wait for it.
-        :rtype: SpallocState
         """
         raise NotImplementedError()
 
     @abstractmethod
-    def wait_until_ready(self, timeout: Optional[int] = None,
-                         n_retries: Optional[int] = None) -> None:
+    def wait_until_ready(self) -> None:
         """
         Wait until the allocation is in the ``READY`` state.
 
-        :param timeout: The timeout or None to wait forever
-        :type timeout: int or None
-        :param n_retries:
-            The number of times to retry, or None to retry forever
-        :type n_retries: int or None
-        :raises Exception: If the allocation is destroyed
+        :raises SpallocException: If the allocation is destroyed
+        :raises SSpallocBoardUnavailableException:
+            If a job for specific boards are disabled, in use or just wrong
         """
         raise NotImplementedError()
 
@@ -181,7 +171,7 @@ class SpallocJob(AbstractContextManager):
         """
         Destroy the job.
 
-        :param str reason: Why the job is being destroyed.
+        :param reason: Why the job is being destroyed.
         """
         raise NotImplementedError()
 
@@ -191,12 +181,11 @@ class SpallocJob(AbstractContextManager):
         """
         Get the *physical* coordinates of the board hosting the given chip.
 
-        :param int x: Chip X coordinate
-        :param int y: Chip Y coordinate
+        :param x: Chip X coordinate
+        :param y: Chip Y coordinate
         :return: physical board coordinates (cabinet, frame, board), or
             ``None`` if there are no boards currently allocated to the job or
             the chip lies outside the allocation.
-        :rtype: tuple(int,int,int) or None
         """
         raise NotImplementedError()
 
@@ -205,9 +194,48 @@ class SpallocJob(AbstractContextManager):
         """
         Get the session credentials for the job to be written into a database
 
+        These are the "COOKIE" "HEADER" items,
         .. note::
             May assume that there is a ``proxy_configuration`` table with
             ``kind``, ``name`` and ``value`` columns.
+
+        :returns: Mapping of Tuple["COOKIE" or "HEADER", and the key]
+            to the value for that key
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_data(self, x: int, y: int, address: int, data: bytes) -> None:
+        """
+        Write data to a given address on a given chip of the job.
+
+        :param x: The X coordinate of the chip
+        :param y: The Y coordinate of the chip
+        :param address: The address to write to
+        :param data: The data to write
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def read_data(self, x: int, y: int, address: int, size: int) -> bytes:
+        """
+        Write data to a given address on a given chip of the job.
+
+        :param x: The X coordinate of the chip
+        :param y: The Y coordinate of the chip
+        :param address: The address to write to
+        :param size: The number of bytes to read
+        :return: The data read
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def reset_routing(
+            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+        """
+        Clear the routes, reset diagnostic counters and optionally set filters.
+
+        :param custom_filters: Map of router filter id to filter to set.
         """
         raise NotImplementedError()
 

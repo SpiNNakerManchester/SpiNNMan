@@ -52,12 +52,12 @@ class SpallocEIEIOConnection(
     def send_eieio_message_to_core(self, eieio_message: AbstractEIEIOMessage,
                                    x: int, y: int, p: int) -> None:
         """
+        Sends the message including a header
 
-        :param AbstractEIEIOMessage eieio_message:
-        :param int x:
-        :param int y:
-        :param int p:
-        :rtype: None
+        :param eieio_message: Message to send
+        :param x: destination chip x
+        :param y: destination chip y
+        :param p: destination_cpu
         """
         sdp_message = SDPMessage(
             SDPHeader(
@@ -83,8 +83,6 @@ class SpallocEIEIOConnection(
     def _coords(self) -> XY:
         """
         The X, Y coordinates of the chip this connection is connected to.
-
-        :rtype: tuple(int,int)
         """
         raise NotImplementedError
 
@@ -93,8 +91,8 @@ class SpallocEIEIOConnection(
         Update the given tag on the connected Ethernet-enabled chip to send
         messages to this connection.
 
-        :param int tag: The tag ID to update
-        :param bool do_receive:
+        :param tag: The tag ID to update
+        :param do_receive:
             Whether to do the reception of the response or not
         :raises SpinnmanTimeoutException:
             If the message isn't handled within a reasonable timeout.

@@ -22,4 +22,4 @@
 utils="../SpiNNUtils/spinn_utilities"
 machine="../SpiNNMachine/spinn_machine"
 
-mypy --python-version 3.8 $utils $machine spinnman unittests
+mypy $utils $machine spinnman unittests

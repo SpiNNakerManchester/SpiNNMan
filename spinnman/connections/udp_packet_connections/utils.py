@@ -24,8 +24,8 @@ def update_sdp_header_for_udp_send(
     .. deprecated:: 7.0
         Use :py:meth:`SDPHeader.update_for_send` instead.
 
-    :param SDPHeader sdp_header: The SDP header to update
-    :param int source_x: Where the packet is deemed to originate: X coordinate
-    :param int source_y: Where the packet is deemed to originate: Y coordinate
+    :param sdp_header: The SDP header to update
+    :param source_x: Where the packet is deemed to originate: X coordinate
+    :param source_y: Where the packet is deemed to originate: Y coordinate
     """
     sdp_header.update_for_send(source_x, source_y)

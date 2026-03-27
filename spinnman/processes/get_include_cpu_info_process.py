@@ -33,9 +33,7 @@ class GetIncludeCPUInfoProcess(GetCPUInfoProcess):
                  states: Container[CPUState]):
         """
         :param connection_selector:
-        :type connection_selector:
-            AbstractMultiConnectionProcessConnectionSelector
-        :param iterable(CPUState) states:
+        :param states:
             The states for which info is required.
         """
         super().__init__(connection_selector)

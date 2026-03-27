@@ -41,6 +41,8 @@ from .read_router_diagnostics_process import ReadRouterDiagnosticsProcess
 from .round_robin_connection_selector import RoundRobinConnectionSelector
 from .send_single_command_process import SendSingleCommandProcess
 from .write_memory_process import WriteMemoryProcess
+from .set_memory_process import SetMemoryProcess
+from .clear_routes_process import ClearRoutesProcess
 
 # Old name
 AbstractMultiConnectionProcessConnectionSelector = ConnectionSelector
@@ -60,4 +62,5 @@ __all__ = ["AbstractMultiConnectionProcessConnectionSelector",
            "LoadMultiCastRoutesProcess", "MallocSDRAMProcess",
            "ReadFixedRouteRoutingEntryProcess", "ReadIOBufProcess",
            "ReadMemoryProcess", "ReadRouterDiagnosticsProcess",
-           "SendSingleCommandProcess", "WriteMemoryProcess"]
+           "SendSingleCommandProcess", "WriteMemoryProcess",
+           "SetMemoryProcess", "ClearRoutesProcess"]
