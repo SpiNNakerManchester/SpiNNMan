@@ -53,7 +53,6 @@ from spinnman.exceptions import (
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.transceiver import Transceiver
 
-from .abstract_spalloc_client import AbstractSpallocClient
 from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware
 from .spalloc_boot_connection import SpallocBootConnection
@@ -126,7 +125,7 @@ def get_n_boards() -> int:
         return n_boards
 
 
-class SpallocClient(AbstractContextManager, AbstractSpallocClient):
+class SpallocClient(AbstractContextManager):
     """
     Basic client library for talking to new Spalloc.
     """
@@ -213,15 +212,25 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
         session = Session(service_url, session_credentials=(cookies, headers))
         return _SpallocJob(session, job_url)
 
-    @overrides(AbstractSpallocClient.list_machines)
     def list_machines(self) -> Dict[str, SpallocMachine]:
+        """
+        Get the machines supported by the server.
+
+        :return:
+            Mapping from machine names to handles for working with a machine.
+        """
         assert self.__session
         obj = self.__session.get(self.__machines_url).json()
         return {m["name"]: _SpallocMachine(self.__session, m)
                 for m in obj["machines"]}
 
-    @overrides(AbstractSpallocClient.list_jobs)
     def list_jobs(self, deleted: bool = False) -> Iterable[SpallocJob]:
+        """
+        Get the jobs known to the server.
+
+        :param deleted: Whether to include deleted jobs.
+        :return: The jobs known to the server.
+        """
         assert self.__session
         obj = self.__session.get(
             self.__jobs_url,
@@ -233,8 +242,12 @@ class SpallocClient(AbstractContextManager, AbstractSpallocClient):
                 break
             obj = self.__session.get(obj["next"]).json()
 
-    @overrides(AbstractSpallocClient.create_job)
     def create_job(self) -> SpallocJob:
+        """
+        Create a job with a specified number of boards.
+
+        :return: A handle for monitoring and interacting with the job.
+        """
         assert self.__session
 
         operation: Dict[str, JsonValue] = {}
