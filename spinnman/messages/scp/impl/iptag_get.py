@@ -69,8 +69,8 @@ class IPTagGetResponse(AbstractSCPResponse):
          self._flags, self._count, self._rx_port, self._spin_chip_y,
          self._spin_chip_x, processor_and_port) = _IPTAG_FORMAT.unpack_from(
             data, offset)
-        self._ip_address = bytearray(ip_address)
-        self._mac_address = bytearray(mac_address)
+        self._ip_address = bytes(ip_address)
+        self._mac_address = bytes(mac_address)
         self._spin_port = (processor_and_port >> 5) & 0x7
         self._spin_cpu = processor_and_port & 0x1F
 

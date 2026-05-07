@@ -37,7 +37,7 @@ class TestVersionInfo(unittest.TestCase):
         data = b"my/spinnaker"
 
         version_data = struct.pack('<III13s', arg1, arg2, arg3, data)
-        version_data = bytearray(version_data)
+        version_data = bytes(version_data)
         vi = VersionInfo(version_data)
         self.assertEqual(vi.name, 'my')
         self.assertEqual(vi.version_number, (2, 55, 0))
@@ -62,7 +62,7 @@ class TestVersionInfo(unittest.TestCase):
             data = b"my.spinnaker"
 
             version_data = struct.pack('<III13s', arg1, arg2, arg3, data)
-            version_data = bytearray(version_data)
+            version_data = bytes(version_data)
             vi = VersionInfo(version_data)
             # Should be unreachable, but if it ever works, should pass this
             self.assertIsNotNone(vi)
@@ -81,7 +81,7 @@ class TestVersionInfo(unittest.TestCase):
             data = b"my/spinnaker"
 
             version_data = struct.pack('<II13s', arg1, arg2, data)
-            version_data = bytearray(version_data)
+            version_data = bytes(version_data)
             vi = VersionInfo(version_data)
             # Should be unreachable, but if it ever works, should pass this
             self.assertIsNotNone(vi)
