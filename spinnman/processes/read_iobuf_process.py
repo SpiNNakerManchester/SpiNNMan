@@ -94,7 +94,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         self._iobuf_address: Dict[XYP, int] = dict()
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
-        self._iobuf: Dict[XYP, Dict[int, bytes]] = defaultdict(dict)
+        self._iobuf: Dict[XYP, Dict[int, bytearray]] = defaultdict(dict)
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> memoryview
         self._iobuf_view: Dict[XYP, Dict[int, memoryview]] = defaultdict(dict)
@@ -153,7 +153,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
             response.data, response.offset)
 
         # Create a buffer for the data
-        data = bytes(bytes_to_read)
+        data = bytearray(bytes_to_read)
         view = memoryview(data)
         self._iobuf[region.core_coords][region.n] = data
         self._iobuf_view[region.core_coords][region.n] = view
