@@ -114,7 +114,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
             functools.partial(WriteLink, coordinates, link), get_sum)
 
     def _write_memory_from_bytearray(
-            self, base_address: int, data: bytearray0, data_offset: int,
+            self, base_address: int, data: bytearray, data_offset: int,
             n_bytes: int, packet_class: Callable[
                 [int, bytes], AbstractSCPRequest[CheckOKResponse]],
             get_sum: bool) -> int:
