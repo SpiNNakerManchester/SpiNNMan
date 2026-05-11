@@ -63,7 +63,7 @@ class LoadMultiCastRoutesProcess(AbstractMultiConnectionProcess):
         """
         # Create the routing data - 16 bytes per entry plus one for the end
         # entry
-        routing_data = bytes(16 * (len(routes) + 1))
+        routing_data = bytearray(16 * (len(routes) + 1))
         n_entries = 0
         for route in routes:
             route_entry = \
