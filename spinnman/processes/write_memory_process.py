@@ -33,7 +33,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     __slots__ = ()
 
     def write_memory_from_bytearray(
-            self, coordinates: XYP, base_address: int, data: bytearray,
+            self, coordinates: XYP, base_address: int, data: bytearray | bytes,
             offset: int, n_bytes: int, get_sum: bool = False) -> int:
         """
         Writes memory onto a SpiNNaker chip from a bytearray.
