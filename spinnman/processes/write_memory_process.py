@@ -116,7 +116,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     def _write_memory_from_bytearray(
             self, base_address: int, data: bytearray | bytes, data_offset: int,
             n_bytes: int, packet_class: Callable[
-                [int, bytes], AbstractSCPRequest[CheckOKResponse]],
+                [int, bytearray | bytes], AbstractSCPRequest[CheckOKResponse]],
             get_sum: bool) -> int:
         offset = 0
         n_bytes_to_write = int(n_bytes)

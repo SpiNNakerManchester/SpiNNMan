@@ -28,7 +28,8 @@ class WriteMemory(AbstractSCPRequest[CheckOKResponse]):
     """
     __slots__ = "_data_to_write",
 
-    def __init__(self, coordinates: XYP, base_address: int, data: bytes):
+    def __init__(self, coordinates: XYP, base_address: int,
+                 data: bytearray | bytes):
         """
         :param coordinates:
             The coordinates of the chip, X and Y between 0 and 255, and P
