@@ -33,8 +33,9 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     __slots__ = ()
 
     def write_memory_from_bytearray(
-            self, coordinates: XYP, base_address: int, data: bytearray,
-            offset: int, n_bytes: int, get_sum: bool = False) -> int:
+            self, coordinates: XYP, base_address: int,
+            data: bytearray | bytes, offset: int, n_bytes: int,
+            get_sum: bool = False) -> int:
         """
         Writes memory onto a SpiNNaker chip from a bytearray.
 
@@ -71,7 +72,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(WriteLink, coordinates, link), get_sum)
+            functools.partial(W00riteLink, coordinates, link), get_sum)
 
     def write_memory_from_reader(
             self, coordinates: XYP, base_address: int, reader: BinaryIO,
@@ -114,8 +115,8 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
             functools.partial(WriteLink, coordinates, link), get_sum)
 
     def _write_memory_from_bytearray(
-            self, base_address: int, data: bytearray, data_offset: int,
-            n_bytes: int, packet_class: Callable[
+            self, base_address: int, data: bytearray | bytes,
+            data_offset: int, n_bytes: int, packet_class: Callable[
                 [int, bytearray], AbstractSCPRequest[CheckOKResponse]],
             get_sum: bool) -> int:
         offset = 0
