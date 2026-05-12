@@ -209,7 +209,7 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def write_memory(
             cls, x: int, y: int, base_address: int, data: Union[
-                BinaryIO, bytes, int, str], *,
+                BinaryIO, bytearray, bytes, int, str], *,
             n_bytes: Optional[int] = None, offset: int = 0,
             cpu: int = 0) -> Tuple[int, int]:
         """
