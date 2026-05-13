@@ -72,7 +72,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
         """
         return self._write_memory_from_bytearray(
             base_address, data, offset, n_bytes,
-            functools.partial(W00riteLink, coordinates, link), get_sum)
+            functools.partial(WriteLink, coordinates, link), get_sum)
 
     def write_memory_from_reader(
             self, coordinates: XYP, base_address: int, reader: BinaryIO,
@@ -117,7 +117,7 @@ class WriteMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     def _write_memory_from_bytearray(
             self, base_address: int, data: bytearray | bytes,
             data_offset: int, n_bytes: int, packet_class: Callable[
-                [int, bytearray], AbstractSCPRequest[CheckOKResponse]],
+                [int, bytearray, bytes], AbstractSCPRequest[CheckOKResponse]],
             get_sum: bool) -> int:
         offset = 0
         n_bytes_to_write = int(n_bytes)

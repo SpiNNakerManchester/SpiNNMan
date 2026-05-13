@@ -28,7 +28,8 @@ class WriteLink(AbstractSCPRequest[CheckOKResponse]):
     __slots__ = "_data_to_write",
 
     def __init__(
-            self, coordinates: XYP, link: int, base_address: int, data: bytearray):
+            self, coordinates: XYP, link: int, base_address: int,
+            data: bytearray | bytes):
         """
         :param coordinates:
             The coordinates of the core of the chip whose neighbour will be

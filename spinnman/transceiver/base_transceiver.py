@@ -720,7 +720,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     def _get_sv_data(
             self, x: int, y: int,
-            data_item: SystemVariableDefinition) -> Union[int, bytes]:
+            data_item: SystemVariableDefinition) -> Union[int, bytearray]:
         addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
         if data_item.data_type.is_byte_array:
             size = cast(int, data_item.array_size)
