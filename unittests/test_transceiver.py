@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from parameterized import parameterized
 import struct
 import unittest
+
+from parameterized import parameterized
 
 from spinn_utilities.config_holder import set_config
 
