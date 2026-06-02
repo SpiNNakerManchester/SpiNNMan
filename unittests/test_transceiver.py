@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
+from parameterized import parameterized
 import struct
+import unittest
 
 from spinn_utilities.config_holder import set_config
 
-from spinn_machine.version.version_strings import VersionStrings
+from spinn_machine.version import ALL_BOARD_TYPES
 
 from spinnman.config_setup import unittest_setup
 from spinnman.data import SpiNNManDataView
@@ -83,8 +84,9 @@ class TestTransceiver(unittest.TestCase):
         trans = create_transceiver_from_hostname(self.board_config.remotehost)
         trans._boot_board()  # type: ignore[attr-defined]
 
-    def test_set_watch_dog(self) -> None:
-        set_config("Machine", "versions", VersionStrings.ANY.text)
+    @parameterized.expand(ALL_BOARD_TYPES)
+    def test_set_watch_dog(self, _: str, version: str) -> None:
+        set_config("Machine", "version", version)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
         tx = MockExtendedTransceiver()
