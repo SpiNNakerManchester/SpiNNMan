@@ -47,7 +47,7 @@ class MockableTransceiver(ExtendableTransceiver):
     def __init__(self) -> None:
         super().__init__()
         self.written_memory: List[
-            Tuple[int, int, int, Union[BinaryIO, bytes, int, str],
+            Tuple[int, int, int, Union[BinaryIO, bytearray, bytes, int, str],
                   Optional[int], int, int]] = []
 
     @overrides(Transceiver.send_sdp_message)
@@ -131,7 +131,7 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.write_memory)
     def write_memory(
             self, x: int, y: int, base_address: int,
-            data: Union[BinaryIO, bytes, int, str], *,
+            data: Union[BinaryIO, bytearray, bytes, int, str], *,
             n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
             get_sum: bool = False) -> Tuple[int, int]:
         print("Doing write to", x, y)

@@ -94,7 +94,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         self._iobuf_address: Dict[XYP, int] = dict()
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
-        self._iobuf: Dict[XYP, Dict[int, bytes]] = defaultdict(dict)
+        self._iobuf: Dict[XYP, Dict[int, bytearray]] = defaultdict(dict)
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> memoryview
         self._iobuf_view: Dict[XYP, Dict[int, memoryview]] = defaultdict(dict)

@@ -209,7 +209,8 @@ class EIEIODataHeader(object):
             "EIEIODataMessage", "unexpected EIEIO type code")
 
     @staticmethod
-    def from_bytestring(data: bytes, offset: int) -> 'EIEIODataHeader':
+    def from_bytestring(
+            data: bytes | memoryview, offset: int) -> 'EIEIODataHeader':
         """
         Read an EIEIO data header from a byte-string.
 

@@ -171,7 +171,7 @@ class SpiNNManDataView(MachineDataView):
     @classmethod
     def read_memory(
             cls, x: int, y: int, base_address: int, length: int, *,
-            cpu: int = 0) -> bytes:
+            cpu: int = 0) -> bytearray:
         """
         Read some areas of memory (usually SDRAM) from the board.
 
