@@ -49,7 +49,7 @@ class TestTransceiver(unittest.TestCase):
         self.board_config = BoardTestConfiguration()
 
     @parameterized.expand(ALL_BOARD_TYPES)
-    def test_create_new_transceiver_to_board(self, _:str, ver_num:str) -> None:
+    def test_create_new_transceiver_to_board(self, _: str, ver_num: str) -> None:
         set_config("Machine", "version", ver_num)
         self.board_config.set_up_remote_board()
         connections = list()
