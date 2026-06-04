@@ -48,7 +48,9 @@ class TestTransceiver(unittest.TestCase):
         unittest_setup()
         self.board_config = BoardTestConfiguration()
 
-    def test_create_new_transceiver_to_board(self) -> None:
+    @parameterized.expand(ALL_BOARD_TYPES)
+    def test_create_new_transceiver_to_board(self, _:str, ver_num:str) -> None:
+        set_config("Machine", "version", ver_num)
         self.board_config.set_up_remote_board()
         connections = list()
         connections.append(SCAMPConnection(
@@ -86,8 +88,8 @@ class TestTransceiver(unittest.TestCase):
         trans._boot_board()  # type: ignore[attr-defined]
 
     @parameterized.expand(ALL_BOARD_TYPES)
-    def test_set_watch_dog(self, _: str, version: str) -> None:
-        set_config("Machine", "version", version)
+    def test_set_watch_dog(self, _: str, ver_num: str) -> None:
+        set_config("Machine", "version", ver_num)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
         tx = MockExtendedTransceiver()

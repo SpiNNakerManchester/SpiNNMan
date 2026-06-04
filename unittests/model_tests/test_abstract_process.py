@@ -14,9 +14,7 @@
 
 from typing import Optional
 from typing_extensions import Never
-from spinn_utilities.config_holder import set_config
 from spinn_utilities.overrides import overrides
-from spinn_machine.version.version_strings import VersionStrings
 from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess)
 from spinnman.messages.scp.impl import ReadMemory
