@@ -18,3 +18,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.mypy]
 exclude = ["doc", "setup.py", "quick_tests"]
+
+[[tool.mypy.overrides]]
+module = ["parameterized"]
+ignore_missing_imports = true
