@@ -22,7 +22,7 @@ import spinnman.spinnman_script as sim
 sim.setup(n_boards_required=2)
 # sim.setup()
 
-assert SpiNNManDataView.has_transceiver() == False
+assert not SpiNNManDataView.has_transceiver()
 try:
     SpiNNManDataView.get_transceiver()
     raise AssertionError("SpiNNManDataView.get_transceiver() worked??")
@@ -33,7 +33,7 @@ except DataNotYetAvialable:
 # Can be called with ensure_board_is_ready=True
 transceiver1 = sim.get_transceiver(ensure_board_is_ready=False)
 print(transceiver1, id(transceiver1))
-assert SpiNNManDataView.has_transceiver() == True
+assert SpiNNManDataView.has_transceiver()
 transceiver2 = SpiNNManDataView.get_transceiver()
 assert id(transceiver2) == id(transceiver1)
 
@@ -65,7 +65,7 @@ assert id(transceiver2) == id(transceiver1)
 sim.end()
 
 # Like other scripts DataView still has (useless) Transceiver object
-assert SpiNNManDataView.has_transceiver() == True
+assert SpiNNManDataView.has_transceiver()
 transceiver2 = SpiNNManDataView.get_transceiver()
 assert id(transceiver2) == id(transceiver1)
 
