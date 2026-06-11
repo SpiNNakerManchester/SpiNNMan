@@ -468,7 +468,6 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         # Work out and add the SpiNNaker links and FPGA links
         machine.add_spinnaker_links()
-        machine.add_fpga_links()
 
         if self._boot_send_connection:
             logger.info(f"Detected {machine.summary_string()}")
