@@ -16,7 +16,7 @@ import unittest
 from requests.exceptions import ConnectionError
 from spinn_utilities.config_holder import set_config
 
-from spinn_machine.version import FIVE
+from spinn_machine.version import Spin1Gen
 
 from spinnman.config_setup import unittest_setup
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
@@ -27,7 +27,7 @@ class TestTransceiver(unittest.TestCase):
 
     def test_create_job(self) -> None:
         unittest_setup()
-        set_config("Machine", "version", str(FIVE))
+        set_config("Machine", "version", str(Spin1Gen.FIVE.value))
         self.spalloc_url = "https://spinnaker.cs.man.ac.uk/spalloc"
         self.spalloc_machine = "SpiNNaker1M"
         writer = SpiNNManDataWriter.mock()
