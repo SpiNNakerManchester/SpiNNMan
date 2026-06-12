@@ -16,6 +16,9 @@ from typing import Optional
 import unittest
 from spinn_utilities.config_holder import set_config
 from spinn_utilities.ping import Ping
+
+from spinn_machine.version import Spin1Gen
+
 from spinnman.constants import LOCAL_HOST
 
 
@@ -48,14 +51,14 @@ class BoardTestConfiguration(object):
         """
         if Ping.host_is_reachable("192.168.240.253"):
             self.remotehost = "192.168.240.253"
-            set_config("Machine", "version", "3")
+            set_config("Machine", "version", str(Spin1Gen.THREE.value))
             self.auto_detect_bmp = False
         elif Ping.host_is_reachable("spinn-4.cs.man.ac.uk"):
             self.remotehost = "spinn-4.cs.man.ac.uk"
-            set_config("Machine", "version", "5")
+            set_config("Machine", "version", str(Spin1Gen.FIVE.value))
         elif Ping.host_is_reachable("192.168.240.1"):
             self.remotehost = "192.168.240.1"
-            set_config("Machine", "version", "5")
+            set_config("Machine", "version", str(Spin1Gen.FIVE.value))
         elif version is not None:
             self.remotehost = LOCAL_HOST
             set_config("Machine", "version", str(version))
