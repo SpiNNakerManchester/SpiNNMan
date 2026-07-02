@@ -26,12 +26,12 @@ import struct
 import threading
 from time import sleep
 from typing import (Any, Callable, Dict, Final, FrozenSet, Iterable, List,
-                    Mapping, Never, Optional, Tuple, cast)
+                    Mapping, Optional, Tuple, cast)
 from urllib.parse import urlparse, urlunparse, ParseResult
 
 from packaging.version import Version
 import requests
-from typing_extensions import TypeAlias
+from typing_extensions import Never, TypeAlias
 from websocket import WebSocket  # type: ignore
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
