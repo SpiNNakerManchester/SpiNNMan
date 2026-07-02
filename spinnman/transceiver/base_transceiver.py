@@ -710,7 +710,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def get_clock_drift(self, x: int, y: int) -> float:
         drift_fp = 1 << 17
 
-        drift_b = self._get_int_sv_data(x, y, SystemVariableDefinition.clock_drift)
+        drift_b = self._get_int_sv_data(
+            x, y, SystemVariableDefinition.clock_drift)
         drift = struct.unpack("<i", struct.pack("<I", drift_b))[0]
         return drift / drift_fp
 
