@@ -59,14 +59,3 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
         if self._database_path is not None:
             data += self._database_path
         return data
-
-    @staticmethod
-    def from_bytestring(
-            command_header: EIEIOCommandHeader, data: bytes,
-            offset: int) -> 'NotificationProtocolDatabaseLocation':
-        database_path = None
-        if len(data) - offset > 0:
-            raise Exception(
-                "https://github.com/SpiNNakerManchester/SpiNNMan/issues/424")
-            # database_path = data[offset:]
-        return NotificationProtocolDatabaseLocation(database_path)
