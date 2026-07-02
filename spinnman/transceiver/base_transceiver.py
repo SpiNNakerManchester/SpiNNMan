@@ -710,21 +710,25 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def get_clock_drift(self, x: int, y: int) -> float:
         drift_fp = 1 << 17
 
-        drift_b = self._get_sv_data(x, y, SystemVariableDefinition.clock_drift)
+        drift_b = self._get_int_sv_data(x, y, SystemVariableDefinition.clock_drift)
         drift = struct.unpack("<i", struct.pack("<I", drift_b))[0]
         return drift / drift_fp
 
-    def _get_sv_data(
+    def _get_int_sv_data(
             self, x: int, y: int,
-            data_item: SystemVariableDefinition) -> Union[int, bytearray]:
+            data_item: SystemVariableDefinition) -> int:
         addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
-        if data_item.data_type.is_byte_array:
-            size = cast(int, data_item.array_size)
-            # Do not need to decode the bytes of a byte array
-            return self.read_memory(x, y, addr, size)
         return struct.unpack_from(
             data_item.data_type.struct_code,
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
+
+    def _get_array_sv_data(
+            self, x: int, y: int,
+            data_item: SystemVariableDefinition) -> bytearray:
+        addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
+        size = cast(int, data_item.array_size)
+        # Do not need to decode the bytes of a byte array
+        return self.read_memory(x, y, addr, size)
 
     @staticmethod
     def __get_user_register_address_from_core(
@@ -769,10 +773,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                   ) -> Iterable[IOBuffer]:
         # making the assumption that all chips have the same iobuf size.
         if self._iobuf_size is None:
-            self._iobuf_size = cast(int, self._get_sv_data(
+            self._iobuf_size = self._get_int_sv_data(
                 AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                 AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-                SystemVariableDefinition.iobuf_size))
+                SystemVariableDefinition.iobuf_size)
         # Get all the cores if the subsets are not given
         # TODO is core_subsets ever None
         if core_subsets is None:
@@ -1280,8 +1284,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self, x: int, y: int,
             app_id: Optional[int] = None) -> List[MulticastRoutingEntry]:
         try:
-            base_address = cast(int, self._get_sv_data(
-                x, y, SystemVariableDefinition.router_table_copy_address))
+            base_address = self._get_int_sv_data(
+                x, y, SystemVariableDefinition.router_table_copy_address)
             process = GetMultiCastRoutesProcess(
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)
