@@ -14,9 +14,11 @@
 
 import re
 import struct
-from time import localtime, asctime
-from typing import cast, Final, Tuple
+from time import asctime, localtime
+from typing import Final, Tuple, cast
+
 from typing_extensions import TypeAlias
+
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")

@@ -14,7 +14,9 @@
 
 import struct
 from typing import List, Optional
+
 from spinn_machine.machine import Machine
+
 from spinnman.model.enums import CPUState
 
 _THREE_WORDS = struct.Struct("<3I")

@@ -16,9 +16,10 @@ import struct
 from typing import Callable, Optional
 
 from spinn_utilities.overrides import overrides
-from spinnman.messages.sdp import SDPMessage, SDPFlag
+
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
+from spinnman.messages.sdp import SDPFlag, SDPMessage
 
 from .udp_connection import UDPConnection
 

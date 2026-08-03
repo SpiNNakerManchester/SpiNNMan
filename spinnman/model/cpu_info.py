@@ -14,8 +14,10 @@
 
 import struct
 from typing import Final, Sequence, Tuple
+
 from typing_extensions import TypeAlias
-from spinnman.model.enums import CPUState, RunTimeError, MailboxCommand
+
+from spinnman.model.enums import CPUState, MailboxCommand, RunTimeError
 
 #: Size of `vcpu_t` in SARK.
 CPU_INFO_BYTES = 128

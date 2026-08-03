@@ -13,11 +13,15 @@
 # limitations under the License.
 
 from typing import Container
+
 from spinn_utilities.overrides import overrides
+
 from spinnman.model import CPUInfo
 from spinnman.model.enums import CPUState
+
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 from .get_cpu_info_process import GetCPUInfoProcess
 
 

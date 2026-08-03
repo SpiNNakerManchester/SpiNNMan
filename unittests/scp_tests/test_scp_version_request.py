@@ -13,9 +13,10 @@
 # limitations under the License.
 
 import unittest
+
 from spinnman.config_setup import unittest_setup
-from spinnman.messages.scp.impl import GetVersion
 from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.impl import GetVersion
 
 
 class TestSCPVersionRequest(unittest.TestCase):

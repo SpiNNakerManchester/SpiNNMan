@@ -14,5 +14,4 @@
 
 from .spinnman_data_view import SpiNNManDataView
 
-
 __all__ = ["SpiNNManDataView"]

@@ -13,11 +13,14 @@
 # limitations under the License.
 
 import unittest
+
 from spinnman.config_setup import unittest_setup
-from spinnman.messages.scp.enums import IPTagCommand
-from spinnman.messages.scp.enums import SCPCommand
-from spinnman.messages.scp.enums import SCPResult
-from spinnman.messages.scp.enums import Signal
+from spinnman.messages.scp.enums import (
+    IPTagCommand,
+    SCPCommand,
+    SCPResult,
+    Signal,
+)
 from spinnman.messages.scp.enums.signal import SignalType
 
 

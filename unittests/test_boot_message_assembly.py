@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import unittest
+
 import spinnman.messages.spinnaker_boot.spinnaker_boot_message as boot_msg
 from spinnman.config_setup import unittest_setup
 from spinnman.messages.spinnaker_boot import SpinnakerBootOpCode

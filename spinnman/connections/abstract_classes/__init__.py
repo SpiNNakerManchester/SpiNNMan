@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from .abstract_scp_connection import AbstractSCPConnection
 from .connection import Connection
 from .listenable import Listenable
-from .abstract_scp_connection import AbstractSCPConnection
 
 __all__ = ("Connection", "Listenable", "AbstractSCPConnection")

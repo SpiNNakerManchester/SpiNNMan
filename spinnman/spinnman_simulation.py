@@ -19,8 +19,12 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 
 from spinnman.config_setup import (
-    add_spinnman_cfg, add_spinnman_template, SPINNMAN_CFG)
+    SPINNMAN_CFG,
+    add_spinnman_cfg,
+    add_spinnman_template,
+)
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
+
 from .abstract_spinnman_simulation import AbstractSpiNNManSimulation
 
 logger = FormatAdapter(logging.getLogger(__name__))

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 
 import unittest
+
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.processes import MostDirectConnectionSelector
 

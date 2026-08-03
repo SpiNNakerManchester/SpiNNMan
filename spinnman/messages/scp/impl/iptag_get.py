@@ -15,13 +15,15 @@
 import struct
 
 from spinn_utilities.overrides import overrides
+
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse)
+    AbstractSCPRequest,
+    AbstractSCPResponse,
+)
 from spinnman.messages.scp.enums import SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-
 
 _IPTAG_GET = 2
 

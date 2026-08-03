@@ -13,7 +13,9 @@
 # limitations under the License.
 
 from spinnman.messages.eieio.data_messages import (
-    EIEIODataMessage, EIEIODataHeader)
+    EIEIODataHeader,
+    EIEIODataMessage,
+)
 
 
 def read_eieio_data_message(data: bytes, offset: int) -> EIEIODataMessage:

@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import unittest
-from spinnman.connections.udp_packet_connections import BootConnection
+
 from spinnman.config_setup import unittest_setup
+from spinnman.connections.udp_packet_connections import BootConnection
 
 
 class MyTestCase(unittest.TestCase):

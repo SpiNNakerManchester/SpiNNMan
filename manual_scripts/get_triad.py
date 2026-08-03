@@ -13,9 +13,8 @@
 # limitations under the License.
 
 
-from spinnman.spalloc import SpallocClient
 import spinnman.spinnman_script as sim
-
+from spinnman.spalloc import SpallocClient
 
 SPALLOC_URL = "https://spinnaker.cs.man.ac.uk/spalloc"
 # If None these are read from environment variables

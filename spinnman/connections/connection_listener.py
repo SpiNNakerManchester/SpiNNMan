@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
+
 import logging
+from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Thread
 from typing import Callable, Generic, List, TypeVar
-from concurrent.futures import ThreadPoolExecutor, Future
+
 from spinn_utilities.log import FormatAdapter
-from spinnman.exceptions import SpinnmanEOFException
+
 from spinnman.connections.abstract_classes import Listenable
+from spinnman.exceptions import SpinnmanEOFException
 
 #: :meta private:
 T = TypeVar("T")

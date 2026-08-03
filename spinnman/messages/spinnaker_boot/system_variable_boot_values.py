@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import struct
-from typing import Any, NamedTuple, Union, Optional
 from enum import Enum
+from typing import Any, NamedTuple, Optional, Union
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
 

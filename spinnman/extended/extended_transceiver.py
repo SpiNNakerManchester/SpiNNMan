@@ -12,17 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from contextlib import contextmanager
-import os
 import logging
+import os
 import struct
-from threading import Condition
 import time
-from typing import (BinaryIO, Generator, Iterable, List, Mapping, Optional,
-                    Sequence, Union)
+from contextlib import contextmanager
+from threading import Condition
+from typing import (
+    BinaryIO,
+    Generator,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Union,
+)
 
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod)
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.logger_utils import warn_once
 from spinn_utilities.require_subclass import require_subclass
@@ -30,30 +37,45 @@ from spinn_utilities.require_subclass import require_subclass
 from spinn_machine import CoreSubsets
 
 from spinnman.connections.abstract_classes import Connection
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import (
-    ROUTER_REGISTER_BASE_ADDRESS, ROUTER_FILTER_CONTROLS_OFFSET,
-    ROUTER_DIAGNOSTIC_FILTER_SIZE)
+    ROUTER_DIAGNOSTIC_FILTER_SIZE,
+    ROUTER_FILTER_CONTROLS_OFFSET,
+    ROUTER_REGISTER_BASE_ADDRESS,
+    SYSTEM_VARIABLE_BASE_ADDRESS,
+)
+from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanException
 from spinnman.extended import (
-    BMPSetLed, DeAllocSDRAMProcess, ReadADC, SetLED, WriteMemoryFloodProcess)
-from spinnman.model import (
-    ADCInfo, DiagnosticFilter, ExecutableTargets, HeapElement, IOBuffer)
-from spinnman.model.enums import CPUState
+    BMPSetLed,
+    DeAllocSDRAMProcess,
+    ReadADC,
+    SetLED,
+    WriteMemoryFloodProcess,
+)
 from spinnman.messages.scp.enums import Signal
-from spinnman.messages.scp.impl import (
-    ReadMemory, ApplicationRun)
-from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
-from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.enums.led_action import LEDAction
+from spinnman.messages.scp.impl import ApplicationRun, ReadMemory
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
+from spinnman.model import (
+    ADCInfo,
+    DiagnosticFilter,
+    ExecutableTargets,
+    HeapElement,
+    IOBuffer,
+)
+from spinnman.model.enums import CPUState
 from spinnman.processes import (
-    GetHeapProcess, ReadMemoryProcess, SendSingleCommandProcess,
-    WriteMemoryProcess)
-
+    GetHeapProcess,
+    ReadMemoryProcess,
+    SendSingleCommandProcess,
+    WriteMemoryProcess,
+)
 from spinnman.transceiver import Transceiver
 from spinnman.transceiver.base_transceiver import (
-    BaseTransceiver, _EXECUTABLE_ADDRESS)
+    _EXECUTABLE_ADDRESS,
+    BaseTransceiver,
+)
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
 
 _ONE_BYTE = struct.Struct("B")

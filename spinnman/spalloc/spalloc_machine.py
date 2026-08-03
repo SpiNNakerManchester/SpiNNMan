@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from typing import FrozenSet, Tuple
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 

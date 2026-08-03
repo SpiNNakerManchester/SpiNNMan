@@ -13,17 +13,23 @@
 # limitations under the License.
 
 from typing import Optional
+
+import pytest
 from typing_extensions import Never
+
 from spinn_utilities.overrides import overrides
-from spinnman.processes.abstract_multi_connection_process import (
-    AbstractMultiConnectionProcess)
-from spinnman.messages.scp.impl import ReadMemory
+
 from spinnman.config_setup import unittest_setup
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.exceptions import (
-    SpinnmanTimeoutException, SpinnmanGenericProcessException)
+    SpinnmanGenericProcessException,
+    SpinnmanTimeoutException,
+)
+from spinnman.messages.scp.impl import ReadMemory
 from spinnman.processes import RoundRobinConnectionSelector
-import pytest
+from spinnman.processes.abstract_multi_connection_process import (
+    AbstractMultiConnectionProcess,
+)
 
 
 class MockProcess(AbstractMultiConnectionProcess):

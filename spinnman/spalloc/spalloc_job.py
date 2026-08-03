@@ -15,18 +15,21 @@
 from contextlib import AbstractContextManager
 from types import TracebackType
 from typing import Dict, Mapping, Optional, Tuple, Type
+
 from typing_extensions import Literal, Self
 
 from spinn_utilities.abstract_base import abstractmethod
-from spinnman.constants import SCP_SCAMP_PORT
-from spinnman.transceiver.transceiver import Transceiver
+
 from spinnman.connections.udp_packet_connections import UDPConnection
+from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.model.diagnostic_filter import DiagnosticFilter
-from .spalloc_state import SpallocState
+from spinnman.transceiver.transceiver import Transceiver
+
 from .spalloc_boot_connection import SpallocBootConnection
 from .spalloc_eieio_connection import SpallocEIEIOConnection
 from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_scp_connection import SpallocSCPConnection
+from .spalloc_state import SpallocState
 
 
 class SpallocJob(AbstractContextManager):

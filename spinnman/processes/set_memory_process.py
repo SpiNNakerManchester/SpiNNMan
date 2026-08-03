@@ -16,10 +16,11 @@ from typing import List, Tuple
 
 from spinn_utilities.progress_bar import ProgressBar
 
-from spinnman.processes.abstract_multi_connection_process import (
-    AbstractMultiConnectionProcess)
 from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
 from spinnman.messages.scp.impl.write_memory import WriteMemory
+from spinnman.processes.abstract_multi_connection_process import (
+    AbstractMultiConnectionProcess,
+)
 
 _ONE_WORD = struct.Struct("<I")
 

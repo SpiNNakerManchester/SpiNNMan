@@ -12,29 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from contextlib import ExitStack
 import logging
 import os
 import re
-from typing import cast, ContextManager, Dict, Tuple, Optional, Union
+from contextlib import ExitStack
+from typing import ContextManager, Dict, Optional, Tuple, Union, cast
 
 import ebrains_drive  # type: ignore[import]
 import requests
 
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_str_or_none)
+    get_config_bool,
+    get_config_str,
+    get_config_str_or_none,
+)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
-from spinn_utilities.config_holder import get_config_str
 
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.spalloc import (
     MachineAllocationController,
-    SpallocClient, SpallocJob, SpallocState)
+    SpallocClient,
+    SpallocJob,
+    SpallocState,
+)
 from spinnman.transceiver import Transceiver
-
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

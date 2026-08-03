@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import unittest
+
 from spinn_machine import CoreSubset
+
 from spinnman.config_setup import unittest_setup
 
 

@@ -14,6 +14,7 @@
 
 import struct
 from typing import Dict, Iterable, List, Tuple
+
 from spinnman.model.enums import P2PTableRoute
 
 _ONE_WORD = struct.Struct("<I")

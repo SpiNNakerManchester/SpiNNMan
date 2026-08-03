@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinn_machine import Router, RoutingEntry
+
 from spinnman.messages.scp.impl import FixedRouteInit
 from spinnman.processes import AbstractMultiConnectionProcess
 

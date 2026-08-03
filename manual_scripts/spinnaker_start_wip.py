@@ -14,45 +14,57 @@
 
 
 from __future__ import print_function
-from threading import Thread, RLock, Condition
-from matplotlib import pyplot, animation
-from numpy.random.mtrand import shuffle
+
 import functools
-import numpy
-import matplotlib
-import time
 import operator
 import os
+import pickle
 import struct
 import sys
-import pickle
+import time
 import traceback
+from threading import Condition, RLock, Thread
 from typing import Dict, Optional, Tuple
+
+import matplotlib
+import numpy
+from matplotlib import animation, pyplot
+from numpy.random.mtrand import shuffle
 
 from spinn_utilities.overrides import overrides
 
 from spinn_machine.machine import Machine
 
-from spinnman.connections.udp_packet_connections import UDPConnection
-from spinnman.constants import ROUTER_REGISTER_P2P_ADDRESS,\
-    SYSTEM_VARIABLE_BASE_ADDRESS, address_length_dtype
-from spinnman.processes import AbstractMultiConnectionProcess
-from spinnman.messages.scp.impl import ReadMemory, GetChipInfo
-from spinnman.model import P2PTable, MachineDimensions
-from spinnman.processes.get_version_process import GetVersionProcess
-from spinnman.messages.sdp.sdp_flag import SDPFlag
-from spinnman.messages.scp.impl.read_memory import Response
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-from spinnman.connections.udp_packet_connections \
-    import SCAMPConnection, BootConnection
-from spinnman.processes import RoundRobinConnectionSelector
+import spinnman.spinnman_script as sim
+from spinnman.connections.udp_packet_connections import (
+    BootConnection,
+    SCAMPConnection,
+    UDPConnection,
+)
+from spinnman.constants import (
+    ROUTER_REGISTER_P2P_ADDRESS,
+    SYSTEM_VARIABLE_BASE_ADDRESS,
+    address_length_dtype,
+)
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
-from spinnman.messages.sdp import SDPHeader
+from spinnman.messages.scp.impl import GetChipInfo, ReadMemory
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
-from spinnman.messages.spinnaker_boot import SpinnakerBootMessages
+from spinnman.messages.scp.impl.read_memory import Response
+from spinnman.messages.sdp import SDPHeader
+from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.spinnaker_boot import (
+    SpinnakerBootMessages,
+    SystemVariableDefinition,
+)
+from spinnman.model import MachineDimensions, P2PTable
 from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.processes import (
+    AbstractMultiConnectionProcess,
+    RoundRobinConnectionSelector,
+)
+from spinnman.processes.get_version_process import GetVersionProcess
 from spinnman.spalloc import SpallocClient, SpallocJob, SpallocState
 from spinnman.spalloc.spalloc_boot_connection import SpallocBootConnection
 from spinnman.spalloc.spalloc_eieio_connection import SpallocEIEIOConnection
@@ -60,9 +72,6 @@ from spinnman.spalloc.spalloc_eieio_listener import SpallocEIEIOListener
 from spinnman.spalloc.spalloc_scp_connection import SpallocSCPConnection
 from spinnman.transceiver.mockable_transceiver import MockableTransceiver
 from spinnman.transceiver.transceiver import Transceiver
-
-import spinnman.spinnman_script as sim
-
 
 print_lock = RLock()
 

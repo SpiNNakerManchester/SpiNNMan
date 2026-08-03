@@ -12,16 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Union
 import struct
+from typing import List, Union
 
 from spinn_utilities.overrides import overrides
-from spinnman.exceptions import (
-    SpinnmanInvalidPacketException, SpinnmanInvalidParameterTypeException)
-from spinnman.constants import EIEIO_COMMAND_IDS
 
-from .eieio_command_message import EIEIOCommandMessage
+from spinnman.constants import EIEIO_COMMAND_IDS
+from spinnman.exceptions import (
+    SpinnmanInvalidPacketException,
+    SpinnmanInvalidParameterTypeException,
+)
+
 from .eieio_command_header import EIEIOCommandHeader
+from .eieio_command_message import EIEIOCommandMessage
 
 _PATTERN_BBBB = struct.Struct("<BBBB")
 _PATTERN_BBII = struct.Struct("<BBII")

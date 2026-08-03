@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from io import TextIOBase
 import logging
 import os.path
 import time
+from io import TextIOBase
 from typing import List
 
 from spinn_utilities.log import FormatAdapter
-from spinn_machine import Machine, Chip
+
+from spinn_machine import Chip, Machine
+
 from spinnman.connections.abstract_classes import Connection
 
 logger = FormatAdapter(logging.getLogger(__name__))

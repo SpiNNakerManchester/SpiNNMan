@@ -16,13 +16,20 @@ import logging
 import traceback
 from typing import Dict, Optional, Tuple, Type
 
-
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.config_holder import (
-    check_user_cfg, clear_cfg_files, get_config_bool, get_config_int,
-    get_config_str, get_config_str_or_none, is_config_none, load_config)
+    check_user_cfg,
+    clear_cfg_files,
+    get_config_bool,
+    get_config_int,
+    get_config_str,
+    get_config_str_or_none,
+    is_config_none,
+    load_config,
+)
 from spinn_utilities.configs.no_config_found_exception import (
-    NoConfigFoundException)
+    NoConfigFoundException,
+)
 from spinn_utilities.exceptions import ConfigException
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
@@ -32,7 +39,9 @@ from spinn_machine.virtual_machine import virtual_machine_generator
 
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.exceptions import (
-    SpallocBoardUnavailableException, SpinnmanUnsupportedOperationException)
+    SpallocBoardUnavailableException,
+    SpinnmanUnsupportedOperationException,
+)
 from spinnman.spalloc import is_server_address
 from spinnman.spalloc.spalloc_allocator import spalloc_allocate_job
 from spinnman.transceiver import Transceiver, transceiver_generator

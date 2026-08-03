@@ -12,43 +12,49 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
+import logging
 from collections import defaultdict
 from contextlib import suppress
-import logging
-import functools
 from types import TracebackType
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 from spinn_utilities.config_holder import (
-    get_config_bool, get_config_int_or_none, get_config_str_or_none,
-    get_report_path)
+    get_config_bool,
+    get_config_int_or_none,
+    get_config_str_or_none,
+    get_report_path,
+)
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
 
-from spinn_machine import (Router, Chip, Link, Machine)
+from spinn_machine import Chip, Link, Machine, Router
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
 from spinn_machine.machine_factory import machine_repair
 
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import (
-    ROUTER_REGISTER_P2P_ADDRESS, SYSTEM_VARIABLE_BASE_ADDRESS)
+    ROUTER_REGISTER_P2P_ADDRESS,
+    SYSTEM_VARIABLE_BASE_ADDRESS,
+)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl import ReadMemory, ReadLink, GetChipInfo
+from spinnman.messages.scp.impl import GetChipInfo, ReadLink, ReadMemory
 from spinnman.messages.scp.impl.get_chip_info_response import (
-    GetChipInfoResponse)
+    GetChipInfoResponse,
+)
 from spinnman.messages.scp.impl.read_memory import Response
-from spinnman.messages.spinnaker_boot import (
-    SystemVariableDefinition)
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.model import ChipSummaryInfo, P2PTable
 from spinnman.model.enums import CPUState
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import \
-    ConnectionSelector
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector,
+)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

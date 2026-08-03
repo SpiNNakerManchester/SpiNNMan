@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterable, Optional
+
 from spinn_utilities.overrides import overrides
+
+from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from spinnman.messages.scp import SCPRequestHeader
+
 from .check_ok_response import CheckOKResponse
 
 _WAIT_FLAG = 0x1 << 18

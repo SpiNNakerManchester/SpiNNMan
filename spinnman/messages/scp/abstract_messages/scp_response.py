@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Optional
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinnman.messages.sdp import SDPHeader
+
 from spinnman.messages.scp import SCPResponseHeader
+from spinnman.messages.sdp import SDPHeader
 
 # The offset of the header from the start of a received packet
 # (8 bytes of SDP header)

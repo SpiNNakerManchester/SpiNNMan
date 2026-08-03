@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from spinnman.transceiver.version5transceiver import Version5Transceiver
+
 from .extended_transceiver import ExtendedTransceiver
 
 

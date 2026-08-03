@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import unittest
+
 from spinnman.config_setup import unittest_setup
 from spinnman.model import CPUInfo, CPUInfos
 from spinnman.model.enums.cpu_state import CPUState

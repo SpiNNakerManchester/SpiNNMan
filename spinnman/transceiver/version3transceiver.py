@@ -13,7 +13,9 @@
 # limitations under the License.
 
 from typing import Iterable, Optional
+
 from spinn_utilities.overrides import overrides
+
 from spinnman.connections.abstract_classes import Connection
 from spinnman.data import SpiNNManDataView
 from spinnman.transceiver.base_transceiver import BaseTransceiver

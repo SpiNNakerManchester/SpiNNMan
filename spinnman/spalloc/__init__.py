@@ -22,13 +22,13 @@ The main class in here is :py:class:`~spinnman.spalloc.SpallocClient`.
 """
 
 from .machine_allocation_controller import MachineAllocationController
+from .spalloc_client import SpallocClient
+from .spalloc_eieio_connection import SpallocEIEIOConnection
+from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_job import SpallocJob
 from .spalloc_machine import SpallocMachine
 from .spalloc_proxied_connection import SpallocProxiedConnection
-from .spalloc_eieio_connection import SpallocEIEIOConnection
-from .spalloc_eieio_listener import SpallocEIEIOListener
 from .spalloc_state import SpallocState
-from .spalloc_client import SpallocClient
 from .utils import is_server_address
 
 __all__ = (

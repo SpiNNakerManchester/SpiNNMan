@@ -12,17 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
+
 import logging
-from typing import BinaryIO, Optional, Tuple, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, BinaryIO, Optional, Tuple, Union
 
 from spinn_utilities.log import FormatAdapter
+
 from spinn_machine.data import MachineDataView
 
 from spinnman.utilities.appid_tracker import AppIdTracker
 
 if TYPE_CHECKING:
     from spinnman.processes import MostDirectConnectionSelector
-    from spinnman.spalloc import (MachineAllocationController, SpallocJob)
+    from spinnman.spalloc import MachineAllocationController, SpallocJob
     from spinnman.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))

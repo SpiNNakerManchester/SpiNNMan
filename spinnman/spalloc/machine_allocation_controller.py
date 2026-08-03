@@ -16,8 +16,10 @@ import logging
 import sys
 from threading import Thread
 from typing import Tuple
-from spinn_utilities.log import FormatAdapter
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+from spinn_utilities.log import FormatAdapter
+
 logger = FormatAdapter(logging.getLogger(__name__))
 
 

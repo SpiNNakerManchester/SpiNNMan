@@ -15,15 +15,18 @@
 import functools
 import struct
 from typing import Callable, List, Sequence
-from spinn_utilities.typing.coords import XY, XYP
-from spinnman.processes import AbstractMultiConnectionProcess
-from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
-from spinnman.model import HeapElement
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
 
+from spinn_utilities.typing.coords import XY, XYP
+
+from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
+from spinnman.messages.spinnaker_boot import SystemVariableDefinition
+from spinnman.model import HeapElement
+from spinnman.processes import AbstractMultiConnectionProcess
+
+from .abstract_multi_connection_process_connection_selector import (
+    ConnectionSelector,
+)
 
 HEAP_ADDRESS = SystemVariableDefinition.sdram_heap_address
 _ADDRESS = struct.Struct("<I")

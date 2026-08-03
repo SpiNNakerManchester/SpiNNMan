@@ -16,9 +16,10 @@ from enum import Enum
 from typing import Union
 
 from spinn_utilities.overrides import overrides
+
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 
 class CheckOKResponse(AbstractSCPResponse):

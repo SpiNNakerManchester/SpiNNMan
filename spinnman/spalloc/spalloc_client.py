@@ -14,42 +14,57 @@
 """
 Implementation of the client for the Spalloc web service.
 """
-import sys
-
 import math
 import os
-import time
-from logging import getLogger
-
 import queue
 import struct
+import sys
 import threading
+import time
+from logging import getLogger
 from time import sleep
-from typing import (Any, Callable, Dict, Final, FrozenSet, Iterable, List,
-                    Mapping, Optional, Tuple, cast)
-from urllib.parse import urlparse, urlunparse, ParseResult
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Final,
+    FrozenSet,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    cast,
+)
+from urllib.parse import ParseResult, urlparse, urlunparse
 
-from packaging.version import Version
 import requests
+from packaging.version import Version
 from typing_extensions import Never, TypeAlias
 from websocket import WebSocket  # type: ignore
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.config_holder import (
-    get_config_int, get_config_int_or_none, get_config_str_or_none)
+    get_config_int,
+    get_config_int_or_none,
+    get_config_str_or_none,
+)
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
-from spinn_utilities.overrides import overrides
 
-from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
+from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.data import SpiNNManDataView
-from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import (
-    SpinnmanException, SpallocBoardUnavailableException, SpallocException)
+    SpallocBoardUnavailableException,
+    SpallocException,
+    SpinnmanException,
+    SpinnmanTimeoutException,
+)
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.transceiver import Transceiver
 
@@ -63,8 +78,8 @@ from .spalloc_machine import SpallocMachine
 from .spalloc_proxied_connection import SpallocProxiedConnection
 from .spalloc_scp_connection import SpallocSCPConnection
 from .spalloc_state import SpallocState
-from .utils import parse_service_url, get_hostname
 from .spalloc_transceiver import SpallocTransceiver
+from .utils import get_hostname, parse_service_url
 
 logger = FormatAdapter(getLogger(__name__))
 _open_req = struct.Struct("<IIIII")
