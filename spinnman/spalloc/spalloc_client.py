@@ -31,7 +31,7 @@ from urllib.parse import urlparse, urlunparse, ParseResult
 
 from packaging.version import Version
 import requests
-from typing_extensions import TypeAlias
+from typing_extensions import Never, TypeAlias
 from websocket import WebSocket  # type: ignore
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
@@ -160,9 +160,12 @@ class SpallocClient(AbstractContextManager):
         if password is None:
             password = os.getenv("SPALLOC_PASSWORD", None)
 
-        self.__session: Optional[Session] = Session(
-            service_url, username, password, bearer_token)
-        obj = self.__session.renew()
+        try:
+            self.__session: Optional[Session] = Session(
+                service_url, username, password, bearer_token)
+            obj = self.__session.renew()
+        except SpallocException as ex:
+            self._session_error(service_url, ex, username, password)
         v = cast(JsonObject, obj["version"])
         self.version = Version(
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
@@ -173,6 +176,23 @@ class SpallocClient(AbstractContextManager):
         self.__nmpi_job = nmpi_job
         self.__nmpi_user = nmpi_user
         logger.info("established session to {} for {}", service_url, username)
+
+    def _session_error(
+            self, service_url: str, exception: SpallocException,
+            username: Optional[str], password: Optional[str]) -> Never:
+        message = f"Unable to connect to {service_url}. "
+        if username is None:
+            if password is None:
+                message += ("Username and password missing. "
+                            "Please add to url or set ENV SPALLOC_USER "
+                            "and SPALLOC_PASSWORD.")
+            else:
+                message += ("Username missing. "
+                            "Please add to url or set ENV SPALLOC_USER.")
+        elif password is None:
+            message += ("Password missing. "
+                        "Please add to url or set ENV SPALLOC_PASSWORD.")
+        raise SpallocException(message) from exception
 
     def get_job(self, job_id: str) -> SpallocJob:
         """
