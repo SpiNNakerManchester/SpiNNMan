@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from spinnman.messages.eieio.eieio_message import AbstractEIEIOMessage
+from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
+from spinnman.messages.eieio.eieio_type import EIEIOType
+
 from .create_eieio_command import read_eieio_command_message
 from .create_eieio_data import read_eieio_data_message
-from .eieio_message import AbstractEIEIOMessage
-from .eieio_prefix import EIEIOPrefix
-from .eieio_type import EIEIOType
 
 __all__ = ["EIEIOPrefix", "EIEIOType", "read_eieio_command_message",
            "read_eieio_data_message", "AbstractEIEIOMessage"]
