@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .app_stop import AppStop
 from .app_copy_run import AppCopyRun
+from .app_stop import AppStop
 from .application_run import ApplicationRun
 from .bmp_get_version import BMPGetVersion
 from .check_ok_response import CheckOKResponse
 from .count_state import CountState
 from .do_sync import DoSync
 from .fill_request import FillRequest
+from .fixed_route_init import FixedRouteInit
+from .fixed_route_read import FixedRouteRead
 from .flood_fill_data import FloodFillData
 from .flood_fill_end import FloodFillEnd
 from .flood_fill_start import FloodFillStart
@@ -44,8 +46,6 @@ from .set_power import SetPower
 from .write_fpga_register import WriteFPGARegister
 from .write_link import WriteLink
 from .write_memory import WriteMemory
-from .fixed_route_init import FixedRouteInit
-from .fixed_route_read import FixedRouteRead
 
 __all__ = ["AppStop", "ApplicationRun", "AppCopyRun",
            "BMPGetVersion", "CheckOKResponse", "GetChipInfo", "CountState",

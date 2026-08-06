@@ -14,8 +14,11 @@
 # return 0the License.
 
 from typing import Dict, Iterable, Optional, Union
+
 from spinn_utilities.overrides import overrides
+
 from spinn_machine import CoreSubsets, Machine, virtual_machine
+
 from spinnman.constants import N_RETRIES
 from spinnman.exceptions import SpinnmanIOException
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
@@ -23,6 +26,7 @@ from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.model import CPUInfos, VersionInfo
 from spinnman.model.enums import CPUState
 from spinnman.processes import ConnectionSelector
+
 from .version5transceiver import Version5Transceiver
 
 

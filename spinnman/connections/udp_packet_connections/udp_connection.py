@@ -13,20 +13,29 @@
 # limitations under the License.
 
 import logging
-import socket
 import select
+import socket
 from contextlib import suppress
 from typing import Callable, Optional, Tuple
+
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.ping import Ping
-from spinnman.exceptions import (SpinnmanIOException, SpinnmanEOFException)
-from spinnman.connections.abstract_classes import Connection
+
+from spinnman.connections.abstract_classes import Connection, Listenable
+from spinnman.exceptions import SpinnmanEOFException, SpinnmanIOException
 from spinnman.utilities.socket_utils import (
-    bind_socket, connect_socket, get_udp_socket, get_socket_address,
-    resolve_host, set_receive_buffer_size, receive_message,
-    receive_message_and_address, send_message, send_message_to_address)
-from spinnman.connections.abstract_classes import Listenable
+    bind_socket,
+    connect_socket,
+    get_socket_address,
+    get_udp_socket,
+    receive_message,
+    receive_message_and_address,
+    resolve_host,
+    send_message,
+    send_message_to_address,
+    set_receive_buffer_size,
+)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 _RECEIVE_BUFFER_SIZE = 1048576

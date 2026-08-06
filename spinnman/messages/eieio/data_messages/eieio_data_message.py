@@ -14,16 +14,24 @@
 
 import struct
 from typing import Optional
+
 from spinn_utilities.overrides import overrides
-from spinnman.exceptions import (
-    SpinnmanInvalidPacketException, SpinnmanInvalidParameterException)
-from spinnman.messages.eieio import (
-    AbstractEIEIOMessage, EIEIOType, EIEIOPrefix)
+
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+from spinnman.exceptions import (
+    SpinnmanInvalidPacketException,
+    SpinnmanInvalidParameterException,
+)
+from spinnman.messages.eieio import (
+    AbstractEIEIOMessage,
+    EIEIOPrefix,
+    EIEIOType,
+)
+
+from .abstract_data_element import AbstractDataElement
 from .eieio_data_header import EIEIODataHeader
 from .key_data_element import KeyDataElement
 from .key_payload_data_element import KeyPayloadDataElement
-from .abstract_data_element import AbstractDataElement
 
 _ONE_SHORT = struct.Struct("<H")
 _TWO_SHORTS = struct.Struct("<HH")

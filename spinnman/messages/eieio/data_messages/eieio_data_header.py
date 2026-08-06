@@ -15,8 +15,8 @@
 import struct
 from typing import Optional
 
-from spinnman.messages.eieio import EIEIOType, EIEIOPrefix
 from spinnman.exceptions import SpinnmanInvalidPacketException
+from spinnman.messages.eieio import EIEIOPrefix, EIEIOType
 
 _PATTERN_BBHH = struct.Struct("<BBHH")
 _PATTERN_BBH = struct.Struct("<BBH")

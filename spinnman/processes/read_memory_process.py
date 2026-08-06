@@ -17,14 +17,15 @@ from typing import Callable
 
 from spinn_utilities.typing.coords import XYP
 
-from spinnman.messages.scp.impl import ReadLink, ReadMemory
-from spinnman.messages.scp.impl.read_memory import Response
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.impl import ReadLink, ReadMemory
+from spinnman.messages.scp.impl.read_memory import Response
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 
 
 class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):

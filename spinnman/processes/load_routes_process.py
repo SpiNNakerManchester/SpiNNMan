@@ -19,12 +19,13 @@ from spinn_machine import Router
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.scp.impl import RouterInit, RouterAlloc
+from spinnman.messages.scp.impl import RouterAlloc, RouterInit
 from spinnman.messages.scp.impl.router_alloc import RouterAllocResponse
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 from .write_memory_process import WriteMemoryProcess
 
 _ROUTE_PATTERN = struct.Struct("<H2xIII")

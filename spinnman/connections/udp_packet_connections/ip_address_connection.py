@@ -13,7 +13,9 @@
 # limitations under the License.
 from contextlib import suppress
 from typing import Optional
+
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
+
 from .udp_connection import UDPConnection
 
 _BOOTROM_SPINN_PORT = 54321  # Matches SPINN_PORT in spinnaker_bootROM

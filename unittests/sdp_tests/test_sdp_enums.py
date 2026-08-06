@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import unittest
+
 from spinnman.config_setup import unittest_setup
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 

@@ -14,6 +14,7 @@
 
 import struct
 from typing import Optional
+
 from spinnman import constants
 
 _PATTERN = struct.Struct(

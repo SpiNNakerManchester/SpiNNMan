@@ -14,13 +14,17 @@
 
 import struct
 from typing import Optional, overload
+
 from spinn_utilities.overrides import overrides
+
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse)
+    AbstractSCPRequest,
+    AbstractSCPResponse,
+)
 from spinnman.messages.scp.enums import AllocFree, SCPCommand, SCPResult
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 _ONE_WORD = struct.Struct("<I")
 

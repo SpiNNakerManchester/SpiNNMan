@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
-from typing import Union, TYPE_CHECKING
-from spinn_utilities.abstract_base import abstractmethod, AbstractBase
+
+from typing import TYPE_CHECKING, Union
+
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+
 if TYPE_CHECKING:
     from spinnman.messages.eieio.command_messages import EIEIOCommandHeader
     from spinnman.messages.eieio.data_messages import EIEIODataHeader

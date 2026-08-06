@@ -13,10 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Optional
+
 from spinnman.messages.scp.impl.sdram_de_alloc import (
-    SDRAMDeAlloc, _SCPSDRAMDeAllocResponse)
-from spinnman.processes import AbstractMultiConnectionProcess
-from spinnman.processes import ConnectionSelector
+    SDRAMDeAlloc,
+    _SCPSDRAMDeAllocResponse,
+)
+from spinnman.processes import (
+    AbstractMultiConnectionProcess,
+    ConnectionSelector,
+)
 
 
 class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):

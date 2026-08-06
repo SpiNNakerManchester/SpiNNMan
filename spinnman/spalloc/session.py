@@ -12,17 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from functools import wraps
-from logging import getLogger
-from json.decoder import JSONDecodeError
 import re
-from typing import Any, Callable, Dict, Tuple, cast, Optional
-import websocket  # type: ignore
+from functools import wraps
+from json.decoder import JSONDecodeError
+from logging import getLogger
+from typing import Any, Callable, Dict, Optional, Tuple, cast
 
 import requests
+import websocket  # type: ignore
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.json import JsonObject
+
 from spinnman.exceptions import SpallocException
 
 from .utils import clean_url

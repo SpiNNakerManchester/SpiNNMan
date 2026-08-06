@@ -13,9 +13,10 @@
 # limitations under the License.
 
 import unittest
-from spinnman.model.enums import MailboxCommand, CPUState, RunTimeError
-from spinnman.constants import ROUTER_REGISTER_REGISTERS
+
 from spinnman.config_setup import unittest_setup
+from spinnman.constants import ROUTER_REGISTER_REGISTERS
+from spinnman.model.enums import CPUState, MailboxCommand, RunTimeError
 
 
 class TestingEnums(unittest.TestCase):

@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import unittest
+
 from requests.exceptions import ConnectionError
+
 from spinn_utilities.config_holder import set_config
 
 from spinn_machine.version import Spin1Gen

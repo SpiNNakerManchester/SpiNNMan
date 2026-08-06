@@ -14,6 +14,7 @@
 
 import struct
 from typing import Iterable, List, Optional
+
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 
 

@@ -14,15 +14,16 @@
 
 import importlib
 import os
-import pytest
-from requests.exceptions import ConnectionError
 import runpy
 import sys
-from types import ModuleType
 import unittest
+from types import ModuleType
 
-from spinnman.exceptions import SpallocBoardUnavailableException
+import pytest
+from requests.exceptions import ConnectionError
+
 import spinnman.spinnman_script as sim
+from spinnman.exceptions import SpallocBoardUnavailableException
 
 
 class TestScripts(unittest.TestCase):

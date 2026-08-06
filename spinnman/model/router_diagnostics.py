@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Sequence
-from spinnman.exceptions import SpinnmanInvalidParameterException
+
 from spinnman.constants import ROUTER_REGISTER_REGISTERS
+from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.model.enums.router_error import RouterError
 
 

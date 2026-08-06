@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import struct
+
 from spinnman.messages.scp.enums import SCPResult
 
 _TWO_SHORTS = struct.Struct("<2H")

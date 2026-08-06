@@ -14,11 +14,14 @@
 
 import struct
 from typing import Optional, Tuple
+
 from spinn_utilities.overrides import overrides
-from spinnman.constants import SCP_SCAMP_PORT
-from spinnman.messages.scp.enums import SCPResult
+
 from spinnman.connections.abstract_classes import AbstractSCPConnection
+from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.enums import SCPResult
+
 from .sdp_connection import SDPConnection
 
 _TWO_SHORTS = struct.Struct("<2H")

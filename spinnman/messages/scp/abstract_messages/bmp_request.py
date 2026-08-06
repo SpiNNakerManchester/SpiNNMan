@@ -13,10 +13,11 @@
 # limitations under the License.
 
 from typing import Generic, Iterable, Optional, TypeVar, Union
+
 from typing_extensions import TypeAlias
 
-from spinnman.messages.sdp import SDPFlag, SDPHeader
 from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.sdp import SDPFlag, SDPHeader
 
 from .bmp_response import BMPResponse
 from .scp_request import AbstractSCPRequest

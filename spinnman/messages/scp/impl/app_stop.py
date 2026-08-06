@@ -13,10 +13,12 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
+
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand, Signal
 from spinnman.messages.sdp import SDPFlag, SDPHeader
+
 from .check_ok_response import CheckOKResponse
 
 _APP_MASK = 0xFF

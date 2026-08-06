@@ -17,18 +17,24 @@ API of the client for the Spalloc web service.
 
 import struct
 from typing import Optional, Tuple
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
+
 from spinnman.connections.udp_packet_connections import EIEIOConnection
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.messages.eieio import (
     AbstractEIEIOMessage,
-    read_eieio_command_message, read_eieio_data_message)
-from spinnman.messages.sdp import SDPMessage, SDPFlag, SDPHeader
+    read_eieio_command_message,
+    read_eieio_data_message,
+)
 from spinnman.messages.scp.impl import IPTagSet
+from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
+
 from .spalloc_proxied_connection import SpallocProxiedConnection
+
 # mypy: disable-error-code=empty-body
 
 _ONE_SHORT = struct.Struct("<H")

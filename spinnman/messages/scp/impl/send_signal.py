@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import cast
+
 from spinn_utilities.overrides import overrides
+
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand, Signal
 from spinnman.messages.sdp import SDPFlag, SDPHeader
+
 from .check_ok_response import CheckOKResponse
 
 _ALL_CORE_MASK = 0xFFFF

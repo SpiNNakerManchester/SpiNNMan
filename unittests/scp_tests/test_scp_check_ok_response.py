@@ -14,10 +14,11 @@
 
 import struct
 import unittest
+
 from spinnman.config_setup import unittest_setup
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.impl import CheckOKResponse
 from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.impl import CheckOKResponse
 from spinnman.messages.sdp import SDPFlag
 
 

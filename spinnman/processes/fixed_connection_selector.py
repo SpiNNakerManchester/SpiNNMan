@@ -13,11 +13,17 @@
 # limitations under the License.
 
 from typing import Any, Generic, TypeVar
+
 from spinn_utilities.overrides import overrides
+
 from spinnman.connections.udp_packet_connections import (
-    SCAMPConnection, BMPConnection)
+    BMPConnection,
+    SCAMPConnection,
+)
+
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 
 #: Type of connections selected between.
 #: :meta private:

@@ -21,10 +21,12 @@ from typing import Any, Dict, Iterable, Optional, Tuple
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanIOException
 
-from .system_variable_boot_values import (
-    SystemVariableBootValues, SystemVariableDefinition)
 from .spinnaker_boot_message import SpinnakerBootMessage
 from .spinnaker_boot_op_code import SpinnakerBootOpCode
+from .system_variable_boot_values import (
+    SystemVariableBootValues,
+    SystemVariableDefinition,
+)
 
 _BOOT_MESSAGE_DATA_WORDS = 256
 _BOOT_MESSAGE_DATA_BYTES = _BOOT_MESSAGE_DATA_WORDS * 4

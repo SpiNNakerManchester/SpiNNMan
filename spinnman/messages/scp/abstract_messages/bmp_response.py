@@ -14,11 +14,14 @@
 
 from logging import getLogger
 from typing import Generic, Optional, TypeVar, final
+
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
-from spinnman.messages.scp.enums import SCPCommand, SCPResult
+
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
+from spinnman.messages.scp.enums import SCPCommand, SCPResult
+
 from .scp_response import AbstractSCPResponse
 
 logger = FormatAdapter(getLogger(__name__))

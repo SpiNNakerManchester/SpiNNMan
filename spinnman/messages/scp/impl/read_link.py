@@ -14,10 +14,12 @@
 
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XYP
+
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
+
 from .read_memory import Response
 
 

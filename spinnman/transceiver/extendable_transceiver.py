@@ -13,11 +13,12 @@
 # limitations under the License.
 
 import logging
-from typing import Optional
 from threading import Condition, RLock
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod)
+from typing import Optional
+
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.log import FormatAdapter
+
 from spinnman.connections.udp_packet_connections import BMPConnection
 from spinnman.processes import ConnectionSelector, FixedConnectionSelector
 from spinnman.transceiver.transceiver import Transceiver

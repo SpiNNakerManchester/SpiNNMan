@@ -12,84 +12,163 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import defaultdict
 import io
+import logging
 import os
 import random
-import struct
-from contextlib import contextmanager, suppress
-import logging
 import socket
-from threading import Condition
+import struct
 import time
+from collections import defaultdict
+from contextlib import contextmanager, suppress
+from threading import Condition
 from typing import (
-    BinaryIO, Collection, Dict, FrozenSet, Iterable, Iterator, List, Optional,
-    Sequence, Set, Tuple, TypeVar, Union, cast)
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod)
+    BinaryIO,
+    Collection,
+    Dict,
+    FrozenSet,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
+
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
+
 from spinn_machine import (
-    CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
+    CoreSubsets,
+    Machine,
+    MulticastRoutingEntry,
+    RoutingEntry,
+)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
+
 from spinnman.connections.abstract_classes import Connection
-from spinnman.connections.udp_packet_connections import SDPConnection
+from spinnman.connections.udp_packet_connections import (
+    BMPConnection,
+    BootConnection,
+    SCAMPConnection,
+    SDPConnection,
+)
 from spinnman.constants import (
-    BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
-    CPU_MAX_USER, CPU_USER_OFFSET, CPU_USER_START_ADDRESS,
-    IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, SYSTEM_VARIABLE_BASE_ADDRESS,
-    UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
-    ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
-    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS, ROUTER_REGISTER_REGISTERS)
+    BMP_POST_POWER_ON_SLEEP_TIME,
+    BMP_POWER_ON_TIMEOUT,
+    BMP_TIMEOUT,
+    BOOT_RETRIES,
+    CPU_MAX_USER,
+    CPU_USER_OFFSET,
+    CPU_USER_START_ADDRESS,
+    IPTAG_TIME_OUT_WAIT_TIMES,
+    N_RETRIES,
+    NO_ROUTER_DIAGNOSTIC_FILTERS,
+    POWER_CYCLE_WAIT_TIME_IN_SECONDS,
+    ROUTER_DEFAULT_FILTERS_MAX_POSITION,
+    ROUTER_DIAGNOSTIC_FILTER_SIZE,
+    ROUTER_FILTER_CONTROLS_OFFSET,
+    ROUTER_REGISTER_BASE_ADDRESS,
+    ROUTER_REGISTER_REGISTERS,
+    SCP_SCAMP_PORT,
+    SYSTEM_VARIABLE_BASE_ADDRESS,
+    UDP_BOOT_CONNECTION_DEFAULT_PORT,
+)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanBootException,
-    SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
-    SpinnmanTimeoutException, SpinnmanGenericProcessException,
+    SpiNNManCoresNotInStateException,
+    SpinnmanException,
+    SpinnmanGenericProcessException,
+    SpinnmanInvalidParameterException,
+    SpinnmanIOException,
+    SpinnmanTimeoutException,
     SpinnmanUnexpectedResponseCodeException,
-    SpiNNManCoresNotInStateException)
-from spinnman.model import (
-    CPUInfo, CPUInfos, DiagnosticFilter, ChipSummaryInfo,
-    IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
-from spinnman.model.enums import (
-    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister,
-    DiagnosticFilterDefaultRoutingStatus, DiagnosticFilterPacketType,
-    DiagnosticFilterSource)
-from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
-from spinnman.messages.scp.enums import Signal
+)
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest,
+    AbstractSCPResponse,
+)
+from spinnman.messages.scp.enums import PowerCommand, Signal
+from spinnman.messages.scp.impl import (
+    AppStop,
+    BMPGetVersion,
+    DoSync,
+    IPTagClear,
+    IPTagSet,
+    IPTagSetTTO,
+    ReadFPGARegister,
+    ReverseIPTagSet,
+    RouterClear,
+    SendSignal,
+    SetPower,
+    WriteFPGARegister,
+    WriteMemory,
+)
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.scp.impl.get_chip_info_response import (
-    GetChipInfoResponse)
+    GetChipInfoResponse,
+)
 from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
-    SystemVariableDefinition, SpinnakerBootMessages)
-from spinnman.messages.scp.enums import PowerCommand
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl import (
-    BMPGetVersion, SetPower, ReadFPGARegister,
-    WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet,
-    WriteMemory, SendSignal, AppStop,
-    IPTagSet, IPTagClear, RouterClear, DoSync)
-from spinnman.processes import ConnectionSelector
-from spinnman.connections.udp_packet_connections import (
-    BMPConnection, BootConnection, SCAMPConnection)
+    SpinnakerBootMessages,
+    SystemVariableDefinition,
+)
+from spinnman.model import (
+    ChipSummaryInfo,
+    CPUInfo,
+    CPUInfos,
+    DiagnosticFilter,
+    IOBuffer,
+    MachineDimensions,
+    RouterDiagnostics,
+    VersionInfo,
+)
+from spinnman.model.enums import (
+    SDP_PORTS,
+    SDP_RUNNING_MESSAGE_CODES,
+    CPUState,
+    DiagnosticFilterDefaultRoutingStatus,
+    DiagnosticFilterPacketType,
+    DiagnosticFilterSource,
+    UserRegister,
+)
 from spinnman.processes import (
-    GetMachineProcess, GetVersionProcess,
-    MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
-    GetCPUInfoProcess, GetExcludeCPUInfoProcess, GetIncludeCPUInfoProcess,
-    ReadIOBufProcess, ApplicationRunProcess,
-    LoadFixedRouteRoutingEntryProcess, FixedConnectionSelector,
+    ApplicationCopyRunProcess,
+    ApplicationRunProcess,
+    ClearRoutesProcess,
+    ConnectionSelector,
+    FixedConnectionSelector,
+    GetCPUInfoProcess,
+    GetExcludeCPUInfoProcess,
+    GetIncludeCPUInfoProcess,
+    GetMachineProcess,
+    GetMultiCastRoutesProcess,
+    GetNCoresInStateProcess,
+    GetTagsProcess,
+    GetVersionProcess,
+    LoadFixedRouteRoutingEntryProcess,
+    LoadMultiCastRoutesProcess,
+    MallocSDRAMProcess,
+    MostDirectConnectionSelector,
     ReadFixedRouteRoutingEntryProcess,
-    LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
-    SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
-    MostDirectConnectionSelector, ApplicationCopyRunProcess,
-    GetNCoresInStateProcess, SetMemoryProcess, ClearRoutesProcess)
-from spinnman.transceiver.transceiver import Transceiver
+    ReadIOBufProcess,
+    ReadMemoryProcess,
+    ReadRouterDiagnosticsProcess,
+    SendSingleCommandProcess,
+    SetMemoryProcess,
+    WriteMemoryProcess,
+)
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
+from spinnman.transceiver.transceiver import Transceiver
 from spinnman.utilities.utility_functions import get_vcpu_address
 
 #: Type of a response.

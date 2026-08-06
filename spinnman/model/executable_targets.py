@@ -14,9 +14,13 @@
 
 from collections import defaultdict
 from typing import Collection, Dict, Iterable, Optional, Set, cast
+
 from spinn_utilities.ordered_set import OrderedSet
+
 from spinn_machine import CoreSubsets, FrozenCoreSubsets
+
 from spinnman.exceptions import SpinnmanInvalidParameterException
+
 from .enums import ExecutableType
 
 

@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from enum import Enum
 import struct
+from enum import Enum
 from typing import Union
+
 from typing_extensions import TypeAlias
+
 from spinnman.messages.scp.enums import SCPCommand
 
 _TWO_SHORTS = struct.Struct("<2H")

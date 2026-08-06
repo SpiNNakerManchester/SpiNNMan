@@ -12,12 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
+
 from enum import Enum
 from typing import List, Type, TypeVar
+
 from spinnman.model.enums import (
-    DiagnosticFilterDestination, DiagnosticFilterSource,
-    DiagnosticFilterPayloadStatus, DiagnosticFilterDefaultRoutingStatus,
-    DiagnosticFilterEmergencyRoutingStatus, DiagnosticFilterPacketType)
+    DiagnosticFilterDefaultRoutingStatus,
+    DiagnosticFilterDestination,
+    DiagnosticFilterEmergencyRoutingStatus,
+    DiagnosticFilterPacketType,
+    DiagnosticFilterPayloadStatus,
+    DiagnosticFilterSource,
+)
+
 #: :meta private:
 E = TypeVar("E", bound=Enum)
 

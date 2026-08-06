@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import unittest
-from spinnman.config_setup import unittest_setup
+
 import spinnman.messages.multicast_message as multicast_msg
+from spinnman.config_setup import unittest_setup
 
 
 class TestMulticastMessage(unittest.TestCase):
