@@ -14,10 +14,13 @@
 
 
 import struct
+
 from spinn_utilities.overrides import overrides
+
 from spinnman.constants import EIEIO_COMMAND_IDS
-from .eieio_command_message import EIEIOCommandMessage
+
 from .eieio_command_header import EIEIOCommandHeader
+from .eieio_command_message import EIEIOCommandMessage
 
 _PATTERN_B = struct.Struct("<B")
 

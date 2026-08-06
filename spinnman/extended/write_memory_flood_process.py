@@ -14,11 +14,17 @@
 
 import math
 from typing import BinaryIO, Optional
-from spinnman.messages.scp.impl import (
-    FloodFillEnd, FloodFillStart, FloodFillData)
-from spinnman.processes import (
-    AbstractMultiConnectionProcess, ConnectionSelector)
+
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
+from spinnman.messages.scp.impl import (
+    FloodFillData,
+    FloodFillEnd,
+    FloodFillStart,
+)
+from spinnman.processes import (
+    AbstractMultiConnectionProcess,
+    ConnectionSelector,
+)
 
 
 class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):

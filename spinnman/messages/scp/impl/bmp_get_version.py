@@ -13,11 +13,15 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
-from spinnman.model import VersionInfo
-from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, BMPRequest, BMPResponse)
+
 from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest,
+    BMPRequest,
+    BMPResponse,
+)
 from spinnman.messages.scp.enums import SCPCommand
+from spinnman.model import VersionInfo
 
 
 class BMPGetVersion(BMPRequest['_BMPVersion']):

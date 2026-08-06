@@ -15,12 +15,16 @@
 from typing import Optional
 
 from spinn_machine import RoutingEntry
+
 from spinnman.messages.scp.impl.fixed_route_read import (
-    FixedRouteRead, _FixedRouteResponse)
+    FixedRouteRead,
+    _FixedRouteResponse,
+)
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 
 
 class ReadFixedRouteRoutingEntryProcess(

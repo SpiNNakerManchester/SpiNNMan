@@ -21,18 +21,21 @@ from spinn_utilities.config_holder import set_config
 
 from spinn_machine.version import ALL_BOARD_TYPES
 
+from spinnman import constants
+from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
+from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
-from spinnman.transceiver import (
-    create_transceiver_from_connections, create_transceiver_from_hostname,
-    MockableTransceiver)
 from spinnman.extended.extended_transceiver import ExtendedTransceiver
-from spinnman import constants
 from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
-    SystemVariableDefinition)
-from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.board_test_configuration import BoardTestConfiguration
+    SystemVariableDefinition,
+)
+from spinnman.transceiver import (
+    MockableTransceiver,
+    create_transceiver_from_connections,
+    create_transceiver_from_hostname,
+)
 
 
 class MockExtendedTransceiver(MockableTransceiver, ExtendedTransceiver):

@@ -13,18 +13,21 @@
 # limitations under the License.
 
 import sys
-from threading import RLock
 import time
+from threading import RLock
 from types import TracebackType
-from typing import (Callable, Dict, Generic, List, Optional, Set, TypeVar,
-                    cast)
+from typing import Callable, Dict, Generic, List, Optional, Set, TypeVar, cast
+
 from typing_extensions import TypeAlias
-from spinnman.messages.scp.enums import SCPResult
-from spinnman.exceptions import SpinnmanTimeoutException, SpinnmanIOException
-from spinnman.constants import SCP_TIMEOUT, N_RETRIES
+
 from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
+from spinnman.constants import N_RETRIES, SCP_TIMEOUT
+from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest,
+    AbstractSCPResponse,
+)
+from spinnman.messages.scp.enums import SCPResult
 
 #: Type of responses.
 #: :meta private:

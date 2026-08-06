@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import unittest
+
 from spinn_machine.tags import IPTag
+
 from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
 

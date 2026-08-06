@@ -13,11 +13,14 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import cast, Iterable, List, Mapping, Tuple
+from typing import Iterable, List, Mapping, Tuple, cast
+
 from spinn_machine import Chip, CoreSubsets, Link, Machine
+
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
 from spinnman.processes import ConnectionSelector
+
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 
 APP_COPY_RUN_TIMEOUT = 6.0

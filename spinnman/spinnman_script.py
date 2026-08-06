@@ -16,9 +16,8 @@ from typing import Optional
 
 from spinn_machine import Machine
 
-from spinnman.transceiver import Transceiver
 from spinnman.spinnman_simulation import SpiNNManSimulation
-
+from spinnman.transceiver import Transceiver
 
 __simulator: Optional[SpiNNManSimulation] = None
 

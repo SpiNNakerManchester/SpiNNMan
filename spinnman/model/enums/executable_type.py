@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
+
 from enum import Enum
 from typing import FrozenSet, Sequence
+
 from spinnman.model.enums import CPUState
 
 

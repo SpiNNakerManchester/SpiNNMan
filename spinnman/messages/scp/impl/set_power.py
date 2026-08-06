@@ -13,13 +13,18 @@
 # limitations under the License.
 
 import logging
+
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
-from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, BMPRequest, BMPOKResponse)
-from spinnman.messages.scp.abstract_messages.bmp_request import Boards
-from spinnman.messages.scp.enums import SCPCommand, PowerCommand
+
 from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest,
+    BMPOKResponse,
+    BMPRequest,
+)
+from spinnman.messages.scp.abstract_messages.bmp_request import Boards
+from spinnman.messages.scp.enums import PowerCommand, SCPCommand
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

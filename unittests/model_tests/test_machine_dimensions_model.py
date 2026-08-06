@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import unittest
-from spinnman.model import MachineDimensions
+
 from spinnman.config_setup import unittest_setup
+from spinnman.model import MachineDimensions
 
 
 class TestMachineDimensionsModel(unittest.TestCase):

@@ -14,42 +14,57 @@
 """
 Implementation of the client for the Spalloc web service.
 """
-import sys
-
 import math
 import os
-import time
-from logging import getLogger
-
 import queue
 import struct
+import sys
 import threading
+import time
+from logging import getLogger
 from time import sleep
-from typing import (Any, Callable, Dict, Final, FrozenSet, Iterable, List,
-                    Mapping, Optional, Tuple, cast)
-from urllib.parse import urlparse, urlunparse, ParseResult
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Final,
+    FrozenSet,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    cast,
+)
+from urllib.parse import ParseResult, urlparse, urlunparse
 
-from packaging.version import Version
 import requests
-from typing_extensions import TypeAlias
+from packaging.version import Version
+from typing_extensions import Never, TypeAlias
 from websocket import WebSocket  # type: ignore
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.abstract_context_manager import AbstractContextManager
 from spinn_utilities.config_holder import (
-    get_config_int, get_config_int_or_none, get_config_str_or_none)
+    get_config_int,
+    get_config_int_or_none,
+    get_config_str_or_none,
+)
 from spinn_utilities.log import FormatAdapter
+from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
-from spinn_utilities.overrides import overrides
 
-from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.connections.abstract_classes import Connection, Listenable
+from spinnman.connections.udp_packet_connections import UDPConnection
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.data import SpiNNManDataView
-from spinnman.exceptions import SpinnmanTimeoutException
 from spinnman.exceptions import (
-    SpinnmanException, SpallocBoardUnavailableException, SpallocException)
+    SpallocBoardUnavailableException,
+    SpallocException,
+    SpinnmanException,
+    SpinnmanTimeoutException,
+)
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.transceiver import Transceiver
 
@@ -63,8 +78,8 @@ from .spalloc_machine import SpallocMachine
 from .spalloc_proxied_connection import SpallocProxiedConnection
 from .spalloc_scp_connection import SpallocSCPConnection
 from .spalloc_state import SpallocState
-from .utils import parse_service_url, get_hostname
 from .spalloc_transceiver import SpallocTransceiver
+from .utils import get_hostname, parse_service_url
 
 logger = FormatAdapter(getLogger(__name__))
 _open_req = struct.Struct("<IIIII")
@@ -160,9 +175,12 @@ class SpallocClient(AbstractContextManager):
         if password is None:
             password = os.getenv("SPALLOC_PASSWORD", None)
 
-        self.__session: Optional[Session] = Session(
-            service_url, username, password, bearer_token)
-        obj = self.__session.renew()
+        try:
+            self.__session: Optional[Session] = Session(
+                service_url, username, password, bearer_token)
+            obj = self.__session.renew()
+        except SpallocException as ex:
+            self._session_error(service_url, ex, username, password)
         v = cast(JsonObject, obj["version"])
         self.version = Version(
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
@@ -173,6 +191,23 @@ class SpallocClient(AbstractContextManager):
         self.__nmpi_job = nmpi_job
         self.__nmpi_user = nmpi_user
         logger.info("established session to {} for {}", service_url, username)
+
+    def _session_error(
+            self, service_url: str, exception: SpallocException,
+            username: Optional[str], password: Optional[str]) -> Never:
+        message = f"Unable to connect to {service_url}. "
+        if username is None:
+            if password is None:
+                message += ("Username and password missing. "
+                            "Please add to url or set ENV SPALLOC_USER "
+                            "and SPALLOC_PASSWORD.")
+            else:
+                message += ("Username missing. "
+                            "Please add to url or set ENV SPALLOC_USER.")
+        elif password is None:
+            message += ("Password missing. "
+                        "Please add to url or set ENV SPALLOC_PASSWORD.")
+        raise SpallocException(message) from exception
 
     def get_job(self, job_id: str) -> SpallocJob:
         """

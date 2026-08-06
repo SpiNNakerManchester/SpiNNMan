@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import struct
+
 from spinn_utilities.overrides import overrides
+
 from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.messages.eieio import EIEIOType
+
 from .abstract_data_element import AbstractDataElement
 
 _TWO_SHORTS = struct.Struct("<HH")

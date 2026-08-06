@@ -14,7 +14,9 @@
 
 import struct
 from typing import Optional
+
 from spinnman.exceptions import SpinnmanInvalidParameterException
+
 from .spinnaker_boot_op_code import SpinnakerBootOpCode
 
 _PATTERN_HIIII = struct.Struct(">HIIII")

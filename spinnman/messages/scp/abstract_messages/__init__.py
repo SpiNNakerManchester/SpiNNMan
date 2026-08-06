@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .bmp_response import BMPResponse, BMPOKResponse
 from .bmp_request import BMPRequest
+from .bmp_response import BMPOKResponse, BMPResponse
 from .scp_request import AbstractSCPRequest
 from .scp_response import AbstractSCPResponse
 

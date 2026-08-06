@@ -13,11 +13,14 @@
 # limitations under the License.
 
 from typing import Generic, TypeVar
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod)
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+
 from spinnman.connections.udp_packet_connections import (
-    BMPConnection, SCAMPConnection)
+    BMPConnection,
+    SCAMPConnection,
+)
+from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 
 #: Type of connections selected between.
 #: :meta private:

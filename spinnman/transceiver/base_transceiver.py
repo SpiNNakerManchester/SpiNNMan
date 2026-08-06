@@ -12,84 +12,163 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import defaultdict
 import io
+import logging
 import os
 import random
-import struct
-from contextlib import contextmanager, suppress
-import logging
 import socket
-from threading import Condition
+import struct
 import time
+from collections import defaultdict
+from contextlib import contextmanager, suppress
+from threading import Condition
 from typing import (
-    BinaryIO, Collection, Dict, FrozenSet, Iterable, Iterator, List, Optional,
-    Sequence, Set, Tuple, TypeVar, Union, cast)
-from spinn_utilities.abstract_base import (
-    AbstractBase, abstractmethod)
+    BinaryIO,
+    Collection,
+    Dict,
+    FrozenSet,
+    Iterable,
+    Iterator,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
+
+from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.config_holder import get_config_bool
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
+
 from spinn_machine import (
-    CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
+    CoreSubsets,
+    Machine,
+    MulticastRoutingEntry,
+    RoutingEntry,
+)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
+
 from spinnman.connections.abstract_classes import Connection
-from spinnman.connections.udp_packet_connections import SDPConnection
+from spinnman.connections.udp_packet_connections import (
+    BMPConnection,
+    BootConnection,
+    SCAMPConnection,
+    SDPConnection,
+)
 from spinnman.constants import (
-    BMP_POST_POWER_ON_SLEEP_TIME, BMP_POWER_ON_TIMEOUT, BMP_TIMEOUT,
-    CPU_MAX_USER, CPU_USER_OFFSET, CPU_USER_START_ADDRESS,
-    IPTAG_TIME_OUT_WAIT_TIMES, SCP_SCAMP_PORT, SYSTEM_VARIABLE_BASE_ADDRESS,
-    UDP_BOOT_CONNECTION_DEFAULT_PORT, NO_ROUTER_DIAGNOSTIC_FILTERS,
-    ROUTER_REGISTER_BASE_ADDRESS, ROUTER_DEFAULT_FILTERS_MAX_POSITION,
-    ROUTER_FILTER_CONTROLS_OFFSET, ROUTER_DIAGNOSTIC_FILTER_SIZE, N_RETRIES,
-    BOOT_RETRIES, POWER_CYCLE_WAIT_TIME_IN_SECONDS, ROUTER_REGISTER_REGISTERS)
+    BMP_POST_POWER_ON_SLEEP_TIME,
+    BMP_POWER_ON_TIMEOUT,
+    BMP_TIMEOUT,
+    BOOT_RETRIES,
+    CPU_MAX_USER,
+    CPU_USER_OFFSET,
+    CPU_USER_START_ADDRESS,
+    IPTAG_TIME_OUT_WAIT_TIMES,
+    N_RETRIES,
+    NO_ROUTER_DIAGNOSTIC_FILTERS,
+    POWER_CYCLE_WAIT_TIME_IN_SECONDS,
+    ROUTER_DEFAULT_FILTERS_MAX_POSITION,
+    ROUTER_DIAGNOSTIC_FILTER_SIZE,
+    ROUTER_FILTER_CONTROLS_OFFSET,
+    ROUTER_REGISTER_BASE_ADDRESS,
+    ROUTER_REGISTER_REGISTERS,
+    SCP_SCAMP_PORT,
+    SYSTEM_VARIABLE_BASE_ADDRESS,
+    UDP_BOOT_CONNECTION_DEFAULT_PORT,
+)
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import (
     SpinnmanBootException,
-    SpinnmanInvalidParameterException, SpinnmanException, SpinnmanIOException,
-    SpinnmanTimeoutException, SpinnmanGenericProcessException,
+    SpiNNManCoresNotInStateException,
+    SpinnmanException,
+    SpinnmanGenericProcessException,
+    SpinnmanInvalidParameterException,
+    SpinnmanIOException,
+    SpinnmanTimeoutException,
     SpinnmanUnexpectedResponseCodeException,
-    SpiNNManCoresNotInStateException)
-from spinnman.model import (
-    CPUInfo, CPUInfos, DiagnosticFilter, ChipSummaryInfo,
-    IOBuffer, MachineDimensions, RouterDiagnostics, VersionInfo)
-from spinnman.model.enums import (
-    CPUState, SDP_PORTS, SDP_RUNNING_MESSAGE_CODES, UserRegister,
-    DiagnosticFilterDefaultRoutingStatus, DiagnosticFilterPacketType,
-    DiagnosticFilterSource)
-from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
-from spinnman.messages.scp.enums import Signal
+)
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest,
+    AbstractSCPResponse,
+)
+from spinnman.messages.scp.enums import PowerCommand, Signal
+from spinnman.messages.scp.impl import (
+    AppStop,
+    BMPGetVersion,
+    DoSync,
+    IPTagClear,
+    IPTagSet,
+    IPTagSetTTO,
+    ReadFPGARegister,
+    ReverseIPTagSet,
+    RouterClear,
+    SendSignal,
+    SetPower,
+    WriteFPGARegister,
+    WriteMemory,
+)
 from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.scp.impl.get_chip_info_response import (
-    GetChipInfoResponse)
+    GetChipInfoResponse,
+)
 from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
 from spinnman.messages.spinnaker_boot import (
-    SystemVariableDefinition, SpinnakerBootMessages)
-from spinnman.messages.scp.enums import PowerCommand
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl import (
-    BMPGetVersion, SetPower, ReadFPGARegister,
-    WriteFPGARegister, IPTagSetTTO, ReverseIPTagSet,
-    WriteMemory, SendSignal, AppStop,
-    IPTagSet, IPTagClear, RouterClear, DoSync)
-from spinnman.processes import ConnectionSelector
-from spinnman.connections.udp_packet_connections import (
-    BMPConnection, BootConnection, SCAMPConnection)
+    SpinnakerBootMessages,
+    SystemVariableDefinition,
+)
+from spinnman.model import (
+    ChipSummaryInfo,
+    CPUInfo,
+    CPUInfos,
+    DiagnosticFilter,
+    IOBuffer,
+    MachineDimensions,
+    RouterDiagnostics,
+    VersionInfo,
+)
+from spinnman.model.enums import (
+    SDP_PORTS,
+    SDP_RUNNING_MESSAGE_CODES,
+    CPUState,
+    DiagnosticFilterDefaultRoutingStatus,
+    DiagnosticFilterPacketType,
+    DiagnosticFilterSource,
+    UserRegister,
+)
 from spinnman.processes import (
-    GetMachineProcess, GetVersionProcess,
-    MallocSDRAMProcess, WriteMemoryProcess, ReadMemoryProcess,
-    GetCPUInfoProcess, GetExcludeCPUInfoProcess, GetIncludeCPUInfoProcess,
-    ReadIOBufProcess, ApplicationRunProcess,
-    LoadFixedRouteRoutingEntryProcess, FixedConnectionSelector,
+    ApplicationCopyRunProcess,
+    ApplicationRunProcess,
+    ClearRoutesProcess,
+    ConnectionSelector,
+    FixedConnectionSelector,
+    GetCPUInfoProcess,
+    GetExcludeCPUInfoProcess,
+    GetIncludeCPUInfoProcess,
+    GetMachineProcess,
+    GetMultiCastRoutesProcess,
+    GetNCoresInStateProcess,
+    GetTagsProcess,
+    GetVersionProcess,
+    LoadFixedRouteRoutingEntryProcess,
+    LoadMultiCastRoutesProcess,
+    MallocSDRAMProcess,
+    MostDirectConnectionSelector,
     ReadFixedRouteRoutingEntryProcess,
-    LoadMultiCastRoutesProcess, GetTagsProcess, GetMultiCastRoutesProcess,
-    SendSingleCommandProcess, ReadRouterDiagnosticsProcess,
-    MostDirectConnectionSelector, ApplicationCopyRunProcess,
-    GetNCoresInStateProcess, SetMemoryProcess, ClearRoutesProcess)
-from spinnman.transceiver.transceiver import Transceiver
+    ReadIOBufProcess,
+    ReadMemoryProcess,
+    ReadRouterDiagnosticsProcess,
+    SendSingleCommandProcess,
+    SetMemoryProcess,
+    WriteMemoryProcess,
+)
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
+from spinnman.transceiver.transceiver import Transceiver
 from spinnman.utilities.utility_functions import get_vcpu_address
 
 #: Type of a response.
@@ -710,21 +789,26 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def get_clock_drift(self, x: int, y: int) -> float:
         drift_fp = 1 << 17
 
-        drift_b = self._get_sv_data(x, y, SystemVariableDefinition.clock_drift)
+        drift_b = self._get_int_sv_data(
+            x, y, SystemVariableDefinition.clock_drift)
         drift = struct.unpack("<i", struct.pack("<I", drift_b))[0]
         return drift / drift_fp
 
-    def _get_sv_data(
+    def _get_int_sv_data(
             self, x: int, y: int,
-            data_item: SystemVariableDefinition) -> Union[int, bytearray]:
+            data_item: SystemVariableDefinition) -> int:
         addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
-        if data_item.data_type.is_byte_array:
-            size = cast(int, data_item.array_size)
-            # Do not need to decode the bytes of a byte array
-            return self.read_memory(x, y, addr, size)
         return struct.unpack_from(
             data_item.data_type.struct_code,
             self.read_memory(x, y, addr, data_item.data_type.value))[0]
+
+    def _get_array_sv_data(
+            self, x: int, y: int,
+            data_item: SystemVariableDefinition) -> bytearray:
+        addr = SYSTEM_VARIABLE_BASE_ADDRESS + data_item.offset
+        size = cast(int, data_item.array_size)
+        # Do not need to decode the bytes of a byte array
+        return self.read_memory(x, y, addr, size)
 
     @staticmethod
     def __get_user_register_address_from_core(
@@ -769,10 +853,10 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                   ) -> Iterable[IOBuffer]:
         # making the assumption that all chips have the same iobuf size.
         if self._iobuf_size is None:
-            self._iobuf_size = cast(int, self._get_sv_data(
+            self._iobuf_size = self._get_int_sv_data(
                 AbstractSCPRequest.DEFAULT_DEST_X_COORD,
                 AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-                SystemVariableDefinition.iobuf_size))
+                SystemVariableDefinition.iobuf_size)
         # Get all the cores if the subsets are not given
         # TODO is core_subsets ever None
         if core_subsets is None:
@@ -1280,8 +1364,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             self, x: int, y: int,
             app_id: Optional[int] = None) -> List[MulticastRoutingEntry]:
         try:
-            base_address = cast(int, self._get_sv_data(
-                x, y, SystemVariableDefinition.router_table_copy_address))
+            base_address = self._get_int_sv_data(
+                x, y, SystemVariableDefinition.router_table_copy_address)
             process = GetMultiCastRoutesProcess(
                 self._scamp_connection_selector, app_id)
             return process.get_routes(x, y, base_address)

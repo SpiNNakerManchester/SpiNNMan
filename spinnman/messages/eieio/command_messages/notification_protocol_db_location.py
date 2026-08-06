@@ -15,8 +15,9 @@
 from typing import Optional
 
 from spinnman.constants import EIEIO_COMMAND_IDS
-from .eieio_command_message import EIEIOCommandMessage
+
 from .eieio_command_header import EIEIOCommandHeader
+from .eieio_command_message import EIEIOCommandMessage
 
 
 class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):

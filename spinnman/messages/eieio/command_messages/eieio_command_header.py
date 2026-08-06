@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import cast, Union
 import struct
 from enum import Enum
+from typing import Union, cast
+
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _ONE_SHORT = struct.Struct("<H")

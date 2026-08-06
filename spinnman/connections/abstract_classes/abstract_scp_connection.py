@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Optional, Tuple
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
-from spinnman.messages.scp.enums import SCPResult
+
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.enums import SCPResult
+
 from .connection import Connection
 
 

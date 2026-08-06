@@ -19,7 +19,8 @@ from .host_data_read import HostDataRead
 from .host_data_read_ack import HostDataReadAck
 from .host_send_sequenced_data import HostSendSequencedData
 from .notification_protocol_db_location import (
-    NotificationProtocolDatabaseLocation)
+    NotificationProtocolDatabaseLocation,
+)
 from .notification_protocol_pause_stop import NotificationProtocolPauseStop
 from .notification_protocol_start_resume import NotificationProtocolStartResume
 from .padding_request import PaddingRequest

@@ -13,22 +13,44 @@
 # limitations under the License.
 
 from typing import (
-    BinaryIO, Collection, Dict, FrozenSet, Iterable,
-    List, Optional, Set, Tuple, Union)
+    BinaryIO,
+    Collection,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
+
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
+
 from spinn_machine import (
-    CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
+    CoreSubsets,
+    Machine,
+    MulticastRoutingEntry,
+    RoutingEntry,
+)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
+
 from spinnman.connections.abstract_classes import Connection
 from spinnman.connections.udp_packet_connections import (
-    SCAMPConnection, SDPConnection)
+    SCAMPConnection,
+    SDPConnection,
+)
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.sdp import SDPMessage
 from spinnman.model import (
-    CPUInfos, DiagnosticFilter, IOBuffer, RouterDiagnostics,
-    VersionInfo)
+    CPUInfos,
+    DiagnosticFilter,
+    IOBuffer,
+    RouterDiagnostics,
+    VersionInfo,
+)
 from spinnman.model.enums import CPUState, UserRegister
 from spinnman.processes import MostDirectConnectionSelector
 

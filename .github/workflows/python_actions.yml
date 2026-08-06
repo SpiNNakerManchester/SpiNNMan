@@ -28,4 +28,5 @@ jobs:
       flake8-packages: spinnman unittests spinnman_integration_tests
       pylint-packages: spinnman
       mypy-full-packages: spinnman unittests spinnman_integration_tests
+      ruff-packages: spinnman unittests spinnman_integration_tests manual_scripts
     secrets: inherit

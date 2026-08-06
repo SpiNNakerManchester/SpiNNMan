@@ -13,9 +13,13 @@
 # limitations under the License.
 
 from typing import Dict, Iterable, Iterator
+
 from typing_extensions import Self
+
 from spinn_utilities.typing.coords import XYP
+
 from spinnman.model.enums import CPUState
+
 from .cpu_info import CPUInfo
 
 

@@ -13,10 +13,12 @@
 # limitations under the License.
 
 import struct
+
 from spinn_utilities.overrides import overrides
+
+from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
 from spinnman.messages.scp.enums import SCPResult
-from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
 
 _BYTE_SKIP_BYTE_BYTE = struct.Struct("<Bx2B")
 

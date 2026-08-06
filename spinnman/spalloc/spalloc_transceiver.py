@@ -14,17 +14,17 @@
 import io
 import os
 import struct
-from typing import List, Union, BinaryIO, Optional, Tuple, cast, Dict
+from typing import BinaryIO, Dict, List, Optional, Tuple, Union, cast
 
 import numpy
 from numpy import uint8, uint32
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.transceiver.version5transceiver import Version5Transceiver
 from spinnman.connections.abstract_classes.connection import Connection
-from spinnman.processes.write_memory_process import _UNSIGNED_WORD
 from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.processes.write_memory_process import _UNSIGNED_WORD
+from spinnman.transceiver.version5transceiver import Version5Transceiver
 
 from .spalloc_job import SpallocJob
 

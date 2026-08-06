@@ -14,13 +14,17 @@
 
 import logging
 from typing import Optional
+
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
+
 from spinn_machine.data.machine_data_writer import MachineDataWriter
+
 from spinnman.spalloc import MachineAllocationController
 from spinnman.spalloc.spalloc_allocator import SpallocJobController
 from spinnman.transceiver import Transceiver
-from .spinnman_data_view import _SpiNNManDataModel, SpiNNManDataView
+
+from .spinnman_data_view import SpiNNManDataView, _SpiNNManDataModel
 
 logger = FormatAdapter(logging.getLogger(__name__))
 __temp_dir = None

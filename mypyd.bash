@@ -14,12 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This bash assumes that other repositories are installed in paralled
+# This bash assumes that other repositories are installed in parallel
 
-# requires the latest mypy
-# pip install --upgrade mypy
+if [ "$#" -eq  "0" ]
+  then
+    echo "Using previous setup. Provide an argument to run setup"
+    source ../SupportScripts/venv/mypy_runner/bin/activate
+else
+    python3 -m venv ../SupportScripts/venv/mypy_runner
+    source ../SupportScripts/venv/mypy_runner/bin/activate
+    pip3 install --upgrade ../SpiNNUtils
+    pip3 install --upgrade ../SpiNNMachine
+    pip3 install --upgrade ../SpiNNMan[test]
+    python3 -m pip install --upgrade mypy
+fi
 
-utils="../SpiNNUtils/spinn_utilities"
-machine="../SpiNNMachine/spinn_machine"
-
-mypy --disallow-untyped-defs $utils $machine spinnman unittests spinnman_integration_tests
+mypy --disallow-untyped-defs spinnman unittests spinnman_integration_tests

@@ -13,12 +13,17 @@
 # limitations under the License.
 
 import unittest
+
 import spinn_utilities
+
 import spinn_machine
-from spinnman.transceiver.base_transceiver import (
-    BaseTransceiver, _SCAMP_VERSION)
+
 import spinnman
 from spinnman.config_setup import unittest_setup
+from spinnman.transceiver.base_transceiver import (
+    _SCAMP_VERSION,
+    BaseTransceiver,
+)
 
 
 class Test(unittest.TestCase):

@@ -13,11 +13,13 @@
 # limitations under the License.
 
 from spinn_utilities.overrides import overrides
+
+from spinnman.constants import IPTAG_TIME_OUT_WAIT_TIMES
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
 from spinnman.messages.sdp import SDPFlag, SDPHeader
-from spinnman.constants import IPTAG_TIME_OUT_WAIT_TIMES
+
 from .iptag_get_info_response import IPTagGetInfoResponse
 
 _IPTAG_TTO = (4 << 16)

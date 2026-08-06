@@ -15,7 +15,9 @@
 API of the client for the Spalloc web service.
 """
 from typing import Optional
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+
 from spinnman.connections.abstract_classes import Listenable
 
 

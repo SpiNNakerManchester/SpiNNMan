@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 import unittest
+from typing import Optional
+
 from spinn_utilities.config_holder import set_config
 from spinn_utilities.ping import Ping
 

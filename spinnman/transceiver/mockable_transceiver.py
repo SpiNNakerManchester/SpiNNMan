@@ -13,29 +13,54 @@
 # limitations under the License.
 
 from typing import (
-    BinaryIO, Collection, Dict, FrozenSet, Iterable,
-    List, Optional, Set, Tuple, Union)
+    BinaryIO,
+    Collection,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
+
 from spinn_utilities.overrides import overrides
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
+
 from spinn_machine import (
-    CoreSubsets, Machine, MulticastRoutingEntry, RoutingEntry)
+    CoreSubsets,
+    Machine,
+    MulticastRoutingEntry,
+    RoutingEntry,
+)
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
-from spinnman.data import SpiNNManDataView
+
 from spinnman.connections.abstract_classes import Connection
-from spinnman.connections.udp_packet_connections import BMPConnection
 from spinnman.connections.udp_packet_connections import (
-    SCAMPConnection, SDPConnection)
-from spinnman.processes import ConnectionSelector, FixedConnectionSelector
+    BMPConnection,
+    SCAMPConnection,
+    SDPConnection,
+)
+from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.enums import Signal
 from spinnman.messages.sdp import SDPMessage
 from spinnman.model import (
-    CPUInfos, DiagnosticFilter, IOBuffer, RouterDiagnostics,
-    VersionInfo)
+    CPUInfos,
+    DiagnosticFilter,
+    IOBuffer,
+    RouterDiagnostics,
+    VersionInfo,
+)
 from spinnman.model.enums import CPUState, UserRegister
-from spinnman.transceiver.transceiver import Transceiver
+from spinnman.processes import (
+    ConnectionSelector,
+    FixedConnectionSelector,
+    MostDirectConnectionSelector,
+)
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
-from spinnman.processes import MostDirectConnectionSelector
+from spinnman.transceiver.transceiver import Transceiver
 
 
 class MockableTransceiver(ExtendableTransceiver):

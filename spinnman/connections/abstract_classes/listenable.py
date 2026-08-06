@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Callable, Generic, TypeVar
+
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
+
 #: :meta private:
 T = TypeVar("T")
 

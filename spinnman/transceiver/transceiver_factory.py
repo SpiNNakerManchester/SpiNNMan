@@ -14,28 +14,33 @@
 
 import logging
 import re
-from typing import (Dict, Iterable, List, Optional, Tuple)
+from typing import Dict, Iterable, List, Optional, Tuple
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
 
 from spinn_machine.version.version_3 import Version3
 from spinn_machine.version.version_5 import Version5
+
 from spinnman.connections.abstract_classes import Connection
+from spinnman.connections.udp_packet_connections import (
+    BMPConnection,
+    BootConnection,
+    SCAMPConnection,
+)
+from spinnman.constants import LOCAL_HOST
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanException
 from spinnman.extended.version3transceiver import ExtendedVersion3Transceiver
 from spinnman.extended.version5transceiver import ExtendedVersion5Transceiver
 from spinnman.model.bmp_connection_data import BMPConnectionData
-from spinnman.utilities.utility_functions import (
-    work_out_bmp_from_machine_details)
-from spinnman.connections.udp_packet_connections import (
-    BMPConnection, BootConnection, SCAMPConnection)
 from spinnman.transceiver import Transceiver
 from spinnman.transceiver.version3transceiver import Version3Transceiver
 from spinnman.transceiver.version5transceiver import Version5Transceiver
 from spinnman.transceiver.virtual5transceiver import Virtual5Transceiver
-from spinnman.constants import LOCAL_HOST
+from spinnman.utilities.utility_functions import (
+    work_out_bmp_from_machine_details,
+)
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

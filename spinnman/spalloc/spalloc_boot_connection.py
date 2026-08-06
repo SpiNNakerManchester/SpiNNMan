@@ -18,13 +18,17 @@ API of the client for the Spalloc web service.
 import struct
 import time
 from typing import Callable, Optional
+
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
+
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.connections.udp_packet_connections import BootConnection
 from spinnman.connections.udp_packet_connections.boot_connection import (
-    _ANTI_FLOOD_DELAY)
+    _ANTI_FLOOD_DELAY,
+)
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
+
 from .spalloc_proxied_connection import SpallocProxiedConnection
 
 _ONE_SHORT = struct.Struct("<H")

@@ -17,7 +17,16 @@ import logging
 import sys
 from types import TracebackType
 from typing import (
-    Callable, Dict, Generator, Generic, List, Optional, TypeVar, cast, Set)
+    Callable,
+    Dict,
+    Generator,
+    Generic,
+    List,
+    Optional,
+    Set,
+    TypeVar,
+    cast,
+)
 
 from typing_extensions import Self, TypeAlias
 
@@ -25,15 +34,20 @@ from spinn_utilities.log import FormatAdapter
 
 from spinnman.connections import SCPRequestPipeLine
 from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.constants import SCP_TIMEOUT, N_RETRIES
+from spinnman.constants import N_RETRIES, SCP_TIMEOUT
 from spinnman.exceptions import (
-    SpinnmanGenericProcessException, SpinnmanGroupedProcessException)
+    SpinnmanGenericProcessException,
+    SpinnmanGroupedProcessException,
+)
 from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, AbstractSCPResponse)
+    AbstractSCPRequest,
+    AbstractSCPResponse,
+)
 from spinnman.messages.scp.enums.scp_result import SCPResult
 
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 
 #: Type of responses.
 #: :meta private:

@@ -12,16 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import annotations
+
 import traceback
 from types import TracebackType
 from typing import (
-    Generic, List, Optional, FrozenSet, TYPE_CHECKING, TypeVar, Union)
+    TYPE_CHECKING,
+    FrozenSet,
+    Generic,
+    List,
+    Optional,
+    TypeVar,
+    Union,
+)
+
 if TYPE_CHECKING:
-    from spinnman.messages.scp.enums import SCPResult
-    from spinnman.model.enums import CPUState
-    from spinnman.model import CPUInfos
-    from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
     from spinnman.connections.udp_packet_connections import SCAMPConnection
+    from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+    from spinnman.messages.scp.enums import SCPResult
+    from spinnman.model import CPUInfos
+    from spinnman.model.enums import CPUState
 
 T = TypeVar("T")
 

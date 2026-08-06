@@ -14,35 +14,37 @@
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 from .application_copy_run_process import ApplicationCopyRunProcess
 from .application_run_process import ApplicationRunProcess
-
+from .clear_routes_process import ClearRoutesProcess
 from .fixed_connection_selector import FixedConnectionSelector
-from .get_heap_process import GetHeapProcess
 from .get_cpu_info_process import GetCPUInfoProcess
 from .get_exclude_cpu_info_process import GetExcludeCPUInfoProcess
+from .get_heap_process import GetHeapProcess
 from .get_include_cpu_info_process import GetIncludeCPUInfoProcess
 from .get_machine_process import GetMachineProcess
 from .get_n_cores_in_state_process import GetNCoresInStateProcess
 from .get_routes_process import GetMultiCastRoutesProcess
 from .get_tags_process import GetTagsProcess
 from .get_version_process import GetVersionProcess
+from .load_fixed_route_routing_entry_process import (
+    LoadFixedRouteRoutingEntryProcess,
+)
 from .load_routes_process import LoadMultiCastRoutesProcess
 from .malloc_sdram_process import MallocSDRAMProcess
 from .most_direct_connection_selector import MostDirectConnectionSelector
 from .read_fixed_route_routing_entry_process import (
-    ReadFixedRouteRoutingEntryProcess)
-from .load_fixed_route_routing_entry_process import (
-    LoadFixedRouteRoutingEntryProcess)
+    ReadFixedRouteRoutingEntryProcess,
+)
 from .read_iobuf_process import ReadIOBufProcess
 from .read_memory_process import ReadMemoryProcess
 from .read_router_diagnostics_process import ReadRouterDiagnosticsProcess
 from .round_robin_connection_selector import RoundRobinConnectionSelector
 from .send_single_command_process import SendSingleCommandProcess
-from .write_memory_process import WriteMemoryProcess
 from .set_memory_process import SetMemoryProcess
-from .clear_routes_process import ClearRoutesProcess
+from .write_memory_process import WriteMemoryProcess
 
 # Old name
 AbstractMultiConnectionProcessConnectionSelector = ConnectionSelector

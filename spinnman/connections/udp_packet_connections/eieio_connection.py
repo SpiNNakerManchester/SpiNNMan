@@ -19,8 +19,10 @@ from spinn_utilities.overrides import overrides
 
 from spinnman.connections.abstract_classes import Listenable
 from spinnman.messages.eieio import (
-    read_eieio_command_message, read_eieio_data_message)
-from spinnman.messages.eieio import AbstractEIEIOMessage
+    AbstractEIEIOMessage,
+    read_eieio_command_message,
+    read_eieio_data_message,
+)
 
 from .udp_connection import UDPConnection
 

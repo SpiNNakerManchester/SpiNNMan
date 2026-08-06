@@ -19,7 +19,9 @@ apply some consistency to things.
 import logging
 import socket
 from typing import Optional, Tuple
+
 from spinn_utilities.log import FormatAdapter
+
 from spinnman.exceptions import SpinnmanIOException, SpinnmanTimeoutException
 
 logger = FormatAdapter(logging.getLogger(__name__))

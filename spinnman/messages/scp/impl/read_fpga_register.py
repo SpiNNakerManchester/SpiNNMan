@@ -13,11 +13,16 @@
 # limitations under the License.
 
 import struct
+
 from spinn_utilities.overrides import overrides
-from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest, BMPRequest, BMPResponse)
-from spinnman.messages.scp.enums import SCPCommand
+
 from spinnman.messages.scp import SCPRequestHeader
+from spinnman.messages.scp.abstract_messages import (
+    AbstractSCPRequest,
+    BMPRequest,
+    BMPResponse,
+)
+from spinnman.messages.scp.enums import SCPCommand
 
 _ONE_WORD = struct.Struct("<I")
 

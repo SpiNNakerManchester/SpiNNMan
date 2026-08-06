@@ -13,7 +13,9 @@
 # limitations under the License.
 
 from typing import Optional
+
 from spinn_utilities.overrides import overrides
+
 from spinnman.messages.eieio import AbstractEIEIOMessage
 from spinnman.messages.eieio.command_messages import EIEIOCommandHeader
 

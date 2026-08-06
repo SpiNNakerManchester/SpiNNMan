@@ -14,14 +14,15 @@
 
 from typing import Optional
 
-from spinnman.messages.scp.impl import GetVersion
 from spinnman.constants import N_RETRIES
-from spinnman.model import VersionInfo
+from spinnman.messages.scp.impl import GetVersion
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
+from spinnman.model import VersionInfo
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 
 
 class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):

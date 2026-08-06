@@ -12,20 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from dataclasses import dataclass
 import functools
 import struct
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Dict, Iterable, List
+
 from spinn_utilities.typing.coords import XYP
+
 from spinn_machine import CoreSubsets
+
+from spinnman.constants import CPU_IOBUF_ADDRESS_OFFSET, UDP_MESSAGE_MAX_SIZE
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinnman.model import IOBuffer
 from spinnman.utilities.utility_functions import get_vcpu_address
-from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
-from spinnman.constants import UDP_MESSAGE_MAX_SIZE, CPU_IOBUF_ADDRESS_OFFSET
+
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector)
+    ConnectionSelector,
+)
 
 
 @dataclass(frozen=True)
