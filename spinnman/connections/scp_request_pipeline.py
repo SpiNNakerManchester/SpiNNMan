@@ -114,20 +114,20 @@ class SCPRequestPipeLine(Generic[R]):
                 self._intermediate_channel_waits = 0
 
         # A dictionary of sequence number -> requests in progress
-        self._requests: Dict[int, AbstractSCPRequest] = dict()
-        self._request_data: Dict[int, bytes] = dict()
+        self._requests: Dict[int, AbstractSCPRequest] = {}
+        self._request_data: Dict[int, bytes] = {}
 
         # A dictionary of sequence number -> number of retries for the packet
-        self._retries: Dict[int, int] = dict()
+        self._retries: Dict[int, int] = {}
 
         # A dictionary of sequence number -> callback function for response
-        self._callbacks: Dict[int, Optional[CB]] = dict()
+        self._callbacks: Dict[int, Optional[CB]] = {}
 
         # A dictionary of sequence number -> callback function for errors
-        self._error_callbacks: Dict[int, ECB] = dict()
+        self._error_callbacks: Dict[int, ECB] = {}
 
         # A dictionary of sequence number -> retry reason
-        self._retry_reason: Dict[int, List[str]] = dict()
+        self._retry_reason: Dict[int, List[str]] = {}
 
         # The number of responses outstanding
         self._in_progress = 0

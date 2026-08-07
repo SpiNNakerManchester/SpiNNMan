@@ -96,7 +96,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         super().__init__(connection_selector)
 
         # A dictionary of (x, y, p) -> iobuf address
-        self._iobuf_address: Dict[XYP, int] = dict()
+        self._iobuf_address: Dict[XYP, int] = {}
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
         self._iobuf: Dict[XYP, Dict[int, bytearray]] = defaultdict(dict)

@@ -275,7 +275,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         # A dict of IP address -> SCAMP connection
         # These are those that can be used for setting up IP Tags
-        self._udp_scamp_connections: Dict[str, SCAMPConnection] = dict()
+        self._udp_scamp_connections: Dict[str, SCAMPConnection] = {}
 
         # A list of all connections that can be used to send and receive SCP
         # messages for SCAMP interaction
@@ -605,7 +605,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             # No can do. Can't boot without a boot connection.
             raise SpinnmanIOException("no boot connection available")
         if extra_boot_values is None:
-            extra_boot_values = dict()
+            extra_boot_values = {}
         if SystemVariableDefinition.led_0 not in extra_boot_values:
             extra_boot_values[SystemVariableDefinition.led_0] = \
                 self.boot_led_0_value

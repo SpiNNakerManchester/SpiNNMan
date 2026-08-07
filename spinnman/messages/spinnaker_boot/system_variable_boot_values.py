@@ -372,7 +372,7 @@ class SystemVariableBootValues(object):
 
     def __init__(self) -> None:
         # Create a dict of variable values
-        self._values = dict()
+        self._values = {}
         for variable in SystemVariableDefinition:
             self._values[variable] = variable.default
 
