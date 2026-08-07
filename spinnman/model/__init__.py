@@ -27,7 +27,19 @@ from .p2p_table import P2PTable
 from .router_diagnostics import RouterDiagnostics
 from .version_info import VersionInfo
 
-__all__ = ["ADCInfo", "BMPConnectionData", "ChipInfo", "ChipSummaryInfo",
-           "CPUInfo", "CPUInfos", "DiagnosticFilter",
-           "ExecutableTargets", "HeapElement", "IOBuffer", "MachineDimensions",
-           "P2PTable", "RouterDiagnostics", "VersionInfo"]
+__all__ = [
+           "ADCInfo",
+           "BMPConnectionData",
+           "CPUInfo",
+           "CPUInfos",
+           "ChipInfo",
+           "ChipSummaryInfo",
+           "DiagnosticFilter",
+           "ExecutableTargets",
+           "HeapElement",
+           "IOBuffer",
+           "MachineDimensions",
+           "P2PTable",
+           "RouterDiagnostics",
+           "VersionInfo",
+]

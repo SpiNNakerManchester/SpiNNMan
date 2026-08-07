@@ -29,9 +29,19 @@ from .spinnaker_request_read_data import SpinnakerRequestReadData
 from .start_requests import StartRequests
 from .stop_requests import StopRequests
 
-__all__ = ["EIEIOCommandHeader", "EIEIOCommandMessage",
-           "EventStopRequest", "HostDataRead", "HostSendSequencedData",
-           "NotificationProtocolDatabaseLocation",
-           "NotificationProtocolPauseStop", "NotificationProtocolStartResume",
-           "PaddingRequest", "SpinnakerRequestBuffers", "HostDataReadAck",
-           "SpinnakerRequestReadData", "StartRequests", "StopRequests"]
+__all__ = [
+    "EIEIOCommandHeader",
+    "EIEIOCommandMessage",
+    "EventStopRequest",
+    "HostDataRead",
+    "HostDataReadAck",
+    "HostSendSequencedData",
+    "NotificationProtocolDatabaseLocation",
+    "NotificationProtocolPauseStop",
+    "NotificationProtocolStartResume",
+    "PaddingRequest",
+    "SpinnakerRequestBuffers",
+    "SpinnakerRequestReadData",
+    "StartRequests",
+    "StopRequests",
+]
