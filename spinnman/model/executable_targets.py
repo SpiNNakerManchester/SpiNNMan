@@ -37,7 +37,7 @@ class ExecutableTargets(object):
     __EMPTY_SUBSET = FrozenCoreSubsets()
 
     def __init__(self) -> None:
-        self._targets: Dict[str, CoreSubsets] = dict()
+        self._targets: Dict[str, CoreSubsets] = {}
         self._total_processors = 0
         self._all_core_subsets = CoreSubsets()
         self._binary_type_map: Dict[

@@ -96,7 +96,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         super().__init__(connection_selector)
 
         # A dictionary of (x, y, p) -> iobuf address
-        self._iobuf_address: Dict[XYP, int] = dict()
+        self._iobuf_address: Dict[XYP, int] = {}
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
         self._iobuf: Dict[XYP, Dict[int, bytearray]] = defaultdict(dict)
@@ -106,11 +106,11 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
 
         # A list of extra reads that need to be done as a result of the first
         # read = list of (x, y, p, n, base_address, size, offset)
-        self._extra_reads: List[_RegionTail] = list()
+        self._extra_reads: List[_RegionTail] = []
 
         # A list of next reads that need to be done as a result of the first
         # read = list of (x, y, p, n, next_address, first_read_size)
-        self._next_reads: List[_NextRegion] = list()
+        self._next_reads: List[_NextRegion] = []
 
     def _request_iobuf_address(
             self, iobuf_size: int, x: int, y: int, p: int) -> None:

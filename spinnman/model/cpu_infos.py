@@ -31,7 +31,7 @@ class CPUInfos(object):
         "_cpu_infos"]
 
     def __init__(self) -> None:
-        self._cpu_infos: Dict[XYP, CPUInfo] = dict()
+        self._cpu_infos: Dict[XYP, CPUInfo] = {}
 
     def add_info(self, cpu_info: CPUInfo) -> None:
         """

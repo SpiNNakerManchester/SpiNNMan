@@ -37,7 +37,7 @@ class MostDirectConnectionSelector(ConnectionSelector):
         """
         :param connections: The connections to be used
         """
-        self._connections: Dict[XY, SCAMPConnection] = dict()
+        self._connections: Dict[XY, SCAMPConnection] = {}
         lead_connection = None
         for conn in connections:
             if conn.chip_x == 0 and conn.chip_y == 0:

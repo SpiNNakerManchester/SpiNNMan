@@ -168,10 +168,10 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         p = (processor_and_requests >> 3) & 0x1F
         n_requests = processor_and_requests & 0x7
         offset += 4
-        channel = list()
-        region_id = list()
-        start_address = list()
-        space_to_be_read = list()
+        channel = []
+        region_id = []
+        start_address = []
+        space_to_be_read = []
 
         for i in range(n_requests):
             if i == 0:

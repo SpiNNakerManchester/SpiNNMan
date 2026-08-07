@@ -105,7 +105,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
         self._error_requests: List[AbstractSCPRequest[R]] = []
         self._connections: List[SCAMPConnection] = []
         self._scp_request_pipelines: Dict[
-            SCAMPConnection, SCPRequestPipeLine[R]] = dict()
+            SCAMPConnection, SCPRequestPipeLine[R]] = {}
         self._n_retries = n_retries
         self._timeout = timeout
         self._n_channels = n_channels

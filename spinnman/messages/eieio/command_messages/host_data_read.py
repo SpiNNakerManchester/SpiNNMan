@@ -127,9 +127,9 @@ class HostDataRead(EIEIOCommandMessage):
 
         offset += 2
         n_requests &= 0x7
-        channel = list()
-        region_id = list()
-        space_read = list()
+        channel = []
+        region_id = []
+        space_read = []
 
         for _ in range(n_requests):
             channel_ack, region_id_ack, space_read_ack = \

@@ -36,7 +36,7 @@ class P2PTable(object):
         :param height:
         :param column_data:
         """
-        self._routes: Dict[Tuple[int, int], P2PTableRoute] = dict()
+        self._routes: Dict[Tuple[int, int], P2PTableRoute] = {}
         self._width = width
         self._height = height
         for x, (data, offset) in enumerate(column_data):
