@@ -102,7 +102,7 @@ def __create_transceiver_from_hostname(
         ensure_board_is_ready: bool = True) -> Transceiver:
     if hostname is not None:
         logger.info("Creating transceiver for {}", hostname)
-    connections: List[Connection] = list()
+    connections: List[Connection] = []
 
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
     # machine, then an assumption can be made that the BMP is at -1 on the

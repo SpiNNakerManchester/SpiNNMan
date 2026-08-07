@@ -44,7 +44,7 @@ def _set_flags_in_word(
         word: int, enum_list: List[E], enum_type: Type[E],
         offset: int) -> int:
     if enum_list is None:
-        enum_values: List[E] = list()
+        enum_values: List[E] = []
     else:
         enum_values = list(enum_list)
     if not enum_values:
@@ -57,7 +57,7 @@ def _set_flags_in_word(
 # Uses an enum to read flags in the filter word from a given offset
 def _read_flags_from_word(
         word: int, enum_list: Type[E], offset: int) -> List[E]:
-    flags: List[E] = list()
+    flags: List[E] = []
     for enum_value in enum_list:
         if word & 1 << (enum_value.value + offset) != 0:
             flags.append(enum_value)

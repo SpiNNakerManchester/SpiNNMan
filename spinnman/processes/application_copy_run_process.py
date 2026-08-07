@@ -47,7 +47,7 @@ def _get_next_chips(
         parent
     :return: A list of next chips to use
     """
-    next_chips: List[Chip] = list()
+    next_chips: List[Chip] = []
     for eth_chip in chips_done:
         off_board_copy_done = False
         for c_x, c_y in chips_done[eth_chip]:

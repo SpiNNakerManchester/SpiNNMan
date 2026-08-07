@@ -52,7 +52,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
 
         self._heap_address = 0
         self._next_block_address = 0
-        self._blocks: List[HeapElement] = list()
+        self._blocks: List[HeapElement] = []
 
     def _read_heap_address_response(self, response: Response) -> None:
         self._heap_address = _ADDRESS.unpack_from(

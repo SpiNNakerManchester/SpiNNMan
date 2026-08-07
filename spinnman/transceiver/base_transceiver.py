@@ -279,7 +279,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         # A list of all connections that can be used to send and receive SCP
         # messages for SCAMP interaction
-        self._scamp_connections: List[SCAMPConnection] = list()
+        self._scamp_connections: List[SCAMPConnection] = []
 
         # The BMP connections
         self._bmp_connection: Optional[BMPConnection] = None
@@ -1301,7 +1301,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.get_tags)
     def get_tags(self, connection: Optional[SCAMPConnection] = None
                  ) -> Iterable[AbstractTag]:
-        all_tags = list()
+        all_tags = []
         for conn in self.__get_connection_list(connection):
             process = GetTagsProcess(self._scamp_connection_selector)
             all_tags.extend(process.get_tags(conn))

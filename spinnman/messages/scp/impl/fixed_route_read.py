@@ -55,11 +55,11 @@ class _FixedRouteResponse(AbstractSCPResponse):
     @property
     def route(self) -> RoutingEntry:
         """ Converts this response into a Route """
-        processor_ids: List[int] = list()
+        processor_ids: List[int] = []
         for processor_id in range(26):
             if self._route & (1 << (6 + processor_id)) != 0:
                 processor_ids.append(processor_id)
-        link_ids: List[int] = list()
+        link_ids: List[int] = []
         for link_id in range(6):
             if self._route & (1 << link_id) != 0:
                 link_ids.append(link_id)

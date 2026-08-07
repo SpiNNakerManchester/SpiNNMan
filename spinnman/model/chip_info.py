@@ -47,7 +47,7 @@ class ChipInfo(object):
         self._offset = offset
 
         links_available = self._read_int("links_available")
-        self._links_available: List[int] = list()
+        self._links_available: List[int] = []
         for i in range(6):
             if ((links_available >> i) & 0x1) != 0:
                 self._links_available.append(i)
@@ -61,7 +61,7 @@ class ChipInfo(object):
         self._virtual_to_physical_core_map = self._read_bytes(
             "virtual_to_physical_core_map")
 
-        self._virtual_core_ids: List[int] = list()
+        self._virtual_core_ids: List[int] = []
         for virtual_core_id in self._physical_to_virtual_core_map:
             if virtual_core_id != 0xFF:
                 self._virtual_core_ids.append(virtual_core_id)

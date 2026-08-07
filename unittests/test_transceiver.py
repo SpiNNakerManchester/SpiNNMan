@@ -56,7 +56,7 @@ class TestTransceiver(unittest.TestCase):
             self, _: str, ver_num: str) -> None:
         set_config("Machine", "version", ver_num)
         self.board_config.set_up_remote_board()
-        connections = list()
+        connections = []
         connections.append(SCAMPConnection(
             remote_host=self.board_config.remotehost))
         trans = create_transceiver_from_connections(connections=connections)

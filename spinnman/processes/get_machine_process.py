@@ -92,7 +92,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
         self._ignore_cores_map: Dict[XY, Set[int]] = defaultdict(set)
 
-        self._p2p_column_data: List[Tuple[bytes, int]] = list()
+        self._p2p_column_data: List[Tuple[bytes, int]] = []
 
         # A dictionary of (x, y) -> ChipInfo
         self._chip_info: Dict[XY, ChipSummaryInfo] = dict()
@@ -125,7 +125,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         if 0 in down_cores:
             raise NotImplementedError(
                 "Declaring scamp core (0) as down is not supported")
-        cores = list()
+        cores = []
         for i in range(1, n_cores):
             if i in down_cores:
                 pass
@@ -159,7 +159,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
 
     def _make_router(
             self, chip_info: ChipSummaryInfo, machine: Machine) -> Router:
-        links = list()
+        links = []
         for link in chip_info.working_links:
             dest_xy = machine.xy_over_link(chip_info.x, chip_info.y, link)
             if dest_xy in self._chip_info:
