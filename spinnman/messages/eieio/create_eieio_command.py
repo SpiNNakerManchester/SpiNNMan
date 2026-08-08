@@ -44,8 +44,7 @@ def read_eieio_command_message(
     command_number = command_header.command
 
     if command_number == EIEIO_COMMAND_IDS.DATABASE.value:
-        return NotificationProtocolDatabaseLocation.from_bytestring(
-            command_header, data, offset + 2)
+        return NotificationProtocolDatabaseLocation()
     # Fill in buffer area with padding
     elif command_number == EIEIO_COMMAND_IDS.EVENT_PADDING.value:
         return PaddingRequest()
