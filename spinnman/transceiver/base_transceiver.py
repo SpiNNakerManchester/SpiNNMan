@@ -220,8 +220,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     """
     __slots__ = (
         "_all_connections",
-        "_bmp_selector",
         "_bmp_connection",
+        "_bmp_selector",
         "_boot_send_connection",
         "_chip_execute_lock_condition",
         "_chip_execute_locks",
@@ -232,7 +232,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         "_scamp_connection_selector",
         "_scamp_connections",
         "_udp_scamp_connections",
-        "_width")
+        "_width",
+    )
 
     def __init__(self, connections: Optional[Iterable[Connection]] = None,
                  power_cycle: bool = False,

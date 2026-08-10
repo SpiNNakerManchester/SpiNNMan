@@ -35,8 +35,9 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
     Gets information about the tags over the provided connection.
     """
     __slots__ = (
+        "_tag_info",
         "_tags",
-        "_tag_info")
+    )
 
     def __init__(self, connection_selector: ConnectionSelector):
         """

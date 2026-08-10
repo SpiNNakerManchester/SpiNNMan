@@ -220,8 +220,11 @@ class _SpinnakerRequestReadDataHeader(object):
     """
     __slots__ = [
         "_n_requests",
+        "_p",
         "_sequence_no",
-        "_p", "_x", "_y"]
+        "_x",
+        "_y",
+    ]
 
     def __init__(
             self, x: int, y: int, p: int, n_requests: int, sequence_no: int):
@@ -277,8 +280,9 @@ class _SpinnakerRequestReadDataRequest(object):
     __slots__ = [
         "_channel",
         "_region_id",
+        "_space_to_be_read",
         "_start_address",
-        "_space_to_be_read"]
+    ]
 
     def __init__(self, channel: Union[List[int], int],
                  region_id: Union[List[int], int],

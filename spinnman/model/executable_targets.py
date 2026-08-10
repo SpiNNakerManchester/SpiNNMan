@@ -30,9 +30,10 @@ class ExecutableTargets(object):
     """
     __slots__ = [
         "_all_core_subsets",
+        "_binary_type_map",
         "_targets",
         "_total_processors",
-        "_binary_type_map"]
+    ]
 
     __EMPTY_SUBSET = FrozenCoreSubsets()
 

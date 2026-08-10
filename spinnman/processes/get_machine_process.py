@@ -77,12 +77,13 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         # Holds a map from x,y to a set of virtual cores to ignores
         "_ignore_cores_map",
         "_p2p_column_data",
-        # Holds a mapping from (x,y) to a mapping of physical to virtual core
-        "_virtual_to_physical_map",
         # Holds a mapping from (x,y) to a mapping of virtual to physical core
         "_physical_to_virtual_map",
         # Progress bar to fill in as details are received
-        "_progress")
+        "_progress",
+        # Holds a mapping from (x,y) to a mapping of physical to virtual core
+        "_virtual_to_physical_map",
+    )
 
     def __init__(self, connection_selector: ConnectionSelector):
         """

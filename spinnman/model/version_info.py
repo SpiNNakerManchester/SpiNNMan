@@ -33,10 +33,13 @@ class VersionInfo(object):
         "_build_date",
         "_hardware",
         "_name",
+        "_p",
         "_physical_cpu_id",
         "_version_number",
         "_version_string",
-        "_x", "_y", "_p"]
+        "_x",
+        "_y",
+    ]
 
     def __init__(self, version_data: bytes, offset: int = 0):
         """

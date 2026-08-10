@@ -51,28 +51,31 @@ class CPUInfo(object):
     This is the content of the `vcpu_t` for the processor, maintained by SARK.
     """
     __slots__ = [
+        "__app_mailbox",
         "__application_id",
         "__application_mailbox_command",
-        "__app_mailbox",
         "__application_name",
+        "__filename_address",
         "__iobuf_address",
+        "__line_number",
         "__link_register",
-        "__monitor_mailbox_command",
         "__monitor_mailbox",
+        "__monitor_mailbox_command",
+        "__p",
         "__physical_cpu_id",
         "__processor_state_register",
         "__registers",
         "__run_time_error",
         "__run_time_error_value",
         "__software_error_count",
-        "__filename_address",
-        "__line_number",
         "__software_version",
         "__stack_pointer",
         "__state",
         "__time",
         "__user",
-        "__x", "__y", "__p"]
+        "__x",
+        "__y",
+    ]
 
     def __init__(self, x: int, y: int, p: int, cpu_data: VcpuT):
         """

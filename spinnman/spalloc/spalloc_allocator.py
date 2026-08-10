@@ -54,12 +54,12 @@ class SpallocJobController(MachineAllocationController):
     """
 
     __slots__ = (
+        "__client",
+        "__use_proxy",
         # the spalloc job object
         "_job",
         # the current job's old state
         "_state",
-        "__client",
-        "__use_proxy"
     )
 
     def __init__(

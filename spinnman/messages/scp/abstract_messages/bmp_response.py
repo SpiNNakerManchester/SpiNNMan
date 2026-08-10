@@ -33,7 +33,7 @@ class BMPResponse(AbstractSCPResponse, Generic[T]):
     """
     Represents an SCP response that's tailored for the BMP connection.
     """
-    __slots__ = ("__operation", "__command", "__value")
+    __slots__ = ("__command", "__operation", "__value")
 
     def __init__(self, operation: str, command: SCPCommand):
         """

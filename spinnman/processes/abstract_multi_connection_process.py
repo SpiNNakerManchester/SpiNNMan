@@ -66,17 +66,18 @@ class AbstractMultiConnectionProcess(Generic[R]):
     connections in communication if relevant.
     """
     __slots__ = (
+        "_conn_selector",
+        "_connections",
         "_error_requests",
         "_exceptions",
-        "_tracebacks",
-        "_connections",
         "_intermediate_channel_waits",
         "_n_channels",
         "_n_retries",
         "_non_fail_retry_codes",
-        "_conn_selector",
         "_scp_request_pipelines",
-        "_timeout")
+        "_timeout",
+        "_tracebacks",
+    )
 
     def __init__(self, next_connection_selector: ConnectionSelector,
                  n_retries: int = N_RETRIES, timeout: float = SCP_TIMEOUT,

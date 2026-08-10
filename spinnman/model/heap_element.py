@@ -20,16 +20,16 @@ class HeapElement(object):
     """
 
     __slots__ = [
+        # The app ID of the block
+        "_app_id",
         # A pointer to the block
         "_block_address",
-        # A pointer to the next block
-        "_next_address",
         # True if the block is free
         "_is_free",
+        # A pointer to the next block
+        "_next_address",
         # The tag of the block
         "_tag",
-        # The app ID of the block
-        "_app_id"
     ]
 
     def __init__(self, block_address: int, next_address: int, free: int):
