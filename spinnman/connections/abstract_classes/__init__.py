@@ -16,4 +16,4 @@ from .abstract_scp_connection import AbstractSCPConnection
 from .connection import Connection
 from .listenable import Listenable
 
-__all__ = ("Connection", "Listenable", "AbstractSCPConnection")
+__all__ = ("AbstractSCPConnection", "Connection", "Listenable")

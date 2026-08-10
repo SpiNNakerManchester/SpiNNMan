@@ -32,12 +32,13 @@ from .spalloc_state import SpallocState
 from .utils import is_server_address
 
 __all__ = (
-    "is_server_address",
     "MachineAllocationController",
     "SpallocClient",
+    "SpallocEIEIOConnection",
+    "SpallocEIEIOListener",
     "SpallocJob",
     "SpallocMachine",
     "SpallocProxiedConnection",
-    "SpallocEIEIOConnection",
-    "SpallocEIEIOListener",
-    "SpallocState")
+    "SpallocState",
+    "is_server_address",
+)

@@ -22,6 +22,13 @@ from .scp_result import SCPResult
 from .signal import Signal, SignalType
 
 __all__ = [
-    "AllocFree", "BMPInfo", "SCPCommand",
-    "IPTagCommand", "LEDAction",
-    "PowerCommand", "SCPResult", "Signal", "SignalType"]
+    "AllocFree",
+    "BMPInfo",
+    "IPTagCommand",
+    "LEDAction",
+    "PowerCommand",
+    "SCPCommand",
+    "SCPResult",
+    "Signal",
+    "SignalType",
+]

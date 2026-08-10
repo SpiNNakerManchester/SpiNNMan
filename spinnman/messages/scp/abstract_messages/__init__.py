@@ -18,5 +18,10 @@ from .scp_request import AbstractSCPRequest
 from .scp_response import AbstractSCPResponse
 
 __author__ = 'stokesa6'
-__all__ = ["BMPRequest", "BMPResponse", "BMPOKResponse",
-           "AbstractSCPRequest", "AbstractSCPResponse"]
+__all__ = [
+           "AbstractSCPRequest",
+           "AbstractSCPResponse",
+           "BMPOKResponse",
+           "BMPRequest",
+           "BMPResponse",
+]

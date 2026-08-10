@@ -21,7 +21,13 @@ from .sdp_connection import SDPConnection
 from .udp_connection import UDPConnection
 from .utils import update_sdp_header_for_udp_send
 
-__all__ = ["BMPConnection", "BootConnection", "UDPConnection",
-           "EIEIOConnection", "IPAddressesConnection",
-           "SCAMPConnection", "SDPConnection",
-           "update_sdp_header_for_udp_send"]
+__all__ = [
+           "BMPConnection",
+           "BootConnection",
+           "EIEIOConnection",
+           "IPAddressesConnection",
+           "SCAMPConnection",
+           "SDPConnection",
+           "UDPConnection",
+           "update_sdp_header_for_udp_send",
+]
