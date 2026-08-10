@@ -56,7 +56,7 @@ class ChipSummaryInfo(object):
                 chip_summary_data, offset)
         self._n_cores = chip_summary_flags & 0x1F
         self._working_links = [
-            link for link in range(0, 6)
+            link for link in range(6)
             if chip_summary_flags >> (8 + link) & 1 != 0]
         self._n_free_multicast_routing_entries = \
             (chip_summary_flags >> 14) & 0x7FF
