@@ -444,7 +444,7 @@ class ReadBoardProcess(AbstractMultiConnectionProcess):
         # Get the set of chips to read
         chips = [((x + self._eth_x) % self._width,
                   (y + self._eth_y) % self._height)
-                 for x in range(0, 8) for y in range(0, 8)
+                 for x in range(8) for y in range(8)
                  if (x, y) not in Machine.BOARD_48_CHIP_GAPS]
         chips = filter(
             lambda coords: self._p2p_table.is_route(coords[0], coords[1]),

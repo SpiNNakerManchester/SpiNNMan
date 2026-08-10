@@ -145,7 +145,7 @@ class SpinnakerBootMessages(object):
             operand_1=0, operand_2=0, operand_3=self._no_data_packets - 1)
 
         # Construct and yield the data packets
-        for block_id in range(0, self._no_data_packets):
+        for block_id in range(self._no_data_packets):
             operand_1 = _BOOT_DATA_OPERAND_1 | (block_id & 0xFF)
             yield SpinnakerBootMessage(
                 opcode=SpinnakerBootOpCode.FLOOD_FILL_BLOCK,
