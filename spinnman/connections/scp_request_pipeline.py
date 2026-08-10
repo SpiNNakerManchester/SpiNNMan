@@ -75,11 +75,12 @@ class SCPRequestPipeLine(Generic[R]):
         "_n_timeouts",
         "_non_fail_retry_codes",
         "_packet_timeout",
-        "_retry_reason",
         "_request_data",
         "_requests",
         "_retries",
-        "_send_time")
+        "_retry_reason",
+        "_send_time",
+    )
 
     def __init__(self, connection: SCAMPConnection, n_channels: int = 1,
                  intermediate_channel_waits: int = 0,

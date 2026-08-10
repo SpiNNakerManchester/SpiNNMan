@@ -31,11 +31,12 @@ class Response(AbstractSCPResponse):
     An SCP response to a request to read a region of memory on a chip.
     """
     __slots__ = (
+        "__cmd",
+        "__op",
         "_data",
         "_length",
         "_offset",
-        "__op",
-        "__cmd")
+    )
 
     def __init__(self, operation: str, command: str) -> None:
         """

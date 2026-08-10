@@ -144,9 +144,16 @@ class SpallocClient(AbstractContextManager):
     """
     Basic client library for talking to new Spalloc.
     """
-    __slots__ = ("__session",
-                 "__machines_url", "__jobs_url", "version",
-                 "__group", "__collab", "__nmpi_job", "__nmpi_user")
+    __slots__ = (
+        "__collab",
+        "__group",
+        "__jobs_url",
+        "__machines_url",
+        "__nmpi_job",
+        "__nmpi_user",
+        "__session",
+        "version",
+    )
 
     def __init__(
             self, service_url: str,
@@ -387,8 +394,14 @@ class _SpallocMachine(SessionAware, SpallocMachine):
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
-    __slots__ = ("__name", "__tags", "__width", "__height",
-                 "__dead_boards", "__dead_links")
+    __slots__ = (
+        "__dead_boards",
+        "__dead_links",
+        "__height",
+        "__name",
+        "__tags",
+        "__width",
+    )
 
     def __init__(self, session: Session, machine_data: JsonObject):
         """
@@ -585,10 +598,18 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     Don't make this yourself. Use :py:class:`SpallocClient` instead.
     """
-    __slots__ = ("__board_st", "__machine_url", "__chip_url",
-                 "__memory_url", "__router_url",
-                 "_keepalive_url", "__proxy_handle",
-                 "__proxy_thread", "__proxy_ping", "__root")
+    __slots__ = (
+        "__board_st",
+        "__chip_url",
+        "__machine_url",
+        "__memory_url",
+        "__proxy_handle",
+        "__proxy_ping",
+        "__proxy_thread",
+        "__root",
+        "__router_url",
+        "_keepalive_url",
+    )
 
     def __init__(self, session: Session, job_handle: str,
                  board_st: Optional[str] = None):
@@ -1165,7 +1186,7 @@ class _ProxiedEIEIOConnection(
         _ProxiedBidirectionalConnection,
         SpallocEIEIOConnection):
     # Special: This is a unidirectional receive-only connection
-    __slots__ = ("__addr", "__port", "__chip_x", "__chip_y")
+    __slots__ = ("__addr", "__chip_x", "__chip_y", "__port")
 
     def __init__(
             self, websocket: WebSocket, receiver: _ProxyReceiver,

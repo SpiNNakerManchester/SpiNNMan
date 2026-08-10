@@ -19,7 +19,10 @@ class IOBuffer(object):
     """
     __slots__ = [
         "_iobuf",
-        "_x", "_y", "_p"]
+        "_p",
+        "_x",
+        "_y",
+    ]
 
     def __init__(self, x: int, y: int, p: int, iobuf: str):
         """

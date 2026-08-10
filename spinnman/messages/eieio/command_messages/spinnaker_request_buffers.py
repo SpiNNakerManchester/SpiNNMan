@@ -31,10 +31,13 @@ class SpinnakerRequestBuffers(EIEIOCommandMessage):
     to inject during the simulation.
     """
     __slots__ = (
+        "_p",
         "_region_id",
         "_sequence_no",
         "_space_available",
-        "_p", "_x", "_y")
+        "_x",
+        "_y",
+    )
 
     def __init__(
             self, x: int, y: int, p: int, region_id: int, sequence_no: int,
