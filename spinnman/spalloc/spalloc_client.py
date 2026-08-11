@@ -134,7 +134,7 @@ def get_n_boards() -> int:
         # If the number of boards rounded up is less than 50% of a board
         # bigger than the actual number of boards,
         # add another board just in case.
-        n_boards = int(math.ceil(n_boards_float))
+        n_boards = math.ceil(n_boards_float)
         if n_boards - n_boards_float < 0.5:
             n_boards += 1
         return n_boards
