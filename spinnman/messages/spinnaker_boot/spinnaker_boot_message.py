@@ -24,7 +24,7 @@ _PATTERN_2xIIII = struct.Struct("2xIIII")
 BOOT_MESSAGE_VERSION = 1
 
 
-class SpinnakerBootMessage(object):
+class SpinnakerBootMessage:
     """
     A message used for booting the board.
     """

@@ -16,7 +16,6 @@ import logging
 import os.path
 import time
 from io import TextIOBase
-from typing import List
 
 from spinn_utilities.log import FormatAdapter
 
@@ -30,7 +29,7 @@ _REPORT_NAME = "machine_structure.rpt"
 
 def generate_machine_report(
         report_directory: str, machine: Machine,
-        connections: List[Connection]) -> None:
+        connections: list[Connection]) -> None:
     """
     Generate report on the physical structure of the target SpiNNaker machine.
 
@@ -56,7 +55,7 @@ def generate_machine_report(
 
 
 def _write_header(f: TextIOBase, timestamp: str, machine: Machine,
-                  connections: List[Connection]) -> None:
+                  connections: list[Connection]) -> None:
     f.write("\t\tTarget SpiNNaker Machine Structure\n")
     f.write("\t\t==================================\n")
     f.write(f"\nGenerated: {timestamp} for target machine '{connections}'\n\n")

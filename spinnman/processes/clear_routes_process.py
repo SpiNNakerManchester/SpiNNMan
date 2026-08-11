@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
 
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
@@ -27,7 +26,7 @@ class ClearRoutesProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     """ A Process to clear routes
     """
 
-    def clear_routes(self, chips: List[XY]) -> None:
+    def clear_routes(self, chips: list[XY]) -> None:
         """ Clear the routes on the selected chips
 
         :param chips: A list of x, y, address and value to set

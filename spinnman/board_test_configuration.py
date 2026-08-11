@@ -23,7 +23,7 @@ from spinn_machine.version import Spin1Gen
 from spinnman.constants import LOCAL_HOST
 
 
-class BoardTestConfiguration(object):
+class BoardTestConfiguration:
     """
     Configuration to use for a test board
     """

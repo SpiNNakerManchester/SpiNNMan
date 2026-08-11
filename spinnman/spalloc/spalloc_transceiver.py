@@ -14,7 +14,7 @@
 import io
 import os
 import struct
-from typing import BinaryIO, Dict, List, Optional, Tuple, Union, cast
+from typing import BinaryIO, Optional, Union, cast
 
 import numpy
 from numpy import uint8, uint32
@@ -46,7 +46,7 @@ class SpallocTransceiver(Version5Transceiver):
             Flag to say if ensure_board_is_ready should be run
         """
         self.__job: SpallocJob = job
-        proxies: List[Connection] = [
+        proxies: list[Connection] = [
             job.connect_to_board(x, y) for (x, y) in job.get_connections()]
         # Also need a boot connection
         proxies.append(job.connect_for_booting())
@@ -59,7 +59,7 @@ class SpallocTransceiver(Version5Transceiver):
             self, x: int, y: int, base_address: int,
             data: Union[BinaryIO, bytearray, bytes, int, str],
             *, n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
-            get_sum: bool = False) -> Tuple[int, int]:
+            get_sum: bool = False) -> tuple[int, int]:
 
         if isinstance(data, io.RawIOBase):
             assert n_bytes is not None
@@ -99,7 +99,7 @@ class SpallocTransceiver(Version5Transceiver):
 
     @overrides(Version5Transceiver._do_reset_routing)
     def _do_reset_routing(
-            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+            self, custom_filters: dict[int, DiagnosticFilter]) -> None:
         self.__job.reset_routing(custom_filters)
 
     @overrides(Version5Transceiver.close)

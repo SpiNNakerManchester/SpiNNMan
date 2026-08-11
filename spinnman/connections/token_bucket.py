@@ -15,7 +15,7 @@
 import time
 
 
-class TokenBucket(object):
+class TokenBucket:
     """
     An implementation of the token bucket algorithm. Usage::
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Final, Sequence, Tuple
+from typing import Final, Sequence
 
 from typing_extensions import TypeAlias
 
@@ -27,7 +27,7 @@ STATE_FIELD_OFFSET = 48
 
 #: Corresponds to vcpu_t in sark.h
 _VCPU_PATTERN = struct.Struct("< 32s 3I 2B 2B 2I 2B H 3I 16s 2I 16x 4I")
-VcpuT: Final['TypeAlias'] = Tuple[
+VcpuT: Final['TypeAlias'] = tuple[
     # pylint: disable=wrong-spelling-in-comment
     bytes,             # 32s - r0-r7
     int, int, int,     # 3I  - psr, sp, lr
@@ -44,7 +44,7 @@ VcpuT: Final['TypeAlias'] = Tuple[
 _REGISTERS_PATTERN = struct.Struct("<IIIIIIII")
 
 
-class CPUInfo(object):
+class CPUInfo:
     """
     Represents information about the state of a CPU.
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import List, Union
+from typing import Union
 
 from spinn_utilities.overrides import overrides
 
@@ -43,8 +43,8 @@ class HostDataRead(EIEIOCommandMessage):
 
     def __init__(
             self, n_requests: int, sequence_no: int,
-            channel: Union[List[int], int], region_id: Union[List[int], int],
-            space_read: Union[List[int], int]):
+            channel: Union[list[int], int], region_id: Union[list[int], int],
+            space_read: Union[list[int], int]):
         """
 
         :param n_requests:
@@ -153,7 +153,7 @@ class HostDataRead(EIEIOCommandMessage):
         return byte_string
 
 
-class _HostDataReadHeader(object):
+class _HostDataReadHeader:
     """
     The HostDataRead contains itself on header with the number of requests
     and a sequence number.
@@ -182,7 +182,7 @@ class _HostDataReadHeader(object):
         return self._n_requests
 
 
-class _HostDataReadAck(object):
+class _HostDataReadAck:
     """
     Contains a set of ACKs which refer to each of the channels read.
     """
@@ -191,9 +191,9 @@ class _HostDataReadAck(object):
         "_region_id",
         "_space_read"]
 
-    def __init__(self, channel: Union[List[int], int],
-                 region_id: Union[List[int], int],
-                 space_read: Union[List[int], int]):
+    def __init__(self, channel: Union[list[int], int],
+                 region_id: Union[list[int], int],
+                 space_read: Union[list[int], int]):
         """
 
         :param channel:

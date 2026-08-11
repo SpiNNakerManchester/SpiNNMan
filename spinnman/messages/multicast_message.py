@@ -15,7 +15,7 @@
 from typing import Optional
 
 
-class MulticastMessage(object):
+class MulticastMessage:
     """
     A SpiNNaker Multicast message, comprising a key (determining the target
     locations) and an optional payload.

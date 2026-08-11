@@ -26,7 +26,7 @@ _SDP_SOURCE_CPU = 31
 _SDP_TAG = 0xFF
 
 
-class SDPHeader(object):
+class SDPHeader:
     """
     Represents the header of an SDP message.
     Each optional parameter in the constructor can be set to a value other

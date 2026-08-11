@@ -14,7 +14,7 @@
 
 import functools
 import struct
-from typing import Callable, List, Sequence
+from typing import Callable, Sequence
 
 from spinn_utilities.typing.coords import XY, XYP
 
@@ -52,7 +52,7 @@ class GetHeapProcess(AbstractMultiConnectionProcess[Response]):
 
         self._heap_address = 0
         self._next_block_address = 0
-        self._blocks: List[HeapElement] = []
+        self._blocks: list[HeapElement] = []
 
     def _read_heap_address_response(self, response: Response) -> None:
         self._heap_address = _ADDRESS.unpack_from(

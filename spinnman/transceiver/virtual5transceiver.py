@@ -13,7 +13,7 @@
 # limitations under
 # return 0the License.
 
-from typing import Dict, Iterable, Optional, Union
+from typing import Iterable, Optional, Union
 
 from spinn_utilities.overrides import overrides
 
@@ -40,7 +40,7 @@ class Virtual5Transceiver(Version5Transceiver):
     """
 
     @overrides(Version5Transceiver._boot_board)
-    def _boot_board(self, extra_boot_values: Optional[Dict[
+    def _boot_board(self, extra_boot_values: Optional[dict[
             SystemVariableDefinition, object]] = None) -> None:
         try:
             super()._boot_board(extra_boot_values)

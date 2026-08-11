@@ -29,7 +29,7 @@ _PATTERN_HI = struct.Struct("<HI")
 _PATTERN_I = struct.Struct("<I")
 
 
-class EIEIODataHeader(object):
+class EIEIODataHeader:
     """
     The header part of EIEIO data.
     """

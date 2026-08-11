@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import functools
-from typing import List, Tuple
 
 from spinnman.messages.scp.impl.sdram_alloc import SDRAMAlloc, _AllocResponse
 
@@ -34,7 +33,7 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
         :param connection_selector:
         """
         super().__init__(connection_selector)
-        self.__base_addresses: List[int] = []
+        self.__base_addresses: list[int] = []
 
     def __handle_sdram_alloc_response(
             self, pos: int, response: _AllocResponse) -> None:
@@ -58,7 +57,7 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
                 functools.partial(self.__handle_sdram_alloc_response, 0))
 
     def malloc_sdram_multi(
-            self, allocations: List[Tuple[int, int, int, int, int]]) -> None:
+            self, allocations: list[tuple[int, int, int, int, int]]) -> None:
         """
         Allocate space in the SDRAM space for multiple chips
 
@@ -81,7 +80,7 @@ class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
         return self.__base_addresses[0]
 
     @property
-    def base_addresses(self) -> List[int]:
+    def base_addresses(self) -> list[int]:
         """
         The addresses of the allocated memory blocks.
         """

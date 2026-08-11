@@ -17,7 +17,7 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinnman.messages.eieio.eieio_type import EIEIOType
 
 
-class AbstractDataElement(object, metaclass=AbstractBase):
+class AbstractDataElement(metaclass=AbstractBase):
     """
     A marker interface for possible data elements in the EIEIO data packet.
     """

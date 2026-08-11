@@ -21,7 +21,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 _ONE_SHORT = struct.Struct("<H")
 
 
-class EIEIOCommandHeader(object):
+class EIEIOCommandHeader:
     """
     EIEIO header for command packets.
     """

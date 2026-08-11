@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from spinnman.messages.eieio.data_messages import EIEIODataHeader
 
 
-class AbstractEIEIOMessage(object, metaclass=AbstractBase):
+class AbstractEIEIOMessage(metaclass=AbstractBase):
     """
     Interface for an EIEIOMessage.
     """

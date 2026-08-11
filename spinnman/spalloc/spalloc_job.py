@@ -14,7 +14,7 @@
 
 from contextlib import AbstractContextManager
 from types import TracebackType
-from typing import Dict, Mapping, Optional, Tuple, Type
+from typing import Mapping, Optional
 
 from typing_extensions import Literal, Self
 
@@ -60,7 +60,7 @@ class SpallocJob(AbstractContextManager):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_connections(self) -> Dict[Tuple[int, int], str]:
+    def get_connections(self) -> dict[tuple[int, int], str]:
         """
         Get the mapping from board coordinates to IP addresses.
 
@@ -180,7 +180,7 @@ class SpallocJob(AbstractContextManager):
 
     @abstractmethod
     def where_is_machine(self, x: int, y: int) -> Optional[
-            Tuple[int, int, int]]:
+            tuple[int, int, int]]:
         """
         Get the *physical* coordinates of the board hosting the given chip.
 
@@ -193,7 +193,7 @@ class SpallocJob(AbstractContextManager):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_session_credentials_for_db(self) -> Mapping[Tuple[str, str], str]:
+    def get_session_credentials_for_db(self) -> Mapping[tuple[str, str], str]:
         """
         Get the session credentials for the job to be written into a database
 
@@ -234,7 +234,7 @@ class SpallocJob(AbstractContextManager):
 
     @abstractmethod
     def reset_routing(
-            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+            self, custom_filters: dict[int, DiagnosticFilter]) -> None:
         """
         Clear the routes, reset diagnostic counters and optionally set filters.
 
@@ -248,7 +248,7 @@ class SpallocJob(AbstractContextManager):
         """
         return self
 
-    def __exit__(self, exc_type: Optional[Type],
+    def __exit__(self, exc_type: Optional[type],
                  exc_value: Optional[BaseException],
                  exc_tb: Optional[TracebackType]) -> Literal[False]:
         """

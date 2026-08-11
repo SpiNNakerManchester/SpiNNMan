@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import List, Union
+from typing import Union
 
 from spinn_utilities.overrides import overrides
 
@@ -44,10 +44,10 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         "_requests")
 
     def __init__(
-            self, x: int, y: int, p: int, region_id: Union[List[int], int],
-            sequence_no: int, n_requests: int, channel: Union[List[int], int],
-            start_address: Union[List[int], int],
-            space_to_be_read: Union[List[int], int]):
+            self, x: int, y: int, p: int, region_id: Union[list[int], int],
+            sequence_no: int, n_requests: int, channel: Union[list[int], int],
+            start_address: Union[list[int], int],
+            space_to_be_read: Union[list[int], int]):
         """
 
         :param x:
@@ -213,7 +213,7 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         return byte_string
 
 
-class _SpinnakerRequestReadDataHeader(object):
+class _SpinnakerRequestReadDataHeader:
     """
     Contains the position of the core in the machine (x, y, p), the number
     of requests and a sequence number.
@@ -273,7 +273,7 @@ class _SpinnakerRequestReadDataHeader(object):
         return self._n_requests
 
 
-class _SpinnakerRequestReadDataRequest(object):
+class _SpinnakerRequestReadDataRequest:
     """
     Contains a set of requests which refer to the channels used.
     """
@@ -284,10 +284,10 @@ class _SpinnakerRequestReadDataRequest(object):
         "_start_address",
     ]
 
-    def __init__(self, channel: Union[List[int], int],
-                 region_id: Union[List[int], int],
-                 start_address: Union[List[int], int],
-                 space_to_be_read: Union[List[int], int]):
+    def __init__(self, channel: Union[list[int], int],
+                 region_id: Union[list[int], int],
+                 start_address: Union[list[int], int],
+                 space_to_be_read: Union[list[int], int]):
         """
 
         :param channel:

@@ -18,7 +18,7 @@ apply some consistency to things.
 
 import logging
 import socket
-from typing import Optional, Tuple
+from typing import Optional
 
 from spinn_utilities.log import FormatAdapter
 
@@ -109,7 +109,7 @@ def connect_socket(
             f"Error connecting to {remote_address}:{remote_port}: {e}") from e
 
 
-def get_socket_address(sock: socket.socket) -> Tuple[str, int]:
+def get_socket_address(sock: socket.socket) -> tuple[str, int]:
     """
     Wrapper round getsockname() system call.
 
@@ -143,8 +143,8 @@ def receive_message(
 
 
 def receive_message_and_address(
-        sock: socket.socket, timeout: Optional[float], size: int) -> Tuple[
-            bytes, Tuple[str, int]]:
+        sock: socket.socket, timeout: Optional[float], size: int) -> tuple[
+            bytes, tuple[str, int]]:
     """
     Wrapper round recvfrom() system call.
 
@@ -172,7 +172,7 @@ def send_message(sock: socket.socket, data: bytes) -> int:
 
 
 def send_message_to_address(
-        sock: socket.socket, data: bytes, address: Tuple[str, int]) -> int:
+        sock: socket.socket, data: bytes, address: tuple[str, int]) -> int:
     """
     Wrapper round sendto() system call.
 

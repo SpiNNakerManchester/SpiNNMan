@@ -363,7 +363,7 @@ class SystemVariableDefinition(Enum):
         return self._default
 
 
-class SystemVariableBootValues(object):
+class SystemVariableBootValues:
     """
     Default values of the system variables that get passed to SpiNNaker
     during boot.

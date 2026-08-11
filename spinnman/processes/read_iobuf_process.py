@@ -16,7 +16,7 @@ import functools
 import struct
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Dict, Iterable, List
+from typing import Iterable
 
 from spinn_utilities.typing.coords import XYP
 
@@ -96,21 +96,21 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
         super().__init__(connection_selector)
 
         # A dictionary of (x, y, p) -> iobuf address
-        self._iobuf_address: Dict[XYP, int] = {}
+        self._iobuf_address: dict[XYP, int] = {}
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> bytearray
-        self._iobuf: Dict[XYP, Dict[int, bytearray]] = defaultdict(dict)
+        self._iobuf: dict[XYP, dict[int, bytearray]] = defaultdict(dict)
 
         # A dictionary of (x, y, p) -> OrderedDict(n) -> memoryview
-        self._iobuf_view: Dict[XYP, Dict[int, memoryview]] = defaultdict(dict)
+        self._iobuf_view: dict[XYP, dict[int, memoryview]] = defaultdict(dict)
 
         # A list of extra reads that need to be done as a result of the first
         # read = list of (x, y, p, n, base_address, size, offset)
-        self._extra_reads: List[_RegionTail] = []
+        self._extra_reads: list[_RegionTail] = []
 
         # A list of next reads that need to be done as a result of the first
         # read = list of (x, y, p, n, next_address, first_read_size)
-        self._next_reads: List[_NextRegion] = []
+        self._next_reads: list[_NextRegion] = []
 
     def _request_iobuf_address(
             self, iobuf_size: int, x: int, y: int, p: int) -> None:

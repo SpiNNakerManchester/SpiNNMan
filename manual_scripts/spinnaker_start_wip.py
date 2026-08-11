@@ -24,7 +24,7 @@ import sys
 import time
 import traceback
 from threading import Condition, RLock, Thread
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 import matplotlib
 import numpy
@@ -466,7 +466,7 @@ class ReadBoardProcess(AbstractMultiConnectionProcess):
             close_file(write_file)
 
 
-class CoreCounter(object):
+class CoreCounter:
 
     def __init__(self, width, height, gui: bool = False):
         """
@@ -600,7 +600,7 @@ class CoreCounter(object):
         else:
             print(f"add_cores {eth_x=} {eth_y=} {x=} {y=}")
 
-class MainThread(object):
+class MainThread:
     def __init__(self, core_counter, job, save, load):
         """
         :param core_counter: Plot to show cores
@@ -770,7 +770,7 @@ class MockJob(SpallocJob):
         return False
 
     @overrides(SpallocJob.get_connections)
-    def get_connections(self) -> Dict[Tuple[int, int], str]:
+    def get_connections(self) -> dict[tuple[int, int], str]:
         return {(x, y): "127.0.0.1" for (x, y) in self._boards}
 
     @overrides(SpallocJob.connect_to_board)
@@ -813,11 +813,11 @@ class MockJob(SpallocJob):
 
     @overrides(SpallocJob.where_is_machine)
     def where_is_machine(self, x: int, y: int) -> Optional[
-        Tuple[int, int, int]]:
+        tuple[int, int, int]]:
         return None
 
     @overrides(SpallocJob.get_session_credentials_for_db)
-    def get_session_credentials_for_db(self) -> Dict[Tuple[str, str], str]:
+    def get_session_credentials_for_db(self) -> dict[tuple[str, str], str]:
         return {}
 
     @overrides(SpallocJob.write_data)
@@ -830,10 +830,10 @@ class MockJob(SpallocJob):
 
     @overrides(SpallocJob.reset_routing)
     def reset_routing(
-            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+            self, custom_filters: dict[int, DiagnosticFilter]) -> None:
         pass
 
-def _estimate_width_and_heigth(job: SpallocJob) -> Tuple[int, int]:
+def _estimate_width_and_heigth(job: SpallocJob) -> tuple[int, int]:
     max_x = 0
     max_y = 0
     for (x, y) in job.get_connections():

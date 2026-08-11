@@ -16,7 +16,7 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Optional, Tuple
+from typing import Optional
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
@@ -99,7 +99,7 @@ class SpallocEIEIOListener(
         """
         raise NotImplementedError
 
-    def send_to(self, data: bytes, address: Tuple[str, int]) -> None:
+    def send_to(self, data: bytes, address: tuple[str, int]) -> None:
         """
         Send a message on an open socket.
 

@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, BinaryIO, Optional, Tuple, Union
+from typing import TYPE_CHECKING, BinaryIO, Optional, Union
 
 from spinn_utilities.log import FormatAdapter
 
@@ -31,7 +31,7 @@ logger = FormatAdapter(logging.getLogger(__name__))
 # pylint: disable=protected-access
 
 
-class _SpiNNManDataModel(object):
+class _SpiNNManDataModel:
     """
     Singleton data model.
 
@@ -213,7 +213,7 @@ class SpiNNManDataView(MachineDataView):
             cls, x: int, y: int, base_address: int, data: Union[
                 BinaryIO, bytes, bytearray, int, str], *,
             n_bytes: Optional[int] = None, offset: int = 0,
-            cpu: int = 0) -> Tuple[int, int]:
+            cpu: int = 0) -> tuple[int, int]:
         """
         Write to the SDRAM on the board.
 

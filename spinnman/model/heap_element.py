@@ -14,7 +14,7 @@
 from typing import Optional
 
 
-class HeapElement(object):
+class HeapElement:
     """
     An element of one of the heaps on SpiNNaker.
     """

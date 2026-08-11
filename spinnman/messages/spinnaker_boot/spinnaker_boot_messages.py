@@ -16,7 +16,7 @@ import array
 import math
 import os
 import time
-from typing import Any, Dict, Iterable, Optional, Tuple
+from typing import Any, Iterable, Optional
 
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanIOException
@@ -37,7 +37,7 @@ _BOOT_STRUCT_REPLACE_LENGTH = 128 // 4
 _BOOT_DATA_OPERAND_1 = ((_BOOT_MESSAGE_DATA_BYTES // 4) - 1) << 8
 
 
-class SpinnakerBootMessages(object):
+class SpinnakerBootMessages:
     """
     A set of boot messages to be sent to boot the board.
     """
@@ -46,7 +46,7 @@ class SpinnakerBootMessages(object):
         "_n_bytes_to_read",
         "_no_data_packets")
 
-    def __init__(self, extra_boot_values: Optional[Dict[
+    def __init__(self, extra_boot_values: Optional[dict[
             SystemVariableDefinition, Any]] = None):
         """
         :param extra_boot_values:
@@ -107,7 +107,7 @@ class SpinnakerBootMessages(object):
         self._n_bytes_to_read = n_words_to_read * 4
 
     @staticmethod
-    def _get_boot_image_file() -> Tuple[str, int]:
+    def _get_boot_image_file() -> tuple[str, int]:
         """
         The name and size of the boot file
         """

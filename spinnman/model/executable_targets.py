@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import Collection, Dict, Iterable, Optional, Set, cast
+from typing import Collection, Iterable, Optional, cast
 
 from spinn_utilities.ordered_set import OrderedSet
 
@@ -24,7 +24,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 from .enums import ExecutableType
 
 
-class ExecutableTargets(object):
+class ExecutableTargets:
     """
     Encapsulate the binaries and cores on which to execute them.
     """
@@ -38,13 +38,13 @@ class ExecutableTargets(object):
     __EMPTY_SUBSET = FrozenCoreSubsets()
 
     def __init__(self) -> None:
-        self._targets: Dict[str, CoreSubsets] = {}
+        self._targets: dict[str, CoreSubsets] = {}
         self._total_processors = 0
         self._all_core_subsets = CoreSubsets()
-        self._binary_type_map: Dict[
-            ExecutableType, Set[str]] = defaultdict(
+        self._binary_type_map: dict[
+            ExecutableType, set[str]] = defaultdict(
                 # Need to pretend!
-                lambda: cast(Set, OrderedSet()))
+                lambda: cast(set, OrderedSet()))
 
     def add_subsets(
             self, binary: str, subsets: CoreSubsets,

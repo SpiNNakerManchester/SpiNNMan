@@ -14,7 +14,7 @@
 from typing import Optional, Sequence
 
 
-class BMPConnectionData(object):
+class BMPConnectionData:
     """
     Contains the details of a BMP connection.
     """

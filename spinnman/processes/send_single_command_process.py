@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Generic, Optional, Set, TypeVar
+from typing import Generic, Optional, TypeVar
 
 from spinnman.constants import SCP_TIMEOUT
 from spinnman.messages.scp.abstract_messages import (
@@ -39,7 +39,7 @@ class SendSingleCommandProcess(AbstractMultiConnectionProcess, Generic[R]):
 
     def __init__(self, connection_selector: ConnectionSelector,
                  n_retries: int = 3, timeout: float = SCP_TIMEOUT,
-                 non_fail_retry_codes: Optional[Set[SCPResult]] = None):
+                 non_fail_retry_codes: Optional[set[SCPResult]] = None):
         """
         :param connection_selector:
         :param n_retries:

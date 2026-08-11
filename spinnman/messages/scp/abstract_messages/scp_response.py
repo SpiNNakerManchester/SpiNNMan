@@ -27,7 +27,7 @@ _SCP_HEADER_OFFSET = 8
 _SCP_DATA_OFFSET = 12
 
 
-class AbstractSCPResponse(object, metaclass=AbstractBase):
+class AbstractSCPResponse(metaclass=AbstractBase):
     """
     Represents an abstract SCP Response.
     """

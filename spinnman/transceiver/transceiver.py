@@ -15,13 +15,8 @@
 from typing import (
     BinaryIO,
     Collection,
-    Dict,
-    FrozenSet,
     Iterable,
-    List,
     Optional,
-    Set,
-    Tuple,
     Union,
 )
 
@@ -55,7 +50,7 @@ from spinnman.model.enums import CPUState, UserRegister
 from spinnman.processes import MostDirectConnectionSelector
 
 
-class Transceiver(object):
+class Transceiver:
     """
     An encapsulation of various communications with the SpiNNaker board.
 
@@ -109,7 +104,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def add_scamp_connections(self, connections: Dict[XY, str]) -> None:
+    def add_scamp_connections(self, connections: dict[XY, str]) -> None:
         """
         Check connections to the board and store these for future use.
 
@@ -132,7 +127,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_connections(self) -> Set[Connection]:
+    def get_connections(self) -> set[Connection]:
         """
         Get the currently known connections to the board, made up of those
         passed in to the transceiver and those that are discovered during
@@ -313,7 +308,7 @@ class Transceiver(object):
     @abstractmethod
     def get_core_state_count(
             self, app_id: int, state: CPUState,
-            xys: Optional[Iterable[Tuple[int, int]]] = None) -> int:
+            xys: Optional[Iterable[tuple[int, int]]] = None) -> int:
         """
         Get a count of the number of cores which have a given state.
 
@@ -429,7 +424,7 @@ class Transceiver(object):
             self, x: int, y: int, base_address: int,
             data: Union[BinaryIO, bytearray, bytes, int, str], *,
             n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
-            get_sum: bool = False) -> Tuple[int, int]:
+            get_sum: bool = False) -> tuple[int, int]:
         """
         Write to the SDRAM on the board.
 
@@ -501,7 +496,7 @@ class Transceiver(object):
         raise NotImplementedError("abstractmethod")
 
     def write_user_many(
-            self, values: List[Tuple[int, int, int, UserRegister, int]],
+            self, values: list[tuple[int, int, int, UserRegister, int]],
             description: Optional[str] = None) -> None:
         """ Write to the user *N* "register" for each of the given processors
 
@@ -602,7 +597,7 @@ class Transceiver(object):
             cpu_states: Union[CPUState, Iterable[CPUState]], *,
             timeout: Optional[float] = None,
             time_between_polls: float = 0.1,
-            error_states: FrozenSet[CPUState] = frozenset((
+            error_states: frozenset[CPUState] = frozenset((
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check: int = 100,
             progress_bar: Optional[ProgressBar] = None) -> None:
@@ -770,8 +765,8 @@ class Transceiver(object):
 
     @abstractmethod
     def malloc_sdram_multi(
-            self, allocations: List[Tuple[int, int, int, int, int]]
-            ) -> List[int]:
+            self, allocations: list[tuple[int, int, int, int, int]]
+            ) -> list[int]:
         """
         Allocate space in the SDRAM space for multiple chips
 
@@ -853,7 +848,7 @@ class Transceiver(object):
     @abstractmethod
     def get_multicast_routes(
             self, x: int, y: int,
-            app_id: Optional[int] = None) -> List[MulticastRoutingEntry]:
+            app_id: Optional[int] = None) -> list[MulticastRoutingEntry]:
         """
         Get the current multicast routes set up on a chip.
 

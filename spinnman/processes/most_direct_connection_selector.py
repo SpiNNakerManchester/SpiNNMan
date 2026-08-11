@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List
 
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
@@ -33,11 +32,11 @@ class MostDirectConnectionSelector(ConnectionSelector):
         "_connections",
         "_lead_connection")
 
-    def __init__(self, connections: List[SCAMPConnection]):
+    def __init__(self, connections: list[SCAMPConnection]):
         """
         :param connections: The connections to be used
         """
-        self._connections: Dict[XY, SCAMPConnection] = {}
+        self._connections: dict[XY, SCAMPConnection] = {}
         lead_connection = None
         for conn in connections:
             if conn.chip_x == 0 and conn.chip_y == 0:

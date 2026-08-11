@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Optional, Tuple
+from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -96,14 +96,14 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         return _TWO_SKIP.pack() + scp_request.bytestring
 
     @overrides(AbstractSCPConnection.receive_scp_response)
-    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> Tuple[
+    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> tuple[
             SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
         return SCPResult(result), sequence, data, 2
 
     def receive_scp_response_with_address(
-            self, timeout: float = 1.0) -> Tuple[
+            self, timeout: float = 1.0) -> tuple[
                 SCPResult, int, bytes, int, str, int]:
         """
         Receive data from the connection along with the address where the

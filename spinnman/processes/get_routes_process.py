@@ -14,7 +14,7 @@
 
 import struct
 from functools import partial
-from typing import List, Optional
+from typing import Optional
 
 from spinn_machine import MulticastRoutingEntry, RoutingEntry
 
@@ -53,7 +53,7 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
         :param app_id:
         """
         super().__init__(connection_selector)
-        self._entries: List[Optional[MulticastRoutingEntry]] = \
+        self._entries: list[Optional[MulticastRoutingEntry]] = \
             [None] * _N_ENTRIES
         self._app_id = app_id
 
@@ -76,7 +76,7 @@ class GetMultiCastRoutesProcess(AbstractMultiConnectionProcess[Response]):
             self._add_routing_entry(route_no, offset, *entry)
 
     def get_routes(self, x: int, y: int,
-                   base_address: int) -> List[MulticastRoutingEntry]:
+                   base_address: int) -> list[MulticastRoutingEntry]:
         """
         :param x:
         :param y:

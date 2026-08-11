@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, Iterable, Iterator
+from typing import Iterable, Iterator
 
 from typing_extensions import Self
 
@@ -23,7 +23,7 @@ from spinnman.model.enums import CPUState
 from .cpu_info import CPUInfo
 
 
-class CPUInfos(object):
+class CPUInfos:
     """
     A set of CPU information objects.
     """
@@ -31,7 +31,7 @@ class CPUInfos(object):
         "_cpu_infos"]
 
     def __init__(self) -> None:
-        self._cpu_infos: Dict[XYP, CPUInfo] = {}
+        self._cpu_infos: dict[XYP, CPUInfo] = {}
 
     def add_info(self, cpu_info: CPUInfo) -> None:
         """

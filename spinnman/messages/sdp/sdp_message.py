@@ -16,7 +16,7 @@ from typing import Optional
 from .sdp_header import SDPHeader
 
 
-class SDPMessage(object):
+class SDPMessage:
     """
     Wraps up an SDP message with a header and optional data.
     """

@@ -16,7 +16,7 @@ import re
 from functools import wraps
 from json.decoder import JSONDecodeError
 from logging import getLogger
-from typing import Any, Callable, Dict, Optional, Tuple, cast
+from typing import Any, Callable, Optional, cast
 
 import requests
 import websocket  # type: ignore
@@ -105,7 +105,7 @@ class Session:
             username: Optional[str] = None, password: Optional[str] = None,
             token: Optional[str] = None,
             session_credentials: Optional[
-                Tuple[Dict[str, str], Dict[str, str]]] = None):
+                tuple[dict[str, str], dict[str, str]]] = None):
         """
         :param service_url: The reference to the service.
             *Should not* include a username or password in it.
@@ -326,7 +326,7 @@ class Session:
         return obj
 
     @property
-    def credentials(self) -> Tuple[Dict[str, str], Dict[str, str]]:
+    def credentials(self) -> tuple[dict[str, str], dict[str, str]]:
         """
         The credentials for requests. *Serializable.*
         """
@@ -402,7 +402,7 @@ class SessionAware:
         self._url = clean_url(url)
 
     @property
-    def _session_credentials(self) -> Tuple[Dict[str, str], Dict[str, str]]:
+    def _session_credentials(self) -> tuple[dict[str, str], dict[str, str]]:
         """
         The current session credentials.
         Only supposed to be called by subclasses.

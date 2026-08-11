@@ -14,7 +14,7 @@
 
 import logging
 import traceback
-from typing import Dict, Optional, Tuple, Type
+from typing import Optional
 
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.config_holder import (
@@ -49,7 +49,7 @@ from spinnman.transceiver import Transceiver, transceiver_generator
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class AbstractSpiNNManSimulation(object):
+class AbstractSpiNNManSimulation:
     """
     The SpiNNMan level part of the simulation interface, with abstract config.
     """
@@ -100,7 +100,7 @@ class AbstractSpiNNManSimulation(object):
 
     @property
     @abstractmethod
-    def _data_writer_cls(self) -> Type[SpiNNManDataWriter]:
+    def _data_writer_cls(self) -> type[SpiNNManDataWriter]:
         """
         Type to use for the data writer.
 
@@ -256,7 +256,7 @@ class AbstractSpiNNManSimulation(object):
 
     def _execute_transceiver_by_spalloc(
             self, ensure_board_is_ready: bool
-            ) -> Tuple[Transceiver, Dict[XY, str]]:
+            ) -> tuple[Transceiver, dict[XY, str]]:
         """
         :return: Transceiver and connections (to write to provenance)
         """

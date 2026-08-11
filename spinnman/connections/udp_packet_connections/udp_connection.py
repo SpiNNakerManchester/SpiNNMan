@@ -16,7 +16,7 @@ import logging
 import select
 import socket
 from contextlib import suppress
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
@@ -199,8 +199,8 @@ class UDPConnection(Connection, Listenable[bytes]):
             raise SpinnmanEOFException()
         return receive_message(self._socket, timeout, _MSG_MAX)
 
-    def receive_with_address(self, timeout: Optional[float] = None) -> Tuple[
-            bytes, Tuple[str, int]]:
+    def receive_with_address(self, timeout: Optional[float] = None) -> tuple[
+            bytes, tuple[str, int]]:
         """
         Receive data from the connection along with the address where the
         data was received from.
@@ -233,7 +233,7 @@ class UDPConnection(Connection, Listenable[bytes]):
             if self.__is_closed:
                 raise SpinnmanEOFException()
 
-    def send_to(self, data: bytes, address: Tuple[str, int]) -> None:
+    def send_to(self, data: bytes, address: tuple[str, int]) -> None:
         """
         Send data down this connection.
 
