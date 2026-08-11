@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from functools import partial
-from typing import List, Optional
+from typing import Optional
 
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 
@@ -45,7 +45,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
         """
         super().__init__(connection_selector)
         self._tag_info: Optional[IPTagGetInfoResponse] = None
-        self._tags: List[Optional[AbstractTag]] = []
+        self._tags: list[Optional[AbstractTag]] = []
 
     def __handle_tag_info_response(
             self, response: IPTagGetInfoResponse) -> None:
@@ -68,7 +68,7 @@ class GetTagsProcess(AbstractMultiConnectionProcess):
                     response.sdp_header.source_chip_y, tag, host,
                     response.port, response.strip_sdp)
 
-    def get_tags(self, connection: SCAMPConnection) -> List[AbstractTag]:
+    def get_tags(self, connection: SCAMPConnection) -> list[AbstractTag]:
         """
         :param connection:
         :returns: The tags read from the connection.

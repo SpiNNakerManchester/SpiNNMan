@@ -19,7 +19,7 @@ from spinnman.messages.scp.enums import SCPResult
 _TWO_SHORTS = struct.Struct("<2H")
 
 
-class SCPResponseHeader(object):
+class SCPResponseHeader:
     """
     Represents the header of an SCP Response.
     """

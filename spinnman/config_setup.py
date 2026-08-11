@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-from typing import Set
 
 from spinn_utilities.config_holder import (
     add_default_cfg,
@@ -60,7 +59,7 @@ def add_spinnman_template() -> None:
     add_template(os.path.join(os.path.dirname(__file__), TEMPLATE_FILE))
 
 
-def man_cfg_paths_skipped() -> Set[str]:
+def man_cfg_paths_skipped() -> set[str]:
     """
     cfg report options that point to paths that may not exist.
 

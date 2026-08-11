@@ -17,9 +17,7 @@ import traceback
 from types import TracebackType
 from typing import (
     TYPE_CHECKING,
-    FrozenSet,
     Generic,
-    List,
     Optional,
     TypeVar,
     Union,
@@ -250,9 +248,9 @@ class SpinnmanGroupedProcessException(SpinnmanException):
     Encapsulates exceptions from processes which communicate with a
     collection of cores/chips.
     """
-    def __init__(self, error_requests: List[AbstractSCPRequest],
-                 exceptions: List[Exception], trace_backs: List[TracebackType],
-                 connections: List[SCAMPConnection]):
+    def __init__(self, error_requests: list[AbstractSCPRequest],
+                 exceptions: list[Exception], trace_backs: list[TracebackType],
+                 connections: list[SCAMPConnection]):
         """
         :param error_requests: List of the requests that cause the error.
         :param exceptions: List of the exceptions caught.
@@ -361,7 +359,7 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
 
     def __init__(
             self, timeout: Optional[float],
-            expected_states: FrozenSet[CPUState],
+            expected_states: frozenset[CPUState],
             failed_core_states: CPUInfos):
         """
         :param timeout:

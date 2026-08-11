@@ -16,7 +16,7 @@ import logging
 import os
 import re
 from contextlib import ExitStack
-from typing import ContextManager, Dict, Optional, Tuple, Union, cast
+from typing import ContextManager, Optional, Union, cast
 
 import ebrains_drive  # type: ignore[import]
 import requests
@@ -100,7 +100,7 @@ class SpallocJobController(MachineAllocationController):
 
     @overrides(MachineAllocationController.where_is_machine)
     def where_is_machine(
-            self, chip_x: int, chip_y: int) -> Tuple[int, int, int]:
+            self, chip_x: int, chip_y: int) -> tuple[int, int, int]:
         result = self._job.where_is_machine(x=chip_x, y=chip_y)
         if result is None:
             raise ValueError("coordinates lie outside machine")
@@ -202,7 +202,7 @@ def __bearer_token() -> Optional[str]:
     return os.getenv("OIDC_BEARER_TOKEN")
 
 
-def __get_collab_id_from_folder(folder: str) -> Optional[Dict[str, str]]:
+def __get_collab_id_from_folder(folder: str) -> Optional[dict[str, str]]:
     """
     Currently hacky way to get the EBRAINS collab id from the
     drive folder, replicated from the NMPI collab template.
@@ -225,7 +225,7 @@ def __get_collab_id_from_folder(folder: str) -> Optional[Dict[str, str]]:
     return {"collab": collab_id}
 
 
-def __group_collab_or_job() -> Dict[str, str]:
+def __group_collab_or_job() -> dict[str, str]:
     """
     :return: The group, collab, or NMPI Job ID to associate with jobs
     """
@@ -264,8 +264,8 @@ def __group_collab_or_job() -> Dict[str, str]:
     return {}
 
 
-def spalloc_allocate_job() -> Tuple[
-            str, Dict[XY, str], SpallocJobController]:
+def spalloc_allocate_job() -> tuple[
+            str, dict[XY, str], SpallocJobController]:
     """
     Request a machine from an new-style spalloc server that will fit the
     given number of boards.
@@ -279,8 +279,8 @@ def spalloc_allocate_job() -> Tuple[
 def __spalloc_allocate_job(
         bearer_token: Optional[str] = None, group: Optional[str] = None,
         collab: Optional[str] = None, nmpi_job: Union[int, str, None] = None,
-        nmpi_user: Optional[str] = None) -> Tuple[
-            str, Dict[XY, str], SpallocJobController]:
+        nmpi_user: Optional[str] = None) -> tuple[
+            str, dict[XY, str], SpallocJobController]:
     """
     Request a machine from an new-style spalloc server that will fit the
     given number of boards.

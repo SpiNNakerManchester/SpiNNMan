@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import Dict, Tuple
 
 LOCAL_HOST = "127.0.0.1"
 
@@ -197,7 +196,7 @@ class READ_TYPES(Enum):
 #: This is a mapping between read address in the mapping between word byte
 #: position, the number of bytes you wish to read, and the type of time
 #: efficient way to read said amount of bytes via SARK
-address_length_dtype: Dict[Tuple[int, int], READ_TYPES] = {
+address_length_dtype: dict[tuple[int, int], READ_TYPES] = {
     (0, 0): READ_TYPES.WORD,
     (0, 1): READ_TYPES.BYTE,
     (0, 2): READ_TYPES.HALF_WORD,

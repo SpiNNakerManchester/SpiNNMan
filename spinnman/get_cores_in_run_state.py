@@ -18,7 +18,7 @@ This is a script used to check the state of a SpiNNaker machine.
 
 import argparse
 import sys
-from typing import List, Optional
+from typing import Optional
 
 from spinn_utilities.config_holder import set_config
 
@@ -110,7 +110,7 @@ def _make_transceiver(host: Optional[str], version: Optional[int],
         auto_detect_bmp=auto_detect_bmp)
 
 
-def main(args: List[str]) -> None:
+def main(args: list[str]) -> None:
     """
     Runs the script.
     """

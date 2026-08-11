@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class IOBuffer(object):
+class IOBuffer:
     """
     The contents of IOBUF for a core.
     """

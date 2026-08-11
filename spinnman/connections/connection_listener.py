@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Thread
-from typing import Callable, Generic, List, TypeVar
+from typing import Callable, Generic, TypeVar
 
 from spinn_utilities.log import FormatAdapter
 
@@ -59,7 +59,7 @@ class ConnectionListener(Thread, Generic[T]):
         self.__timeout = timeout
         self.__callback_pool = ThreadPoolExecutor(max_workers=n_processes)
         self.__done = False
-        self.__callbacks: List[Callable[[T], None]] = []
+        self.__callbacks: list[Callable[[T], None]] = []
 
     def __run_step(self, handler: Callable[[], T]) -> None:
         """

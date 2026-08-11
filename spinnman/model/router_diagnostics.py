@@ -18,7 +18,7 @@ from spinnman.exceptions import SpinnmanInvalidParameterException
 from spinnman.model.enums.router_error import RouterError
 
 
-class RouterDiagnostics(object):
+class RouterDiagnostics:
     """
     Represents a set of diagnostic information available from a chip router.
     """

@@ -27,7 +27,7 @@ _PATTERN = struct.Struct(
     "I")  # uint32_t shutdown
 
 
-class ADCInfo(object):
+class ADCInfo:
     """
     Container for the ADC data that's been retrieved from an FPGA.
     """

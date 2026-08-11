@@ -26,14 +26,10 @@ from time import sleep
 from typing import (
     Any,
     Callable,
-    Dict,
     Final,
-    FrozenSet,
     Iterable,
-    List,
     Mapping,
     Optional,
-    Tuple,
     cast,
 )
 from urllib.parse import ParseResult, urlparse, urlunparse
@@ -229,8 +225,8 @@ class SpallocClient(AbstractContextManager):
 
     @staticmethod
     def open_job_from_database(
-            service_url: str, job_url: str, cookies: Dict[str, str],
-            headers: Dict[str, str]) -> SpallocJob:
+            service_url: str, job_url: str, cookies: dict[str, str],
+            headers: dict[str, str]) -> SpallocJob:
         """
         Create a job from the description in the attached database. This is
         intended to allow for access to the job's allocated resources from
@@ -254,7 +250,7 @@ class SpallocClient(AbstractContextManager):
         session = Session(service_url, session_credentials=(cookies, headers))
         return _SpallocJob(session, job_url)
 
-    def list_machines(self) -> Dict[str, SpallocMachine]:
+    def list_machines(self) -> dict[str, SpallocMachine]:
         """
         Get the machines supported by the server.
 
@@ -292,7 +288,7 @@ class SpallocClient(AbstractContextManager):
         """
         assert self.__session
 
-        operation: Dict[str, JsonValue] = {}
+        operation: dict[str, JsonValue] = {}
 
         spalloc_triad = get_config_str_or_none("Machine", "spalloc_triad")
         spalloc_physical = get_config_str_or_none(
@@ -410,7 +406,7 @@ class _SpallocMachine(SessionAware, SpallocMachine):
         """
         super().__init__(session, cast(str, machine_data["uri"]))
         self.__name = cast(str, machine_data["name"])
-        self.__tags = frozenset(cast(List[str], machine_data["tags"]))
+        self.__tags = frozenset(cast(list[str], machine_data["tags"]))
         self.__width = cast(int, machine_data["width"])
         self.__height = cast(int, machine_data["height"])
         self.__dead_boards = cast(list, machine_data["dead-boards"])
@@ -423,7 +419,7 @@ class _SpallocMachine(SessionAware, SpallocMachine):
 
     @property
     @overrides(SpallocMachine.tags)
-    def tags(self) -> FrozenSet[str]:
+    def tags(self) -> frozenset[str]:
         return self.__tags
 
     @property
@@ -448,7 +444,7 @@ class _SpallocMachine(SessionAware, SpallocMachine):
 
     @property
     @overrides(SpallocMachine.area)
-    def area(self) -> Tuple[int, int]:
+    def area(self) -> tuple[int, int]:
         return (self.width, self.height)
 
     def __repr__(self) -> str:
@@ -508,8 +504,8 @@ class _ProxyReceiver(threading.Thread):
         """
         super().__init__(daemon=True)
         self.__ws = websocket
-        self.__returns: Dict[int, _WSCB] = {}
-        self.__handlers: Dict[int, _WSCB] = {}
+        self.__returns: dict[int, _WSCB] = {}
+        self.__handlers: dict[int, _WSCB] = {}
         self.__correlation_id = 0
         self.__closed = False
         self.start()
@@ -520,7 +516,7 @@ class _ProxyReceiver(threading.Thread):
         """
         while self.__ws.connected:
             try:
-                result: Tuple[int, bytes] = self.__ws.recv_data()
+                result: tuple[int, bytes] = self.__ws.recv_data()
                 frame = result[1]
                 if len(frame) < _msg.size:
                     # Message is out of protocol
@@ -635,7 +631,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         keep_alive.start()
 
     @overrides(SpallocJob.get_session_credentials_for_db)
-    def get_session_credentials_for_db(self) -> Mapping[Tuple[str, str], str]:
+    def get_session_credentials_for_db(self) -> Mapping[tuple[str, str], str]:
         config = {}
         config["SPALLOC", "service uri"] = self._service_url
         config["SPALLOC", "job uri"] = self._url
@@ -672,7 +668,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         return None
 
     @overrides(SpallocJob.get_connections)
-    def get_connections(self) -> Dict[XY, str]:
+    def get_connections(self) -> dict[XY, str]:
         r = self._get(self.__machine_url)
         if r.status_code == 204:
             return {}
@@ -698,7 +694,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         logger.info("Connecting to proxy on {}", url)
         return url
 
-    def __init_proxy(self) -> Tuple[_ProxyReceiver, WebSocket]:
+    def __init_proxy(self) -> tuple[_ProxyReceiver, WebSocket]:
         if self.__proxy_handle is None or not self.__proxy_handle.connected:
             self.__proxy_handle = self._websocket(
                 self.__proxy_url, origin=get_hostname(self._url))
@@ -811,7 +807,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.reset_routing)
     def reset_routing(
-            self, custom_filters: Dict[int, DiagnosticFilter]) -> None:
+            self, custom_filters: dict[int, DiagnosticFilter]) -> None:
         keys = {str(i): f.filter_word for i, f in custom_filters.items()}
         self._delete(self.__router_url, **keys)
 
@@ -843,11 +839,11 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.where_is_machine)
     def where_is_machine(self, x: int, y: int) -> Optional[
-            Tuple[int, int, int]]:
+            tuple[int, int, int]]:
         r = self._get(self.__chip_url, x=int(x), y=int(y))
         if r.status_code == 204:
             return None
-        return cast(Tuple[int, int, int], tuple(
+        return cast(tuple[int, int, int], tuple(
             r.json()["physical-board-coordinates"]))
 
     @overrides(SpallocJob.create_transceiver)
@@ -896,7 +892,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         raise NotImplementedError
 
     def _call(self, protocol: ProxyProtocol, packer: struct.Struct,
-              unpacker: struct.Struct, *args: int) -> Tuple[Any, ...]:
+              unpacker: struct.Struct, *args: int) -> tuple[Any, ...]:
         """
         Do a synchronous call.
 
@@ -1227,7 +1223,7 @@ class _ProxiedEIEIOListener(_ProxiedUnboundConnection, SpallocEIEIOListener):
     __slots__ = ("__conns", )
 
     def __init__(self, websocket: WebSocket, receiver: _ProxyReceiver,
-                 connections: Dict[XY, str]):
+                 connections: dict[XY, str]):
         """
         :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver created when starting the Client
@@ -1268,7 +1264,7 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
     __slots__ = ("__conns", )
 
     def __init__(self, websocket: WebSocket, receiver: _ProxyReceiver,
-                 connections: Dict[XY, str]):
+                 connections: dict[XY, str]):
         """
         :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver created when starting the Client
@@ -1281,7 +1277,7 @@ class _ProxiedUDPListener(_ProxiedUnboundConnection, UDPConnection):
         self.__conns = {ip: xy for (xy, ip) in connections.items()}
 
     @overrides(UDPConnection.send_to)
-    def send_to(self, data: bytes, address: Tuple[str, int]) -> None:
+    def send_to(self, data: bytes, address: tuple[str, int]) -> None:
         ip, port = address
         x, y = self.__conns[ip]
         self._send_to(data, x, y, port)

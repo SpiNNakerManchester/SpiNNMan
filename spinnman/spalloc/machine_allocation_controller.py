@@ -15,7 +15,6 @@
 import logging
 import sys
 from threading import Thread
-from typing import Tuple
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.log import FormatAdapter
@@ -23,7 +22,7 @@ from spinn_utilities.log import FormatAdapter
 logger = FormatAdapter(logging.getLogger(__name__))
 
 
-class MachineAllocationController(object, metaclass=AbstractBase):
+class MachineAllocationController(metaclass=AbstractBase):
     """
     How to manage the allocation of a machine so that it gets cleaned up
     neatly when the script dies.
@@ -70,7 +69,7 @@ class MachineAllocationController(object, metaclass=AbstractBase):
 
     @abstractmethod
     def where_is_machine(
-            self, chip_x: int, chip_y: int) -> Tuple[int, int, int]:
+            self, chip_x: int, chip_y: int) -> tuple[int, int, int]:
         """
         Locates and returns cabinet, frame, board for a given chip in a
         machine allocated to this job.

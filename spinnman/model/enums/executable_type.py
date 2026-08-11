@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import FrozenSet, Sequence
+from typing import Sequence
 
 from spinnman.model.enums import CPUState
 
@@ -25,8 +25,8 @@ class ExecutableType(Enum):
     are started and controlled.
     """
     value: int
-    start_state: FrozenSet[CPUState]
-    end_state: FrozenSet[CPUState]
+    start_state: frozenset[CPUState]
+    end_state: frozenset[CPUState]
     supports_auto_pause_and_resume: bool
 
     #: Runs immediately without waiting for barrier and then exits.
@@ -90,6 +90,6 @@ class ExecutableType(Enum):
         :param doc: Description of the type
         """
         _ = (value, doc)
-        self.start_state: FrozenSet[CPUState] = frozenset(start_state)
-        self.end_state: FrozenSet[CPUState] = frozenset(end_state)
+        self.start_state: frozenset[CPUState] = frozenset(start_state)
+        self.end_state: frozenset[CPUState] = frozenset(end_state)
         self.supports_auto_pause_and_resume = supports_auto_pause_and_resume

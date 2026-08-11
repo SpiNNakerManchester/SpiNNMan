@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Iterable, Tuple
+from typing import Iterable
 
 from spinnman.messages.scp.enums.scp_result import SCPResult
 from spinnman.messages.scp.impl import CountState
@@ -46,7 +46,7 @@ class GetNCoresInStateProcess(AbstractMultiConnectionProcess):
     def __handle_response(self, response: CountStateResponse) -> None:
         self._n_cores += response.count
 
-    def get_n_cores_in_state(self, xys: Iterable[Tuple[int, int]],
+    def get_n_cores_in_state(self, xys: Iterable[tuple[int, int]],
                              app_id: int, state: CPUState) -> int:
         """
         :param xys:

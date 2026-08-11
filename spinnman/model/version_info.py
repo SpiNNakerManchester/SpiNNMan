@@ -15,17 +15,17 @@
 import re
 import struct
 from time import asctime, localtime
-from typing import Final, Tuple, cast
+from typing import Final, cast
 
 from typing_extensions import TypeAlias
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
 _VERSION_PATTERN = struct.Struct("<BBBBHHI")
-_V: Final['TypeAlias'] = Tuple[int, int, int]
+_V: Final['TypeAlias'] = tuple[int, int, int]
 
 
-class VersionInfo(object):
+class VersionInfo:
     """
     Decodes SC&MP/SARK version information as returned by the SVER command.
     """

@@ -13,14 +13,14 @@
 # limitations under the License.
 
 import struct
-from typing import Dict, Iterable, List, Tuple
+from typing import Iterable
 
 from spinnman.model.enums import P2PTableRoute
 
 _ONE_WORD = struct.Struct("<I")
 
 
-class P2PTable(object):
+class P2PTable:
     """
     Represents a P2P routing table read from the machine.
     """
@@ -30,13 +30,13 @@ class P2PTable(object):
         "_width"]
 
     def __init__(self, width: int, height: int,
-                 column_data: List[Tuple[bytes, int]]):
+                 column_data: list[tuple[bytes, int]]):
         """
         :param width:
         :param height:
         :param column_data:
         """
-        self._routes: Dict[Tuple[int, int], P2PTableRoute] = {}
+        self._routes: dict[tuple[int, int], P2PTableRoute] = {}
         self._width = width
         self._height = height
         for x, (data, offset) in enumerate(column_data):
@@ -82,7 +82,7 @@ class P2PTable(object):
         """
         return self._height
 
-    def iterchips(self) -> Iterable[Tuple[int, int]]:
+    def iterchips(self) -> Iterable[tuple[int, int]]:
         """
         :returns: An iterator of tuples of (x, y) coordinates in the table.
         """

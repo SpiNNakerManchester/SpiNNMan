@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import struct
-from typing import List, Tuple
 
 from spinn_utilities.progress_bar import ProgressBar
 
@@ -30,7 +29,7 @@ class SetMemoryProcess(AbstractMultiConnectionProcess[CheckOKResponse]):
     """
 
     def set_values(
-            self, values: List[Tuple[int, int, int, int]],
+            self, values: list[tuple[int, int, int, int]],
             description: str) -> None:
         """ Set the memory values selected
 

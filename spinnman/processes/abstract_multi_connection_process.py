@@ -18,12 +18,9 @@ import sys
 from types import TracebackType
 from typing import (
     Callable,
-    Dict,
     Generator,
     Generic,
-    List,
     Optional,
-    Set,
     TypeVar,
     cast,
 )
@@ -82,7 +79,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
     def __init__(self, next_connection_selector: ConnectionSelector,
                  n_retries: int = N_RETRIES, timeout: float = SCP_TIMEOUT,
                  n_channels: int = 8, intermediate_channel_waits: int = 7,
-                 non_fail_retry_codes: Optional[Set[SCPResult]] = None):
+                 non_fail_retry_codes: Optional[set[SCPResult]] = None):
         """
         :param next_connection_selector:
             How to choose the connection.
@@ -101,11 +98,11 @@ class AbstractMultiConnectionProcess(Generic[R]):
             Optional set of responses that result in retry but after retrying
             don't then result in failure even if returned on the last call.
         """
-        self._exceptions: List[Exception] = []
-        self._tracebacks: List[TracebackType] = []
-        self._error_requests: List[AbstractSCPRequest[R]] = []
-        self._connections: List[SCAMPConnection] = []
-        self._scp_request_pipelines: Dict[
+        self._exceptions: list[Exception] = []
+        self._tracebacks: list[TracebackType] = []
+        self._error_requests: list[AbstractSCPRequest[R]] = []
+        self._connections: list[SCAMPConnection] = []
+        self._scp_request_pipelines: dict[
             SCAMPConnection, SCPRequestPipeLine[R]] = {}
         self._n_retries = n_retries
         self._timeout = timeout

@@ -24,7 +24,7 @@ _TWO_SHORTS = struct.Struct("<2H")
 _Command: TypeAlias = Union[SCPCommand, Enum]
 
 
-class SCPRequestHeader(object):
+class SCPRequestHeader:
     """
     Represents the header of an SCP Request.
     """

@@ -15,13 +15,8 @@
 from typing import (
     BinaryIO,
     Collection,
-    Dict,
-    FrozenSet,
     Iterable,
-    List,
     Optional,
-    Set,
-    Tuple,
     Union,
 )
 
@@ -71,8 +66,8 @@ class MockableTransceiver(ExtendableTransceiver):
 
     def __init__(self) -> None:
         super().__init__()
-        self.written_memory: List[
-            Tuple[int, int, int, Union[BinaryIO, bytearray, bytes, int, str],
+        self.written_memory: list[
+            tuple[int, int, int, Union[BinaryIO, bytearray, bytes, int, str],
                   Optional[int], int, int]] = []
 
     @overrides(Transceiver.send_sdp_message)
@@ -85,7 +80,7 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.add_scamp_connections)
-    def add_scamp_connections(self, connections: Dict[XY, str]) -> None:
+    def add_scamp_connections(self, connections: dict[XY, str]) -> None:
         pass
 
     @overrides(Transceiver.get_machine_details)
@@ -93,7 +88,7 @@ class MockableTransceiver(ExtendableTransceiver):
         return SpiNNManDataView.get_machine()
 
     @overrides(Transceiver.get_connections)
-    def get_connections(self) -> Set[Connection]:
+    def get_connections(self) -> set[Connection]:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_cpu_infos)
@@ -129,7 +124,7 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.get_core_state_count)
     def get_core_state_count(
             self, app_id: int, state: CPUState,
-            xys: Optional[Iterable[Tuple[int, int]]] = None) -> int:
+            xys: Optional[Iterable[tuple[int, int]]] = None) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.execute_flood)
@@ -158,7 +153,7 @@ class MockableTransceiver(ExtendableTransceiver):
             self, x: int, y: int, base_address: int,
             data: Union[BinaryIO, bytearray, bytes, int, str], *,
             n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
-            get_sum: bool = False) -> Tuple[int, int]:
+            get_sum: bool = False) -> tuple[int, int]:
         print("Doing write to", x, y)
         self.written_memory.append(
             (x, y, base_address, data, n_bytes, offset, cpu))
@@ -191,7 +186,7 @@ class MockableTransceiver(ExtendableTransceiver):
             cpu_states: Union[CPUState, Iterable[CPUState]], *,
             timeout: Optional[float] = None,
             time_between_polls: float = 0.1,
-            error_states: FrozenSet[CPUState] = frozenset((
+            error_states: frozenset[CPUState] = frozenset((
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check: int = 100,
             progress_bar: Optional[ProgressBar] = None) -> None:
@@ -242,7 +237,7 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.get_multicast_routes)
     def get_multicast_routes(
             self, x: int, y: int,
-            app_id: Optional[int] = None) -> List[MulticastRoutingEntry]:
+            app_id: Optional[int] = None) -> list[MulticastRoutingEntry]:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.clear_multicast_routes)

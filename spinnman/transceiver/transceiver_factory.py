@@ -14,7 +14,7 @@
 
 import logging
 import re
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Iterable, Optional
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
@@ -102,7 +102,7 @@ def __create_transceiver_from_hostname(
         ensure_board_is_ready: bool = True) -> Transceiver:
     if hostname is not None:
         logger.info("Creating transceiver for {}", hostname)
-    connections: List[Connection] = []
+    connections: list[Connection] = []
 
     # if no BMP has been supplied, but the board is a spinn4 or a spinn5
     # machine, then an assumption can be made that the BMP is at -1 on the
@@ -206,7 +206,7 @@ def __create_transceiver_from_connections(
 
 def transceiver_generator(
         bmp_details: Optional[str], auto_detect_bmp: bool,
-        scamp_connection_data: Optional[Dict[XY, str]],
+        scamp_connection_data: Optional[dict[XY, str]],
         reset_machine_on_start_up: bool,
         ensure_board_is_ready: bool = True) -> Transceiver:
     """
@@ -238,7 +238,7 @@ def transceiver_generator(
     return txrx
 
 
-def _parse_bmp_cabinet_and_frame(bmp_str: str) -> Tuple[str, Optional[str]]:
+def _parse_bmp_cabinet_and_frame(bmp_str: str) -> tuple[str, Optional[str]]:
     if ";" in bmp_str:
         raise NotImplementedError(
             "cfg bmp_names no longer supports cabinet and frame")
@@ -248,7 +248,7 @@ def _parse_bmp_cabinet_and_frame(bmp_str: str) -> Tuple[str, Optional[str]]:
     return host[0], host[1]
 
 
-def _parse_bmp_boards(bmp_boards: str) -> List[int]:
+def _parse_bmp_boards(bmp_boards: str) -> list[int]:
     # If the string is a range of boards, get the range
     range_match = re.match(r"(\d+)-(\d+)", bmp_boards)
     if range_match is not None:

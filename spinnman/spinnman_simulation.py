@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-from typing import Type
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
@@ -49,5 +48,5 @@ class SpiNNManSimulation(AbstractSpiNNManSimulation):
 
     @property
     @overrides(AbstractSpiNNManSimulation._data_writer_cls)
-    def _data_writer_cls(self) -> Type[SpiNNManDataWriter]:
+    def _data_writer_cls(self) -> type[SpiNNManDataWriter]:
         return SpiNNManDataWriter

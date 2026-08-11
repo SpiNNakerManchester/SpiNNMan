@@ -22,7 +22,6 @@ from typing import (
     BinaryIO,
     Generator,
     Iterable,
-    List,
     Mapping,
     Optional,
     Sequence,
@@ -85,7 +84,7 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 @require_subclass(ExtendableTransceiver)
-class ExtendedTransceiver(object, metaclass=AbstractBase):
+class ExtendedTransceiver(metaclass=AbstractBase):
     """
     Allows a Transceiver to support extra method not currently needed.
 
@@ -98,7 +97,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
 
     Typing is best effort as without use there is no way to check
     """
-    __slots__: List[str] = []
+    __slots__: list[str] = []
 
     # calls many methods only reachable do to require_subclass
     # pylint: disable=no-member,assigning-non-slot
@@ -192,7 +191,7 @@ class ExtendedTransceiver(object, metaclass=AbstractBase):
                 self._n_chip_execute_locks -= 1
                 self._chip_execute_lock_condition.notify_all()
 
-    def execute(self, x: int, y: int, processors: List[int],
+    def execute(self, x: int, y: int, processors: list[int],
                 executable: Union[BinaryIO, bytes, int, str], app_id: int,
                 n_bytes: Optional[int] = None, wait: bool = False) -> None:
         """

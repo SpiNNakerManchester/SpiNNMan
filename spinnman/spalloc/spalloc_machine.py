@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import FrozenSet, Tuple
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 
-class SpallocMachine(object, metaclass=AbstractBase):
+class SpallocMachine(metaclass=AbstractBase):
     """
     Represents a Spalloc-controlled machine.
 
@@ -35,7 +34,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
 
     @property
     @abstractmethod
-    def tags(self) -> FrozenSet[str]:
+    def tags(self) -> frozenset[str]:
         """
         The tags of the machine.
         """
@@ -75,7 +74,7 @@ class SpallocMachine(object, metaclass=AbstractBase):
 
     @property
     @abstractmethod
-    def area(self) -> Tuple[int, int]:
+    def area(self) -> tuple[int, int]:
         """
         The width and height of machine
         """

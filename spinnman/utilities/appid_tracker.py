@@ -17,7 +17,7 @@ _MIN_APP_ID = 17
 _MAX_APP_ID = 254
 
 
-class AppIdTracker(object):
+class AppIdTracker:
     """
     A tracker of application IDs to make it easier to allocate new IDs.
     """

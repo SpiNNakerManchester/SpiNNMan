@@ -17,7 +17,7 @@ import logging
 from collections import defaultdict
 from contextlib import suppress
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Optional, cast
 
 from spinn_utilities.config_holder import (
     get_config_bool,
@@ -91,19 +91,19 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         """
         super().__init__(connection_selector)
 
-        self._ignore_cores_map: Dict[XY, Set[int]] = defaultdict(set)
+        self._ignore_cores_map: dict[XY, set[int]] = defaultdict(set)
 
-        self._p2p_column_data: List[Tuple[bytes, int]] = []
+        self._p2p_column_data: list[tuple[bytes, int]] = []
 
         # A dictionary of (x, y) -> ChipInfo
-        self._chip_info: Dict[XY, ChipSummaryInfo] = {}
+        self._chip_info: dict[XY, ChipSummaryInfo] = {}
 
         # Set to None meaning not computed yet
-        self._ethernets: Optional[Dict[str, XY]] = None
+        self._ethernets: Optional[dict[str, XY]] = None
 
         # Maps between virtual and physical cores
-        self._virtual_to_physical_map: Dict[XY, bytes] = {}
-        self._physical_to_virtual_map: Dict[XY, bytes] = {}
+        self._virtual_to_physical_map: dict[XY, bytes] = {}
+        self._physical_to_virtual_map: dict[XY, bytes] = {}
         self._progress: Optional[ProgressBar] = None
 
     def _make_chip(self, chip_info: ChipSummaryInfo, machine: Machine) -> Chip:

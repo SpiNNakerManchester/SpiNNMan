@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import List, Optional
+from typing import Optional
 
 from spinn_machine.machine import Machine
 
@@ -26,7 +26,7 @@ _EIGHTEEN_BYTES = struct.Struct("<18B")
 _ONE_SHORT = struct.Struct("<H")
 
 
-class ChipSummaryInfo(object):
+class ChipSummaryInfo:
     """
     Represents the chip summary information read via an SCP command.
     """
@@ -117,14 +117,14 @@ class ChipSummaryInfo(object):
         return self._n_cores
 
     @property
-    def core_states(self) -> List[CPUState]:
+    def core_states(self) -> list[CPUState]:
         """
         The state of the cores on the chip (list of one per core).
         """
         return self._core_states
 
     @property
-    def working_links(self) -> List[int]:
+    def working_links(self) -> list[int]:
         """
         The IDs of the working links outgoing from this chip.
         """

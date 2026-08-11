@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-class MachineDimensions(object):
+class MachineDimensions:
     """
     Represents the size of a machine in chips.
     """

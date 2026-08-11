@@ -16,7 +16,7 @@ import sys
 import time
 from threading import RLock
 from types import TracebackType
-from typing import Callable, Dict, Generic, List, Optional, Set, TypeVar, cast
+from typing import Callable, Generic, Optional, TypeVar, cast
 
 from typing_extensions import TypeAlias
 
@@ -86,7 +86,7 @@ class SCPRequestPipeLine(Generic[R]):
                  intermediate_channel_waits: int = 0,
                  n_retries: int = N_RETRIES,
                  packet_timeout: float = SCP_TIMEOUT,
-                 non_fail_retry_codes: Optional[Set[SCPResult]] = None):
+                 non_fail_retry_codes: Optional[set[SCPResult]] = None):
         """
         :param connection:
             The connection over which the communication is to take place
@@ -115,20 +115,20 @@ class SCPRequestPipeLine(Generic[R]):
                 self._intermediate_channel_waits = 0
 
         # A dictionary of sequence number -> requests in progress
-        self._requests: Dict[int, AbstractSCPRequest] = {}
-        self._request_data: Dict[int, bytes] = {}
+        self._requests: dict[int, AbstractSCPRequest] = {}
+        self._request_data: dict[int, bytes] = {}
 
         # A dictionary of sequence number -> number of retries for the packet
-        self._retries: Dict[int, int] = {}
+        self._retries: dict[int, int] = {}
 
         # A dictionary of sequence number -> callback function for response
-        self._callbacks: Dict[int, Optional[CB]] = {}
+        self._callbacks: dict[int, Optional[CB]] = {}
 
         # A dictionary of sequence number -> callback function for errors
-        self._error_callbacks: Dict[int, ECB] = {}
+        self._error_callbacks: dict[int, ECB] = {}
 
         # A dictionary of sequence number -> retry reason
-        self._retry_reason: Dict[int, List[str]] = {}
+        self._retry_reason: dict[int, list[str]] = {}
 
         # The number of responses outstanding
         self._in_progress = 0
@@ -139,7 +139,7 @@ class SCPRequestPipeLine(Generic[R]):
         # The number of packets that have been resent
         self._n_resent = 0
         self._n_retry_code_resent = 0
-        self._non_fail_retry_codes: Set[SCPResult]
+        self._non_fail_retry_codes: set[SCPResult]
         if non_fail_retry_codes is None:
             self._non_fail_retry_codes = set()
         else:
