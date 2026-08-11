@@ -585,7 +585,7 @@ class CoreCounter(object):
         if self._gui:
             colour = self._get_max_value(x, y)
             max_n_routes = self._width * self._height
-            value = int(round((float(colour) / max_n_routes) * n_routes))
+            value = round((float(colour) / max_n_routes) * n_routes)
             self._image_data[y, x] = [255 - value, 0, 255 - value]
         else:
             print(f"set_ethernet_n_routes {x=} {y=}")
@@ -595,7 +595,7 @@ class CoreCounter(object):
             colour = self._get_max_value(eth_x, eth_y)
             with self._update_lock:
                 self._total_cores += n_cores
-                value = int(round((float(colour) / 18.0) * n_cores))
+                value = round((float(colour) / 18.0) * n_cores)
                 self._image_data[y, x] = [0, value, 0]
         else:
             print(f"add_cores {eth_x=} {eth_y=} {x=} {y=}")

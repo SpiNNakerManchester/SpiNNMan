@@ -88,8 +88,8 @@ class SpinnakerBootMessages(object):
 
         # Compute how many packets to send
         n_words_to_read = boot_data_size // 4
-        self._no_data_packets = int(math.ceil(
-            float(boot_data_size) / _BOOT_MESSAGE_DATA_BYTES))
+        self._no_data_packets = math.ceil(
+            float(boot_data_size) / _BOOT_MESSAGE_DATA_BYTES)
 
         # Read the data
         boot_data = array.array("I")

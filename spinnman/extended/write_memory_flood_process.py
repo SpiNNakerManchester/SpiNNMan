@@ -44,8 +44,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
     def _start_flood_fill(
             self, n_bytes: int, nearest_neighbour_id: int) -> None:
-        n_blocks = int(math.ceil(math.ceil(n_bytes / 4.0) /
-                                 UDP_MESSAGE_MAX_SIZE))
+        n_blocks = math.ceil(math.ceil(n_bytes / 4.0) / UDP_MESSAGE_MAX_SIZE)
         with self._collect_responses():
             self._send_request(
                 FloodFillStart(nearest_neighbour_id, n_blocks))
