@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 
 from spinnman.constants import N_RETRIES
 from spinnman.messages.scp.impl import GetVersion
@@ -37,7 +36,7 @@ class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):
         :param connection_selector:
         """
         super().__init__(connection_selector, n_retries)
-        self._version_info: Optional[VersionInfo] = None
+        self._version_info: VersionInfo | None = None
 
     def _get_response(self, version_response: GetVersionResponse) -> None:
         self._version_info = version_response.version_info

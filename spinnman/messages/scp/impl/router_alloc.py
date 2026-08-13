@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -37,7 +36,7 @@ class RouterAllocResponse(AbstractSCPResponse):
 
     def __init__(self) -> None:
         super().__init__()
-        self._base_address: Optional[int] = None
+        self._base_address: int | None = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data: bytes, offset: int) -> None:

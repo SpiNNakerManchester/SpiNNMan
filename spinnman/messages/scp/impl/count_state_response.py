@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -32,7 +31,7 @@ class CountStateResponse(AbstractSCPResponse):
 
     def __init__(self) -> None:
         super().__init__()
-        self._count: Optional[int] = None
+        self._count: int | None = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data: bytes, offset: int) -> None:

@@ -20,7 +20,6 @@ from typing import (
     Callable,
     Generator,
     Generic,
-    Optional,
     TypeVar,
     cast,
 )
@@ -79,7 +78,7 @@ class AbstractMultiConnectionProcess(Generic[R]):
     def __init__(self, next_connection_selector: ConnectionSelector,
                  n_retries: int = N_RETRIES, timeout: float = SCP_TIMEOUT,
                  n_channels: int = 8, intermediate_channel_waits: int = 7,
-                 non_fail_retry_codes: Optional[set[SCPResult]] = None):
+                 non_fail_retry_codes: set[SCPResult] | None = None):
         """
         :param next_connection_selector:
             How to choose the connection.
@@ -112,8 +111,8 @@ class AbstractMultiConnectionProcess(Generic[R]):
         self._non_fail_retry_codes = non_fail_retry_codes
 
     def _send_request(self, request: AbstractSCPRequest[R],
-                      callback: Optional[Callable[[R], None]] = None,
-                      error_callback: Optional[ECB] = None) -> None:
+                      callback: Callable[[R], None] | None = None,
+                      error_callback: ECB | None = None) -> None:
         if error_callback is None:
             error_callback = self._receive_error
         connection = self._conn_selector.get_next_connection(request)

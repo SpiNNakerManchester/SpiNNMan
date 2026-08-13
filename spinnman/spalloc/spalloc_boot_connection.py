@@ -17,7 +17,7 @@ API of the client for the Spalloc web service.
 
 import struct
 import time
-from typing import Callable, Optional
+from typing import Callable
 
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
@@ -57,7 +57,7 @@ class SpallocBootConnection(
 
     @overrides(BootConnection.receive_boot_message)
     def receive_boot_message(
-            self, timeout: Optional[float] = None) -> SpinnakerBootMessage:
+            self, timeout: float | None = None) -> SpinnakerBootMessage:
         data = self.receive(timeout)
         return SpinnakerBootMessage.from_bytestring(data, 0)
 

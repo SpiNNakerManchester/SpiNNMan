@@ -16,7 +16,7 @@ import logging
 import select
 import socket
 from contextlib import suppress
-from typing import Callable, Optional
+from typing import Callable
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
@@ -66,10 +66,10 @@ class UDPConnection(Connection, Listenable[bytes]):
         "_socket")
 
     def __init__(
-            self, local_host: Optional[str] = None,
-            local_port: Optional[int] = None,
-            remote_host: Optional[str] = None,
-            remote_port: Optional[int] = None):
+            self, local_host: str | None = None,
+            local_port: int | None = None,
+            remote_host: str | None = None,
+            remote_port: int | None = None):
         """
         :param local_host: The local host name or IP address to bind to.
             If not specified defaults to bind to all interfaces, unless
@@ -98,8 +98,8 @@ class UDPConnection(Connection, Listenable[bytes]):
         # Mark the socket as non-sending, unless the remote host is
         # specified - send requests will then cause an exception
         self._can_send = False
-        self._remote_ip_address: Optional[str] = None
-        self._remote_port: Optional[int] = None
+        self._remote_ip_address: str | None = None
+        self._remote_port: int | None = None
 
         # Get the host to connect to remotely
         if remote_host is not None and remote_port is not None:
@@ -170,7 +170,7 @@ class UDPConnection(Connection, Listenable[bytes]):
         return self._local_port
 
     @property
-    def remote_ip_address(self) -> Optional[str]:
+    def remote_ip_address(self) -> str | None:
         """
         The remote IP address to which the connection is connected,
         or `None` if not connected remotely.
@@ -178,14 +178,14 @@ class UDPConnection(Connection, Listenable[bytes]):
         return self._remote_ip_address
 
     @property
-    def remote_port(self) -> Optional[int]:
+    def remote_port(self) -> int | None:
         """
         The remote port number to which the connection is connected,
         or `None` if not connected remotely.
         """
         return self._remote_port
 
-    def receive(self, timeout: Optional[float] = None) -> bytes:
+    def receive(self, timeout: float | None = None) -> bytes:
         """
         Receive data from the connection.
 
@@ -199,7 +199,7 @@ class UDPConnection(Connection, Listenable[bytes]):
             raise SpinnmanEOFException()
         return receive_message(self._socket, timeout, _MSG_MAX)
 
-    def receive_with_address(self, timeout: Optional[float] = None) -> tuple[
+    def receive_with_address(self, timeout: float | None = None) -> tuple[
             bytes, tuple[str, int]]:
         """
         Receive data from the connection along with the address where the

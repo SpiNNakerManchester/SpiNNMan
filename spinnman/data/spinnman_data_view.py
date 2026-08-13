@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, BinaryIO, Optional, Union
+from typing import TYPE_CHECKING, BinaryIO
 
 from spinn_utilities.log import FormatAdapter
 
@@ -78,22 +78,21 @@ class _SpiNNManDataModel:
         """
         Clears out all data that should change after a reset and graph change.
         """
-        self._allocation_controller: Optional[
-            MachineAllocationController] = None
-        self._app_id: Optional[int] = None
-        self._app_id_tracker: Optional[AppIdTracker] = None
-        self._ipaddress: Optional[str] = None
+        self._allocation_controller: MachineAllocationController | None = None
+        self._app_id: int | None = None
+        self._app_id_tracker: AppIdTracker | None = None
+        self._ipaddress: str | None = None
         self._soft_reset()
-        self._scamp_connection_selector: Optional[
-            MostDirectConnectionSelector] = None
-        self._spalloc_job: Optional[SpallocJob] = None
+        self._scamp_connection_selector: (
+                MostDirectConnectionSelector | None) = None
+        self._spalloc_job: SpallocJob | None = None
         if self._transceiver:
             try:
                 self._transceiver.close()
             except Exception as ex:  # pylint: disable=broad-except
                 logger.exception(
                     f"Error {ex} when closing the transceiver ignored")
-        self._transceiver: Optional[Transceiver] = None
+        self._transceiver: Transceiver | None = None
 
     def _soft_reset(self) -> None:
         """
@@ -140,7 +139,7 @@ class SpiNNManDataView(MachineDataView):
         return cls.__data._allocation_controller
 
     @classmethod
-    def get_spalloc_job(cls) -> Optional[SpallocJob]:
+    def get_spalloc_job(cls) -> SpallocJob | None:
         """
         :returns: The Spalloc job, if there is one.
         """
@@ -210,9 +209,9 @@ class SpiNNManDataView(MachineDataView):
 
     @classmethod
     def write_memory(
-            cls, x: int, y: int, base_address: int, data: Union[
-                BinaryIO, bytes, bytearray, int, str], *,
-            n_bytes: Optional[int] = None, offset: int = 0,
+            cls, x: int, y: int, base_address: int,
+            data: BinaryIO | bytes | bytearray | int | str, *,
+            n_bytes: int | None = None, offset: int = 0,
             cpu: int = 0) -> tuple[int, int]:
         """
         Write to the SDRAM on the board.

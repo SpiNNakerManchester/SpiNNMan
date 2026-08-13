@@ -16,7 +16,7 @@ import logging
 import os
 import re
 from contextlib import ExitStack
-from typing import ContextManager, Optional, Union, cast
+from typing import ContextManager, cast
 
 import ebrains_drive  # type: ignore[import]
 import requests
@@ -150,7 +150,7 @@ class SpallocJobController(MachineAllocationController):
 
     def open_sdp_connection(
             self, chip_x: int, chip_y: int,
-            udp_port: int = SCP_SCAMP_PORT) -> Optional[SCAMPConnection]:
+            udp_port: int = SCP_SCAMP_PORT) -> SCAMPConnection | None:
         """
         Open a connection to a specific Ethernet-enabled SpiNNaker chip.
         Caller will have to arrange for SpiNNaker to pay attention to the
@@ -182,7 +182,7 @@ class SpallocJobController(MachineAllocationController):
         return f"SpallocJobController over {self._job}"
 
 
-def __bearer_token() -> Optional[str]:
+def __bearer_token() -> str | None:
     """
     :return: The OIDC bearer token
     """
@@ -202,7 +202,7 @@ def __bearer_token() -> Optional[str]:
     return os.getenv("OIDC_BEARER_TOKEN")
 
 
-def __get_collab_id_from_folder(folder: str) -> Optional[dict[str, str]]:
+def __get_collab_id_from_folder(folder: str) -> dict[str, str] | None:
     """
     Currently hacky way to get the EBRAINS collab id from the
     drive folder, replicated from the NMPI collab template.
@@ -277,9 +277,9 @@ def spalloc_allocate_job() -> tuple[
 
 
 def __spalloc_allocate_job(
-        bearer_token: Optional[str] = None, group: Optional[str] = None,
-        collab: Optional[str] = None, nmpi_job: Union[int, str, None] = None,
-        nmpi_user: Optional[str] = None) -> tuple[
+        bearer_token: str | None = None, group: str | None = None,
+        collab: str | None = None, nmpi_job: int | str | None = None,
+        nmpi_user: str | None = None) -> tuple[
             str, dict[XY, str], SpallocJobController]:
     """
     Request a machine from an new-style spalloc server that will fit the
@@ -297,7 +297,7 @@ def __spalloc_allocate_job(
     with ExitStack() as stack:
         use_proxy = get_config_bool("Machine", "spalloc_use_proxy")
         if nmpi_job is None:
-            _nmpi_job: Optional[int] = None
+            _nmpi_job: int | None = None
         else:
             _nmpi_job = int(nmpi_job)
         client = SpallocClient(

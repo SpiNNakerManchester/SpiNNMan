@@ -16,7 +16,7 @@ import sys
 import time
 from threading import RLock
 from types import TracebackType
-from typing import Callable, Generic, Optional, TypeVar, cast
+from typing import Callable, Generic, TypeVar, cast
 
 from typing_extensions import TypeAlias
 
@@ -86,7 +86,7 @@ class SCPRequestPipeLine(Generic[R]):
                  intermediate_channel_waits: int = 0,
                  n_retries: int = N_RETRIES,
                  packet_timeout: float = SCP_TIMEOUT,
-                 non_fail_retry_codes: Optional[set[SCPResult]] = None):
+                 non_fail_retry_codes: set[SCPResult] | None = None):
         """
         :param connection:
             The connection over which the communication is to take place
@@ -122,7 +122,7 @@ class SCPRequestPipeLine(Generic[R]):
         self._retries: dict[int, int] = {}
 
         # A dictionary of sequence number -> callback function for response
-        self._callbacks: dict[int, Optional[CB]] = {}
+        self._callbacks: dict[int, CB | None] = {}
 
         # A dictionary of sequence number -> callback function for errors
         self._error_callbacks: dict[int, ECB] = {}
@@ -163,7 +163,7 @@ class SCPRequestPipeLine(Generic[R]):
         return sequence
 
     def send_request(
-            self, request: AbstractSCPRequest[R], callback: Optional[CB],
+            self, request: AbstractSCPRequest[R], callback: CB | None,
             error_callback: ECB) -> None:
         """
         Add an SCP request to the set to be sent.

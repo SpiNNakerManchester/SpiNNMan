@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinnman.data import SpiNNManDataView
 
@@ -45,13 +44,13 @@ class SDPHeader:
         "_source_port",
         "_tag")
 
-    def __init__(self, flags: SDPFlag, tag: Optional[int] = None,
+    def __init__(self, flags: SDPFlag, tag: int | None = None,
                  destination_port: int = 0, destination_cpu: int = 0,
                  destination_chip_x: int = 0, destination_chip_y: int = 0,
-                 source_port: Optional[int] = None,
-                 source_cpu: Optional[int] = None,
-                 source_chip_x: Optional[int] = None,
-                 source_chip_y: Optional[int] = None):
+                 source_port: int | None = None,
+                 source_cpu: int | None = None,
+                 source_chip_x: int | None = None,
+                 source_chip_y: int | None = None):
         """
         :param flags: Any flags for the packet
         :param tag:

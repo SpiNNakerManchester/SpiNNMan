@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Union
 
 from spinn_utilities.overrides import overrides
 
@@ -44,10 +43,10 @@ class SpinnakerRequestReadData(EIEIOCommandMessage):
         "_requests")
 
     def __init__(
-            self, x: int, y: int, p: int, region_id: Union[list[int], int],
-            sequence_no: int, n_requests: int, channel: Union[list[int], int],
-            start_address: Union[list[int], int],
-            space_to_be_read: Union[list[int], int]):
+            self, x: int, y: int, p: int, region_id: list[int] | int,
+            sequence_no: int, n_requests: int, channel: list[int] | int,
+            start_address: list[int] | int,
+            space_to_be_read: list[int] | int):
         """
 
         :param x:
@@ -284,10 +283,10 @@ class _SpinnakerRequestReadDataRequest:
         "_start_address",
     ]
 
-    def __init__(self, channel: Union[list[int], int],
-                 region_id: Union[list[int], int],
-                 start_address: Union[list[int], int],
-                 space_to_be_read: Union[list[int], int]):
+    def __init__(self, channel: list[int] | int,
+                 region_id: list[int] | int,
+                 start_address: list[int] | int,
+                 space_to_be_read: list[int] | int):
         """
 
         :param channel:

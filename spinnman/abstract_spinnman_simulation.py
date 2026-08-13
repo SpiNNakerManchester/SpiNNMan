@@ -14,7 +14,6 @@
 
 import logging
 import traceback
-from typing import Optional
 
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.config_holder import (
@@ -59,8 +58,8 @@ class AbstractSpiNNManSimulation:
         # access this via the property _data_writer to get the type correct
         "_untyped_data_writer", )
 
-    def __init__(self, n_boards_required: Optional[int] = None,
-                 n_chips_required: Optional[int] = None) -> None:
+    def __init__(self, n_boards_required: int | None = None,
+                 n_chips_required: int | None = None) -> None:
         """
         :param n_boards_required:
             `None` or the number of boards requested by the user
@@ -117,7 +116,7 @@ class AbstractSpiNNManSimulation:
         return self._get_known_machine()
 
     def _get_transceiver(
-            self, total_run_time: Optional[float] = 0.0,
+            self, total_run_time: float | None = 0.0,
             ensure_board_is_ready: bool = True) -> Transceiver:
         """
         Creates a Transceiver
@@ -142,7 +141,7 @@ class AbstractSpiNNManSimulation:
         return transceiver
 
     def _get_known_machine(
-            self, total_run_time: Optional[float] = 0.0) -> Machine:
+            self, total_run_time: float | None = 0.0) -> Machine:
         """
         Gets and if needed creates a Machine
 
@@ -158,7 +157,7 @@ class AbstractSpiNNManSimulation:
         return self._do_machine_by_transciever(total_run_time)
 
     def _do_machine_by_transciever(
-            self, total_run_time: Optional[float] = 0.0,
+            self, total_run_time: float | None = 0.0,
             retry: int = 0) -> Machine:
         """
         Gets and if needed creates a Transceiver and then Machine
@@ -239,7 +238,7 @@ class AbstractSpiNNManSimulation:
         return transceiver
 
     def _do_transceiver_by_remote(
-            self, total_run_time: Optional[float],
+            self, total_run_time: float | None,
             ensure_board_is_ready: bool) -> Transceiver:
         _ = total_run_time
         spalloc_server = get_config_str_or_none("Machine", "spalloc_server")

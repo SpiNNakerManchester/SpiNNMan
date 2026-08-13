@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterable, Optional
+from typing import Iterable
 
 from spinn_utilities.overrides import overrides
 
@@ -32,7 +32,7 @@ class ApplicationRun(AbstractSCPRequest[CheckOKResponse]):
     __slots__ = ()
 
     def __init__(self, app_id: int, x: int, y: int,
-                 processors: Optional[Iterable[int]], wait: bool = False):
+                 processors: Iterable[int] | None, wait: bool = False):
         """
         :param app_id: The ID of the application to run, between 16 and 255
         :param x: The x-coordinate of the chip to run on, between 0 and 255

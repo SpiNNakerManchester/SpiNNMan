@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Iterable, Optional
+from typing import Iterable
 
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 
@@ -68,7 +68,7 @@ class ChipInfo:
         self._virtual_core_ids.sort()
 
         ip = self._read_bytes("ethernet_ip_address")
-        self._ip_address: Optional[str] = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
+        self._ip_address: str | None = f"{ip[0]}.{ip[1]}.{ip[2]}.{ip[3]}"
         if self._ip_address == "0.0.0.0":
             self._ip_address = None
 
@@ -203,7 +203,7 @@ class ChipInfo:
         return self._read_int("first_free_router_entry")
 
     @property
-    def ip_address(self) -> Optional[str]:
+    def ip_address(self) -> str | None:
         """
         The IP address of the chip, or `None` if no Ethernet.
         """

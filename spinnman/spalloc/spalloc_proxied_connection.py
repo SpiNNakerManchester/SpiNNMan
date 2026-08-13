@@ -14,7 +14,6 @@
 """
 API of the client for the Spalloc web service.
 """
-from typing import Optional
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
@@ -37,7 +36,7 @@ class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):
         raise NotImplementedError
 
     @abstractmethod
-    def receive(self, timeout: Optional[float] = None) -> bytes:
+    def receive(self, timeout: float | None = None) -> bytes:
         """
         Receive a message on an open socket. Will block until a message is
         received.

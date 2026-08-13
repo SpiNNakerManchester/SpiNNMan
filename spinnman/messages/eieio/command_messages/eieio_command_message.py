@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -30,7 +29,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         "_offset")
 
     def __init__(self, eieio_command_header: EIEIOCommandHeader,
-                 data: Optional[bytes] = None, offset: int = 0):
+                 data: bytes | None = None, offset: int = 0):
         """
         :param eieio_command_header:
             The header of the message
@@ -51,7 +50,7 @@ class EIEIOCommandMessage(AbstractEIEIOMessage):
         return self._eieio_command_header
 
     @property
-    def data(self) -> Optional[bytes]:
+    def data(self) -> bytes | None:
         """ Gets the data passed into the init (if applicable). """
         return self._data
 

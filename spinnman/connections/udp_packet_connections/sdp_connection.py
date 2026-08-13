@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Callable, Optional
+from typing import Callable
 
 from spinn_utilities.overrides import overrides
 
@@ -36,10 +36,10 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
 
     def __init__(
             self, chip_x: int, chip_y: int,
-            local_host: Optional[str] = None,
-            local_port: Optional[int] = None,
-            remote_host: Optional[str] = None,
-            remote_port: Optional[int] = None):
+            local_host: str | None = None,
+            local_port: int | None = None,
+            remote_host: str | None = None,
+            remote_port: int | None = None):
         """
         :param chip_x: The optional x-coordinate of the chip at the remote
             end of the connection. If not specified, it will not be possible
@@ -62,7 +62,7 @@ class SDPConnection(UDPConnection, Listenable[SDPMessage]):
         self._chip_y = chip_y
 
     def receive_sdp_message(
-            self, timeout: Optional[float] = None) -> SDPMessage:
+            self, timeout: float | None = None) -> SDPMessage:
         """
         Receives an SDP message from this connection.  Blocks until the
         message has been received, or a timeout occurs.

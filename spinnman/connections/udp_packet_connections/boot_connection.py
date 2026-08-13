@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import time
-from typing import Optional
 
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
 from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
@@ -32,7 +31,7 @@ class BootConnection(UDPConnection):
         "BootConnection(local_host={}, local_port={}, remote_host={}, "
         "remote_port={})")
 
-    def __init__(self, remote_host: Optional[str] = None):
+    def __init__(self, remote_host: str | None = None):
         """
         :param remote_host:
             The remote host name or IP address to send packets to.  If not
@@ -58,7 +57,7 @@ class BootConnection(UDPConnection):
         time.sleep(_ANTI_FLOOD_DELAY)
 
     def receive_boot_message(
-            self, timeout: Optional[float] = None) -> SpinnakerBootMessage:
+            self, timeout: float | None = None) -> SpinnakerBootMessage:
         """
         Receives a boot message from this connection.  Blocks until a
         message has been received, or a timeout occurs.

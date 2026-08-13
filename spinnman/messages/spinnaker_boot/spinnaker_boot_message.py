@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
@@ -38,7 +37,7 @@ class SpinnakerBootMessage:
 
     def __init__(self, opcode: SpinnakerBootOpCode,
                  operand_1: int, operand_2: int, operand_3: int,
-                 data: Optional[bytes] = None, offset: int = 0):
+                 data: bytes | None, offset: int = 0):
         """
         :param opcode: The operation of this packet
         :param operand_1: The first operand
@@ -82,7 +81,7 @@ class SpinnakerBootMessage:
         return self._operand_3
 
     @property
-    def data(self) -> Optional[bytes]:
+    def data(self) -> bytes | None:
         """ The data, or `None` if no data. """
         return self._data
 

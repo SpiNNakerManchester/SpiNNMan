@@ -14,7 +14,6 @@
 
 import logging
 from threading import Condition, RLock
-from typing import Optional
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.log import FormatAdapter
@@ -51,7 +50,7 @@ class ExtendableTransceiver(Transceiver, metaclass=AbstractBase):
 
     @property
     @abstractmethod
-    def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
+    def bmp_selector(self) -> FixedConnectionSelector[BMPConnection] | None:
         """
         Returns the BMP selector
         """

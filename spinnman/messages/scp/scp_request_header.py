@@ -14,14 +14,13 @@
 
 import struct
 from enum import Enum
-from typing import Union
 
 from typing_extensions import TypeAlias
 
 from spinnman.messages.scp.enums import SCPCommand
 
 _TWO_SHORTS = struct.Struct("<2H")
-_Command: TypeAlias = Union[SCPCommand, Enum]
+_Command: TypeAlias = SCPCommand | Enum
 
 
 class SCPRequestHeader:

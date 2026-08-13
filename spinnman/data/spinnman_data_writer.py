@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-from typing import Optional
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
@@ -101,8 +100,9 @@ class SpiNNManDataWriter(MachineDataWriter, SpiNNManDataView):
         MachineDataWriter._soft_reset(self)
         self._local_soft_reset()
 
-    def set_allocation_controller(self, allocation_controller: Optional[
-            MachineAllocationController]) -> None:
+    def set_allocation_controller(
+            self, allocation_controller: MachineAllocationController | None
+            ) -> None:
         """
         Sets the allocation controller variable.
 

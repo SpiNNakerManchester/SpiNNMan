@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from enum import Enum
-from typing import Union
 
 from spinn_utilities.overrides import overrides
 
@@ -30,7 +29,7 @@ class CheckOKResponse(AbstractSCPResponse):
         "_command",
         "_operation")
 
-    def __init__(self, operation: str, command: Union[Enum, int, str]):
+    def __init__(self, operation: str, command: Enum | int | str):
         """
         :param operation: The operation being performed
         :param command: The command that was sent

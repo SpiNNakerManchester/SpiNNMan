@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -29,7 +28,7 @@ class GetVersionResponse(AbstractSCPResponse):
 
     def __init__(self) -> None:
         super().__init__()
-        self._version_info: Optional[VersionInfo] = None
+        self._version_info: VersionInfo | None = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data: bytes, offset: int) -> None:
@@ -40,6 +39,6 @@ class GetVersionResponse(AbstractSCPResponse):
         self._version_info = VersionInfo(data, offset)
 
     @property
-    def version_info(self) -> Optional[VersionInfo]:
+    def version_info(self) -> VersionInfo | None:
         """ The version information received. """
         return self._version_info

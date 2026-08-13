@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinnman.exceptions import SpinnmanInvalidPacketException
 from spinnman.messages.eieio import EIEIOPrefix, EIEIOType
@@ -43,9 +42,9 @@ class EIEIODataHeader:
         "_tag")
 
     def __init__(self, eieio_type: EIEIOType, tag: int = 0,
-                 prefix: Optional[int] = None,
+                 prefix: int | None = None,
                  prefix_type: EIEIOPrefix = EIEIOPrefix.LOWER_HALF_WORD,
-                 payload_base: Optional[int] = None, is_time: bool = False,
+                 payload_base: int | None = None, is_time: bool = False,
                  count: int = 0):
         """
         EIEIO header for data packets.
@@ -83,7 +82,7 @@ class EIEIODataHeader:
         return self._tag
 
     @property
-    def prefix(self) -> Optional[int]:
+    def prefix(self) -> int | None:
         """
         Gets prefix passed into the init (if applicable). """
         return self._prefix
@@ -95,7 +94,7 @@ class EIEIODataHeader:
         return self._prefix_type
 
     @property
-    def payload_base(self) -> Optional[int]:
+    def payload_base(self) -> int | None:
         """
         Gets the payload_base value passed into the init (if applicable). """
         return self._payload_base

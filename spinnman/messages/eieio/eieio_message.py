@@ -13,7 +13,7 @@
 # limitations under the License.
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
@@ -30,7 +30,7 @@ class AbstractEIEIOMessage(metaclass=AbstractBase):
 
     @property
     @abstractmethod
-    def eieio_header(self) -> Union[EIEIOCommandHeader, EIEIODataHeader]:
+    def eieio_header(self) -> EIEIOCommandHeader | EIEIODataHeader:
         """
         The header of the message.
         """

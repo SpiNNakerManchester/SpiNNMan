@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -29,7 +28,7 @@ class GetChipInfoResponse(AbstractSCPResponse):
 
     def __init__(self) -> None:
         super().__init__()
-        self._chip_info: Optional[ChipSummaryInfo] = None
+        self._chip_info: ChipSummaryInfo | None = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data: bytes, offset: int) -> None:

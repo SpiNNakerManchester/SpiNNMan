@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterable, Optional
+from typing import Iterable
 
 from spinn_utilities.overrides import overrides
 
@@ -35,7 +35,7 @@ class FloodFillEnd(AbstractSCPRequest[CheckOKResponse]):
 
     def __init__(
             self, nearest_neighbour_id: int, app_id: int = 0,
-            processors: Optional[Iterable[int]] = None, wait: bool = False):
+            processors: Iterable[int] | None = None, wait: bool = False):
         """
 
         :param nearest_neighbour_id:

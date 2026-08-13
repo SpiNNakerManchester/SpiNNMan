@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
 from spinnman.messages.scp.impl.sdram_de_alloc import (
     SDRAMDeAlloc,
@@ -38,7 +37,7 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         :param connection_selector:
         """
         super().__init__(connection_selector)
-        self._no_blocks_freed: Optional[int] = None
+        self._no_blocks_freed: int | None = None
 
     def de_alloc_all_app_sdram(self, x: int, y: int, app_id: int) -> None:
         """
@@ -70,6 +69,6 @@ class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):
         self._no_blocks_freed = response.number_of_blocks_freed
 
     @property
-    def no_blocks_freed(self) -> Optional[int]:
+    def no_blocks_freed(self) -> int | None:
         """ number of blocks freed """
         return self._no_blocks_freed

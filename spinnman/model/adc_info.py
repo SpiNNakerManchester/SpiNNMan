@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinnman import constants
 
@@ -63,21 +62,21 @@ class ADCInfo:
         self._temp_top = float(data[8]) * constants.BMP_TEMP_SCALE
         self._temp_btm = float(data[9]) * constants.BMP_TEMP_SCALE
         if data[12] != constants.BMP_MISSING_TEMP:
-            self._temp_ext_0: Optional[float] = (
+            self._temp_ext_0: float | None = (
                 float(data[12]) * constants.BMP_TEMP_SCALE)
         else:
             self._temp_ext_0 = None
         if data[13] != constants.BMP_MISSING_TEMP:
-            self._temp_ext_1: Optional[float] = (
+            self._temp_ext_1: float | None = (
                 float(data[13]) * constants.BMP_TEMP_SCALE)
         else:
             self._temp_ext_1 = None
         if data[16] != constants.BMP_MISSING_FAN:
-            self._fan_0: Optional[float] = float(data[16])
+            self._fan_0: float | None = float(data[16])
         else:
             self._fan_0 = None
         if data[17] != constants.BMP_MISSING_FAN:
-            self._fan_1: Optional[float] = float(data[17])
+            self._fan_1: float | None = float(data[17])
         else:
             self._fan_1 = None
 
@@ -138,28 +137,28 @@ class ADCInfo:
         return self._temp_btm
 
     @property
-    def temp_ext_0(self) -> Optional[float]:
+    def temp_ext_0(self) -> float | None:
         """
         Temperature external 0.
         """
         return self._temp_ext_0
 
     @property
-    def temp_ext_1(self) -> Optional[float]:
+    def temp_ext_1(self) -> float | None:
         """
         Temperature external 1.
         """
         return self._temp_ext_1
 
     @property
-    def fan_0(self) -> Optional[float]:
+    def fan_0(self) -> float | None:
         """
         Fan 0.
         """
         return self._fan_0
 
     @property
-    def fan_1(self) -> Optional[float]:
+    def fan_1(self) -> float | None:
         """
         Fan 1.
         """

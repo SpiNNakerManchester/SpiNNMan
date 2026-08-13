@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import math
-from typing import BinaryIO, Optional
+from typing import BinaryIO
 
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 from spinnman.messages.scp.impl import (
@@ -55,7 +55,7 @@ class WriteMemoryFloodProcess(AbstractMultiConnectionProcess):
 
     def write_memory_from_bytearray(
             self, nearest_neighbour_id: int, base_address: int,
-            data: bytes, offset: int, n_bytes: Optional[int] = None) -> None:
+            data: bytes, offset: int, n_bytes: int | None = None) -> None:
         """
         Currently not used!
 

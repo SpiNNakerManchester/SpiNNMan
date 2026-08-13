@@ -12,18 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 
 from spinn_machine import Machine
 
 from spinnman.spinnman_simulation import SpiNNManSimulation
 from spinnman.transceiver import Transceiver
 
-__simulator: Optional[SpiNNManSimulation] = None
+__simulator: SpiNNManSimulation | None = None
 
 
-def setup(n_boards_required: Optional[int] = None,
-          n_chips_required: Optional[int] = None) -> None:
+def setup(n_boards_required: int | None = None,
+          n_chips_required: int | None = None) -> None:
     """
     The main method similar to PyNN setup.
 

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
@@ -50,7 +49,7 @@ class SpallocSCPConnection(
 
     @overrides(SCAMPConnection.receive_sdp_message)
     def receive_sdp_message(
-            self, timeout: Optional[float] = None) -> SDPMessage:
+            self, timeout: float | None = None) -> SDPMessage:
         data = self.receive(timeout)
         return SDPMessage.from_bytestring(data, 2)
 
@@ -64,7 +63,7 @@ class SpallocSCPConnection(
         self.send(_TWO_SKIP + sdp_message.bytestring)
 
     @overrides(SCAMPConnection.receive_scp_response)
-    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> tuple[
+    def receive_scp_response(self, timeout: float | None = 1.0) -> tuple[
             SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)
@@ -73,7 +72,7 @@ class SpallocSCPConnection(
     @overrides(SCAMPConnection.get_scp_data)
     def get_scp_data(
             self, scp_request: AbstractSCPRequest,
-            x: Optional[int] = None, y: Optional[int] = None) -> bytes:
+            x: int | None = None, y: int | None = None) -> bytes:
         if x is None:
             x = self.chip_x
         if y is None:

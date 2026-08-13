@@ -14,7 +14,7 @@
 import io
 import os
 import struct
-from typing import BinaryIO, Optional, Union, cast
+from typing import BinaryIO, cast
 
 import numpy
 from numpy import uint8, uint32
@@ -57,8 +57,8 @@ class SpallocTransceiver(Version5Transceiver):
     @overrides(Version5Transceiver.write_memory)
     def write_memory(
             self, x: int, y: int, base_address: int,
-            data: Union[BinaryIO, bytearray, bytes, int, str],
-            *, n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
+            data: BinaryIO | bytearray | bytes | int | str,
+            *, n_bytes: int | None = None, offset: int = 0, cpu: int = 0,
             get_sum: bool = False) -> tuple[int, int]:
 
         if isinstance(data, io.RawIOBase):

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import unittest
-from typing import Optional
 
 from spinn_utilities.config_holder import set_config
 from spinn_utilities.ping import Ping
@@ -32,7 +31,7 @@ class BoardTestConfiguration:
         self.remotehost: str = "UNSET"
         self.auto_detect_bmp: bool = False
 
-    def set_up_remote_board(self, version: Optional[int] = None) -> None:
+    def set_up_remote_board(self, version: int | None = None) -> None:
         """
         Gets a remote board to test, returning the first that it finds.
 

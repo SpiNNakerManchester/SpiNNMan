@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -36,10 +35,10 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
 
     def __init__(
             self, chip_x: int = 255, chip_y: int = 255,
-            local_host: Optional[str] = None,
-            local_port: Optional[int] = None,
-            remote_host: Optional[str] = None,
-            remote_port: Optional[int] = None):
+            local_host: str | None = None,
+            local_port: int | None = None,
+            remote_host: str | None = None,
+            remote_port: int | None = None):
         """
         :param chip_x:
             The x-coordinate of the chip on the board with this remote_host
@@ -83,7 +82,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
     @overrides(AbstractSCPConnection.get_scp_data)
     def get_scp_data(
             self, scp_request: AbstractSCPRequest,
-            x: Optional[int] = None, y: Optional[int] = None) -> bytes:
+            x: int | None = None, y: int | None = None) -> bytes:
         """
         :param x: Optional: x-coordinate of where to send to
         :param y: Optional: y-coordinate of where to send to
@@ -96,7 +95,7 @@ class SCAMPConnection(SDPConnection, AbstractSCPConnection):
         return _TWO_SKIP.pack() + scp_request.bytestring
 
     @overrides(AbstractSCPConnection.receive_scp_response)
-    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> tuple[
+    def receive_scp_response(self, timeout: float | None = 1.0) -> tuple[
             SCPResult, int, bytes, int]:
         data = self.receive(timeout)
         result, sequence = _TWO_SHORTS.unpack_from(data, 10)

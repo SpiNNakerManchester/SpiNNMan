@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Optional, overload
+from typing import overload
 
 from spinn_utilities.overrides import overrides
 
@@ -86,8 +86,8 @@ class SDRAMDeAlloc(AbstractSCPRequest[_SCPSDRAMDeAllocResponse]):
                  base_address: int):
         ...
 
-    def __init__(self, x: int, y: int, *, app_id: Optional[int] = None,
-                 base_address: Optional[int] = None):
+    def __init__(self, x: int, y: int, *, app_id: int | None = None,
+                 base_address: int | None = None):
         """
         :param x:
             The x-coordinate of the chip to allocate on, between 0 and 255

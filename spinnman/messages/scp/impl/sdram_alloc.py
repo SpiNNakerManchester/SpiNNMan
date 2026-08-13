@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -48,7 +47,7 @@ class _AllocResponse(AbstractSCPResponse):
         """
         super().__init__()
         self._size = size
-        self._base_address: Optional[int] = None
+        self._base_address: int | None = None
 
     @overrides(AbstractSCPResponse.read_data_bytestring)
     def read_data_bytestring(self, data: bytes, offset: int) -> None:
@@ -80,7 +79,7 @@ class SDRAMAlloc(AbstractSCPRequest[_AllocResponse]):
     __slots__ = "_size",
 
     def __init__(self, x: int, y: int, app_id: int, size: int,
-                 tag: Optional[int] = None, retry_tag: bool = True):
+                 tag: int | None = None, retry_tag: bool = True):
         """
         :param x:
             The x-coordinate of the chip to allocate on, between 0 and 255
