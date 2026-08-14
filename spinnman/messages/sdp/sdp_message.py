@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
 from .sdp_header import SDPHeader
 
@@ -26,7 +25,7 @@ class SDPMessage:
         "_sdp_header")
 
     def __init__(self, sdp_header: SDPHeader,
-                 data: Optional[bytes] = None, offset: int = 0):
+                 data: bytes | None = None, offset: int = 0):
         """
         :param sdp_header: The header of the message
         :param data: The data of the SDP packet, or `None` if no data
@@ -59,7 +58,7 @@ class SDPMessage:
         return self._sdp_header
 
     @property
-    def data(self) -> Optional[bytes]:
+    def data(self) -> bytes | None:
         """ The data in the packet. """
         return self._data
 

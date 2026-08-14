@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 
 import pytest
 from typing_extensions import Never
@@ -45,7 +44,7 @@ class MockConnection(SCAMPConnection):
         pass
 
     @overrides(SCAMPConnection.receive_scp_response)
-    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> Never:
+    def receive_scp_response(self, timeout: float | None = 1.0) -> Never:
         raise SpinnmanTimeoutException("Test", timeout)
 
 

@@ -16,8 +16,6 @@ from typing import (
     BinaryIO,
     Collection,
     Iterable,
-    Optional,
-    Union,
 )
 
 from spinn_utilities.abstract_base import abstractmethod
@@ -70,7 +68,7 @@ class Transceiver:
 
     @abstractmethod
     def send_sdp_message(self, message: SDPMessage,
-                         connection: Optional[SDPConnection] = None) -> None:
+                         connection: SDPConnection | None = None) -> None:
         """
         Sends an SDP message using one of the connections.
 
@@ -159,8 +157,8 @@ class Transceiver:
 
     @abstractmethod
     def get_cpu_infos(
-            self, core_subsets: Optional[CoreSubsets] = None,
-            states: Union[CPUState, Iterable[CPUState], None] = None,
+            self, core_subsets: CoreSubsets | None = None,
+            states: CPUState | Iterable[CPUState] | None = None,
             include: bool = True) -> CPUInfos:
         """
         Get information about the processors on the board.
@@ -281,7 +279,7 @@ class Transceiver:
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_iobuf(self, core_subsets: Optional[CoreSubsets] = None
+    def get_iobuf(self, core_subsets: CoreSubsets | None = None
                   ) -> Iterable[IOBuffer]:
         """
         Get the contents of the IOBUF buffer for a number of processors.
@@ -308,7 +306,7 @@ class Transceiver:
     @abstractmethod
     def get_core_state_count(
             self, app_id: int, state: CPUState,
-            xys: Optional[Iterable[tuple[int, int]]] = None) -> int:
+            xys: Iterable[tuple[int, int]] | None = None) -> int:
         """
         Get a count of the number of cores which have a given state.
 
@@ -333,8 +331,8 @@ class Transceiver:
     @abstractmethod
     def execute_flood(
             self, core_subsets: CoreSubsets,
-            executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False) -> None:
+            executable: BinaryIO | bytes | str, app_id: int, *,
+            n_bytes: int | None = None, wait: bool = False) -> None:
         """
         Start an executable running on multiple places on the board.  This
         will be optimised based on the selected cores, but it may still
@@ -422,8 +420,8 @@ class Transceiver:
     @abstractmethod
     def write_memory(
             self, x: int, y: int, base_address: int,
-            data: Union[BinaryIO, bytearray, bytes, int, str], *,
-            n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
+            data: BinaryIO | bytearray | bytes | int | str, *,
+            n_bytes: int | None = None, offset: int = 0, cpu: int = 0,
             get_sum: bool = False) -> tuple[int, int]:
         """
         Write to the SDRAM on the board.
@@ -497,7 +495,7 @@ class Transceiver:
 
     def write_user_many(
             self, values: list[tuple[int, int, int, UserRegister, int]],
-            description: Optional[str] = None) -> None:
+            description: str | None = None) -> None:
         """ Write to the user *N* "register" for each of the given processors
 
         :param values:
@@ -594,13 +592,13 @@ class Transceiver:
     @abstractmethod
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets: CoreSubsets, app_id: int,
-            cpu_states: Union[CPUState, Iterable[CPUState]], *,
-            timeout: Optional[float] = None,
+            cpu_states: CPUState | Iterable[CPUState], *,
+            timeout: float | None = None,
             time_between_polls: float = 0.1,
             error_states: frozenset[CPUState] = frozenset((
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check: int = 100,
-            progress_bar: Optional[ProgressBar] = None) -> None:
+            progress_bar: ProgressBar | None = None) -> None:
         """
         Waits for the specified cores running the given application to be
         in some target state or states. Handles failures.
@@ -700,7 +698,7 @@ class Transceiver:
 
     @abstractmethod
     def clear_ip_tag(
-            self, tag: int, board_address: Optional[str] = None) -> None:
+            self, tag: int, board_address: str | None = None) -> None:
         """
         Clear the setting of an IP tag.
 
@@ -723,7 +721,7 @@ class Transceiver:
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def get_tags(self, connection: Optional[SCAMPConnection] = None
+    def get_tags(self, connection: SCAMPConnection | None = None
                  ) -> Iterable[AbstractTag]:
         """
         Get the current set of tags that have been set on the board.
@@ -848,7 +846,7 @@ class Transceiver:
     @abstractmethod
     def get_multicast_routes(
             self, x: int, y: int,
-            app_id: Optional[int] = None) -> list[MulticastRoutingEntry]:
+            app_id: int | None = None) -> list[MulticastRoutingEntry]:
         """
         Get the current multicast routes set up on a chip.
 
@@ -872,7 +870,7 @@ class Transceiver:
         raise NotImplementedError("abstractmethod")
 
     @abstractmethod
-    def clear_multicast_routes(self, xy: Optional[XY] = None) -> None:
+    def clear_multicast_routes(self, xy: XY | None = None) -> None:
         """
         Remove all the multicast routes on a chip.
 
@@ -953,7 +951,7 @@ class Transceiver:
 
     @abstractmethod
     def clear_router_diagnostic_counters(
-            self, xy: Optional[XY] = None) -> None:
+            self, xy: XY | None = None) -> None:
         """
         Clear router diagnostic information on a chip.
 

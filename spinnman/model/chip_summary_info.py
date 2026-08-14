@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinn_machine.machine import Machine
 
@@ -72,7 +71,7 @@ class ChipSummaryInfo:
         self._y = y
 
         self._nearest_ethernet_x, self._nearest_ethernet_y = 0, 0
-        self._ethernet_ip_address: Optional[str] = None
+        self._ethernet_ip_address: str | None = None
 
         (self._nearest_ethernet_y, self._nearest_ethernet_x) = \
             _TWO_BYTES.unpack_from(chip_summary_data, data_offset)
@@ -85,7 +84,7 @@ class ChipSummaryInfo:
         data_offset += 4
 
         # In case the data hasn't been added in the version of SCAMP being used
-        self._parent_link: Optional[int] = None
+        self._parent_link: int | None = None
         if len(chip_summary_data) > data_offset:
             (self._parent_link, ) = _ONE_SHORT.unpack_from(
                 chip_summary_data, data_offset)
@@ -173,7 +172,7 @@ class ChipSummaryInfo:
         return self._nearest_ethernet_y
 
     @property
-    def ethernet_ip_address(self) -> Optional[str]:
+    def ethernet_ip_address(self) -> str | None:
         """
         The IP address of the Ethernet if up, or `None` if not.
         """
@@ -186,7 +185,7 @@ class ChipSummaryInfo:
         self._ethernet_ip_address = None
 
     @property
-    def parent_link(self) -> Optional[int]:
+    def parent_link(self) -> int | None:
         """
         The link to the parent of the chip in the tree of chips from root.
         """

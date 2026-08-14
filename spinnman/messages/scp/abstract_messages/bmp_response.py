@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from logging import getLogger
-from typing import Generic, Optional, TypeVar, final
+from typing import Generic, TypeVar, final
 
 from spinn_utilities.abstract_base import abstractmethod
 from spinn_utilities.log import FormatAdapter
@@ -43,7 +43,7 @@ class BMPResponse(AbstractSCPResponse, Generic[T]):
         super().__init__()
         self.__operation = operation
         self.__command = command
-        self.__value: Optional[T] = None
+        self.__value: T | None = None
 
     @property
     def _value(self) -> T:

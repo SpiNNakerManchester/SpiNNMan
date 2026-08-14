@@ -14,7 +14,7 @@
 
 import struct
 from enum import Enum
-from typing import Union, cast
+from typing import cast
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
 
@@ -27,7 +27,7 @@ class EIEIOCommandHeader:
     """
     __slots__ = "_command",
 
-    def __init__(self, command: Union[int, Enum]):
+    def __init__(self, command: int | Enum):
         """
 
         :param command:

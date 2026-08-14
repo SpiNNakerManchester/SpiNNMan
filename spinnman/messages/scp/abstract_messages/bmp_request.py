@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Generic, Iterable, Optional, TypeVar, Union
+from typing import Generic, Iterable, TypeVar
 
 from typing_extensions import TypeAlias
 
@@ -23,7 +23,7 @@ from .bmp_response import BMPResponse
 from .scp_request import AbstractSCPRequest
 
 #: The type of boards parameters.
-Boards: TypeAlias = Union[int, Iterable[int]]
+Boards: TypeAlias = int | Iterable[int]
 R = TypeVar("R", bound=BMPResponse)
 
 
@@ -36,10 +36,10 @@ class BMPRequest(  # pylint: disable=abstract-method
 
     def __init__(self, boards: Boards,
                  scp_request_header: SCPRequestHeader,
-                 argument_1: Optional[int] = None,
-                 argument_2: Optional[int] = None,
-                 argument_3: Optional[int] = None,
-                 data: Optional[bytes] = None):
+                 argument_1: int | None = None,
+                 argument_2: int | None = None,
+                 argument_3: int | None = None,
+                 data: bytes | None = None):
         """
         :param boards: The board or boards to be addressed by this request
         :param scp_request_header: The SCP request header

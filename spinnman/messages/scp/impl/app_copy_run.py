@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterable, Optional
+from typing import Iterable
 
 from spinn_utilities.overrides import overrides
 
@@ -32,7 +32,7 @@ class AppCopyRun(AbstractSCPRequest[CheckOKResponse]):
     __slots__ = "__link",
 
     def __init__(self, x: int, y: int, link: int, size: int, app_id: int,
-                 processors: Optional[Iterable[int]],
+                 processors: Iterable[int] | None,
                  checksum: int, wait: bool = False):
         """
         :param x:

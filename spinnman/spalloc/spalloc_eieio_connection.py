@@ -16,7 +16,6 @@ API of the client for the Spalloc web service.
 """
 
 import struct
-from typing import Optional
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
@@ -76,7 +75,7 @@ class SpallocEIEIOConnection(
 
     @overrides(EIEIOConnection.receive_eieio_message)
     def receive_eieio_message(
-            self, timeout: Optional[float] = None) -> AbstractEIEIOMessage:
+            self, timeout: float | None = None) -> AbstractEIEIOMessage:
         data = self.receive(timeout)
         header = _ONE_SHORT.unpack_from(data)[0]
         if header & 0xC000 == 0x4000:

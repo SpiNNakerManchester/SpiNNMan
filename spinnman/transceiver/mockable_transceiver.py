@@ -16,8 +16,6 @@ from typing import (
     BinaryIO,
     Collection,
     Iterable,
-    Optional,
-    Union,
 )
 
 from spinn_utilities.overrides import overrides
@@ -67,12 +65,12 @@ class MockableTransceiver(ExtendableTransceiver):
     def __init__(self) -> None:
         super().__init__()
         self.written_memory: list[
-            tuple[int, int, int, Union[BinaryIO, bytearray, bytes, int, str],
-                  Optional[int], int, int]] = []
+            tuple[int, int, int, BinaryIO | bytearray | bytes | int | str,
+                  int | None, int, int]] = []
 
     @overrides(Transceiver.send_sdp_message)
     def send_sdp_message(self, message: SDPMessage,
-                         connection: Optional[SDPConnection] = None) -> None:
+                         connection: SDPConnection | None = None) -> None:
         pass
 
     @overrides(Transceiver.discover_scamp_connections)
@@ -93,8 +91,8 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.get_cpu_infos)
     def get_cpu_infos(
-            self, core_subsets: Optional[CoreSubsets] = None,
-            states: Union[CPUState, Iterable[CPUState], None] = None,
+            self, core_subsets: CoreSubsets | None = None,
+            states: CPUState | Iterable[CPUState] | None = None,
             include: bool = True) -> CPUInfos:
         raise NotImplementedError("Needs to be mocked")
 
@@ -117,21 +115,21 @@ class MockableTransceiver(ExtendableTransceiver):
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_iobuf)
-    def get_iobuf(self, core_subsets: Optional[CoreSubsets] = None
+    def get_iobuf(self, core_subsets: CoreSubsets | None = None
                   ) -> Iterable[IOBuffer]:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.get_core_state_count)
     def get_core_state_count(
             self, app_id: int, state: CPUState,
-            xys: Optional[Iterable[tuple[int, int]]] = None) -> int:
+            xys: Iterable[tuple[int, int]] | None = None) -> int:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.execute_flood)
     def execute_flood(
             self, core_subsets: CoreSubsets,
-            executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False) -> None:
+            executable: BinaryIO | bytes | str, app_id: int, *,
+            n_bytes: int | None = None, wait: bool = False) -> None:
         pass
 
     @overrides(Transceiver.read_fpga_register)
@@ -151,8 +149,8 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.write_memory)
     def write_memory(
             self, x: int, y: int, base_address: int,
-            data: Union[BinaryIO, bytearray, bytes, int, str], *,
-            n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
+            data: BinaryIO | bytearray | bytes | int | str, *,
+            n_bytes: int | None = None, offset: int = 0, cpu: int = 0,
             get_sum: bool = False) -> tuple[int, int]:
         print("Doing write to", x, y)
         self.written_memory.append(
@@ -183,13 +181,13 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets: CoreSubsets, app_id: int,
-            cpu_states: Union[CPUState, Iterable[CPUState]], *,
-            timeout: Optional[float] = None,
+            cpu_states: CPUState | Iterable[CPUState], *,
+            timeout: float | None = None,
             time_between_polls: float = 0.1,
             error_states: frozenset[CPUState] = frozenset((
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check: int = 100,
-            progress_bar: Optional[ProgressBar] = None) -> None:
+            progress_bar: ProgressBar | None = None) -> None:
         pass
 
     @overrides(Transceiver.send_signal)
@@ -206,11 +204,11 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.clear_ip_tag)
     def clear_ip_tag(
-            self, tag: int, board_address: Optional[str] = None) -> None:
+            self, tag: int, board_address: str | None = None) -> None:
         pass
 
     @overrides(Transceiver.get_tags)
-    def get_tags(self, connection: Optional[SCAMPConnection] = None
+    def get_tags(self, connection: SCAMPConnection | None = None
                  ) -> Iterable[AbstractTag]:
         raise NotImplementedError("Needs to be mocked")
 
@@ -237,11 +235,11 @@ class MockableTransceiver(ExtendableTransceiver):
     @overrides(Transceiver.get_multicast_routes)
     def get_multicast_routes(
             self, x: int, y: int,
-            app_id: Optional[int] = None) -> list[MulticastRoutingEntry]:
+            app_id: int | None = None) -> list[MulticastRoutingEntry]:
         raise NotImplementedError("Needs to be mocked")
 
     @overrides(Transceiver.clear_multicast_routes)
-    def clear_multicast_routes(self, xy: Optional[XY] = None) -> None:
+    def clear_multicast_routes(self, xy: XY | None = None) -> None:
         pass
 
     @overrides(Transceiver.get_router_diagnostics)
@@ -260,7 +258,7 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
     def clear_router_diagnostic_counters(
-            self, xy: Optional[XY] = None) -> None:
+            self, xy: XY | None = None) -> None:
         pass
 
     @overrides(Transceiver.close)
@@ -282,7 +280,7 @@ class MockableTransceiver(ExtendableTransceiver):
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)
-    def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
+    def bmp_selector(self) -> FixedConnectionSelector[BMPConnection] | None:
         raise NotImplementedError("Needs to be mocked")
 
     @property

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Callable, Optional
+from typing import Callable
 
 from spinn_utilities.overrides import overrides
 
@@ -38,7 +38,7 @@ class EIEIOConnection(UDPConnection, Listenable[AbstractEIEIOMessage]):
     __slots__ = ()
 
     def receive_eieio_message(
-            self, timeout: Optional[float] = None) -> AbstractEIEIOMessage:
+            self, timeout: float | None = None) -> AbstractEIEIOMessage:
         """
         Receives an EIEIO message from this connection.  Blocks until
         a message has been received, or a timeout occurs.

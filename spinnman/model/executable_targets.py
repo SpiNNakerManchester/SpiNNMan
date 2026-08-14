@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import Collection, Iterable, Optional, cast
+from typing import Collection, Iterable, cast
 
 from spinn_utilities.ordered_set import OrderedSet
 
@@ -48,7 +48,7 @@ class ExecutableTargets:
 
     def add_subsets(
             self, binary: str, subsets: CoreSubsets,
-            executable_type: Optional[ExecutableType] = None) -> None:
+            executable_type: ExecutableType | None = None) -> None:
         """
         Add core subsets to a binary.
 
@@ -71,7 +71,7 @@ class ExecutableTargets:
 
     def add_processor(
             self, binary: str, chip_x: int, chip_y: int, chip_p: int,
-            executable_type: Optional[ExecutableType] = None) -> None:
+            executable_type: ExecutableType | None = None) -> None:
         """
         Add a processor to the executable targets
 

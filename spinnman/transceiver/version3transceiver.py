@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Iterable, Optional
+from typing import Iterable
 
 from spinn_utilities.overrides import overrides
 
@@ -29,7 +29,7 @@ class Version3Transceiver(BaseTransceiver):
     """
 
     @overrides(BaseTransceiver.__init__)
-    def __init__(self, connections: Optional[Iterable[Connection]] = None,
+    def __init__(self, connections: Iterable[Connection] | None = None,
                  power_cycle: bool = False,
                  ensure_board_is_ready: bool = True):
         """

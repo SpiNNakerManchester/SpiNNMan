@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Union
 
 from spinn_utilities.overrides import overrides
 
@@ -43,8 +42,8 @@ class HostDataRead(EIEIOCommandMessage):
 
     def __init__(
             self, n_requests: int, sequence_no: int,
-            channel: Union[list[int], int], region_id: Union[list[int], int],
-            space_read: Union[list[int], int]):
+            channel: list[int] | int, region_id: list[int] | int,
+            space_read: list[int] | int):
         """
 
         :param n_requests:
@@ -191,9 +190,9 @@ class _HostDataReadAck:
         "_region_id",
         "_space_read"]
 
-    def __init__(self, channel: Union[list[int], int],
-                 region_id: Union[list[int], int],
-                 space_read: Union[list[int], int]):
+    def __init__(self, channel: list[int] | int,
+                 region_id: list[int] | int,
+                 space_read: list[int] | int):
         """
 
         :param channel:

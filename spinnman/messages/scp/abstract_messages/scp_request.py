@@ -14,7 +14,7 @@
 from __future__ import annotations
 
 import struct
-from typing import TYPE_CHECKING, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
@@ -46,10 +46,10 @@ class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
 
     def __init__(
             self, sdp_header: SDPHeader, scp_request_header: SCPRequestHeader,
-            argument_1: Optional[int] = None,
-            argument_2: Optional[int] = None,
-            argument_3: Optional[int] = None,
-            data: Optional[bytes] = None):
+            argument_1: int | None = None,
+            argument_2: int | None = None,
+            argument_3: int | None = None,
+            data: bytes | None = None):
         """
         :param sdp_header: The SDP header of the request
         :param scp_request_header:
@@ -81,22 +81,22 @@ class AbstractSCPRequest(Generic[R], metaclass=AbstractBase):
         return self._scp_request_header
 
     @property
-    def argument_1(self) -> Optional[int]:
+    def argument_1(self) -> int | None:
         """ The first argument, or `None` if no first argument."""
         return self._argument_1
 
     @property
-    def argument_2(self) -> Optional[int]:
+    def argument_2(self) -> int | None:
         """ The second argument, or `None` if no second argument. """
         return self._argument_2
 
     @property
-    def argument_3(self) -> Optional[int]:
+    def argument_3(self) -> int | None:
         """ The third argument, or `None` if no third argument. """
         return self._argument_3
 
     @property
-    def data(self) -> Optional[bytes]:
+    def data(self) -> bytes | None:
         """ The data, or `None` if no data. """
         return self._data
 

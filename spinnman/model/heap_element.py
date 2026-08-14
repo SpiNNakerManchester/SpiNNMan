@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
 
 class HeapElement:
@@ -41,8 +40,8 @@ class HeapElement:
         self._block_address = block_address
         self._next_address = next_address
         self._is_free = (free & 0xFFFF0000) != 0xFFFF0000
-        self._tag: Optional[int] = None
-        self._app_id: Optional[int] = None
+        self._tag: int | None = None
+        self._app_id: int | None = None
         if not self._is_free:
             self._tag = free & 0xFF
             self._app_id = (free >> 8) & 0xFF
@@ -76,14 +75,14 @@ class HeapElement:
         return self._is_free
 
     @property
-    def tag(self) -> Optional[int]:
+    def tag(self) -> int | None:
         """
         The tag of the block if allocated, or `None` if not.
         """
         return self._tag
 
     @property
-    def app_id(self) -> Optional[int]:
+    def app_id(self) -> int | None:
         """
         The application ID of the block if allocated, or `None` if not.
         """

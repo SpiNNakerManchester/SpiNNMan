@@ -27,10 +27,8 @@ from typing import (
     Collection,
     Iterable,
     Iterator,
-    Optional,
     Sequence,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -230,7 +228,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         "_width",
     )
 
-    def __init__(self, connections: Optional[Iterable[Connection]] = None,
+    def __init__(self, connections: Iterable[Connection] | None = None,
                  power_cycle: bool = False,
                  ensure_board_is_ready: bool = True):
         """
@@ -253,9 +251,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         super().__init__()
 
         # Place to keep the current machine
-        self._width: Optional[int] = None
-        self._height: Optional[int] = None
-        self._iobuf_size: Optional[int] = None
+        self._width: int | None = None
+        self._height: int | None = None
+        self._iobuf_size: int | None = None
 
         # A set of the original connections - used to determine what can
         # be closed
@@ -267,7 +265,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
         # A boot send connection - there can only be one in the current system,
         # or otherwise bad things can happen!
-        self._boot_send_connection: Optional[BootConnection] = None
+        self._boot_send_connection: BootConnection | None = None
 
         # A dict of IP address -> SCAMP connection
         # These are those that can be used for setting up IP Tags
@@ -278,7 +276,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         self._scamp_connections: list[SCAMPConnection] = []
 
         # The BMP connections
-        self._bmp_connection: Optional[BMPConnection] = None
+        self._bmp_connection: BMPConnection | None = None
 
         # A lock against single chip executions (entry is (x, y))
         # The condition should be acquired before the locks are
@@ -291,8 +289,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         self._n_chip_execute_locks = 0
 
         # build connection selectors for the processes.
-        self._bmp_selector: Optional[
-            FixedConnectionSelector[BMPConnection]] = None
+        self._bmp_selector: (FixedConnectionSelector[BMPConnection] |
+                             None) = None
         self._scamp_connection_selector = \
             self.__identify_connections(connections)
 
@@ -309,7 +307,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @property
     @overrides(ExtendableTransceiver.bmp_selector)
-    def bmp_selector(self) -> Optional[FixedConnectionSelector[BMPConnection]]:
+    def bmp_selector(self) -> FixedConnectionSelector[BMPConnection] | None:
         return self._bmp_selector
 
     @property
@@ -317,7 +315,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def scamp_connection_selector(self) -> MostDirectConnectionSelector:
         return self._scamp_connection_selector
 
-    def _where_is_xy(self, x: int, y: int) -> Optional[str]:
+    def _where_is_xy(self, x: int, y: int) -> str | None:
         """
         Attempts to get where_is_x_y info from the machine
 
@@ -401,7 +399,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @staticmethod
     def _check_connection(
-            connection: SCAMPConnection) -> Optional[ChipSummaryInfo]:
+            connection: SCAMPConnection) -> ChipSummaryInfo | None:
         """
         Check that the given connection to the given chip works.
 
@@ -429,7 +427,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.send_sdp_message)
     def send_sdp_message(self, message: SDPMessage,
-                         connection: Optional[SDPConnection] = None) -> None:
+                         connection: SDPConnection | None = None) -> None:
         if connection is None:
             connection_to_use: SDPConnection = self._scamp_connections[
                 random.randint(0, len(self._scamp_connections) - 1)]
@@ -548,7 +546,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     def _get_scamp_version(
             self, chip_x: int = AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y: int = AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-            connection_selector: Optional[ConnectionSelector] = None,
+            connection_selector: ConnectionSelector | None = None,
             n_retries: int = N_RETRIES) -> VersionInfo:
         """
         Get the version of SCAMP which is running on the board.
@@ -581,8 +579,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         """
         raise NotImplementedError
 
-    def _boot_board(self, extra_boot_values: Optional[dict[
-            SystemVariableDefinition, object]] = None) -> None:
+    def _boot_board(self, extra_boot_values: dict[
+                SystemVariableDefinition, object] | None = None) -> None:
         """
         Attempt to boot the board. No check is performed to see if the
         board is already booted.
@@ -643,8 +641,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.ensure_board_is_ready)
     def ensure_board_is_ready(
-            self, n_retries: int = 5, extra_boot_values: Optional[dict[
-            SystemVariableDefinition, object]] = None) -> None:
+            self, n_retries: int = 5,
+            extra_boot_values: dict[SystemVariableDefinition, object] | None
+            = None) -> None:
         logger.info("Working out if machine is booted")
         if self._machine_off:
             version_info = None
@@ -702,8 +701,9 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 and version_info.y == AbstractSCPRequest.DEFAULT_DEST_Y_COORD)
 
     def _try_to_find_scamp_and_boot(
-            self, tries_to_go: int, extra_boot_values: Optional[dict[
-                SystemVariableDefinition, object]]) -> Optional[VersionInfo]:
+            self, tries_to_go: int,
+            extra_boot_values: dict[SystemVariableDefinition, object] | None
+            ) -> VersionInfo | None:
         """
         Try to detect if SCAMP is running, and if not, boot the machine.
 
@@ -754,8 +754,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.get_cpu_infos)
     def get_cpu_infos(
-            self, core_subsets: Optional[CoreSubsets] = None,
-            states: Union[CPUState, Iterable[CPUState], None] = None,
+            self, core_subsets: CoreSubsets | None = None,
+            states: CPUState | Iterable[CPUState] | None = None,
             include: bool = True) -> CPUInfos:
         # Get all the cores if the subsets are not given
         if core_subsets is None:
@@ -845,7 +845,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         return self.read_user(x, y, p, UserRegister.USER_0)
 
     @overrides(Transceiver.get_iobuf)
-    def get_iobuf(self, core_subsets: Optional[CoreSubsets] = None
+    def get_iobuf(self, core_subsets: CoreSubsets | None = None
                   ) -> Iterable[IOBuffer]:
         # making the assumption that all chips have the same iobuf size.
         if self._iobuf_size is None:
@@ -868,7 +868,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.get_core_state_count)
     def get_core_state_count(
             self, app_id: int, state: CPUState,
-            xys: Optional[Iterable[tuple[int, int]]] = None) -> int:
+            xys: Iterable[tuple[int, int]] | None = None) -> int:
         process = GetNCoresInStateProcess(self._scamp_connection_selector)
         chip_xys: Iterable[tuple[int, int]]
         if xys is None:
@@ -893,8 +893,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.execute_flood)
     def execute_flood(
             self, core_subsets: CoreSubsets,
-            executable: Union[BinaryIO, bytes, str], app_id: int, *,
-            n_bytes: Optional[int] = None, wait: bool = False) -> None:
+            executable: BinaryIO | bytes | str, app_id: int, *,
+            n_bytes: int | None = None, wait: bool = False) -> None:
         if isinstance(executable, int):
             # No executable is 4 bytes long
             raise TypeError("executable may not be int")
@@ -940,8 +940,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         logger.warning("Power cycle wait complete")
 
     def _bmp_call(self, req: AbstractSCPRequest[_AbstractSCPResponse],
-                  timeout: Optional[float] = None,
-                  n_retries: Optional[int] = None) -> _AbstractSCPResponse:
+                  timeout: float | None = None,
+                  n_retries: int | None = None) -> _AbstractSCPResponse:
         """
         Wrapper that makes doing simple BMP calls easier,
         especially with types.
@@ -1003,8 +1003,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.write_memory)
     def write_memory(
             self, x: int, y: int, base_address: int,
-            data: Union[BinaryIO, bytearray, bytes, int, str], *,
-            n_bytes: Optional[int] = None, offset: int = 0, cpu: int = 0,
+            data: BinaryIO | bytearray | bytes | int | str, *,
+            n_bytes: int | None = None, offset: int = 0, cpu: int = 0,
             get_sum: bool = False) -> tuple[int, int]:
         process = WriteMemoryProcess(self._scamp_connection_selector)
         if isinstance(data, io.RawIOBase):
@@ -1040,7 +1040,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.write_user_many)
     def write_user_many(
             self, values: list[tuple[int, int, int, UserRegister, int]],
-            description: Optional[str] = None) -> None:
+            description: str | None = None) -> None:
         values_with_addr: list[tuple[int, int, int, int]] = [
             (x, y, self.__get_user_register_address_from_core(
                 p, user), value)
@@ -1084,7 +1084,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 "Please fix and try again")
 
     def __log_where_is_info(self, cpu_infos: Iterable[
-            Union[CPUInfo, Sequence[int]]]) -> None:
+            CPUInfo | Sequence[int]]) -> None:
         """
         Logs the where_is info for each chip in cpu_infos.
 
@@ -1101,7 +1101,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             logger.info(self._where_is_xy(x, y))
 
     @staticmethod
-    def __state_set(cpu_states: Union[CPUState, Iterable[CPUState]])\
+    def __state_set(cpu_states: CPUState | Iterable[CPUState])\
             -> frozenset[CPUState]:
         if isinstance(cpu_states, CPUState):
             return frozenset((cpu_states,))
@@ -1111,13 +1111,13 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.wait_for_cores_to_be_in_state)
     def wait_for_cores_to_be_in_state(
             self, all_core_subsets: CoreSubsets, app_id: int,
-            cpu_states: Union[CPUState, Iterable[CPUState]], *,
-            timeout: Optional[float] = None,
+            cpu_states: CPUState | Iterable[CPUState], *,
+            timeout: float | None = None,
             time_between_polls: float = 0.1,
             error_states: frozenset[CPUState] = frozenset((
                 CPUState.RUN_TIME_EXCEPTION, CPUState.WATCHDOG)),
             counts_between_full_check: int = 100,
-            progress_bar: Optional[ProgressBar] = None) -> None:
+            progress_bar: ProgressBar | None = None) -> None:
         processors_ready = 0
         max_processors_ready = 0
         timeout_time = None if timeout is None else time.time() + timeout
@@ -1194,7 +1194,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         self._call(SendSignal(app_id, signal))
 
     def _locate_spinnaker_connection_for_board_address(
-            self, board_address: str) -> Optional[SCAMPConnection]:
+            self, board_address: str) -> SCAMPConnection | None:
         """
         Find a connection that matches the given board IP address.
 
@@ -1233,8 +1233,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
                 ip_tag.tag, strip=ip_tag.strip_sdp, use_sender=use_sender))
 
     def __get_connection_list(
-            self, connection: Optional[SCAMPConnection] = None,
-            board_address: Optional[str] = None) -> list[SCAMPConnection]:
+            self, connection: SCAMPConnection | None = None,
+            board_address: str | None = None) -> list[SCAMPConnection]:
         """
         Get the connections for talking to a board.
 
@@ -1290,12 +1290,12 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.clear_ip_tag)
     def clear_ip_tag(
-            self, tag: int, board_address: Optional[str] = None) -> None:
+            self, tag: int, board_address: str | None = None) -> None:
         for conn in self.__get_connection_list(board_address=board_address):
             self._call(IPTagClear(conn.chip_x, conn.chip_y, tag))
 
     @overrides(Transceiver.get_tags)
-    def get_tags(self, connection: Optional[SCAMPConnection] = None
+    def get_tags(self, connection: SCAMPConnection | None = None
                  ) -> Iterable[AbstractTag]:
         all_tags = []
         for conn in self.__get_connection_list(connection):
@@ -1358,7 +1358,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.get_multicast_routes)
     def get_multicast_routes(
             self, x: int, y: int,
-            app_id: Optional[int] = None) -> list[MulticastRoutingEntry]:
+            app_id: int | None = None) -> list[MulticastRoutingEntry]:
         try:
             base_address = self._get_int_sv_data(
                 x, y, SystemVariableDefinition.router_table_copy_address)
@@ -1370,7 +1370,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             raise
 
     @overrides(Transceiver.clear_multicast_routes)
-    def clear_multicast_routes(self, xy: Optional[XY] = None) -> None:
+    def clear_multicast_routes(self, xy: XY | None = None) -> None:
         if xy is None:
             process = ClearRoutesProcess(self._scamp_connection_selector)
             process.clear_routes(
@@ -1433,7 +1433,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     @overrides(Transceiver.clear_router_diagnostic_counters)
     def clear_router_diagnostic_counters(
-            self, xy: Optional[XY] = None) -> None:
+            self, xy: XY | None = None) -> None:
         if xy is None:
             process = SetMemoryProcess(self.get_scamp_connection_selector())
             process.set_values(

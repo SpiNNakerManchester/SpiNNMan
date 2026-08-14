@@ -24,7 +24,6 @@ import sys
 import time
 import traceback
 from threading import Condition, RLock, Thread
-from typing import Optional
 
 import matplotlib
 import numpy
@@ -800,7 +799,7 @@ class MockJob(SpallocJob):
 
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state: SpallocState,
-                              timeout: Optional[int] = None) -> SpallocState:
+                              timeout: int | None = None) -> SpallocState:
         return SpallocState.READY
 
     @overrides(SpallocJob.wait_until_ready)
@@ -812,8 +811,7 @@ class MockJob(SpallocJob):
         pass
 
     @overrides(SpallocJob.where_is_machine)
-    def where_is_machine(self, x: int, y: int) -> Optional[
-        tuple[int, int, int]]:
+    def where_is_machine(self, x: int, y: int) -> tuple[int, int, int] | None:
         return None
 
     @overrides(SpallocJob.get_session_credentials_for_db)

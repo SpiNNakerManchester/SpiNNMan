@@ -18,9 +18,7 @@ from types import TracebackType
 from typing import (
     TYPE_CHECKING,
     Generic,
-    Optional,
     TypeVar,
-    Union,
 )
 
 if TYPE_CHECKING:
@@ -178,8 +176,8 @@ class SpinnmanTimeoutException(SpinnmanException, Generic[T]):
     could finish.
     """
 
-    def __init__(self, operation: T, timeout: Optional[float],
-                 msg: Optional[str] = None):
+    def __init__(self, operation: T, timeout: float | None,
+                 msg: str | None = None):
         """
         :param operation: The operation being performed
         :param timeout: The timeout value in seconds
@@ -200,7 +198,7 @@ class SpinnmanTimeoutException(SpinnmanException, Generic[T]):
         return self._operation
 
     @property
-    def timeout(self) -> Optional[float]:
+    def timeout(self) -> float | None:
         """ The timeout value in seconds. """
         return self._timeout
 
@@ -212,7 +210,7 @@ class SpinnmanUnexpectedResponseCodeException(SpinnmanException):
     """
 
     def __init__(self, operation: str, command: str,
-                 response: Union[str, SCPResult]):
+                 response: str | SCPResult):
         """
         :param operation: The operation being performed
         :param command: The command being executed
@@ -287,7 +285,7 @@ class SpinnmanGenericProcessException(SpinnmanException):
     def __init__(
             self, exception: Exception, tb: TracebackType,
             x: int, y: int, p: int, phys_p: str,
-            tb2: Optional[TracebackType] = None):
+            tb2: TracebackType | None = None):
         """
         :param exception:
         :param x:
@@ -358,7 +356,7 @@ class SpiNNManCoresNotInStateException(SpinnmanTimeoutException):
     """
 
     def __init__(
-            self, timeout: Optional[float],
+            self, timeout: float | None,
             expected_states: frozenset[CPUState],
             failed_core_states: CPUInfos):
         """

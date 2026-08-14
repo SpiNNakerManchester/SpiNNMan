@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Iterable, Union
+from typing import Iterable
 
 from spinn_utilities.overrides import overrides
 
@@ -35,8 +35,8 @@ class BMPSetLed(BMPRequest):
     """
     __slots__ = ()
 
-    def __init__(self, led: Union[int, Iterable[int]], action: LEDAction,
-                 boards: Union[int, Iterable[int]]):
+    def __init__(self, led: int | Iterable[int], action: LEDAction,
+                 boards: int | Iterable[int]):
         """
         :param led: Number of the LED or an iterable of LEDs to set the
             state of (0-7)

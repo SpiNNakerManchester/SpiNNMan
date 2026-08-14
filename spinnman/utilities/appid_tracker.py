@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterable, Optional
+from typing import Iterable
 
 _MIN_APP_ID = 17
 _MAX_APP_ID = 254
@@ -30,7 +30,7 @@ class AppIdTracker:
     # allocated globally
 
     def __init__(
-            self, app_ids_in_use: Optional[Iterable[int]] = None,
+            self, app_ids_in_use: Iterable[int] | None = None,
             min_app_id: int = _MIN_APP_ID,
             max_app_id: int = _MAX_APP_ID):
         """

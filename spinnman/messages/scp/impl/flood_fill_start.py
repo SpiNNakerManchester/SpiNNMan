@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -33,7 +32,7 @@ class FloodFillStart(AbstractSCPRequest[CheckOKResponse]):
     __slots__ = ()
 
     def __init__(self, nearest_neighbour_id: int, n_blocks: int,
-                 x: Optional[int] = None, y: Optional[int] = None):
+                 x: int | None = None, y: int | None = None):
         """
         :param nearest_neighbour_id:
             The ID of the packet, between 0 and 127

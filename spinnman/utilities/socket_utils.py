@@ -18,7 +18,6 @@ apply some consistency to things.
 
 import logging
 import socket
-from typing import Optional
 
 from spinn_utilities.log import FormatAdapter
 
@@ -127,7 +126,7 @@ def get_socket_address(sock: socket.socket) -> tuple[str, int]:
 
 
 def receive_message(
-        sock: socket.socket, timeout: Optional[float], size: int) -> bytes:
+        sock: socket.socket, timeout: float | None, size: int) -> bytes:
     """
     Wrapper round recv() system call.
 
@@ -143,7 +142,7 @@ def receive_message(
 
 
 def receive_message_and_address(
-        sock: socket.socket, timeout: Optional[float], size: int) -> tuple[
+        sock: socket.socket, timeout: float | None, size: int) -> tuple[
             bytes, tuple[str, int]]:
     """
     Wrapper round recvfrom() system call.

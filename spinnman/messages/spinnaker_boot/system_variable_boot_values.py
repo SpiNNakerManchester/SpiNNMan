@@ -14,7 +14,7 @@
 
 import struct
 from enum import Enum
-from typing import Any, NamedTuple, Optional, Union
+from typing import Any, NamedTuple
 
 _SYSTEM_VARIABLES_BOOT_SIZE = 128
 
@@ -64,8 +64,8 @@ class _Definition(NamedTuple):
     """
     data_type: _DataType
     offset: int
-    default: Union[int, bytes] = 0
-    array_size: Optional[int] = None
+    default: int | bytes = 0
+    array_size: int | None = None
     doc: str = ""
 
 
@@ -327,7 +327,7 @@ class SystemVariableDefinition(Enum):
 
     def __init__(
             self, data_type: _DataType, offset: int,
-            default: Union[int, bytes], array_size: Optional[int], doc: str):
+            default: int | bytes, array_size: int | None, doc: str):
         """
         :param data_type: The data type of the variable
         :param offset: The offset from the start of the system variable
@@ -338,8 +338,8 @@ class SystemVariableDefinition(Enum):
         """
         self._data_type: _DataType = data_type
         self._offset: int = offset
-        self._default: Union[int, bytes] = default
-        self._array_size: Optional[int] = array_size
+        self._default: int | bytes = default
+        self._array_size: int | None = array_size
         self.__doc__ = doc
 
     @property
@@ -348,7 +348,7 @@ class SystemVariableDefinition(Enum):
         return self._data_type
 
     @property
-    def array_size(self) -> Optional[int]:
+    def array_size(self) -> int | None:
         """ Gets the array size passed into the init (if applicable) """
         return self._array_size
 
@@ -358,7 +358,7 @@ class SystemVariableDefinition(Enum):
         return self._offset
 
     @property
-    def default(self) -> Union[int, bytes]:
+    def default(self) -> int | bytes:
         """ Gets the default Value passed into the init """
         return self._default
 

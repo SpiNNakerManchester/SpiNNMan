@@ -17,7 +17,7 @@ import socket
 import sys
 import time
 from types import FrameType
-from typing import Callable, Optional
+from typing import Callable
 
 from typing_extensions import Never
 
@@ -47,7 +47,7 @@ def locate_connected_machine(handler: Callable[[str, float], bool]) -> None:
 
 
 if __name__ == "__main__":
-    def _ctrlc_handler(sig: int, frame: Optional[FrameType]) -> Never:
+    def _ctrlc_handler(sig: int, frame: FrameType | None) -> Never:
         """
         Never returns as it causes a sys.exit()
         """

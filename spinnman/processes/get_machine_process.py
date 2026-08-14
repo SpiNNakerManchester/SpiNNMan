@@ -17,7 +17,7 @@ import logging
 from collections import defaultdict
 from contextlib import suppress
 from types import TracebackType
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from spinn_utilities.config_holder import (
     get_config_bool,
@@ -99,12 +99,12 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
         self._chip_info: dict[XY, ChipSummaryInfo] = {}
 
         # Set to None meaning not computed yet
-        self._ethernets: Optional[dict[str, XY]] = None
+        self._ethernets: dict[str, XY] | None = None
 
         # Maps between virtual and physical cores
         self._virtual_to_physical_map: dict[XY, bytes] = {}
         self._physical_to_virtual_map: dict[XY, bytes] = {}
-        self._progress: Optional[ProgressBar] = None
+        self._progress: ProgressBar | None = None
 
     def _make_chip(self, chip_info: ChipSummaryInfo, machine: Machine) -> Chip:
         """
@@ -406,8 +406,8 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                             inv_xy, inv_link, global_xy)
 
     def _ignores_local_to_global(
-            self, local_x: int, local_y: int, ip_address: Optional[str],
-            machine: Machine) -> Optional[XY]:
+            self, local_x: int, local_y: int, ip_address: str | None,
+            machine: Machine) -> XY | None:
         if ip_address is None:
             global_xy = (local_x, local_y)
         else:
@@ -432,7 +432,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                 "in this machine", global_xy)
             return None
 
-    def _ethernet_by_ipaddress(self, ip_address: str) -> Optional[XY]:
+    def _ethernet_by_ipaddress(self, ip_address: str) -> XY | None:
         if self._ethernets is None:
             self._ethernets = {}
             for chip_info in self._chip_info.values():
@@ -441,7 +441,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
                         (chip_info.x, chip_info.y)
         return self._ethernets.get(ip_address, None)
 
-    def _get_virtual_p(self, xy: XY, p: int) -> Optional[int]:
+    def _get_virtual_p(self, xy: XY, p: int) -> int | None:
         if p > 0:
             self._report_ignore("On chip {} ignoring core {}", xy, p)
             return p

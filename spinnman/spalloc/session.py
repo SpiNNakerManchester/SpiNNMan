@@ -16,7 +16,7 @@ import re
 from functools import wraps
 from json.decoder import JSONDecodeError
 from logging import getLogger
-from typing import Any, Callable, Optional, cast
+from typing import Any, Callable, cast
 
 import requests
 import websocket  # type: ignore
@@ -102,10 +102,10 @@ class Session:
 
     def __init__(
             self, service_url: str,
-            username: Optional[str] = None, password: Optional[str] = None,
-            token: Optional[str] = None,
-            session_credentials: Optional[
-                tuple[dict[str, str], dict[str, str]]] = None):
+            username: str | None = None, password: str | None = None,
+            token: str | None = None,
+            session_credentials: tuple[dict[str, str],
+                                       dict[str, str]] | None = None):
         """
         :param service_url: The reference to the service.
             *Should not* include a username or password in it.
@@ -124,17 +124,17 @@ class Session:
         if session_credentials:
             cookies, headers = session_credentials
             if _SESSION_COOKIE in cookies:
-                self._session_id: Optional[str] = cookies[_SESSION_COOKIE]
+                self._session_id: str | None = cookies[_SESSION_COOKIE]
             for key, value in headers.items():
                 if key == "Authorization":
                     # TODO: extract this?
                     pass
                 else:
                     self.__csrf_header = key
-                    self.__csrf: Optional[str] = value
+                    self.__csrf: str | None = value
 
     def __handle_error_or_return(self, response: requests.Response
-                                 ) -> Optional[requests.Response]:
+                                 ) -> requests.Response | None:
         """
         :returns: The response verified that it is not an error
         """
@@ -147,7 +147,7 @@ class Session:
 
     @_may_renew
     def get(self, url: str, timeout: int = 10, **kwargs: Any
-            ) -> Optional[requests.Response]:
+            ) -> requests.Response | None:
         """
         Do an HTTP ``GET`` in the session.
 
@@ -167,7 +167,7 @@ class Session:
 
     @_may_renew
     def post(self, url: str, json_dict: dict, timeout: int = 10,
-             **kwargs: Any) -> Optional[requests.Response]:
+             **kwargs: Any) -> requests.Response | None:
         """
         Do an HTTP ``POST`` in the session.
 
@@ -188,7 +188,7 @@ class Session:
 
     @_may_renew
     def post_raw(self, url: str, data: bytes, timeout: int = 10,
-                 **kwargs: Any) -> Optional[requests.Response]:
+                 **kwargs: Any) -> requests.Response | None:
         """
         Do an HTTP ``POST`` in the session. Posts raw data!
 
@@ -210,7 +210,7 @@ class Session:
 
     @_may_renew
     def put(self, url: str, data: str, timeout: int = 10,
-            **kwargs: Any) -> Optional[requests.Response]:
+            **kwargs: Any) -> requests.Response | None:
         """
         Do an HTTP ``PUT`` in the session. Puts plain text *OR* JSON!
 
@@ -233,7 +233,7 @@ class Session:
 
     @_may_renew
     def delete(self, url: str, timeout: int = 10,
-               **kwargs: Any) -> Optional[requests.Response]:
+               **kwargs: Any) -> requests.Response | None:
         """
         Do an HTTP ``DELETE`` in the session.
 
@@ -340,8 +340,8 @@ class Session:
         return cookies, headers
 
     def websocket(
-            self, url: str, header: Optional[dict] = None,
-            cookie: Optional[str] = None,
+            self, url: str, header: dict | None = None,
+            cookie: str | None = None,
             **kwargs: Any) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish

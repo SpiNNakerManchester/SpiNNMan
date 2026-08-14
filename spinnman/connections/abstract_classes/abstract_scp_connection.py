@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
@@ -40,7 +39,7 @@ class AbstractSCPConnection(Connection, metaclass=AbstractBase):
         raise NotImplementedError
 
     @abstractmethod
-    def receive_scp_response(self, timeout: Optional[float] = 1.0) -> tuple[
+    def receive_scp_response(self, timeout: float | None = 1.0) -> tuple[
             SCPResult, int, bytes, int]:
         """
         Receives an SCP response from this connection.  Blocks

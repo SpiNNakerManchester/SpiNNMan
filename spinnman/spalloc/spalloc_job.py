@@ -14,7 +14,7 @@
 
 from contextlib import AbstractContextManager
 from types import TracebackType
-from typing import Mapping, Optional
+from typing import Mapping
 
 from typing_extensions import Literal, Self
 
@@ -51,7 +51,7 @@ class SpallocJob(AbstractContextManager):
         raise NotImplementedError()
 
     @abstractmethod
-    def get_root_host(self) -> Optional[str]:
+    def get_root_host(self) -> str | None:
         """
         Get the IP address for talking to the machine.
 
@@ -143,7 +143,7 @@ class SpallocJob(AbstractContextManager):
 
     @abstractmethod
     def wait_for_state_change(self, old_state: SpallocState,
-                              timeout: Optional[int] = None) -> SpallocState:
+                              timeout: int | None = None) -> SpallocState:
         """
         Wait until the allocation is not in the given old state.
 
@@ -179,8 +179,7 @@ class SpallocJob(AbstractContextManager):
         raise NotImplementedError()
 
     @abstractmethod
-    def where_is_machine(self, x: int, y: int) -> Optional[
-            tuple[int, int, int]]:
+    def where_is_machine(self, x: int, y: int) -> tuple[int, int, int] | None:
         """
         Get the *physical* coordinates of the board hosting the given chip.
 
@@ -248,9 +247,9 @@ class SpallocJob(AbstractContextManager):
         """
         return self
 
-    def __exit__(self, exc_type: Optional[type],
-                 exc_value: Optional[BaseException],
-                 exc_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(self, exc_type: type | None,
+                 exc_value: BaseException | None,
+                 exc_tb: TracebackType | None) -> Literal[False]:
         """
         Handle exceptions by killing the job and logging the exception in the
         job's destroy reason.

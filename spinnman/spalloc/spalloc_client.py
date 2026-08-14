@@ -29,7 +29,6 @@ from typing import (
     Final,
     Iterable,
     Mapping,
-    Optional,
     cast,
 )
 from urllib.parse import ParseResult, urlparse, urlunparse
@@ -89,7 +88,7 @@ _msg_to = struct.Struct("<IIIII")
 
 KEEP_ALIVE_PERIOND = 120
 
-_WSCB: Final['TypeAlias'] = Callable[[Optional[bytes]], None]
+_WSCB: Final['TypeAlias'] = Callable[[bytes | None], None]
 
 
 def fix_url(url: Any) -> str:
@@ -153,10 +152,10 @@ class SpallocClient(AbstractContextManager):
 
     def __init__(
             self, service_url: str,
-            username: Optional[str] = None, password: Optional[str] = None,
-            bearer_token: Optional[str] = None,
-            group: Optional[str] = None, collab: Optional[str] = None,
-            nmpi_job: Optional[int] = None, nmpi_user: Optional[str] = None):
+            username: str | None = None, password: str | None = None,
+            bearer_token: str | None = None,
+            group: str | None = None, collab: str | None = None,
+            nmpi_job: int | None = None, nmpi_user: str | None = None):
         """
         :param service_url: The reference to the service.
             May have username and password supplied as part of the network
@@ -179,7 +178,7 @@ class SpallocClient(AbstractContextManager):
             password = os.getenv("SPALLOC_PASSWORD", None)
 
         try:
-            self.__session: Optional[Session] = Session(
+            self.__session: Session | None = Session(
                 service_url, username, password, bearer_token)
             obj = self.__session.renew()
         except SpallocException as ex:
@@ -197,7 +196,7 @@ class SpallocClient(AbstractContextManager):
 
     def _session_error(
             self, service_url: str, exception: SpallocException,
-            username: Optional[str], password: Optional[str]) -> Never:
+            username: str | None, password: str | None) -> Never:
         message = f"Unable to connect to {service_url}. "
         if username is None:
             if password is None:
@@ -295,7 +294,7 @@ class SpallocClient(AbstractContextManager):
             "Machine", "spalloc_physical")
         spalloc_ip_address = get_config_str_or_none(
             "Machine", "spalloc_ip_address")
-        board_st: Optional[str] = None
+        board_st: str | None = None
         if spalloc_triad is not None:
             board_st = f"{spalloc_triad=}"
             triad = map(int, spalloc_triad.split(","))
@@ -608,7 +607,7 @@ class _SpallocJob(SessionAware, SpallocJob):
     )
 
     def __init__(self, session: Session, job_handle: str,
-                 board_st: Optional[str] = None):
+                 board_st: str | None = None):
         """
         :param session: The session created when starting the spalloc client
         :param job_handle: url
@@ -621,11 +620,11 @@ class _SpallocJob(SessionAware, SpallocJob):
         self.__chip_url = self._url + "chip"
         self.__memory_url = self._url + "memory"
         self.__router_url = self._url + "router"
-        self._keepalive_url: Optional[str] = self._url + "keepalive"
-        self.__proxy_handle: Optional[WebSocket] = None
-        self.__proxy_thread: Optional[_ProxyReceiver] = None
-        self.__proxy_ping: Optional[_ProxyPing] = None
-        self.__root: Optional[str] = None
+        self._keepalive_url: str | None = self._url + "keepalive"
+        self.__proxy_handle: WebSocket | None = None
+        self.__proxy_thread: _ProxyReceiver | None = None
+        self.__proxy_ping: _ProxyPing | None = None
+        self.__root: str | None = None
         keep_alive = threading.Thread(
             target=self.__start_keepalive, daemon=True)
         keep_alive.start()
@@ -648,7 +647,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.get_state)
     def get_state(self, wait_for_change: bool = False) -> SpallocState:
-        timeout: Optional[int] = 10
+        timeout: int | None = 10
         if wait_for_change:
             timeout = None
         obj = self._get(
@@ -656,7 +655,7 @@ class _SpallocJob(SessionAware, SpallocJob):
         return SpallocState[obj["state"]]
 
     @overrides(SpallocJob.get_root_host)
-    def get_root_host(self) -> Optional[str]:
+    def get_root_host(self) -> str | None:
         r = self._get(self.__machine_url)
         if r.status_code == 204:
             return None
@@ -734,7 +733,7 @@ class _SpallocJob(SessionAware, SpallocJob):
 
     @overrides(SpallocJob.wait_for_state_change)
     def wait_for_state_change(self, old_state: SpallocState,
-                              timeout: Optional[int] = None) -> SpallocState:
+                              timeout: int | None = None) -> SpallocState:
         while old_state != SpallocState.DESTROYED:
             obj = self._get(self._url, wait="true", timeout=timeout).json()
             s = SpallocState[obj["state"]]
@@ -838,8 +837,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             logger.exception(ex)
 
     @overrides(SpallocJob.where_is_machine)
-    def where_is_machine(self, x: int, y: int) -> Optional[
-            tuple[int, int, int]]:
+    def where_is_machine(self, x: int, y: int) -> tuple[int, int, int] | None:
         r = self._get(self.__chip_url, x=int(x), y=int(y))
         if r.status_code == 204:
             return None
@@ -878,12 +876,12 @@ class _ProxiedConnection(metaclass=AbstractBase):
         :param websocket: WebSocket obtained when starting the client
         :param receiver: Receiver created when starting the Client
         """
-        self.__ws: Optional[WebSocket] = websocket
-        self.__receiver: Optional[_ProxyReceiver] = receiver
+        self.__ws: WebSocket | None = websocket
+        self.__receiver: _ProxyReceiver | None = receiver
         self.__msgs: queue.SimpleQueue = queue.SimpleQueue()
         self.__call_queue: queue.Queue = queue.Queue(1)
         self.__call_lock = threading.RLock()
-        self.__current_msg: Optional[bytes] = None
+        self.__current_msg: bytes | None = None
         self.__handle = self._open_connection()
         self.__receiver.listen(self.__handle, self.__msgs.put)
 
@@ -983,7 +981,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         else:
             return self.__msgs.get(timeout=timeout)[_msg.size:]
 
-    def _receive(self, timeout: Optional[float] = None) -> bytes:
+    def _receive(self, timeout: float | None = None) -> bytes:
         if self.__current_msg is not None:
             try:
                 return self.__current_msg
@@ -1062,7 +1060,7 @@ class _ProxiedBidirectionalConnection(
         self._send(data)
 
     @overrides(SpallocProxiedConnection.receive)
-    def receive(self, timeout: Optional[float] = None) -> bytes:
+    def receive(self, timeout: float | None = None) -> bytes:
         return self._receive(timeout)
 
     @overrides(Listenable.is_ready_to_receive)
@@ -1087,8 +1085,8 @@ class _ProxiedUnboundConnection(
         :param receiver: Receiver created when starting the Client
         """
         super().__init__(websocket, receiver)
-        self.__addr: Optional[str] = None
-        self.__port: Optional[int] = None
+        self.__addr: str | None = None
+        self.__port: int | None = None
 
     @overrides(_ProxiedConnection._open_connection)
     def _open_connection(self) -> int:
@@ -1099,11 +1097,11 @@ class _ProxiedUnboundConnection(
         return handle
 
     @property
-    def _addr(self) -> Optional[str]:
+    def _addr(self) -> str | None:
         return self.__addr if self._connected else None
 
     @property
-    def _port(self) -> Optional[int]:
+    def _port(self) -> int | None:
         return self.__port if self._connected else None
 
     @overrides(Connection.is_connected)
@@ -1128,7 +1126,7 @@ class _ProxiedUnboundConnection(
         raise IOError("socket is not open for sending")
 
     @overrides(SpallocProxiedConnection.receive)
-    def receive(self, timeout: Optional[float] = None) -> bytes:
+    def receive(self, timeout: float | None = None) -> bytes:
         return self._receive(timeout)
 
     @overrides(Listenable.is_ready_to_receive)

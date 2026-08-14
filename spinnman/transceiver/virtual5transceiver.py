@@ -13,7 +13,7 @@
 # limitations under
 # return 0the License.
 
-from typing import Iterable, Optional, Union
+from typing import Iterable
 
 from spinn_utilities.overrides import overrides
 
@@ -40,8 +40,8 @@ class Virtual5Transceiver(Version5Transceiver):
     """
 
     @overrides(Version5Transceiver._boot_board)
-    def _boot_board(self, extra_boot_values: Optional[dict[
-            SystemVariableDefinition, object]] = None) -> None:
+    def _boot_board(self, extra_boot_values: dict[
+            SystemVariableDefinition, object] | None = None) -> None:
         try:
             super()._boot_board(extra_boot_values)
         except SpinnmanIOException:
@@ -64,7 +64,7 @@ class Virtual5Transceiver(Version5Transceiver):
     def _get_scamp_version(
             self, chip_x: int = AbstractSCPRequest.DEFAULT_DEST_X_COORD,
             chip_y: int = AbstractSCPRequest.DEFAULT_DEST_Y_COORD,
-            connection_selector: Optional[ConnectionSelector] = None,
+            connection_selector: ConnectionSelector | None = None,
             n_retries: int = N_RETRIES) -> VersionInfo:
         try:
             return super()._get_scamp_version(
@@ -85,8 +85,8 @@ class Virtual5Transceiver(Version5Transceiver):
 
     @overrides(Version5Transceiver.get_cpu_infos)
     def get_cpu_infos(
-            self, core_subsets: Optional[CoreSubsets] = None,
-            states: Union[CPUState, Iterable[CPUState], None] = None,
+            self, core_subsets: CoreSubsets | None = None,
+            states: CPUState | Iterable[CPUState] | None = None,
             include: bool = True) -> CPUInfos:
         try:
             return super().get_cpu_infos(core_subsets, states, include)

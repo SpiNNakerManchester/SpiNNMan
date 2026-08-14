@@ -14,7 +14,7 @@
 
 import logging
 import re
-from typing import Iterable, Optional
+from typing import Iterable
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY
@@ -46,8 +46,8 @@ logger = FormatAdapter(logging.getLogger(__name__))
 
 
 def create_transceiver_from_hostname(
-        hostname: Optional[str], *,
-        bmp_connection_data: Optional[BMPConnectionData] = None,
+        hostname: str | None, *,
+        bmp_connection_data: BMPConnectionData | None = None,
         auto_detect_bmp: bool = False, power_cycle: bool = False,
         extended: bool = False,
         ensure_board_is_ready: bool = True) -> Transceiver:
@@ -95,8 +95,8 @@ def create_transceiver_from_hostname(
 
 
 def __create_transceiver_from_hostname(
-        hostname: Optional[str], *,
-        bmp_connection_data: Optional[BMPConnectionData] = None,
+        hostname: str | None, *,
+        bmp_connection_data: BMPConnectionData | None = None,
         auto_detect_bmp: bool = False, power_cycle: bool = False,
         extended: bool = False,
         ensure_board_is_ready: bool = True) -> Transceiver:
@@ -205,8 +205,8 @@ def __create_transceiver_from_connections(
 
 
 def transceiver_generator(
-        bmp_details: Optional[str], auto_detect_bmp: bool,
-        scamp_connection_data: Optional[dict[XY, str]],
+        bmp_details: str | None, auto_detect_bmp: bool,
+        scamp_connection_data: dict[XY, str] | None,
         reset_machine_on_start_up: bool,
         ensure_board_is_ready: bool = True) -> Transceiver:
     """
@@ -238,7 +238,7 @@ def transceiver_generator(
     return txrx
 
 
-def _parse_bmp_cabinet_and_frame(bmp_str: str) -> tuple[str, Optional[str]]:
+def _parse_bmp_cabinet_and_frame(bmp_str: str) -> tuple[str, str | None]:
     if ";" in bmp_str:
         raise NotImplementedError(
             "cfg bmp_names no longer supports cabinet and frame")
@@ -276,7 +276,7 @@ def _parse_bmp_connection(bmp_detail: str) -> BMPConnectionData:
 
 
 def _parse_bmp_details(
-        bmp_string: Optional[str]) -> Optional[BMPConnectionData]:
+        bmp_string: str | None) -> BMPConnectionData | None:
     """
     Take a BMP line (a colon-separated list) and split it into the
     BMP connection data.

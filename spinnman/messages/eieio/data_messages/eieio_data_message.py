@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import struct
-from typing import Optional
 
 from spinn_utilities.overrides import overrides
 
@@ -51,7 +50,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         "_offset")
 
     def __init__(self, eieio_header: EIEIODataHeader,
-                 data: Optional[bytes] = None, offset: int = 0):
+                 data: bytes | None = None, offset: int = 0):
         """
         :param eieio_header: The header of the message
         :param data: Optional data contained within the packet
@@ -71,10 +70,10 @@ class EIEIODataMessage(AbstractEIEIOMessage):
     @staticmethod
     def create(
             eieio_type: EIEIOType, count: int = 0,
-            data: Optional[bytes] = None, offset: int = 0,
-            key_prefix: Optional[int] = None,
-            payload_prefix: Optional[int] = None,
-            timestamp: Optional[int] = None,
+            data: bytes | None = None, offset: int = 0,
+            key_prefix: int | None = None,
+            payload_prefix: int | None = None,
+            timestamp: int | None = None,
             prefix_type: EIEIOPrefix = EIEIOPrefix.LOWER_HALF_WORD
             ) -> "EIEIODataMessage":
         """
@@ -215,7 +214,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
                 self._elements_read < self._header.count)
 
     @property
-    def next_element(self) -> Optional[AbstractDataElement]:
+    def next_element(self) -> AbstractDataElement | None:
         """
         The next element to be read, or `None` if no more elements.
         The exact type of element returned depends on the packet type.
@@ -223,7 +222,7 @@ class EIEIODataMessage(AbstractEIEIOMessage):
         if not self.is_next_element:
             return None
         self._elements_read += 1
-        payload: Optional[int] = None
+        payload: int | None = None
         assert self._data is not None
         if self._header.eieio_type == EIEIOType.KEY_16_BIT:
             key = _ONE_SHORT.unpack_from(self._data, self._offset)[0]

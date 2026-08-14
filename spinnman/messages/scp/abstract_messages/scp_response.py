@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
@@ -36,8 +35,8 @@ class AbstractSCPResponse(metaclass=AbstractBase):
         "_sdp_header")
 
     def __init__(self) -> None:
-        self._sdp_header: Optional[SDPHeader] = None
-        self._scp_response_header: Optional[SCPResponseHeader] = None
+        self._sdp_header: SDPHeader | None = None
+        self._scp_response_header: SCPResponseHeader | None = None
 
     def read_bytestring(self, data: bytes, offset: int) -> None:
         """

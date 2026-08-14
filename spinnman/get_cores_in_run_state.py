@@ -18,7 +18,6 @@ This is a script used to check the state of a SpiNNaker machine.
 
 import argparse
 import sys
-from typing import Optional
 
 from spinn_utilities.config_holder import set_config
 
@@ -77,8 +76,8 @@ def get_cores_in_run_state(
         print(f'watchdog core: {x} {y} {p}')
 
 
-def _make_transceiver(host: Optional[str], version: Optional[int],
-                      bmp_names: Optional[str]) -> Transceiver:
+def _make_transceiver(host: str | None, version: int | None,
+                      bmp_names: str | None) -> Transceiver:
     """
     :param host:
         Host to use or `None` to use test configuration for all parameters

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 
 from spinnman.constants import EIEIO_COMMAND_IDS
 
@@ -31,7 +30,7 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
     """
     __slots__ = "_database_path",
 
-    def __init__(self, database_path: Optional[str] = None):
+    def __init__(self, database_path: str | None = None):
         """
         :param database_path:
             The location of the database. If ``None``, this is an
@@ -43,7 +42,7 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
             self._database_path = database_path.encode()
 
     @property
-    def database_path(self) -> Optional[str]:
+    def database_path(self) -> str | None:
         """
         Gets the database path passed into the init.
 

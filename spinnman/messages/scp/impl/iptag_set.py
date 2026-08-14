@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Union
 
 from spinn_utilities.overrides import overrides
 
@@ -32,7 +31,7 @@ class IPTagSet(AbstractSCPRequest[CheckOKResponse]):
     """
     __slots__ = ()
 
-    def __init__(self, x: int, y: int, host: Union[bytearray, list[int]],
+    def __init__(self, x: int, y: int, host: bytearray | list[int],
                  port: int, tag: int, *,
                  strip: bool = False, use_sender: bool = False):
         """

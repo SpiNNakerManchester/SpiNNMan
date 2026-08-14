@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional
 
 from spinn_machine import RoutingEntry
 
@@ -42,7 +41,7 @@ class ReadFixedRouteRoutingEntryProcess(
         :param connection_selector: the SC&MP connection selector
         """
         super().__init__(connection_selector)
-        self._route: Optional[RoutingEntry] = None
+        self._route: RoutingEntry | None = None
 
     def __handle_read_response(self, response: _FixedRouteResponse) -> None:
         self._route = response.route

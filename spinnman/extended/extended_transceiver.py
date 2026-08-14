@@ -23,9 +23,7 @@ from typing import (
     Generator,
     Iterable,
     Mapping,
-    Optional,
     Sequence,
-    Union,
 )
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
@@ -106,10 +104,10 @@ class ExtendedTransceiver(metaclass=AbstractBase):
     # pylint: disable=protected-access
 
     @abstractmethod
-    def _where_is_xy(self, x: int, y: int) -> Optional[str]:
+    def _where_is_xy(self, x: int, y: int) -> str | None:
         raise NotImplementedError
 
-    def is_connected(self, connection: Optional[Connection] = None) -> bool:
+    def is_connected(self, connection: Connection | None = None) -> bool:
         """
         Determines if the board can be contacted via SCAMP
 
@@ -192,8 +190,8 @@ class ExtendedTransceiver(metaclass=AbstractBase):
                 self._chip_execute_lock_condition.notify_all()
 
     def execute(self, x: int, y: int, processors: list[int],
-                executable: Union[BinaryIO, bytes, int, str], app_id: int,
-                n_bytes: Optional[int] = None, wait: bool = False) -> None:
+                executable: BinaryIO | bytes | int | str, app_id: int,
+                n_bytes: int | None = None, wait: bool = False) -> None:
         """
         Start an executable running on a single chip.
 
@@ -290,8 +288,8 @@ class ExtendedTransceiver(metaclass=AbstractBase):
         # Send a signal telling the application to start
         self.send_signal(app_id, Signal.START)
 
-    def set_led(self, led: Union[int, Iterable[int]], action: LEDAction,
-                board: Union[int, Iterable[int]]) -> None:
+    def set_led(self, led: int | Iterable[int], action: LEDAction,
+                board: int | Iterable[int]) -> None:
         """
         Set the LED state of a board in the machine.
 
@@ -339,8 +337,8 @@ class ExtendedTransceiver(metaclass=AbstractBase):
 
     def write_neighbour_memory(
             self, x: int, y: int, link: int, base_address: int,
-            data: Union[BinaryIO, str, int, bytes],
-            n_bytes: Optional[int] = None, offset: int = 0,
+            data: BinaryIO | str | int | bytes,
+            n_bytes: int | None = None, offset: int = 0,
             cpu: int = 0) -> None:
         """
         Write to the memory of a neighbouring chip using a LINK_READ SCP
@@ -464,8 +462,8 @@ class ExtendedTransceiver(metaclass=AbstractBase):
 
     def write_memory_flood(
             self, base_address: int,
-            data: Union[BinaryIO, str, int, bytes],
-            n_bytes: Optional[int] = None, offset: int = 0,
+            data: BinaryIO | str | int | bytes,
+            n_bytes: int | None = None, offset: int = 0,
             is_filename: bool = False) -> None:
         """
         Write to the SDRAM of all chips.
@@ -589,7 +587,7 @@ class ExtendedTransceiver(metaclass=AbstractBase):
             raise
 
     def free_sdram_by_app_id(
-            self, x: int, y: int, app_id: int) -> Optional[int]:
+            self, x: int, y: int, app_id: int) -> int | None:
         """
         Free all SDRAM allocated to a given app ID.
 
@@ -697,7 +695,7 @@ class ExtendedTransceiver(metaclass=AbstractBase):
             raise
 
     def __set_watch_dog_on_chip(
-            self, x: int, y: int, watch_dog: Union[int, bool]) -> None:
+            self, x: int, y: int, watch_dog: int | bool) -> None:
         """
         Enable, disable or set the value of the watch dog timer on a
         specific chip.
@@ -718,7 +716,7 @@ class ExtendedTransceiver(metaclass=AbstractBase):
         warn_once(logger, "The set_watch_dog_on_chip method is deprecated "
                           "and untested due to no known use.")
         assert isinstance(self, Transceiver)
-        value_to_set: Union[int, bool, bytes] = watch_dog
+        value_to_set: int | bool | bytes = watch_dog
         watchdog = SystemVariableDefinition.software_watchdog_count
         if isinstance(watch_dog, bool):
             value_to_set = watchdog.default if watch_dog else 0
@@ -730,7 +728,7 @@ class ExtendedTransceiver(metaclass=AbstractBase):
         address = SYSTEM_VARIABLE_BASE_ADDRESS + watchdog.offset
         self.write_memory(x=x, y=y, base_address=address, data=data)
 
-    def set_watch_dog(self, watch_dog: Union[int, bool]) -> None:
+    def set_watch_dog(self, watch_dog: int | bool) -> None:
         """
         Enable, disable or set the value of the watch dog timer.
 
