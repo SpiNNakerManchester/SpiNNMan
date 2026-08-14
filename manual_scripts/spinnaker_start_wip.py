@@ -84,7 +84,7 @@ def warn(*args):
 
 
 def open_file(filename, mode):
-    global file_open_lock, n_open_files
+    global n_open_files
     with file_open_lock:
         while n_open_files >= 200:
             file_open_lock.wait()
@@ -93,7 +93,7 @@ def open_file(filename, mode):
 
 
 def close_file(open_file):
-    global file_open_lock, n_open_files
+    global n_open_files
     with file_open_lock:
         open_file.close()
         n_open_files -= 1
@@ -599,6 +599,7 @@ class CoreCounter:
         else:
             print(f"add_cores {eth_x=} {eth_y=} {x=} {y=}")
 
+
 class MainThread:
     def __init__(self, core_counter, job, save, load):
         """
@@ -691,7 +692,7 @@ class MainThread:
                                 time.sleep(1.0)
                         except Exception:
                             if not version_read_ok:
-                               raise
+                                raise
                 except Exception as ex:
                     print(ex)
                     warn("Boot failed, retrying")
@@ -727,6 +728,7 @@ class MainThread:
                 for process in self._processes:
                     process.join()
 
+
 class MockTransceiver(MockableTransceiver):
 
     def __init__(self, width, height):
@@ -739,6 +741,7 @@ class MockTransceiver(MockableTransceiver):
 
     def _get_machine_dimensions(self) -> MachineDimensions:
         return MachineDimensions(self._width, self._height)
+
 
 class MockJob(SpallocJob):
 
@@ -773,7 +776,8 @@ class MockJob(SpallocJob):
         return {(x, y): "127.0.0.1" for (x, y) in self._boards}
 
     @overrides(SpallocJob.connect_to_board)
-    def connect_to_board(self, x: int, y: int, port: int = 0) -> SpallocSCPConnection:
+    def connect_to_board(
+            self, x: int, y: int, port: int = 0) -> SpallocSCPConnection:
         return SpallocSCPConnection(x, y)
 
     @overrides(SpallocJob.connect_for_booting)
@@ -830,6 +834,7 @@ class MockJob(SpallocJob):
     def reset_routing(
             self, custom_filters: dict[int, DiagnosticFilter]) -> None:
         pass
+
 
 def _estimate_width_and_heigth(job: SpallocJob) -> tuple[int, int]:
     max_x = 0
