@@ -15,9 +15,7 @@
 import re
 import struct
 from time import asctime, localtime
-from typing import Final, cast
-
-from typing_extensions import TypeAlias
+from typing import Final, TypeAlias, cast
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
 

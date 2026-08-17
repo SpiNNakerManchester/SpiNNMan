@@ -13,7 +13,8 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import Collection, Iterable, cast
+from collections.abc import Collection, Iterable
+from typing import cast
 
 from spinn_utilities.ordered_set import OrderedSet
 

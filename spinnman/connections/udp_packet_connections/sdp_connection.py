@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Callable
+from collections.abc import Callable
 
 from spinn_utilities.overrides import overrides
 

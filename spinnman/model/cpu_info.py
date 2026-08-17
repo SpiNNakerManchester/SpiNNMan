@@ -13,9 +13,8 @@
 # limitations under the License.
 
 import struct
-from typing import Final, Sequence
-
-from typing_extensions import TypeAlias
+from collections.abc import Sequence
+from typing import Final, TypeAlias
 
 from spinnman.model.enums import CPUState, MailboxCommand, RunTimeError
 

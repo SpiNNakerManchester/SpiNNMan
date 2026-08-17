@@ -14,7 +14,7 @@
 
 import functools
 import struct
-from typing import Callable, Sequence
+from collections.abc import Callable, Sequence
 
 from spinn_utilities.typing.coords import XY, XYP
 

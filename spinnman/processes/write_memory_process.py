@@ -13,7 +13,8 @@
 # limitations under the License.
 
 import functools
-from typing import BinaryIO, Callable
+from collections.abc import Callable
+from typing import BinaryIO
 
 import numpy
 from numpy import uint8, uint32

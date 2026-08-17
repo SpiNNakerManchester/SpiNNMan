@@ -13,7 +13,8 @@
 # limitations under the License.
 
 from collections import defaultdict
-from typing import Iterable, Mapping, cast
+from collections.abc import Iterable, Mapping
+from typing import cast
 
 from spinn_machine import Chip, CoreSubsets, Link, Machine
 

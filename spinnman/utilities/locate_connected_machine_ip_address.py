@@ -16,8 +16,8 @@ import signal
 import socket
 import sys
 import time
+from collections.abc import Callable
 from types import FrameType
-from typing import Callable
 
 from typing_extensions import Never
 

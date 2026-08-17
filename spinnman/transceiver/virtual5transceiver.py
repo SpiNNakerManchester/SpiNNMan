@@ -13,7 +13,7 @@
 # limitations under
 # return 0the License.
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from spinn_utilities.overrides import overrides
 

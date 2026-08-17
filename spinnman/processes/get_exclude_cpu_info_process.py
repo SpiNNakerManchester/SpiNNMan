@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Container
+from collections.abc import Container
 
 from spinn_utilities.overrides import overrides
 

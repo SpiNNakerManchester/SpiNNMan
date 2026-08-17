@@ -16,7 +16,8 @@ import array
 import math
 import os
 import time
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from spinnman.data import SpiNNManDataView
 from spinnman.exceptions import SpinnmanIOException

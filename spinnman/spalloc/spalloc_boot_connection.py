@@ -17,7 +17,7 @@ API of the client for the Spalloc web service.
 
 import struct
 import time
-from typing import Callable
+from collections.abc import Callable
 
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
