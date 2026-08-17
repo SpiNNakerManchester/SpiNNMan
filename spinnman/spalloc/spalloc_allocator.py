@@ -15,8 +15,8 @@
 import logging
 import os
 import re
-from contextlib import ExitStack
-from typing import ContextManager, cast
+from contextlib import AbstractContextManager, ExitStack
+from typing import cast
 
 import ebrains_drive  # type: ignore[import]
 import requests
@@ -303,7 +303,8 @@ def __spalloc_allocate_job(
         client = SpallocClient(
             spalloc_server, bearer_token=bearer_token, group=group,
             collab=collab, nmpi_job=_nmpi_job, nmpi_user=nmpi_user)
-        stack.enter_context(cast(ContextManager[SpallocClient], client))
+        stack.enter_context(
+            cast(AbstractContextManager[SpallocClient], client))
         job = client.create_job()
         stack.enter_context(job)
         job.wait_until_ready()
