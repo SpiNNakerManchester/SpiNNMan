@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import functools
-from typing import Callable
+from collections.abc import Callable
 
 from spinn_utilities.typing.coords import XYP
 

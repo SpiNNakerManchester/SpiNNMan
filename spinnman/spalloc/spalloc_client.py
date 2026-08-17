@@ -21,21 +21,20 @@ import struct
 import sys
 import threading
 import time
+from collections.abc import Callable, Iterable, Mapping
 from logging import getLogger
 from time import sleep
 from typing import (
     Any,
-    Callable,
     Final,
-    Iterable,
-    Mapping,
+    Never,
+    TypeAlias,
     cast,
 )
 from urllib.parse import ParseResult, urlparse, urlunparse
 
 import requests
 from packaging.version import Version
-from typing_extensions import Never, TypeAlias
 from websocket import WebSocket  # type: ignore
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod

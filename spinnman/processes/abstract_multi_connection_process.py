@@ -15,16 +15,15 @@
 import contextlib
 import logging
 import sys
+from collections.abc import Callable, Generator
 from types import TracebackType
 from typing import (
-    Callable,
-    Generator,
     Generic,
+    Self,
+    TypeAlias,
     TypeVar,
     cast,
 )
-
-from typing_extensions import Self, TypeAlias
 
 from spinn_utilities.log import FormatAdapter
 

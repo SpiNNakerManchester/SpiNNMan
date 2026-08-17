@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Collection
+from collections.abc import Collection
 
 from spinn_machine import Router
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry

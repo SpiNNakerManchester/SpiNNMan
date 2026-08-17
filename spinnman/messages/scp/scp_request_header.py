@@ -14,8 +14,7 @@
 
 import struct
 from enum import Enum
-
-from typing_extensions import TypeAlias
+from typing import TypeAlias
 
 from spinnman.messages.scp.enums import SCPCommand
 

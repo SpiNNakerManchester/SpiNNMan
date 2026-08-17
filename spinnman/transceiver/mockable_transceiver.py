@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections.abc import Collection, Iterable
 from typing import (
     BinaryIO,
-    Collection,
-    Iterable,
 )
 
 from spinn_utilities.overrides import overrides

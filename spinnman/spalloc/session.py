@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import re
+from collections.abc import Callable
 from functools import wraps
 from json.decoder import JSONDecodeError
 from logging import getLogger
-from typing import Any, Callable, cast
+from typing import Any, cast
 
 import requests
 import websocket  # type: ignore

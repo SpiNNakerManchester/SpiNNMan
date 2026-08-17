@@ -14,9 +14,10 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from threading import Thread
-from typing import Callable, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from spinn_utilities.log import FormatAdapter
 

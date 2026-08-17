@@ -14,11 +14,10 @@
 
 import sys
 import time
+from collections.abc import Callable
 from threading import RLock
 from types import TracebackType
-from typing import Callable, Generic, TypeVar, cast
-
-from typing_extensions import TypeAlias
+from typing import Generic, TypeAlias, TypeVar, cast
 
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 from spinnman.constants import N_RETRIES, SCP_TIMEOUT

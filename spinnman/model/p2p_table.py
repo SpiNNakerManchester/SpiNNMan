@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import struct
-from typing import Iterable
+from collections.abc import Iterable
 
 from spinnman.model.enums import P2PTableRoute
 

@@ -20,14 +20,11 @@ import socket
 import struct
 import time
 from collections import defaultdict
+from collections.abc import Collection, Iterable, Iterator, Sequence
 from contextlib import contextmanager, suppress
 from threading import Condition
 from typing import (
     BinaryIO,
-    Collection,
-    Iterable,
-    Iterator,
-    Sequence,
     TypeVar,
     cast,
 )

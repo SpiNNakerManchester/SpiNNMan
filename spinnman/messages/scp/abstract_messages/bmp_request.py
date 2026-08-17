@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Generic, Iterable, TypeVar
-
-from typing_extensions import TypeAlias
+from collections.abc import Iterable
+from typing import Generic, TypeAlias, TypeVar
 
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.sdp import SDPFlag, SDPHeader

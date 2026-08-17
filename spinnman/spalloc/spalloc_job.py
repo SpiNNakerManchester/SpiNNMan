@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections.abc import Mapping
 from contextlib import AbstractContextManager
 from types import TracebackType
-from typing import Mapping
-
-from typing_extensions import Literal, Self
+from typing import Literal, Self
 
 from spinn_utilities.abstract_base import abstractmethod
 

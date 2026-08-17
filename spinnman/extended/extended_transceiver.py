@@ -16,14 +16,11 @@ import logging
 import os
 import struct
 import time
+from collections.abc import Generator, Iterable, Mapping, Sequence
 from contextlib import contextmanager
 from threading import Condition
 from typing import (
     BinaryIO,
-    Generator,
-    Iterable,
-    Mapping,
-    Sequence,
 )
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod

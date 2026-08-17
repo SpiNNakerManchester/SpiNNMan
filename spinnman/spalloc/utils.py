@@ -15,7 +15,7 @@
 Miscellaneous utilities for working with URLs relating to the Spalloc Client.
 """
 
-from typing import Iterable
+from collections.abc import Iterable
 from urllib.parse import urlparse, urlsplit, urlunparse
 
 

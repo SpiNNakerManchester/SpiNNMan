@@ -14,7 +14,7 @@
 
 import logging
 import re
-from typing import Iterable
+from collections.abc import Iterable
 
 from spinn_utilities.log import FormatAdapter
 from spinn_utilities.typing.coords import XY

@@ -15,8 +15,8 @@
 import functools
 import struct
 from collections import defaultdict
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from spinn_utilities.typing.coords import XYP
 
