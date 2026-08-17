@@ -15,7 +15,9 @@
 from collections.abc import Mapping
 from contextlib import AbstractContextManager
 from types import TracebackType
-from typing import Literal, Self
+from typing import Literal
+
+from typing_extensions import Self
 
 from spinn_utilities.abstract_base import abstractmethod
 

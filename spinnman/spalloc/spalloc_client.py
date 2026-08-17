@@ -27,7 +27,6 @@ from time import sleep
 from typing import (
     Any,
     Final,
-    Never,
     TypeAlias,
     cast,
 )
@@ -35,6 +34,7 @@ from urllib.parse import ParseResult, urlparse, urlunparse
 
 import requests
 from packaging.version import Version
+from typing_extensions import Never
 from websocket import WebSocket  # type: ignore
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod

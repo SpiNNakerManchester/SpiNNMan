@@ -13,9 +13,8 @@
 # limitations under the License.
 
 
-from typing import Never
-
 import pytest
+from typing_extensions import Never
 
 from spinn_utilities.overrides import overrides
 
