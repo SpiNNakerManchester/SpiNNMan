@@ -85,5 +85,5 @@ def is_server_address(
         pieces = urlparse(address)
         scheme = pieces.scheme.lower()
         return scheme in schemes and pieces.netloc is not None
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # NOQA
         return False

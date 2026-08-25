@@ -269,7 +269,7 @@ class SCPRequestPipeLine(Generic[R]):
                     self._resend(seq, request_sent, str(result))
                     self._n_retry_code_resent += 1
                     return
-                except Exception as e:  # pylint: disable=broad-except
+                except Exception as e:  # NOQA
                     if result not in self._non_fail_retry_codes:
                         self._error_callbacks[seq](
                             request_sent, e,
@@ -285,7 +285,7 @@ class SCPRequestPipeLine(Generic[R]):
                 cb = self._callbacks[seq]
                 if cb is not None:
                     cb(response)
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # NOQA
                 self._error_callbacks[seq](
                     request_sent, e,
                     cast(TracebackType, sys.exc_info()[2]),
@@ -303,7 +303,7 @@ class SCPRequestPipeLine(Generic[R]):
             self._in_progress -= 1
             try:
                 self._resend(seq, request_sent, "timeout")
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # NOQA
                 self._error_callbacks[seq](
                     request_sent, e, cast(TracebackType, sys.exc_info()[2]),
                     self._connection)
