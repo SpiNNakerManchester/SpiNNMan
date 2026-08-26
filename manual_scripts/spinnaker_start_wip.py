@@ -693,7 +693,7 @@ class MainThread:
                         except Exception:  # NOQA
                             if not version_read_ok:
                                 raise
-                except Exception as ex:
+                except Exception as ex:  # NOQA
                     print(ex)
                     warn("Boot failed, retrying")
                     tries -= 1
