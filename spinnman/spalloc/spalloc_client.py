@@ -911,18 +911,18 @@ class _ProxiedConnection(metaclass=AbstractBase):
             closed, or the receipt of an ERROR response.
         """
         if not self._connected:
-            raise IOError("socket closed")
+            raise OSError("socket closed")
         if not self.__receiver:
-            raise IOError("socket closed")
+            raise OSError("socket closed")
         if not self.__ws:
-            raise IOError("socket closed")
+            raise OSError("socket closed")
         with self.__call_lock:
             # All calls via websocket use correlation_id
             correlation_id = self.__receiver.expect_return(
                 self.__call_queue.put)
             self.__ws.send_binary(packer.pack(protocol, correlation_id, *args))
             if not self._connected:
-                raise IOError("socket closed after send!")
+                raise OSError("socket closed after send!")
             reply = self.__call_queue.get()
             code, _ = _msg.unpack_from(reply, 0)
             if code == ProxyProtocol.ERROR:
@@ -940,7 +940,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
 
     def _throw_if_closed(self) -> None:
         if not self._connected:
-            raise IOError("socket closed")
+            raise OSError("socket closed")
 
     def _close(self) -> None:
         if self._connected:
@@ -948,7 +948,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
                 ProxyProtocol.CLOSE, _close_req, _open_close_res,
                 self.__handle)
             if channel_id != self.__handle:
-                raise IOError("failed to close proxy socket")
+                raise OSError("failed to close proxy socket")
         if self.__receiver:
             self.__receiver.unlisten(self.__handle)
         self.__ws = None
@@ -958,7 +958,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         self._throw_if_closed()
         # Put the header on the front and send it
         if not self.__ws:
-            raise IOError("socket closed")
+            raise OSError("socket closed")
         self.__ws.send_binary(_msg.pack(
             ProxyProtocol.MSG, self.__handle) + message)
 
@@ -966,7 +966,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         self._throw_if_closed()
         # Put the header on the front and send it
         if not self.__ws:
-            raise IOError("socket closed")
+            raise OSError("socket closed")
         self.__ws.send_binary(_msg_to.pack(
             ProxyProtocol.MSG_TO, self.__handle, x, y, port) + message)
 
@@ -1122,7 +1122,7 @@ class _ProxiedUnboundConnection(
     @overrides(SpallocProxiedConnection.send)
     def send(self, data: bytes) -> None:
         self._throw_if_closed()
-        raise IOError("socket is not open for sending")
+        raise OSError("socket is not open for sending")
 
     @overrides(SpallocProxiedConnection.receive)
     def receive(self, timeout: float | None = None) -> bytes:
@@ -1209,7 +1209,7 @@ class _ProxiedEIEIOConnection(
         """
         _ = (data, address)
         self._throw_if_closed()
-        raise IOError("socket is not open for sending")
+        raise OSError("socket is not open for sending")
 
     def __str__(self) -> str:
         return (f"EIEIOConnection[proxied](remote:{self.__chip_x},"
