@@ -456,7 +456,7 @@ class ReadBoardProcess(AbstractMultiConnectionProcess):
         self._finish()
         try:
             self.check_for_error()
-        except Exception as e:
+        except Exception as e:  # NOQA
             warn(e)
         if self._save:
             write_file = open_file(
@@ -690,10 +690,10 @@ class MainThread:
                                 core_counter.set_ethernet_booted(0, 0)
                             else:
                                 time.sleep(1.0)
-                        except Exception:
+                        except Exception:  # NOQA
                             if not version_read_ok:
                                 raise
-                except Exception as ex:
+                except Exception as ex:  # NOQA
                     print(ex)
                     warn("Boot failed, retrying")
                     tries -= 1
@@ -898,7 +898,7 @@ def run_script(save: bool = False, load: bool = False) -> None:
         # Close and wait for completion
         main_thread.close()
         main_thread.join()
-    except Exception:
+    except Exception:  # NOQA
         traceback.print_exc()
         job.destroy()
     finally:

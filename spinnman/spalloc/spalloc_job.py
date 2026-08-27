@@ -257,7 +257,7 @@ class SpallocJob(AbstractContextManager):
         """
         try:
             self.destroy(str(exc_value))
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # NOQA
             # Ignore this exception; there's not much we can do with it
             pass
         return False

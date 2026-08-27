@@ -324,7 +324,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
             return (f"No Machine. "
                     f"Root IP:{self._scamp_connections[0].remote_ip_address}"
                     f"x:{x} y:{y}")
-        except Exception as ex:  # pylint: disable=broad-except
+        except Exception as ex:  # NOQA
             return str(ex)
 
     def __identify_connections(
