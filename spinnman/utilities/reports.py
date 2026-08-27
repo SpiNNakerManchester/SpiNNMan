@@ -47,7 +47,7 @@ def generate_machine_report(
             # TODO: Add further details on the target machine.
             for chip in machine.chips:
                 _write_chip_router_report(f, chip)
-    except IOError:
+    except OSError:
         logger.exception(
             "Generate_placement_reports: Can't open file {} for writing.",
             file_name)
