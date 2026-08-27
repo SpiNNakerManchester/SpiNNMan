@@ -72,7 +72,7 @@ class ExecutableType(Enum):
     def __new__(cls, value: int, start_state: Sequence[CPUState],
                 end_state: Sequence[CPUState],
                 supports_auto_pause_and_resume: bool,
-                doc: str = "") -> 'ExecutableType':
+                doc: str = "") -> ExecutableType:
         obj = object.__new__(cls)
         obj._value_ = value
         obj. __doc__ = doc
