@@ -125,7 +125,7 @@ class GetVersion(AbstractSCPRequest):
         :param x: X coordinate of the Chip to ask
         :param y: Y coordinate of the Chip to ask
         """
-        super(GetVersion, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED_NO_P2P, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -151,7 +151,7 @@ class ReadSV(AbstractSCPRequest):
         base_address = (SYSTEM_VARIABLE_BASE_ADDRESS + variable.offset)
         if size is None:
             size = variable.data_type.value
-        super(ReadSV, self).__init__(
+        super().__init__(
             SDPHeader(
                 flags=SDPFlag.REPLY_EXPECTED_NO_P2P, destination_port=0,
                 destination_cpu=0, destination_chip_x=x,
@@ -178,7 +178,7 @@ class ReadNetinitPhaseProcess(AbstractMultiConnectionProcess):
         :param save: Flag to say data should be saved
         :param load: Flag to say data should be read
         """
-        super(ReadNetinitPhaseProcess, self).__init__(
+        super().__init__(
             connection_selector, timeout=0.5, n_retries=0)
         self._x = x
         self._y = y
@@ -324,7 +324,7 @@ class GetP2PTableProcess(AbstractMultiConnectionProcess):
         :param save: Flag to say data should be saved
         :param load: Flag to say data should be read
         """
-        super(GetP2PTableProcess, self).__init__(connection_selector)
+        super().__init__(connection_selector)
         self._width = width
         self._height = height
         self._p2p_column_data = [None] * width
@@ -391,7 +391,7 @@ class ReadBoardProcess(AbstractMultiConnectionProcess):
         :param load: Flag to say data should be read
         """
         # pylint: disable=too-many-arguments
-        super(ReadBoardProcess, self).__init__(
+        super().__init__(
             connection_selector, n_retries=10, timeout=5.0, n_channels=1,
             intermediate_channel_waits=0)
         self._eth_x = eth_x

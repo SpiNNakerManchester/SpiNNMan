@@ -51,7 +51,7 @@ class SpallocTransceiver(Version5Transceiver):
         # Also need a boot connection
         proxies.append(job.connect_for_booting())
 
-        super(SpallocTransceiver, self).__init__(
+        super().__init__(
             connections=proxies, ensure_board_is_ready=ensure_board_is_ready)
 
     @overrides(Version5Transceiver.write_memory)
