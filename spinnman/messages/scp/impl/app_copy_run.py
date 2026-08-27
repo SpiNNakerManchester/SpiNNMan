@@ -71,7 +71,7 @@ class AppCopyRun(AbstractSCPRequest[CheckOKResponse]):
             argument_1=arg1, argument_2=size, argument_3=processor_mask)
 
     def __repr__(self) -> str:
-        return f"{super(AppCopyRun, self).__repr__()} (Link {self.__link})"
+        return f"{super().__repr__()} (Link {self.__link})"
 
     @overrides(AbstractSCPRequest.get_scp_response)
     def get_scp_response(self) -> CheckOKResponse:
