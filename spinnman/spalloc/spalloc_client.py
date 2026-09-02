@@ -743,9 +743,8 @@ class _SpallocJob(SessionAware, SpallocJob):
     def wait_until_ready(self) -> None:
         state = self.get_state()
 
-        if self.__board_st is None:
-            queue_time = get_config_int(
-                "Machine", "spalloc_queue_time")
+        queue_time = get_config_int(
+            "Machine", "spalloc_queue_time")
         start_time = time.time()
 
         while state in [SpallocState.QUEUED, SpallocState.POWER]:
