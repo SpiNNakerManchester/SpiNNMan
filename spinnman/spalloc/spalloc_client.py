@@ -18,7 +18,6 @@ import math
 import os
 import queue
 import struct
-import sys
 import threading
 import time
 from collections.abc import Callable, Iterable, Mapping
