@@ -743,37 +743,26 @@ class _SpallocJob(SessionAware, SpallocJob):
     @overrides(SpallocJob.wait_until_ready)
     def wait_until_ready(self) -> None:
         state = self.get_state()
-        retries = 0
 
         if self.__board_st is None:
-            queue_time = get_config_int_or_none(
+            queue_time = get_config_int(
                 "Machine", "spalloc_queue_time")
-            if queue_time is None:
-                n_retries = sys.maxsize
-            else:
-                n_retries = queue_time // 5
-        else:
-            n_retries = 3
+        start_time = time.time()
 
-        while state == SpallocState.QUEUED:
-            logger.info(f"Waiting as job is QUEUED {retries=} of {n_retries}")
-            if retries >= n_retries:
+        while state in [SpallocState.QUEUED, SpallocState.POWER]:
+            wait_time = time.time() - start_time
+            logger.info(f"Waiting as job {state=} for {int(wait_time)} "
+                        f"out of {queue_time} seconds")
+            if wait_time >= queue_time:
                 if self.__board_st is None:
                     raise SpallocBoardUnavailableException(
                         f"{self._url} killed "
-                        f"as it remained QUEUED for {queue_time} seconds")
+                        f"as it remained {state=} for {wait_time} seconds")
                 else:
                     raise SpallocBoardUnavailableException(
                         f"Boards described as {self.__board_st} "
-                        f"are not available")
+                        f"are not available after {wait_time} seconds")
             time.sleep(5)
-            retries += 1
-            state = self.get_state()
-
-        while state == SpallocState.POWER:
-            logger.info(f"Waiting as job is powering up {retries=}")
-            time.sleep(5)
-            retries += 1
             state = self.get_state()
 
         if state != SpallocState.READY:
