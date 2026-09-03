@@ -182,9 +182,9 @@ class SpallocEIEIOListener(
                     request.get_scp_response().read_bytestring(
                         response_data, len(_TWO_SKIP))
                 return
-            except SpinnmanTimeoutException as e:
+            except SpinnmanTimeoutException:
                 if _try + 1 == _NUM_UPDATE_TAG_TRIES:
-                    raise e
+                    raise
 
     def update_tag_by_ip(self, ip_address: str, tag: int) -> None:
         """
