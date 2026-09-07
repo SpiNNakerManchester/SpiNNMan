@@ -110,8 +110,7 @@ class SCPRequestPipeLine(Generic[R]):
         if (self._n_channels is not None and
                 self._intermediate_channel_waits is None):
             self._intermediate_channel_waits = self._n_channels - 8
-            if self._intermediate_channel_waits < 0:
-                self._intermediate_channel_waits = 0
+            self._intermediate_channel_waits = max(self._intermediate_channel_waits, 0)
 
         # A dictionary of sequence number -> requests in progress
         self._requests: dict[int, AbstractSCPRequest] = {}
@@ -182,8 +181,7 @@ class SCPRequestPipeLine(Generic[R]):
         if self._n_channels is None:
             if self._connection.is_ready_to_receive():
                 self._n_channels = self._in_progress + 8
-                if self._n_channels < 12:
-                    self._n_channels = 12
+                self._n_channels = max(self._n_channels, 12)
                 self._intermediate_channel_waits = self._n_channels - 8
 
         # If all the channels are used, start to receive packets
