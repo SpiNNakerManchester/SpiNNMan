@@ -110,7 +110,8 @@ class SCPRequestPipeLine(Generic[R]):
         if (self._n_channels is not None and
                 self._intermediate_channel_waits is None):
             self._intermediate_channel_waits = self._n_channels - 8
-            self._intermediate_channel_waits = max(self._intermediate_channel_waits, 0)
+            self._intermediate_channel_waits = max(
+                self._intermediate_channel_waits, 0)
 
         # A dictionary of sequence number -> requests in progress
         self._requests: dict[int, AbstractSCPRequest] = {}
