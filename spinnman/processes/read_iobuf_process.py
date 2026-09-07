@@ -165,8 +165,7 @@ class ReadIOBufProcess(AbstractMultiConnectionProcess[Response]):
 
         # Put the data from this packet into the buffer
         packet_bytes = response.length - 16
-        if packet_bytes > bytes_to_read:
-            packet_bytes = bytes_to_read
+        packet_bytes = min(packet_bytes, bytes_to_read)
         if packet_bytes > 0:
             offset = response.offset + 16
             view[0:packet_bytes] = response.data[offset:offset + packet_bytes]

@@ -840,10 +840,8 @@ def _estimate_width_and_heigth(job: SpallocJob) -> tuple[int, int]:
     max_x = 0
     max_y = 0
     for (x, y) in job.get_connections():
-        if x > max_x:
-            max_x = x
-        if y > max_y:
-            max_y = y
+        max_x = max(max_x, x)
+        max_y = max(max_y, y)
     return max_x + 8, max_y + 8
 
 
