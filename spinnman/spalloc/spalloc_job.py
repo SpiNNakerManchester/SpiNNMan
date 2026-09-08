@@ -248,15 +248,16 @@ class SpallocJob(AbstractContextManager):
         """
         return self
 
-    def __exit__(self, exc_type: type | None,
-                 exc_value: BaseException | None,
+    def __exit__(self, exc_type: type[BaseException] | None,
+                 exc_val: BaseException | None,
+
                  exc_tb: TracebackType | None) -> Literal[False]:
         """
         Handle exceptions by killing the job and logging the exception in the
         job's destroy reason.
         """
         try:
-            self.destroy(str(exc_value))
+            self.destroy(str(exc_val))
         except Exception:  # NOQA
             # Ignore this exception; there's not much we can do with it
             pass
