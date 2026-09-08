@@ -15,6 +15,8 @@
 from enum import Enum
 from typing import cast
 
+from typing_extensions import Self
+
 
 class EIEIOType(Enum):
     """
@@ -30,7 +32,7 @@ class EIEIOType(Enum):
     KEY_PAYLOAD_32_BIT = (3, 4, 4)
 
     def __new__(cls, encoded_value: int, key_bytes: int = 0,
-                payload_bytes: int = 0) -> 'EIEIOType':
+                payload_bytes: int = 0) -> Self:
         # Default values just to make pylint SHUT UP!
         obj = object.__new__(cls)
         obj._value_ = encoded_value

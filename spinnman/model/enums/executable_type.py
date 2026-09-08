@@ -16,6 +16,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from enum import Enum
 
+from typing_extensions import Self
+
 from spinnman.model.enums import CPUState
 
 
@@ -72,7 +74,7 @@ class ExecutableType(Enum):
     def __new__(cls, value: int, start_state: Sequence[CPUState],
                 end_state: Sequence[CPUState],
                 supports_auto_pause_and_resume: bool,
-                doc: str = "") -> ExecutableType:
+                doc: str = "") -> Self:
         obj = object.__new__(cls)
         obj._value_ = value
         obj. __doc__ = doc
