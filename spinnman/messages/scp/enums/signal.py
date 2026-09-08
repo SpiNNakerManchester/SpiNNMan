@@ -14,6 +14,8 @@
 
 from enum import Enum
 
+from typing_extensions import Self
+
 
 class SignalType(Enum):
     """
@@ -43,7 +45,7 @@ class Signal(Enum):
     USER_2 = (12, SignalType.MULTICAST)
     USER_3 = (13, SignalType.MULTICAST)
 
-    def __new__(cls, value: int, signal_type: SignalType) -> 'Signal':
+    def __new__(cls, value: int, signal_type: SignalType) -> Self:
         obj = object.__new__(cls)
         obj._value_ = value
         return obj

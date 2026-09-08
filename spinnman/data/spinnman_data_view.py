@@ -59,7 +59,7 @@ class _SpiNNManDataModel:
         "_transceiver",
     ]
 
-    def __new__(cls) -> _SpiNNManDataModel:
+    def __new__(cls) -> _SpiNNManDataModel:  # NOQA: PYI034
         if cls.__singleton:
             return cls.__singleton
         obj = object.__new__(cls)
