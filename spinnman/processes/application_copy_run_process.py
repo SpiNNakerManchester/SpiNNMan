@@ -127,7 +127,7 @@ class ApplicationCopyRunProcess(AbstractMultiConnectionProcess):
         boot_chip = machine.boot_chip
         chips_done: Mapping[tuple[int, int], list[tuple[int, int]]] = \
             defaultdict(list)
-        chips_done[boot_chip].append((boot_chip))
+        chips_done[boot_chip].append(boot_chip)
         parent_chips = _compute_parent_chips(machine)
         next_chips = _get_next_chips(chips_done, parent_chips, machine)
 
