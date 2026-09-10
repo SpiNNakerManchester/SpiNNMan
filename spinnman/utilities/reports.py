@@ -70,6 +70,5 @@ def _write_chip_router_report(f: TextIOBase, chip: Chip) -> None:
     f.write("Neighbouring chips\n"
             f"{chip.router.get_neighbouring_chips_coords()}\n")
     f.write("Router list of links for this chip are: \n")
-    for link in chip.router.links:
-        f.write(f"\t{link}\n")
+    f.writelines(f"\t{link}\n" for link in chip.router.links)
     f.write("\t\t==========================\n")
