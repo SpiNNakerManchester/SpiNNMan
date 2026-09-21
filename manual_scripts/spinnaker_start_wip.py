@@ -879,7 +879,7 @@ def run_script(save: bool = False, load: bool = False) -> None:
             save_file = open_file("record/meta.dat", "wb")
             save_file.write(struct.pack(
                 "<III", width, height, len(job.get_connections())))
-            for (x, y) in job.get_connections().keys():
+            for (x, y) in job.get_connections():
                 save_file.write(struct.pack("<II", x, y))
             close_file(save_file)
 
