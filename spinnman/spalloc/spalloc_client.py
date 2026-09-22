@@ -819,8 +819,8 @@ class _SpallocJob(SessionAware, SpallocJob):
         try:
             while self.__keepalive():
                 time.sleep(KEEP_ALIVE_PERIOND / 2)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.exception(ex)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Keep alive failed")
 
     @overrides(SpallocJob.where_is_machine)
     def where_is_machine(self, x: int, y: int) -> tuple[int, int, int] | None:

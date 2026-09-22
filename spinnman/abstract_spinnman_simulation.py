@@ -183,10 +183,9 @@ class AbstractSpiNNManSimulation:
                     "Suspected DNS error") from ex
             max_retry = get_config_int("Machine", "spalloc_retry")
             if retry >= max_retry:
-                logger.exception(
+                logger.error(
                     "\n*****************************************************")
             logger.exception(f"Error on machine_generation {retry=}")
-            logger.exception(ex)
             path = self._data_writer.get_error_file()
             with open(path, "a", encoding="utf-8") as f:
                 f.write(f"Error on machine_generation {retry=}\n")
