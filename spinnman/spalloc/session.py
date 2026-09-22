@@ -144,7 +144,7 @@ class Session:
             return response
         result = response.content
         raise ValueError(f"Unexpected response from server {code}\n"
-                         f"    {str(result)}")
+                         f"    {result!s}")
 
     @_may_renew
     def get(self, url: str, timeout: int = 10, **kwargs: Any

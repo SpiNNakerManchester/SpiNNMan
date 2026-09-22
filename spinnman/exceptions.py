@@ -271,7 +271,7 @@ class SpinnmanGroupedProcessException(SpinnmanException):
             problem += \
                 f"   Received exception class: " \
                 f"{exception.__class__.__name__}\n" \
-                f"       With message {str(exception)}\n" \
+                f"       With message {exception}\n" \
                 f"       When sending to {location}\n" \
                 f"       Stack trace: {traceback.format_tb(trace_back)}\n"
         super().__init__(problem)
@@ -295,7 +295,7 @@ class SpinnmanGenericProcessException(SpinnmanException):
         """
         super().__init__(
             f"   Received exception class: {exception.__class__.__name__} \n"
-            f"      With message: {str(exception)} \n"
+            f"      With message: {exception!s} \n"
             f"      When sending to {x}:{y}:{p}{phys_p}\n"
             f"      Stack trace: {traceback.format_tb(tb)}\n")
 
