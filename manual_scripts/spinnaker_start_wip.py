@@ -45,6 +45,7 @@ from spinnman.constants import (
     SYSTEM_VARIABLE_BASE_ADDRESS,
     address_length_dtype,
 )
+from spinnman.exceptions import SpinnmanBootException
 from spinnman.messages.scp import SCPRequestHeader
 from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
 from spinnman.messages.scp.enums import SCPCommand
@@ -699,7 +700,7 @@ class MainThread:
                     tries -= 1
             if not boot_done and not self._done:
                 core_counter._close("Boot not done")
-                raise Exception("Could not boot machine")
+                raise SpinnmanBootException("Could not boot machine")
 
             for thread in self._boot_threads:
                 thread.join()
