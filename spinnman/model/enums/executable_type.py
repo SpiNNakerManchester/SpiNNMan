@@ -52,8 +52,8 @@ class ExecutableType(Enum):
         [CPUState.SYNC0, CPUState.SYNC1, CPUState.PAUSED, CPUState.READY],
         [CPUState.READY],
         True,
-        "Calls simulation_run() and simulation_exit() / "
-        "simulation_handle_pause_resume()")
+        ("Calls simulation_run() and simulation_exit() / "
+         "simulation_handle_pause_resume()"))
     #: Situation where there user has supplied no application but for some
     #: reason still wants to run.
     NO_APPLICATION = (
@@ -61,8 +61,8 @@ class ExecutableType(Enum):
         (),
         (),
         True,
-        "Situation where there user has supplied no application but for "
-        "some reason still wants to run")
+        ("Situation where there user has supplied no application but for "
+         "some reason still wants to run"))
     #: Runs immediately without waiting for barrier and never ends.
     SYSTEM = (
         4,
