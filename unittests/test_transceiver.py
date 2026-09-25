@@ -39,7 +39,6 @@ from spinnman.transceiver import (
 
 
 class MockExtendedTransceiver(MockableTransceiver, ExtendedTransceiver):
-    pass
 
     def _where_is_xy(self, x: int, y: int) -> None:
         return None
