@@ -38,8 +38,6 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
         "_read_n_blocks_freed")
 
     def __init__(self, read_n_blocks_freed: bool = False):
-        """
-        """
         super().__init__()
         self._number_of_blocks_freed = 0
         self._read_n_blocks_freed = read_n_blocks_freed
