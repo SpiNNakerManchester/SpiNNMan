@@ -88,7 +88,6 @@ class BMPOKResponse(BMPResponse[None]):
         if len(data) != offset:
             logger.warning("response message with unexpected extra {} bytes",
                            len(data) - offset)
-        return
 
     @property
     def _value(self) -> None:
