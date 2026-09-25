@@ -39,6 +39,8 @@ class _SCPSDRAMDeAllocResponse(AbstractSCPResponse):
 
     def __init__(self, read_n_blocks_freed: bool = False):
         """
+        :param read_n_blocks_freed:
+        The number of allocated blocks that have been freed.
         """
         super().__init__()
         self._number_of_blocks_freed = 0
