@@ -59,7 +59,7 @@ class TestTransceiver(unittest.TestCase):
         connections.append(SCAMPConnection(
             remote_host=self.board_config.remotehost))
         trans = create_transceiver_from_connections(connections=connections)
-        trans.get_connections() == connections
+        self.assertEqual(trans.get_connections(), connections)
         trans.close()
 
     def test_create_new_transceiver_one_connection(self) -> None:
