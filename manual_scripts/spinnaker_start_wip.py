@@ -827,7 +827,7 @@ class MockJob(SpallocJob):
 
     @overrides(SpallocJob.read_data)
     def read_data(self, x: int, y: int, address: int, size: int) -> bytes:
-        return bytes()
+        return b""
 
     @overrides(SpallocJob.reset_routing)
     def reset_routing(
