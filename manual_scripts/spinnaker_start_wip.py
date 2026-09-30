@@ -13,8 +13,6 @@
 # limitations under the License.
 
 
-from __future__ import print_function
-
 import functools
 import operator
 import os
@@ -829,7 +827,7 @@ class MockJob(SpallocJob):
 
     @overrides(SpallocJob.read_data)
     def read_data(self, x: int, y: int, address: int, size: int) -> bytes:
-        return bytes()
+        return b""
 
     @overrides(SpallocJob.reset_routing)
     def reset_routing(

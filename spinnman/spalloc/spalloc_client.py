@@ -673,10 +673,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             (int(x), int(y)): str(host)
             for ((x, y), host) in r.json()["connections"]
         }
-        if (0, 0) in unproxied:
-            self.__root = unproxied[(0, 0)]
-        else:
-            self.__root = "No 0,0"
+        self.__root = unproxied.get((0, 0), "No 0,0")
         return unproxied
 
     @property
