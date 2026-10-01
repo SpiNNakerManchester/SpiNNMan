@@ -53,7 +53,7 @@ class TestTransceiver(unittest.TestCase):
     def test_create_new_transceiver_to_board(self) -> None:
         self.board_config.set_up_remote_board()
         connections = set()
-        connections.append(SCAMPConnection(
+        connections.add(SCAMPConnection(
             remote_host=self.board_config.remotehost))
         trans = create_transceiver_from_connections(connections=connections)
         self.assertSetEqual(trans.get_connections(), connections)
@@ -92,7 +92,7 @@ class TestTransceiver(unittest.TestCase):
     @parameterized.expand(ALL_BOARD_TYPES)
     def test_set_watch_dog(self, _: str, ver_num: str) -> None:
 
-        #set_config("Machine", "version", ver_num)
+        set_config("Machine", "version", ver_num)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
         tx = MockExtendedTransceiver()
