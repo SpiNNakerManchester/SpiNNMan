@@ -21,10 +21,10 @@ from spinn_utilities.config_holder import set_config
 
 from spinn_machine.version import ALL_BOARD_TYPES, SPIN1_BOARDS
 
-from spinnman.constants import LOCAL_HOST, SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
 from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.constants import LOCAL_HOST, SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.extended.extended_transceiver import ExtendedTransceiver
