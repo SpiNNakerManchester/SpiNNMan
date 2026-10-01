@@ -49,18 +49,34 @@ class BoardTestConfiguration:
         :raises unittest.SkipTest:
             If no physical machine found and no version provided
         """
-        if Ping.host_is_reachable("192.168.240.253"):
-            self.remotehost = "192.168.240.253"
-            set_config("Machine", "version", str(Spin1Gen.THREE.value))
-            self.auto_detect_bmp = False
-        elif Ping.host_is_reachable("spinn-4.cs.man.ac.uk"):
-            self.remotehost = "spinn-4.cs.man.ac.uk"
-            set_config("Machine", "version", str(Spin1Gen.FIVE.value))
-        elif Ping.host_is_reachable("192.168.240.1"):
-            self.remotehost = "192.168.240.1"
-            set_config("Machine", "version", str(Spin1Gen.FIVE.value))
-        elif version is not None:
+        if version is None:
+            if Ping.host_is_reachable("192.168.240.253"):
+                self.remotehost = "192.168.240.253"
+                set_config("Machine", "version", str(Spin1Gen.THREE.value))
+                self.auto_detect_bmp = False
+            elif Ping.host_is_reachable("spinn-4.cs.man.ac.uk"):
+                self.remotehost = "spinn-4.cs.man.ac.uk"
+                set_config("Machine", "version", str(Spin1Gen.FIVE.value))
+            elif Ping.host_is_reachable("192.168.240.1"):
+                self.remotehost = "192.168.240.1"
+                set_config("Machine", "version", str(Spin1Gen.FIVE.value))
+            else:
+                raise unittest.SkipTest("None of the test boards reachable")
+
+        else:
+            # default if no suitable host pingable
             self.remotehost = LOCAL_HOST
             set_config("Machine", "version", str(version))
-        else:
-            raise unittest.SkipTest("None of the test boards reachable")
+
+            if version <= Spin1Gen.THREE.value:
+                if Ping.host_is_reachable("192.168.240.253"):
+                    self.remotehost = "192.168.240.253"
+                    self.auto_detect_bmp = False
+            elif version <= Spin1Gen.FIVE.value:
+                if Ping.host_is_reachable("spinn-4.cs.man.ac.uk"):
+                    self.remotehost = "spinn-4.cs.man.ac.uk"
+                elif Ping.host_is_reachable("192.168.240.1"):
+                    self.remotehost = "192.168.240.1"
+
+            else:
+                raise unittest.SkipTest(f"No board known for {version=}")

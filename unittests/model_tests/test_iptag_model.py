@@ -16,8 +16,8 @@ import unittest
 
 from spinn_machine.tags import IPTag
 
-from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
+from spinnman.constants import LOCAL_HOST
 
 
 class TestIptag(unittest.TestCase):
@@ -26,12 +26,10 @@ class TestIptag(unittest.TestCase):
         unittest_setup()
 
     def test_new_iptag(self) -> None:
-        board_config = BoardTestConfiguration()
-        board_config.set_up_remote_board(version=5)
         ip = "8.8.8.8"
         port = 1337
         tag = 255
-        board_address = board_config.remotehost
+        board_address = LOCAL_HOST
         iptag = IPTag(board_address, 0, 0, tag, ip, port)
         self.assertEqual(ip, iptag.ip_address)
         self.assertEqual(port, iptag.port)

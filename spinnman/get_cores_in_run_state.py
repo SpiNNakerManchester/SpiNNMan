@@ -88,7 +88,7 @@ def _make_transceiver(host: str | None, version: int | None,
     """
     if host is None:
         config = BoardTestConfiguration()
-        config.set_up_remote_board()
+        config.set_up_remote_board(version)
         host = config.remotehost
         bmp_names = None
         auto_detect_bmp = config.auto_detect_bmp
@@ -102,7 +102,6 @@ def _make_transceiver(host: str | None, version: int | None,
         set_config("Machine", "version", str(version))
 
     print(f"talking to SpiNNaker system at {host}")
-    # TODO https://github.com/SpiNNakerManchester/SpiNNMan/issues/423
     assert bmp_names is None
     return create_transceiver_from_hostname(
         host, bmp_connection_data=bmp_names,
