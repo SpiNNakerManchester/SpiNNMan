@@ -17,8 +17,8 @@ import struct
 from spinn_utilities.overrides import overrides
 
 from spinnman.constants import EIEIO_COMMAND_IDS
-from spinnman.messages.eieio import AbstractEIEIOMessage
 from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
+from spinnman.messages.eieio.eieio_message import AbstractEIEIOMessage
 
 from .eieio_command_header import EIEIOCommandHeader
 from .eieio_command_message import EIEIOCommandMessage
