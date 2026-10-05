@@ -21,8 +21,12 @@ from spinn_machine import CoreSubsets, Machine, virtual_machine
 
 from spinnman.constants import N_RETRIES
 from spinnman.exceptions import SpinnmanIOException
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
+    SystemVariableDefinition,
+)
 from spinnman.model import CPUInfos, VersionInfo
 from spinnman.model.enums import CPUState
 from spinnman.processes import ConnectionSelector

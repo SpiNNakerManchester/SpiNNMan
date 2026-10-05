@@ -21,15 +21,19 @@ from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
 
-from spinnman.connections.udp_packet_connections import EIEIOConnection
-from spinnman.exceptions import SpinnmanTimeoutException
-from spinnman.messages.eieio import (
-    AbstractEIEIOMessage,
-    read_eieio_command_message,
-    read_eieio_data_message,
+from spinnman.connections.udp_packet_connections.eieio_connection import (
+    EIEIOConnection,
 )
-from spinnman.messages.scp.impl import IPTagSet
-from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
+from spinnman.exceptions import SpinnmanTimeoutException
+from spinnman.messages.eieio.create_eieio_command import (
+    read_eieio_command_message,
+)
+from spinnman.messages.eieio.create_eieio_data import read_eieio_data_message
+from spinnman.messages.eieio.eieio_message import AbstractEIEIOMessage
+from spinnman.messages.scp.impl.iptag_set import IPTagSet
+from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.sdp.sdp_header import SDPHeader
+from spinnman.messages.sdp.sdp_message import SDPMessage
 
 from .spalloc_proxied_connection import SpallocProxiedConnection
 

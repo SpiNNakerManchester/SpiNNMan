@@ -22,12 +22,14 @@ from collections.abc import Callable
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.abstract_classes import Listenable
-from spinnman.connections.udp_packet_connections import BootConnection
+from spinnman.connections.abstract_classes.listenable import Listenable
 from spinnman.connections.udp_packet_connections.boot_connection import (
     _ANTI_FLOOD_DELAY,
+    BootConnection,
 )
-from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
+from spinnman.messages.spinnaker_boot.spinnaker_boot_message import (
+    SpinnakerBootMessage,
+)
 
 from .spalloc_proxied_connection import SpallocProxiedConnection
 
