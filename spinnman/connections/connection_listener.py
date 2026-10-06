@@ -21,7 +21,7 @@ from typing import Generic, TypeVar
 
 from spinn_utilities.log import FormatAdapter
 
-from spinnman.connections.abstract_classes import Listenable
+from spinnman.connections.abstract_classes.listenable import Listenable
 from spinnman.exceptions import SpinnmanEOFException
 
 #: :meta private:

@@ -16,7 +16,7 @@ import struct
 from enum import Enum
 from typing import TypeAlias
 
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 
 _TWO_SHORTS = struct.Struct("<2H")
 _Command: TypeAlias = SCPCommand | Enum

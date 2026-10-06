@@ -22,14 +22,18 @@ from spinn_utilities.typing.coords import XY
 from spinn_machine.version.version_3 import Version3
 from spinn_machine.version.version_5 import Version5
 
-from spinnman.connections.abstract_classes import Connection
-from spinnman.connections.udp_packet_connections import (
+from spinnman.connections.abstract_classes.connection import Connection
+from spinnman.connections.udp_packet_connections.bmp_connection import (
     BMPConnection,
+)
+from spinnman.connections.udp_packet_connections.boot_connection import (
     BootConnection,
+)
+from spinnman.connections.udp_packet_connections.scamp_connection import (
     SCAMPConnection,
 )
 from spinnman.constants import LOCAL_HOST
-from spinnman.data import SpiNNManDataView
+from spinnman.data.spinnman_data_view import SpiNNManDataView
 from spinnman.exceptions import SpinnmanException
 from spinnman.extended.version3transceiver import ExtendedVersion3Transceiver
 from spinnman.extended.version5transceiver import ExtendedVersion5Transceiver

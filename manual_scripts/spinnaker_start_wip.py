@@ -44,12 +44,14 @@ from spinnman.constants import (
     address_length_dtype,
 )
 from spinnman.exceptions import SpinnmanBootException
-from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.impl import GetChipInfo, ReadMemory
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 from spinnman.messages.scp.impl.read_memory import Response
+from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 from spinnman.messages.sdp import SDPHeader
 from spinnman.messages.sdp.sdp_flag import SDPFlag
 from spinnman.messages.spinnaker_boot import (

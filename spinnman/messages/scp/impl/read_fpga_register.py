@@ -16,13 +16,13 @@ import struct
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import (
+from spinnman.messages.scp.abstract_messages.bmp_request import BMPRequest
+from spinnman.messages.scp.abstract_messages.bmp_response import BMPResponse
+from spinnman.messages.scp.abstract_messages.scp_request import (
     AbstractSCPRequest,
-    BMPRequest,
-    BMPResponse,
 )
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 
 _ONE_WORD = struct.Struct("<I")
 

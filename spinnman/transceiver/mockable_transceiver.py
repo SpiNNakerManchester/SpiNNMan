@@ -49,9 +49,11 @@ from spinnman.model.enums.user_registers import UserRegister
 from spinnman.model.io_buffer import IOBuffer
 from spinnman.model.router_diagnostics import RouterDiagnostics
 from spinnman.model.version_info import VersionInfo
-from spinnman.processes import (
-    ConnectionSelector,
+from spinnman.processes.connection_selector import ConnectionSelector
+from spinnman.processes.fixed_connection_selector import (
     FixedConnectionSelector,
+)
+from spinnman.processes.most_direct_connection_selector import (
     MostDirectConnectionSelector,
 )
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver

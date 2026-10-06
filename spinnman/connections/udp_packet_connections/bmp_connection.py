@@ -17,11 +17,15 @@ from collections.abc import Sequence
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.abstract_classes import AbstractSCPConnection
+from spinnman.connections.abstract_classes.abstract_scp_connection import (
+    AbstractSCPConnection,
+)
 from spinnman.constants import SCP_SCAMP_PORT
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPResult
-from spinnman.model import BMPConnectionData
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.model.bmp_connection_data import BMPConnectionData
 
 from .udp_connection import UDPConnection
 

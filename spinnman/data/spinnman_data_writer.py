@@ -19,9 +19,11 @@ from spinn_utilities.overrides import overrides
 
 from spinn_machine.data.machine_data_writer import MachineDataWriter
 
-from spinnman.spalloc import MachineAllocationController
+from spinnman.spalloc.machine_allocation_controller import (
+    MachineAllocationController,
+)
 from spinnman.spalloc.spalloc_allocator import SpallocJobController
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 
 from .spinnman_data_view import SpiNNManDataView, _SpiNNManDataModel
 

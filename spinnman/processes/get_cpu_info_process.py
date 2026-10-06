@@ -19,8 +19,8 @@ from spinn_machine import CoreSubsets
 
 from spinnman.constants import CPU_INFO_BYTES
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
-from spinnman.model import CPUInfos
 from spinnman.model.cpu_info import _VCPU_PATTERN, CPUInfo, VcpuT
+from spinnman.model.cpu_infos import CPUInfos
 from spinnman.utilities.utility_functions import get_vcpu_address
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess

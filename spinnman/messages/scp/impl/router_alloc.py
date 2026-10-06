@@ -17,13 +17,18 @@ import struct
 from spinn_utilities.overrides import overrides
 
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import (
+from spinnman.messages.scp.abstract_messages.scp_request import (
     AbstractSCPRequest,
+)
+from spinnman.messages.scp.abstract_messages.scp_response import (
     AbstractSCPResponse,
 )
-from spinnman.messages.scp.enums import AllocFree, SCPCommand, SCPResult
-from spinnman.messages.sdp import SDPFlag, SDPHeader
+from spinnman.messages.scp.enums.alloc_free import AllocFree
+from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.messages.scp.scp_request_header import SCPRequestHeader
+from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.sdp.sdp_header import SDPHeader
 
 _ONE_WORD = struct.Struct("<I")
 

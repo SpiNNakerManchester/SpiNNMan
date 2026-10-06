@@ -14,9 +14,9 @@
 
 
 from spinnman.constants import N_RETRIES
-from spinnman.messages.scp.impl import GetVersion
+from spinnman.messages.scp.impl.get_version import GetVersion
 from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
-from spinnman.model import VersionInfo
+from spinnman.model.version_info import VersionInfo
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .connection_selector import ConnectionSelector

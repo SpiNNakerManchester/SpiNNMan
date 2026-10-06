@@ -17,7 +17,7 @@ API of the client for the Spalloc web service.
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
-from spinnman.connections.abstract_classes import Listenable
+from spinnman.connections.abstract_classes.listenable import Listenable
 
 
 class SpallocProxiedConnection(Listenable, metaclass=AbstractBase):

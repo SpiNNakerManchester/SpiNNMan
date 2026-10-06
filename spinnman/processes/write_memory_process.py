@@ -22,8 +22,12 @@ from numpy import uint8, uint32
 from spinn_utilities.typing.coords import XYP
 
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl import CheckOKResponse, WriteLink, WriteMemory
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
+from spinnman.messages.scp.impl.write_link import WriteLink
+from spinnman.messages.scp.impl.write_memory import WriteMemory
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 

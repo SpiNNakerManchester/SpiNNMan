@@ -15,7 +15,7 @@
 import unittest
 
 from spinnman.config_setup import unittest_setup
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.impl import GetVersion
 
 

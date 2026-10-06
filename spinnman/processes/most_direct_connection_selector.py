@@ -15,9 +15,13 @@
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
 
-from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.data import SpiNNManDataView
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.connections.udp_packet_connections.scamp_connection import (
+    SCAMPConnection,
+)
+from spinnman.data.spinnman_data_view import SpiNNManDataView
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
 
 from .connection_selector import ConnectionSelector
 

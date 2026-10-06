@@ -16,11 +16,15 @@ from typing import Generic, TypeVar
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
-from spinnman.connections.udp_packet_connections import (
+from spinnman.connections.udp_packet_connections.bmp_connection import (
     BMPConnection,
+)
+from spinnman.connections.udp_packet_connections.scamp_connection import (
     SCAMPConnection,
 )
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
 
 #: Type of connections selected between.
 #: :meta private:

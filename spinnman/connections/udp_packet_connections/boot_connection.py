@@ -15,7 +15,9 @@
 import time
 
 from spinnman.constants import UDP_BOOT_CONNECTION_DEFAULT_PORT
-from spinnman.messages.spinnaker_boot import SpinnakerBootMessage
+from spinnman.messages.spinnaker_boot.spinnaker_boot_message import (
+    SpinnakerBootMessage,
+)
 
 from .udp_connection import UDPConnection
 

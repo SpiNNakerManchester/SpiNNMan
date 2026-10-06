@@ -29,22 +29,25 @@ from spinn_machine import (
 )
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 
-from spinnman.connections.abstract_classes import Connection
-from spinnman.connections.udp_packet_connections import (
+from spinnman.connections.abstract_classes.connection import Connection
+from spinnman.connections.udp_packet_connections.scamp_connection import (
     SCAMPConnection,
+)
+from spinnman.connections.udp_packet_connections.sdp_connection import (
     SDPConnection,
 )
-from spinnman.messages.scp.enums import Signal
-from spinnman.messages.sdp import SDPMessage
-from spinnman.model import (
-    CPUInfos,
-    DiagnosticFilter,
-    IOBuffer,
-    RouterDiagnostics,
-    VersionInfo,
+from spinnman.messages.scp.enums.signal import Signal
+from spinnman.messages.sdp.sdp_message import SDPMessage
+from spinnman.model.cpu_infos import CPUInfos
+from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.model.enums.cpu_state import CPUState
+from spinnman.model.enums.user_registers import UserRegister
+from spinnman.model.io_buffer import IOBuffer
+from spinnman.model.router_diagnostics import RouterDiagnostics
+from spinnman.model.version_info import VersionInfo
+from spinnman.processes.most_direct_connection_selector import (
+    MostDirectConnectionSelector,
 )
-from spinnman.model.enums import CPUState, UserRegister
-from spinnman.processes import MostDirectConnectionSelector
 
 
 class Transceiver:

@@ -22,7 +22,7 @@ from .scp_response import AbstractSCPResponse
 
 if TYPE_CHECKING:
     from spinnman.messages.scp.scp_request_header import SCPRequestHeader
-    from spinnman.messages.sdp import SDPHeader
+    from spinnman.messages.sdp.sdp_header import SDPHeader
 #: :meta private:
 R = TypeVar("R", bound=AbstractSCPResponse)
 

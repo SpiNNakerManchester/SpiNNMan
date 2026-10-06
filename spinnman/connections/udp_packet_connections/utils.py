@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinnman.messages.sdp import SDPHeader
+from spinnman.messages.sdp.sdp_header import SDPHeader
 
 
 # Kept for spalloc_server to use

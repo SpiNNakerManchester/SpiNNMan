@@ -16,11 +16,14 @@ from collections.abc import Mapping
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
-from spinnman.messages.sdp import SDPFlag, SDPHeader
+from spinnman.messages.scp.scp_request_header import SCPRequestHeader
+from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.sdp.sdp_header import SDPHeader
 
 
 class SetLED(AbstractSCPRequest[CheckOKResponse]):

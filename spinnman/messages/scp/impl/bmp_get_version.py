@@ -14,14 +14,18 @@
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest,
+from spinnman.messages.scp.abstract_messages.bmp_request import (
     BMPRequest,
+)
+from spinnman.messages.scp.abstract_messages.bmp_response import (
     BMPResponse,
 )
-from spinnman.messages.scp.enums import SCPCommand
-from spinnman.model import VersionInfo
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.scp_request_header import SCPRequestHeader
+from spinnman.model.version_info import VersionInfo
 
 
 class BMPGetVersion(BMPRequest['_BMPVersion']):

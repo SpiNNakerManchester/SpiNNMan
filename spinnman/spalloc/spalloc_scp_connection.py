@@ -17,10 +17,15 @@ import struct
 from spinn_utilities.abstract_base import AbstractBase
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPResult
-from spinnman.messages.sdp import SDPFlag, SDPMessage
+from spinnman.connections.udp_packet_connections.scamp_connection import (
+    SCAMPConnection,
+)
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.enums.scp_result import SCPResult
+from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.sdp.sdp_message import SDPMessage
 
 from .spalloc_proxied_connection import SpallocProxiedConnection
 

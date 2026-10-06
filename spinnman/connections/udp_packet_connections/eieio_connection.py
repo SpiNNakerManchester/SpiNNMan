@@ -17,12 +17,14 @@ from collections.abc import Callable
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.abstract_classes import Listenable
-from spinnman.messages.eieio import (
-    AbstractEIEIOMessage,
+from spinnman.connections.abstract_classes.listenable import Listenable
+from spinnman.messages.eieio.create_eieio_command import (
     read_eieio_command_message,
+)
+from spinnman.messages.eieio.create_eieio_data import (
     read_eieio_data_message,
 )
+from spinnman.messages.eieio.eieio_message import AbstractEIEIOMessage
 
 from .udp_connection import UDPConnection
 

@@ -18,8 +18,8 @@ from typing import cast
 
 from spinn_machine import Chip, CoreSubsets, Link, Machine
 
-from spinnman.data import SpiNNManDataView
-from spinnman.messages.scp.impl import AppCopyRun
+from spinnman.data.spinnman_data_view import SpiNNManDataView
+from spinnman.messages.scp.impl.app_copy_run import AppCopyRun
 from spinnman.processes.connection_selector import ConnectionSelector
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess

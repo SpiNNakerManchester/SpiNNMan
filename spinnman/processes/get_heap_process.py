@@ -20,8 +20,10 @@ from spinn_utilities.typing.coords import XY, XYP
 
 from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-from spinnman.model import HeapElement
+from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
+    SystemVariableDefinition,
+)
+from spinnman.model.heap_element import HeapElement
 from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess,
 )

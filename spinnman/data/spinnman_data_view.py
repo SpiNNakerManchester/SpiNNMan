@@ -23,9 +23,14 @@ from spinn_machine.data import MachineDataView
 from spinnman.utilities.appid_tracker import AppIdTracker
 
 if TYPE_CHECKING:
-    from spinnman.processes import MostDirectConnectionSelector
-    from spinnman.spalloc import MachineAllocationController, SpallocJob
-    from spinnman.transceiver import Transceiver
+    from spinnman.processes.most_direct_connection_selector import (
+        MostDirectConnectionSelector,
+    )
+    from spinnman.spalloc.machine_allocation_controller import (
+        MachineAllocationController,
+    )
+    from spinnman.spalloc.spalloc_job import SpallocJob
+    from spinnman.transceiver.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 # pylint: disable=protected-access

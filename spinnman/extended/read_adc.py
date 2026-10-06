@@ -14,14 +14,15 @@
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import (
+from spinnman.messages.scp.abstract_messages.bmp_request import BMPRequest
+from spinnman.messages.scp.abstract_messages.bmp_response import BMPResponse
+from spinnman.messages.scp.abstract_messages.scp_request import (
     AbstractSCPRequest,
-    BMPRequest,
-    BMPResponse,
 )
-from spinnman.messages.scp.enums import BMPInfo, SCPCommand
-from spinnman.model import ADCInfo
+from spinnman.messages.scp.enums.bmp_info import BMPInfo
+from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.scp_request_header import SCPRequestHeader
+from spinnman.model.adc_info import ADCInfo
 
 
 class ReadADC(BMPRequest['_SCPReadADCResponse']):

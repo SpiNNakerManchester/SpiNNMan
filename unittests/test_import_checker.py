@@ -33,4 +33,5 @@ class TestImportChecker(unittest.TestCase):
         repo_dir = os.path.dirname(unittest_dir)
         code_dir = os.path.join(repo_dir, "spinnman")
         checker = DirChecker(code_dir)
-        self.assertEqual(checker.check_dir(), 0)
+        self.assertEqual(checker.check_dir(), 0,
+                         "Checking for imports from init files")

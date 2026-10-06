@@ -19,7 +19,7 @@ import time
 from collections.abc import Iterable
 from typing import Any
 
-from spinnman.data import SpiNNManDataView
+from spinnman.data.spinnman_data_view import SpiNNManDataView
 from spinnman.exceptions import SpinnmanIOException
 
 from .spinnaker_boot_message import SpinnakerBootMessage
