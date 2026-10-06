@@ -21,9 +21,7 @@ from spinnman.connections.udp_packet_connections import (
     SCAMPConnection,
 )
 
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 #: Type of connections selected between.
 #: :meta private:

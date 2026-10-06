@@ -17,9 +17,7 @@ import functools
 from spinnman.messages.scp.impl.sdram_alloc import SDRAMAlloc, _AllocResponse
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 
 class MallocSDRAMProcess(AbstractMultiConnectionProcess[_AllocResponse]):
