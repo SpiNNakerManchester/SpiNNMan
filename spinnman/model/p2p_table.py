@@ -15,7 +15,7 @@
 import struct
 from collections.abc import Iterable
 
-from spinnman.model.enums import P2PTableRoute
+from spinnman.model.enums.p2p_table_route import P2PTableRoute
 
 _ONE_WORD = struct.Struct("<I")
 

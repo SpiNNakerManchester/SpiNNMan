@@ -16,7 +16,7 @@ import struct
 
 from spinn_machine.machine import Machine
 
-from spinnman.model.enums import CPUState
+from spinnman.model.enums.cpu_state import CPUState
 
 _THREE_WORDS = struct.Struct("<3I")
 _TWO_BYTES = struct.Struct("<BB")

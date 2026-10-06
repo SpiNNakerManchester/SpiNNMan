@@ -41,9 +41,10 @@ from spinnman.exceptions import (
     SpallocBoardUnavailableException,
     SpinnmanUnsupportedOperationException,
 )
-from spinnman.spalloc import is_server_address
 from spinnman.spalloc.spalloc_allocator import spalloc_allocate_job
-from spinnman.transceiver import Transceiver, transceiver_generator
+from spinnman.spalloc.utils import is_server_address
+from spinnman.transceiver.transceiver import Transceiver
+from spinnman.transceiver.transceiver_factory import transceiver_generator
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

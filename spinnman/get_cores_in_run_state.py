@@ -25,8 +25,11 @@ from spinn_machine import CoreSubset, CoreSubsets
 
 from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
-from spinnman.model.enums import CPUState
-from spinnman.transceiver import Transceiver, create_transceiver_from_hostname
+from spinnman.model.enums.cpu_state import CPUState
+from spinnman.transceiver.transceiver import Transceiver
+from spinnman.transceiver.transceiver_factory import (
+    create_transceiver_from_hostname,
+)
 
 SCAMP_ID = 0
 IGNORED_IDS = {SCAMP_ID, 16}  # WHY 16?

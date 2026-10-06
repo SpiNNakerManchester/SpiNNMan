@@ -21,7 +21,7 @@ from spinn_utilities.log import FormatAdapter
 
 from spinn_machine import Chip, Machine
 
-from spinnman.connections.abstract_classes import Connection
+from spinnman.connections.abstract_classes.connection import Connection
 
 logger = FormatAdapter(logging.getLogger(__name__))
 _REPORT_NAME = "machine_structure.rpt"
