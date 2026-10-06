@@ -21,9 +21,7 @@ from spinnman.constants import UDP_MESSAGE_MAX_SIZE
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 # There are 1024 entries in a routing table
 _N_ENTRIES = 1024

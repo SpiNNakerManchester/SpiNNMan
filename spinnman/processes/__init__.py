@@ -13,12 +13,10 @@
 # limitations under the License.
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
 from .application_copy_run_process import ApplicationCopyRunProcess
 from .application_run_process import ApplicationRunProcess
 from .clear_routes_process import ClearRoutesProcess
+from .connection_selector import ConnectionSelector
 from .fixed_connection_selector import FixedConnectionSelector
 from .get_cpu_info_process import GetCPUInfoProcess
 from .get_exclude_cpu_info_process import GetExcludeCPUInfoProcess

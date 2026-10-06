@@ -52,9 +52,7 @@ from spinnman.model import ChipSummaryInfo, P2PTable
 from spinnman.model.enums import CPUState
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

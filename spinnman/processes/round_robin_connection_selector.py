@@ -17,9 +17,7 @@ from spinn_utilities.overrides import overrides
 
 from spinnman.connections.udp_packet_connections import SCAMPConnection
 
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 
 class RoundRobinConnectionSelector(ConnectionSelector):

@@ -18,9 +18,7 @@ from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinnman.model import RouterDiagnostics
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 _N_REGISTERS = 16
 _ONE_WORD = struct.Struct("<I")
