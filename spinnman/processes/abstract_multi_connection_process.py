@@ -41,9 +41,7 @@ from spinnman.messages.scp.abstract_messages import (
 )
 from spinnman.messages.scp.enums.scp_result import SCPResult
 
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 #: Type of responses.
 #: :meta private:

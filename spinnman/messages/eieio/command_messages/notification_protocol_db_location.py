@@ -66,7 +66,7 @@ class NotificationProtocolDatabaseLocation(EIEIOCommandMessage):
             offset: int) -> 'NotificationProtocolDatabaseLocation':
         database_path = None
         if len(data) - offset > 0:
-            raise Exception(
+            raise NotImplementedError(
                 "https://github.com/SpiNNakerManchester/SpiNNMan/issues/424")
             # database_path = data[offset:]
         return NotificationProtocolDatabaseLocation(database_path)

@@ -89,9 +89,9 @@ class _SpiNNManDataModel:
         if self._transceiver:
             try:
                 self._transceiver.close()
-            except Exception as ex:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except
                 logger.exception(
-                    f"Error {ex} when closing the transceiver ignored")
+                    "Error closing the transceiver ignored")
         self._transceiver: Transceiver | None = None
 
     def _soft_reset(self) -> None:

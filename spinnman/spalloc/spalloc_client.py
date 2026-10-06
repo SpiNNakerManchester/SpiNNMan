@@ -673,10 +673,7 @@ class _SpallocJob(SessionAware, SpallocJob):
             (int(x), int(y)): str(host)
             for ((x, y), host) in r.json()["connections"]
         }
-        if (0, 0) in unproxied:
-            self.__root = unproxied[(0, 0)]
-        else:
-            self.__root = "No 0,0"
+        self.__root = unproxied.get((0, 0), "No 0,0")
         return unproxied
 
     @property
@@ -819,8 +816,8 @@ class _SpallocJob(SessionAware, SpallocJob):
         try:
             while self.__keepalive():
                 time.sleep(KEEP_ALIVE_PERIOND / 2)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.exception(ex)
+        except Exception:  # pylint: disable=broad-except
+            logger.exception("Keep alive failed")
 
     @overrides(SpallocJob.where_is_machine)
     def where_is_machine(self, x: int, y: int) -> tuple[int, int, int] | None:

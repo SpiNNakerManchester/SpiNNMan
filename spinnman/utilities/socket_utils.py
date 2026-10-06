@@ -135,7 +135,7 @@ def receive_message(
     try:
         sock.settimeout(timeout)
         return sock.recv(size)
-    except socket.timeout as e:
+    except TimeoutError as e:
         raise SpinnmanTimeoutException("receive", timeout) from e
     except Exception as e:  # pylint: disable=broad-except
         raise SpinnmanIOException(f"Error receiving: {e}") from e
@@ -152,7 +152,7 @@ def receive_message_and_address(
     try:
         sock.settimeout(timeout)
         return sock.recvfrom(size)
-    except socket.timeout as e:
+    except TimeoutError as e:
         raise SpinnmanTimeoutException("receive", timeout) from e
     except Exception as e:  # pylint: disable=broad-except
         raise SpinnmanIOException(f"Error receiving: {e}") from e

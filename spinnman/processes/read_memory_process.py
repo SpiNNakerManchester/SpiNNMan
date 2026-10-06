@@ -23,9 +23,7 @@ from spinnman.messages.scp.impl import ReadLink, ReadMemory
 from spinnman.messages.scp.impl.read_memory import Response
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 
 class ReadMemoryProcess(AbstractMultiConnectionProcess[Response]):

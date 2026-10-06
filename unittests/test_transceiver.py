@@ -19,12 +19,12 @@ from parameterized import parameterized
 
 from spinn_utilities.config_holder import set_config
 
-from spinn_machine.version import ALL_BOARD_TYPES
+from spinn_machine.version import ALL_BOARD_TYPES, SPIN1_BOARDS
 
-from spinnman import constants
 from spinnman.board_test_configuration import BoardTestConfiguration
 from spinnman.config_setup import unittest_setup
 from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.constants import LOCAL_HOST, SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.data import SpiNNManDataView
 from spinnman.data.spinnman_data_writer import SpiNNManDataWriter
 from spinnman.extended.extended_transceiver import ExtendedTransceiver
@@ -39,7 +39,6 @@ from spinnman.transceiver import (
 
 
 class MockExtendedTransceiver(MockableTransceiver, ExtendedTransceiver):
-    pass
 
     def _where_is_xy(self, x: int, y: int) -> None:
         return None
@@ -51,23 +50,22 @@ class TestTransceiver(unittest.TestCase):
         unittest_setup()
         self.board_config = BoardTestConfiguration()
 
-    @parameterized.expand(ALL_BOARD_TYPES)
-    def test_create_new_transceiver_to_board(
-            self, _: str, ver_num: str) -> None:
-        set_config("Machine", "version", ver_num)
-        self.board_config.set_up_remote_board()
-        connections = []
-        connections.append(SCAMPConnection(
-            remote_host=self.board_config.remotehost))
-        trans = create_transceiver_from_connections(connections=connections)
-        trans.get_connections() == connections
-        trans.close()
-
-    def test_create_new_transceiver_one_connection(self) -> None:
+    def test_create_new_transceiver_to_board(self) -> None:
         self.board_config.set_up_remote_board()
         connections = set()
         connections.add(SCAMPConnection(
             remote_host=self.board_config.remotehost))
+        trans = create_transceiver_from_connections(connections=connections)
+        self.assertSetEqual(trans.get_connections(), connections)
+        trans.close()
+
+    # No Spin2 board Transceiver available
+    @parameterized.expand(SPIN1_BOARDS)
+    def test_create_new_transceiver_one_connection(
+            self, _: str, ver_num: str) -> None:
+        set_config("Machine", "version", ver_num)
+        connections = set()
+        connections.add(SCAMPConnection(remote_host=LOCAL_HOST))
         trans = create_transceiver_from_connections(connections=connections)
         self.assertSetEqual(connections, trans.get_connections())
         trans.close()
@@ -93,6 +91,7 @@ class TestTransceiver(unittest.TestCase):
 
     @parameterized.expand(ALL_BOARD_TYPES)
     def test_set_watch_dog(self, _: str, ver_num: str) -> None:
+
         set_config("Machine", "version", ver_num)
         connections = []
         connections.append(SCAMPConnection(remote_host=None))
@@ -116,7 +115,7 @@ class TestTransceiver(unittest.TestCase):
                 assert written_memory[write_item][0] == x
                 assert written_memory[write_item][1] == y
                 assert written_memory[write_item][2] == (
-                    constants.SYSTEM_VARIABLE_BASE_ADDRESS +
+                    SYSTEM_VARIABLE_BASE_ADDRESS +
                     SystemVariableDefinition.software_watchdog_count.offset)
                 expected_data = struct.pack("B", expected_writes[write])
                 assert written_memory[write_item][3] == expected_data

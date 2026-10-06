@@ -23,9 +23,7 @@ from spinnman.messages.scp.impl import RouterAlloc, RouterInit
 from spinnman.messages.scp.impl.router_alloc import RouterAllocResponse
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 from .write_memory_process import WriteMemoryProcess
 
 _ROUTE_PATTERN = struct.Struct("<H2xIII")
