@@ -26,9 +26,7 @@ from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess,
 )
 
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 HEAP_ADDRESS = SystemVariableDefinition.sdram_heap_address
 _ADDRESS = struct.Struct("<I")

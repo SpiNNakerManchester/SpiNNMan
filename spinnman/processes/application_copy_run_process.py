@@ -20,10 +20,7 @@ from spinn_machine import Chip, CoreSubsets, Link, Machine
 
 from spinnman.data import SpiNNManDataView
 from spinnman.messages.scp.impl import AppCopyRun
-from spinnman.processes. \
-    abstract_multi_connection_process_connection_selector import (
-        ConnectionSelector,
-    )
+from spinnman.processes.connection_selector import ConnectionSelector
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 

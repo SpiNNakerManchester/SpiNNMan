@@ -19,9 +19,7 @@ from spinnman.messages.scp.impl.get_version_response import GetVersionResponse
 from spinnman.model import VersionInfo
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
-from .abstract_multi_connection_process_connection_selector import (
-    ConnectionSelector,
-)
+from .connection_selector import ConnectionSelector
 
 
 class GetVersionProcess(AbstractMultiConnectionProcess[GetVersionResponse]):
