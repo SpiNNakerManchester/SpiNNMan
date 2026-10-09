@@ -65,12 +65,12 @@ from spinnman.processes import (
     SendSingleCommandProcess,
     WriteMemoryProcess,
 )
-from spinnman.transceiver import Transceiver
 from spinnman.transceiver.base_transceiver import (
     _EXECUTABLE_ADDRESS,
     BaseTransceiver,
 )
 from spinnman.transceiver.extendable_transceiver import ExtendableTransceiver
+from spinnman.transceiver.transceiver import Transceiver
 
 _ONE_BYTE = struct.Struct("B")
 _ONE_WORD = struct.Struct("<I")

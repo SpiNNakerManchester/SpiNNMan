@@ -13,19 +13,30 @@
 # limitations under the License.
 
 from spinnman.constants import EIEIO_COMMAND_IDS
-from spinnman.messages.eieio.command_messages import (
-    EIEIOCommandHeader,
-    EIEIOCommandMessage,
-    EventStopRequest,
-    HostDataRead,
-    HostSendSequencedData,
-    NotificationProtocolDatabaseLocation,
-    PaddingRequest,
-    SpinnakerRequestBuffers,
-    SpinnakerRequestReadData,
-    StartRequests,
-    StopRequests,
-)
+from spinnman.messages.eieio.command_messages. \
+    eieio_command_header import EIEIOCommandHeader
+from spinnman.messages.eieio.command_messages. \
+    eieio_command_message import EIEIOCommandMessage
+from spinnman.messages.eieio.command_messages. \
+    event_stop_request import EventStopRequest
+from spinnman.messages.eieio.command_messages. \
+    host_data_read import HostDataRead
+from spinnman.messages.eieio.command_messages. \
+    host_send_sequenced_data import HostSendSequencedData
+from spinnman.messages.eieio.command_messages. \
+    notification_protocol_db_location import (
+        NotificationProtocolDatabaseLocation,
+    )
+from spinnman.messages.eieio.command_messages. \
+    padding_request import PaddingRequest
+from spinnman.messages.eieio.command_messages. \
+    spinnaker_request_buffers import SpinnakerRequestBuffers
+from spinnman.messages.eieio.command_messages. \
+    spinnaker_request_read_data import SpinnakerRequestReadData
+from spinnman.messages.eieio.command_messages. \
+    start_requests import StartRequests
+from spinnman.messages.eieio.command_messages. \
+    stop_requests import StopRequests
 
 
 def read_eieio_command_message(

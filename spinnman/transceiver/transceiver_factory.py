@@ -34,7 +34,7 @@ from spinnman.exceptions import SpinnmanException
 from spinnman.extended.version3transceiver import ExtendedVersion3Transceiver
 from spinnman.extended.version5transceiver import ExtendedVersion5Transceiver
 from spinnman.model.bmp_connection_data import BMPConnectionData
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 from spinnman.transceiver.version3transceiver import Version3Transceiver
 from spinnman.transceiver.version5transceiver import Version5Transceiver
 from spinnman.transceiver.virtual5transceiver import Virtual5Transceiver

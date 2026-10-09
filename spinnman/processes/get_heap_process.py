@@ -22,7 +22,9 @@ from spinnman.constants import SYSTEM_VARIABLE_BASE_ADDRESS
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 from spinnman.messages.spinnaker_boot import SystemVariableDefinition
 from spinnman.model import HeapElement
-from spinnman.processes import AbstractMultiConnectionProcess
+from spinnman.processes.abstract_multi_connection_process import (
+    AbstractMultiConnectionProcess,
+)
 
 from .connection_selector import ConnectionSelector
 
