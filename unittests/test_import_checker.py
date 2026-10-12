@@ -17,7 +17,7 @@ import sys
 import unittest
 
 from spinn_utilities.config_setup import unittest_setup
-from spinn_utilities.testing.import_checker import DirChecker
+from spinn_utilities.testing.import_checker import ImportChecker
 
 
 class TestImportChecker(unittest.TestCase):
@@ -32,6 +32,6 @@ class TestImportChecker(unittest.TestCase):
         unittest_dir = os.path.dirname(abs_class_file)
         repo_dir = os.path.dirname(unittest_dir)
         code_dir = os.path.join(repo_dir, "spinnman")
-        checker = DirChecker(code_dir)
+        checker = ImportChecker(code_dir)
         self.assertEqual(checker.check_dir(), 0,
                          "Checking for imports from init files")
