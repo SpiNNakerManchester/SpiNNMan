@@ -207,7 +207,7 @@ def __get_collab_id_from_folder(folder: str) -> dict[str, str] | None:
     Currently hacky way to get the EBRAINS collab id from the
     drive folder, replicated from the NMPI collab template.
     """
-    token = __bearer_token
+    token = __bearer_token()
     if token is None:
         return None
     ebrains_drive_client = ebrains_drive.connect(token=token)
