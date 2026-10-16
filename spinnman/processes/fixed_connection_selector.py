@@ -16,8 +16,10 @@ from typing import Any, Generic, TypeVar
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.udp_packet_connections import (
+from spinnman.connections.udp_packet_connections.bmp_connection import (
     BMPConnection,
+)
+from spinnman.connections.udp_packet_connections.scamp_connection import (
     SCAMPConnection,
 )
 

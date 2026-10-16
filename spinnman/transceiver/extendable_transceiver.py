@@ -18,8 +18,13 @@ from threading import Condition, RLock
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 from spinn_utilities.log import FormatAdapter
 
-from spinnman.connections.udp_packet_connections import BMPConnection
-from spinnman.processes import ConnectionSelector, FixedConnectionSelector
+from spinnman.connections.udp_packet_connections.bmp_connection import (
+    BMPConnection,
+)
+from spinnman.processes.connection_selector import ConnectionSelector
+from spinnman.processes.fixed_connection_selector import (
+    FixedConnectionSelector,
+)
 from spinnman.transceiver.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))

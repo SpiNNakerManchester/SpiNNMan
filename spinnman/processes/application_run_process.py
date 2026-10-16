@@ -14,7 +14,8 @@
 
 from spinn_machine.core_subsets import CoreSubsets
 
-from spinnman.messages.scp.impl import ApplicationRun, CheckOKResponse
+from spinnman.messages.scp.impl.application_run import ApplicationRun
+from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 

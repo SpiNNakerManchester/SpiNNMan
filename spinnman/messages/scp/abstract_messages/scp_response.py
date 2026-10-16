@@ -14,8 +14,8 @@
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
-from spinnman.messages.scp import SCPResponseHeader
-from spinnman.messages.sdp import SDPHeader
+from spinnman.messages.scp.scp_response_header import SCPResponseHeader
+from spinnman.messages.sdp.sdp_header import SDPHeader
 
 # The offset of the header from the start of a received packet
 # (8 bytes of SDP header)

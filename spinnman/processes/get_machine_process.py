@@ -34,22 +34,30 @@ from spinn_machine import Chip, Link, Machine, Router
 from spinn_machine.ignores import IgnoreChip, IgnoreCore, IgnoreLink
 from spinn_machine.machine_factory import machine_repair
 
-from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.connections.udp_packet_connections.scamp_connection import (
+    SCAMPConnection,
+)
 from spinnman.constants import (
     ROUTER_REGISTER_P2P_ADDRESS,
     SYSTEM_VARIABLE_BASE_ADDRESS,
 )
-from spinnman.data import SpiNNManDataView
+from spinnman.data.spinnman_data_view import SpiNNManDataView
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl import GetChipInfo, ReadLink, ReadMemory
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.impl.get_chip_info import GetChipInfo
 from spinnman.messages.scp.impl.get_chip_info_response import (
     GetChipInfoResponse,
 )
-from spinnman.messages.scp.impl.read_memory import Response
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-from spinnman.model import ChipSummaryInfo, P2PTable
-from spinnman.model.enums import CPUState
+from spinnman.messages.scp.impl.read_link import ReadLink
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
+from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
+    SystemVariableDefinition,
+)
+from spinnman.model.chip_summary_info import ChipSummaryInfo
+from spinnman.model.enums.cpu_state import CPUState
+from spinnman.model.p2p_table import P2PTable
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .connection_selector import ConnectionSelector

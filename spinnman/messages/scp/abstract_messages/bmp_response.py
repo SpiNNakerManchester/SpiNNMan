@@ -20,7 +20,8 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.enums import SCPCommand, SCPResult
+from spinnman.messages.scp.enums.scp_command import SCPCommand
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 from .scp_response import AbstractSCPResponse
 

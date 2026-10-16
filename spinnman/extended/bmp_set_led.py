@@ -16,14 +16,16 @@ from collections.abc import Iterable
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.scp.abstract_messages import (
-    AbstractSCPRequest,
+from spinnman.messages.scp.abstract_messages.bmp_request import (
     BMPRequest,
 )
-from spinnman.messages.scp.enums import SCPCommand
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
 from spinnman.messages.scp.enums.led_action import LEDAction
+from spinnman.messages.scp.enums.scp_command import SCPCommand
 from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
+from spinnman.messages.scp.scp_request_header import SCPRequestHeader
 
 
 class BMPSetLed(BMPRequest):

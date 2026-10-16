@@ -14,15 +14,19 @@
 
 import socket
 
-from spinnman.connections.udp_packet_connections import (
+from spinnman.connections.udp_packet_connections.scamp_connection import (
     SCAMPConnection,
+)
+from spinnman.connections.udp_packet_connections.udp_connection import (
     UDPConnection,
 )
 from spinnman.constants import CPU_INFO_BYTES, CPU_INFO_OFFSET, SCP_SCAMP_PORT
 from spinnman.exceptions import SpinnmanTimeoutException
-from spinnman.messages.scp.impl import IPTagSet
-from spinnman.messages.sdp import SDPFlag, SDPHeader, SDPMessage
-from spinnman.model import BMPConnectionData
+from spinnman.messages.scp.impl.iptag_set import IPTagSet
+from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.sdp.sdp_header import SDPHeader
+from spinnman.messages.sdp.sdp_message import SDPMessage
+from spinnman.model.bmp_connection_data import BMPConnectionData
 
 
 def work_out_bmp_from_machine_details(

@@ -16,7 +16,9 @@ from functools import partial
 
 from spinn_machine.tags import AbstractTag, IPTag, ReverseIPTag
 
-from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.connections.udp_packet_connections.scamp_connection import (
+    SCAMPConnection,
+)
 from spinnman.messages.scp.impl.iptag_get import IPTagGet, IPTagGetResponse
 from spinnman.messages.scp.impl.iptag_get_info import IPTagGetInfo
 from spinnman.messages.scp.impl.iptag_get_info_response import (

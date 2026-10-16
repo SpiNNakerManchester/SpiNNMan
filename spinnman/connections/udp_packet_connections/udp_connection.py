@@ -22,7 +22,8 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.ping import Ping
 
-from spinnman.connections.abstract_classes import Connection, Listenable
+from spinnman.connections.abstract_classes.connection import Connection
+from spinnman.connections.abstract_classes.listenable import Listenable
 from spinnman.exceptions import SpinnmanEOFException, SpinnmanIOException
 from spinnman.utilities.socket_utils import (
     bind_socket,

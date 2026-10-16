@@ -17,8 +17,10 @@ import struct
 from spinn_utilities.overrides import overrides
 
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
-from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.abstract_messages.scp_response import (
+    AbstractSCPResponse,
+)
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 _BYTE_SKIP_BYTE_BYTE = struct.Struct("<Bx2B")
 

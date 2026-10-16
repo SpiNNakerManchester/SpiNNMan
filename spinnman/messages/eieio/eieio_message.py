@@ -18,8 +18,12 @@ from typing import TYPE_CHECKING
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
 if TYPE_CHECKING:
-    from spinnman.messages.eieio.command_messages import EIEIOCommandHeader
-    from spinnman.messages.eieio.data_messages import EIEIODataHeader
+    from spinnman.messages.eieio.command_messages.eieio_command_header import (
+        EIEIOCommandHeader,
+    )
+    from spinnman.messages.eieio.data_messages.eieio_data_header import (
+        EIEIODataHeader,
+    )
 
 
 class AbstractEIEIOMessage(metaclass=AbstractBase):

@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from spinnman.messages.eieio.data_messages import (
+from spinnman.messages.eieio.data_messages.eieio_data_header import (
     EIEIODataHeader,
+)
+from spinnman.messages.eieio.data_messages.eieio_data_message import (
     EIEIODataMessage,
 )
 

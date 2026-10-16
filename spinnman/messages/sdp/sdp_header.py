@@ -14,7 +14,7 @@
 
 import struct
 
-from spinnman.data import SpiNNManDataView
+from spinnman.data.spinnman_data_view import SpiNNManDataView
 
 from .sdp_flag import SDPFlag
 
