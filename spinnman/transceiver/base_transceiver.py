@@ -639,7 +639,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.ensure_board_is_ready)
     def ensure_board_is_ready(
             self, n_retries: int = 5,
-            extra_boot_values: dict[SystemVariableDefinition, int | bytes] | None
+            extra_boot_values:
+            dict[SystemVariableDefinition, int | bytes] | None
             = None) -> None:
         logger.info("Working out if machine is booted")
         if self._machine_off:
@@ -699,7 +700,8 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     def _try_to_find_scamp_and_boot(
             self, tries_to_go: int,
-            extra_boot_values: dict[SystemVariableDefinition, int | bytes] | None
+            extra_boot_values:
+            dict[SystemVariableDefinition, int | bytes] | None
             ) -> VersionInfo | None:
         """
         Try to detect if SCAMP is running, and if not, boot the machine.

@@ -343,7 +343,7 @@ class Session:
     def websocket(
             self, url: str, header: dict | None = None,
             cookie: str | None = None,
-            **kwargs: object) -> websocket.WebSocket:
+            **kwargs: Any) -> websocket.WebSocket:
         """
         Create a websocket that uses the session credentials to establish
         itself.
