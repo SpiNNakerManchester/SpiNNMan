@@ -41,7 +41,7 @@ class Virtual5Transceiver(Version5Transceiver):
 
     @overrides(Version5Transceiver._boot_board)
     def _boot_board(self, extra_boot_values: dict[
-            SystemVariableDefinition, object] | None = None) -> None:
+            SystemVariableDefinition, int | bytes] | None = None) -> None:
         try:
             super()._boot_board(extra_boot_values)
         except SpinnmanIOException:

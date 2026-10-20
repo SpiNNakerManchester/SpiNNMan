@@ -577,7 +577,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
         raise NotImplementedError
 
     def _boot_board(self, extra_boot_values: dict[
-                SystemVariableDefinition, object] | None = None) -> None:
+                SystemVariableDefinition, int | bytes] | None = None) -> None:
         """
         Attempt to boot the board. No check is performed to see if the
         board is already booted.
@@ -639,7 +639,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
     @overrides(Transceiver.ensure_board_is_ready)
     def ensure_board_is_ready(
             self, n_retries: int = 5,
-            extra_boot_values: dict[SystemVariableDefinition, object] | None
+            extra_boot_values: dict[SystemVariableDefinition, int | bytes] | None
             = None) -> None:
         logger.info("Working out if machine is booted")
         if self._machine_off:
@@ -699,7 +699,7 @@ class BaseTransceiver(ExtendableTransceiver, metaclass=AbstractBase):
 
     def _try_to_find_scamp_and_boot(
             self, tries_to_go: int,
-            extra_boot_values: dict[SystemVariableDefinition, object] | None
+            extra_boot_values: dict[SystemVariableDefinition, int | bytes] | None
             ) -> VersionInfo | None:
         """
         Try to detect if SCAMP is running, and if not, boot the machine.
