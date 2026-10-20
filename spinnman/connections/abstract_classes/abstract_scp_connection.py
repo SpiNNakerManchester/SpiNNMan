@@ -14,8 +14,10 @@
 
 from spinn_utilities.abstract_base import AbstractBase, abstractmethod
 
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 from .connection import Connection
 

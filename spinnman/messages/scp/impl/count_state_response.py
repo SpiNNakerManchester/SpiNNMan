@@ -17,8 +17,10 @@ import struct
 from spinn_utilities.overrides import overrides
 
 from spinnman.exceptions import SpinnmanUnexpectedResponseCodeException
-from spinnman.messages.scp.abstract_messages import AbstractSCPResponse
-from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPResponse,
+)
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 _ONE_WORD = struct.Struct("<I")
 

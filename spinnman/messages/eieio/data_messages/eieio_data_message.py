@@ -21,11 +21,9 @@ from spinnman.exceptions import (
     SpinnmanInvalidPacketException,
     SpinnmanInvalidParameterException,
 )
-from spinnman.messages.eieio import (
-    AbstractEIEIOMessage,
-    EIEIOPrefix,
-    EIEIOType,
-)
+from spinnman.messages.eieio.eieio_message import AbstractEIEIOMessage
+from spinnman.messages.eieio.eieio_prefix import EIEIOPrefix
+from spinnman.messages.eieio.eieio_type import EIEIOType
 
 from .abstract_data_element import AbstractDataElement
 from .eieio_data_header import EIEIODataHeader

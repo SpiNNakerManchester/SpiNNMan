@@ -15,7 +15,9 @@
 import struct
 from collections.abc import Iterable
 
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
+from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
+    SystemVariableDefinition,
+)
 
 
 class ChipInfo:

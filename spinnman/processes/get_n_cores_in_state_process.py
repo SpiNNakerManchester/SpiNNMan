@@ -15,9 +15,9 @@
 from collections.abc import Iterable
 
 from spinnman.messages.scp.enums.scp_result import SCPResult
-from spinnman.messages.scp.impl import CountState
+from spinnman.messages.scp.impl.count_state import CountState
 from spinnman.messages.scp.impl.count_state_response import CountStateResponse
-from spinnman.model.enums import CPUState
+from spinnman.model.enums.cpu_state import CPUState
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .connection_selector import ConnectionSelector

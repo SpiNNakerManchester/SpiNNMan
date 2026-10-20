@@ -21,7 +21,9 @@ from typing_extensions import Self
 
 from spinn_utilities.abstract_base import abstractmethod
 
-from spinnman.connections.udp_packet_connections import UDPConnection
+from spinnman.connections.udp_packet_connections.udp_connection import (
+    UDPConnection,
+)
 from spinnman.constants import SCP_SCAMP_PORT
 from spinnman.model.diagnostic_filter import DiagnosticFilter
 from spinnman.transceiver.transceiver import Transceiver

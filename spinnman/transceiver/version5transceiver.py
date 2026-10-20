@@ -16,8 +16,8 @@ from collections.abc import Iterable
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.abstract_classes import Connection
-from spinnman.data import SpiNNManDataView
+from spinnman.connections.abstract_classes.connection import Connection
+from spinnman.data.spinnman_data_view import SpiNNManDataView
 from spinnman.transceiver.base_transceiver import BaseTransceiver
 
 

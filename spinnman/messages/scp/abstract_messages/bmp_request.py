@@ -15,8 +15,9 @@
 from collections.abc import Iterable
 from typing import Generic, TypeAlias, TypeVar
 
-from spinnman.messages.scp import SCPRequestHeader
-from spinnman.messages.sdp import SDPFlag, SDPHeader
+from spinnman.messages.scp.scp_request_header import SCPRequestHeader
+from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.sdp.sdp_header import SDPHeader
 
 from .bmp_response import BMPResponse
 from .scp_request import AbstractSCPRequest
