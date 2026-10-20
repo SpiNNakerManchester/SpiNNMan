@@ -16,10 +16,14 @@ import struct
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.abstract_classes import AbstractSCPConnection
+from spinnman.connections.abstract_classes.abstract_scp_connection import (
+    AbstractSCPConnection,
+)
 from spinnman.constants import SCP_SCAMP_PORT
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 from .sdp_connection import SDPConnection
 

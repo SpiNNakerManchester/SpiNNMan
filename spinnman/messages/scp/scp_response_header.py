@@ -14,7 +14,7 @@
 
 import struct
 
-from spinnman.messages.scp.enums import SCPResult
+from spinnman.messages.scp.enums.scp_result import SCPResult
 
 _TWO_SHORTS = struct.Struct("<2H")
 

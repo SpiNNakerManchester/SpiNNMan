@@ -15,7 +15,7 @@
 import struct
 
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
-from spinnman.model import RouterDiagnostics
+from spinnman.model.router_diagnostics import RouterDiagnostics
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .connection_selector import ConnectionSelector

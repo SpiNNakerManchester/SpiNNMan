@@ -18,7 +18,7 @@ from enum import Enum
 
 from typing_extensions import Self
 
-from spinnman.model.enums import CPUState
+from .cpu_state import CPUState
 
 
 class ExecutableType(Enum):

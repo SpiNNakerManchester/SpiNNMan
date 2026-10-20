@@ -17,7 +17,7 @@ import struct
 from spinn_utilities.overrides import overrides
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.eieio import EIEIOType
+from spinnman.messages.eieio.eieio_type import EIEIOType
 
 from .abstract_data_element import AbstractDataElement
 

@@ -15,8 +15,10 @@
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.messages.eieio import AbstractEIEIOMessage
-from spinnman.messages.eieio.command_messages import EIEIOCommandHeader
+from spinnman.messages.eieio.command_messages.eieio_command_header import (
+    EIEIOCommandHeader,
+)
+from spinnman.messages.eieio.eieio_message import AbstractEIEIOMessage
 
 
 class EIEIOCommandMessage(AbstractEIEIOMessage):

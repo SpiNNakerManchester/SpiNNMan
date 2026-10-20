@@ -16,13 +16,13 @@ import math
 from typing import BinaryIO
 
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
-from spinnman.messages.scp.impl import (
-    FloodFillData,
-    FloodFillEnd,
-    FloodFillStart,
-)
-from spinnman.processes import (
+from spinnman.messages.scp.impl.flood_fill_data import FloodFillData
+from spinnman.messages.scp.impl.flood_fill_end import FloodFillEnd
+from spinnman.messages.scp.impl.flood_fill_start import FloodFillStart
+from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess,
+)
+from spinnman.processes.connection_selector import (
     ConnectionSelector,
 )
 

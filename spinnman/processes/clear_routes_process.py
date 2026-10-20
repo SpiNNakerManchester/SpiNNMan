@@ -15,8 +15,8 @@
 from spinn_utilities.progress_bar import ProgressBar
 from spinn_utilities.typing.coords import XY
 
-from spinnman.messages.scp.impl import RouterClear
 from spinnman.messages.scp.impl.check_ok_response import CheckOKResponse
+from spinnman.messages.scp.impl.router_clear import RouterClear
 from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess,
 )

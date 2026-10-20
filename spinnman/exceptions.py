@@ -22,11 +22,15 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from spinnman.connections.udp_packet_connections import SCAMPConnection
-    from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-    from spinnman.messages.scp.enums import SCPResult
-    from spinnman.model import CPUInfos
-    from spinnman.model.enums import CPUState
+    from spinnman.connections.udp_packet_connections.scamp_connection import (
+        SCAMPConnection,
+    )
+    from spinnman.messages.scp.abstract_messages.scp_request import (
+        AbstractSCPRequest,
+    )
+    from spinnman.messages.scp.enums.scp_result import SCPResult
+    from spinnman.model.cpu_infos import CPUInfos
+    from spinnman.model.enums.cpu_state import CPUState
 
 T = TypeVar("T")
 

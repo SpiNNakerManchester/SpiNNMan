@@ -19,8 +19,11 @@ from spinn_machine import Router
 from spinn_machine.multicast_routing_entry import MulticastRoutingEntry
 
 from spinnman.exceptions import SpinnmanInvalidParameterException
-from spinnman.messages.scp.impl import RouterAlloc, RouterInit
-from spinnman.messages.scp.impl.router_alloc import RouterAllocResponse
+from spinnman.messages.scp.impl.router_alloc import (
+    RouterAlloc,
+    RouterAllocResponse,
+)
+from spinnman.messages.scp.impl.router_init import RouterInit
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .connection_selector import ConnectionSelector
