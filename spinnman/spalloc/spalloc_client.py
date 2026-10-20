@@ -24,7 +24,6 @@ from collections.abc import Callable, Iterable, Mapping
 from logging import getLogger
 from time import sleep
 from typing import (
-    Any,
     Final,
     TypeAlias,
     cast,
@@ -873,7 +872,7 @@ class _ProxiedConnection(metaclass=AbstractBase):
         raise NotImplementedError
 
     def _call(self, protocol: ProxyProtocol, packer: struct.Struct,
-              unpacker: struct.Struct, *args: int) -> tuple[Any, ...]:
+              unpacker: struct.Struct, *args: int) -> tuple[int, ...]:
         """
         Do a synchronous call.
 
