@@ -89,7 +89,7 @@ KEEP_ALIVE_PERIOND = 120
 _WSCB: Final['TypeAlias'] = Callable[[bytes | None], None]
 
 
-def fix_url(url: Any) -> str:
+def fix_url(url: str) -> str:
     """
     Makes sure the url is the correct format.
 
@@ -184,8 +184,8 @@ class SpallocClient(AbstractContextManager):
         v = cast(JsonObject, obj["version"])
         self.version = Version(
             f"{v['major-version']}.{v['minor-version']}.{v['revision']}")
-        self.__machines_url = fix_url(obj["machines-ref"])
-        self.__jobs_url = fix_url(obj["jobs-ref"])
+        self.__machines_url = fix_url(str(obj["machines-ref"]))
+        self.__jobs_url = fix_url(str(obj["jobs-ref"]))
         self.__group = group
         self.__collab = collab
         self.__nmpi_job = nmpi_job
