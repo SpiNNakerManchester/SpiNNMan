@@ -16,12 +16,22 @@ from __future__ import annotations
 from enum import Enum
 from typing import TypeVar
 
-from spinnman.model.enums import (
+from spinnman.model.enums.diagnostic_filter_default_routing_status import (
     DiagnosticFilterDefaultRoutingStatus,
+)
+from spinnman.model.enums.diagnostic_filter_destination import (
     DiagnosticFilterDestination,
+)
+from spinnman.model.enums.diagnostic_filter_emergency_routing_status import (
     DiagnosticFilterEmergencyRoutingStatus,
+)
+from spinnman.model.enums.diagnostic_filter_packet_type import (
     DiagnosticFilterPacketType,
+)
+from spinnman.model.enums.diagnostic_filter_payload_status import (
     DiagnosticFilterPayloadStatus,
+)
+from spinnman.model.enums.diagnostic_filter_source import (
     DiagnosticFilterSource,
 )
 

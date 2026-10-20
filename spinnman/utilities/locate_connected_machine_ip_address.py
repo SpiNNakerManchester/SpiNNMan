@@ -21,7 +21,9 @@ from types import FrameType
 
 from typing_extensions import Never
 
-from spinnman.connections.udp_packet_connections import IPAddressesConnection
+from spinnman.connections.udp_packet_connections.ip_address_connection import (
+    IPAddressesConnection,
+)
 
 
 def locate_connected_machine(handler: Callable[[str, float], bool]) -> None:

@@ -28,15 +28,19 @@ from typing_extensions import Self
 
 from spinn_utilities.log import FormatAdapter
 
-from spinnman.connections import SCPRequestPipeLine
-from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.connections.scp_request_pipeline import SCPRequestPipeLine
+from spinnman.connections.udp_packet_connections.scamp_connection import (
+    SCAMPConnection,
+)
 from spinnman.constants import N_RETRIES, SCP_TIMEOUT
 from spinnman.exceptions import (
     SpinnmanGenericProcessException,
     SpinnmanGroupedProcessException,
 )
-from spinnman.messages.scp.abstract_messages import (
+from spinnman.messages.scp.abstract_messages.scp_request import (
     AbstractSCPRequest,
+)
+from spinnman.messages.scp.abstract_messages.scp_response import (
     AbstractSCPResponse,
 )
 from spinnman.messages.scp.enums.scp_result import SCPResult

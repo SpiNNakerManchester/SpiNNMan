@@ -30,15 +30,17 @@ from spinn_utilities.log import FormatAdapter
 from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
 
-from spinnman.connections.udp_packet_connections import SCAMPConnection
-from spinnman.constants import SCP_SCAMP_PORT
-from spinnman.spalloc import (
-    MachineAllocationController,
-    SpallocClient,
-    SpallocJob,
-    SpallocState,
+from spinnman.connections.udp_packet_connections.scamp_connection import (
+    SCAMPConnection,
 )
-from spinnman.transceiver import Transceiver
+from spinnman.constants import SCP_SCAMP_PORT
+from spinnman.spalloc.machine_allocation_controller import (
+    MachineAllocationController,
+)
+from spinnman.spalloc.spalloc_client import SpallocClient
+from spinnman.spalloc.spalloc_job import SpallocJob
+from spinnman.spalloc.spalloc_state import SpallocState
+from spinnman.transceiver.transceiver import Transceiver
 
 logger = FormatAdapter(logging.getLogger(__name__))
 

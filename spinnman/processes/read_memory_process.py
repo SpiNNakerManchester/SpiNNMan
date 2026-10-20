@@ -18,9 +18,11 @@ from collections.abc import Callable
 from spinn_utilities.typing.coords import XYP
 
 from spinnman.constants import UDP_MESSAGE_MAX_SIZE
-from spinnman.messages.scp.abstract_messages import AbstractSCPRequest
-from spinnman.messages.scp.impl import ReadLink, ReadMemory
-from spinnman.messages.scp.impl.read_memory import Response
+from spinnman.messages.scp.abstract_messages.scp_request import (
+    AbstractSCPRequest,
+)
+from spinnman.messages.scp.impl.read_link import ReadLink
+from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess
 from .connection_selector import ConnectionSelector

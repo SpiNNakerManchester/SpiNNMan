@@ -30,41 +30,44 @@ from spinn_utilities.require_subclass import require_subclass
 
 from spinn_machine import CoreSubsets
 
-from spinnman.connections.abstract_classes import Connection
-from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.connections.abstract_classes.connection import Connection
+from spinnman.connections.udp_packet_connections.scamp_connection import (
+    SCAMPConnection,
+)
 from spinnman.constants import (
     ROUTER_DIAGNOSTIC_FILTER_SIZE,
     ROUTER_FILTER_CONTROLS_OFFSET,
     ROUTER_REGISTER_BASE_ADDRESS,
     SYSTEM_VARIABLE_BASE_ADDRESS,
 )
-from spinnman.data import SpiNNManDataView
+from spinnman.data.spinnman_data_view import SpiNNManDataView
 from spinnman.exceptions import SpinnmanException
-from spinnman.extended import (
-    BMPSetLed,
-    DeAllocSDRAMProcess,
-    ReadADC,
-    SetLED,
+from spinnman.extended.bmp_set_led import BMPSetLed
+from spinnman.extended.de_alloc_sdram_process import DeAllocSDRAMProcess
+from spinnman.extended.read_adc import ReadADC
+from spinnman.extended.set_led import SetLED
+from spinnman.extended.write_memory_flood_process import (
     WriteMemoryFloodProcess,
 )
-from spinnman.messages.scp.enums import Signal
 from spinnman.messages.scp.enums.led_action import LEDAction
-from spinnman.messages.scp.impl import ApplicationRun, ReadMemory
-from spinnman.messages.spinnaker_boot import SystemVariableDefinition
-from spinnman.model import (
-    ADCInfo,
-    DiagnosticFilter,
-    ExecutableTargets,
-    HeapElement,
-    IOBuffer,
+from spinnman.messages.scp.enums.signal import Signal
+from spinnman.messages.scp.impl.application_run import ApplicationRun
+from spinnman.messages.scp.impl.read_memory import ReadMemory
+from spinnman.messages.spinnaker_boot.system_variable_boot_values import (
+    SystemVariableDefinition,
 )
-from spinnman.model.enums import CPUState
-from spinnman.processes import (
-    GetHeapProcess,
-    ReadMemoryProcess,
+from spinnman.model.adc_info import ADCInfo
+from spinnman.model.diagnostic_filter import DiagnosticFilter
+from spinnman.model.enums.cpu_state import CPUState
+from spinnman.model.executable_targets import ExecutableTargets
+from spinnman.model.heap_element import HeapElement
+from spinnman.model.io_buffer import IOBuffer
+from spinnman.processes.get_heap_process import GetHeapProcess
+from spinnman.processes.read_memory_process import ReadMemoryProcess
+from spinnman.processes.send_single_command_process import (
     SendSingleCommandProcess,
-    WriteMemoryProcess,
 )
+from spinnman.processes.write_memory_process import WriteMemoryProcess
 from spinnman.transceiver.base_transceiver import (
     _EXECUTABLE_ADDRESS,
     BaseTransceiver,

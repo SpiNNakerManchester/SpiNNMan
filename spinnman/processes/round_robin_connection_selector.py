@@ -15,7 +15,9 @@ from typing import Any
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.udp_packet_connections import SCAMPConnection
+from spinnman.connections.udp_packet_connections.scamp_connection import (
+    SCAMPConnection,
+)
 
 from .connection_selector import ConnectionSelector
 

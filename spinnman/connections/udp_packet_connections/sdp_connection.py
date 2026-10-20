@@ -17,9 +17,10 @@ from collections.abc import Callable
 
 from spinn_utilities.overrides import overrides
 
-from spinnman.connections.abstract_classes import Listenable
+from spinnman.connections.abstract_classes.listenable import Listenable
 from spinnman.exceptions import SpinnmanUnsupportedOperationException
-from spinnman.messages.sdp import SDPFlag, SDPMessage
+from spinnman.messages.sdp.sdp_flag import SDPFlag
+from spinnman.messages.sdp.sdp_message import SDPMessage
 
 from .udp_connection import UDPConnection
 

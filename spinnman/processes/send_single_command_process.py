@@ -15,8 +15,10 @@
 from typing import Generic, TypeVar
 
 from spinnman.constants import SCP_TIMEOUT
-from spinnman.messages.scp.abstract_messages import (
+from spinnman.messages.scp.abstract_messages.scp_request import (
     AbstractSCPRequest,
+)
+from spinnman.messages.scp.abstract_messages.scp_response import (
     AbstractSCPResponse,
 )
 from spinnman.messages.scp.enums.scp_result import SCPResult

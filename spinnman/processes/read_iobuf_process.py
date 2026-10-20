@@ -24,7 +24,7 @@ from spinn_machine import CoreSubsets
 
 from spinnman.constants import CPU_IOBUF_ADDRESS_OFFSET, UDP_MESSAGE_MAX_SIZE
 from spinnman.messages.scp.impl.read_memory import ReadMemory, Response
-from spinnman.model import IOBuffer
+from spinnman.model.io_buffer import IOBuffer
 from spinnman.utilities.utility_functions import get_vcpu_address
 
 from .abstract_multi_connection_process import AbstractMultiConnectionProcess

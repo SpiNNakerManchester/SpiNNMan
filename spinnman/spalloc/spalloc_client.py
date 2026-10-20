@@ -48,10 +48,13 @@ from spinn_utilities.overrides import overrides
 from spinn_utilities.typing.coords import XY
 from spinn_utilities.typing.json import JsonObject, JsonValue
 
-from spinnman.connections.abstract_classes import Connection, Listenable
-from spinnman.connections.udp_packet_connections import UDPConnection
+from spinnman.connections.abstract_classes.connection import Connection
+from spinnman.connections.abstract_classes.listenable import Listenable
+from spinnman.connections.udp_packet_connections.udp_connection import (
+    UDPConnection,
+)
 from spinnman.constants import SCP_SCAMP_PORT, UDP_BOOT_CONNECTION_DEFAULT_PORT
-from spinnman.data import SpiNNManDataView
+from spinnman.data.spinnman_data_view import SpiNNManDataView
 from spinnman.exceptions import (
     SpallocBoardUnavailableException,
     SpallocException,
@@ -59,7 +62,7 @@ from spinnman.exceptions import (
     SpinnmanTimeoutException,
 )
 from spinnman.model.diagnostic_filter import DiagnosticFilter
-from spinnman.transceiver import Transceiver
+from spinnman.transceiver.transceiver import Transceiver
 
 from .proxy_protocol import ProxyProtocol
 from .session import Session, SessionAware

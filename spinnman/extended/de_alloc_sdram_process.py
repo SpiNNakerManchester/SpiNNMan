@@ -17,10 +17,10 @@ from spinnman.messages.scp.impl.sdram_de_alloc import (
     SDRAMDeAlloc,
     _SCPSDRAMDeAllocResponse,
 )
-from spinnman.processes import (
+from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess,
-    ConnectionSelector,
 )
+from spinnman.processes.connection_selector import ConnectionSelector
 
 
 class DeAllocSDRAMProcess(AbstractMultiConnectionProcess):

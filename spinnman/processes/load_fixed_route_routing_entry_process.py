@@ -14,7 +14,7 @@
 
 from spinn_machine import Router, RoutingEntry
 
-from spinnman.messages.scp.impl import FixedRouteInit
+from spinnman.messages.scp.impl.fixed_route_init import FixedRouteInit
 from spinnman.processes.abstract_multi_connection_process import (
     AbstractMultiConnectionProcess,
 )
