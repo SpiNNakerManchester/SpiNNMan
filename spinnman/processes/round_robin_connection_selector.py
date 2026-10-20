@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Any
-
 from spinn_utilities.overrides import overrides
 
 from spinnman.connections.udp_packet_connections import SCAMPConnection
@@ -36,7 +34,7 @@ class RoundRobinConnectionSelector(ConnectionSelector):
         self._next_connection_index = 0
 
     @overrides(ConnectionSelector.get_next_connection)
-    def get_next_connection(self, message: Any) -> SCAMPConnection:
+    def get_next_connection(self, message: object) -> SCAMPConnection:
         index = self._next_connection_index
         self._next_connection_index = (index + 1) % len(self._connections)
         return self._connections[index]

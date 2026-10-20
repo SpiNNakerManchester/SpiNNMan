@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from spinn_utilities.overrides import overrides
 
@@ -41,5 +41,5 @@ class FixedConnectionSelector(ConnectionSelector[Conn], Generic[Conn]):
         self.__connection: Conn = connection
 
     @overrides(ConnectionSelector.get_next_connection)
-    def get_next_connection(self, message: Any) -> Conn:
+    def get_next_connection(self, message: object) -> Conn:
         return self.__connection
