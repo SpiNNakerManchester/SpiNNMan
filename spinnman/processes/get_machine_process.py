@@ -17,7 +17,7 @@ import logging
 from collections import defaultdict
 from contextlib import suppress
 from types import TracebackType
-from typing import Any, cast
+from typing import cast
 
 from spinn_utilities.config_holder import (
     get_config_bool,
@@ -469,7 +469,7 @@ class GetMachineProcess(AbstractMultiConnectionProcess):
             "core {}", xy, virtual_p, physical)
         return virtual_p
 
-    def _report_ignore(self, message: str, *args: Any) -> None:
+    def _report_ignore(self, message: str, *args: object) -> None:
         """
         Writes the ignore message by either creating or appending the report.
 

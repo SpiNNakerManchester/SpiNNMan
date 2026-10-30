@@ -14,7 +14,7 @@
 
 import struct
 from enum import Enum
-from typing import Any, NamedTuple
+from typing import NamedTuple
 
 from typing_extensions import Self
 
@@ -379,7 +379,7 @@ class SystemVariableBootValues:
             self._values[variable] = variable.default
 
     def set_value(self, system_variable_definition: SystemVariableDefinition,
-                  value: Any) -> None:
+                  value: int | bytes) -> None:
         """
         Save a value to the system_variable_definition Enum as the key
 

@@ -63,7 +63,7 @@ def _may_renew(method: Callable) -> Callable:
         print(str(response.content, "UTF-8") if response.content else "")
 
     @wraps(method)
-    def call(self: 'Session', *args: Any, **kwargs: Any) -> None:
+    def call(self: 'Session', *args: object, **kwargs: object) -> None:
         renew_count = 0
         while True:
             r = method(self, *args, **kwargs)
@@ -417,21 +417,21 @@ class SessionAware:
         """
         return self.__session.service_url
 
-    def _get(self, url: str, **kwargs: Any) -> requests.Response:
+    def _get(self, url: str, **kwargs: object) -> requests.Response:
         return self.__session.get(url, **kwargs)
 
     def _post(self, url: str, json_dict: dict,
-              **kwargs: Any) -> requests.Response:
+              **kwargs: object) -> requests.Response:
         return self.__session.post(url, json_dict, **kwargs)
 
     def _post_raw(self, url: str, data: bytes,
-                  **kwargs: Any) -> requests.Response:
+                  **kwargs: object) -> requests.Response:
         return self.__session.post_raw(url, data, **kwargs)
 
-    def _put(self, url: str, data: str, **kwargs: Any) -> requests.Response:
+    def _put(self, url: str, data: str, **kwargs: object) -> requests.Response:
         return self.__session.put(url, data, **kwargs)
 
-    def _delete(self, url: str, **kwargs: Any) -> requests.Response:
+    def _delete(self, url: str, **kwargs: object) -> requests.Response:
         return self.__session.delete(url, **kwargs)
 
     def _websocket(self, url: str, **kwargs: Any) -> websocket.WebSocket:

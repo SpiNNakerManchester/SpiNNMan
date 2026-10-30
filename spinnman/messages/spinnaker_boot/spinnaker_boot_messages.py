@@ -17,7 +17,6 @@ import math
 import os
 import time
 from collections.abc import Iterable
-from typing import Any
 
 from spinnman.data.spinnman_data_view import SpiNNManDataView
 from spinnman.exceptions import SpinnmanIOException
@@ -48,7 +47,7 @@ class SpinnakerBootMessages:
         "_no_data_packets")
 
     def __init__(self, extra_boot_values: dict[
-            SystemVariableDefinition, Any] | None = None):
+            SystemVariableDefinition, int | bytes] | None = None):
         """
         :param extra_boot_values:
             Any additional or overwrite values to set during boot.
